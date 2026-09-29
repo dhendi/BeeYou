@@ -33,7 +33,6 @@ import React, { useState, useEffect } from 'react';
 import { AppTheme } from '../data/themesData';
 import { useApp } from '../context/AppContext';
 import { getRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
-import { PixelHairOverlay } from './PixelHairOverlay';
 
 export type EmotionId =
   | 'happy'
@@ -804,21 +803,15 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
       aria-hidden="true"
     >
       {hasRealImage ? (
-        <span className="relative w-full h-full flex items-center justify-center">
-          <img
-            key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
-            src={displaySrc}
-            alt={label}
-            onError={() => setImageFailed(true)}
-            className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
-            style={{ imageRendering: 'pixelated' }}
-            loading="lazy"
-          />
-          <PixelHairOverlay
-            hairStyle={effectiveHairStyle}
-            hairColor={effectiveHair}
-          />
-        </span>
+        <img
+          key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
+          src={displaySrc}
+          alt={label}
+          onError={() => setImageFailed(true)}
+          className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
+          style={{ imageRendering: 'pixelated' }}
+          loading="lazy"
+        />
       ) : (
         <svg
           viewBox="0 0 32 32"
