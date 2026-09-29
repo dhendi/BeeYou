@@ -30,6 +30,7 @@ import {
 import { EMOTIONS } from '../data/defaultData';
 import { EmotionType } from '../types';
 import { playChime } from '../utils/audio';
+import { ThemedEmotionFace } from './ThemedEmotionFace';
 
 export const DailyRecollectionModal: React.FC = () => {
   const {
@@ -39,6 +40,7 @@ export const DailyRecollectionModal: React.FC = () => {
     dailyRecollections,
     childProfile,
     speak,
+    activeTheme,
   } = useApp();
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -351,7 +353,11 @@ export const DailyRecollectionModal: React.FC = () => {
                     }`}
                     style={{ backgroundColor: isSelected ? emo.bgColor : undefined }}
                   >
-                    <span className="text-2xl mb-1 select-none">{emo.emoji}</span>
+                    <ThemedEmotionFace
+                      emotionId={emo.id}
+                      theme={activeTheme}
+                      className="w-10 h-10 mb-1 transition-transform hover:scale-110"
+                    />
                     <span className="text-[11px] font-bold truncate max-w-full" style={{ color: emo.color }}>
                       {emo.label}
                     </span>

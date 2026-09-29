@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { EMOTIONS } from '../data/defaultData';
 import { EmotionType } from '../types';
+import { ThemedEmotionFace } from './ThemedEmotionFace';
 import { 
   Heart, 
   Sparkles, 
@@ -26,6 +27,7 @@ export const FeelingsView: React.FC = () => {
     setShowCopingToolkit,
     setShowRecollectionModal,
     dailyRecollections,
+    activeTheme,
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'recollection'>('check-in');
@@ -194,9 +196,11 @@ export const FeelingsView: React.FC = () => {
                 }`}
                 style={{ backgroundColor: isSelected ? emo.bgColor : '#ffffff' }}
               >
-                <span className="text-4xl sm:text-5xl leading-none mb-1.5 select-none transition-transform hover:scale-110">
-                  {emo.emoji}
-                </span>
+                <ThemedEmotionFace
+                  emotionId={emo.id}
+                  theme={activeTheme}
+                  className="w-14 h-14 sm:w-16 sm:h-16 mb-1.5 transition-transform hover:scale-110"
+                />
                 <span
                   className="font-black text-xs sm:text-sm tracking-tight text-center leading-tight"
                   style={{ color: emo.color }}

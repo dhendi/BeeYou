@@ -28,6 +28,7 @@ import {
 } from '../data/recollectionData';
 import { EMOTIONS } from '../data/defaultData';
 import { playChime } from '../utils/audio';
+import { ThemedEmotionFace } from './ThemedEmotionFace';
 
 export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({ isParentPortal = false }) => {
   const {
@@ -35,6 +36,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
     setShowRecollectionModal,
     deleteDailyRecollection,
     childProfile,
+    activeTheme,
   } = useApp();
 
   const [dateFilter, setDateFilter] = useState<'7' | '14' | 'all'>('7');
@@ -315,7 +317,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border"
                         style={{ backgroundColor: emotion.bgColor, color: emotion.color, borderColor: emotion.color + '40' }}
                       >
-                        <span>{emotion.emoji}</span>
+                        <ThemedEmotionFace emotionId={emotion.id} theme={activeTheme} className="w-6 h-6 flex-shrink-0" />
                         <span>{emotion.label}</span>
                       </span>
                     )}
