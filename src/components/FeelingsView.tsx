@@ -208,40 +208,36 @@ export const FeelingsView: React.FC = () => {
             {/* ── NONBINARY AVATAR QUICK CONTROLS: HAIRSTYLE, HAIR COLOR & SKIN TONE ── */}
             <div className="bg-slate-50 dark:bg-slate-800/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs mb-3 space-y-2.5">
               {/* Row 1: Changeable Hairstyle */}
-              <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+              <div className="flex items-center gap-2 overflow-x-auto py-0.5">
                 <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
                   <span>✂️</span>
                   <span>Hairstyle:</span>
                 </span>
                 {[
-                  { id: 'short', label: 'Short', icon: '💇' },
-                  { id: 'curly', label: 'Curly', icon: '🌀' },
+                  { id: 'short', label: 'Short Hair', icon: '🧒' },
                   { id: 'pigtails', label: 'Pigtails', icon: '👧' },
-                  { id: 'spiky', label: 'Spiky', icon: '⚡' },
-                  { id: 'braids', label: 'Braids', icon: '🪢' },
-                  { id: 'wavy', label: 'Wavy', icon: '🌊' },
-                  { id: 'afro', label: 'Afro', icon: '👑' },
-                  { id: 'bob', label: 'Bob', icon: '🎀' },
-                  { id: 'ponytail', label: 'Ponytail', icon: '🐎' },
-                  { id: 'buzz', label: 'Buzz', icon: '✨' },
                 ].map((hs) => {
-                  const isCurrent = (avatar.hairStyle || 'short') === hs.id;
+                  const isCurrent =
+                    hs.id === 'pigtails'
+                      ? ['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle)
+                      : !['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle);
                   return (
                     <button
                       key={hs.id}
                       type="button"
                       onClick={() => {
                         updateAvatar({ hairStyle: hs.id as any });
+                        updateChildProfile({ characterGender: hs.id === 'pigtails' ? 'girl' : 'boy' });
                         playChime('tap');
                       }}
-                      className={`px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shrink-0 ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
                         isCurrent
-                          ? 'bg-indigo-600 text-white shadow-xs font-black scale-102 ring-2 ring-indigo-300'
+                          ? 'bg-indigo-600 text-white shadow-xs scale-102 ring-2 ring-indigo-300'
                           : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 border border-slate-200 dark:border-slate-600'
                       }`}
-                      title={`Select ${hs.label} Hairstyle`}
+                      title={`Select ${hs.label}`}
                     >
-                      <span className="text-xs">{hs.icon}</span>
+                      <span className="text-sm">{hs.icon}</span>
                       <span>{hs.label}</span>
                     </button>
                   );

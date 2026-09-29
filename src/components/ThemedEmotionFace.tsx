@@ -750,9 +750,8 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   hairColor,
   className = 'w-16 h-16',
 }) => {
-  const { avatar, childProfile } = useApp();
+  const { avatar } = useApp();
 
-  const effectiveGender = gender ?? (childProfile?.characterGender || 'boy');
   const effectiveHairStyle = hairStyle ?? avatar?.hairStyle ?? 'short';
   const effectiveSkin = skinTone ?? avatar?.skinTone ?? '#fed7aa';
   const effectiveHair = hairColor ?? avatar?.hairColor ?? '#451a03';
@@ -762,27 +761,33 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // If pigtails/braids/bob or girl selected, use girl pixel art sprite; otherwise classic
-  const isPigtailsStyle = effectiveHairStyle === 'pigtails' || effectiveHairStyle === 'braids' || effectiveHairStyle === 'bob';
-  const useGirlFolder = effectiveGender === 'girl' || isPigtailsStyle;
+  // Hairstyle determination (nonbinary):
+  // If explicitly passed gender === 'girl' OR hairstyle is pigtails/braids/bob/ponytail, use girl pixel art sprite (pigtails).
+  // Otherwise (short, curly, spiky, wavy, afro, buzz, etc.), use the classic short hair sprite!
+  const isPigtailsStyle =
+    effectiveHairStyle === 'pigtails' ||
+    effectiveHairStyle === 'braids' ||
+    effectiveHairStyle === 'bob' ||
+    effectiveHairStyle === 'ponytail';
+  const useGirlFolder = gender ? gender === 'girl' : isPigtailsStyle;
   const folder = useGirlFolder ? `${category}_girl` : category;
   const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 
   // Dynamically recolor skin & hair if user has customized them
-  const [displaySrc, setDisplaySrc] = useState<string>(baseSrc);
+  const [recoloredSrc, setRecoloredSrc] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     if (isDefaultPalette(effectiveSkin, effectiveHair)) {
-      setDisplaySrc(baseSrc);
+      setRecoloredSrc(null);
       return;
     }
 
     getRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair).then((recolored) => {
       if (active) {
-        setDisplaySrc(recolored);
+        setRecoloredSrc(recolored);
       }
     });
 
@@ -790,6 +795,11 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
       active = false;
     };
   }, [baseSrc, effectiveSkin, effectiveHair]);
+
+  const displaySrc =
+    !isDefaultPalette(effectiveSkin, effectiveHair) && recoloredSrc
+      ? recoloredSrc
+      : baseSrc;
 
   return (
     <span
