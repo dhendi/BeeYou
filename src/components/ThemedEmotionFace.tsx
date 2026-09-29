@@ -33,6 +33,7 @@ import React, { useState, useEffect } from 'react';
 import { AppTheme } from '../data/themesData';
 import { useApp } from '../context/AppContext';
 import { getRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
+import { PixelHairOverlay } from './PixelHairOverlay';
 
 export type EmotionId =
   | 'happy'
@@ -762,14 +763,10 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const [imageFailed, setImageFailed] = useState(false);
 
   // Hairstyle determination (nonbinary):
-  // If explicitly passed gender === 'girl' OR hairstyle is pigtails/braids/bob/ponytail, use girl pixel art sprite (pigtails).
-  // Otherwise (short, curly, spiky, wavy, afro, buzz, etc.), use the classic short hair sprite!
-  const isPigtailsStyle =
-    effectiveHairStyle === 'pigtails' ||
-    effectiveHairStyle === 'braids' ||
-    effectiveHairStyle === 'bob' ||
-    effectiveHairStyle === 'ponytail';
-  const useGirlFolder = gender ? gender === 'girl' : isPigtailsStyle;
+  // For 'pigtails', use the authentic native girl pixel art sprite (which has handcrafted pigtails).
+  // For other styles ('short', 'curly', 'afro', 'spiky', 'braids', 'ponytail', 'bob'),
+  // use the base sprite and overlay the custom pixel art hairstyle!
+  const useGirlFolder = gender ? gender === 'girl' : effectiveHairStyle === 'pigtails';
   const folder = useGirlFolder ? `${category}_girl` : category;
   const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
 
@@ -807,15 +804,21 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
       aria-hidden="true"
     >
       {hasRealImage ? (
-        <img
-          key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
-          src={displaySrc}
-          alt={label}
-          onError={() => setImageFailed(true)}
-          className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
-          style={{ imageRendering: 'pixelated' }}
-          loading="lazy"
-        />
+        <span className="relative w-full h-full flex items-center justify-center">
+          <img
+            key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
+            src={displaySrc}
+            alt={label}
+            onError={() => setImageFailed(true)}
+            className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
+            style={{ imageRendering: 'pixelated' }}
+            loading="lazy"
+          />
+          <PixelHairOverlay
+            hairStyle={effectiveHairStyle}
+            hairColor={effectiveHair}
+          />
+        </span>
       ) : (
         <svg
           viewBox="0 0 32 32"

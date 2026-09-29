@@ -216,18 +216,20 @@ export const FeelingsView: React.FC = () => {
                 {[
                   { id: 'short', label: 'Short Hair', icon: '🧒' },
                   { id: 'pigtails', label: 'Pigtails', icon: '👧' },
+                  { id: 'curly', label: 'Curly', icon: '🌀' },
+                  { id: 'afro', label: 'Afro Puffs', icon: '👑' },
+                  { id: 'spiky', label: 'Spiky', icon: '⚡' },
+                  { id: 'braids', label: 'Braids', icon: '🪢' },
+                  { id: 'ponytail', label: 'Ponytail', icon: '🐎' },
+                  { id: 'bob', label: 'Bob', icon: '🎀' },
                 ].map((hs) => {
-                  const isCurrent =
-                    hs.id === 'pigtails'
-                      ? ['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle)
-                      : !['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle);
+                  const isCurrent = (avatar.hairStyle || 'short') === hs.id;
                   return (
                     <button
                       key={hs.id}
                       type="button"
                       onClick={() => {
                         updateAvatar({ hairStyle: hs.id as any });
-                        updateChildProfile({ characterGender: hs.id === 'pigtails' ? 'girl' : 'boy' });
                         playChime('tap');
                       }}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
@@ -235,7 +237,7 @@ export const FeelingsView: React.FC = () => {
                           ? 'bg-indigo-600 text-white shadow-xs scale-102 ring-2 ring-indigo-300'
                           : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 border border-slate-200 dark:border-slate-600'
                       }`}
-                      title={`Select ${hs.label}`}
+                      title={`Select ${hs.label} Hairstyle`}
                     >
                       <span className="text-sm">{hs.icon}</span>
                       <span>{hs.label}</span>
