@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { AACTileArt } from './AACTileArt';
+import { AACWordIcon } from './AACWordIcon';
 import { 
   Volume2, 
   Trash2, 
@@ -322,12 +323,15 @@ export const AACView: React.FC = () => {
                 className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-xl shadow-xs mb-1"
               />
             ) : (
-              <span
-                className={`relative z-10 drop-shadow-sm ${
-                  settings.largeButtonMode ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'
-                } leading-none mb-1 select-none transition-transform group-hover:scale-110`}
-              >
-                {getThemedAacEmoji(item, activeTheme)}
+              <span className={`relative z-10 mb-1 transition-transform group-hover:scale-110 ${
+                settings.largeButtonMode ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-9 h-9 sm:w-11 sm:h-11'
+              }`}>
+                <AACWordIcon
+                  label={item.label}
+                  colorType={item.colorType}
+                  theme={activeTheme}
+                  className="w-full h-full"
+                />
               </span>
             )}
             <span
