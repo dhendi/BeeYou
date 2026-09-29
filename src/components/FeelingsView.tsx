@@ -229,12 +229,12 @@ export const FeelingsView: React.FC = () => {
                 {/* Skin & Hair Representation Presets */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-x-auto">
                   {[
-                    { id: 'default', label: 'Classic', skin: '#fcd34d', hair: '#451a03', icon: '🌟' },
-                    { id: 'african', label: 'African', skin: '#5a2e12', hair: '#18181b', icon: '🌍' },
-                    { id: 'asian', label: 'Asian', skin: '#fef3c7', hair: '#18181b', icon: '🌏' },
-                    { id: 'blonde', label: 'Blonde', skin: '#fed7aa', hair: '#facc15', icon: '☀️' },
-                    { id: 'olive', label: 'Tan', skin: '#d97706', hair: '#27272a', icon: '🌿' },
-                    { id: 'redhead', label: 'Redhead', skin: '#fef3c7', hair: '#ea580c', icon: '🍁' },
+                    { id: 'white', label: '1. White', skin: '#fed7aa', hair: '#451a03', icon: '🌟' },
+                    { id: 'black', label: '2. Black', skin: '#5a2e12', hair: '#18181b', icon: '🌍' },
+                    { id: 'asian', label: '3. Asian', skin: '#fef3c7', hair: '#18181b', icon: '🌏' },
+                    { id: 'hispanic', label: '4. Hispanic', skin: '#d97706', hair: '#27272a', icon: '🌿' },
+                    { id: 'blonde', label: '5. Blonde', skin: '#fed7aa', hair: '#facc15', icon: '☀️' },
+                    { id: 'redhead', label: '6. Redhead', skin: '#fef3c7', hair: '#ea580c', icon: '🍁' },
                   ].map((preset) => {
                     const isSelected = avatar.skinTone === preset.skin && avatar.hairColor === preset.hair;
                     return (

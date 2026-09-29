@@ -439,6 +439,57 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                     </div>
                   </div>
 
+                  {/* Representation Presets */}
+                  <div>
+                    <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 block mb-2">
+                      Representation Presets:
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { id: 'white', label: '1. White', skin: '#fed7aa', hair: '#451a03', icon: '🌟' },
+                        { id: 'black', label: '2. Black', skin: '#5a2e12', hair: '#18181b', icon: '🌍' },
+                        { id: 'asian', label: '3. Asian', skin: '#fef3c7', hair: '#18181b', icon: '🌏' },
+                        { id: 'hispanic', label: '4. Hispanic', skin: '#d97706', hair: '#27272a', icon: '🌿' },
+                        { id: 'blonde', label: '5. Blonde', skin: '#fed7aa', hair: '#facc15', icon: '☀️' },
+                        { id: 'redhead', label: '6. Redhead', skin: '#fef3c7', hair: '#ea580c', icon: '🍁' },
+                      ].map((preset) => {
+                        const isSelected = draft.skinTone === preset.skin && draft.hairColor === preset.hair;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => {
+                              updateDraft({ skinTone: preset.skin, hairColor: preset.hair });
+                              playChime('tap');
+                            }}
+                            className={`p-2.5 rounded-2xl border-2 font-bold text-xs flex items-center justify-between transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-indigo-50 border-indigo-600 text-indigo-950 dark:bg-indigo-950/40 dark:text-white ring-2 ring-indigo-300'
+                                : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="flex items-center gap-1.5 font-black">
+                              <span className="text-base">{preset.icon}</span>
+                              <span>{preset.label}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span
+                                className="w-4 h-4 rounded-full border border-slate-300 shrink-0"
+                                style={{ backgroundColor: preset.skin }}
+                                title="Skin tone"
+                              />
+                              <span
+                                className="w-4 h-4 rounded-full border border-slate-300 shrink-0"
+                                style={{ backgroundColor: preset.hair }}
+                                title="Hair color"
+                              />
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   {/* Skin Tone */}
                   <div>
                     <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 block mb-2">

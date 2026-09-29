@@ -2,7 +2,7 @@
  * avatarRecolor.ts — Real-time Palette Swapping Engine for Themed Emotion Icons
  *
  * Dynamically recolors 16-bit pixel art emotion sprites so that characters
- * reflect the child's own skin tone, ethnicity (e.g. African, Asian, Hispanic, Caucasian),
+ * reflect the child's own skin tone, ethnicity (e.g. 1. White, 2. Black, 3. Asian, 4. Hispanic),
  * and hair color (e.g. blonde, red, black, brown).
  */
 
