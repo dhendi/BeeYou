@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { WORLD_ITEMS_CATALOG } from '../data/defaultData';
 import { ChildAvatar } from './ChildAvatar';
+import { AnimatedWorldItem } from './AnimatedWorldItem';
 import { 
   Sparkles, 
   ShoppingBag, 
@@ -13,9 +14,13 @@ import {
   Lock, 
   Heart,
   Volume2,
-  Trophy
+  Trophy,
+  Trash2,
+  Smile,
+  Zap,
+  Info
 } from 'lucide-react';
-import { playChime } from '../utils/audio';
+import { playChime, playEntitySound } from '../utils/audio';
 import { Rewards } from './Rewards';
 
 export const MyWorldView: React.FC = () => {
@@ -24,13 +29,16 @@ export const MyWorldView: React.FC = () => {
     setCurrentRoom,
     buyWorldItem,
     placeWorldItem,
+    removePlacedItem,
     avatar,
     updateAvatar,
     speak,
+    settings,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'world' | 'avatar' | 'shop' | 'rewards'>('world');
   const [petFeedback, setPetFeedback] = useState<string | null>(null);
+  const [selectedPlacedId, setSelectedPlacedId] = useState<string | null>(null);
 
   // Placed items in the current room
   const roomPlacedItems = worldState.placedItems.filter(
@@ -45,21 +53,63 @@ export const MyWorldView: React.FC = () => {
 
   const currentRoomObj = rooms.find((r) => r.id === worldState.currentRoom) || rooms[0];
 
-  const handleInteractWithItem = (itemCatalogId: string, itemName: string) => {
-    playChime('tap');
+  const handleInteractWithItem = (itemCatalogId: string, itemName: string, actionType?: 'pet' | 'feed' | 'play') => {
+    playEntitySound(itemCatalogId);
+
     if (itemCatalogId.includes('puppy')) {
-      setPetFeedback('The puppy wags its tail happily and rolls over! 🐶 Woof!');
-      speak('The puppy wags its tail!');
+      if (actionType === 'feed') {
+        setPetFeedback('Crunch crunch! The puppy happily munches a bone biscuit! 🦴 Yum!');
+        speak('The puppy eats a yummy biscuit! Good boy!');
+      } else if (actionType === 'play') {
+        setPetFeedback('You throw the tennis ball! The puppy zooms across the room and brings it back! 🎾 Woof!');
+        speak('The puppy fetches the ball and wags its tail!');
+      } else {
+        setPetFeedback('The puppy wags its tail happily, rolls over, and gives you sweet puppy kisses! 🐶 Woof!');
+        speak('The puppy wags its tail happily!');
+      }
     } else if (itemCatalogId.includes('kitten')) {
-      setPetFeedback('The fluffy kitten purrs softly in your lap! 🐱 Purr...');
-      speak('The kitten purrs softly.');
+      if (actionType === 'feed') {
+        setPetFeedback('The kitten licks up some warm milk and purrs softly! 🥛 Purr...');
+        speak('The kitten drinks warm milk and purrs!');
+      } else if (actionType === 'play') {
+        setPetFeedback('The kitten playfully swats at a yarn ball with little paws! 🧶 Pounce!');
+        speak('The kitten swats at yarn!');
+      } else {
+        setPetFeedback('The fluffy kitten purrs softly in your lap and stretches out cozy paws! 🐱 Purr...');
+        speak('The kitten purrs softly and cuddles close.');
+      }
     } else if (itemCatalogId.includes('bunny')) {
-      setPetFeedback('The bunny hops and wiggles its little nose! 🐰 Munch!');
-      speak('The bunny wiggles its nose.');
+      if (actionType === 'feed') {
+        setPetFeedback('Crunch munch! The calm bunny nibbles on a crisp golden carrot! 🥕');
+        speak('The bunny crunches a sweet carrot!');
+      } else {
+        setPetFeedback('The velvety bunny hops joyfully and wiggles its little pink nose! 🐰 Hop hop!');
+        speak('The bunny hops and wiggles its nose.');
+      }
+    } else if (itemCatalogId.includes('turtle')) {
+      setPetFeedback('The wise turtle breathes slowly and peacefully. Inhale... and exhale. 🐢 Calming breaths...');
+      speak('The wise turtle reminds us: Take a deep, peaceful breath.');
+    } else if (itemCatalogId.includes('train')) {
+      setPetFeedback('Choo choo! The wooden steam train chugs along the railway with happy steam puffs! 🚂 Toot!');
+      speak('Choo choo! The train chugs along the tracks.');
+    } else if (itemCatalogId.includes('tent')) {
+      setPetFeedback('You step inside the cozy sensory hideaway tent. Soft fairy lights twinkle peacefully. ⛺ Quiet sanctuary.');
+      speak('A peaceful hideaway with glowing fairy lights.');
+    } else if (itemCatalogId.includes('projector') || itemCatalogId.includes('nightlight')) {
+      setPetFeedback('The star projector swirls constellations and shooting stars across the room! ✨ Starlight dream.');
+      speak('Stars and galaxies spin across the ceiling.');
     } else if (itemCatalogId.includes('trampoline')) {
-      setPetFeedback('Boing! Boing! You bounce high with big smiles! 🤸');
-      playChime('star');
+      setPetFeedback('Boing! Boing! You bounce high on the rebounder with big happy smiles! 🤸 Springy fun!');
       speak('Boing! Boing! Fun bounce!');
+    } else if (itemCatalogId.includes('aquarium')) {
+      setPetFeedback('Neon fish glide through bubbling aqua water and hide behind swaying sea grass! 🐠 Bubble bubble.');
+      speak('The fish swim peacefully in bubbling water.');
+    } else if (itemCatalogId.includes('plant')) {
+      setPetFeedback('The sunflower friend sways in the warm sunshine and beams a bright smile at you! 🌻 Warmth.');
+      speak('The sunflower friend sways and smiles.');
+    } else if (itemCatalogId.includes('beanbag')) {
+      setPetFeedback('Squelch! You sink into the ultra-squishy beanbag for a wonderful restful break. 🛋️ Ahhh.');
+      speak('You sink into the cozy beanbag.');
     } else {
       setPetFeedback(`You enjoy your ${itemName}!`);
       speak(`I love my ${itemName}.`);
@@ -155,33 +205,123 @@ export const MyWorldView: React.FC = () => {
             </div>
 
             {/* Placed Items inside room */}
-            <div className="flex-1 flex flex-wrap items-center justify-around gap-4 p-4">
+            <div className="flex-1 flex flex-wrap items-end justify-around gap-6 p-4 z-10 min-h-[220px]">
+              {roomPlacedItems.length === 0 && (
+                <div className="text-center bg-white/80 backdrop-blur-xs p-4 rounded-2xl border border-dashed border-slate-300 mx-auto my-auto">
+                  <p className="text-xs font-bold text-slate-600">Your room is waiting for your favorite companions!</p>
+                  <button
+                    onClick={() => setActiveTab('shop')}
+                    className="mt-2 px-3 py-1 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs rounded-xl shadow-xs cursor-pointer"
+                  >
+                    Open Shop to Add Pets & Toys ✨
+                  </button>
+                </div>
+              )}
+
               {roomPlacedItems.map((placed) => {
                 const item = WORLD_ITEMS_CATALOG.find((i) => i.id === placed.itemId);
                 if (!item) return null;
+                const isSelected = selectedPlacedId === placed.id;
+                const isPet = item.category === 'pet';
 
                 return (
-                  <button
+                  <div
                     key={placed.id}
-                    onClick={() => handleInteractWithItem(item.id, item.name)}
-                    className="flex flex-col items-center justify-center p-3 rounded-3xl bg-white/80 hover:bg-white border-2 border-white shadow-md active:scale-95 transition-all cursor-pointer group"
+                    className="relative flex flex-col items-center justify-end group transition-all"
                   >
-                    <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform">
-                      {item.emoji}
-                    </span>
-                    <span className="text-xs font-black text-slate-800 mt-1">
+                    {/* Floating Pet / Item Action Toolbar */}
+                    {isSelected && (
+                      <div className="absolute -top-12 z-30 bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-2xl p-1 flex items-center gap-1 animate-in fade-in zoom-in-95 duration-200">
+                        {isPet ? (
+                          <>
+                            <button
+                              onClick={() => handleInteractWithItem(item.id, item.name, 'pet')}
+                              className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
+                              title="Pet with gentle pats"
+                            >
+                              <span>🐾</span>
+                              <span>Pet</span>
+                            </button>
+                            <button
+                              onClick={() => handleInteractWithItem(item.id, item.name, 'feed')}
+                              className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
+                              title="Feed a treat"
+                            >
+                              <span>🦴</span>
+                              <span>Feed</span>
+                            </button>
+                            <button
+                              onClick={() => handleInteractWithItem(item.id, item.name, 'play')}
+                              className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
+                              title="Play fetch"
+                            >
+                              <span>🎾</span>
+                              <span>Play</span>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => handleInteractWithItem(item.id, item.name)}
+                            className="px-2 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
+                          >
+                            <span>✨</span>
+                            <span>Interact</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            removePlacedItem(placed.id);
+                            setSelectedPlacedId(null);
+                          }}
+                          className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer transition-colors"
+                          title="Put away in inventory"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Real Animated Entity Component */}
+                    <div
+                      onClick={() => {
+                        setSelectedPlacedId(isSelected ? null : placed.id);
+                        handleInteractWithItem(item.id, item.name);
+                      }}
+                      className="cursor-pointer active:scale-95 transition-all group-hover:scale-105"
+                      title={`Tap ${item.name} to interact`}
+                    >
+                      <AnimatedWorldItem
+                        itemId={item.id}
+                        size="lg"
+                        interactive={true}
+                        showFloorShadow={true}
+                        reduceMotion={settings.reduceMotion}
+                        onInteract={() => handleInteractWithItem(item.id, item.name)}
+                      />
+                    </div>
+
+                    {/* Interactive Name Pill */}
+                    <button
+                      onClick={() => setSelectedPlacedId(isSelected ? null : placed.id)}
+                      className={`mt-2 text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xs border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-teal-600 text-white border-teal-700 ring-2 ring-teal-300'
+                          : 'bg-white/90 text-slate-800 border-slate-200/80 hover:bg-white'
+                      }`}
+                    >
                       {item.name}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 );
               })}
 
               {/* Child Avatar in the Room */}
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-end">
                 <div className="animate-bounce duration-1000">
                   <ChildAvatar config={avatar} size="lg" />
                 </div>
-                <span className="text-xs font-black px-2 py-0.5 rounded-full bg-white/90 text-slate-800 shadow-xs border mt-1">
+                <div className="w-16 h-2.5 bg-black/15 rounded-full blur-[2px] mt-1" />
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white/90 text-slate-800 shadow-xs border mt-1">
                   You
                 </span>
               </div>
@@ -405,11 +545,26 @@ export const MyWorldView: React.FC = () => {
                   className="bg-white rounded-3xl border-2 border-slate-200 p-4 shadow-xs flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-4xl">{item.emoji}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                        {item.category}
-                      </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div
+                        className="w-20 h-20 bg-gradient-to-b from-slate-50 to-slate-100 rounded-2xl p-1.5 flex items-center justify-center border border-slate-200/80 shadow-inner group hover:border-teal-300 transition-colors cursor-pointer"
+                        title="Tap to preview animation and sounds"
+                      >
+                        <AnimatedWorldItem
+                          itemId={item.id}
+                          size="md"
+                          interactive={true}
+                          reduceMotion={settings.reduceMotion}
+                        />
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                          {item.category}
+                        </span>
+                        <span className="text-[9px] font-black text-teal-700 bg-teal-50 border border-teal-200/80 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                          ✨ Tap to Test
+                        </span>
+                      </div>
                     </div>
                     <h4 className="font-black text-slate-800 text-sm sm:text-base">
                       {item.name}
