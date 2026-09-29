@@ -199,7 +199,7 @@ export const FeelingsView: React.FC = () => {
                 <ThemedEmotionFace
                   emotionId={emo.id}
                   theme={activeTheme}
-                  className="w-14 h-14 sm:w-16 sm:h-16 mb-1.5 transition-transform hover:scale-110"
+                  className="w-16 h-16 sm:w-20 sm:h-20 mb-2 transition-transform hover:scale-110 drop-shadow-sm"
                 />
                 <span
                   className="font-black text-xs sm:text-sm tracking-tight text-center leading-tight"
