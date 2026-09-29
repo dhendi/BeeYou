@@ -320,6 +320,27 @@ export function getDefaultFeaturesForAge(age: UserAgeGroup): EnabledFeatures {
   }
 }
 
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  relationship: string;
+  phone: string;
+  isPrimary: boolean;
+  email?: string;
+  notes?: string;
+}
+
+export interface AboutMeCardData {
+  conditions: string[];           // What they have (e.g. Autistic, Non-speaking, ADHD, Sensory Processing)
+  sensorySensitivities: string[]; // What they are sensitive from (e.g. Loud noises, bright lights, sudden touch)
+  comfortsAndLikes: string[];     // What they like & what helps (e.g. Dinosaurs, headphones, calm room)
+  communicationTips: string[];    // How to communicate (e.g. Give 10s to reply, I understand words)
+  allergiesOrMedical: string[];   // Medical alerts & allergies (e.g. Peanut allergy, EpiPen location)
+  emergencyContacts: EmergencyContact[];
+  bloodType?: string;
+  speechSummary?: string;         // Audio script for "Read My ID" button
+}
+
 export interface ChildProfile {
   name: string;
   pronouns?: string;
@@ -341,6 +362,7 @@ export interface ChildProfile {
   activeSticker?: string;
   activeTitle?: string;
   onboardingCompleted?: boolean;
+  aboutMe?: AboutMeCardData;
 }
 
 export interface RewardBadge {

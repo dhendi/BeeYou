@@ -34,6 +34,7 @@ export const ChildHeader: React.FC = () => {
     setShowThemeModal,
     enabledFeatures,
     userAgeGroup,
+    setShowAboutMeModal,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -65,17 +66,24 @@ export const ChildHeader: React.FC = () => {
       <div className="flex items-center gap-2.5 sm:gap-3">
         <div 
           onClick={() => {
-            setChildView('rewards');
+            setShowAboutMeModal(true);
             playChime('tap');
           }}
           className="relative cursor-pointer transition-transform hover:scale-105 active:scale-95"
-          title="View rewards & profile"
+          title="About Me ID & Emergency Advocacy Card"
         >
           <ChildAvatar config={avatar} size="sm" />
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight leading-none">
+            <h1 
+              onClick={() => {
+                setShowAboutMeModal(true);
+                playChime('tap');
+              }}
+              className="text-base sm:text-lg font-bold text-slate-800 tracking-tight leading-none cursor-pointer hover:underline"
+              title="Show About Me ID Card"
+            >
               {childProfile.name}
             </h1>
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
@@ -109,6 +117,19 @@ export const ChildHeader: React.FC = () => {
             >
               <span>{activeTheme.mascotEmoji}</span>
               <span className="hidden xs:inline">{activeTheme.name}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowAboutMeModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Quick About Me & Emergency ID Card"
+            >
+              <span>🪪</span>
+              <span className="hidden sm:inline">About Me</span>
             </button>
           </div>
         </div>

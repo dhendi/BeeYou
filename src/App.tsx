@@ -32,6 +32,7 @@ import { RoutineStickerCelebrationModal } from './components/RoutineStickerCeleb
 import { DailyRecollectionModal } from './components/DailyRecollectionModal';
 import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
 import { OnboardingWizardModal } from './components/OnboardingWizardModal';
+import { AboutMeIDModal } from './components/AboutMeIDModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -45,6 +46,8 @@ const AppContent: React.FC = () => {
     showOnboardingModal,
     setShowOnboardingModal,
     enabledFeatures,
+    showAboutMeModal,
+    setShowAboutMeModal,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
@@ -151,6 +154,12 @@ const AppContent: React.FC = () => {
         isOpen={showOnboardingModal}
         onClose={() => setShowOnboardingModal(false)}
         canDismiss={true}
+      />
+
+      {/* About Me & Emergency ID Card Modal */}
+      <AboutMeIDModal
+        isOpen={showAboutMeModal}
+        onClose={() => setShowAboutMeModal(false)}
       />
     </div>
   );

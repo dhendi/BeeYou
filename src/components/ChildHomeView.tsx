@@ -42,6 +42,7 @@ export const ChildHomeView: React.FC = () => {
     setShowThemeModal,
     enabledFeatures,
     userAgeGroup,
+    setShowAboutMeModal,
   } = useApp();
 
 
@@ -143,6 +144,18 @@ export const ChildHomeView: React.FC = () => {
           >
             <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
             <span>Caregiver</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setShowAboutMeModal(true);
+              playChime('tap');
+            }}
+            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-200 shrink-0"
+            title="View and show About Me ID Card"
+          >
+            <span>🪪</span>
+            <span>About Me ID</span>
           </button>
 
           <button

@@ -45,6 +45,64 @@ export const INITIAL_CHILD_PROFILE: ChildProfile = {
     waiting: 'Helps to see a visual countdown timer or know what is next.',
   },
   communicationPreference: 'AAC tiles, visual schedules, and gesture choice cards.',
+  aboutMe: {
+    conditions: [
+      'Autistic Spectrum',
+      'Non-speaking / AAC Communicator',
+      'Sensory Processing Sensitivity',
+    ],
+    communicationTips: [
+      'I communicate using this AAC tablet. Please give me 10-15 seconds to reply.',
+      'I understand what you say. Please speak directly to me in a calm voice.',
+      'If I am overwhelmed or non-responsive, do not touch me without asking.',
+      'Ask simple yes/no questions if I am in a sensory overload.',
+    ],
+    sensorySensitivities: [
+      'Sudden loud noises (sirens, hand dryers, loud clapping, blenders)',
+      'Bright fluorescent lights & sudden flashing flashes',
+      'Unexpected physical touch or crowded spaces',
+      'Scratchy shirt tags and rough seams',
+    ],
+    comfortsAndLikes: [
+      'Dinosaurs 🦖 & Trains 🚂',
+      'Noise-canceling headphones 🎧',
+      'Weighted blue dinosaur comfort toy 🦕',
+      'Gentle pressure or quiet dim break room',
+      'Swinging or gentle rocking to regulate',
+    ],
+    allergiesOrMedical: [
+      'Peanuts (Severe - EpiPen in front backpack pocket)',
+      'Mild Asthma (Inhaler in backpack side pouch)',
+    ],
+    bloodType: 'O+',
+    emergencyContacts: [
+      {
+        id: 'ec-1',
+        name: 'Sarah (Mom)',
+        relationship: 'Mother & Primary Caregiver',
+        phone: '(555) 234-5678',
+        isPrimary: true,
+        notes: 'Works 10 minutes from school; call first anytime!',
+      },
+      {
+        id: 'ec-2',
+        name: 'David (Dad)',
+        relationship: 'Father',
+        phone: '(555) 876-5432',
+        isPrimary: false,
+        notes: 'Backup contact',
+      },
+      {
+        id: 'ec-3',
+        name: 'Dr. Evans (Pediatrician / Clinic)',
+        relationship: 'Primary Physician',
+        phone: '(555) 912-3456',
+        isPrimary: false,
+        notes: 'Children’s Health Clinic, Suite 300',
+      },
+    ],
+    speechSummary: 'Hello! My name is Leo. I am autistic and use this tablet to communicate. If I look lost, hurt, or overwhelmed, please call my mom Sarah at 555-234-5678. Thank you for your patience and kindness.',
+  },
 };
 
 export const INITIAL_APP_SETTINGS: AppSettings = {
