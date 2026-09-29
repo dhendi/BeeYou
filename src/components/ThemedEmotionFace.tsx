@@ -29,7 +29,7 @@
  *    - happy, calm, excited, tired, worried, sad, angry, frustrated, overwhelmed, scared, confused
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppTheme } from '../data/themesData';
 
 export type EmotionId =
@@ -628,6 +628,8 @@ const PixelFaceEmotion: React.FC<{ emotion: string }> = ({ emotion }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PUBLIC COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
+const REAL_IMAGE_THEMES = new Set(['dinosaur', 'ocean', 'turtle', 'frog', 'space']);
+
 export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   emotionId,
   theme,
@@ -636,38 +638,54 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const normalizedId = emotionId.toLowerCase().trim();
   const category = theme?.category;
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  // If real pixel art image is available, render the actual image!
+  const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
+  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png`;
 
   return (
     <span
-      className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-md`}
+      className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-md relative overflow-hidden rounded-2xl`}
       aria-hidden="true"
     >
-      <svg
-        viewBox="0 0 32 32"
-        width="100%"
-        height="100%"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label={label}
-        role="img"
-        shapeRendering="crispEdges"
-        className="overflow-visible"
-        style={{ imageRendering: 'pixelated' }}
-      >
-        <title>{label}</title>
+      {hasRealImage ? (
+        <img
+          src={imageSrc}
+          alt={label}
+          onError={() => setImageFailed(true)}
+          className="w-full h-full object-cover rounded-2xl transition-transform hover:scale-105 active:scale-95"
+          style={{ imageRendering: 'pixelated' }}
+          loading="lazy"
+        />
+      ) : (
+        <svg
+          viewBox="0 0 32 32"
+          width="100%"
+          height="100%"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label={label}
+          role="img"
+          shapeRendering="crispEdges"
+          className="overflow-visible"
+          style={{ imageRendering: 'pixelated' }}
+        >
+          <title>{label}</title>
 
-        {/* 1. Themed 16-Bit Pixel Background Badge (Prehistoric Sky, Ocean Waves, Galaxy, Lily Pond, Tracks) */}
-        <PixelBackground category={category} />
+          {/* 1. Themed 16-Bit Pixel Background Badge (Prehistoric Sky, Ocean Waves, Galaxy, Lily Pond, Tracks) */}
+          <PixelBackground category={category} />
 
-        {/* 2. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
-        <PixelHoodieBack category={category} />
+          {/* 2. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
+          <PixelHoodieBack category={category} />
 
-        {/* 3. Character Face with 11 Expressive Pixel Expressions */}
-        <PixelFaceEmotion emotion={normalizedId} />
+          {/* 3. Character Face with 11 Expressive Pixel Expressions */}
+          <PixelFaceEmotion emotion={normalizedId} />
 
-        {/* 4. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
-        <PixelHoodieFront category={category} />
-      </svg>
+          {/* 4. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
+          <PixelHoodieFront category={category} />
+        </svg>
+      )}
     </span>
   );
 };
