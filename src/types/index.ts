@@ -292,6 +292,17 @@ export interface ProfileSticker {
   starsRequired?: number;
 }
 
+export interface EarnedRoutineSticker {
+  id: string;
+  routineId: string;
+  routineTitle: string;
+  stickerName: string;
+  emoji: string;
+  description: string;
+  earnedAt: string;
+  starsAwarded: number;
+}
+
 export interface AppSettings {
   pin: string;
   voiceRate: number;

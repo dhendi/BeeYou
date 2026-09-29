@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
+import { getStickerForRoutine } from '../data/rewardsData';
 
 export const MyDayView: React.FC = () => {
   const {
@@ -24,6 +25,8 @@ export const MyDayView: React.FC = () => {
     plansChanged,
     setShowPlansChangedModal,
     speak,
+    setChildView,
+    earnedStickers,
   } = useApp();
 
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
@@ -80,6 +83,8 @@ export const MyDayView: React.FC = () => {
   const completedStepsCount = currentRoutine.steps.filter((s) => s.completed).length;
   const totalStepsCount = currentRoutine.steps.length;
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
+  const isRoutineCompleted = totalStepsCount > 0 && completedStepsCount === totalStepsCount;
+  const routineStickerDef = getStickerForRoutine(currentRoutine);
 
   const startTimerForStep = (
     step: { title: string; emoji: string; durationMin?: number; id: string },
@@ -281,6 +286,40 @@ export const MyDayView: React.FC = () => {
             className="bg-emerald-500 h-full transition-all duration-500 rounded-full"
             style={{ width: `${progressPercent}%` }}
           />
+        </div>
+
+        {/* Digital Sticker Reward Banner */}
+        <div className="mt-3.5 p-3 rounded-2xl border-2 flex items-center justify-between flex-wrap gap-2 transition-all bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 border-amber-300/80 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-white border border-amber-200 flex items-center justify-center text-2xl shadow-xs shrink-0">
+              {routineStickerDef.emoji}
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
+                  {isRoutineCompleted ? '🎉 Sticker Unlocked!' : '🎁 Complete Routine Reward'}
+                </span>
+                <span className="text-[11px] font-bold text-amber-700">
+                  +{routineStickerDef.starsAward} Stars
+                </span>
+              </div>
+              <p className="font-black text-xs sm:text-sm text-slate-800 mt-0.5">
+                {routineStickerDef.stickerName}: <span className="text-slate-500 font-medium">{routineStickerDef.description}</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setChildView('rewards');
+              playChime('tap');
+            }}
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+          >
+            <span>Sticker Album ({earnedStickers.length})</span>
+            <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+          </button>
         </div>
 
         {/* WHAT AM I DOING? & WHAT'S NEXT? Indicator */}

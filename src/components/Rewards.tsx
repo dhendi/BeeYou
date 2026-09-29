@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { REWARD_BADGES, PROFILE_STICKERS, CHARACTER_TITLES } from '../data/rewardsData';
+import { REWARD_BADGES, PROFILE_STICKERS, CHARACTER_TITLES, ROUTINE_STICKER_REWARDS } from '../data/rewardsData';
 import { RewardBadge, ProfileSticker } from '../types';
 import { ChildAvatar } from './ChildAvatar';
 import { 
@@ -13,11 +13,12 @@ import {
   Filter, 
   User, 
   Smile, 
-  Heart,
-  ChevronRight,
-  Award,
-  Layers,
-  ArrowRight
+  Heart, 
+  ChevronRight, 
+  Award, 
+  Layers, 
+  ArrowRight,
+  BookOpen
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
@@ -32,6 +33,7 @@ export const Rewards: React.FC = () => {
     skills,
     emotionHistory,
     setChildView,
+    earnedStickers,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile'>('badges');
@@ -248,8 +250,8 @@ export const Rewards: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Stickers & Flair</span>
+          <BookOpen className="w-4 h-4" />
+          <span>Sticker Album ({earnedStickers.length})</span>
         </button>
 
         <button
@@ -436,78 +438,228 @@ export const Rewards: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: STICKERS & PROFILE FLAIR */}
+      {/* TAB 2: DIGITAL STICKERS ALBUM & PROFILE FLAIR */}
       {activeTab === 'stickers' && (
-        <div className="space-y-4">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-600" />
-              <span>Unlocked Stickers & Character Items</span>
-            </h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Badges and tasks unlock fun collectible stickers. Tap any unlocked sticker to wear it as your profile flair!
-            </p>
+        <div className="space-y-6">
+          {/* 1. EARNED ROUTINE DIGITAL STICKERS (Sticker Book) */}
+          <div className="bg-gradient-to-br from-indigo-50/70 via-sky-50/50 to-purple-50/70 border-3 border-indigo-200 rounded-3xl p-4 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-xs">
+                  📖
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-black text-indigo-950">
+                      Routine Stickers Album
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-200 text-indigo-900 font-black text-[11px]">
+                      {earnedStickers.length} Earned
+                    </span>
+                  </div>
+                  <p className="text-xs text-indigo-800 font-medium">
+                    Earned by completing scheduled routines in <strong>My Day</strong>!
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setChildView('my-day')}
+                className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer self-start sm:self-auto shadow-xs"
+              >
+                <span>Go to My Day</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Earned Routine Stickers Grid */}
+            {earnedStickers.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {earnedStickers.map((sticker) => {
+                  const isEquipped = childProfile.activeSticker === sticker.emoji;
+
+                  return (
+                    <div
+                      key={sticker.id}
+                      onClick={() => handleEquipSticker({
+                        id: sticker.id,
+                        name: sticker.stickerName,
+                        emoji: sticker.emoji,
+                        description: sticker.description,
+                      })}
+                      className={`p-4 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative ${
+                        isEquipped
+                          ? 'bg-white border-indigo-500 ring-4 ring-indigo-200 shadow-md'
+                          : 'bg-white hover:bg-indigo-50/50 border-indigo-200/80 shadow-xs'
+                      }`}
+                    >
+                      {isEquipped && (
+                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-600 text-white shadow-2xs">
+                          Active
+                        </span>
+                      )}
+
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-100 to-indigo-100 border border-indigo-100 flex items-center justify-center text-4xl shadow-xs my-2">
+                        {sticker.emoji}
+                      </div>
+
+                      <div className="space-y-0.5">
+                        <h4 className="font-black text-xs sm:text-sm text-slate-800">
+                          {sticker.stickerName}
+                        </h4>
+                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md inline-block">
+                          {sticker.routineTitle}
+                        </span>
+                        <p className="text-[10px] text-slate-400 font-medium leading-tight mt-1 line-clamp-2">
+                          {sticker.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-2.5 w-full space-y-1">
+                        <span className="text-[10px] font-semibold text-amber-700 block">
+                          ⭐ +{sticker.starsAwarded} Stars • {sticker.earnedAt}
+                        </span>
+                        <button
+                          type="button"
+                          className={`w-full py-1.5 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
+                            isEquipped
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-900'
+                          }`}
+                        >
+                          {isEquipped ? '✓ Wearing' : 'Wear on Profile'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-8 text-center bg-white rounded-2xl border border-indigo-100 text-slate-500">
+                <span className="text-3xl block mb-1">🌟</span>
+                <p className="font-bold text-sm text-slate-700">No Routine Stickers Yet!</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Complete all the steps of any routine in My Day to unlock your first digital sticker!
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Sticker Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {PROFILE_STICKERS.map((sticker) => {
-              const unlocked = isStickerUnlocked(sticker);
-              const isEquipped = childProfile.activeSticker === sticker.emoji;
+          {/* 2. ROUTINE STICKERS TO DISCOVER */}
+          <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-black text-sm text-slate-800 flex items-center gap-1.5">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+                  <span>Routine Stickers to Unlock in My Day</span>
+                </h4>
+                <p className="text-xs text-slate-500 font-medium">
+                  Follow your daily routines to collect these shiny stickers!
+                </p>
+              </div>
+            </div>
 
-              return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+              {ROUTINE_STICKER_REWARDS.filter(
+                (def) => !earnedStickers.some((es) => es.stickerName === def.stickerName)
+              ).map((lockedDef) => (
                 <div
-                  key={sticker.id}
-                  onClick={() => handleEquipSticker(sticker)}
-                  className={`p-3.5 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative ${
-                    isEquipped
-                      ? 'bg-indigo-50 border-indigo-500 ring-3 ring-indigo-300 shadow-sm'
-                      : unlocked
-                      ? 'bg-white hover:bg-slate-50 border-slate-200 shadow-xs'
-                      : 'bg-slate-50 border-slate-200/80 opacity-70'
-                  }`}
+                  key={lockedDef.routineId}
+                  onClick={() => setChildView('my-day')}
+                  className="p-3 bg-slate-50 hover:bg-sky-50/60 rounded-2xl border-2 border-dashed border-slate-300 hover:border-sky-300 flex items-center gap-3 transition-all cursor-pointer"
                 >
-                  {isEquipped && (
-                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-600 text-white shadow-2xs">
-                      Active
+                  <div className="w-12 h-12 rounded-xl bg-slate-200/80 text-2xl flex items-center justify-center shrink-0 grayscale opacity-75">
+                    {lockedDef.emoji}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <span className="font-black text-xs text-slate-800 block truncate">
+                      {lockedDef.stickerName}
                     </span>
-                  )}
-
-                  <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-4xl shadow-xs my-2">
-                    {sticker.emoji}
+                    <span className="text-[10px] text-sky-700 font-bold block">
+                      Finish {lockedDef.routineTitlePattern.toUpperCase()} Routine
+                    </span>
+                    <span className="text-[10px] text-amber-700 font-semibold block mt-0.5">
+                      Rewards: +{lockedDef.starsAward} Stars 🌟
+                    </span>
                   </div>
+                  <Lock className="w-4 h-4 text-slate-400 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  <div>
-                    <h5 className="font-black text-xs sm:text-sm text-slate-800">
-                      {sticker.name}
-                    </h5>
-                    <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 line-clamp-2">
-                      {sticker.description}
-                    </p>
-                  </div>
+          {/* 3. PROFILE FLAIR & BADGE STICKERS */}
+          <div className="space-y-3">
+            <div className="border-b border-slate-100 pb-2">
+              <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-600" />
+                <span>General Flair & Collectible Stickers</span>
+              </h4>
+              <p className="text-xs text-slate-500 font-medium">
+                Badges and star coins unlock special flair items.
+              </p>
+            </div>
 
-                  <div className="mt-2.5 w-full">
-                    {unlocked ? (
-                      <button
-                        type="button"
-                        className={`w-full py-1.5 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
-                          isEquipped
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-900'
-                        }`}
-                      >
-                        {isEquipped ? 'Equipped' : 'Wear on Profile'}
-                      </button>
-                    ) : (
-                      <span className="w-full py-1.5 rounded-xl font-bold text-[10px] text-slate-400 bg-slate-100 flex items-center justify-center gap-1">
-                        <Lock className="w-3 h-3" />
-                        <span>Locked</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {PROFILE_STICKERS.map((sticker) => {
+                const unlocked = isStickerUnlocked(sticker);
+                const isEquipped = childProfile.activeSticker === sticker.emoji;
+
+                return (
+                  <div
+                    key={sticker.id}
+                    onClick={() => handleEquipSticker(sticker)}
+                    className={`p-3.5 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative ${
+                      isEquipped
+                        ? 'bg-indigo-50 border-indigo-500 ring-3 ring-indigo-300 shadow-sm'
+                        : unlocked
+                        ? 'bg-white hover:bg-slate-50 border-slate-200 shadow-xs'
+                        : 'bg-slate-50 border-slate-200/80 opacity-70'
+                    }`}
+                  >
+                    {isEquipped && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-600 text-white shadow-2xs">
+                        Active
                       </span>
                     )}
+
+                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-4xl shadow-xs my-2">
+                      {sticker.emoji}
+                    </div>
+
+                    <div>
+                      <h5 className="font-black text-xs sm:text-sm text-slate-800">
+                        {sticker.name}
+                      </h5>
+                      <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5 line-clamp-2">
+                        {sticker.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-2.5 w-full">
+                      {unlocked ? (
+                        <button
+                          type="button"
+                          className={`w-full py-1.5 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
+                            isEquipped
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-900'
+                          }`}
+                        >
+                          {isEquipped ? 'Equipped' : 'Wear on Profile'}
+                        </button>
+                      ) : (
+                        <span className="w-full py-1.5 rounded-xl font-bold text-[10px] text-slate-400 bg-slate-100 flex items-center justify-center gap-1">
+                          <Lock className="w-3 h-3" />
+                          <span>Locked</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Character Title Customizer */}

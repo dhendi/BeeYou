@@ -17,6 +17,7 @@ import {
   EmotionType,
   CaregiverMessage,
   DailyCheckInEntry,
+  EarnedRoutineSticker,
 } from '../types';
 import {
   DEFAULT_AAC_ITEMS,
@@ -34,6 +35,7 @@ import {
   WORLD_ITEMS_CATALOG,
   DEFAULT_DAILY_CHECKINS,
 } from '../data/defaultData';
+import { getStickerForRoutine } from '../data/rewardsData';
 import { 
   speakText, 
   playChime, 
@@ -174,6 +176,12 @@ interface AppContextType {
   settings: AppSettings;
   updateSettings: (settings: Partial<AppSettings>) => void;
 
+  // Digital Routine Stickers & Rewards
+  earnedStickers: EarnedRoutineSticker[];
+  newlyAwardedSticker: EarnedRoutineSticker | null;
+  awardRoutineSticker: (routine: Routine) => EarnedRoutineSticker;
+  dismissStickerCelebration: () => void;
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -232,6 +240,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [avatar, setAvatar] = useState<AvatarConfig>(INITIAL_AVATAR);
   const [childProfile, setChildProfile] = useState<ChildProfile>(INITIAL_CHILD_PROFILE);
   const [settings, setSettings] = useState<AppSettings>(INITIAL_APP_SETTINGS);
+
+  // Digital Routine Stickers earned through My Day completions
+  const [earnedStickers, setEarnedStickers] = useState<EarnedRoutineSticker[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_earned_routine_stickers');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // Fallback
+    }
+    return [
+      {
+        id: 'sticker-morning-initial',
+        routineId: 'routine-morning',
+        routineTitle: 'Morning Routine',
+        stickerName: 'Morning Superstar',
+        emoji: '🌅',
+        description: 'Woke up, stretched, brushed teeth, and got ready to shine!',
+        earnedAt: 'Today',
+        starsAwarded: 3,
+      },
+    ];
+  });
+
+  const [newlyAwardedSticker, setNewlyAwardedSticker] = useState<EarnedRoutineSticker | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_earned_routine_stickers', JSON.stringify(earnedStickers));
+    } catch (e) {}
+  }, [earnedStickers]);
 
   // Active Speech & Offline States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -486,18 +524,67 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setQuickPhrases((prev) => prev.filter((qp) => qp.id !== id));
   };
 
+  // Digital Routine Sticker Reward Methods
+  const awardRoutineSticker = (routine: Routine): EarnedRoutineSticker => {
+    const stickerDef = getStickerForRoutine(routine);
+    const dateFormatted = new Date().toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+
+    const newSticker: EarnedRoutineSticker = {
+      id: `stk-${routine.id}-${Date.now()}`,
+      routineId: routine.id,
+      routineTitle: routine.title,
+      stickerName: stickerDef.stickerName,
+      emoji: stickerDef.emoji,
+      description: stickerDef.description,
+      earnedAt: dateFormatted,
+      starsAwarded: stickerDef.starsAward,
+    };
+
+    setEarnedStickers((prev) => [newSticker, ...prev]);
+    awardStars(stickerDef.starsAward);
+    setNewlyAwardedSticker(newSticker);
+
+    if (settings.soundEffects) {
+      playChime('complete');
+      setTimeout(() => playChime('star'), 400);
+    }
+
+    try {
+      confetti({
+        particleCount: 75,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#38bdf8', '#8b5cf6', '#10b981', '#ec4899'],
+      });
+    } catch (e) {}
+
+    speakText(
+      `Awesome job, ${childProfile.name}! You finished ${routine.title} and earned the ${stickerDef.stickerName} sticker!`
+    );
+
+    return newSticker;
+  };
+
+  const dismissStickerCelebration = () => {
+    setNewlyAwardedSticker(null);
+  };
+
   // Routine Methods
   const toggleRoutineStep = (routineId: string, stepId: string) => {
     if (settings.soundEffects) playChime('tap');
     setRoutines((prev) =>
       prev.map((r) => {
         if (r.id !== routineId) return r;
+        const wasAllCompleted = r.steps.length > 0 && r.steps.every((s) => s.completed);
         const newSteps = r.steps.map((s) => (s.id === stepId ? { ...s, completed: !s.completed } : s));
-        const allCompleted = newSteps.length > 0 && newSteps.every((s) => s.completed);
-        if (allCompleted) {
-          if (settings.soundEffects) playChime('complete');
-          confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-          awardStars(1);
+        const isNowAllCompleted = newSteps.length > 0 && newSteps.every((s) => s.completed);
+        if (isNowAllCompleted && !wasAllCompleted) {
+          awardRoutineSticker(r);
         }
         return { ...r, steps: newSteps };
       })
@@ -959,6 +1046,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateChildProfile,
         settings,
         updateSettings,
+
+        earnedStickers,
+        newlyAwardedSticker,
+        awardRoutineSticker,
+        dismissStickerCelebration,
+
         resetToDefaults,
       }}
     >

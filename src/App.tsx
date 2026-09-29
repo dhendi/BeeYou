@@ -28,6 +28,7 @@ import { CaregiverAlertModal } from './components/CaregiverAlertModal';
 import { CaregiverLivePortal } from './components/CaregiverLivePortal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { RoutineStickerCelebrationModal } from './components/RoutineStickerCelebrationModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -132,6 +133,7 @@ const AppContent: React.FC = () => {
         isOpen={showCaregiverAlertModal}
         onClose={() => setShowCaregiverAlertModal(false)}
       />
+      <RoutineStickerCelebrationModal />
     </div>
   );
 };

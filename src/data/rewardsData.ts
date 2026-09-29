@@ -219,3 +219,77 @@ export const CHARACTER_TITLES: string[] = [
   'Creative Artist',
   'Peaceful Dreamer',
 ];
+
+export interface RoutineStickerDef {
+  routineId: string;
+  routineTitlePattern: string;
+  stickerName: string;
+  emoji: string;
+  description: string;
+  starsAward: number;
+}
+
+export const ROUTINE_STICKER_REWARDS: RoutineStickerDef[] = [
+  {
+    routineId: 'routine-morning',
+    routineTitlePattern: 'morning',
+    stickerName: 'Morning Superstar',
+    emoji: '🌅',
+    description: 'Woke up, stretched, brushed teeth, and got ready to shine!',
+    starsAward: 3,
+  },
+  {
+    routineId: 'routine-bedtime',
+    routineTitlePattern: 'bedtime',
+    stickerName: 'Starry Dreamer',
+    emoji: '🌙',
+    description: 'Cozy in pajamas, brushed teeth, ready for sweet dreams!',
+    starsAward: 3,
+  },
+  {
+    routineId: 'routine-appointment',
+    routineTitlePattern: 'dentist',
+    stickerName: 'Sparkle Chomper',
+    emoji: '🦷',
+    description: 'Braved the dentist appointment with courage and calm!',
+    starsAward: 5,
+  },
+  {
+    routineId: 'routine-school',
+    routineTitlePattern: 'school',
+    stickerName: 'Backpack Hero',
+    emoji: '🎒',
+    description: 'School routine conquered like an everyday champion!',
+    starsAward: 3,
+  },
+  {
+    routineId: 'routine-cleanup',
+    routineTitlePattern: 'clean',
+    stickerName: 'Tidy Champion',
+    emoji: '🧸',
+    description: 'Put every toy away into its cozy home!',
+    starsAward: 3,
+  },
+  {
+    routineId: 'routine-default',
+    routineTitlePattern: '.*',
+    stickerName: 'Routine Rocker',
+    emoji: '🎸',
+    description: 'Completed your scheduled missions step-by-step with great focus!',
+    starsAward: 3,
+  },
+];
+
+export function getStickerForRoutine(routine: { id: string; title: string }): RoutineStickerDef {
+  const matchById = ROUTINE_STICKER_REWARDS.find((s) => s.routineId === routine.id);
+  if (matchById) return matchById;
+
+  const titleLower = (routine.title || '').toLowerCase();
+  const matchByTitle = ROUTINE_STICKER_REWARDS.find(
+    (s) => s.routineTitlePattern !== '.*' && titleLower.includes(s.routineTitlePattern)
+  );
+  if (matchByTitle) return matchByTitle;
+
+  return ROUTINE_STICKER_REWARDS[ROUTINE_STICKER_REWARDS.length - 1];
+}
+
