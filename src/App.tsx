@@ -30,6 +30,7 @@ import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { RoutineStickerCelebrationModal } from './components/RoutineStickerCelebrationModal';
 import { DailyRecollectionModal } from './components/DailyRecollectionModal';
+import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -38,7 +39,8 @@ const AppContent: React.FC = () => {
     showCaregiverModal, 
     setShowCaregiverModal,
     showCaregiverAlertModal,
-    setShowCaregiverAlertModal 
+    setShowCaregiverAlertModal,
+    activeTheme,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
@@ -74,7 +76,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] w-full bg-amber-50/40 text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative">
+    <div className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}>
       {/* Child Top Header (anchored, does not shift) */}
       <header className="shrink-0 z-30">
         <ChildHeader />
@@ -136,6 +138,7 @@ const AppContent: React.FC = () => {
       />
       <RoutineStickerCelebrationModal />
       <DailyRecollectionModal />
+      <ThemeCustomizerModal />
     </div>
   );
 };

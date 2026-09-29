@@ -416,3 +416,10 @@ export type {
   DailyRecollectionEntry,
 } from '../data/recollectionData';
 
+export type {
+  AppTheme,
+  ThemePalette,
+  WallpaperPattern,
+} from '../data/themesData';
+
+

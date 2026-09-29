@@ -18,8 +18,10 @@ import {
   Award, 
   Layers, 
   ArrowRight,
-  BookOpen
+  BookOpen,
+  Palette
 } from 'lucide-react';
+import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
 
@@ -36,7 +38,7 @@ export const Rewards: React.FC = () => {
     earnedStickers,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile'>('badges');
+  const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile' | 'themes'>('badges');
   const [badgeFilter, setBadgeFilter] = useState<'all' | 'earned' | 'in-progress'>('all');
   const [selectedBadge, setSelectedBadge] = useState<RewardBadge | null>(null);
 
@@ -268,6 +270,22 @@ export const Rewards: React.FC = () => {
         >
           <User className="w-4 h-4" />
           <span>Profile Card</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('themes');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            activeTab === 'themes'
+              ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span>Themes & Studio 🎨</span>
         </button>
       </div>
 
@@ -792,6 +810,11 @@ export const Rewards: React.FC = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* TAB 4: THEMES & STUDIO */}
+      {activeTab === 'themes' && (
+        <ThemeShopAndStudio />
       )}
     </div>
   );

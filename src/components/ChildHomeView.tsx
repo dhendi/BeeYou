@@ -38,6 +38,8 @@ export const ChildHomeView: React.FC = () => {
     quickPhrases,
     speak,
     setShowCopingToolkit,
+    activeTheme,
+    setShowThemeModal,
   } = useApp();
 
 
@@ -168,6 +170,46 @@ export const ChildHomeView: React.FC = () => {
             <span>Say Hello!</span>
           </button>
         </div>
+      </div>
+
+      {/* 2.5 THEMED COMPANION & MOTIVATION BANNER */}
+      <div 
+        onClick={() => {
+          setShowThemeModal(true);
+          playChime('star');
+        }}
+        className={`rounded-3xl p-4 sm:p-5 border-2 shadow-xs transition-all hover:shadow-md cursor-pointer active:scale-98 flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
+      >
+        <div className="flex items-center gap-3.5">
+          <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs shrink-0">
+            {activeTheme.mascotEmoji}
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
+                {activeTheme.name}
+              </span>
+              <span className="text-xs font-bold text-slate-500">
+                {activeTheme.mascotName}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-black text-slate-800 mt-0.5">
+              "{activeTheme.greetingMessage}"
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowThemeModal(true);
+            playChime('tap');
+          }}
+          className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
+        >
+          <span>🎨 Themes</span>
+        </button>
       </div>
 
       {/* 3. CURRENT SCHEDULE & FIRST/THEN SNAPSHOT */}

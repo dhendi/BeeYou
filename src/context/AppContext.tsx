@@ -19,7 +19,9 @@ import {
   DailyCheckInEntry,
   EarnedRoutineSticker,
   DailyRecollectionEntry,
+  AppTheme,
 } from '../types';
+import { PRESET_THEMES } from '../data/themesData';
 import {
   DEFAULT_AAC_ITEMS,
   DEFAULT_QUICK_PHRASES,
@@ -193,6 +195,18 @@ interface AppContextType {
   updateDailyRecollection: (id: string, updates: Partial<DailyRecollectionEntry>) => void;
   deleteDailyRecollection: (id: string) => void;
 
+  // Themes & Customization
+  themes: AppTheme[];
+  activeThemeId: string;
+  activeTheme: AppTheme;
+  setTheme: (id: string) => void;
+  buyTheme: (themeId: string) => boolean;
+  createCustomTheme: (theme: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>) => AppTheme;
+  updateCustomTheme: (id: string, updates: Partial<AppTheme>) => void;
+  deleteCustomTheme: (id: string) => void;
+  showThemeModal: boolean;
+  setShowThemeModal: (val: boolean) => void;
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -303,6 +317,117 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {}
   }, [dailyRecollections]);
 
+  // Themes & Customization state
+  const [themes, setThemes] = useState<AppTheme[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_themes');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const customThemes = parsed.filter((p: AppTheme) => p.isCustom);
+          const presets = PRESET_THEMES.map((preset) => {
+            const found = parsed.find((p: AppTheme) => p.id === preset.id);
+            return found ? { ...preset, isUnlocked: found.isUnlocked } : preset;
+          });
+          return [...presets, ...customThemes];
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse lumina_themes:', e);
+    }
+    return PRESET_THEMES;
+  });
+
+  const [activeThemeId, setActiveThemeId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_active_theme_id');
+      if (saved) return saved;
+    } catch (e) {}
+    return 'theme-dino'; // Default to dinosaur theme as requested!
+  });
+
+  const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_themes', JSON.stringify(themes));
+    } catch (e) {}
+  }, [themes]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_active_theme_id', activeThemeId);
+    } catch (e) {}
+  }, [activeThemeId]);
+
+  const activeTheme = themes.find((t) => t.id === activeThemeId) || themes[0] || PRESET_THEMES[0];
+
+  const setTheme = (id: string) => {
+    const target = themes.find((t) => t.id === id);
+    if (target && target.isUnlocked) {
+      setActiveThemeId(id);
+      if (settings.soundEffects) playChime('star');
+      speakText(`Equipped ${target.name} theme!`);
+    }
+  };
+
+  const buyTheme = (themeId: string): boolean => {
+    const target = themes.find((t) => t.id === themeId);
+    if (!target) return false;
+    if (target.isUnlocked) {
+      setTheme(themeId);
+      return true;
+    }
+    if (worldState.stars < target.costStars) {
+      if (settings.soundEffects) playChime('tap');
+      speakText(`Need ${target.costStars - worldState.stars} more stars to unlock ${target.name}!`);
+      return false;
+    }
+
+    setWorldState((prev) => ({
+      ...prev,
+      stars: prev.stars - target.costStars,
+    }));
+
+    setThemes((prev) =>
+      prev.map((t) => (t.id === themeId ? { ...t, isUnlocked: true } : t))
+    );
+
+    setActiveThemeId(themeId);
+    if (settings.soundEffects) playChime('star');
+    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+    speakText(`Hooray! You unlocked and equipped the ${target.name} theme!`);
+    return true;
+  };
+
+  const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
+    const newTheme: AppTheme = {
+      ...themeData,
+      id: `custom-theme-${Date.now()}`,
+      isCustom: true,
+      isUnlocked: true,
+      costStars: 0,
+    };
+    setThemes((prev) => [...prev, newTheme]);
+    setActiveThemeId(newTheme.id);
+    if (settings.soundEffects) playChime('complete');
+    confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+    speakText(`Awesome! Created your custom theme ${newTheme.name}!`);
+    return newTheme;
+  };
+
+  const updateCustomTheme = (id: string, updates: Partial<AppTheme>) => {
+    setThemes((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    );
+  };
+
+  const deleteCustomTheme = (id: string) => {
+    setThemes((prev) => prev.filter((t) => t.id !== id));
+    if (activeThemeId === id) {
+      setActiveThemeId('theme-dino');
+    }
+  };
 
   // Active Speech & Offline States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -1141,6 +1266,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addDailyRecollection,
         updateDailyRecollection,
         deleteDailyRecollection,
+
+        themes,
+        activeThemeId,
+        activeTheme,
+        setTheme,
+        buyTheme,
+        createCustomTheme,
+        updateCustomTheme,
+        deleteCustomTheme,
+        showThemeModal,
+        setShowThemeModal,
 
         resetToDefaults,
       }}

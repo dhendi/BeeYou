@@ -30,6 +30,8 @@ export const ChildHeader: React.FC = () => {
     setShowPlansChangedModal,
     speak,
     setChildView,
+    activeTheme,
+    setShowThemeModal,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -56,7 +58,7 @@ export const ChildHeader: React.FC = () => {
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur border-b border-amber-100 px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-100'} backdrop-blur px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors duration-300`}>
       {/* Left: Avatar + Greeting + Time */}
       <div className="flex items-center gap-2.5 sm:gap-3">
         <div 
@@ -78,18 +80,33 @@ export const ChildHeader: React.FC = () => {
               {currentTime}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setChildView('rewards');
-              playChime('star');
-            }}
-            className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 mt-0.5 cursor-pointer transition-all active:scale-95"
-            title="View earned rewards & badges"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-            <span><strong className="text-amber-900">{worldState.stars}</strong> Stars</span>
-          </button>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setChildView('rewards');
+                playChime('star');
+              }}
+              className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 cursor-pointer transition-all active:scale-95"
+              title="View earned rewards & badges"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+              <span><strong className="text-amber-900">{worldState.stars}</strong> Stars</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowThemeModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-emerald-900 bg-white/80 hover:bg-white px-2 py-0.5 rounded-full border border-emerald-300 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Change theme & icons"
+            >
+              <span>{activeTheme.mascotEmoji}</span>
+              <span className="hidden xs:inline">{activeTheme.name}</span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
+import { getThemedAacEmoji } from '../data/themesData';
 import { 
   Volume2, 
   Trash2, 
@@ -10,7 +11,8 @@ import {
   Layers, 
   SlidersHorizontal,
   Search,
-  AlertTriangle
+  AlertTriangle,
+  Palette
 } from 'lucide-react';
 
 export const AACView: React.FC = () => {
@@ -30,6 +32,8 @@ export const AACView: React.FC = () => {
     isSpeaking,
     stopSpeaking,
     isOffline,
+    activeTheme,
+    setShowThemeModal,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
@@ -117,7 +121,7 @@ export const AACView: React.FC = () => {
                   {item.photoUrl ? (
                     <img src={item.photoUrl} alt="" className="w-6 h-6 object-cover rounded" />
                   ) : (
-                    <span className="text-xl leading-none">{item.emoji}</span>
+                    <span className="text-xl leading-none">{getThemedAacEmoji(item, activeTheme)}</span>
                   )}
                   <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
                 </div>
@@ -253,8 +257,18 @@ export const AACView: React.FC = () => {
           ))}
         </div>
 
-        {/* Accessibility quick toggles */}
-        <div className="flex items-center gap-1 shrink-0 ml-auto">
+        {/* Theme switcher and accessibility quick toggles */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+          <button
+            type="button"
+            onClick={() => setShowThemeModal(true)}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-black border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+            title="Change theme or customize AAC icons"
+          >
+            <span className="text-sm">{activeTheme.mascotEmoji}</span>
+            <span className="hidden sm:inline font-bold">{activeTheme.name}</span>
+          </button>
+
           <button
             onClick={() =>
               updateSettings({ largeButtonMode: !settings.largeButtonMode })
@@ -280,7 +294,11 @@ export const AACView: React.FC = () => {
           <button
             key={item.id}
             onClick={() => addToSentence(item)}
-            className={`flex flex-col items-center justify-center p-2 sm:p-3.5 rounded-2xl border-2 shadow-xs transition-all active:scale-92 cursor-pointer relative group ${
+            className={`flex flex-col items-center justify-center p-2 sm:p-3.5 ${
+              activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
+            } ${
+              activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
+            } shadow-xs transition-all active:scale-92 cursor-pointer relative group ${
               settings.largeButtonMode ? 'min-h-[110px] sm:min-h-[130px]' : 'min-h-[82px] sm:min-h-[96px]'
             } ${getColorStyles(item.colorType)}`}
           >
@@ -296,7 +314,7 @@ export const AACView: React.FC = () => {
                   settings.largeButtonMode ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'
                 } leading-none mb-1 select-none transition-transform group-hover:scale-110`}
               >
-                {item.emoji}
+                {getThemedAacEmoji(item, activeTheme)}
               </span>
             )}
             <span

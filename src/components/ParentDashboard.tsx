@@ -32,7 +32,8 @@ import {
   Edit3,
   BookOpen,
   Layers,
-  BarChart3
+  BarChart3,
+  Palette
 } from 'lucide-react';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
 import { AACCategory, LifeAdventure, Routine, RoutineTemplate } from '../types';
@@ -41,6 +42,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from './RoutineCustomizerModal';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
+import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorage';
 
 import { getPairingCode } from '../services/caregiverSync';
@@ -89,6 +91,7 @@ export const ParentDashboard: React.FC = () => {
     | 'adventures'
     | 'skills'
     | 'profile'
+    | 'themes'
     | 'ai'
     | 'settings';
 
@@ -563,6 +566,7 @@ export const ParentDashboard: React.FC = () => {
             { id: 'adventures', label: 'Life Adventures', emoji: '🚀', icon: Compass },
             { id: 'skills', label: 'Life Skills', emoji: '⭐', icon: CheckCircle2 },
             { id: 'profile', label: 'Child Profile', emoji: '👤', icon: User },
+            { id: 'themes', label: 'Themes & Studio', emoji: '🎨', icon: Palette, badge: 'Studio' },
             { id: 'ai', label: 'AI Helper (Gemini)', emoji: '🤖', icon: Bot },
             { id: 'settings', label: 'Settings & PIN', emoji: '⚙️', icon: SettingsIcon },
           ].map((tab) => (
@@ -2405,6 +2409,11 @@ export const ParentDashboard: React.FC = () => {
                 </button>
               </div>
             </div>
+          )}
+
+          {/* TAB: THEMES & CUSTOMIZATION STUDIO */}
+          {activeTab === 'themes' && (
+            <ThemeShopAndStudio />
           )}
         </main>
       </div>
