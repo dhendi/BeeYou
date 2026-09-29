@@ -36,7 +36,18 @@ import {
   Palette
 } from 'lucide-react';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
-import { AACCategory, LifeAdventure, Routine, RoutineTemplate } from '../types';
+import { 
+  AACCategory, 
+  LifeAdventure, 
+  Routine, 
+  RoutineTemplate, 
+  UserAgeGroup, 
+  EnabledFeatures, 
+  getDefaultFeaturesForAge,
+  DEFAULT_KID_FEATURES,
+  DEFAULT_TEEN_FEATURES,
+  DEFAULT_ADULT_FEATURES
+} from '../types';
 import { CaregiverLivePortal } from './CaregiverLivePortal';
 import { PWAInstallButton } from './PWAInstallButton';
 import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
@@ -78,6 +89,12 @@ export const ParentDashboard: React.FC = () => {
     speak,
     offlineVoices,
     resetToDefaults,
+    userAgeGroup,
+    setUserAgeGroup,
+    enabledFeatures,
+    updateEnabledFeatures,
+    toggleFeature,
+    reopenOnboarding,
   } = useApp();
 
   type TabType = 
@@ -2353,6 +2370,145 @@ export const ParentDashboard: React.FC = () => {
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
                   Protect parent controls and configure device preferences.
                 </p>
+              </div>
+
+              {/* AGE EXPERIENCE & SETUP WIZARD */}
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-base font-black text-slate-800">Age Experience Mode</h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Controls terminology, visual tone, and recommended feature layouts.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      reopenOnboarding();
+                      setIsParentMode(false);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <span>✨ Relaunch Onboarding Setup Wizard</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    { id: 'kid', label: 'Kids (3–11)', emoji: '🧒', desc: 'Mascots, stars, stickers, First/Then' },
+                    { id: 'teen', label: 'Teens (12–17)', emoji: '🎧', desc: 'Modern lofi/cyber, countdowns, independence' },
+                    { id: 'adult', label: 'Adults (18+)', emoji: '💼', desc: 'Executive function, discreet AAC, zero clutter' },
+                  ].map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => {
+                        setUserAgeGroup(a.id as UserAgeGroup);
+                        playChime('tap');
+                      }}
+                      className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
+                        userAgeGroup === a.id
+                          ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-300'
+                          : 'border-slate-200 hover:bg-white bg-white/70'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{a.emoji}</span>
+                        <span className="text-xs font-black text-slate-800">{a.label}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1 font-medium">{a.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* MODULAR FEATURES MATRIX */}
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                  <div>
+                    <h3 className="text-base font-black text-slate-800">Modular Feature Controls</h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Turn any feature on or off. Adults can use stickers/mascots, and kids can have a minimal layout.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-slate-400">Presets:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateEnabledFeatures(DEFAULT_KID_FEATURES);
+                        playChime('star');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs cursor-pointer"
+                    >
+                      Kid
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateEnabledFeatures(DEFAULT_TEEN_FEATURES);
+                        playChime('star');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-xs cursor-pointer"
+                    >
+                      Teen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateEnabledFeatures(DEFAULT_ADULT_FEATURES);
+                        playChime('star');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs cursor-pointer"
+                    >
+                      Adult
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {[
+                    { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', emoji: '🗣️', desc: 'Motor-planned AAC tiles with voice' },
+                    { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', emoji: '⏱️', desc: 'Activity countdown ring for routines' },
+                    { key: 'firstThenSchedules', label: 'First / Then Routine Cards', emoji: '📋', desc: 'Clear step-by-step guidance' },
+                    { key: 'starsAndRewards', label: 'Stars & Digital Routine Stickers', emoji: '⭐', desc: 'Gamification reward coins & badges' },
+                    { key: 'mascotCompanion', label: 'Playful Mascot Companion', emoji: '🦕', desc: 'Rex/Hopper cheer greetings & banner' },
+                    { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', emoji: '🌙', desc: 'Evening reflection & therapist chart' },
+                    { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', emoji: '🫁', desc: 'Coping toolkit & breath circle' },
+                    { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', emoji: '🚨', desc: 'One-tap emergency & emotion broadcast' },
+                    { key: 'socialStories', label: 'Social Stories Preparation', emoji: '📖', desc: 'Scenarios for outings and changes' },
+                    { key: 'lifeSkills', label: 'Step-by-Step Life Skills', emoji: '🛠️', desc: 'Task analysis breakdowns for independence' },
+                    { key: 'discreetMode', label: 'Discreet Minimal Mode', emoji: '🕶️', desc: 'Text-focused layout, minimal clutter' },
+                  ].map((feat) => {
+                    const isChecked = enabledFeatures ? (enabledFeatures as any)[feat.key] !== false : true;
+                    return (
+                      <div
+                        key={feat.key}
+                        onClick={() => {
+                          toggleFeature(feat.key as any);
+                          playChime('tap');
+                        }}
+                        className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
+                          isChecked ? 'border-amber-400 bg-white shadow-2xs' : 'border-slate-200 bg-slate-100/70 opacity-60'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl">{feat.emoji}</span>
+                          <div>
+                            <h4 className="text-xs font-black text-slate-800">{feat.label}</h4>
+                            <p className="text-[11px] text-slate-500 font-medium">{feat.desc}</p>
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}}
+                          className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="max-w-xs">

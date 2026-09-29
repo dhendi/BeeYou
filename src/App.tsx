@@ -31,6 +31,7 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { RoutineStickerCelebrationModal } from './components/RoutineStickerCelebrationModal';
 import { DailyRecollectionModal } from './components/DailyRecollectionModal';
 import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
+import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -41,6 +42,9 @@ const AppContent: React.FC = () => {
     showCaregiverAlertModal,
     setShowCaregiverAlertModal,
     activeTheme,
+    showOnboardingModal,
+    setShowOnboardingModal,
+    enabledFeatures,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
@@ -95,21 +99,23 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Easy Floating Caregiver Alert / SOS Button: Anchored above bottom bar */}
-      <div className="absolute bottom-20 right-3 sm:right-5 z-30 pointer-events-none">
-        <button
-          onClick={() => {
-            setShowCaregiverAlertModal(true);
-            playChime('tap');
-          }}
-          className="pointer-events-auto group flex items-center gap-2 pl-3.5 pr-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-400/50 border-2 border-white ring-4 ring-rose-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
-          title="Easy Alert Button: Send emotions or ask caregiver for help at school or therapy"
-        >
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-4 h-4 text-white" />
-          </div>
-          <span className="tracking-wide">Alert Caregiver 🚨</span>
-        </button>
-      </div>
+      {enabledFeatures?.emergencyAlertSOS !== false && (
+        <div className="absolute bottom-20 right-3 sm:right-5 z-30 pointer-events-none">
+          <button
+            onClick={() => {
+              setShowCaregiverAlertModal(true);
+              playChime('tap');
+            }}
+            className="pointer-events-auto group flex items-center gap-2 pl-3.5 pr-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-400/50 border-2 border-white ring-4 ring-rose-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
+            title="Easy Alert Button: Send emotions or ask caregiver for help at school or therapy"
+          >
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-4 h-4 text-white" />
+            </div>
+            <span className="tracking-wide">Alert Caregiver 🚨</span>
+          </button>
+        </div>
+      )}
 
       {/* Primary Navigation Bar (anchored bottom footer, never jumps on tab switch) */}
       <footer className="shrink-0 z-20">
@@ -131,7 +137,7 @@ const AppContent: React.FC = () => {
       <ConnectCaregiverModal 
         isOpen={showCaregiverModal} 
         onClose={() => setShowCaregiverModal(false)} 
-      />
+        />
       <CaregiverAlertModal
         isOpen={showCaregiverAlertModal}
         onClose={() => setShowCaregiverAlertModal(false)}
@@ -139,6 +145,13 @@ const AppContent: React.FC = () => {
       <RoutineStickerCelebrationModal />
       <DailyRecollectionModal />
       <ThemeCustomizerModal />
+
+      {/* First-Run Onboarding Setup Wizard */}
+      <OnboardingWizardModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+        canDismiss={true}
+      />
     </div>
   );
 };

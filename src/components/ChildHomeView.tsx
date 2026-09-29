@@ -40,6 +40,8 @@ export const ChildHomeView: React.FC = () => {
     setShowCopingToolkit,
     activeTheme,
     setShowThemeModal,
+    enabledFeatures,
+    userAgeGroup,
   } = useApp();
 
 
@@ -88,40 +90,48 @@ export const ChildHomeView: React.FC = () => {
               <span className="inline-flex items-center text-xs font-black uppercase tracking-wider text-amber-800 bg-amber-100/90 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
                 Welcome Back
               </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setChildView('rewards');
-                  playChime('star');
-                }}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-100/70 hover:bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/80 cursor-pointer transition-all active:scale-95 whitespace-nowrap shrink-0"
-                title="View earned badges & rewards"
-              >
-                <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                <span>{worldState.stars} Stars • 🏆 Rewards</span>
-              </button>
+              {enabledFeatures?.starsAndRewards !== false && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChildView('rewards');
+                    playChime('star');
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-100/70 hover:bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/80 cursor-pointer transition-all active:scale-95 whitespace-nowrap shrink-0"
+                  title="View earned badges & rewards"
+                >
+                  <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                  <span>{worldState.stars} Stars • 🏆 Rewards</span>
+                </button>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-800 truncate">
-              Hi, {childProfile.name}! 👋
+              {userAgeGroup === 'adult' ? `Welcome back, ${childProfile.name} 👋` : `Hi, ${childProfile.name}! 👋`}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 font-medium truncate">
-              Your safe, friendly everyday companion
+              {userAgeGroup === 'adult'
+                ? 'Your personal executive assistant & communication hub'
+                : userAgeGroup === 'teen'
+                ? 'Your daily focus, communication & independence space'
+                : 'Your safe, friendly everyday companion'}
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto lg:justify-end">
-          <button
-            onClick={() => {
-              setShowCaregiverAlertModal(true);
-              playChime('tap');
-            }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0"
-            title="Easy Alert to Caregiver - Send your feeling or ask for help"
-          >
-            <ShieldAlert className="w-4 h-4 text-white" />
-            <span>Alert Caregiver 🚨</span>
-          </button>
+          {enabledFeatures?.emergencyAlertSOS !== false && (
+            <button
+              onClick={() => {
+                setShowCaregiverAlertModal(true);
+                playChime('tap');
+              }}
+              className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0"
+              title="Easy Alert to Caregiver - Send your feeling or ask for help"
+            >
+              <ShieldAlert className="w-4 h-4 text-white" />
+              <span>Alert Caregiver 🚨</span>
+            </button>
+          )}
 
           <button
             onClick={() => {
@@ -173,44 +183,82 @@ export const ChildHomeView: React.FC = () => {
       </div>
 
       {/* 2.5 THEMED COMPANION & MOTIVATION BANNER */}
-      <div 
-        onClick={() => {
-          setShowThemeModal(true);
-          playChime('star');
-        }}
-        className={`rounded-3xl p-4 sm:p-5 border-2 shadow-xs transition-all hover:shadow-md cursor-pointer active:scale-98 flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
-      >
-        <div className="flex items-center gap-3.5">
-          <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs shrink-0">
-            {activeTheme.mascotEmoji}
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
-                {activeTheme.name}
-              </span>
-              <span className="text-xs font-bold text-slate-500">
-                {activeTheme.mascotName}
-              </span>
+      {enabledFeatures?.mascotCompanion !== false ? (
+        <div 
+          onClick={() => {
+            setShowThemeModal(true);
+            playChime('star');
+          }}
+          className={`rounded-3xl p-4 sm:p-5 border-2 shadow-xs transition-all hover:shadow-md cursor-pointer active:scale-98 flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
+        >
+          <div className="flex items-center gap-3.5">
+            <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs shrink-0">
+              {activeTheme.mascotEmoji}
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
+                  {activeTheme.name}
+                </span>
+                <span className="text-xs font-bold text-slate-500">
+                  {activeTheme.mascotName}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm font-black text-slate-800 mt-0.5">
+                "{activeTheme.greetingMessage}"
+              </p>
             </div>
-            <p className="text-xs sm:text-sm font-black text-slate-800 mt-0.5">
-              "{activeTheme.greetingMessage}"
-            </p>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowThemeModal(true);
+              playChime('tap');
+            }}
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
+          >
+            <span>🎨 Themes</span>
+          </button>
+        </div>
+      ) : (
+        <div 
+          onClick={() => {
             setShowThemeModal(true);
             playChime('tap');
           }}
-          className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
+          className={`rounded-2xl p-3.5 sm:p-4 border shadow-xs transition-all hover:shadow-sm cursor-pointer flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
         >
-          <span>🎨 Themes</span>
-        </button>
-      </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xl p-2 rounded-xl bg-white/90 shadow-2xs">
+              {activeTheme.mascotEmoji}
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
+                  {activeTheme.name}
+                </span>
+                <span className="text-xs text-slate-500 font-medium">Personal Theme Active</span>
+              </div>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">
+                "{activeTheme.greetingMessage}"
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowThemeModal(true);
+              playChime('tap');
+            }}
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer flex items-center gap-1"
+          >
+            <span>🎨 Change Theme</span>
+          </button>
+        </div>
+      )}
 
       {/* 3. CURRENT SCHEDULE & FIRST/THEN SNAPSHOT */}
       {currentRoutine && (

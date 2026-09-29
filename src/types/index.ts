@@ -250,9 +250,81 @@ export interface MyWorldState {
   currentRoom: 'bedroom' | 'playroom' | 'yard';
 }
 
+export type UserAgeGroup = 'kid' | 'teen' | 'adult';
+
+export interface EnabledFeatures {
+  starsAndRewards: boolean;       // Star coins, badges, routine stickers (gamification)
+  firstThenSchedules: boolean;     // Visual first/then routine cards
+  mascotCompanion: boolean;        // Playful mascot avatar greeting and cheering
+  visualCountdownTimer: boolean;   // Visual activity countdown timer
+  socialStories: boolean;          // Social stories preparation
+  lifeSkills: boolean;             // Step-by-step life skills breakdown
+  dailyMoodRecollection: boolean;  // End-of-day reflection & therapist clinical log
+  emergencyAlertSOS: boolean;      // Quick help / caregiver alert SOS button
+  aacCommunication: boolean;       // AAC picture & symbol communication board
+  sensoryBreathingPacer: boolean;  // Calm sensory breathing pacer & coping toolkit
+  discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
+}
+
+export const DEFAULT_KID_FEATURES: EnabledFeatures = {
+  starsAndRewards: true,
+  firstThenSchedules: true,
+  mascotCompanion: true,
+  visualCountdownTimer: true,
+  socialStories: true,
+  lifeSkills: true,
+  dailyMoodRecollection: true,
+  emergencyAlertSOS: true,
+  aacCommunication: true,
+  sensoryBreathingPacer: true,
+  discreetMode: false,
+};
+
+export const DEFAULT_TEEN_FEATURES: EnabledFeatures = {
+  starsAndRewards: true,
+  firstThenSchedules: true,
+  mascotCompanion: false,
+  visualCountdownTimer: true,
+  socialStories: true,
+  lifeSkills: true,
+  dailyMoodRecollection: true,
+  emergencyAlertSOS: true,
+  aacCommunication: true,
+  sensoryBreathingPacer: true,
+  discreetMode: false,
+};
+
+export const DEFAULT_ADULT_FEATURES: EnabledFeatures = {
+  starsAndRewards: false,
+  firstThenSchedules: true,
+  mascotCompanion: false,
+  visualCountdownTimer: true,
+  socialStories: false,
+  lifeSkills: false,
+  dailyMoodRecollection: true,
+  emergencyAlertSOS: true,
+  aacCommunication: true,
+  sensoryBreathingPacer: true,
+  discreetMode: true,
+};
+
+export function getDefaultFeaturesForAge(age: UserAgeGroup): EnabledFeatures {
+  switch (age) {
+    case 'adult':
+      return { ...DEFAULT_ADULT_FEATURES };
+    case 'teen':
+      return { ...DEFAULT_TEEN_FEATURES };
+    case 'kid':
+    default:
+      return { ...DEFAULT_KID_FEATURES };
+  }
+}
+
 export interface ChildProfile {
   name: string;
   pronouns?: string;
+  ageGroup?: UserAgeGroup;
+  userRole?: 'self' | 'caregiver_managing';
   interests: string[];
   favoriteFoods: string[];
   favoriteActivities: string[];
@@ -268,6 +340,7 @@ export interface ChildProfile {
   communicationPreference: string;
   activeSticker?: string;
   activeTitle?: string;
+  onboardingCompleted?: boolean;
 }
 
 export interface RewardBadge {
@@ -317,6 +390,8 @@ export interface AppSettings {
   reduceMotion: boolean;
   soundEffects: boolean;
   autoSpeakSentence: boolean;
+  features?: EnabledFeatures;
+  onboardingCompleted?: boolean;
 }
 
 export interface CaregiverMessage {
@@ -420,6 +495,12 @@ export type {
   AppTheme,
   ThemePalette,
   WallpaperPattern,
+} from '../data/themesData';
+
+export {
+  getThemesForAgeGroup,
+  suggestThemeForUser,
+  getThemedAacEmoji,
 } from '../data/themesData';
 
 

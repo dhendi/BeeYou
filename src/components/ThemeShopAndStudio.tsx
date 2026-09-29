@@ -192,6 +192,14 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'shop' | 'studio'>(defaultMode);
+  const [ageFilter, setAgeFilter] = useState<'all' | 'kid' | 'teen' | 'adult' | 'custom'>('all');
+
+  const filteredThemes = themes.filter((t) => {
+    if (ageFilter === 'all') return true;
+    if (ageFilter === 'custom') return t.isCustom;
+    if (t.targetAudience === 'all') return true;
+    return t.targetAudience === ageFilter;
+  });
 
   // --- STUDIO BUILDER FORM STATE ---
   const [customName, setCustomName] = useState('My Super Theme');
@@ -360,9 +368,38 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             )}
           </div>
 
+          {/* Age Group & Category Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+            <span className="text-xs font-black text-slate-500 mr-1">Filter by Age:</span>
+            {[
+              { id: 'all', label: 'All Themes', emoji: '🌟' },
+              { id: 'kid', label: 'Kids (3–11)', emoji: '🧒' },
+              { id: 'teen', label: 'Teens (12–17)', emoji: '🎧' },
+              { id: 'adult', label: 'Adults (18+)', emoji: '💼' },
+              { id: 'custom', label: 'Custom Creations', emoji: '✨' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => {
+                  setAgeFilter(f.id as any);
+                  playChime('tap');
+                }}
+                className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                  ageFilter === f.id
+                    ? 'bg-amber-500 text-white shadow-xs scale-102 font-black'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                <span>{f.emoji}</span>
+                <span>{f.label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Grid of All Themes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-            {themes.map((theme) => {
+            {filteredThemes.map((theme) => {
               const isEquipped = theme.id === activeThemeId;
               const canAfford = worldState.stars >= theme.costStars;
 

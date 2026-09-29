@@ -20,6 +20,9 @@ import {
   EarnedRoutineSticker,
   DailyRecollectionEntry,
   AppTheme,
+  UserAgeGroup,
+  EnabledFeatures,
+  getDefaultFeaturesForAge,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -206,6 +209,16 @@ interface AppContextType {
   deleteCustomTheme: (id: string) => void;
   showThemeModal: boolean;
   setShowThemeModal: (val: boolean) => void;
+
+  // Onboarding & Multi-Age Adaptability
+  userAgeGroup: UserAgeGroup;
+  setUserAgeGroup: (age: UserAgeGroup) => void;
+  enabledFeatures: EnabledFeatures;
+  updateEnabledFeatures: (features: Partial<EnabledFeatures>) => void;
+  toggleFeature: (key: keyof EnabledFeatures) => void;
+  showOnboardingModal: boolean;
+  setShowOnboardingModal: (val: boolean) => void;
+  reopenOnboarding: () => void;
 
   // Utilities
   resetToDefaults: () => void;
@@ -427,6 +440,62 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (activeThemeId === id) {
       setActiveThemeId('theme-dino');
     }
+  };
+
+  // Onboarding & Multi-Age Adaptability
+  const [userAgeGroup, setUserAgeGroupState] = useState<UserAgeGroup>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_user_age_group');
+      if (saved === 'kid' || saved === 'teen' || saved === 'adult') return saved;
+    } catch (e) {}
+    return 'kid';
+  });
+
+  const [enabledFeatures, setEnabledFeatures] = useState<EnabledFeatures>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_enabled_features');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return getDefaultFeaturesForAge('kid');
+  });
+
+  const [showOnboardingModal, setShowOnboardingModal] = useState<boolean>(() => {
+    try {
+      const completed = localStorage.getItem('lumina_onboarding_completed');
+      if (completed === 'true') return false;
+    } catch (e) {}
+    return true; // First time launch
+  });
+
+  const setUserAgeGroup = (age: UserAgeGroup) => {
+    setUserAgeGroupState(age);
+    try {
+      localStorage.setItem('lumina_user_age_group', age);
+    } catch (e) {}
+  };
+
+  const updateEnabledFeatures = (updates: Partial<EnabledFeatures>) => {
+    setEnabledFeatures((prev) => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('lumina_enabled_features', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const toggleFeature = (key: keyof EnabledFeatures) => {
+    setEnabledFeatures((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      try {
+        localStorage.setItem('lumina_enabled_features', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const reopenOnboarding = () => {
+    setShowOnboardingModal(true);
   };
 
   // Active Speech & Offline States
@@ -1146,9 +1215,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setChildProfile(INITIAL_CHILD_PROFILE);
     setSettings(INITIAL_APP_SETTINGS);
     setDailyRecollections(INITIAL_DAILY_RECOLLECTIONS);
+    setUserAgeGroupState('kid');
+    setEnabledFeatures(getDefaultFeaturesForAge('kid'));
     setSentence([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('lumina_daily_recollections');
+    localStorage.removeItem('lumina_user_age_group');
+    localStorage.removeItem('lumina_enabled_features');
+    localStorage.removeItem('lumina_onboarding_completed');
     if (settings.soundEffects) playChime('clear');
   };
 
@@ -1277,6 +1351,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteCustomTheme,
         showThemeModal,
         setShowThemeModal,
+
+        userAgeGroup,
+        setUserAgeGroup,
+        enabledFeatures,
+        updateEnabledFeatures,
+        toggleFeature,
+        showOnboardingModal,
+        setShowOnboardingModal,
+        reopenOnboarding,
 
         resetToDefaults,
       }}

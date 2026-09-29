@@ -10,50 +10,65 @@ import {
 import { playChime } from '../utils/audio';
 
 export const ChildNavBar: React.FC = () => {
-  const { childView, setChildView, setActiveAdventureId, setActiveSkillId, setActiveStoryId } = useApp();
+  const { 
+    childView, 
+    setChildView, 
+    setActiveAdventureId, 
+    setActiveSkillId, 
+    setActiveStoryId,
+    userAgeGroup,
+    enabledFeatures,
+  } = useApp();
 
-  const navItems = [
+  const allNavItems = [
     {
       id: 'home',
-      label: 'Home',
+      label: userAgeGroup === 'adult' ? 'Dashboard' : 'Home',
       emoji: '🏠',
       icon: Home,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
       activeBg: 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
+      show: true,
     },
     {
       id: 'aac',
-      label: 'Communicate',
+      label: userAgeGroup === 'adult' ? 'AAC Speech' : userAgeGroup === 'teen' ? 'Voice / AAC' : 'Communicate',
       emoji: '🗣️',
       icon: MessageSquare,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
       activeBg: 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
+      show: enabledFeatures?.aacCommunication !== false,
     },
     {
       id: 'my-day',
-      label: 'My Day',
+      label: userAgeGroup === 'adult' ? 'Schedule' : 'My Day',
       emoji: '📅',
       icon: CalendarDays,
       color: 'hover:bg-sky-100 text-sky-900 border-sky-300',
       activeBg: 'bg-sky-400 text-sky-950 shadow-md ring-2 ring-sky-500',
+      show: true,
     },
     {
       id: 'adventures',
-      label: 'Adventures',
-      emoji: '🚀',
+      label: userAgeGroup === 'adult' ? 'Guides' : userAgeGroup === 'teen' ? 'Scenarios' : 'Adventures',
+      emoji: userAgeGroup === 'adult' ? '🧭' : '🚀',
       icon: Compass,
       color: 'hover:bg-emerald-100 text-emerald-900 border-emerald-300',
       activeBg: 'bg-emerald-400 text-emerald-950 shadow-md ring-2 ring-emerald-500',
+      show: (enabledFeatures?.socialStories !== false) || (enabledFeatures?.lifeSkills !== false),
     },
     {
       id: 'feelings',
-      label: 'Feelings',
-      emoji: '💛',
+      label: userAgeGroup === 'adult' ? 'Reflection' : userAgeGroup === 'teen' ? 'Mood' : 'Feelings',
+      emoji: userAgeGroup === 'adult' ? '🧘' : userAgeGroup === 'teen' ? '🎧' : '💛',
       icon: Smile,
       color: 'hover:bg-rose-100 text-rose-900 border-rose-300',
       activeBg: 'bg-rose-400 text-rose-950 shadow-md ring-2 ring-rose-500',
+      show: enabledFeatures?.dailyMoodRecollection !== false || enabledFeatures?.sensoryBreathingPacer !== false,
     },
   ];
+
+  const navItems = allNavItems.filter(item => item.show);
 
   const handleNav = (id: any) => {
     // Clear sub-details when switching tabs

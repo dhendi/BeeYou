@@ -32,6 +32,8 @@ export const ChildHeader: React.FC = () => {
     setChildView,
     activeTheme,
     setShowThemeModal,
+    enabledFeatures,
+    userAgeGroup,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -81,18 +83,20 @@ export const ChildHeader: React.FC = () => {
             </span>
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setChildView('rewards');
-                playChime('star');
-              }}
-              className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 cursor-pointer transition-all active:scale-95"
-              title="View earned rewards & badges"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-              <span><strong className="text-amber-900">{worldState.stars}</strong> Stars</span>
-            </button>
+            {enabledFeatures?.starsAndRewards !== false && (
+              <button
+                type="button"
+                onClick={() => {
+                  setChildView('rewards');
+                  playChime('star');
+                }}
+                className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 cursor-pointer transition-all active:scale-95"
+                title="View earned rewards & badges"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                <span><strong className="text-amber-900">{worldState.stars}</strong> Stars</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -167,30 +171,34 @@ export const ChildHeader: React.FC = () => {
         </button>
 
         {/* Easy Emotion Alert Button */}
-        <button
-          onClick={() => {
-            setShowCaregiverAlertModal(true);
-            playChime('tap');
-          }}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm active:scale-95 transition-all shadow-sm shadow-rose-200 cursor-pointer animate-pulse ring-2 ring-rose-400/50"
-          title="Easy Alert Button - Send your emotion or ask for help at school or therapy"
-        >
-          <ShieldAlert className="w-4 h-4 text-white" />
-          <span className="hidden sm:inline">Alert 🚨</span>
-          <span className="sm:hidden">SOS</span>
-        </button>
+        {enabledFeatures?.emergencyAlertSOS !== false && (
+          <button
+            onClick={() => {
+              setShowCaregiverAlertModal(true);
+              playChime('tap');
+            }}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm active:scale-95 transition-all shadow-sm shadow-rose-200 cursor-pointer animate-pulse ring-2 ring-rose-400/50"
+            title="Easy Alert Button - Send your emotion or ask for help at school or therapy"
+          >
+            <ShieldAlert className="w-4 h-4 text-white" />
+            <span className="hidden sm:inline">Alert 🚨</span>
+            <span className="sm:hidden">SOS</span>
+          </button>
+        )}
 
         {/* PWA Install Button */}
         <PWAInstallButton variant="compact" />
 
-        {/* Parent Lock Switch */}
+        {/* Parent / Settings Lock Switch */}
         <button
           onClick={() => setShowPinModal(true)}
           className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs active:scale-95 transition-all flex items-center gap-1 border border-slate-200 ml-1 cursor-pointer"
-          title="Parent Dashboard (Protected by PIN)"
+          title={userAgeGroup === 'adult' ? 'Settings & Personal Hub (Protected by PIN)' : 'Parent & Caregiver Dashboard (Protected by PIN)'}
         >
           <Lock className="w-3.5 h-3.5 text-slate-500" />
-          <span className="hidden lg:inline">Grown-Up</span>
+          <span className="hidden lg:inline">
+            {userAgeGroup === 'adult' ? 'Settings' : userAgeGroup === 'teen' ? 'Settings' : 'Grown-Up'}
+          </span>
         </button>
       </div>
     </header>
