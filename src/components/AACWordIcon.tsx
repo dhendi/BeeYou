@@ -40,6 +40,8 @@ function themeAccent(cat?: string): { main: string; light: string; dark: string 
 const Svg: React.FC<{ children: React.ReactNode; title?: string }> = ({ children, title }) => (
   <svg
     viewBox="0 0 48 48"
+    width="100%"
+    height="100%"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     aria-label={title}
@@ -966,7 +968,7 @@ export const AACWordIcon: React.FC<AACWordIconProps> = ({
   const renderer = ICON_MAP[key];
 
   return (
-    <span className={`${className} flex-shrink-0 drop-shadow-sm`} aria-hidden="true">
+    <span className={`${className} block drop-shadow-sm`} aria-hidden="true">
       {renderer ? renderer({ a: accent, label }) : <IconFallback a={accent} label={label} />}
     </span>
   );

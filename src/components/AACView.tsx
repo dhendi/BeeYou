@@ -91,12 +91,12 @@ export const AACView: React.FC = () => {
   };
 
   const gridColsClass = settings.largeButtonMode
-    ? 'grid-cols-2 sm:grid-cols-3'
+    ? 'grid-cols-3 sm:grid-cols-4'
     : settings.gridColumns === 3
-    ? 'grid-cols-3'
+    ? 'grid-cols-3 sm:grid-cols-4'
     : settings.gridColumns === 6
-    ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6'
-    : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-4';
+    ? 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6'
+    : 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6';
 
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-5xl mx-auto w-full px-2 sm:px-4">
@@ -289,7 +289,7 @@ export const AACView: React.FC = () => {
 
       {/* 4. MOTOR-PLANNING PREDICTABLE VOCABULARY GRID */}
       <main
-        className={`grid ${gridColsClass} gap-2 sm:gap-3 mt-1`}
+        className={`grid ${gridColsClass} gap-1.5 sm:gap-2 mt-1`}
         aria-label="Vocabulary grid"
       >
         {filteredItems.map((item) => {
@@ -298,13 +298,13 @@ export const AACView: React.FC = () => {
           <button
             key={item.id}
             onClick={() => addToSentence(item)}
-            className={`flex flex-col items-center justify-center p-2 sm:p-3.5 ${
+            className={`flex flex-col items-center aspect-square p-1.5 sm:p-2 ${
               activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
             } ${
               activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-            } shadow-xs transition-all active:scale-92 cursor-pointer relative overflow-hidden group ${
-              settings.largeButtonMode ? 'min-h-[110px] sm:min-h-[130px]' : 'min-h-[82px] sm:min-h-[96px]'
-            } ${hasThemedArt ? 'border-opacity-60' : ''} ${getColorStyles(item.colorType)}`}
+            } shadow-sm transition-all active:scale-92 cursor-pointer relative overflow-hidden group ${
+              hasThemedArt ? 'border-opacity-60' : ''
+            } ${getColorStyles(item.colorType)}`}
           >
             {/* Themed SVG art layer — sits behind content */}
             {hasThemedArt && activeTheme && (
@@ -315,28 +315,28 @@ export const AACView: React.FC = () => {
               />
             )}
 
-            {/* Content sits above art */}
-            {item.photoUrl ? (
-              <img
-                src={item.photoUrl}
-                alt={item.label}
-                className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-xl shadow-xs mb-1"
-              />
-            ) : (
-              <span className={`relative z-10 mb-1 transition-transform group-hover:scale-110 ${
-                settings.largeButtonMode ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-9 h-9 sm:w-11 sm:h-11'
-              }`}>
+            {/* Icon area — fills all available vertical space */}
+            <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95">
+              {item.photoUrl ? (
+                <img
+                  src={item.photoUrl}
+                  alt={item.label}
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              ) : (
                 <AACWordIcon
                   label={item.label}
                   colorType={item.colorType}
                   theme={activeTheme}
                   className="w-full h-full"
                 />
-              </span>
-            )}
+              )}
+            </div>
+
+            {/* Label — pinned at the bottom, always visible */}
             <span
-              className={`relative z-10 font-black tracking-tight text-center leading-tight select-none drop-shadow-sm ${
-                settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
+              className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 ${
+                settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-[10px] sm:text-xs'
               }`}
             >
               {item.label}
