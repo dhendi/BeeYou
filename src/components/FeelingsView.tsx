@@ -274,6 +274,80 @@ export const FeelingsView: React.FC = () => {
               </div>
             </div>
 
+            {/* Hair Color Customization Quick-Bar */}
+            <div className="flex items-center justify-between gap-2 mb-3 bg-slate-50 dark:bg-slate-800/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex-wrap">
+              <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+                  <span>💇</span>
+                  <span>Hair Color:</span>
+                </span>
+                {[
+                  { color: '#18181b', name: 'Jet Black' },
+                  { color: '#451a03', name: 'Dark Brown' },
+                  { color: '#78350f', name: 'Chestnut' },
+                  { color: '#d97706', name: 'Caramel' },
+                  { color: '#facc15', name: 'Golden Blonde' },
+                  { color: '#ef4444', name: 'Auburn Red' },
+                  { color: '#ec4899', name: 'Pastel Pink' },
+                  { color: '#3b82f6', name: 'Sky Blue' },
+                  { color: '#10b981', name: 'Emerald Green' },
+                  { color: '#a855f7', name: 'Lavender' },
+                ].map((hc) => {
+                  const isCurrent = avatar.hairColor === hc.color;
+                  return (
+                    <button
+                      key={hc.color}
+                      type="button"
+                      onClick={() => {
+                        updateAvatar({ hairColor: hc.color });
+                        playChime('tap');
+                      }}
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 transition-transform cursor-pointer shrink-0 flex items-center justify-center relative ${
+                        isCurrent
+                          ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
+                          : 'border-white dark:border-slate-600 hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: hc.color }}
+                      title={`Change hair color to ${hc.name}`}
+                    >
+                      {isCurrent && (
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white drop-shadow-xs" />
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Custom Color Input */}
+                <label
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 cursor-pointer shrink-0 flex items-center justify-center relative transition-transform hover:scale-110 bg-gradient-to-tr from-pink-400 via-amber-300 to-indigo-400 ${
+                    ![
+                      '#18181b', '#451a03', '#78350f', '#d97706', '#facc15',
+                      '#ef4444', '#ec4899', '#3b82f6', '#10b981', '#a855f7',
+                    ].includes(avatar.hairColor)
+                      ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
+                      : 'border-dashed border-slate-300'
+                  }`}
+                  title="Choose any custom hair color"
+                >
+                  <input
+                    type="color"
+                    value={avatar.hairColor || '#451a03'}
+                    onChange={(e) => updateAvatar({ hairColor: e.target.value })}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                  <span className="text-[10px] sm:text-xs">🎨</span>
+                </label>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block shrink-0 shadow-xs"
+                  style={{ backgroundColor: avatar.hairColor || '#451a03' }}
+                />
+                <span className="text-[11px] hidden sm:inline">Active Hair</span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
               {EMOTIONS.map((emo) => {
                 const isSelected = selectedEmotion === emo.id;

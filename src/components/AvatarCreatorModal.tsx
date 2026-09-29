@@ -509,7 +509,10 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                         <button
                           key={t.color}
                           type="button"
-                          onClick={() => updateDraft({ skinTone: t.color })}
+                          onClick={() => {
+                            updateDraft({ skinTone: t.color });
+                            playChime('tap');
+                          }}
                           className={`w-11 h-11 rounded-2xl border-3 transition-transform cursor-pointer flex items-center justify-center shrink-0 ${
                             draft.skinTone === t.color ? 'scale-115 ring-3 ring-indigo-500 border-white shadow-md' : 'border-slate-300'
                           }`}
@@ -519,6 +522,74 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                           {draft.skinTone === t.color && <Check className="w-5 h-5 text-slate-900 drop-shadow-xs" />}
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Hair Color Customization */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400">
+                        Hair Color:
+                      </label>
+                      <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block"
+                          style={{ backgroundColor: draft.hairColor || '#451a03' }}
+                        />
+                        <span>{draft.hairColor}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2.5 overflow-x-auto pb-2">
+                      {[
+                        { color: '#18181b', name: 'Jet Black' },
+                        { color: '#451a03', name: 'Espresso Brown' },
+                        { color: '#78350f', name: 'Chestnut' },
+                        { color: '#d97706', name: 'Caramel' },
+                        { color: '#facc15', name: 'Golden Blonde' },
+                        { color: '#ef4444', name: 'Auburn Red' },
+                        { color: '#ec4899', name: 'Pastel Pink' },
+                        { color: '#3b82f6', name: 'Sky Blue' },
+                        { color: '#10b981', name: 'Emerald Green' },
+                        { color: '#a855f7', name: 'Lavender' },
+                      ].map((c) => (
+                        <button
+                          key={c.color}
+                          type="button"
+                          onClick={() => {
+                            updateDraft({ hairColor: c.color });
+                            playChime('tap');
+                          }}
+                          className={`w-11 h-11 rounded-2xl border-3 transition-transform cursor-pointer flex items-center justify-center shrink-0 ${
+                            draft.hairColor === c.color ? 'scale-115 ring-3 ring-indigo-500 border-white shadow-md' : 'border-slate-300'
+                          }`}
+                          style={{ backgroundColor: c.color }}
+                          title={c.name}
+                        >
+                          {draft.hairColor === c.color && <Check className="w-5 h-5 text-white drop-shadow-sm" />}
+                        </button>
+                      ))}
+
+                      {/* Custom Hair Color Input */}
+                      <label
+                        className={`w-11 h-11 rounded-2xl border-3 transition-transform cursor-pointer flex flex-col items-center justify-center shrink-0 relative bg-gradient-to-tr from-pink-400 via-amber-300 to-indigo-400 ${
+                          ![
+                            '#18181b', '#451a03', '#78350f', '#d97706', '#facc15',
+                            '#ef4444', '#ec4899', '#3b82f6', '#10b981', '#a855f7',
+                          ].includes(draft.hairColor)
+                            ? 'scale-115 ring-3 ring-indigo-500 border-white shadow-md'
+                            : 'border-slate-300'
+                        }`}
+                        title="Pick any custom hair color"
+                      >
+                        <input
+                          type="color"
+                          value={draft.hairColor || '#451a03'}
+                          onChange={(e) => updateDraft({ hairColor: e.target.value })}
+                          className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                        />
+                        <span className="text-xs">🎨</span>
+                        <span className="text-[7px] font-black text-white drop-shadow-xs uppercase">Custom</span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -564,9 +635,18 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
 
                   {/* Hair Color */}
                   <div>
-                    <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 block mb-2">
-                      Hair Color:
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400">
+                        Hair Color:
+                      </label>
+                      <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block"
+                          style={{ backgroundColor: draft.hairColor || '#451a03' }}
+                        />
+                        <span>{draft.hairColor}</span>
+                      </span>
+                    </div>
                     <div className="flex items-center gap-3 overflow-x-auto pb-2">
                       {[
                         { color: '#18181b', name: 'Jet Black' },
@@ -583,7 +663,10 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                         <button
                           key={c.color}
                           type="button"
-                          onClick={() => updateDraft({ hairColor: c.color })}
+                          onClick={() => {
+                            updateDraft({ hairColor: c.color });
+                            playChime('tap');
+                          }}
                           className={`w-11 h-11 rounded-2xl border-3 transition-transform cursor-pointer flex items-center justify-center shrink-0 ${
                             draft.hairColor === c.color ? 'scale-115 ring-3 ring-indigo-500 border-white shadow-md' : 'border-slate-300'
                           }`}
@@ -593,6 +676,28 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                           {draft.hairColor === c.color && <Check className="w-5 h-5 text-white drop-shadow-sm" />}
                         </button>
                       ))}
+
+                      {/* Custom Hair Color Input */}
+                      <label
+                        className={`w-11 h-11 rounded-2xl border-3 transition-transform cursor-pointer flex flex-col items-center justify-center shrink-0 relative bg-gradient-to-tr from-pink-400 via-amber-300 to-indigo-400 ${
+                          ![
+                            '#18181b', '#451a03', '#78350f', '#d97706', '#facc15',
+                            '#ef4444', '#ec4899', '#3b82f6', '#10b981', '#a855f7',
+                          ].includes(draft.hairColor)
+                            ? 'scale-115 ring-3 ring-indigo-500 border-white shadow-md'
+                            : 'border-slate-300'
+                        }`}
+                        title="Pick any custom hair color"
+                      >
+                        <input
+                          type="color"
+                          value={draft.hairColor || '#451a03'}
+                          onChange={(e) => updateDraft({ hairColor: e.target.value })}
+                          className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                        />
+                        <span className="text-xs">🎨</span>
+                        <span className="text-[7px] font-black text-white drop-shadow-xs uppercase">Custom</span>
+                      </label>
                     </div>
                   </div>
                 </div>

@@ -90,19 +90,19 @@ export async function getRecoloredEmotionImage(
 
           // Exclude extreme colors (teeth/eyes white, dark outlines)
           if (r > 245 && g > 245 && b > 245) continue;
-          if (r < 40 && g < 40 && b < 40) continue;
+          if (r < 25 && g < 25 && b < 25) continue;
 
           // Exclude green hoodie
           if (g > r + 15 && g > b + 15) continue;
           // Exclude blue ocean/space
-          if (b > r + 15 && b > g + 15) continue;
+          if (b > r + 20 && b > g + 15) continue;
           // Exclude dino yellow/gold spikes (r > 180, g > 130, b < 70)
           if (r > 180 && g > 130 && b < 70) continue;
           // Exclude pink tongue / inner mouth (r > 180, g < 110, b < 130)
           if (r > 180 && g < 110 && b < 130) continue;
 
           // 1. Detect skin pixels (warm tones with R > G > B and high lightness)
-          if (r > 165 && g > 115 && b > 75 && r > g && g > b && r - b >= 35) {
+          if (r > 165 && g > 115 && b > 70 && r > g && r - b >= 25) {
             const curLum = r * 0.299 + g * 0.587 + b * 0.114;
             const ratio = curLum / baseSkinLum;
             data[i] = Math.min(255, Math.round(targetSkinRgb[0] * ratio));
@@ -111,13 +111,15 @@ export async function getRecoloredEmotionImage(
             continue;
           }
 
-          // 2. Detect hair pixels (dark warm brown)
-          if (r >= 40 && r <= 165 && g >= 20 && g <= 110 && b >= 15 && b <= 80 && r >= g && g >= b) {
+          // 2. Detect hair pixels (medium to dark brown / slate-brown / dark chestnut)
+          const maxVal = Math.max(r, g, b);
+          const minVal = Math.min(r, g, b);
+          if (maxVal <= 165 && minVal >= 25 && (r >= b || maxVal - minVal <= 35)) {
             const curLum = r * 0.299 + g * 0.587 + b * 0.114;
-            const ratio = curLum / baseHairLum;
-            data[i] = Math.min(255, Math.round(targetHairRgb[0] * ratio));
-            data[i + 1] = Math.min(255, Math.round(targetHairRgb[1] * ratio));
-            data[i + 2] = Math.min(255, Math.round(targetHairRgb[2] * ratio));
+            const factor = Math.min(1.4, Math.max(0.6, curLum / 75));
+            data[i] = Math.min(255, Math.round(targetHairRgb[0] * factor));
+            data[i + 1] = Math.min(255, Math.round(targetHairRgb[1] * factor));
+            data[i + 2] = Math.min(255, Math.round(targetHairRgb[2] * factor));
             continue;
           }
         }
