@@ -642,11 +642,11 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // If real pixel art image is available, render the actual image!
   const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
-  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=2`;
+  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=3`;
 
   return (
     <span
-      className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-md relative overflow-hidden rounded-2xl`}
+      className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-xs relative overflow-hidden`}
       aria-hidden="true"
     >
       {hasRealImage ? (
