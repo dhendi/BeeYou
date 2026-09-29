@@ -33,6 +33,7 @@ import { DailyRecollectionModal } from './components/DailyRecollectionModal';
 import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
 import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { AboutMeIDModal } from './components/AboutMeIDModal';
+import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
 
 const AppContent: React.FC = () => {
   const { 
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
     enabledFeatures,
     showAboutMeModal,
     setShowAboutMeModal,
+    settings,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
@@ -84,13 +86,20 @@ const AppContent: React.FC = () => {
 
   return (
     <div className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}>
+      {/* Dynamic Theme Custom Wallpaper & Art Layer */}
+      <ThemeWallpaperArt
+        pattern={activeTheme?.wallpaperPattern}
+        category={activeTheme?.category}
+        reduceMotion={settings.reduceMotion}
+      />
+
       {/* Child Top Header (anchored, does not shift) */}
-      <header className="shrink-0 z-30">
+      <header className="shrink-0 z-30 relative">
         <ChildHeader />
       </header>
 
       {/* Main Content View Switcher (scrolls inside itself) */}
-      <main ref={mainScrollRef} className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4">
+      <main ref={mainScrollRef} className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4 relative z-10">
         {childView === 'home' && <ChildHomeView />}
         {childView === 'aac' && <AACView />}
         {childView === 'my-day' && <MyDayView />}

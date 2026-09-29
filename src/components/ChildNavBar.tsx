@@ -18,6 +18,7 @@ export const ChildNavBar: React.FC = () => {
     setActiveStoryId,
     userAgeGroup,
     enabledFeatures,
+    activeTheme,
   } = useApp();
 
   const allNavItems = [
@@ -27,16 +28,16 @@ export const ChildNavBar: React.FC = () => {
       emoji: '🏠',
       icon: Home,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
-      activeBg: 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
+      activeBg: activeTheme?.palette?.navActiveBg || 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
       show: true,
     },
     {
       id: 'aac',
       label: userAgeGroup === 'adult' ? 'AAC Speech' : userAgeGroup === 'teen' ? 'Voice / AAC' : 'Communicate',
-      emoji: '🗣️',
+      emoji: activeTheme?.mascotEmoji || '🗣️',
       icon: MessageSquare,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
-      activeBg: 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
+      activeBg: activeTheme?.palette?.navActiveBg || 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
       show: enabledFeatures?.aacCommunication !== false,
     },
     {

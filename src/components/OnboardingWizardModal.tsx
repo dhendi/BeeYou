@@ -42,6 +42,7 @@ interface OnboardingWizardModalProps {
 
 const AGE_INTEREST_SUGGESTIONS: Record<UserAgeGroup, { label: string; emoji: string }[]> = {
   kid: [
+    { label: 'Turtles & Sea Life', emoji: '🐢' },
     { label: 'Dinosaurs', emoji: '🦖' },
     { label: 'Frogs & Nature', emoji: '🐸' },
     { label: 'Trains & Railways', emoji: '🚂' },

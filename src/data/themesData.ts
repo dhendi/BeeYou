@@ -14,18 +14,21 @@ export interface ThemePalette {
 }
 
 export type WallpaperPattern = 
+  | 'turtle_shell'
   | 'dino_footprints' 
   | 'lily_pads' 
   | 'railroad' 
   | 'cosmic_stars' 
   | 'bubbles' 
   | 'sparkles' 
+  | 'ocean_waves'
+  | 'zen_botanical'
   | 'none';
 
 export interface AppTheme {
   id: string;
   name: string;
-  category: 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'nature' | 'racing' | 'fantasy' | 'custom' | 'classic' | 'lofi' | 'cyber' | 'executive' | 'minimal' | 'dark' | 'skate';
+  category: 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'nature' | 'racing' | 'fantasy' | 'custom' | 'classic' | 'lofi' | 'cyber' | 'executive' | 'minimal' | 'dark' | 'skate';
   emoji: string;
   mascotName: string;
   mascotEmoji: string;
@@ -45,11 +48,77 @@ export interface AppTheme {
     customWordEmojis?: Record<string, string>;
   };
 
-  soundTheme: 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic';
+  soundTheme: 'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic';
 }
 
 export const PRESET_THEMES: AppTheme[] = [
-  // 1. DINOSAUR THEME (Requested specifically by user)
+  // 1. WISE TURTLE THEME (Requested specifically by user)
+  {
+    id: 'theme-turtle',
+    name: 'Wise Turtle Sanctuary',
+    category: 'turtle',
+    emoji: '🐢',
+    mascotName: 'Shelly the Wise Turtle',
+    mascotEmoji: '🐢',
+    greetingMessage: 'Slow, steady, and peaceful! Welcome to your calm turtle sanctuary!',
+    description: 'Calming turquoise waters, sacred geometric shell patterns, and gentle swimming turtles for deep relaxed focus.',
+    costStars: 0, // Unlocked by default so kid or adult can pick turtles right away!
+    isUnlocked: true,
+    palette: {
+      primary: '#059669',
+      primaryBg: 'bg-emerald-600',
+      primaryHover: 'hover:bg-emerald-700',
+      primaryLight: 'bg-emerald-50/90',
+      primaryBorder: 'border-emerald-400',
+      textAccent: 'text-emerald-950',
+      badgeBg: 'bg-emerald-200',
+      appBg: 'bg-gradient-to-b from-teal-50 via-emerald-50/50 to-green-100',
+      headerBg: 'bg-emerald-100/90 border-emerald-300',
+      navActiveBg: 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400',
+    },
+    wallpaperPattern: 'turtle_shell',
+    aacStyling: {
+      tileBorderRadius: 'rounded-3xl',
+      tileBorderWidth: 'border-3',
+      customWordEmojis: {
+        'I / Me': '🐢',
+        'I': '🐢',
+        'You': '👉',
+        'We': '🐢👥',
+        'My / Mine': '🐢🤲',
+        'Want': '🤲',
+        'Need': '❗',
+        'Like': '💚',
+        'Go': '🐢💨',
+        'See / Look': '👀',
+        'Feel': '💖',
+        'Eat': '🥬',
+        'Drink': '🌊',
+        'Play': '🏝️',
+        'Help': '🛟',
+        'Stop': '🛑',
+        'Wait': '⏳',
+        'More': '➕',
+        'All Done': '🏁',
+        'Don\'t / Not': '❌',
+        'Yes': '✅',
+        'No': '⛔',
+        'Break': '🧘',
+        'Please': '🙏',
+        'What Next?': '❓',
+        'Water': '🌊',
+        'Apple': '🍏',
+        'Sandwich': '🥪',
+        'Cookie': '🍪',
+        'Milk': '🥛',
+        'Good': '🐢✨',
+        'Happy': '🐢💚',
+      },
+    },
+    soundTheme: 'turtle',
+  },
+
+  // 2. DINOSAUR THEME (Requested specifically by user)
   {
     id: 'theme-dino',
     name: 'Dino Kingdom',
@@ -574,11 +643,68 @@ export const PRESET_THEMES: AppTheme[] = [
  * Returns the customized emoji for an AAC item based on the active theme
  */
 export function getThemedAacEmoji(item: AACItem, theme?: AppTheme): string {
-  if (!theme || !theme.aacStyling?.customWordEmojis) {
-    return item.emoji;
+  if (!theme) return item.emoji;
+
+  // 1. Explicit word overrides in theme customWordEmojis
+  if (theme.aacStyling?.customWordEmojis) {
+    if (theme.aacStyling.customWordEmojis[item.label]) {
+      return theme.aacStyling.customWordEmojis[item.label];
+    }
+    if (item.speechText && theme.aacStyling.customWordEmojis[item.speechText]) {
+      return theme.aacStyling.customWordEmojis[item.speechText];
+    }
+    const labelLower = item.label.toLowerCase();
+    for (const [key, val] of Object.entries(theme.aacStyling.customWordEmojis)) {
+      if (key.toLowerCase() === labelLower) return val;
+    }
   }
-  const override = theme.aacStyling.customWordEmojis[item.label];
-  return override || item.emoji;
+
+  // 2. Dynamic theme-wide visual adaptation across all AAC tiles
+  if (theme.category === 'turtle') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🐢';
+    if (item.label.includes('Eat') || item.label.includes('Food')) return '🥬';
+    if (item.label.includes('Drink') || item.label.includes('Water')) return '🌊';
+    if (item.label.includes('Break')) return '🧘';
+    if (item.label.includes('Wait')) return '⏳';
+    if (item.label.includes('Help')) return '🛟';
+    if (item.label.includes('Play')) return '🏝️';
+    if (item.label.includes('Go')) return '🐢💨';
+    if (item.label.includes('Good') || item.label.includes('Happy')) return '🐢✨';
+    if (item.label.includes('Like')) return '💚';
+  } else if (theme.category === 'dinosaur') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🦖';
+    if (item.label.includes('Eat')) return '🌿';
+    if (item.label.includes('Help')) return '🌋';
+    if (item.label.includes('Play')) return '🦕';
+    if (item.label.includes('Break')) return '🏕️';
+    if (item.label.includes('Go')) return '🦖💨';
+    if (item.label.includes('Good') || item.label.includes('Happy')) return '🌟';
+  } else if (theme.category === 'frog') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🐸';
+    if (item.label.includes('Eat')) return '🪰';
+    if (item.label.includes('Play')) return '🪷';
+    if (item.label.includes('Help')) return '🛟';
+    if (item.label.includes('Go') || item.label.includes('Jump')) return '🦗';
+  } else if (theme.category === 'train') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🚂';
+    if (item.label.includes('Play')) return '🛤️';
+    if (item.label.includes('Break')) return '🚃';
+    if (item.label.includes('Go')) return '💨';
+  } else if (theme.category === 'space') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🚀';
+    if (item.label.includes('Help')) return '🛰️';
+    if (item.label.includes('Play')) return '👾';
+    if (item.label.includes('Break')) return '🌌';
+    if (item.label.includes('Eat')) return '🪐';
+  } else if (theme.category === 'ocean') {
+    if (item.label.includes('I') || item.speechText === 'I') return '🐬';
+    if (item.label.includes('Help')) return '🛟';
+    if (item.label.includes('Play')) return '🏖️';
+    if (item.label.includes('Drink') || item.label.includes('Water')) return '🌊';
+    if (item.label.includes('Break')) return '🐚';
+  }
+
+  return item.emoji;
 }
 
 /**
@@ -598,6 +724,7 @@ export function suggestThemeForUser(ageGroup: 'kid' | 'teen' | 'adult', interest
   const lower = interests.map((i) => i.toLowerCase());
 
   if (ageGroup === 'kid') {
+    if (lower.some((i) => i.includes('turtle') || i.includes('tortoise') || i.includes('reptile'))) return 'theme-turtle';
     if (lower.some((i) => i.includes('dino') || i.includes('jurassic'))) return 'theme-dino';
     if (lower.some((i) => i.includes('frog') || i.includes('pond') || i.includes('amphibian'))) return 'theme-frog';
     if (lower.some((i) => i.includes('train') || i.includes('rail') || i.includes('locomotive'))) return 'theme-trains';
@@ -605,8 +732,9 @@ export function suggestThemeForUser(ageGroup: 'kid' | 'teen' | 'adult', interest
     if (lower.some((i) => i.includes('car') || i.includes('race') || i.includes('speed') || i.includes('vehicle'))) return 'theme-racing';
     if (lower.some((i) => i.includes('unicorn') || i.includes('magic') || i.includes('fairy') || i.includes('princess'))) return 'theme-fantasy';
     if (lower.some((i) => i.includes('ocean') || i.includes('dolphin') || i.includes('fish') || i.includes('water'))) return 'theme-ocean';
-    return 'theme-dino';
+    return 'theme-turtle';
   } else if (ageGroup === 'teen') {
+    if (lower.some((i) => i.includes('turtle') || i.includes('sea'))) return 'theme-turtle';
     if (lower.some((i) => i.includes('music') || i.includes('lofi') || i.includes('chill') || i.includes('study') || i.includes('headphones'))) return 'theme-lofi';
     if (lower.some((i) => i.includes('game') || i.includes('gaming') || i.includes('tech') || i.includes('code') || i.includes('cyber'))) return 'theme-cyber';
     if (lower.some((i) => i.includes('skate') || i.includes('sport') || i.includes('board') || i.includes('outdoor'))) return 'theme-skate';
@@ -614,6 +742,7 @@ export function suggestThemeForUser(ageGroup: 'kid' | 'teen' | 'adult', interest
     return 'theme-lofi';
   } else {
     // Adult
+    if (lower.some((i) => i.includes('turtle') || i.includes('sea') || i.includes('nature') || i.includes('calm'))) return 'theme-turtle';
     if (lower.some((i) => i.includes('coffee') || i.includes('minimal') || i.includes('work') || i.includes('executive') || i.includes('focus'))) return 'theme-espresso';
     if (lower.some((i) => i.includes('dark') || i.includes('sensory') || i.includes('migraine') || i.includes('night') || i.includes('light'))) return 'theme-midnight';
     if (lower.some((i) => i.includes('nature') || i.includes('calm') || i.includes('sage') || i.includes('plant') || i.includes('mindful'))) return 'theme-sage';

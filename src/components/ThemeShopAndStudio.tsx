@@ -22,6 +22,22 @@ import { playChime, speakText } from '../utils/audio';
 // Pre-packaged color presets for custom theme builder
 const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] = [
   {
+    name: 'Wise Turtle Emerald',
+    icon: '🐢',
+    palette: {
+      primary: '#059669',
+      primaryBg: 'bg-emerald-600',
+      primaryHover: 'hover:bg-emerald-700',
+      primaryLight: 'bg-emerald-50/90',
+      primaryBorder: 'border-emerald-400',
+      textAccent: 'text-emerald-950',
+      badgeBg: 'bg-emerald-200',
+      appBg: 'bg-gradient-to-b from-teal-50 via-emerald-50/50 to-green-100',
+      headerBg: 'bg-emerald-100/95 border-emerald-300',
+      navActiveBg: 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400',
+    },
+  },
+  {
     name: 'Jurassic Green',
     icon: '🦖',
     palette: {
@@ -153,6 +169,7 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
 
 // Quick mascot choices for kids & parents
 const POPULAR_MASCOTS = [
+  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle' as const },
   { emoji: '🦖', name: 'T-Rex', sound: 'dino' as const },
   { emoji: '🦕', name: 'Brachiosaurus', sound: 'dino' as const },
   { emoji: '🐸', name: 'Tree Frog', sound: 'frog' as const },
@@ -202,22 +219,22 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   });
 
   // --- STUDIO BUILDER FORM STATE ---
-  const [customName, setCustomName] = useState('My Super Theme');
-  const [customMascot, setCustomMascot] = useState('🦖');
-  const [customMascotName, setCustomMascotName] = useState('Rexy');
-  const [customGreeting, setCustomGreeting] = useState('Roar! Let’s have an awesome day!');
+  const [customName, setCustomName] = useState('My Turtle Theme');
+  const [customMascot, setCustomMascot] = useState('🐢');
+  const [customMascotName, setCustomMascotName] = useState('Shelly');
+  const [customGreeting, setCustomGreeting] = useState('Slow, steady, and peaceful!');
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
-  const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperPattern>('dino_footprints');
+  const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperPattern>('turtle_shell');
   const [selectedBorderRadius, setSelectedBorderRadius] = useState<'rounded-2xl' | 'rounded-3xl' | 'rounded-xl'>('rounded-3xl');
-  const [selectedSoundTheme, setSelectedSoundTheme] = useState<'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic'>('dino');
+  const [selectedSoundTheme, setSelectedSoundTheme] = useState<'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic'>('turtle');
 
   // Custom AAC button icons mapping
   const [customWordIcons, setCustomWordIcons] = useState<Record<string, string>>({
-    'I want': '🦖',
-    'Help': '🌋',
-    'Play': '🦕',
-    'Eat': '🌿',
-    'Water': '💧',
+    'I want': '🐢',
+    'Help': '🛟',
+    'Play': '🏝️',
+    'Eat': '🥬',
+    'Water': '🌊',
   });
 
   const handleCustomWordChange = (word: string, icon: string) => {
@@ -680,11 +697,14 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
+                { id: 'turtle_shell', label: '🐢 Turtle Shell' },
                 { id: 'dino_footprints', label: '🦖 Dino Tracks' },
                 { id: 'lily_pads', label: '🐸 Lily Pads' },
                 { id: 'cosmic_stars', label: '⭐ Cosmic Stars' },
                 { id: 'bubbles', label: '🫧 Bubbles' },
                 { id: 'railroad', label: '🚂 Railroad' },
+                { id: 'ocean_waves', label: '🌊 Ocean Waves' },
+                { id: 'zen_botanical', label: '🌿 Zen Botanical' },
                 { id: 'sparkles', label: '✨ Sparkles' },
                 { id: 'none', label: '🧼 Clean Solid' },
               ].map((wp) => (
