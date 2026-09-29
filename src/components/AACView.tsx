@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
+import { AACTileArt } from './AACTileArt';
 import { 
   Volume2, 
   Trash2, 
@@ -290,7 +291,9 @@ export const AACView: React.FC = () => {
         className={`grid ${gridColsClass} gap-2 sm:gap-3 mt-1`}
         aria-label="Vocabulary grid"
       >
-        {filteredItems.map((item) => (
+        {filteredItems.map((item) => {
+          const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category);
+          return (
           <button
             key={item.id}
             onClick={() => addToSentence(item)}
@@ -298,19 +301,29 @@ export const AACView: React.FC = () => {
               activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
             } ${
               activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-            } shadow-xs transition-all active:scale-92 cursor-pointer relative group ${
+            } shadow-xs transition-all active:scale-92 cursor-pointer relative overflow-hidden group ${
               settings.largeButtonMode ? 'min-h-[110px] sm:min-h-[130px]' : 'min-h-[82px] sm:min-h-[96px]'
-            } ${getColorStyles(item.colorType)}`}
+            } ${hasThemedArt ? 'border-opacity-60' : ''} ${getColorStyles(item.colorType)}`}
           >
+            {/* Themed SVG art layer — sits behind content */}
+            {hasThemedArt && activeTheme && (
+              <AACTileArt
+                theme={activeTheme}
+                colorType={item.colorType}
+                label={item.label}
+              />
+            )}
+
+            {/* Content sits above art */}
             {item.photoUrl ? (
               <img
                 src={item.photoUrl}
                 alt={item.label}
-                className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-xl shadow-xs mb-1"
+                className="relative z-10 w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-xl shadow-xs mb-1"
               />
             ) : (
               <span
-                className={`${
+                className={`relative z-10 drop-shadow-sm ${
                   settings.largeButtonMode ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'
                 } leading-none mb-1 select-none transition-transform group-hover:scale-110`}
               >
@@ -318,14 +331,15 @@ export const AACView: React.FC = () => {
               </span>
             )}
             <span
-              className={`font-black tracking-tight text-center leading-tight select-none ${
+              className={`relative z-10 font-black tracking-tight text-center leading-tight select-none drop-shadow-sm ${
                 settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
               }`}
             >
               {item.label}
             </span>
           </button>
-        ))}
+          );
+        })}
       </main>
 
       {filteredItems.length === 0 && (
