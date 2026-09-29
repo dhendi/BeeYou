@@ -10,9 +10,13 @@ import {
   Volume2, 
   CheckCircle2, 
   ArrowRight,
-  SmilePlus
+  SmilePlus,
+  Calendar,
+  Smile,
+  BarChart3
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { DailyRecollectionChart } from './DailyRecollectionChart';
 
 export const FeelingsView: React.FC = () => {
   const {
@@ -20,12 +24,19 @@ export const FeelingsView: React.FC = () => {
     recordEmotion,
     speak,
     setShowCopingToolkit,
+    setShowRecollectionModal,
+    dailyRecollections,
   } = useApp();
 
+  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'recollection'>('check-in');
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionType | null>(currentMood);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
   const [savedCheckIn, setSavedCheckIn] = useState<boolean>(false);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const loggedToday = dailyRecollections.some((r) => r.date === todayStr);
+
 
   const reasons = [
     { text: 'A plan changed', emoji: '🔄' },
@@ -70,35 +81,105 @@ export const FeelingsView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-5">
-      {/* Hero Banner with Coping Shortcut */}
-      <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-center sm:text-left">
-          <span className="text-xs font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-3 py-1 rounded-full">
-            Emotion Check-In
-          </span>
-          <h2 className="text-xl sm:text-2xl font-black text-rose-950 mt-1.5">
-            How does your body and mind feel?
-          </h2>
-          <p className="text-xs sm:text-sm text-rose-800 font-medium mt-1">
-            All feelings are valid and okay. Share how you feel and what you need.
-          </p>
-        </div>
+    <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4 sm:space-y-5">
+      {/* SUB-TAB NAVIGATOR */}
+      <div className="flex items-center gap-1.5 p-1 bg-rose-100/60 dark:bg-slate-800 rounded-2xl border border-rose-200 shrink-0">
+        <button
+          type="button"
+          onClick={() => {
+            setActiveSubTab('check-in');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            activeSubTab === 'check-in'
+              ? 'bg-white dark:bg-slate-700 text-rose-950 dark:text-white shadow-xs'
+              : 'text-rose-800 hover:text-rose-950 dark:text-slate-300'
+          }`}
+        >
+          <Smile className="w-4 h-4 text-rose-500" />
+          <span>Quick Emotion Check-In</span>
+        </button>
 
         <button
-          onClick={() => setShowCopingToolkit(true)}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+          type="button"
+          onClick={() => {
+            setActiveSubTab('recollection');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            activeSubTab === 'recollection'
+              ? 'bg-white dark:bg-slate-700 text-amber-950 dark:text-white shadow-xs'
+              : 'text-amber-800 hover:text-amber-950 dark:text-slate-300'
+          }`}
         >
-          <Wind className="w-5 h-5" />
-          <span>Open Calm Toolkit 🛋️</span>
+          <BarChart3 className="w-4 h-4 text-amber-500" />
+          <span>Daily Recollection & History ({dailyRecollections.length})</span>
         </button>
       </div>
 
-      {/* 1. EMOTION GRID */}
-      <div>
-        <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider mb-2.5">
-          1. Choose your feeling:
-        </h3>
+      {activeSubTab === 'recollection' ? (
+        <DailyRecollectionChart />
+      ) : (
+        <>
+          {/* End-of-Day Recollection Prompt Banner */}
+          <div className="bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl sm:text-4xl select-none">🌙</span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200/90 px-2 py-0.5 rounded-full">
+                    Daily Reflection
+                  </span>
+                  <span className="text-xs font-bold text-amber-900">
+                    {loggedToday ? "Today's reflection completed! ✓" : "End-of-day journal"}
+                  </span>
+                </div>
+                <h3 className="font-black text-slate-900 text-sm sm:text-base mt-0.5">
+                  {loggedToday ? "Review or update today's reflection" : "How was today? Fill out your daily recollection chart"}
+                </h3>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowRecollectionModal(true);
+                playChime('tap');
+              }}
+              className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Sparkles className="w-4 h-4 fill-amber-300" />
+              <span>{loggedToday ? 'Edit Reflection' : 'Open Reflection Chart (+3 ⭐)'}</span>
+            </button>
+          </div>
+
+          {/* Hero Banner with Coping Shortcut */}
+          <div className="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-xs font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-3 py-1 rounded-full">
+                Emotion Check-In
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-rose-950 mt-1.5">
+                How does your body and mind feel?
+              </h2>
+              <p className="text-xs sm:text-sm text-rose-800 font-medium mt-1">
+                All feelings are valid and okay. Share how you feel and what you need.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowCopingToolkit(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+            >
+              <Wind className="w-5 h-5" />
+              <span>Open Calm Toolkit 🛋️</span>
+            </button>
+          </div>
+
+          {/* 1. EMOTION GRID */}
+          <div>
+            <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider mb-2.5">
+              1. Choose your feeling:
+            </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
           {EMOTIONS.map((emo) => {
             const isSelected = selectedEmotion === emo.id;
@@ -211,6 +292,9 @@ export const FeelingsView: React.FC = () => {
           )}
         </div>
       )}
+        </>
+      )}
     </div>
   );
 };
+

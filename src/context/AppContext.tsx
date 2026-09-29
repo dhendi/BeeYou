@@ -18,6 +18,7 @@ import {
   CaregiverMessage,
   DailyCheckInEntry,
   EarnedRoutineSticker,
+  DailyRecollectionEntry,
 } from '../types';
 import {
   DEFAULT_AAC_ITEMS,
@@ -36,6 +37,8 @@ import {
   DEFAULT_DAILY_CHECKINS,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
+import { INITIAL_DAILY_RECOLLECTIONS } from '../data/recollectionData';
+
 import { 
   speakText, 
   playChime, 
@@ -182,6 +185,14 @@ interface AppContextType {
   awardRoutineSticker: (routine: Routine) => EarnedRoutineSticker;
   dismissStickerCelebration: () => void;
 
+  // Daily Mood & Recollection (End-of-Day Journal & Therapist Summary)
+  dailyRecollections: DailyRecollectionEntry[];
+  showRecollectionModal: boolean;
+  setShowRecollectionModal: (val: boolean) => void;
+  addDailyRecollection: (entry: Omit<DailyRecollectionEntry, 'id' | 'timestamp'>) => void;
+  updateDailyRecollection: (id: string, updates: Partial<DailyRecollectionEntry>) => void;
+  deleteDailyRecollection: (id: string) => void;
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -270,6 +281,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('lumina_earned_routine_stickers', JSON.stringify(earnedStickers));
     } catch (e) {}
   }, [earnedStickers]);
+
+  // Daily Mood & Recollection (End-of-Day Journal & Therapist Summary)
+  const [dailyRecollections, setDailyRecollections] = useState<DailyRecollectionEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_daily_recollections');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Failed to parse lumina_daily_recollections:', e);
+    }
+    return INITIAL_DAILY_RECOLLECTIONS;
+  });
+
+  const [showRecollectionModal, setShowRecollectionModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_daily_recollections', JSON.stringify(dailyRecollections));
+    } catch (e) {}
+  }, [dailyRecollections]);
+
 
   // Active Speech & Offline States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -927,6 +960,54 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSettings((prev) => ({ ...prev, ...partial }));
   };
 
+  // Daily Mood & Recollection Handlers
+  const addDailyRecollection = (entry: Omit<DailyRecollectionEntry, 'id' | 'timestamp'>) => {
+    const newEntry: DailyRecollectionEntry = {
+      ...entry,
+      id: `rec-${Date.now()}`,
+      timestamp: Date.now(),
+      starsAwarded: entry.starsAwarded ?? 3,
+    };
+
+    setDailyRecollections((prev) => [newEntry, ...prev.filter((p) => p.date !== newEntry.date)]);
+
+    // Record in emotion history
+    recordEmotion(
+      newEntry.primaryFeeling,
+      `Day Recollection: ${newEntry.overallDay}`,
+      newEntry.additionalNotes
+    );
+
+    // Award stars
+    awardStars(newEntry.starsAwarded || 3);
+
+    if (settings.soundEffects) {
+      playChime('star');
+      setTimeout(() => playChime('complete'), 350);
+    }
+
+    try {
+      confetti({
+        particleCount: 60,
+        spread: 75,
+        origin: { y: 0.6 },
+      });
+    } catch (e) {}
+
+    speakText(`Wonderful reflection, ${childProfile.name}! You earned ${newEntry.starsAwarded || 3} stars.`);
+  };
+
+  const updateDailyRecollection = (id: string, updates: Partial<DailyRecollectionEntry>) => {
+    setDailyRecollections((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+    );
+  };
+
+  const deleteDailyRecollection = (id: string) => {
+    setDailyRecollections((prev) => prev.filter((item) => item.id !== id));
+    if (settings.soundEffects) playChime('clear');
+  };
+
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
     setQuickPhrases(DEFAULT_QUICK_PHRASES);
@@ -939,8 +1020,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setAvatar(INITIAL_AVATAR);
     setChildProfile(INITIAL_CHILD_PROFILE);
     setSettings(INITIAL_APP_SETTINGS);
+    setDailyRecollections(INITIAL_DAILY_RECOLLECTIONS);
     setSentence([]);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('lumina_daily_recollections');
     if (settings.soundEffects) playChime('clear');
   };
 
@@ -1051,6 +1134,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         newlyAwardedSticker,
         awardRoutineSticker,
         dismissStickerCelebration,
+
+        dailyRecollections,
+        showRecollectionModal,
+        setShowRecollectionModal,
+        addDailyRecollection,
+        updateDailyRecollection,
+        deleteDailyRecollection,
 
         resetToDefaults,
       }}

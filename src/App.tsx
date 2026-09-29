@@ -29,6 +29,7 @@ import { CaregiverLivePortal } from './components/CaregiverLivePortal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { RoutineStickerCelebrationModal } from './components/RoutineStickerCelebrationModal';
+import { DailyRecollectionModal } from './components/DailyRecollectionModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -134,6 +135,7 @@ const AppContent: React.FC = () => {
         onClose={() => setShowCaregiverAlertModal(false)}
       />
       <RoutineStickerCelebrationModal />
+      <DailyRecollectionModal />
     </div>
   );
 };

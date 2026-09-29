@@ -27,7 +27,10 @@ export const MyDayView: React.FC = () => {
     speak,
     setChildView,
     earnedStickers,
+    dailyRecollections,
+    setShowRecollectionModal,
   } = useApp();
+
 
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
     routines[0]?.id || 'routine-morning'
@@ -446,7 +449,45 @@ export const MyDayView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* End of Day Reflection Card */}
+      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl select-none">🌙</span>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200/90 px-2 py-0.5 rounded-full">
+                End-of-Day Chart
+              </span>
+              <span className="text-xs font-bold text-amber-900">
+                {dailyRecollections.some((r) => r.date === new Date().toISOString().split('T')[0])
+                  ? "Today's reflection recorded! ✓"
+                  : "How was today? (+3 ⭐)"}
+              </span>
+            </div>
+            <h4 className="text-sm sm:text-base font-black text-slate-800 mt-0.5">
+              Daily Mood & Recollection Check-In
+            </h4>
+            <p className="text-xs text-slate-600">
+              Answer quick questions with your family or therapist to review your day.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowRecollectionModal(true);
+            playChime('tap');
+          }}
+          className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+        >
+          <Sparkles className="w-4 h-4 fill-amber-300 text-amber-600" />
+          <span>Open Reflection</span>
+        </button>
+      </div>
     </div>
   );
 };
+
 

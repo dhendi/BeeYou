@@ -31,7 +31,8 @@ import {
   ShieldCheck,
   Edit3,
   BookOpen,
-  Layers
+  Layers,
+  BarChart3
 } from 'lucide-react';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
 import { AACCategory, LifeAdventure, Routine, RoutineTemplate } from '../types';
@@ -39,7 +40,9 @@ import { CaregiverLivePortal } from './CaregiverLivePortal';
 import { PWAInstallButton } from './PWAInstallButton';
 import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from './RoutineCustomizerModal';
+import { DailyRecollectionChart } from './DailyRecollectionChart';
 import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorage';
+
 import { getPairingCode } from '../services/caregiverSync';
 
 export const ParentDashboard: React.FC = () => {
@@ -77,6 +80,7 @@ export const ParentDashboard: React.FC = () => {
 
   type TabType = 
     | 'caregiver'
+    | 'recollection'
     | 'offline'
     | 'plans-changed'
     | 'routines'
@@ -550,6 +554,7 @@ export const ParentDashboard: React.FC = () => {
         <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0">
           {[
             { id: 'routines', label: 'Routine Templates Library', emoji: '✨', icon: Calendar, badge: 'Library' },
+            { id: 'recollection', label: 'Daily Mood & Therapist Summary', emoji: '📊', icon: BarChart3, badge: 'Therapy' },
             { id: 'caregiver', label: 'Live Caregiver Link', emoji: '❤️', icon: Heart, badge: 'Live' },
             { id: 'plans-changed', label: 'Plans Changed', emoji: '🔄', icon: AlertTriangle, badge: plansChanged.active ? 'Active' : undefined },
             { id: 'aac', label: 'AAC & Vocabulary', emoji: '🗣️', icon: MessageSquare },
@@ -622,6 +627,13 @@ export const ParentDashboard: React.FC = () => {
               </button>
             </div>
           )}
+          {/* TAB: DAILY MOOD & THERAPIST RECOLLECTION SUMMARY */}
+          {activeTab === 'recollection' && (
+            <div className="space-y-6">
+              <DailyRecollectionChart isParentPortal={true} />
+            </div>
+          )}
+
           {/* TAB 0A: CAREGIVER LIVE LINK & REMOTE MONITOR */}
           {activeTab === 'caregiver' && (
             <div className="space-y-6">

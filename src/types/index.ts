@@ -406,3 +406,13 @@ export interface DailySummaryChart {
   sensoryWins: string[];
   therapyTakeaways?: string;
 }
+
+export type {
+  DayRating,
+  EnergyLevelType,
+  ChallengeType,
+  WinType,
+  SleepQualityType,
+  DailyRecollectionEntry,
+} from '../data/recollectionData';
+

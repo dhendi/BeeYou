@@ -15,7 +15,8 @@ import {
   Wind,
   Sun,
   Heart,
-  ShieldAlert
+  ShieldAlert,
+  Moon
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -31,12 +32,14 @@ export const ChildHomeView: React.FC = () => {
     setShowMorningBrief,
     setShowCaregiverModal,
     setShowCaregiverAlertModal,
+    setShowRecollectionModal,
     routines,
     adventures,
     quickPhrases,
     speak,
     setShowCopingToolkit,
   } = useApp();
+
 
   const currentRoutine = routines[0];
   const nextStep = currentRoutine?.steps.find((s) => !s.completed);
@@ -140,6 +143,18 @@ export const ChildHomeView: React.FC = () => {
           >
             <Sun className="w-4 h-4 text-amber-600" />
             <span>Morning Brief</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setShowRecollectionModal(true);
+              playChime('tap');
+            }}
+            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-200 shrink-0"
+            title="Log today's mood and recollection chart"
+          >
+            <Moon className="w-4 h-4 text-indigo-600" />
+            <span>Evening Reflection 🌙</span>
           </button>
 
           <button
