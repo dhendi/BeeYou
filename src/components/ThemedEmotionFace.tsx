@@ -29,9 +29,10 @@
  *    - happy, calm, excited, tired, worried, sad, angry, frustrated, overwhelmed, scared, confused
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppTheme } from '../data/themesData';
 import { useApp } from '../context/AppContext';
+import { getRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
 
 export type EmotionId =
   | 'happy'
@@ -738,6 +739,8 @@ const PixelFaceEmotion: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PUBLIC COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
+const REAL_IMAGE_THEMES = new Set(['dinosaur', 'ocean', 'turtle', 'frog', 'space']);
+
 export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   emotionId,
   theme,
@@ -747,8 +750,9 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   hairColor,
   className = 'w-16 h-16',
 }) => {
-  const { avatar } = useApp();
+  const { avatar, childProfile } = useApp();
 
+  const effectiveGender = gender ?? (childProfile?.characterGender || 'boy');
   const effectiveHairStyle = hairStyle ?? avatar?.hairStyle ?? 'short';
   const effectiveSkin = skinTone ?? avatar?.skinTone ?? '#fed7aa';
   const effectiveHair = hairColor ?? avatar?.hairColor ?? '#451a03';
@@ -756,40 +760,83 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const normalizedId = emotionId.toLowerCase().trim();
   const category = theme?.category;
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  // If pigtails/braids/bob or girl selected, use girl pixel art sprite; otherwise classic
+  const isPigtailsStyle = effectiveHairStyle === 'pigtails' || effectiveHairStyle === 'braids' || effectiveHairStyle === 'bob';
+  const useGirlFolder = effectiveGender === 'girl' || isPigtailsStyle;
+  const folder = useGirlFolder ? `${category}_girl` : category;
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
+
+  const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
+
+  // Dynamically recolor skin & hair if user has customized them
+  const [displaySrc, setDisplaySrc] = useState<string>(baseSrc);
+
+  useEffect(() => {
+    let active = true;
+    if (isDefaultPalette(effectiveSkin, effectiveHair)) {
+      setDisplaySrc(baseSrc);
+      return;
+    }
+
+    getRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair).then((recolored) => {
+      if (active) {
+        setDisplaySrc(recolored);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [baseSrc, effectiveSkin, effectiveHair]);
 
   return (
     <span
       className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-xs relative overflow-hidden`}
       aria-hidden="true"
     >
-      <svg
-        viewBox="0 0 32 32"
-        width="100%"
-        height="100%"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label={label}
-        role="img"
-        shapeRendering="crispEdges"
-        className="overflow-visible"
-        style={{ imageRendering: 'pixelated' }}
-      >
-        <title>{label}</title>
-
-        {/* 1. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
-        <PixelHoodieBack category={category} />
-
-        {/* 2. Character Face with 11 Expressive Pixel Expressions & Chosen Hairstyle/Colors */}
-        <PixelFaceEmotion
-          emotion={normalizedId}
-          hairStyle={effectiveHairStyle}
-          skinTone={effectiveSkin}
-          hairColor={effectiveHair}
+      {hasRealImage ? (
+        <img
+          key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
+          src={displaySrc}
+          alt={label}
+          onError={() => setImageFailed(true)}
+          className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
+          style={{ imageRendering: 'pixelated' }}
+          loading="lazy"
         />
+      ) : (
+        <svg
+          viewBox="0 0 32 32"
+          width="100%"
+          height="100%"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label={label}
+          role="img"
+          shapeRendering="crispEdges"
+          className="overflow-visible"
+          style={{ imageRendering: 'pixelated' }}
+        >
+          <title>{label}</title>
 
-        {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
-        <PixelHoodieFront category={category} />
-      </svg>
+          {/* 1. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
+          <PixelHoodieBack category={category} />
+
+          {/* 2. Character Face with 11 Expressive Pixel Expressions & Chosen Hairstyle/Colors */}
+          <PixelFaceEmotion
+            emotion={normalizedId}
+            hairStyle={effectiveHairStyle}
+            skinTone={effectiveSkin}
+            hairColor={effectiveHair}
+          />
+
+          {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
+          <PixelHoodieFront category={category} />
+        </svg>
+      )}
     </span>
   );
 };
+
