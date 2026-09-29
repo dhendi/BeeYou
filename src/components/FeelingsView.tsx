@@ -30,6 +30,9 @@ export const FeelingsView: React.FC = () => {
     activeTheme,
     childProfile,
     updateChildProfile,
+    avatar,
+    updateAvatar,
+    setShowAvatarCreator,
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'recollection'>('check-in');
@@ -182,44 +185,92 @@ export const FeelingsView: React.FC = () => {
           {/* 1. EMOTION GRID */}
           <div>
             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider">
+              <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                 1. Choose your feeling:
               </h3>
 
-              {/* Boy / Girl Character Switcher */}
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateChildProfile({ characterGender: 'boy' });
-                    playChime('tap');
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                    (childProfile?.characterGender || 'boy') === 'boy'
-                      ? 'bg-blue-600 text-white shadow-xs scale-102'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
-                  }`}
-                  aria-label="Boy character version"
-                >
-                  <span className="text-sm">👦</span>
-                  <span>Boy</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateChildProfile({ characterGender: 'girl' });
-                    playChime('tap');
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                    childProfile?.characterGender === 'girl'
-                      ? 'bg-pink-600 text-white shadow-xs scale-102'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
-                  }`}
-                  aria-label="Girl character version"
-                >
-                  <span className="text-sm">👧</span>
-                  <span>Girl</span>
-                </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Boy / Girl Character Switcher */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateChildProfile({ characterGender: 'boy' });
+                      playChime('tap');
+                    }}
+                    className={`px-2.5 py-1 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                      (childProfile?.characterGender || 'boy') === 'boy'
+                        ? 'bg-blue-600 text-white shadow-xs scale-102'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
+                    }`}
+                    aria-label="Boy character version"
+                  >
+                    <span>👦</span>
+                    <span>Boy</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateChildProfile({ characterGender: 'girl' });
+                      playChime('tap');
+                    }}
+                    className={`px-2.5 py-1 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                      childProfile?.characterGender === 'girl'
+                        ? 'bg-pink-600 text-white shadow-xs scale-102'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
+                    }`}
+                    aria-label="Girl character version"
+                  >
+                    <span>👧</span>
+                    <span>Girl</span>
+                  </button>
+                </div>
+
+                {/* Skin & Hair Representation Presets */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-x-auto">
+                  {[
+                    { id: 'default', label: 'Classic', skin: '#fcd34d', hair: '#451a03', icon: '🌟' },
+                    { id: 'african', label: 'African', skin: '#5a2e12', hair: '#18181b', icon: '🌍' },
+                    { id: 'asian', label: 'Asian', skin: '#fef3c7', hair: '#18181b', icon: '🌏' },
+                    { id: 'blonde', label: 'Blonde', skin: '#fed7aa', hair: '#facc15', icon: '☀️' },
+                    { id: 'olive', label: 'Tan', skin: '#d97706', hair: '#27272a', icon: '🌿' },
+                    { id: 'redhead', label: 'Redhead', skin: '#fef3c7', hair: '#ea580c', icon: '🍁' },
+                  ].map((preset) => {
+                    const isSelected = avatar.skinTone === preset.skin && avatar.hairColor === preset.hair;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          updateAvatar({ skinTone: preset.skin, hairColor: preset.hair });
+                          playChime('tap');
+                        }}
+                        className={`px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-white/60'
+                        }`}
+                        title={`${preset.label} representation`}
+                      >
+                        <span className="text-xs">{preset.icon}</span>
+                        <span className="hidden sm:inline">{preset.label}</span>
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAvatarCreator(true);
+                      playChime('tap');
+                    }}
+                    className="px-2 py-1 rounded-xl text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 flex items-center gap-1 cursor-pointer transition-all shadow-xs shrink-0"
+                    title="Open Full Avatar Studio"
+                  >
+                    <span>🎨</span>
+                    <span>Studio</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -241,6 +292,8 @@ export const FeelingsView: React.FC = () => {
                       emotionId={emo.id}
                       theme={activeTheme}
                       gender={childProfile?.characterGender || 'boy'}
+                      skinTone={avatar.skinTone}
+                      hairColor={avatar.hairColor}
                       className="w-16 h-16 sm:w-20 sm:h-20 mb-2 transition-transform hover:scale-110 drop-shadow-sm"
                     />
                     <span
