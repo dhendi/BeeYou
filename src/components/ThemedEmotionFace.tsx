@@ -642,7 +642,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // If real pixel art image is available, render the actual image!
   const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
-  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=3`;
+  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=4`;
 
   return (
     <span
@@ -654,7 +654,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
           src={imageSrc}
           alt={label}
           onError={() => setImageFailed(true)}
-          className="w-full h-full object-cover rounded-2xl transition-transform hover:scale-105 active:scale-95"
+          className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
           style={{ imageRendering: 'pixelated' }}
           loading="lazy"
         />
@@ -673,16 +673,13 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
         >
           <title>{label}</title>
 
-          {/* 1. Themed 16-Bit Pixel Background Badge (Prehistoric Sky, Ocean Waves, Galaxy, Lily Pond, Tracks) */}
-          <PixelBackground category={category} />
-
-          {/* 2. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
+          {/* 1. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
           <PixelHoodieBack category={category} />
 
-          {/* 3. Character Face with 11 Expressive Pixel Expressions */}
+          {/* 2. Character Face with 11 Expressive Pixel Expressions */}
           <PixelFaceEmotion emotion={normalizedId} />
 
-          {/* 4. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
+          {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
           <PixelHoodieFront category={category} />
         </svg>
       )}
