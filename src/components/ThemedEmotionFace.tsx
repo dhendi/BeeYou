@@ -642,7 +642,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // If real pixel art image is available, render the actual image!
   const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
-  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png`;
+  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=2`;
 
   return (
     <span
