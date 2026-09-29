@@ -317,7 +317,12 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border"
                         style={{ backgroundColor: emotion.bgColor, color: emotion.color, borderColor: emotion.color + '40' }}
                       >
-                        <ThemedEmotionFace emotionId={emotion.id} theme={activeTheme} className="w-6 h-6 flex-shrink-0" />
+                        <ThemedEmotionFace
+                          emotionId={emotion.id}
+                          theme={activeTheme}
+                          gender={childProfile?.characterGender || 'boy'}
+                          className="w-6 h-6 flex-shrink-0"
+                        />
                         <span>{emotion.label}</span>
                       </span>
                     )}

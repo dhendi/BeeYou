@@ -28,6 +28,8 @@ export const FeelingsView: React.FC = () => {
     setShowRecollectionModal,
     dailyRecollections,
     activeTheme,
+    childProfile,
+    updateChildProfile,
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'recollection'>('check-in');
@@ -179,39 +181,79 @@ export const FeelingsView: React.FC = () => {
 
           {/* 1. EMOTION GRID */}
           <div>
-            <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider mb-2.5">
-              1. Choose your feeling:
-            </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-          {EMOTIONS.map((emo) => {
-            const isSelected = selectedEmotion === emo.id;
-            return (
-              <button
-                key={emo.id}
-                onClick={() => handleSelectEmotion(emo.id, emo.label)}
-                className={`p-3.5 sm:p-4 rounded-3xl border-2 flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs ${
-                  isSelected
-                    ? 'ring-4 ring-rose-400 border-rose-500 scale-102 font-black shadow-md'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
-                style={{ backgroundColor: isSelected ? emo.bgColor : '#ffffff' }}
-              >
-                <ThemedEmotionFace
-                  emotionId={emo.id}
-                  theme={activeTheme}
-                  className="w-16 h-16 sm:w-20 sm:h-20 mb-2 transition-transform hover:scale-110 drop-shadow-sm"
-                />
-                <span
-                  className="font-black text-xs sm:text-sm tracking-tight text-center leading-tight"
-                  style={{ color: emo.color }}
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider">
+                1. Choose your feeling:
+              </h3>
+
+              {/* Boy / Girl Character Switcher */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateChildProfile({ characterGender: 'boy' });
+                    playChime('tap');
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    (childProfile?.characterGender || 'boy') === 'boy'
+                      ? 'bg-blue-600 text-white shadow-xs scale-102'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
+                  }`}
+                  aria-label="Boy character version"
                 >
-                  {emo.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                  <span className="text-sm">👦</span>
+                  <span>Boy</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateChildProfile({ characterGender: 'girl' });
+                    playChime('tap');
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    childProfile?.characterGender === 'girl'
+                      ? 'bg-pink-600 text-white shadow-xs scale-102'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
+                  }`}
+                  aria-label="Girl character version"
+                >
+                  <span className="text-sm">👧</span>
+                  <span>Girl</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              {EMOTIONS.map((emo) => {
+                const isSelected = selectedEmotion === emo.id;
+                return (
+                  <button
+                    key={emo.id}
+                    onClick={() => handleSelectEmotion(emo.id, emo.label)}
+                    className={`p-3.5 sm:p-4 rounded-3xl border-2 flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs ${
+                      isSelected
+                        ? 'ring-4 ring-rose-400 border-rose-500 scale-102 font-black shadow-md'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                    style={{ backgroundColor: isSelected ? emo.bgColor : '#ffffff' }}
+                  >
+                    <ThemedEmotionFace
+                      emotionId={emo.id}
+                      theme={activeTheme}
+                      gender={childProfile?.characterGender || 'boy'}
+                      className="w-16 h-16 sm:w-20 sm:h-20 mb-2 transition-transform hover:scale-110 drop-shadow-sm"
+                    />
+                    <span
+                      className="font-black text-xs sm:text-sm tracking-tight text-center leading-tight"
+                      style={{ color: emo.color }}
+                    >
+                      {emo.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
       {/* 2. WHAT HAPPENED? (Optional follow-up) */}
       {selectedEmotion && (

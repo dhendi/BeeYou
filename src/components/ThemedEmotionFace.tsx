@@ -48,6 +48,7 @@ export type EmotionId =
 interface ThemedEmotionFaceProps {
   emotionId: EmotionId | string;
   theme?: AppTheme | null;
+  gender?: 'boy' | 'girl';
   /** CSS size class e.g. "w-16 h-16" */
   className?: string;
 }
@@ -408,15 +409,29 @@ const PixelHoodieFront: React.FC<{ category?: string }> = ({ category }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. PIXEL CHARACTER FACE & 11 EMOTIONAL EXPRESSIONS
 // ─────────────────────────────────────────────────────────────────────────────
-const PixelFaceEmotion: React.FC<{ emotion: string }> = ({ emotion }) => {
+const PixelFaceEmotion: React.FC<{ emotion: string; gender?: 'boy' | 'girl' }> = ({ emotion, gender = 'boy' }) => {
   return (
     <g>
       {/* Peach Character Face Base (inside hoodie opening) */}
       <rect x="9" y="10" width="14" height="13" rx="3" fill="#fed7aa" shapeRendering="crispEdges" />
-      {/* Cute brown hair tuft peeking from under hoodie */}
-      <Px x="13" y="10" c="#78350f" w="2" h="3" />
-      <Px x="15" y="11" c="#78350f" w="2" h="2" />
-      <Px x="17" y="10" c="#78350f" w="2" h="3" />
+      {/* Hair peeking from under hoodie */}
+      {gender === 'girl' ? (
+        <g>
+          {/* Cute bangs */}
+          <Px x="11" y="10" c="#78350f" w="4" h="2" />
+          <Px x="17" y="10" c="#78350f" w="4" h="2" />
+          {/* Twin pigtails tufts peeking on sides */}
+          <Px x="7" y="13" c="#78350f" w="2" h="4" />
+          <Px x="23" y="13" c="#78350f" w="2" h="4" />
+        </g>
+      ) : (
+        <g>
+          {/* Cute brown hair tuft peeking from under hoodie */}
+          <Px x="13" y="10" c="#78350f" w="2" h="3" />
+          <Px x="15" y="11" c="#78350f" w="2" h="2" />
+          <Px x="17" y="10" c="#78350f" w="2" h="3" />
+        </g>
+      )}
 
       {/* Rosy Pink Cheek Blush Dots */}
       <Px x="10" y="17" c="#fb7185" w="2" h="1" />
@@ -633,6 +648,7 @@ const REAL_IMAGE_THEMES = new Set(['dinosaur', 'ocean', 'turtle', 'frog', 'space
 export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   emotionId,
   theme,
+  gender = 'boy',
   className = 'w-16 h-16',
 }) => {
   const normalizedId = emotionId.toLowerCase().trim();
@@ -642,7 +658,8 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // If real pixel art image is available, render the actual image!
   const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
-  const imageSrc = `/assets/emotions/${category}/${normalizedId}.png?v=4`;
+  const folder = gender === 'girl' ? `${category}_girl` : category;
+  const imageSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
 
   return (
     <span
@@ -651,6 +668,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
     >
       {hasRealImage ? (
         <img
+          key={`${gender}-${category}-${normalizedId}`}
           src={imageSrc}
           alt={label}
           onError={() => setImageFailed(true)}
@@ -677,7 +695,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
           <PixelHoodieBack category={category} />
 
           {/* 2. Character Face with 11 Expressive Pixel Expressions */}
-          <PixelFaceEmotion emotion={normalizedId} />
+          <PixelFaceEmotion emotion={normalizedId} gender={gender} />
 
           {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
           <PixelHoodieFront category={category} />

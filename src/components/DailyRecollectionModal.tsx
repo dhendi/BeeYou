@@ -356,6 +356,7 @@ export const DailyRecollectionModal: React.FC = () => {
                     <ThemedEmotionFace
                       emotionId={emo.id}
                       theme={activeTheme}
+                      gender={childProfile?.characterGender || 'boy'}
                       className="w-12 h-12 mb-1.5 transition-transform hover:scale-110 drop-shadow-xs"
                     />
                     <span className="text-[11px] font-bold truncate max-w-full" style={{ color: emo.color }}>
