@@ -32,6 +32,7 @@ export const MyWorldView: React.FC = () => {
     removePlacedItem,
     avatar,
     updateAvatar,
+    setShowAvatarCreator,
     speak,
     settings,
   } = useApp();
@@ -363,6 +364,16 @@ export const MyWorldView: React.FC = () => {
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
                 Choose what looks and feels most like you! Disabilities and aids like hearing aids, headphones, and wheelchairs are normal, wonderful parts of life.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAvatarCreator(true);
+                }}
+                className="mt-3 px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+              >
+                <span>🎨</span>
+                <span>Open Full Studio & Themed Hoodies</span>
+              </button>
             </div>
           </div>
 

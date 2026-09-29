@@ -217,13 +217,18 @@ export interface EmotionRecord {
 
 export interface AvatarConfig {
   skinTone: string;
-  hairStyle: 'short' | 'curly' | 'pigtails' | 'spiky' | 'braids' | 'wavy';
+  hairStyle: 'short' | 'curly' | 'pigtails' | 'spiky' | 'braids' | 'wavy' | 'afro' | 'bob' | 'ponytail' | 'buzz';
   hairColor: string;
   shirtColor: string;
   pantsColor: string;
-  accessory: 'none' | 'glasses' | 'hearing_aids' | 'cochlear' | 'sensory_headphones' | 'cap';
-  mobilityAid: 'none' | 'wheelchair' | 'stroller_walker' | 'cane';
-  companionDevice: 'none' | 'aac_tablet' | 'communication_ring' | 'squishy_fidget';
+  clothingStyle?: 'tshirt' | 'hoodie' | 'dino_hoodie' | 'sailor_hoodie' | 'turtle_hoodie' | 'frog_hoodie' | 'space_suit' | 'overalls';
+  expression?: 'happy' | 'smile' | 'calm' | 'excited' | 'wink';
+  gender?: 'boy' | 'girl' | 'neutral';
+  accessory: 'none' | 'glasses' | 'sunglasses' | 'hearing_aids' | 'cochlear' | 'sensory_headphones' | 'cap' | 'beanie';
+  accessoryColor?: string;
+  mobilityAid: 'none' | 'wheelchair' | 'stroller_walker' | 'cane' | 'service_dog';
+  companionDevice: 'none' | 'aac_tablet' | 'communication_ring' | 'squishy_fidget' | 'comfort_plush' | 'star_wand';
+  avatarFrame?: 'none' | 'stars' | 'bubbles' | 'sunburst' | 'rainbow' | 'space';
 }
 
 export interface WorldItem {

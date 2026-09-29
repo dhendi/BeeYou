@@ -33,6 +33,7 @@ import { DailyRecollectionModal } from './components/DailyRecollectionModal';
 import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
 import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { AboutMeIDModal } from './components/AboutMeIDModal';
+import { AvatarCreatorModal } from './components/AvatarCreatorModal';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
 
 const AppContent: React.FC = () => {
@@ -49,6 +50,8 @@ const AppContent: React.FC = () => {
     enabledFeatures,
     showAboutMeModal,
     setShowAboutMeModal,
+    showAvatarCreator,
+    setShowAvatarCreator,
     settings,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
@@ -169,6 +172,12 @@ const AppContent: React.FC = () => {
       <AboutMeIDModal
         isOpen={showAboutMeModal}
         onClose={() => setShowAboutMeModal(false)}
+      />
+
+      {/* Avatar Creator Studio Modal */}
+      <AvatarCreatorModal
+        isOpen={showAvatarCreator}
+        onClose={() => setShowAvatarCreator(false)}
       />
     </div>
   );

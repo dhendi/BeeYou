@@ -43,6 +43,7 @@ export const ChildHomeView: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
+    setShowAvatarCreator,
   } = useApp();
 
 
@@ -79,12 +80,21 @@ export const ChildHomeView: React.FC = () => {
       {/* 2. WELCOME HERO WITH CHILD AVATAR & CURRENT MOOD */}
       <div className="bg-gradient-to-r from-amber-50 via-sky-50 to-indigo-50 border-2 border-amber-200/80 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 overflow-hidden">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div
-            onClick={() => setChildView('my-world')}
-            className="cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0"
-            title="Customize your room & avatar"
-          >
-            <ChildAvatar config={avatar} size="lg" />
+          <div className="relative group shrink-0">
+            <div
+              onClick={() => {
+                setShowAvatarCreator(true);
+                playChime('tap');
+              }}
+              className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
+              title="Open Avatar Creator Studio 🎨"
+            >
+              <ChildAvatar config={avatar} size="lg" />
+              <span className="absolute -bottom-1 -right-1 bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm border border-white cursor-pointer">
+                <span>🎨</span>
+                <span className="hidden sm:inline">Avatar</span>
+              </span>
+            </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">

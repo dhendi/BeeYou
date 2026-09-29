@@ -35,6 +35,7 @@ export const ChildHeader: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
+    setShowAvatarCreator,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -64,15 +65,22 @@ export const ChildHeader: React.FC = () => {
     <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-100'} backdrop-blur px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors duration-300`}>
       {/* Left: Avatar + Greeting + Time */}
       <div className="flex items-center gap-2.5 sm:gap-3">
-        <div 
-          onClick={() => {
-            setShowAboutMeModal(true);
-            playChime('tap');
-          }}
-          className="relative cursor-pointer transition-transform hover:scale-105 active:scale-95"
-          title="About Me ID & Emergency Advocacy Card"
-        >
-          <ChildAvatar config={avatar} size="sm" />
+        <div className="relative group">
+          <button 
+            type="button"
+            onClick={() => {
+              setShowAvatarCreator(true);
+              playChime('tap');
+            }}
+            className="relative cursor-pointer transition-transform hover:scale-105 active:scale-95 block"
+            title="Open Avatar Creator Studio 🎨"
+            aria-label="Open Avatar Creator"
+          >
+            <ChildAvatar config={avatar} size="sm" />
+            <span className="absolute -bottom-1 -right-1 bg-amber-400 hover:bg-amber-500 text-amber-950 text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow-xs border border-white">
+              🎨
+            </span>
+          </button>
         </div>
         <div>
           <div className="flex items-center gap-1.5">
