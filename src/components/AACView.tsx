@@ -1,0 +1,321 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { AACCategory, AACItem } from '../types';
+import { 
+  Volume2, 
+  Trash2, 
+  Delete, 
+  BookmarkPlus, 
+  Sparkles, 
+  Layers, 
+  SlidersHorizontal,
+  Search,
+  AlertTriangle
+} from 'lucide-react';
+
+export const AACView: React.FC = () => {
+  const {
+    aacItems,
+    sentence,
+    addToSentence,
+    speakSentence,
+    clearSentence,
+    removeLastFromSentence,
+    saveSentenceAsQuickPhrase,
+    settings,
+    updateSettings,
+    plansChanged,
+    adventures,
+    speak,
+    isSpeaking,
+    stopSpeaking,
+    isOffline,
+  } = useApp();
+
+  const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Contextual phrases detection
+  // If plans changed is active, or if there's an upcoming adventure (like Dentist today)
+  const isDentistDay = true; // Active context for Dentist adventure
+  const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
+
+  const categories: { id: AACCategory | 'all'; label: string; emoji: string }[] = [
+    { id: 'core', label: 'Core Words', emoji: '⭐' },
+    { id: 'all', label: 'All Words', emoji: '🌐' },
+    { id: 'food', label: 'Food', emoji: '🍕' },
+    { id: 'drinks', label: 'Drinks', emoji: '🧃' },
+    { id: 'activities', label: 'Play & Fun', emoji: '🎮' },
+    { id: 'places', label: 'Places', emoji: '🏠' },
+    { id: 'people', label: 'People', emoji: '👥' },
+    { id: 'feelings', label: 'Feelings', emoji: '💛' },
+    { id: 'sensory', label: 'Sensory', emoji: '🎧' },
+  ];
+
+  // Filter items while keeping consistent motor planning order (sorted by motorIndex)
+  const filteredItems = aacItems
+    .filter((item) => {
+      if (searchQuery.trim()) {
+        return item.label.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      if (activeCategory === 'all') return true;
+      if (activeCategory === 'core') return item.category === 'core';
+      return item.category === activeCategory;
+    })
+    .sort((a, b) => a.motorIndex - b.motorIndex);
+
+  // Styling based on standard AAC Fitzgerald Color Key
+  const getColorStyles = (colorType: AACItem['colorType']) => {
+    switch (colorType) {
+      case 'subject':
+        return 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300 ring-amber-400';
+      case 'verb':
+        return 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border-emerald-300 ring-emerald-400';
+      case 'noun':
+        return 'bg-orange-100 hover:bg-orange-200 text-orange-950 border-orange-300 ring-orange-400';
+      case 'adjective':
+        return 'bg-sky-100 hover:bg-sky-200 text-sky-950 border-sky-300 ring-sky-400';
+      case 'social':
+        return 'bg-purple-100 hover:bg-purple-200 text-purple-950 border-purple-300 ring-purple-400';
+      case 'emergency':
+        return 'bg-rose-100 hover:bg-rose-200 text-rose-950 border-rose-300 ring-rose-400 font-black';
+      default:
+        return 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300 ring-slate-400';
+    }
+  };
+
+  const gridColsClass = settings.largeButtonMode
+    ? 'grid-cols-2 sm:grid-cols-3'
+    : settings.gridColumns === 3
+    ? 'grid-cols-3'
+    : settings.gridColumns === 6
+    ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6'
+    : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-4';
+
+  return (
+    <div className="flex flex-col flex-1 pb-24 max-w-5xl mx-auto w-full px-2 sm:px-4">
+      {/* 1. SENTENCE BUILDER STRIP */}
+      <section
+        aria-label="Sentence builder"
+        className="sticky top-14 z-20 bg-white/95 backdrop-blur-md rounded-2xl border-2 border-slate-300 shadow-md p-2 sm:p-3 my-2"
+      >
+        <div className="flex items-center gap-2">
+          {/* Sentence Display Area */}
+          <div className="flex-1 min-h-[58px] sm:min-h-[66px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-thin">
+            {sentence.length === 0 ? (
+              <span className="text-slate-400 text-sm sm:text-base font-medium px-2 select-none">
+                Tap words below to build a sentence...
+              </span>
+            ) : (
+              sentence.map((item, idx) => (
+                <div
+                  key={`${item.id}-${idx}`}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border shadow-xs animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
+                    item.colorType
+                  )}`}
+                >
+                  {item.photoUrl ? (
+                    <img src={item.photoUrl} alt="" className="w-6 h-6 object-cover rounded" />
+                  ) : (
+                    <span className="text-xl leading-none">{item.emoji}</span>
+                  )}
+                  <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Controls: Backspace, Clear, Speak, Save */}
+          <div className="flex items-center gap-1 shrink-0">
+            {sentence.length > 0 && (
+              <>
+                <button
+                  onClick={removeLastFromSentence}
+                  className="p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all cursor-pointer"
+                  title="Remove last word"
+                  aria-label="Backspace"
+                >
+                  <Delete className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={clearSentence}
+                  className="p-2 sm:p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 active:scale-95 transition-all cursor-pointer"
+                  title="Clear sentence"
+                  aria-label="Clear all"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={saveSentenceAsQuickPhrase}
+                  className="p-2 sm:p-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 active:scale-95 transition-all cursor-pointer hidden sm:block"
+                  title="Save to quick phrases"
+                >
+                  <BookmarkPlus className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {isSpeaking ? (
+              <button
+                onClick={stopSpeaking}
+                className="flex items-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-sm sm:text-base shadow-sm transition-all active:scale-95 bg-rose-500 hover:bg-rose-600 text-white animate-pulse cursor-pointer"
+                title="Stop speaking"
+              >
+                <div className="flex items-center gap-0.5 mr-0.5">
+                  <span className="w-1 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span>STOP</span>
+              </button>
+            ) : (
+              <button
+                onClick={speakSentence}
+                disabled={sentence.length === 0}
+                className={`flex items-center gap-1.5 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-sm sm:text-base shadow-sm transition-all active:scale-95 cursor-pointer ${
+                  sentence.length > 0
+                    ? 'bg-amber-400 hover:bg-amber-500 text-amber-950 ring-2 ring-amber-500 animate-pulse'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                <Volume2 className="w-5 h-5" />
+                <span>SPEAK</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 2. CONTEXTUAL AAC STRIP (Intelligent & Motor-Safe) */}
+      {/* If Plans Changed is active, surface Plans Changed phrases */}
+      {plansChanged.active ? (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-2.5 mb-2 flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span>Context Words: Plans Changed</span>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+            {plansChanged.relevantPhrases.slice(0, 5).map((phrase, idx) => (
+              <button
+                key={idx}
+                onClick={() => speak(phrase)}
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-950 font-bold text-xs border border-amber-300 shadow-xs shrink-0 active:scale-95 cursor-pointer"
+              >
+                💬 {phrase}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : isDentistDay && dentistAdventure ? (
+        // Contextual phrases for Dentist adventure
+        <div className="bg-teal-50 border-2 border-teal-200 rounded-2xl p-2.5 mb-2 flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-teal-900">
+              <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+              <span>Dentist Visit Helper Phrases</span>
+            </span>
+            <span className="text-[10px] text-teal-700 font-medium">Tap to speak instantly</span>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
+            {dentistAdventure.thingsICanSay.map((phrase, idx) => (
+              <button
+                key={idx}
+                onClick={() => speak(phrase)}
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-teal-100 text-teal-950 font-bold text-xs border border-teal-300 shadow-xs shrink-0 active:scale-95 cursor-pointer flex items-center gap-1"
+              >
+                <span>🦷</span>
+                <span>{phrase}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* 3. CATEGORY PILLS & VIEW CONTROLS */}
+      <div className="flex items-center justify-between gap-2 my-1 overflow-x-auto py-1 scrollbar-thin">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => {
+                setActiveCategory(cat.id);
+                setSearchQuery('');
+              }}
+              className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                activeCategory === cat.id
+                  ? 'bg-slate-800 text-white shadow-sm ring-2 ring-slate-800'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+              }`}
+            >
+              <span>{cat.emoji}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Accessibility quick toggles */}
+        <div className="flex items-center gap-1 shrink-0 ml-auto">
+          <button
+            onClick={() =>
+              updateSettings({ largeButtonMode: !settings.largeButtonMode })
+            }
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              settings.largeButtonMode
+                ? 'bg-indigo-600 text-white border-indigo-700'
+                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+            }`}
+            title="Toggle Large Button Mode"
+          >
+            Big Buttons
+          </button>
+        </div>
+      </div>
+
+      {/* 4. MOTOR-PLANNING PREDICTABLE VOCABULARY GRID */}
+      <main
+        className={`grid ${gridColsClass} gap-2 sm:gap-3 mt-1`}
+        aria-label="Vocabulary grid"
+      >
+        {filteredItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => addToSentence(item)}
+            className={`flex flex-col items-center justify-center p-2 sm:p-3.5 rounded-2xl border-2 shadow-xs transition-all active:scale-92 cursor-pointer relative group ${
+              settings.largeButtonMode ? 'min-h-[110px] sm:min-h-[130px]' : 'min-h-[82px] sm:min-h-[96px]'
+            } ${getColorStyles(item.colorType)}`}
+          >
+            {item.photoUrl ? (
+              <img
+                src={item.photoUrl}
+                alt={item.label}
+                className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-xl shadow-xs mb-1"
+              />
+            ) : (
+              <span
+                className={`${
+                  settings.largeButtonMode ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'
+                } leading-none mb-1 select-none transition-transform group-hover:scale-110`}
+              >
+                {item.emoji}
+              </span>
+            )}
+            <span
+              className={`font-black tracking-tight text-center leading-tight select-none ${
+                settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
+              }`}
+            >
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </main>
+
+      {filteredItems.length === 0 && (
+        <div className="text-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-200 mt-4">
+          <p className="font-bold text-base">No words found in this category.</p>
+          <p className="text-xs text-slate-400 mt-1">Parents can add new words anytime in the Parent Dashboard!</p>
+        </div>
+      )}
+    </div>
+  );
+};

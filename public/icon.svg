@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="luminaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="50%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#luminaGrad)" />
+  <circle cx="256" cy="256" r="140" fill="url(#sunGlow)" />
+  <!-- Sparkles / Star motif -->
+  <path d="M256 140 L268 220 L348 232 L268 244 L256 324 L244 244 L164 232 L244 220 Z" fill="#FFFFFF" opacity="0.95" />
+  <!-- Friendly eyes and smile -->
+  <circle cx="216" cy="250" r="14" fill="#4B2C05" />
+  <circle cx="296" cy="250" r="14" fill="#4B2C05" />
+  <path d="M226 285 Q256 315 286 285" stroke="#4B2C05" stroke-width="10" stroke-linecap="round" fill="none" />
+  <!-- Cheeks -->
+  <circle cx="196" cy="275" r="10" fill="#F43F5E" opacity="0.4" />
+  <circle cx="316" cy="275" r="10" fill="#F43F5E" opacity="0.4" />
+</svg>
