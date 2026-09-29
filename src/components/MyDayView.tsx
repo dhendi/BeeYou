@@ -30,14 +30,44 @@ export const MyDayView: React.FC = () => {
     routines[0]?.id || 'routine-morning'
   );
 
+  const timerSectionRef = React.useRef<HTMLDivElement | null>(null);
+
+  const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || routines[0];
+
+  // Find next uncompleted step
+  const nextStep = currentRoutine?.steps.find((s) => !s.completed);
+
   const [activeTimerTask, setActiveTimerTask] = useState<{
     title: string;
     emoji?: string;
     durationSeconds?: number;
     stepId?: string;
-  } | undefined>(undefined);
+    autoStart?: boolean;
+  } | undefined>(() => {
+    if (nextStep) {
+      return {
+        title: nextStep.title,
+        emoji: nextStep.emoji,
+        durationSeconds: (nextStep.durationMin || 2) * 60,
+        stepId: nextStep.id,
+        autoStart: false,
+      };
+    }
+    return undefined;
+  });
 
-  const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || routines[0];
+  // When selected routine changes, sync timer to current activity
+  React.useEffect(() => {
+    if (nextStep) {
+      setActiveTimerTask({
+        title: nextStep.title,
+        emoji: nextStep.emoji,
+        durationSeconds: (nextStep.durationMin || 2) * 60,
+        stepId: nextStep.id,
+        autoStart: false,
+      });
+    }
+  }, [selectedRoutineId, nextStep?.id]);
 
   if (!currentRoutine) {
     return (
@@ -51,8 +81,23 @@ export const MyDayView: React.FC = () => {
   const totalStepsCount = currentRoutine.steps.length;
   const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
-  // Find next uncompleted step
-  const nextStep = currentRoutine.steps.find((s) => !s.completed);
+  const startTimerForStep = (
+    step: { title: string; emoji: string; durationMin?: number; id: string },
+    autoStart = true
+  ) => {
+    setActiveTimerTask({
+      title: step.title,
+      emoji: step.emoji,
+      durationSeconds: (step.durationMin || 2) * 60,
+      stepId: step.id,
+      autoStart,
+    });
+    playChime('tap');
+    speak(`Timer ready for ${step.title}. ${(step.durationMin || 2)} minutes.`);
+    setTimeout(() => {
+      timerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  };
 
   const handleTimerCompleteStep = (stepId?: string) => {
     if (stepId && currentRoutine) {
@@ -189,10 +234,12 @@ export const MyDayView: React.FC = () => {
       )}
 
       {/* 4. VISUAL COUNTDOWN TIMER COMPONENT (Non-pressuring, calm, visual) */}
-      <VisualTaskTimer
-        initialTask={activeTimerTask}
-        onCompleteStep={handleTimerCompleteStep}
-      />
+      <div ref={timerSectionRef} className="scroll-mt-4">
+        <VisualTaskTimer
+          initialTask={activeTimerTask}
+          onCompleteStep={handleTimerCompleteStep}
+        />
+      </div>
 
       {/* 5. ACTIVE ROUTINE HEADER & PROGRESS */}
       <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-sm">
@@ -238,7 +285,7 @@ export const MyDayView: React.FC = () => {
 
         {/* WHAT AM I DOING? & WHAT'S NEXT? Indicator */}
         {nextStep && (
-          <div className="mt-3 p-3 bg-sky-50 border border-sky-200 rounded-2xl flex items-center justify-between">
+          <div className="mt-3 p-3 bg-sky-50 border border-sky-200 rounded-2xl flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black text-sky-800 uppercase tracking-wider">
                 Up Next:
@@ -249,20 +296,12 @@ export const MyDayView: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => {
-                  setActiveTimerTask({
-                    title: nextStep.title,
-                    emoji: nextStep.emoji,
-                    durationSeconds: (nextStep.durationMin || 2) * 60,
-                    stepId: nextStep.id,
-                  });
-                  playChime('tap');
-                }}
-                className="px-2.5 py-1.5 rounded-lg bg-sky-200 text-sky-900 font-black text-xs hover:bg-sky-300 transition-all cursor-pointer flex items-center gap-1"
-                title="Start timer for up next step"
+                onClick={() => startTimerForStep(nextStep, true)}
+                className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm shadow-sky-200"
+                title="Start visual countdown timer for up next step"
               >
                 <Timer className="w-3.5 h-3.5" />
-                <span>Timer</span>
+                <span>Start Timer ({nextStep.durationMin || 2}m)</span>
               </button>
               <button
                 onClick={() => speak(`Up next is: ${nextStep.title}`)}
@@ -343,19 +382,14 @@ export const MyDayView: React.FC = () => {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTimerTask({
-                    title: step.title,
-                    emoji: step.emoji,
-                    durationSeconds: (step.durationMin || 2) * 60,
-                    stepId: step.id,
-                  });
-                  playChime('tap');
+                  startTimerForStep(step, true);
                 }}
-                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 cursor-pointer flex items-center gap-1 text-xs font-bold transition-all active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-800 border-2 border-sky-200 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
                 title={`Start countdown timer for ${step.title}`}
               >
-                <Timer className="w-3.5 h-3.5 text-sky-600" />
-                <span className="hidden sm:inline">Timer</span>
+                <Timer className="w-4 h-4 text-sky-600" />
+                <span className="hidden sm:inline">Start Timer</span>
+                <span className="sm:hidden">Timer</span>
               </button>
 
               <button

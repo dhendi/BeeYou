@@ -39,6 +39,7 @@ const AppContent: React.FC = () => {
     setShowCaregiverAlertModal 
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
+  const mainScrollRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -46,6 +47,13 @@ const AppContent: React.FC = () => {
       setIsCaregiverRoute(params.get('caregiver') === 'true');
     }
   }, []);
+
+  // When tab changes, reset scroll smoothly to top so content never feels jumped or cut off
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [childView]);
 
   if (isCaregiverRoute) {
     return (
@@ -64,12 +72,14 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50/40 text-slate-800 flex flex-col font-sans selection:bg-amber-200">
-      {/* Child Top Header */}
-      <ChildHeader />
+    <div className="h-[100dvh] max-h-[100dvh] w-full bg-amber-50/40 text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative">
+      {/* Child Top Header (anchored, does not shift) */}
+      <header className="shrink-0 z-30">
+        <ChildHeader />
+      </header>
 
-      {/* Main Content View Switcher */}
-      <main className="flex-1 flex flex-col p-2 sm:p-4">
+      {/* Main Content View Switcher (scrolls inside itself) */}
+      <main ref={mainScrollRef} className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4">
         {childView === 'home' && <ChildHomeView />}
         {childView === 'aac' && <AACView />}
         {childView === 'my-day' && <MyDayView />}
@@ -80,14 +90,14 @@ const AppContent: React.FC = () => {
         {childView === 'rewards' && <Rewards />}
       </main>
 
-      {/* Easy Floating Caregiver Alert / SOS Button: Accessible anywhere, anytime across all child views */}
-      <div className="fixed bottom-20 right-3 sm:right-5 z-30">
+      {/* Easy Floating Caregiver Alert / SOS Button: Anchored above bottom bar */}
+      <div className="absolute bottom-20 right-3 sm:right-5 z-30 pointer-events-none">
         <button
           onClick={() => {
             setShowCaregiverAlertModal(true);
             playChime('tap');
           }}
-          className="group flex items-center gap-2 pl-3.5 pr-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-400/50 border-2 border-white ring-4 ring-rose-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
+          className="pointer-events-auto group flex items-center gap-2 pl-3.5 pr-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-400/50 border-2 border-white ring-4 ring-rose-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
           title="Easy Alert Button: Send emotions or ask caregiver for help at school or therapy"
         >
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -97,8 +107,10 @@ const AppContent: React.FC = () => {
         </button>
       </div>
 
-      {/* Primary 6-Pillar Navigation Bar */}
-      <ChildNavBar />
+      {/* Primary Navigation Bar (anchored bottom footer, never jumps on tab switch) */}
+      <footer className="shrink-0 z-20">
+        <ChildNavBar />
+      </footer>
 
       {/* Real-time Caregiver Message Toast */}
       <CaregiverMessageToast />

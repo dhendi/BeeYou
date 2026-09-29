@@ -83,6 +83,7 @@ interface VisualTaskTimerProps {
     emoji?: string;
     durationSeconds?: number;
     stepId?: string;
+    autoStart?: boolean;
   };
   onCompleteStep?: (stepId?: string) => void;
   onClose?: () => void;
@@ -121,7 +122,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
   const [remainingSeconds, setRemainingSeconds] = useState<number>(
     selectedPreset.durationSeconds
   );
-  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isRunning, setIsRunning] = useState<boolean>(Boolean(initialTask?.autoStart));
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -149,7 +150,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
       setSelectedPreset(newPreset);
       setTotalSeconds(newDuration);
       setRemainingSeconds(newDuration);
-      setIsRunning(false);
+      setIsRunning(Boolean(initialTask.autoStart));
       setIsCompleted(false);
       setIsExpanded(true);
     }
