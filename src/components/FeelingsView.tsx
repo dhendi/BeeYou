@@ -190,51 +190,18 @@ export const FeelingsView: React.FC = () => {
               </h3>
 
               <div className="flex items-center gap-1.5 flex-wrap">
-                {/* Skin & Hair Representation Presets */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-x-auto">
-                  {[
-                    { id: 'white', label: '1. White', skin: '#fed7aa', hair: '#451a03', icon: '🌟' },
-                    { id: 'black', label: '2. Black', skin: '#5a2e12', hair: '#18181b', icon: '🌍' },
-                    { id: 'asian', label: '3. Asian', skin: '#fef3c7', hair: '#18181b', icon: '🌏' },
-                    { id: 'hispanic', label: '4. Hispanic', skin: '#d97706', hair: '#27272a', icon: '🌿' },
-                    { id: 'blonde', label: '5. Blonde', skin: '#fed7aa', hair: '#facc15', icon: '☀️' },
-                    { id: 'redhead', label: '6. Redhead', skin: '#fef3c7', hair: '#ea580c', icon: '🍁' },
-                  ].map((preset) => {
-                    const isSelected = avatar.skinTone === preset.skin && avatar.hairColor === preset.hair;
-                    return (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() => {
-                          updateAvatar({ skinTone: preset.skin, hairColor: preset.hair });
-                          playChime('tap');
-                        }}
-                        className={`px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-xs font-black'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-white/60'
-                        }`}
-                        title={`${preset.label} representation`}
-                      >
-                        <span className="text-xs">{preset.icon}</span>
-                        <span className="hidden sm:inline">{preset.label}</span>
-                      </button>
-                    );
-                  })}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAvatarCreator(true);
-                      playChime('tap');
-                    }}
-                    className="px-2.5 py-1 rounded-xl text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 flex items-center gap-1 cursor-pointer transition-all shadow-xs shrink-0"
-                    title="Open Full Avatar Studio"
-                  >
-                    <span>🎨</span>
-                    <span>Studio</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAvatarCreator(true);
+                    playChime('tap');
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 flex items-center gap-1.5 cursor-pointer transition-all shadow-xs shrink-0"
+                  title="Open Full Avatar Studio"
+                >
+                  <span>🎨</span>
+                  <span>Avatar Studio</span>
+                </button>
               </div>
             </div>
 
