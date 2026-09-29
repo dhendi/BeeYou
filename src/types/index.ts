@@ -348,7 +348,7 @@ export interface AboutMeCardData {
 
 export interface ChildProfile {
   name: string;
-  characterGender?: 'boy' | 'girl';
+  characterGender?: 'boy' | 'girl' | 'neutral';
   pronouns?: string;
   ageGroup?: UserAgeGroup;
   userRole?: 'self' | 'caregiver_managing';

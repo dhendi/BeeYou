@@ -111,7 +111,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   const [formData, setFormData] = useState<AboutMeCardData>(aboutMe);
   const [profileName, setProfileName] = useState(childProfile.name || 'Leo');
   const [profilePronouns, setProfilePronouns] = useState(childProfile.pronouns || 'they/them');
-  const [characterGender, setCharacterGender] = useState<'boy' | 'girl'>(childProfile.characterGender || 'boy');
 
   // Input states for adding new items in edit mode
   const [newCondition, setNewCondition] = useState('');
@@ -139,7 +138,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
     updateChildProfile({
       name: profileName.trim() || childProfile.name,
       pronouns: profilePronouns.trim(),
-      characterGender: characterGender,
       aboutMe: formData,
     });
     setIsEditing(false);
@@ -287,7 +285,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                 setFormData(aboutMe);
                 setProfileName(childProfile.name);
                 setProfilePronouns(childProfile.pronouns || 'they/them');
-                setCharacterGender(childProfile.characterGender || 'boy');
                 setIsEditing(true);
               }
               playChime('tap');
@@ -402,7 +399,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                         {userAgeGroup === 'adult' ? 'Adult • 18+' : userAgeGroup === 'teen' ? 'Teen • 12–17' : 'Child • 3–11'}
                       </span>
                       <span className="text-[11px] font-black uppercase text-indigo-800 bg-indigo-100 px-2.5 py-0.5 rounded-full">
-                        {childProfile.characterGender === 'girl' ? '👧 Girl Character' : '👦 Boy Character'}
+                        🧑 Nonbinary Hero
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 font-semibold mt-1">
@@ -617,33 +614,18 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase text-slate-600 block mb-1">Emotion Character:</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCharacterGender('boy')}
-                      className={`flex-1 py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
-                        characterGender === 'boy'
-                          ? 'bg-blue-50 border-blue-400 text-blue-900 font-black ring-2 ring-blue-200 shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="text-sm">👦</span>
-                      <span>Boy</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCharacterGender('girl')}
-                      className={`flex-1 py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
-                        characterGender === 'girl'
-                          ? 'bg-pink-50 border-pink-400 text-pink-900 font-black ring-2 ring-pink-200 shadow-xs'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="text-sm">👧</span>
-                      <span>Girl</span>
-                    </button>
-                  </div>
+                  <label className="text-xs font-black uppercase text-slate-600 block mb-1">Avatar & Look:</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAvatarCreator(true);
+                      playChime('tap');
+                    }}
+                    className="w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-950 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>🎨</span>
+                    <span>Customize Avatar Studio</span>
+                  </button>
                 </div>
               </div>
 

@@ -87,7 +87,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
       mobilityAid: pick(mobilityAids),
       companionDevice: pick(companionDevices),
       avatarFrame: pick(frames),
-      gender: Math.random() > 0.5 ? 'girl' : 'boy',
+      gender: 'neutral',
     };
 
     setDraft(randomized);
@@ -108,10 +108,6 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
   const handleSave = () => {
     updateAvatar(draft);
 
-    if (draft.gender) {
-      updateChildProfile({ characterGender: draft.gender === 'girl' ? 'girl' : 'boy' });
-    }
-
     setSavedSuccess(true);
     playChime('complete');
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
@@ -125,8 +121,8 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
   // Preset Starters
   const presets: { id: string; name: string; desc: string; icon: string; config: AvatarConfig }[] = [
     {
-      id: 'dino_boy',
-      name: 'Leo Dino Adventurer',
+      id: 'dino_explorer',
+      name: 'Dino Adventurer',
       desc: 'Dino hoodie with dorsal spikes, AAC tablet & stars',
       icon: '🦕',
       config: {
@@ -137,7 +133,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
         pantsColor: '#15803d',
         clothingStyle: 'dino_hoodie',
         expression: 'excited',
-        gender: 'boy',
+        gender: 'neutral',
         accessory: 'sensory_headphones',
         accessoryColor: '#0284c7',
         mobilityAid: 'none',
@@ -146,8 +142,8 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
       },
     },
     {
-      id: 'dino_girl',
-      name: 'Maya Dino Explorer',
+      id: 'dino_pigtails',
+      name: 'Dino Explorer',
       desc: 'Twin pigtails, dino spikes hoodie & plushie',
       icon: '🦖',
       config: {
@@ -158,7 +154,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
         pantsColor: '#15803d',
         clothingStyle: 'dino_hoodie',
         expression: 'happy',
-        gender: 'girl',
+        gender: 'neutral',
         accessory: 'none',
         mobilityAid: 'none',
         companionDevice: 'comfort_plush',
@@ -178,7 +174,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
         pantsColor: '#172554',
         clothingStyle: 'sailor_hoodie',
         expression: 'smile',
-        gender: 'boy',
+        gender: 'neutral',
         accessory: 'cap',
         mobilityAid: 'service_dog',
         companionDevice: 'aac_tablet',
@@ -187,7 +183,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
     },
     {
       id: 'cosmic_cadet',
-      name: 'Sam Cosmic Astronaut',
+      name: 'Cosmic Cadet',
       desc: 'Spacesuit helmet with antenna, galaxy orbit frame',
       icon: '🚀',
       config: {
@@ -207,7 +203,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
     },
     {
       id: 'wheelchair_champion',
-      name: 'Alex the Super Athlete',
+      name: 'Super Athlete',
       desc: 'Wheelchair champion with cool shades & star aura',
       icon: '🧑‍🦽',
       config: {
@@ -218,7 +214,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
         pantsColor: '#9a3412',
         clothingStyle: 'hoodie',
         expression: 'excited',
-        gender: 'boy',
+        gender: 'neutral',
         accessory: 'sunglasses',
         mobilityAid: 'wheelchair',
         companionDevice: 'aac_tablet',
@@ -227,7 +223,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
     },
     {
       id: 'zen_artist',
-      name: 'Chloe Calm Creator',
+      name: 'Calm Creator',
       desc: 'Cute bob bangs, sensory headphones & rainbow aura',
       icon: '🎨',
       config: {
@@ -238,7 +234,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
         pantsColor: '#7e22ce',
         clothingStyle: 'overalls',
         expression: 'calm',
-        gender: 'girl',
+        gender: 'neutral',
         accessory: 'sensory_headphones',
         accessoryColor: '#ec4899',
         mobilityAid: 'none',
@@ -381,34 +377,6 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
               {/* ──────────────── TAB 1: FACE & STYLE ──────────────── */}
               {activeTab === 'face' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
-                  {/* Character Gender Base */}
-                  <div>
-                    <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 block mb-2">
-                      Character Base:
-                    </label>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {[
-                        { id: 'boy', label: 'Boy', emoji: '👦' },
-                        { id: 'girl', label: 'Girl', emoji: '👧' },
-                        { id: 'neutral', label: 'Hero', emoji: '🧑' },
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => updateDraft({ gender: item.id as any })}
-                          className={`p-3 rounded-2xl border-2 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                            (draft.gender || 'boy') === item.id
-                              ? 'bg-indigo-50 border-indigo-500 text-indigo-950 dark:bg-indigo-950/40 dark:text-indigo-200 ring-2 ring-indigo-200'
-                              : 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200'
-                          }`}
-                        >
-                          <span className="text-2xl">{item.emoji}</span>
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Expression */}
                   <div>
                     <label className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 block mb-2">

@@ -29,10 +29,9 @@
  *    - happy, calm, excited, tired, worried, sad, angry, frustrated, overwhelmed, scared, confused
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AppTheme } from '../data/themesData';
 import { useApp } from '../context/AppContext';
-import { getRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
 
 export type EmotionId =
   | 'happy'
@@ -50,7 +49,8 @@ export type EmotionId =
 export interface ThemedEmotionFaceProps {
   emotionId: EmotionId | string;
   theme?: AppTheme | null;
-  gender?: 'boy' | 'girl';
+  hairStyle?: string;
+  gender?: 'boy' | 'girl' | 'neutral';
   skinTone?: string;
   hairColor?: string;
   /** CSS size class e.g. "w-16 h-16" */
@@ -415,12 +415,13 @@ const PixelHoodieFront: React.FC<{ category?: string }> = ({ category }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const PixelFaceEmotion: React.FC<{
   emotion: string;
-  gender?: 'boy' | 'girl';
+  hairStyle?: string;
+  gender?: 'boy' | 'girl' | 'neutral';
   skinTone?: string;
   hairColor?: string;
 }> = ({
   emotion,
-  gender = 'boy',
+  hairStyle = 'short',
   skinTone = '#fed7aa',
   hairColor = '#78350f',
 }) => {
@@ -428,8 +429,9 @@ const PixelFaceEmotion: React.FC<{
     <g>
       {/* Character Face Base (inside hoodie opening) */}
       <rect x="9" y="10" width="14" height="13" rx="3" fill={skinTone} shapeRendering="crispEdges" />
-      {/* Hair peeking from under hoodie */}
-      {gender === 'girl' ? (
+
+      {/* Hair peeking from under hoodie based on customizable hairStyle & hairColor */}
+      {hairStyle === 'pigtails' && (
         <g>
           {/* Cute bangs */}
           <Px x="11" y="10" c={hairColor} w="4" h="2" />
@@ -438,9 +440,88 @@ const PixelFaceEmotion: React.FC<{
           <Px x="7" y="13" c={hairColor} w="2" h="4" />
           <Px x="23" y="13" c={hairColor} w="2" h="4" />
         </g>
-      ) : (
+      )}
+
+      {hairStyle === 'curly' && (
         <g>
-          {/* Cute hair tuft peeking from under hoodie */}
+          {/* Curly bumps across forehead and temples */}
+          <Px x="10" y="9" c={hairColor} w="3" h="2" />
+          <Px x="14" y="9" c={hairColor} w="4" h="2" />
+          <Px x="19" y="9" c={hairColor} w="3" h="2" />
+          <Px x="8" y="12" c={hairColor} w="2" h="3" />
+          <Px x="22" y="12" c={hairColor} w="2" h="3" />
+        </g>
+      )}
+
+      {hairStyle === 'spiky' && (
+        <g>
+          {/* Spiky cool peaks */}
+          <Px x="11" y="9" c={hairColor} w="2" h="3" />
+          <Px x="14" y="8" c={hairColor} w="2" h="4" />
+          <Px x="17" y="8" c={hairColor} w="2" h="4" />
+          <Px x="20" y="9" c={hairColor} w="2" h="3" />
+        </g>
+      )}
+
+      {hairStyle === 'braids' && (
+        <g>
+          {/* Braided strands */}
+          <Px x="11" y="10" c={hairColor} w="10" h="2" />
+          <Px x="7" y="12" c={hairColor} w="2" h="2" />
+          <Px x="8" y="14" c={hairColor} w="2" h="2" />
+          <Px x="7" y="16" c={hairColor} w="2" h="2" />
+          <Px x="23" y="12" c={hairColor} w="2" h="2" />
+          <Px x="22" y="14" c={hairColor} w="2" h="2" />
+          <Px x="23" y="16" c={hairColor} w="2" h="2" />
+        </g>
+      )}
+
+      {hairStyle === 'afro' && (
+        <g>
+          {/* Fluffy rounded afro puffs */}
+          <Px x="9" y="8" c={hairColor} w="14" h="3" />
+          <Px x="7" y="10" c={hairColor} w="3" h="4" />
+          <Px x="22" y="10" c={hairColor} w="3" h="4" />
+        </g>
+      )}
+
+      {hairStyle === 'bob' && (
+        <g>
+          {/* Neat straight bangs and sleek sides */}
+          <Px x="10" y="10" c={hairColor} w="12" h="2" />
+          <Px x="8" y="12" c={hairColor} w="2" h="4" />
+          <Px x="22" y="12" c={hairColor} w="2" h="4" />
+        </g>
+      )}
+
+      {hairStyle === 'ponytail' && (
+        <g>
+          {/* Forehead bangs + high ponytail tuft */}
+          <Px x="11" y="10" c={hairColor} w="10" h="2" />
+          <Px x="21" y="8" c={hairColor} w="3" h="3" />
+          <Px x="23" y="11" c={hairColor} w="2" h="3" />
+        </g>
+      )}
+
+      {hairStyle === 'buzz' && (
+        <g>
+          {/* Minimal clean hairline */}
+          <Px x="11" y="10" c={hairColor} w="10" h="1" />
+        </g>
+      )}
+
+      {hairStyle === 'wavy' && (
+        <g>
+          {/* Soft wavy fringe */}
+          <Px x="11" y="10" c={hairColor} w="3" h="2" />
+          <Px x="15" y="11" c={hairColor} w="3" h="2" />
+          <Px x="19" y="10" c={hairColor} w="3" h="2" />
+        </g>
+      )}
+
+      {(!hairStyle || hairStyle === 'short') && (
+        <g>
+          {/* Cute classic tuft peeking from under hoodie */}
           <Px x="13" y="10" c={hairColor} w="2" h="3" />
           <Px x="15" y="11" c={hairColor} w="2" h="2" />
           <Px x="17" y="10" c={hairColor} w="2" h="3" />
@@ -657,98 +738,58 @@ const PixelFaceEmotion: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PUBLIC COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-const REAL_IMAGE_THEMES = new Set(['dinosaur', 'ocean', 'turtle', 'frog', 'space']);
-
 export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   emotionId,
   theme,
+  hairStyle,
   gender,
   skinTone,
   hairColor,
   className = 'w-16 h-16',
 }) => {
-  const { avatar, childProfile } = useApp();
+  const { avatar } = useApp();
 
-  const effectiveGender = gender ?? (childProfile?.characterGender || 'boy');
-  const effectiveSkin = skinTone ?? avatar?.skinTone;
-  const effectiveHair = hairColor ?? avatar?.hairColor;
+  const effectiveHairStyle = hairStyle ?? avatar?.hairStyle ?? 'short';
+  const effectiveSkin = skinTone ?? avatar?.skinTone ?? '#fed7aa';
+  const effectiveHair = hairColor ?? avatar?.hairColor ?? '#451a03';
 
   const normalizedId = emotionId.toLowerCase().trim();
   const category = theme?.category;
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
-  const [imageFailed, setImageFailed] = useState(false);
-
-  // If real pixel art image is available, render the actual image!
-  const hasRealImage = category && REAL_IMAGE_THEMES.has(category) && !imageFailed;
-  const folder = effectiveGender === 'girl' ? `${category}_girl` : category;
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
-
-  // Dynamically recolor skin & hair if user has customized them
-  const [displaySrc, setDisplaySrc] = useState<string>(baseSrc);
-
-  useEffect(() => {
-    let active = true;
-    if (isDefaultPalette(effectiveSkin, effectiveHair)) {
-      setDisplaySrc(baseSrc);
-      return;
-    }
-
-    getRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair).then((recolored) => {
-      if (active) {
-        setDisplaySrc(recolored);
-      }
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [baseSrc, effectiveSkin, effectiveHair]);
 
   return (
     <span
       className={`${className} inline-flex items-center justify-center select-none flex-shrink-0 drop-shadow-xs relative overflow-hidden`}
       aria-hidden="true"
     >
-      {hasRealImage ? (
-        <img
-          key={`${effectiveGender}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
-          src={displaySrc}
-          alt={label}
-          onError={() => setImageFailed(true)}
-          className="w-full h-full object-contain transition-transform hover:scale-105 active:scale-95"
-          style={{ imageRendering: 'pixelated' }}
-          loading="lazy"
+      <svg
+        viewBox="0 0 32 32"
+        width="100%"
+        height="100%"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label={label}
+        role="img"
+        shapeRendering="crispEdges"
+        className="overflow-visible"
+        style={{ imageRendering: 'pixelated' }}
+      >
+        <title>{label}</title>
+
+        {/* 1. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
+        <PixelHoodieBack category={category} />
+
+        {/* 2. Character Face with 11 Expressive Pixel Expressions & Chosen Hairstyle/Colors */}
+        <PixelFaceEmotion
+          emotion={normalizedId}
+          hairStyle={effectiveHairStyle}
+          skinTone={effectiveSkin}
+          hairColor={effectiveHair}
         />
-      ) : (
-        <svg
-          viewBox="0 0 32 32"
-          width="100%"
-          height="100%"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-label={label}
-          role="img"
-          shapeRendering="crispEdges"
-          className="overflow-visible"
-          style={{ imageRendering: 'pixelated' }}
-        >
-          <title>{label}</title>
 
-          {/* 1. Oversized Themed Pixel Hoodie Back (Dino Spikes, Sailor Hat, Frog Eyes, Shell) */}
-          <PixelHoodieBack category={category} />
-
-          {/* 2. Character Face with 11 Expressive Pixel Expressions */}
-          <PixelFaceEmotion
-            emotion={normalizedId}
-            gender={effectiveGender}
-            skinTone={effectiveSkin}
-            hairColor={effectiveHair}
-          />
-
-          {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
-          <PixelHoodieFront category={category} />
-        </svg>
-      )}
+        {/* 3. Themed Pixel Hoodie Front (White Dino Teeth, Golden Anchor, Drawstrings, Collar) */}
+        <PixelHoodieFront category={category} />
+      </svg>
     </span>
   );
 };

@@ -320,7 +320,6 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
                         <ThemedEmotionFace
                           emotionId={emotion.id}
                           theme={activeTheme}
-                          gender={childProfile?.characterGender || 'boy'}
                           className="w-6 h-6 flex-shrink-0"
                         />
                         <span>{emotion.label}</span>

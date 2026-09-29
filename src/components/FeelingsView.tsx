@@ -184,48 +184,12 @@ export const FeelingsView: React.FC = () => {
 
           {/* 1. EMOTION GRID */}
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+            <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
               <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                 1. Choose your feeling:
               </h3>
 
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Boy / Girl Character Switcher */}
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateChildProfile({ characterGender: 'boy' });
-                      playChime('tap');
-                    }}
-                    className={`px-2.5 py-1 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                      (childProfile?.characterGender || 'boy') === 'boy'
-                        ? 'bg-blue-600 text-white shadow-xs scale-102'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
-                    }`}
-                    aria-label="Boy character version"
-                  >
-                    <span>👦</span>
-                    <span>Boy</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateChildProfile({ characterGender: 'girl' });
-                      playChime('tap');
-                    }}
-                    className={`px-2.5 py-1 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                      childProfile?.characterGender === 'girl'
-                        ? 'bg-pink-600 text-white shadow-xs scale-102'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-300'
-                    }`}
-                    aria-label="Girl character version"
-                  >
-                    <span>👧</span>
-                    <span>Girl</span>
-                  </button>
-                </div>
-
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {/* Skin & Hair Representation Presets */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-x-auto">
                   {[
@@ -264,7 +228,7 @@ export const FeelingsView: React.FC = () => {
                       setShowAvatarCreator(true);
                       playChime('tap');
                     }}
-                    className="px-2 py-1 rounded-xl text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 flex items-center gap-1 cursor-pointer transition-all shadow-xs shrink-0"
+                    className="px-2.5 py-1 rounded-xl text-xs font-black text-amber-900 bg-amber-300 hover:bg-amber-400 flex items-center gap-1 cursor-pointer transition-all shadow-xs shrink-0"
                     title="Open Full Avatar Studio"
                   >
                     <span>🎨</span>
@@ -274,77 +238,155 @@ export const FeelingsView: React.FC = () => {
               </div>
             </div>
 
-            {/* Hair Color Customization Quick-Bar */}
-            <div className="flex items-center justify-between gap-2 mb-3 bg-slate-50 dark:bg-slate-800/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs flex-wrap">
+            {/* ── NONBINARY AVATAR QUICK CONTROLS: HAIRSTYLE, HAIR COLOR & SKIN TONE ── */}
+            <div className="bg-slate-50 dark:bg-slate-800/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs mb-3 space-y-2.5">
+              {/* Row 1: Changeable Hairstyle */}
               <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-                <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
-                  <span>💇</span>
-                  <span>Hair Color:</span>
+                <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+                  <span>✂️</span>
+                  <span>Hairstyle:</span>
                 </span>
                 {[
-                  { color: '#18181b', name: 'Jet Black' },
-                  { color: '#451a03', name: 'Dark Brown' },
-                  { color: '#78350f', name: 'Chestnut' },
-                  { color: '#d97706', name: 'Caramel' },
-                  { color: '#facc15', name: 'Golden Blonde' },
-                  { color: '#ef4444', name: 'Auburn Red' },
-                  { color: '#ec4899', name: 'Pastel Pink' },
-                  { color: '#3b82f6', name: 'Sky Blue' },
-                  { color: '#10b981', name: 'Emerald Green' },
-                  { color: '#a855f7', name: 'Lavender' },
-                ].map((hc) => {
-                  const isCurrent = avatar.hairColor === hc.color;
+                  { id: 'short', label: 'Short', icon: '💇' },
+                  { id: 'curly', label: 'Curly', icon: '🌀' },
+                  { id: 'pigtails', label: 'Pigtails', icon: '👧' },
+                  { id: 'spiky', label: 'Spiky', icon: '⚡' },
+                  { id: 'braids', label: 'Braids', icon: '🪢' },
+                  { id: 'wavy', label: 'Wavy', icon: '🌊' },
+                  { id: 'afro', label: 'Afro', icon: '👑' },
+                  { id: 'bob', label: 'Bob', icon: '🎀' },
+                  { id: 'ponytail', label: 'Ponytail', icon: '🐎' },
+                  { id: 'buzz', label: 'Buzz', icon: '✨' },
+                ].map((hs) => {
+                  const isCurrent = (avatar.hairStyle || 'short') === hs.id;
                   return (
                     <button
-                      key={hc.color}
+                      key={hs.id}
                       type="button"
                       onClick={() => {
-                        updateAvatar({ hairColor: hc.color });
+                        updateAvatar({ hairStyle: hs.id as any });
                         playChime('tap');
                       }}
-                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 transition-transform cursor-pointer shrink-0 flex items-center justify-center relative ${
+                      className={`px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shrink-0 ${
                         isCurrent
-                          ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
-                          : 'border-white dark:border-slate-600 hover:scale-110'
+                          ? 'bg-indigo-600 text-white shadow-xs font-black scale-102 ring-2 ring-indigo-300'
+                          : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 border border-slate-200 dark:border-slate-600'
                       }`}
-                      style={{ backgroundColor: hc.color }}
-                      title={`Change hair color to ${hc.name}`}
+                      title={`Select ${hs.label} Hairstyle`}
                     >
-                      {isCurrent && (
-                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white drop-shadow-xs" />
-                      )}
+                      <span className="text-xs">{hs.icon}</span>
+                      <span>{hs.label}</span>
                     </button>
                   );
                 })}
-
-                {/* Custom Color Input */}
-                <label
-                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 cursor-pointer shrink-0 flex items-center justify-center relative transition-transform hover:scale-110 bg-gradient-to-tr from-pink-400 via-amber-300 to-indigo-400 ${
-                    ![
-                      '#18181b', '#451a03', '#78350f', '#d97706', '#facc15',
-                      '#ef4444', '#ec4899', '#3b82f6', '#10b981', '#a855f7',
-                    ].includes(avatar.hairColor)
-                      ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
-                      : 'border-dashed border-slate-300'
-                  }`}
-                  title="Choose any custom hair color"
-                >
-                  <input
-                    type="color"
-                    value={avatar.hairColor || '#451a03'}
-                    onChange={(e) => updateAvatar({ hairColor: e.target.value })}
-                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                  />
-                  <span className="text-[10px] sm:text-xs">🎨</span>
-                </label>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">
-                <span
-                  className="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block shrink-0 shadow-xs"
-                  style={{ backgroundColor: avatar.hairColor || '#451a03' }}
-                />
-                <span className="text-[11px] hidden sm:inline">Active Hair</span>
+              {/* Row 2: Changeable Hair Color & Skin Tone */}
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex-wrap">
+                {/* Hair Color Bar */}
+                <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                  <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+                    <span>💇</span>
+                    <span>Hair:</span>
+                  </span>
+                  {[
+                    { color: '#18181b', name: 'Jet Black' },
+                    { color: '#451a03', name: 'Dark Brown' },
+                    { color: '#78350f', name: 'Chestnut' },
+                    { color: '#d97706', name: 'Caramel' },
+                    { color: '#facc15', name: 'Golden Blonde' },
+                    { color: '#ef4444', name: 'Auburn Red' },
+                    { color: '#ec4899', name: 'Pastel Pink' },
+                    { color: '#3b82f6', name: 'Sky Blue' },
+                    { color: '#10b981', name: 'Emerald Green' },
+                    { color: '#a855f7', name: 'Lavender' },
+                  ].map((hc) => {
+                    const isCurrent = avatar.hairColor === hc.color;
+                    return (
+                      <button
+                        key={hc.color}
+                        type="button"
+                        onClick={() => {
+                          updateAvatar({ hairColor: hc.color });
+                          playChime('tap');
+                        }}
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 transition-transform cursor-pointer shrink-0 flex items-center justify-center relative ${
+                          isCurrent
+                            ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
+                            : 'border-white dark:border-slate-600 hover:scale-110'
+                        }`}
+                        style={{ backgroundColor: hc.color }}
+                        title={`Hair color: ${hc.name}`}
+                      >
+                        {isCurrent && (
+                          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white drop-shadow-xs" />
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {/* Custom Hair Color Input */}
+                  <label
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 cursor-pointer shrink-0 flex items-center justify-center relative transition-transform hover:scale-110 bg-gradient-to-tr from-pink-400 via-amber-300 to-indigo-400 ${
+                      ![
+                        '#18181b', '#451a03', '#78350f', '#d97706', '#facc15',
+                        '#ef4444', '#ec4899', '#3b82f6', '#10b981', '#a855f7',
+                      ].includes(avatar.hairColor)
+                        ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
+                        : 'border-dashed border-slate-300'
+                    }`}
+                    title="Choose any custom hair color"
+                  >
+                    <input
+                      type="color"
+                      value={avatar.hairColor || '#451a03'}
+                      onChange={(e) => updateAvatar({ hairColor: e.target.value })}
+                      className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                    />
+                    <span className="text-[10px] sm:text-xs">🎨</span>
+                  </label>
+                </div>
+
+                {/* Skin Color Swatches */}
+                <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                  <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+                    <span>🧴</span>
+                    <span>Skin:</span>
+                  </span>
+                  {[
+                    { color: '#fef3c7', name: 'Porcelain' },
+                    { color: '#fed7aa', name: 'Peach' },
+                    { color: '#fcd34d', name: 'Warm Gold' },
+                    { color: '#f59e0b', name: 'Golden Amber' },
+                    { color: '#d97706', name: 'Honey Bronze' },
+                    { color: '#a16207', name: 'Almond' },
+                    { color: '#92400e', name: 'Chestnut' },
+                    { color: '#5a2e12', name: 'Espresso' },
+                  ].map((st) => {
+                    const isCurrent = avatar.skinTone === st.color;
+                    return (
+                      <button
+                        key={st.color}
+                        type="button"
+                        onClick={() => {
+                          updateAvatar({ skinTone: st.color });
+                          playChime('tap');
+                        }}
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border-2 transition-transform cursor-pointer shrink-0 flex items-center justify-center relative ${
+                          isCurrent
+                            ? 'scale-115 border-indigo-600 ring-2 ring-indigo-300 z-10 shadow-xs'
+                            : 'border-white dark:border-slate-600 hover:scale-110'
+                        }`}
+                        style={{ backgroundColor: st.color }}
+                        title={`Skin tone: ${st.name}`}
+                      >
+                        {isCurrent && (
+                          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-900 drop-shadow-xs" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -365,7 +407,7 @@ export const FeelingsView: React.FC = () => {
                     <ThemedEmotionFace
                       emotionId={emo.id}
                       theme={activeTheme}
-                      gender={childProfile?.characterGender || 'boy'}
+                      hairStyle={avatar.hairStyle}
                       skinTone={avatar.skinTone}
                       hairColor={avatar.hairColor}
                       className="w-16 h-16 sm:w-20 sm:h-20 mb-2 transition-transform hover:scale-110 drop-shadow-sm"

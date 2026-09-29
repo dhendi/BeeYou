@@ -31,8 +31,8 @@ export const EMOTIONS: EmotionOption[] = [
 
 export const INITIAL_CHILD_PROFILE: ChildProfile = {
   name: 'Leo',
-  characterGender: 'boy',
-  pronouns: 'he/him',
+  characterGender: 'neutral',
+  pronouns: 'they/them',
   interests: ['Trains', 'Space', 'Drawing', 'Dinosaurs', 'Building blocks'],
   favoriteFoods: ['Pizza', 'Mac & cheese', 'Apple slices', 'Strawberries'],
   favoriteActivities: ['Drawing trains', 'Listening to calm music', 'Playground swings'],
