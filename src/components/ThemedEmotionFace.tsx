@@ -798,7 +798,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
     const isPigtailVariant = ['pigtails', 'braids', 'bob', 'ponytail', 'curly'].includes(effectiveHairStyle) || gender === 'girl';
     folder = isPigtailVariant ? `${category}_girl` : category;
   }
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=8`;
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=9`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 
