@@ -12,67 +12,15 @@ import {
   ArrowRight, 
   X, 
   Check, 
-  Heart,
-  Smile,
-  Compass
+  Heart, 
+  Smile, 
+  Compass,
+  RefreshCw
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
 import { EmotionType } from '../types';
-
-interface WeatherPreset {
-  id: string;
-  label: string;
-  temp: string;
-  emoji: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-  bgGradient: string;
-  sensoryTip: string;
-}
-
-const WEATHER_PRESETS: WeatherPreset[] = [
-  {
-    id: 'sunny',
-    label: 'Sunny & Warm',
-    temp: '72°F • Mild',
-    emoji: '☀️',
-    icon: Sun,
-    color: '#f59e0b',
-    bgGradient: 'from-amber-100/80 via-yellow-50 to-orange-50',
-    sensoryTip: 'Bright light today! A cap or sunglasses can help your eyes feel calm.',
-  },
-  {
-    id: 'cloudy',
-    label: 'Soft & Partly Cloudy',
-    temp: '68°F • Gentle',
-    emoji: '⛅',
-    icon: CloudSun,
-    color: '#0284c7',
-    bgGradient: 'from-sky-100/80 via-slate-50 to-indigo-50',
-    sensoryTip: 'Soft natural daylight. Your favorite cozy hoodie or tee is great.',
-  },
-  {
-    id: 'breezy',
-    label: 'Fresh & Breezy',
-    temp: '64°F • Cool breeze',
-    emoji: '🍃',
-    icon: Wind,
-    color: '#10b981',
-    bgGradient: 'from-emerald-100/80 via-teal-50 to-cyan-50',
-    sensoryTip: 'Gentle wind outside. A light jacket will keep you cozy.',
-  },
-  {
-    id: 'rainy',
-    label: 'Cozy Light Rain',
-    temp: '60°F • Quiet drops',
-    emoji: '🌧️',
-    icon: CloudRain,
-    color: '#6366f1',
-    bgGradient: 'from-indigo-100/80 via-sky-50 to-slate-50',
-    sensoryTip: 'Raincoat and soft boots. Quiet tapping sounds outside.',
-  },
-];
+import { fetchLiveWeather, LiveWeatherData, DEFAULT_WEATHER_DATA } from '../utils/weather';
 
 const MOOD_OPTIONS: { id: EmotionType; label: string; emoji: string; response: string }[] = [
   { id: 'happy', label: 'Happy', emoji: '😊', response: 'Wonderful! We are glad you feel happy today.' },
@@ -95,9 +43,32 @@ export const MorningBriefModal: React.FC = () => {
     setChildView,
   } = useApp();
 
-  const [selectedWeather, setSelectedWeather] = useState<WeatherPreset>(WEATHER_PRESETS[0]);
+  const [weatherData, setWeatherData] = useState<LiveWeatherData>(DEFAULT_WEATHER_DATA);
+  const [isRefreshingWeather, setIsRefreshingWeather] = useState<boolean>(false);
   const [selectedMood, setSelectedMood] = useState<EmotionType | null>(null);
   const [moodFeedback, setMoodFeedback] = useState<string | null>(null);
+
+  // Sync live weather when brief opens
+  const loadWeather = async (force: boolean = false) => {
+    setIsRefreshingWeather(true);
+    try {
+      if (force) {
+        localStorage.removeItem('lumina_live_weather_cache');
+      }
+      const data = await fetchLiveWeather();
+      setWeatherData(data);
+    } catch (err) {
+      console.warn('Weather sync fallback', err);
+    } finally {
+      setIsRefreshingWeather(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showMorningBrief) {
+      loadWeather();
+    }
+  }, [showMorningBrief]);
 
   // Today's Date formatted warmly
   const todayFormatted = new Intl.DateTimeFormat('en-US', {
@@ -126,7 +97,7 @@ export const MorningBriefModal: React.FC = () => {
 
   const handleHearBrief = () => {
     playChime('speak');
-    const briefText = `${greetingGreeting}, ${childProfile.name}! Today is ${todayFormatted}. The weather is ${selectedWeather.label}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
+    const briefText = `${greetingGreeting}, ${childProfile.name}! Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${weatherData.tempDisplay}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
     speakText(briefText);
   };
 
@@ -221,60 +192,55 @@ export const MorningBriefModal: React.FC = () => {
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
-          {/* 1. WARM VISUAL WEATHER SUMMARY */}
+          {/* 1. REAL-TIME NON-EDITABLE WEATHER & SENSORY COMFORT */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-                Today's Weather & Sensory Comfort
-              </span>
-              <span className="text-[10px] text-slate-400 font-semibold">
-                Tap to adjust weather
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                  Today's Weather & Sensory Comfort
+                </span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  Live Sync
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => loadWeather(true)}
+                disabled={isRefreshingWeather}
+                title="Refresh live weather data"
+                className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 p-1 rounded-lg hover:bg-slate-100 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshingWeather ? 'animate-spin text-amber-600' : ''}`} />
+                <span>{isRefreshingWeather ? 'Syncing...' : weatherData.locationName}</span>
+              </button>
             </div>
 
-            {/* Selected Weather Showcase Card */}
-            <div className={`p-4 rounded-2xl bg-gradient-to-r ${selectedWeather.bgGradient} border-2 border-amber-200/80 flex items-start gap-3.5 transition-all shadow-xs`}>
-              <span className="text-4xl sm:text-5xl shrink-0 mt-0.5 animate-pulse">
-                {selectedWeather.emoji}
+            {/* Live Weather Card - Non-editable */}
+            <div className={`p-4 rounded-2xl bg-gradient-to-r ${weatherData.bgGradient} border-2 border-amber-200/80 flex items-start gap-3.5 transition-all shadow-xs`}>
+              <span className="text-4xl sm:text-5xl shrink-0 mt-0.5">
+                {weatherData.emoji}
               </span>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-black text-slate-900 text-base sm:text-lg">
-                    {selectedWeather.label}
-                  </h3>
-                  <span className="text-xs font-black px-2 py-0.5 rounded-full bg-white/80 text-slate-700 shadow-2xs">
-                    {selectedWeather.temp}
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base sm:text-lg leading-tight">
+                      {weatherData.condition}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      {weatherData.locationName} • Updated {weatherData.lastUpdated}
+                    </p>
+                  </div>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-white/90 text-slate-800 shadow-2xs border border-slate-200/60">
+                    {weatherData.tempDisplay}
                   </span>
                 </div>
-                <p className="text-xs text-slate-700 font-medium mt-1 leading-relaxed">
-                  💡 <strong>Comfort Tip:</strong> {selectedWeather.sensoryTip}
-                </p>
+                <div className="mt-2.5 p-2 rounded-xl bg-white/80 border border-amber-100/80">
+                  <p className="text-xs text-slate-700 font-medium leading-relaxed">
+                    💡 <strong className="text-amber-950 font-bold">Sensory Comfort Tip:</strong> {weatherData.sensoryTip}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            {/* Quick Weather Picker Chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
-              {WEATHER_PRESETS.map((w) => {
-                const isCurrent = selectedWeather.id === w.id;
-                return (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedWeather(w);
-                      playChime('tap');
-                    }}
-                    className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2 ${
-                      isCurrent
-                        ? 'bg-amber-100/80 border-amber-400 font-black text-amber-950 ring-2 ring-amber-300'
-                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 font-bold'
-                    } text-xs`}
-                  >
-                    <span className="text-lg">{w.emoji}</span>
-                    <span className="truncate">{w.label.split('&')[0].trim()}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
 
