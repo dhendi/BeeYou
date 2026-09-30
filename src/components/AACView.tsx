@@ -4,6 +4,7 @@ import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { AACTileArt } from './AACTileArt';
 import { AACWordIcon } from './AACWordIcon';
+import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { 
   Volume2, 
   Trash2, 
@@ -17,6 +18,7 @@ import {
   Palette,
   Keyboard,
   MapPin,
+  Globe,
   X
 } from 'lucide-react';
 
@@ -42,10 +44,13 @@ export const AACView: React.FC = () => {
     aacActiveScene,
     setAacActiveScene,
     setShowAacKeyboardModal,
+    addAacItem,
+    importAacPack,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSymbolPicker, setShowSymbolPicker] = useState(false);
 
   // Contextual phrases detection
   // If plans changed is active, or if there's an upcoming adventure (like Dentist today)
@@ -354,8 +359,19 @@ export const AACView: React.FC = () => {
           ))}
         </div>
 
-        {/* Theme switcher and accessibility quick toggles */}
+        {/* Theme switcher, Online AAC Tools, and accessibility quick toggles */}
         <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+          <button
+            type="button"
+            onClick={() => setShowSymbolPicker(true)}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+            title="Online AAC Symbols, Logos & Buttons Tools (ARASAAC Library & Real Photos)"
+          >
+            <Globe className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="hidden sm:inline">Online AAC Tools</span>
+            <span className="sm:hidden">Symbols</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowThemeModal(true)}
@@ -444,9 +460,28 @@ export const AACView: React.FC = () => {
       {filteredItems.length === 0 && (
         <div className="text-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-200 mt-4">
           <p className="font-bold text-base">No words found in this category.</p>
-          <p className="text-xs text-slate-400 mt-1">Parents can add new words anytime in the Parent Dashboard!</p>
+          <p className="text-xs text-slate-400 mt-1">Parents can add new words anytime in the Parent Dashboard or via Online AAC Tools!</p>
         </div>
       )}
+
+      {/* Online AAC Symbol & Button Studio Modal */}
+      <AACSymbolPickerModal
+        isOpen={showSymbolPicker}
+        onClose={() => setShowSymbolPicker(false)}
+        onSelectSymbol={(sym) => {
+          addAacItem({
+            label: sym.label,
+            speechText: sym.speechText || sym.label,
+            photoUrl: sym.photoUrl,
+            emoji: sym.emoji || '✨',
+            category: sym.category || 'food',
+            colorType: sym.colorType || 'noun',
+          });
+        }}
+        onImportPack={(pack) => {
+          importAacPack(pack.items);
+        }}
+      />
     </div>
   );
 };

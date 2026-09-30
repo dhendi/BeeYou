@@ -149,6 +149,8 @@ interface AppContextType {
   removeLastFromSentence: () => void;
   saveSentenceAsQuickPhrase: () => void;
   addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string }) => void;
+  updateAacItem: (item: AACItem) => void;
+  importAacPack: (items: Array<Omit<AACItem, 'id' | 'motorIndex'>>) => void;
   deleteAacItem: (id: string) => void;
   addQuickPhrase: (phrase: Omit<QuickPhrase, 'id'>) => void;
   deleteQuickPhrase: (id: string) => void;
@@ -1174,6 +1176,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     setAacItems((prev) => [...prev, newItem]);
     if (settings.soundEffects) playChime('star');
+  };
+
+  const updateAacItem = (updated: AACItem) => {
+    setAacItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const importAacPack = (items: Array<Omit<AACItem, 'id' | 'motorIndex'>>) => {
+    setAacItems((prev) => {
+      const existingLabels = new Set(prev.map((i) => i.label.toLowerCase()));
+      const newItems: AACItem[] = [];
+      let nextIndex = prev.length;
+
+      for (const item of items) {
+        if (!existingLabels.has(item.label.toLowerCase())) {
+          newItems.push({
+            id: `aac-pack-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            label: item.label,
+            speechText: item.speechText || item.label,
+            emoji: item.emoji || '✨',
+            photoUrl: item.photoUrl,
+            category: item.category,
+            colorType: item.colorType,
+            motorIndex: nextIndex++,
+            isCustom: true,
+          });
+          existingLabels.add(item.label.toLowerCase());
+        }
+      }
+      return [...prev, ...newItems];
+    });
+    if (settings.soundEffects) playChime('complete');
   };
 
   const deleteAacItem = (id: string) => {
@@ -2327,6 +2361,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         removeLastFromSentence,
         saveSentenceAsQuickPhrase,
         addAacItem,
+        updateAacItem,
+        importAacPack,
         deleteAacItem,
         addQuickPhrase,
         deleteQuickPhrase,

@@ -38,11 +38,13 @@ import {
   X,
   HeartPulse,
   Lock,
-  Crown
+  Crown,
+  Search
 } from 'lucide-react';
 import { MOOD_META, TRIGGER_META, COPING_META } from '../data/defaultData';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
 import { 
+  AACItem,
   AACCategory, 
   LifeAdventure, 
   Routine, 
@@ -63,6 +65,8 @@ import { RoutineCustomizerModal } from './RoutineCustomizerModal';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorage';
+import { AACSymbolPickerModal } from './AACSymbolPickerModal';
+import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/arasaacService';
 
 import { getPairingCode } from '../services/caregiverSync';
 
@@ -81,6 +85,8 @@ export const ParentDashboard: React.FC = () => {
     deleteRoutine,
     aacItems,
     addAacItem,
+    updateAacItem,
+    importAacPack,
     deleteAacItem,
     quickPhrases,
     addQuickPhrase,
@@ -294,6 +300,39 @@ export const ParentDashboard: React.FC = () => {
   const [newWordEmoji, setNewWordEmoji] = useState('🍗');
   const [newWordPhotoUrl, setNewWordPhotoUrl] = useState('');
   const [newWordColorType, setNewWordColorType] = useState<any>('noun');
+  const [showSymbolPicker, setShowSymbolPicker] = useState(false);
+  const [editingAacItem, setEditingAacItem] = useState<AACItem | null>(null);
+
+  const handlePickSymbol = (symbol: {
+    photoUrl: string;
+    label: string;
+    speechText?: string;
+    emoji?: string;
+    category?: AACCategory;
+    colorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
+  }) => {
+    if (editingAacItem) {
+      updateAacItem({
+        ...editingAacItem,
+        label: symbol.label,
+        speechText: symbol.speechText || symbol.label,
+        photoUrl: symbol.photoUrl,
+        emoji: symbol.emoji || editingAacItem.emoji,
+        colorType: symbol.colorType || editingAacItem.colorType,
+        category: symbol.category || editingAacItem.category,
+      });
+      showNotification(`Updated symbol for "${symbol.label}"!`);
+      setEditingAacItem(null);
+    } else {
+      setNewWordLabel(symbol.label);
+      setNewWordSpeech(symbol.speechText || symbol.label);
+      setNewWordPhotoUrl(symbol.photoUrl);
+      if (symbol.emoji) setNewWordEmoji(symbol.emoji);
+      if (symbol.category) setNewWordCategory(symbol.category);
+      if (symbol.colorType) setNewWordColorType(symbol.colorType);
+      showNotification(`Selected symbol for "${symbol.label}"!`);
+    }
+  };
 
   const handleAddCustomWord = (e: React.FormEvent) => {
     e.preventDefault();
@@ -3135,6 +3174,7 @@ export const ParentDashboard: React.FC = () => {
 
                 {/* 1-Tap Chicken Nuggets Test Button for Journey 2 */}
                 <button
+                  type="button"
                   onClick={handleQuickAddChickenNuggets}
                   className="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs flex items-center gap-1.5 border border-orange-300 shadow-xs cursor-pointer"
                 >
@@ -3142,12 +3182,84 @@ export const ParentDashboard: React.FC = () => {
                 </button>
               </div>
 
+              {/* ONLINE AAC SYMBOL STUDIO HERO BANNER */}
+              <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                    🌐
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
+                        Clinical Standard
+                      </span>
+                      <span className="text-xs text-indigo-200 font-bold">
+                        35,000+ Pictograms (ARASAAC)
+                      </span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-black mt-0.5">
+                      Online AAC Symbol & Logo Studio
+                    </h3>
+                    <p className="text-xs text-indigo-100 font-medium max-w-xl">
+                      Access the same clinical pictograms used in European and global AAC apps (TouchChat, LAMP, Cboard, OpenSymbols), or upload real photos from your camera for photo modeling.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingAacItem(null);
+                    setShowSymbolPicker(true);
+                  }}
+                  className="px-5 py-2.5 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-900 font-black text-xs sm:text-sm flex items-center gap-2 shrink-0 shadow-sm transition-all cursor-pointer active:scale-95"
+                >
+                  <Search className="w-4 h-4 text-indigo-600" />
+                  <span>Browse Online Symbols</span>
+                </button>
+              </div>
+
               {/* Add Custom Word Form */}
               <form onSubmit={handleAddCustomWord} className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
-                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                  <Plus className="w-4 h-4 text-amber-600" />
-                  <span>Add New Vocabulary Item</span>
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                    <Plus className="w-4 h-4 text-amber-600" />
+                    <span>Create Custom AAC Button</span>
+                  </h3>
+
+                  {newWordPhotoUrl && (
+                    <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <span>Symbol Attached ✓</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Symbol Preview Bar if chosen */}
+                {newWordPhotoUrl && (
+                  <div className="p-3 bg-white rounded-2xl border-2 border-indigo-200 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center">
+                        <img src={newWordPhotoUrl} alt="" className="max-h-full max-w-full object-contain" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-xs text-slate-900">
+                          {newWordLabel || 'Selected Symbol'}
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate max-w-xs">
+                          {newWordPhotoUrl.startsWith('data:') ? 'Custom Photo Upload' : 'ARASAAC Clinical Pictogram'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setNewWordPhotoUrl('')}
+                      className="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer"
+                    >
+                      Clear Symbol
+                    </button>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
@@ -3195,7 +3307,7 @@ export const ParentDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-600 block mb-1">Emoji Icon:</label>
+                    <label className="text-xs font-bold text-slate-600 block mb-1">Emoji Icon (Fallback):</label>
                     <input
                       type="text"
                       value={newWordEmoji}
@@ -3205,18 +3317,7 @@ export const ParentDashboard: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-600 block mb-1">Photo URL (Optional):</label>
-                    <input
-                      type="text"
-                      value={newWordPhotoUrl}
-                      onChange={(e) => setNewWordPhotoUrl(e.target.value)}
-                      placeholder="https://... or real photo"
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-600 block mb-1">Color Key:</label>
+                    <label className="text-xs font-bold text-slate-600 block mb-1">Color Key (Fitzgerald):</label>
                     <select
                       value={newWordColorType}
                       onChange={(e) => setNewWordColorType(e.target.value as any)}
@@ -3230,15 +3331,143 @@ export const ParentDashboard: React.FC = () => {
                       <option value="social">Social (Purple)</option>
                     </select>
                   </div>
+
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAacItem(null);
+                        setShowSymbolPicker(true);
+                      }}
+                      className="w-full px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>{newWordPhotoUrl ? 'Change Symbol' : 'Pick Online Symbol'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
                   className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs cursor-pointer"
                 >
-                  Add to Child's AAC
+                  Add to Child's AAC Board
                 </button>
               </form>
+
+              {/* INDUSTRY STANDARD AAC PACKS */}
+              <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-purple-600" />
+                      <span>Pre-Built AAC Standard Packs (TouchChat & LAMP Systems)</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Instantly import clinically validated vocabulary collections used in speech therapy and special ed.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {INDUSTRY_AAC_PACKS.map((pack) => (
+                    <div
+                      key={pack.id}
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200 flex flex-col justify-between shadow-2xs"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-2xl">{pack.icon}</span>
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                            {pack.badge}
+                          </span>
+                        </div>
+                        <h4 className="font-black text-xs text-slate-900">{pack.title}</h4>
+                        <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{pack.subtitle}</p>
+                        <p className="text-[9px] text-indigo-600 font-bold mt-1.5">Used by: {pack.usedBy}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          importAacPack(pack.items);
+                          showNotification(`Imported "${pack.title}" (${pack.items.length} words)!`);
+                        }}
+                        className="mt-3 w-full py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-1 cursor-pointer transition shadow-2xs"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        <span>Import {pack.items.length} Words</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ACTIVE AAC VOCABULARY BUTTONS (CUSTOMIZE / CHANGE LOGO) */}
+              <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                      <Palette className="w-4 h-4 text-indigo-600" />
+                      <span>Active Vocabulary Buttons ({aacItems.length})</span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Click "Change Symbol" on any button to swap its logo with an online ARASAAC pictogram or personal photo.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-96 overflow-y-auto p-1">
+                  {aacItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-2.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col items-center justify-between gap-1.5 text-center group hover:border-indigo-300 transition-all"
+                    >
+                      <div className="w-12 h-12 flex items-center justify-center p-1 bg-white rounded-xl border border-slate-100 shadow-2xs">
+                        {item.photoUrl ? (
+                          <img src={item.photoUrl} alt={item.label} className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-2xl">{item.emoji}</span>
+                        )}
+                      </div>
+
+                      <div className="w-full">
+                        <div className="font-black text-xs text-slate-900 truncate">{item.label}</div>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 capitalize">
+                          {item.colorType}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 w-full pt-1 border-t border-slate-200/60">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingAacItem(item);
+                            setShowSymbolPicker(true);
+                          }}
+                          className="flex-1 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] cursor-pointer"
+                          title="Change symbol for this button"
+                        >
+                          Change Symbol
+                        </button>
+                        {item.isCustom && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              deleteAacItem(item.id);
+                              showNotification(`Deleted "${item.label}" from AAC.`);
+                            }}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            title="Delete custom word"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Voice & Speech Controls */}
               <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
@@ -4332,6 +4561,22 @@ export const ParentDashboard: React.FC = () => {
         }}
         initialRoutine={customizingRoutine}
         onSave={handleSaveCustomizedRoutine}
+      />
+
+      {/* Online AAC Symbol & Button Studio Modal */}
+      <AACSymbolPickerModal
+        isOpen={showSymbolPicker}
+        onClose={() => {
+          setShowSymbolPicker(false);
+          setEditingAacItem(null);
+        }}
+        initialQuery={editingAacItem ? editingAacItem.label : newWordLabel}
+        initialColorType={editingAacItem ? editingAacItem.colorType : newWordColorType}
+        onSelectSymbol={handlePickSymbol}
+        onImportPack={(pack) => {
+          importAacPack(pack.items);
+          showNotification(`Imported "${pack.title}" (${pack.items.length} words)!`);
+        }}
       />
     </div>
   );
