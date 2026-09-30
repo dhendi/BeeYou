@@ -761,44 +761,41 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // Hairstyle determination (nonbinary):
-  // Dedicated authentic pixel art sprite sets with identical onesie and changeable hair:
+  // Hairstyle determination:
+  // Dedicated authentic pixel art sprite sets with identical onesie/outfit and changeable hair:
   let folder = category;
-  if (category === 'dinosaur') {
+  if (category && REAL_IMAGE_THEMES.has(category)) {
     switch (effectiveHairStyle) {
       case 'curly':
       case 'wavy':
-        folder = 'dinosaur_curly';
+        folder = `${category}_curly`;
         break;
       case 'afro':
-        folder = 'dinosaur_afro';
+        folder = `${category}_afro`;
         break;
       case 'spiky':
-        folder = 'dinosaur_spiky';
+        folder = `${category}_spiky`;
         break;
       case 'braids':
-        folder = 'dinosaur_braids';
+        folder = `${category}_braids`;
         break;
       case 'ponytail':
-        folder = 'dinosaur_ponytail';
+        folder = `${category}_ponytail`;
         break;
       case 'bob':
-        folder = 'dinosaur_bob';
+        folder = `${category}_bob`;
         break;
       case 'pigtails':
-        folder = 'dinosaur_girl';
+        folder = `${category}_pigtails`;
         break;
       case 'short':
       case 'buzz':
       default:
-        folder = 'dinosaur';
+        folder = (gender === 'girl' && !hairStyle) ? `${category}_pigtails` : category;
         break;
     }
-  } else {
-    const isPigtailVariant = ['pigtails', 'braids', 'bob', 'ponytail', 'curly'].includes(effectiveHairStyle) || gender === 'girl';
-    folder = isPigtailVariant ? `${category}_girl` : category;
   }
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=9`;
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=10`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 

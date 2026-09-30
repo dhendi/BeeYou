@@ -139,10 +139,12 @@ export async function getRecoloredEmotionImage(
             // 3. Green Hoodie & Ocean Blue (NEVER recolor!)
             if ((g > r + 10 && g > b + 10) || (g > 55 && g > r && g > b)) continue;
             if (b > r + 20 && b > g + 15 && b > 70) continue; // Ocean theme
+            if (r > 60 && b > 90 && b > g + 25) continue; // Space purple headphone pods
+            if (g > 150 && b > 150 && r < 100) continue; // Space cyan visor rim
 
-            // 4. Golden Dinosaur Spikes (NEVER recolor!)
+            // 4. Golden Dinosaur Spikes & Sailor Anchor (NEVER recolor!)
             const isSpike =
-              (r > 160 && g > 110 && b < 95 && g - b >= 30) ||
+              (r > 150 && g > 110 && b < 80 && g - b >= 30) ||
               (x < 85 && y < 170 && r > 90 && g > 60 && b < 60 && g - b >= 15);
             if (isSpike) continue;
 
