@@ -35,6 +35,7 @@ import { OnboardingWizardModal } from './components/OnboardingWizardModal';
 import { AboutMeIDModal } from './components/AboutMeIDModal';
 import { AvatarCreatorModal } from './components/AvatarCreatorModal';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
+import { MedicationRemindersModal } from './components/MedicationRemindersModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -179,6 +180,9 @@ const AppContent: React.FC = () => {
         isOpen={showAvatarCreator}
         onClose={() => setShowAvatarCreator(false)}
       />
+
+      {/* Medication & Health Reminders Modal */}
+      <MedicationRemindersModal />
     </div>
   );
 };

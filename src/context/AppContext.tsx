@@ -23,6 +23,9 @@ import {
   UserAgeGroup,
   EnabledFeatures,
   getDefaultFeaturesForAge,
+  MedicationReminder,
+  MedicationDoseLog,
+  MedicationFrequency,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -40,6 +43,8 @@ import {
   DEFAULT_PLANS_CHANGED,
   WORLD_ITEMS_CATALOG,
   DEFAULT_DAILY_CHECKINS,
+  INITIAL_MEDICATIONS,
+  INITIAL_MEDICATION_LOGS,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { INITIAL_DAILY_RECOLLECTIONS } from '../data/recollectionData';
@@ -223,6 +228,17 @@ interface AppContextType {
   showOnboardingModal: boolean;
   setShowOnboardingModal: (val: boolean) => void;
   reopenOnboarding: () => void;
+  // Medication Reminders & Health Supply
+  medications: MedicationReminder[];
+  medicationLogs: MedicationDoseLog[];
+  showMedicationModal: boolean;
+  setShowMedicationModal: (val: boolean) => void;
+  addMedication: (med: Omit<MedicationReminder, 'id' | 'takenTimesToday'>) => void;
+  updateMedication: (id: string, updates: Partial<MedicationReminder>) => void;
+  deleteMedication: (id: string) => void;
+  takeMedicationDose: (medId: string, time?: string) => void;
+  undoMedicationDose: (medId: string, time?: string) => void;
+  restockMedication: (medId: string, addedCount: number) => void;
 
   // Utilities
   resetToDefaults: () => void;
@@ -335,6 +351,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('lumina_daily_recollections', JSON.stringify(dailyRecollections));
     } catch (e) {}
   }, [dailyRecollections]);
+
+  // Medication Reminders & Supply Tracking state
+  const [medications, setMedications] = useState<MedicationReminder[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_medications');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const todayStr = new Date().toISOString().split('T')[0];
+          return parsed.map((m: MedicationReminder) => {
+            if (m.lastTakenDate !== todayStr) {
+              return { ...m, takenTimesToday: [], lastTakenDate: todayStr };
+            }
+            return m;
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse lumina_medications:', e);
+    }
+    return INITIAL_MEDICATIONS;
+  });
+
+  const [medicationLogs, setMedicationLogs] = useState<MedicationDoseLog[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_medication_logs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse lumina_medication_logs:', e);
+    }
+    return INITIAL_MEDICATION_LOGS;
+  });
+
+  const [showMedicationModal, setShowMedicationModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_medications', JSON.stringify(medications));
+    } catch (e) {}
+  }, [medications]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_medication_logs', JSON.stringify(medicationLogs));
+    } catch (e) {}
+  }, [medicationLogs]);
 
   // Themes & Customization state
   const [themes, setThemes] = useState<AppTheme[]>(() => {
@@ -503,6 +568,51 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const reopenOnboarding = () => {
     setShowOnboardingModal(true);
   };
+
+  // Timed medication reminder notification check (every 30s)
+  const notifiedMedicationKeysRef = React.useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (enabledFeatures?.medicationReminders === false) return;
+
+    const checkDueMedications = () => {
+      const now = new Date();
+      const currentHour = String(now.getHours()).padStart(2, '0');
+      const currentMinute = String(now.getMinutes()).padStart(2, '0');
+      const currentTimeStr = `${currentHour}:${currentMinute}`;
+      const todayDateStr = now.toISOString().split('T')[0];
+      const currentDayOfWeek = now.getDay(); // 0=Sun..6=Sat
+
+      medications.forEach((med) => {
+        if (!med.active || med.frequency === 'as_needed') return;
+        if (med.frequency === 'custom_days' && med.customDays && !med.customDays.includes(currentDayOfWeek)) {
+          return;
+        }
+
+        med.times.forEach((scheduledTime) => {
+          if (scheduledTime === currentTimeStr) {
+            const reminderKey = `${med.id}_${scheduledTime}_${todayDateStr}`;
+            if (!notifiedMedicationKeysRef.current.has(reminderKey) && !med.takenTimesToday?.includes(scheduledTime)) {
+              notifiedMedicationKeysRef.current.add(reminderKey);
+              if (settings.soundEffects) playChime('star');
+              speakText(`Medication reminder: It is time for ${childProfile.name}'s ${med.name}. Please take ${med.dosage} ${med.unit}.`);
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                try {
+                  new Notification(`Medication Reminder: ${med.name}`, {
+                    body: `Time to take ${med.dosage} ${med.unit}. ${med.instructions || ''}`,
+                  });
+                } catch (e) {}
+              }
+            }
+          }
+        });
+      });
+    };
+
+    checkDueMedications();
+    const interval = setInterval(checkDueMedications, 30000);
+    return () => clearInterval(interval);
+  }, [medications, enabledFeatures?.medicationReminders, childProfile.name, settings.soundEffects]);
 
   // Active Speech & Offline States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -1208,6 +1318,124 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (settings.soundEffects) playChime('clear');
   };
 
+  // Medication Actions
+  const addMedication = (med: Omit<MedicationReminder, 'id' | 'takenTimesToday'>) => {
+    const newMed: MedicationReminder = {
+      ...med,
+      id: `med-${Date.now()}`,
+      takenTimesToday: [],
+      lastTakenDate: new Date().toISOString().split('T')[0],
+    };
+    setMedications((prev) => [...prev, newMed]);
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const updateMedication = (id: string, updates: Partial<MedicationReminder>) => {
+    setMedications((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, ...updates } : m))
+    );
+  };
+
+  const deleteMedication = (id: string) => {
+    setMedications((prev) => prev.filter((m) => m.id !== id));
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const takeMedicationDose = (medId: string, time?: string) => {
+    const todayDateStr = new Date().toISOString().split('T')[0];
+    const targetTime = time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+    const targetMed = medications.find((m) => m.id === medId);
+    if (!targetMed) return;
+
+    const newQuantity = Math.max(0, targetMed.totalQuantity - targetMed.dosage);
+    const updatedTaken = targetMed.takenTimesToday.includes(targetTime)
+      ? targetMed.takenTimesToday
+      : [...targetMed.takenTimesToday, targetTime];
+
+    setMedications((prev) =>
+      prev.map((m) =>
+        m.id === medId
+          ? {
+              ...m,
+              totalQuantity: newQuantity,
+              takenTimesToday: updatedTaken,
+              lastTakenDate: todayDateStr,
+            }
+          : m
+      )
+    );
+
+    const newLog: MedicationDoseLog = {
+      id: `log-${Date.now()}`,
+      medicationId: targetMed.id,
+      medicationName: targetMed.name,
+      timestamp: new Date().toISOString(),
+      doseQuantity: targetMed.dosage,
+      doseUnit: targetMed.unit,
+      doseTime: targetTime,
+      status: 'taken',
+      notes: `Taken as scheduled. Remaining: ${newQuantity} ${targetMed.unit}`,
+    };
+    setMedicationLogs((prev) => [newLog, ...prev]);
+
+    awardStars(1);
+    if (settings.soundEffects) playChime('star');
+    try {
+      confetti({
+        particleCount: 35,
+        spread: 55,
+        origin: { y: 0.7 },
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
+      });
+    } catch (e) {}
+    speak(`Great job taking your ${targetMed.name}! You earned 1 star!`);
+  };
+
+  const undoMedicationDose = (medId: string, time?: string) => {
+    const targetMed = medications.find((m) => m.id === medId);
+    if (!targetMed) return;
+
+    const restoredQuantity = targetMed.totalQuantity + targetMed.dosage;
+    const updatedTaken = time
+      ? targetMed.takenTimesToday.filter((t) => t !== time)
+      : targetMed.takenTimesToday.slice(0, -1);
+
+    setMedications((prev) =>
+      prev.map((m) =>
+        m.id === medId
+          ? {
+              ...m,
+              totalQuantity: restoredQuantity,
+              takenTimesToday: updatedTaken,
+            }
+          : m
+      )
+    );
+
+    setMedicationLogs((prev) => {
+      const idx = prev.findIndex((l) => l.medicationId === medId);
+      if (idx !== -1) {
+        const copy = [...prev];
+        copy.splice(idx, 1);
+        return copy;
+      }
+      return prev;
+    });
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const restockMedication = (medId: string, addedCount: number) => {
+    setMedications((prev) =>
+      prev.map((m) =>
+        m.id === medId
+          ? { ...m, totalQuantity: Math.max(0, m.totalQuantity + addedCount) }
+          : m
+      )
+    );
+    if (settings.soundEffects) playChime('star');
+  };
+
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
     setQuickPhrases(DEFAULT_QUICK_PHRASES);
@@ -1221,11 +1449,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setChildProfile(INITIAL_CHILD_PROFILE);
     setSettings(INITIAL_APP_SETTINGS);
     setDailyRecollections(INITIAL_DAILY_RECOLLECTIONS);
+    setMedications(INITIAL_MEDICATIONS);
+    setMedicationLogs(INITIAL_MEDICATION_LOGS);
     setUserAgeGroupState('kid');
     setEnabledFeatures(getDefaultFeaturesForAge('kid'));
     setSentence([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('lumina_daily_recollections');
+    localStorage.removeItem('lumina_medications');
+    localStorage.removeItem('lumina_medication_logs');
     localStorage.removeItem('lumina_user_age_group');
     localStorage.removeItem('lumina_enabled_features');
     localStorage.removeItem('lumina_onboarding_completed');
@@ -1370,6 +1602,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         showOnboardingModal,
         setShowOnboardingModal,
         reopenOnboarding,
+
+        medications,
+        medicationLogs,
+        showMedicationModal,
+        setShowMedicationModal,
+        addMedication,
+        updateMedication,
+        deleteMedication,
+        takeMedicationDose,
+        undoMedicationDose,
+        restockMedication,
 
         resetToDefaults,
       }}

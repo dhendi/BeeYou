@@ -16,7 +16,8 @@ import {
   Sun,
   Heart,
   ShieldAlert,
-  Moon
+  Moon,
+  Pill
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -44,6 +45,9 @@ export const ChildHomeView: React.FC = () => {
     userAgeGroup,
     setShowAboutMeModal,
     setShowAvatarCreator,
+    medications,
+    takeMedicationDose,
+    setShowMedicationModal,
   } = useApp();
 
 
@@ -349,6 +353,82 @@ export const ChildHomeView: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* 3.5. MEDICATION & HEALTH REMINDERS SNAPSHOT */}
+      {enabledFeatures?.medicationReminders !== false && medications.length > 0 && (() => {
+        const pendingMeds = medications.filter(
+          (m) => m.active && m.frequency !== 'as_needed' && m.times.some((t) => !m.takenTimesToday.includes(t))
+        );
+        const nextDueMed = pendingMeds[0] || medications[0];
+        const nextTime = nextDueMed?.times.find((t) => !nextDueMed.takenTimesToday.includes(t)) || nextDueMed?.times[0] || 'As needed';
+        const isAllTaken = pendingMeds.length === 0 && medications.some((m) => m.frequency !== 'as_needed');
+
+        return (
+          <div className="bg-gradient-to-r from-sky-50 via-teal-50 to-indigo-50 rounded-3xl border-2 border-teal-200/90 p-4 sm:p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">💊</span>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 bg-teal-100 px-2 py-0.5 rounded-full">
+                      Medication Reminders
+                    </span>
+                    {medications.some((m) => m.totalQuantity <= m.refillThreshold) && (
+                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
+                        Low Supply!
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-black text-slate-800 text-base mt-0.5">
+                    {isAllTaken ? 'All doses complete for today! 🎉' : `Next: ${nextDueMed?.name}`}
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMedicationModal(true);
+                  playChime('tap');
+                }}
+                className="text-xs font-black text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer bg-white/80 hover:bg-white px-3 py-1.5 rounded-xl border border-teal-200 shadow-2xs"
+              >
+                <span>View All Meds</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Quick Action Card */}
+            {!isAllTaken && nextDueMed && (
+              <div className="bg-white/90 rounded-2xl p-3 sm:p-3.5 border border-teal-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl shrink-0">{nextDueMed.emoji || '💊'}</span>
+                  <div>
+                    <h4 className="font-black text-sm text-slate-800 leading-tight">
+                      {nextDueMed.name}
+                    </h4>
+                    <p className="text-xs font-bold text-teal-800 mt-0.5">
+                      Take {nextDueMed.dosage} {nextDueMed.unit} • Time: {nextTime}
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Supply: {nextDueMed.totalQuantity} {nextDueMed.unit} remaining
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => takeMedicationDose(nextDueMed.id, nextTime)}
+                  className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer transition-all self-end sm:self-auto shrink-0"
+                >
+                  <Pill className="w-4 h-4" />
+                  <span>Take Dose (+1 ⭐)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* 4. TODAY'S ADVENTURE PREPARATION SPOTLIGHT */}
       {todaysAdventure && (

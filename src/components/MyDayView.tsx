@@ -10,7 +10,8 @@ import {
   AlertCircle,
   Volume2,
   Info,
-  Timer
+  Timer,
+  Pill
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
@@ -29,6 +30,10 @@ export const MyDayView: React.FC = () => {
     earnedStickers,
     dailyRecollections,
     setShowRecollectionModal,
+    medications,
+    takeMedicationDose,
+    setShowMedicationModal,
+    enabledFeatures,
   } = useApp();
 
 
@@ -449,6 +454,50 @@ export const MyDayView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Medication & Health Routine Card */}
+      {enabledFeatures?.medicationReminders !== false && medications.length > 0 && (() => {
+        const totalDoses = medications.reduce((acc, m) => acc + (m.frequency === 'as_needed' ? 1 : m.times.length), 0);
+        const takenDoses = medications.reduce((acc, m) => acc + m.takenTimesToday.length, 0);
+
+        return (
+          <div className="bg-gradient-to-r from-teal-50 via-sky-50 to-indigo-50 border-2 border-teal-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl select-none">💊</span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-black uppercase text-teal-800 bg-teal-200/90 px-2 py-0.5 rounded-full">
+                    Health & Medications
+                  </span>
+                  <span className="text-xs font-bold text-teal-900">
+                    {takenDoses >= totalDoses
+                      ? "All doses taken today! ✓"
+                      : `${takenDoses} of ${totalDoses} doses taken (+1 ⭐ per dose)`}
+                  </span>
+                </div>
+                <h4 className="text-sm sm:text-base font-black text-slate-800 mt-0.5">
+                  Medication Reminders & Supply
+                </h4>
+                <p className="text-xs text-slate-600">
+                  Track pills, chewables, and inhalers with automatic inventory countdown.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowMedicationModal(true);
+                playChime('tap');
+              }}
+              className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <Pill className="w-4 h-4" />
+              <span>Open Medication Tracker</span>
+            </button>
+          </div>
+        );
+      })()}
 
       {/* End of Day Reflection Card */}
       <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">

@@ -257,6 +257,44 @@ export interface MyWorldState {
 
 export type UserAgeGroup = 'kid' | 'teen' | 'adult';
 
+export type MedicationFrequency = 
+  | 'daily'
+  | 'twice_daily'
+  | 'three_daily'
+  | 'as_needed'
+  | 'weekly'
+  | 'custom_days';
+
+export interface MedicationReminder {
+  id: string;
+  name: string;                // Medication name (e.g. "Morning Multivitamin", "Inhaler")
+  totalQuantity: number;       // How many they have in stock (inventory count)
+  dosage: number;              // How many to take per intake (e.g. 1, 2)
+  unit: string;                // Unit: "pill", "gummy", "puff", "tablet", "drop", "ml"
+  frequency: MedicationFrequency; // How often they should take it
+  times: string[];             // What time(s) they should take them (e.g. ["08:00", "20:00"])
+  instructions?: string;       // Helpful note (e.g. "Take with breakfast and a glass of water")
+  emoji?: string;              // Friendly visual icon: 💊, 🍬, 🫁, 💧, 🧴
+  color?: string;              // Visual theme color (e.g. #3b82f6)
+  refillThreshold: number;     // Low supply threshold (default: 5)
+  customDays?: number[];       // [0..6] (0=Sun, 1=Mon, ..., 6=Sat)
+  takenTimesToday: string[];   // Times marked taken today (e.g. ["08:00"])
+  lastTakenDate?: string;      // YYYY-MM-DD
+  active: boolean;             // Whether reminder is active
+}
+
+export interface MedicationDoseLog {
+  id: string;
+  medicationId: string;
+  medicationName: string;
+  timestamp: string;           // ISO string
+  doseQuantity: number;        // Quantity taken
+  doseUnit?: string;           // Unit
+  doseTime: string;            // Scheduled time, e.g. "08:00" or "as_needed"
+  status: 'taken' | 'skipped' | 'missed';
+  notes?: string;
+}
+
 export interface EnabledFeatures {
   starsAndRewards: boolean;       // Star coins, badges, routine stickers (gamification)
   firstThenSchedules: boolean;     // Visual first/then routine cards
@@ -268,6 +306,7 @@ export interface EnabledFeatures {
   emergencyAlertSOS: boolean;      // Quick help / caregiver alert SOS button
   aacCommunication: boolean;       // AAC picture & symbol communication board
   sensoryBreathingPacer: boolean;  // Calm sensory breathing pacer & coping toolkit
+  medicationReminders: boolean;    // Medication reminders, dose tracking & inventory supply
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
 }
 
@@ -282,6 +321,7 @@ export const DEFAULT_KID_FEATURES: EnabledFeatures = {
   emergencyAlertSOS: true,
   aacCommunication: true,
   sensoryBreathingPacer: true,
+  medicationReminders: true,
   discreetMode: false,
 };
 
@@ -296,6 +336,7 @@ export const DEFAULT_TEEN_FEATURES: EnabledFeatures = {
   emergencyAlertSOS: true,
   aacCommunication: true,
   sensoryBreathingPacer: true,
+  medicationReminders: true,
   discreetMode: false,
 };
 
@@ -310,6 +351,7 @@ export const DEFAULT_ADULT_FEATURES: EnabledFeatures = {
   emergencyAlertSOS: true,
   aacCommunication: true,
   sensoryBreathingPacer: true,
+  medicationReminders: true,
   discreetMode: true,
 };
 

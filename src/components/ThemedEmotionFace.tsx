@@ -763,7 +763,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // Hairstyle determination:
   // Dedicated authentic pixel art sprite sets with identical onesie/outfit and changeable hair:
-  let folder = category;
+  let folder: string | undefined = category;
   if (category && REAL_IMAGE_THEMES.has(category)) {
     switch (effectiveHairStyle) {
       case 'curly':

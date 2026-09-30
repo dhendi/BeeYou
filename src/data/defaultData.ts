@@ -13,6 +13,8 @@ import {
   MyWorldState,
   PlansChangedState,
   EmotionOption,
+  MedicationReminder,
+  MedicationDoseLog,
 } from '../types';
 
 export const EMOTIONS: EmotionOption[] = [
@@ -864,3 +866,77 @@ export const DEFAULT_DAILY_CHECKINS: import('../types').DailyCheckInEntry[] = [
     therapyHighlight: 'High positive engagement during morning routine.'
   }
 ];
+
+export const INITIAL_MEDICATIONS: MedicationReminder[] = [
+  {
+    id: 'med-multivitamin',
+    name: 'Morning Multivitamin Gummy',
+    totalQuantity: 42,
+    dosage: 1,
+    unit: 'gummy',
+    frequency: 'daily',
+    times: ['08:00'],
+    instructions: 'Chew 1 gummy thoroughly with breakfast',
+    emoji: '🍬',
+    color: '#f59e0b',
+    refillThreshold: 7,
+    takenTimesToday: [],
+    active: true,
+  },
+  {
+    id: 'med-inhaler',
+    name: 'Asthma Inhaler (Albuterol)',
+    totalQuantity: 54,
+    dosage: 2,
+    unit: 'puffs',
+    frequency: 'as_needed',
+    times: ['08:00', '18:00'],
+    instructions: 'Shake well, inhale 2 deep puffs slowly, and rinse mouth with water',
+    emoji: '🫁',
+    color: '#0284c7',
+    refillThreshold: 10,
+    takenTimesToday: [],
+    active: true,
+  },
+  {
+    id: 'med-melatonin',
+    name: 'Evening Calming Melatonin Drops',
+    totalQuantity: 25,
+    dosage: 1,
+    unit: 'dropper',
+    frequency: 'daily',
+    times: ['20:00'],
+    instructions: 'Take 30 minutes before sleep with half a cup of water',
+    emoji: '💧',
+    color: '#6366f1',
+    refillThreshold: 5,
+    takenTimesToday: [],
+    active: true,
+  },
+];
+
+export const INITIAL_MEDICATION_LOGS: MedicationDoseLog[] = [
+  {
+    id: 'log-1',
+    medicationId: 'med-multivitamin',
+    medicationName: 'Morning Multivitamin Gummy',
+    timestamp: new Date(Date.now() - 86400000 + 3600000 * 8).toISOString(),
+    doseQuantity: 1,
+    doseUnit: 'gummy',
+    doseTime: '08:00',
+    status: 'taken',
+    notes: 'Taken with breakfast',
+  },
+  {
+    id: 'log-2',
+    medicationId: 'med-melatonin',
+    medicationName: 'Evening Calming Melatonin Drops',
+    timestamp: new Date(Date.now() - 86400000 + 3600000 * 20).toISOString(),
+    doseQuantity: 1,
+    doseUnit: 'dropper',
+    doseTime: '20:00',
+    status: 'taken',
+    notes: 'Bedtime routine complete',
+  },
+];
+

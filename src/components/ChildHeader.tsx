@@ -36,6 +36,8 @@ export const ChildHeader: React.FC = () => {
     userAgeGroup,
     setShowAboutMeModal,
     setShowAvatarCreator,
+    medications,
+    setShowMedicationModal,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -139,6 +141,24 @@ export const ChildHeader: React.FC = () => {
               <span>🪪</span>
               <span className="hidden sm:inline">About Me</span>
             </button>
+
+            {enabledFeatures?.medicationReminders !== false && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMedicationModal(true);
+                  playChime('tap');
+                }}
+                className="relative flex items-center gap-1 text-[11px] font-black text-sky-900 bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                title="Medication Reminders & Supply"
+              >
+                <span>💊</span>
+                <span className="hidden sm:inline">Meds</span>
+                {medications.some((m) => m.totalQuantity <= m.refillThreshold) && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Low supply alert" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
