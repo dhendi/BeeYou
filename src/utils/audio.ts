@@ -385,13 +385,22 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     tags: ['Pine Forest', 'Canopy Breeze', 'Premium'],
   },
   {
+    id: 'fireplace',
+    name: 'Cozy Crackling Fireplace',
+    description: 'Deep warm glowing hearth, natural cedar wood crackles, gentle spark pops, and cozy fireside calm.',
+    emoji: '🔥',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['Cozy Hearth', 'Wood Crackle', 'Sleep Aid', 'Premium'],
+  },
+  {
     id: 'medieval_tavern',
-    name: 'Medieval Tavern & Fireside Lute',
-    description: 'Cozy crackling stone fireplace hearth, gentle acoustic lute arpeggios, and warm tavern calm.',
+    name: 'Medieval Castle & Bard Hall',
+    description: 'Atmospheric medieval stone hall with gentle Celtic harp, wooden flute melodies, ancient bourdon drone, and peaceful fantasy calm.',
     emoji: '🏰',
     isPremium: true,
     category: 'special_interest',
-    tags: ['Fantasy RPG', 'Acoustic Lute', 'Premium'],
+    tags: ['Fantasy RPG', 'Harp & Woodwinds', 'Medieval Drone', 'Premium'],
   },
 ];
 
@@ -1118,104 +1127,254 @@ export function playSoundscape(id: SoundscapeId, volume = 0.08): void {
       }, 4200);
       activeSoundscapeTimers.push(birdTimer);
 
-    } else if (id === 'medieval_tavern') {
-      // 1. Cozy crackling stone fireplace hearth
-      const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    } else if (id === 'fireplace') {
+      // 1. Warm low hearth flame rumble (pink-brown noise with gentle undulating breath)
+      const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
       const fireData = fireBuffer.getChannelData(0);
       let lastFire = 0;
-      for (let i = 0; i < ctx.sampleRate * 2; i++) {
+      for (let i = 0; i < ctx.sampleRate * 3; i++) {
         const white = Math.random() * 2 - 1;
-        fireData[i] = (lastFire + 0.02 * white) / 1.02;
+        fireData[i] = (lastFire + 0.025 * white) / 1.025;
         lastFire = fireData[i];
       }
       const fireSrc = ctx.createBufferSource();
       fireSrc.buffer = fireBuffer;
       fireSrc.loop = true;
+
       const fireFilter = ctx.createBiquadFilter();
       fireFilter.type = 'lowpass';
-      fireFilter.frequency.setValueAtTime(260, now);
+      fireFilter.frequency.setValueAtTime(220, now);
+
+      // Flame flicker LFO
+      const flameLfo = ctx.createOscillator();
+      flameLfo.type = 'sine';
+      flameLfo.frequency.setValueAtTime(0.35, now);
+      const flameLfoGain = ctx.createGain();
+      flameLfoGain.gain.setValueAtTime(60, now);
+      flameLfo.connect(flameLfoGain);
+      flameLfoGain.connect(fireFilter.frequency);
+
       fireSrc.connect(fireFilter);
       fireFilter.connect(masterGain);
       fireSrc.start(now);
-      activeSoundscapeNodes.push(fireSrc, fireFilter);
+      flameLfo.start(now);
+      activeSoundscapeNodes.push(fireSrc, fireFilter, flameLfo, flameLfoGain);
 
-      // Fire crackle pops
+      // 2. Soft glowing ember hiss (air and warmth)
+      const hissBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const hissData = hissBuffer.getChannelData(0);
+      for (let i = 0; i < ctx.sampleRate * 2; i++) {
+        hissData[i] = (Math.random() * 2 - 1) * 0.12;
+      }
+      const hissSrc = ctx.createBufferSource();
+      hissSrc.buffer = hissBuffer;
+      hissSrc.loop = true;
+      const hissFilter = ctx.createBiquadFilter();
+      hissFilter.type = 'bandpass';
+      hissFilter.frequency.setValueAtTime(1400, now);
+      hissFilter.Q.setValueAtTime(0.8, now);
+      const hissGain = ctx.createGain();
+      hissGain.gain.setValueAtTime(volume * 0.25, now);
+      hissSrc.connect(hissFilter);
+      hissFilter.connect(hissGain);
+      hissGain.connect(masterGain);
+      hissSrc.start(now);
+      activeSoundscapeNodes.push(hissSrc, hissFilter, hissGain);
+
+      // 3. Authentic natural wood crackles, ember snaps & resin pops
       const crackleTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'medieval_tavern') return;
+        if (activeSoundscapeId !== 'fireplace') return;
         const mCtx = getAudioContext();
         if (!mCtx || !activeSoundscapeGain) return;
         const mNow = mCtx.currentTime;
-        if (Math.random() > 0.4) {
+
+        // Random chance of crackle snap
+        if (Math.random() > 0.3) {
+          const isDeepPop = Math.random() < 0.25; // 25% deep wood pop, 75% light snap
+          const dur = isDeepPop ? 0.06 : 0.025;
           const pop = mCtx.createBufferSource();
-          const popBuf = mCtx.createBuffer(1, Math.floor(mCtx.sampleRate * 0.03), mCtx.sampleRate);
+          const popBuf = mCtx.createBuffer(1, Math.floor(mCtx.sampleRate * dur), mCtx.sampleRate);
           const pData = popBuf.getChannelData(0);
+          const decay = isDeepPop ? 80 : 180;
           for (let p = 0; p < pData.length; p++) {
-            pData[p] = (Math.random() * 2 - 1) * Math.exp(-p / 150);
+            pData[p] = (Math.random() * 2 - 1) * Math.exp(-p / decay);
           }
           pop.buffer = popBuf;
+
           const popFilter = mCtx.createBiquadFilter();
-          popFilter.type = 'highpass';
-          popFilter.frequency.setValueAtTime(1800, mNow);
+          popFilter.type = isDeepPop ? 'bandpass' : 'highpass';
+          popFilter.frequency.setValueAtTime(isDeepPop ? 450 + Math.random() * 250 : 1600 + Math.random() * 800, mNow);
+          if (isDeepPop) popFilter.Q.setValueAtTime(3.0, mNow);
+
           const popGain = mCtx.createGain();
-          popGain.gain.setValueAtTime(volume * 0.45, mNow);
+          const popVol = volume * (isDeepPop ? 0.6 : 0.4) * (0.6 + Math.random() * 0.8);
+          popGain.gain.setValueAtTime(popVol, mNow);
+          popGain.gain.exponentialRampToValueAtTime(0.0001, mNow + dur);
+
           pop.connect(popFilter);
           popFilter.connect(popGain);
           popGain.connect(masterGain);
           pop.start(mNow);
         }
-      }, 350);
+      }, 220);
       activeSoundscapeTimers.push(crackleTimer);
+      activeSoundscapeNodes.push(masterGain);
 
-      // 2. Cozy Medieval Lute Melodies (Arpeggiated chords in D Dorian)
-      const luteNotes = [
-        146.83, // D3
-        220.00, // A3
-        293.66, // D4
-        349.23, // F4
-        329.63, // E4
-        293.66, // D4
-        261.63, // C4
-        196.00, // G3
+    } else if (id === 'medieval_tavern') {
+      // 1. Ancient Bourdon & Bowed Vielle Open-Fifth Drone (D2, A2, D3)
+      const dronePitches = [73.42, 110.00, 146.83];
+      dronePitches.forEach((dPitch, dIdx) => {
+        const dOsc = ctx.createOscillator();
+        const dGain = ctx.createGain();
+        const dFilter = ctx.createBiquadFilter();
+
+        dOsc.type = dIdx === 0 ? 'sawtooth' : 'triangle';
+        dOsc.frequency.setValueAtTime(dPitch + (dIdx === 1 ? 0.25 : -0.2), now);
+
+        dFilter.type = 'lowpass';
+        dFilter.frequency.setValueAtTime(360, now);
+
+        dGain.gain.setValueAtTime(volume * (dIdx === 0 ? 0.16 : 0.2), now);
+
+        // Organic slow drone undulation
+        const dLfo = ctx.createOscillator();
+        dLfo.type = 'sine';
+        dLfo.frequency.setValueAtTime(0.14 + dIdx * 0.03, now);
+        const dLfoGain = ctx.createGain();
+        dLfoGain.gain.setValueAtTime(volume * 0.04, now);
+        dLfo.connect(dLfoGain);
+        dLfoGain.connect(dGain.gain);
+
+        dOsc.connect(dFilter);
+        dFilter.connect(dGain);
+        dGain.connect(masterGain);
+
+        dOsc.start(now);
+        dLfo.start(now);
+        activeSoundscapeNodes.push(dOsc, dFilter, dGain, dLfo, dLfoGain);
+      });
+
+      // 2. Celtic Harp & Plucked Dulcimer Arpeggios (Modal Chords in D Dorian)
+      const harpChords = [
+        [146.83, 220.00, 293.66, 349.23, 440.00], // D3, A3, D4, F4, A4 (D min)
+        [130.81, 196.00, 261.63, 329.63, 392.00], // C3, G3, C4, E4, G4 (C maj)
+        [98.00, 146.83, 246.94, 293.66, 392.00],  // G2, D3, B3, D4, G4 (G maj)
+        [146.83, 174.61, 220.00, 293.66, 349.23], // D3, F3, A3, D4, F4 (D min)
       ];
-      let noteIndex = 0;
-      const luteTimer = setInterval(() => {
+      let chordIndex = 0;
+      const harpTimer = setInterval(() => {
         if (activeSoundscapeId !== 'medieval_tavern') return;
-        const lCtx = getAudioContext();
-        if (!lCtx || !activeSoundscapeGain) return;
-        const lNow = lCtx.currentTime;
+        const hCtx = getAudioContext();
+        if (!hCtx || !activeSoundscapeGain) return;
+        const hNow = hCtx.currentTime;
 
-        const pitch = luteNotes[noteIndex % luteNotes.length];
-        noteIndex++;
+        const chord = harpChords[chordIndex % harpChords.length];
+        chordIndex++;
 
-        const osc = lCtx.createOscillator();
-        const overtone = lCtx.createOscillator();
-        const g = lCtx.createGain();
-        const filter = lCtx.createBiquadFilter();
+        chord.forEach((notePitch, pIdx) => {
+          const pluckTime = hNow + pIdx * 0.22;
+          const osc1 = hCtx.createOscillator();
+          const osc2 = hCtx.createOscillator();
+          const pFilter = hCtx.createBiquadFilter();
+          const pGain = hCtx.createGain();
 
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(pitch, lNow);
+          osc1.type = 'triangle';
+          osc1.frequency.setValueAtTime(notePitch, pluckTime);
 
-        overtone.type = 'sine';
-        overtone.frequency.setValueAtTime(pitch * 2, lNow);
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(notePitch * 2.01, pluckTime); // string harmonic
 
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1600, lNow);
-        filter.frequency.exponentialRampToValueAtTime(350, lNow + 0.8);
+          pFilter.type = 'lowpass';
+          pFilter.frequency.setValueAtTime(1900, pluckTime);
+          pFilter.frequency.exponentialRampToValueAtTime(340, pluckTime + 1.2);
 
-        g.gain.setValueAtTime(volume * 0.38, lNow);
-        g.gain.exponentialRampToValueAtTime(0.0001, lNow + 1.2);
+          pGain.gain.setValueAtTime(volume * 0.26, pluckTime);
+          pGain.gain.exponentialRampToValueAtTime(0.0001, pluckTime + 1.7);
 
-        osc.connect(filter);
-        overtone.connect(filter);
-        filter.connect(g);
-        g.connect(masterGain);
+          osc1.connect(pFilter);
+          osc2.connect(pFilter);
+          pFilter.connect(pGain);
+          pGain.connect(masterGain);
 
-        osc.start(lNow);
-        overtone.start(lNow);
-        osc.stop(lNow + 1.25);
-        overtone.stop(lNow + 1.25);
-      }, 480);
-      activeSoundscapeTimers.push(luteTimer);
+          osc1.start(pluckTime);
+          osc2.start(pluckTime);
+          osc1.stop(pluckTime + 1.75);
+          osc2.stop(pluckTime + 1.75);
+        });
+      }, 2600);
+      activeSoundscapeTimers.push(harpTimer);
+
+      // 3. Wandering Renaissance Wooden Flute / Whistle Melodies
+      const fluteMelodies = [
+        [440.00, 523.25, 493.88, 440.00, 392.00, 440.00], // A4, C5, B4, A4, G4, A4
+        [293.66, 349.23, 392.00, 440.00, 349.23, 293.66], // D4, F4, G4, A4, F4, D4
+        [329.63, 349.23, 329.63, 293.66, 261.63, 293.66], // E4, F4, E4, D4, C4, D4
+        [440.00, 392.00, 349.23, 392.00, 440.00, 523.25, 440.00], // A4, G4, F4, G4, A4, C5, A4
+      ];
+      let flutePhraseIndex = 0;
+      const fluteTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'medieval_tavern') return;
+        const flCtx = getAudioContext();
+        if (!flCtx || !activeSoundscapeGain) return;
+        const flNow = flCtx.currentTime;
+
+        const phrase = fluteMelodies[flutePhraseIndex % fluteMelodies.length];
+        flutePhraseIndex++;
+
+        phrase.forEach((notePitch, nIdx) => {
+          const noteTime = flNow + nIdx * 0.44;
+          const noteDur = 0.40;
+
+          // Warm flute core
+          const fOsc = flCtx.createOscillator();
+          fOsc.type = 'sine';
+          fOsc.frequency.setValueAtTime(notePitch, noteTime);
+
+          // Gentle vibrato (after breath onset)
+          const vibOsc = flCtx.createOscillator();
+          vibOsc.frequency.setValueAtTime(4.8, noteTime);
+          const vibGain = flCtx.createGain();
+          vibGain.gain.setValueAtTime(0, noteTime);
+          vibGain.gain.setValueAtTime(0, noteTime + 0.12);
+          vibGain.gain.linearRampToValueAtTime(3.2, noteTime + 0.35);
+          vibOsc.connect(vibGain);
+          vibGain.connect(fOsc.frequency);
+
+          // Woodwind breath noise
+          const bBuffer = flCtx.createBuffer(1, Math.floor(flCtx.sampleRate * noteDur), flCtx.sampleRate);
+          const bData = bBuffer.getChannelData(0);
+          for (let b = 0; b < bData.length; b++) {
+            bData[b] = (Math.random() * 2 - 1) * 0.07;
+          }
+          const bSrc = flCtx.createBufferSource();
+          bSrc.buffer = bBuffer;
+          const bFilter = flCtx.createBiquadFilter();
+          bFilter.type = 'bandpass';
+          bFilter.frequency.setValueAtTime(notePitch * 2.2, noteTime);
+          bFilter.Q.setValueAtTime(2.0, noteTime);
+          bSrc.connect(bFilter);
+
+          // Soft expressive note envelope
+          const fGain = flCtx.createGain();
+          fGain.gain.setValueAtTime(0.0001, noteTime);
+          fGain.gain.linearRampToValueAtTime(volume * 0.30, noteTime + 0.06);
+          fGain.gain.setValueAtTime(volume * 0.26, noteTime + noteDur - 0.08);
+          fGain.gain.exponentialRampToValueAtTime(0.0001, noteTime + noteDur);
+
+          fOsc.connect(fGain);
+          bFilter.connect(fGain);
+          fGain.connect(masterGain);
+
+          fOsc.start(noteTime);
+          vibOsc.start(noteTime);
+          bSrc.start(noteTime);
+
+          fOsc.stop(noteTime + noteDur + 0.05);
+          vibOsc.stop(noteTime + noteDur + 0.05);
+          bSrc.stop(noteTime + noteDur + 0.05);
+        });
+      }, 5200);
+      activeSoundscapeTimers.push(fluteTimer);
       activeSoundscapeNodes.push(masterGain);
     }
   } catch (e) {

@@ -15,6 +15,7 @@ const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string; emoji: string }[] =
   { id: 'brown_noise', label: 'Brown Noise', emoji: '🌫️' },
   { id: 'rain', label: 'Rain', emoji: '🌧️' },
   { id: 'ocean', label: 'Ocean', emoji: '🌊' },
+  { id: 'fireplace', label: 'Cozy Fireplace', emoji: '🔥' },
   { id: 'white_noise', label: 'White Noise', emoji: '📻' },
   { id: 'forest', label: 'Forest', emoji: '🌲' },
 ];

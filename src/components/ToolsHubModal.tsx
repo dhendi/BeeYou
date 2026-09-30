@@ -103,7 +103,7 @@ export const ToolsHubModal: React.FC = () => {
       id: 'coping',
       category: 'sensory',
       title: 'Calm Room & Breathing',
-      desc: 'Box breathing, 16 soundscapes & grounding',
+      desc: 'Box breathing, 17 soundscapes & grounding',
       emoji: '🛋️',
       badge: 'Breathe',
       bg: 'from-teal-50 to-emerald-100/70 border-teal-300 text-teal-950',

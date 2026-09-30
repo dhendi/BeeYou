@@ -443,12 +443,12 @@ export const CopingToolkitModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-amber-600 shrink-0" />
                     <span className="text-amber-900 font-medium">
-                      2 basic sounds included free. 14 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
+                      2 basic sounds included free. 15 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => triggerUpgrade('Unlock All 16 Sensory Room Ambient Soundscapes')}
+                    onClick={() => triggerUpgrade('Unlock All 17 Sensory Room Ambient Soundscapes')}
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
                   >
                     30-Day Free Trial

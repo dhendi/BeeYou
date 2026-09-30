@@ -729,6 +729,7 @@ export type SoundscapeId =
   | 'white_noise'
   | 'beach'
   | 'forest'
+  | 'fireplace'
   | 'medieval_tavern';
 
 export interface SoundscapeItem {

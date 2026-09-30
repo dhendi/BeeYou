@@ -986,7 +986,7 @@ export const ParentDashboard: React.FC = () => {
 
                     <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                       {isPremium
-                        ? 'Your family has full, unrestricted access to all 16 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
+                        ? 'Your family has full, unrestricted access to all 17 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
                         : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to Lumina Premium for ${subscription.billingCycle === 'yearly' ? '$129.99/year (Free 2 months • $10.83/mo)' : '$12.99/month'} ($0 today with a 30-day free trial) to unlock the full clinical suite.`
                       }
                     </p>
@@ -1163,7 +1163,7 @@ export const ParentDashboard: React.FC = () => {
                         <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
                           <span className="flex items-center gap-1 text-emerald-700">
                             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                            All 16 procedural soundscapes (Rain, Ocean, Brown Noise, Stream, Crickets, Space Drone, Wind Chimes, Steam Train, Train Tracks, Car Ride, City Rain, Night Starlight, White Noise, Beach Waves, Pine Forest, Medieval Fireside Lute)
+                            All 17 procedural soundscapes (Rain, Ocean, Brown Noise, Stream, Crickets, Space Drone, Wind Chimes, Steam Train, Train Tracks, Car Ride, City Rain, Night Starlight, White Noise, Beach Waves, Pine Forest, Cozy Fireplace, Medieval Castle & Bard Hall)
                           </span>
                         </td>
                       </tr>
