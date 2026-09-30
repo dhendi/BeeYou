@@ -449,7 +449,7 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
 async function startServer() {
   if (!isProd) {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, allowedHosts: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -465,4 +465,9 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
+
