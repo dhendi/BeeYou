@@ -41,6 +41,8 @@ import {
   DecisionWheelOption,
   CommunicationPassport,
   SpoonBudgetEntry,
+  DashboardWidgetConfig,
+  DashboardWidgetId,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -355,6 +357,15 @@ interface AppContextType {
   // Tools Hub (Consolidated Tools Modal)
   showToolsHubModal: boolean;
   setShowToolsHubModal: (val: boolean) => void;
+
+  // Editable & Customizable Dashboard
+  dashboardWidgets: DashboardWidgetConfig[];
+  setDashboardWidgets: (widgets: DashboardWidgetConfig[]) => void;
+  toggleDashboardWidget: (id: DashboardWidgetId) => void;
+  reorderDashboardWidgets: (fromIndex: number, toIndex: number) => void;
+  resetDashboardWidgets: () => void;
+  showDashboardCustomizer: boolean;
+  setShowDashboardCustomizer: (val: boolean) => void;
 
   // Utilities
   resetToDefaults: () => void;
@@ -2065,6 +2076,168 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Consolidated Tools Hub
   const [showToolsHubModal, setShowToolsHubModal] = useState<boolean>(false);
 
+  // ── Customizable Dashboard Widgets ──
+  const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
+    {
+      id: 'mascot_companion',
+      title: 'Themed Companion & Motivation',
+      emoji: '🦁',
+      description: 'Daily greeting, mascot companion, and star motivation',
+      category: 'core',
+      enabled: true,
+    },
+    {
+      id: 'routine_schedule',
+      title: 'Visual Schedule & Routine',
+      emoji: '📅',
+      description: 'Step-by-step routine progress, timers, and sticker unlocks',
+      category: 'core',
+      enabled: true,
+    },
+    {
+      id: 'five_point_scale',
+      title: 'Incredible 5-Point Scale',
+      emoji: '🌡️',
+      description: 'Visual regulation thermometer with coping actions',
+      category: 'sensory',
+      enabled: true,
+    },
+    {
+      id: 'spoon_budget',
+      title: 'Spoon Theory Energy Budget',
+      emoji: '🥄',
+      description: 'Morning energy check-in and stamina cost tracker',
+      category: 'wellness',
+      enabled: true,
+    },
+    {
+      id: 'quick_aac',
+      title: 'Quick Communication Phrases',
+      emoji: '💬',
+      description: 'Instant speech tiles for fast, motor-friendly expression',
+      category: 'core',
+      enabled: true,
+    },
+    {
+      id: 'pie_timer',
+      title: 'Visual Pie Clock',
+      emoji: '⏰',
+      description: 'Time Timer visual countdown disk with color warnings',
+      category: 'sensory',
+      enabled: true,
+    },
+    {
+      id: 'decision_wheel',
+      title: 'Decision Wheel Spinner',
+      emoji: '🎡',
+      description: 'Break choice paralysis with an animated spin wheel',
+      category: 'sensory',
+      enabled: true,
+    },
+    {
+      id: 'fidget_toys',
+      title: 'Digital Fidget Corner',
+      emoji: '🫧',
+      description: 'Bubble pop with haptics, sand ripples, and marble roll',
+      category: 'sensory',
+      enabled: true,
+    },
+    {
+      id: 'medication_tracker',
+      title: 'Medication Reminders',
+      emoji: '💊',
+      description: 'Upcoming scheduled doses, supply tracking, and logged doses',
+      category: 'wellness',
+      enabled: true,
+    },
+    {
+      id: 'mood_journal',
+      title: 'Mood Reflection Journal',
+      emoji: '📖',
+      description: 'Deep feelings, sensory overload triggers, and body logs',
+      category: 'wellness',
+      enabled: false,
+    },
+    {
+      id: 'cycle_tracker',
+      title: 'Cycle & Sensory Rhythm',
+      emoji: '🌸',
+      description: 'Hormonal wellness, sensory sensitivity, and period predictor',
+      category: 'wellness',
+      enabled: false,
+    },
+    {
+      id: 'communication_passport',
+      title: 'Communication Support Passport',
+      emoji: '🪪',
+      description: '1-page printable summary for teachers, doctors & dentists',
+      category: 'support',
+      enabled: true,
+    },
+    {
+      id: 'adventure_spotlight',
+      title: "Today's Adventure Spotlight",
+      emoji: '🚀',
+      description: 'Social story and life skills preparation walkthrough',
+      category: 'core',
+      enabled: true,
+    },
+    {
+      id: 'evening_reflection',
+      title: 'Evening Mood Recollection',
+      emoji: '🌙',
+      description: 'End-of-day recollection chart and mood tracker',
+      category: 'wellness',
+      enabled: true,
+    },
+  ];
+
+  const [dashboardWidgets, setDashboardWidgetsState] = useState<DashboardWidgetConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_dashboard_widgets');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((p: any) => p.id));
+          const missing = DEFAULT_DASHBOARD_WIDGETS.filter((d) => !existingIds.has(d.id));
+          return [...parsed, ...missing];
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_DASHBOARD_WIDGETS;
+  });
+
+  const [showDashboardCustomizer, setShowDashboardCustomizer] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_dashboard_widgets', JSON.stringify(dashboardWidgets));
+    } catch (e) {}
+  }, [dashboardWidgets]);
+
+  const setDashboardWidgets = (widgets: DashboardWidgetConfig[]) => {
+    setDashboardWidgetsState(widgets);
+  };
+
+  const toggleDashboardWidget = (id: DashboardWidgetId) => {
+    setDashboardWidgetsState((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, enabled: !w.enabled } : w))
+    );
+  };
+
+  const reorderDashboardWidgets = (fromIndex: number, toIndex: number) => {
+    setDashboardWidgetsState((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated;
+    });
+  };
+
+  const resetDashboardWidgets = () => {
+    setDashboardWidgetsState(DEFAULT_DASHBOARD_WIDGETS);
+  };
+
   // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording
   // These live inside routine steps (microSteps and audioDataUrl fields) — no extra top-level state.
 
@@ -2326,6 +2499,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         showToolsHubModal,
         setShowToolsHubModal,
+
+        dashboardWidgets,
+        setDashboardWidgets,
+        toggleDashboardWidget,
+        reorderDashboardWidgets,
+        resetDashboardWidgets,
+        showDashboardCustomizer,
+        setShowDashboardCustomizer,
 
         resetToDefaults,
       }}

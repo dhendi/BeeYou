@@ -48,6 +48,7 @@ import { PieTimerModal } from './components/PieTimerModal';
 import { DigitalFidgetModal } from './components/DigitalFidgetModal';
 import { AacKeyboardModal } from './components/AacKeyboardModal';
 import { ToolsHubModal } from './components/ToolsHubModal';
+import { DashboardCustomizerModal } from './components/DashboardCustomizerModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -236,6 +237,9 @@ const AppContent: React.FC = () => {
 
       {/* Consolidated Tools Hub Modal */}
       <ToolsHubModal />
+
+      {/* Editable Dashboard Customizer Modal */}
+      <DashboardCustomizerModal />
     </div>
   );
 };

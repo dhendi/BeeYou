@@ -19,10 +19,13 @@ import {
   Moon,
   Pill,
   BookOpen,
-  HeartPulse
+  HeartPulse,
+  SlidersHorizontal,
+  LayoutGrid
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { MOOD_META } from '../data/defaultData';
+import { DashboardWidgetId } from '../types';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -64,6 +67,8 @@ export const ChildHomeView: React.FC = () => {
     setShowDecisionWheelModal,
     setShowFidgetModal,
     getTodaySpoonEntry,
+    dashboardWidgets,
+    setShowDashboardCustomizer,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -71,10 +76,540 @@ export const ChildHomeView: React.FC = () => {
   const latestMoodEntry = moodJournalEntries[0];
   const todaySpoonEntry = getTodaySpoonEntry();
 
-
   const currentRoutine = routines[0];
   const nextStep = currentRoutine?.steps.find((s) => !s.completed);
-  const todaysAdventure = adventures[0]; // Dentist Adventure
+  const todaysAdventure = adventures[0];
+
+  // ── Modular Widget Renderers ──
+
+  const renderMascotCompanion = () => (
+    <div 
+      key="mascot_companion"
+      onClick={() => {
+        setShowThemeModal(true);
+        playChime('star');
+      }}
+      className={`rounded-3xl p-4 sm:p-5 border-2 shadow-xs transition-all hover:shadow-md cursor-pointer active:scale-98 flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs shrink-0">
+          {activeTheme.mascotEmoji}
+        </span>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
+              {activeTheme.name}
+            </span>
+            <span className="text-xs font-bold text-slate-500">
+              {activeTheme.mascotName}
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm font-black text-slate-800 mt-0.5">
+            "{activeTheme.greetingMessage}"
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowThemeModal(true);
+          playChime('tap');
+        }}
+        className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
+      >
+        <span>🎨 Themes</span>
+      </button>
+    </div>
+  );
+
+  const renderRoutineSchedule = () => {
+    if (!currentRoutine) return null;
+    return (
+      <div key="routine_schedule" className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">{currentRoutine.emoji}</span>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                Today's Schedule
+              </span>
+              <h3 className="font-black text-slate-800 text-base">
+                {currentRoutine.title}
+              </h3>
+            </div>
+          </div>
+          <button
+            onClick={() => setChildView('my-day')}
+            className="text-xs font-black text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer"
+          >
+            <span>Open Schedule</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* First / Then quick strip */}
+        {currentRoutine.firstThen && (
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-2.5">
+              <span className="text-xl shrink-0">{currentRoutine.firstThen.firstEmoji}</span>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase text-amber-800 block">First</span>
+                <span className="text-xs font-bold text-slate-800 truncate block">
+                  {currentRoutine.firstThen.first}
+                </span>
+              </div>
+            </div>
+            <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center gap-2.5">
+              <span className="text-xl shrink-0">{currentRoutine.firstThen.thenEmoji}</span>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase text-indigo-800 block">Then</span>
+                <span className="text-xs font-bold text-slate-800 truncate block">
+                  {currentRoutine.firstThen.then}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Up Next Step */}
+        {nextStep && (
+          <div className="p-3 bg-sky-50 rounded-2xl border border-sky-200 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-lg">{nextStep.emoji}</span>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase text-sky-700 block">Up Next</span>
+                <span className="text-xs font-bold text-sky-950 truncate block">{nextStep.title}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setChildView('my-day')}
+              className="px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold text-xs shrink-0 cursor-pointer shadow-xs active:scale-95"
+            >
+              Start Step
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderFivePointScale = () => (
+    <div
+      key="five_point_scale"
+      onClick={() => {
+        setShowFivePointModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-green-100/70 border-2 border-emerald-300 shadow-xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">🌡️</span>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+              Regulation Tool
+            </span>
+          </div>
+          <h3 className="font-black text-sm sm:text-base text-emerald-950">
+            Incredible 5-Point Scale
+          </h3>
+          <p className="text-xs text-emerald-800 font-medium">
+            Where are you right now? 1 (Relaxed) to 5 (Meltdown). Tap to check in.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-emerald-700 shrink-0" />
+    </div>
+  );
+
+  const renderSpoonBudget = () => (
+    <div
+      key="spoon_budget"
+      onClick={() => {
+        setShowSpoonModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-100/70 border-2 border-amber-300 shadow-xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">🥄</span>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full">
+              Energy & Fatigue Pacing
+            </span>
+            {todaySpoonEntry && (
+              <span className="text-[10px] font-black text-amber-800">
+                {todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} Spoons Left
+              </span>
+            )}
+          </div>
+          <h3 className="font-black text-sm sm:text-base text-amber-950">
+            Spoon Theory Energy Budget
+          </h3>
+          <p className="text-xs text-amber-800 font-medium">
+            Track daily stamina, plan activities, and prevent burnout.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-amber-700 shrink-0" />
+    </div>
+  );
+
+  const renderPieTimer = () => (
+    <div
+      key="pie_timer"
+      onClick={() => {
+        setShowPieTimerModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-100/70 border-2 border-sky-300 shadow-xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">⏰</span>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-sky-900 bg-sky-100 px-2 py-0.5 rounded-full">
+              Time Awareness
+            </span>
+          </div>
+          <h3 className="font-black text-sm sm:text-base text-sky-950">
+            Visual Pie Clock (Time Timer)
+          </h3>
+          <p className="text-xs text-sky-800 font-medium">
+            Analog visual disk that shows time physically disappearing.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-sky-700 shrink-0" />
+    </div>
+  );
+
+  const renderDecisionWheel = () => (
+    <div
+      key="decision_wheel"
+      onClick={() => {
+        setShowDecisionWheelModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-indigo-50 via-purple-50 to-violet-100/70 border-2 border-indigo-300 shadow-xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">🎡</span>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-900 bg-indigo-100 px-2 py-0.5 rounded-full">
+              Choice Helper
+            </span>
+          </div>
+          <h3 className="font-black text-sm sm:text-base text-indigo-950">
+            Decision Wheel Spinner
+          </h3>
+          <p className="text-xs text-indigo-800 font-medium">
+            Stuck in choice paralysis? Spin the wheel to decide snacks, activities or breaks.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-indigo-700 shrink-0" />
+    </div>
+  );
+
+  const renderFidgetToys = () => (
+    <div
+      key="fidget_toys"
+      onClick={() => {
+        setShowFidgetModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-purple-50 via-pink-50 to-fuchsia-100/70 border-2 border-purple-300 shadow-xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">🫧</span>
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 bg-purple-100 px-2 py-0.5 rounded-full">
+              Discreet Stimming
+            </span>
+          </div>
+          <h3 className="font-black text-sm sm:text-base text-purple-950">
+            Digital Fidget Corner
+          </h3>
+          <p className="text-xs text-purple-800 font-medium">
+            Silent sensory regulation: silicone bubble pops, calming water sand ripples & marble maze.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-purple-700 shrink-0" />
+    </div>
+  );
+
+  const renderMedicationTracker = () => {
+    if (enabledFeatures?.medicationReminders === false || medications.length === 0) return null;
+    const pending = medications.filter(
+      (m) => m.active && m.frequency !== 'as_needed' && m.times.some((t) => !m.takenTimesToday.includes(t))
+    );
+
+    return (
+      <div
+        key="medication_tracker"
+        onClick={() => {
+          setShowMedicationModal(true);
+          playChime('tap');
+        }}
+        className="bg-white rounded-3xl border-2 border-teal-200 p-4 sm:p-5 shadow-xs space-y-3 cursor-pointer hover:border-teal-300 transition"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl p-1.5 bg-teal-50 rounded-xl">💊</span>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-teal-700 block">
+                Health & Medications
+              </span>
+              <h3 className="font-black text-slate-800 text-base">
+                {pending.length > 0 ? `${pending.length} Doses Due Today` : 'All Meds Taken! ✨'}
+              </h3>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMedicationModal(true);
+              playChime('tap');
+            }}
+            className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1"
+          >
+            <span>Manage Meds</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {pending.length > 0 && (
+          <div className="space-y-1.5">
+            {pending.slice(0, 2).map((med) => (
+              <div key={med.id} className="p-2.5 rounded-2xl bg-teal-50/70 border border-teal-200 flex items-center justify-between gap-2">
+                <span className="font-bold text-xs text-teal-950">{med.name} ({med.dosage})</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextDue = med.times.find((t) => !med.takenTimesToday.includes(t)) || 'Now';
+                    takeMedicationDose(med.id, nextDue);
+                    playChime('complete');
+                  }}
+                  className="px-2.5 py-1 rounded-xl bg-teal-600 text-white font-bold text-[11px] shadow-xs cursor-pointer active:scale-95"
+                >
+                  Take Dose ✓
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderMoodJournal = () => {
+    if (!isTeenOrAdult || enabledFeatures?.moodJournal === false) return null;
+    return (
+      <div
+        key="mood_journal"
+        onClick={() => {
+          setShowMoodJournalModal(true);
+          playChime('tap');
+        }}
+        className="p-4 rounded-3xl bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 border-2 border-purple-200 shadow-xs hover:border-purple-300 transition cursor-pointer flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3.5">
+          <span className="text-3xl p-2 bg-white rounded-2xl shadow-2xs shrink-0">📖</span>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+              Self-Reflection & Triggers
+            </span>
+            <h3 className="font-black text-sm sm:text-base text-slate-800 mt-0.5">
+              Deep Mood Journal
+            </h3>
+            <p className="text-xs text-slate-600 font-medium">
+              {latestMoodEntry ? `Latest: ${latestMoodEntry.moodIntensity}/10 - "${latestMoodEntry.journalText || 'Logged'}"` : 'Reflect on sensory overload, energy and triggers.'}
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="w-5 h-5 text-purple-700 shrink-0" />
+      </div>
+    );
+  };
+
+  const renderCycleTracker = () => {
+    if (!isTeenOrAdult || enabledFeatures?.cycleTracker === false || !cyclePhaseInfo) return null;
+    return (
+      <div
+        key="cycle_tracker"
+        onClick={() => {
+          setShowCycleTrackerModal(true);
+          playChime('tap');
+        }}
+        className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-pink-50 to-red-50 border-2 border-rose-200 shadow-xs hover:border-rose-300 transition cursor-pointer flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3.5">
+          <span className="text-3xl p-2 bg-white rounded-2xl shadow-2xs shrink-0">
+            {cycleSettings.discreetMode ? '🌿' : '🌸'}
+          </span>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
+              {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Cycle Day ${cyclePhaseInfo.currentCycleDay}`}
+            </span>
+            <h3 className="font-black text-sm sm:text-base text-slate-800 mt-0.5">
+              Sensory Tolerance & Rhythm
+            </h3>
+            <p className="text-xs text-slate-600 font-medium">
+              Track sensory thresholds, fatigue and hormonal changes.
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="w-5 h-5 text-rose-700 shrink-0" />
+      </div>
+    );
+  };
+
+  const renderCommunicationPassport = () => (
+    <div
+      key="communication_passport"
+      onClick={() => {
+        setShowPassportModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-300 shadow-xs hover:border-slate-400 transition cursor-pointer flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2.5 bg-white rounded-2xl shadow-2xs shrink-0">🪪</span>
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full">
+            Printable Support Sheet
+          </span>
+          <h3 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
+            "How to Support Me" Passport
+          </h3>
+          <p className="text-xs text-slate-600 font-medium">
+            1-page guide covering communication preferences, sensory triggers & comfort items.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-slate-700 shrink-0" />
+    </div>
+  );
+
+  const renderAdventureSpotlight = () => {
+    if (!todaysAdventure) return null;
+    return (
+      <div
+        key="adventure_spotlight"
+        onClick={() => setChildView('adventures')}
+        className="bg-emerald-50/80 hover:bg-emerald-100/60 border-2 border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs flex items-center justify-between cursor-pointer transition-all active:scale-98"
+      >
+        <div className="flex items-center gap-3.5">
+          <span className="text-4xl">{todaysAdventure.emoji}</span>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-200/80 px-2 py-0.5 rounded-md">
+              Preparation Adventure
+            </span>
+            <h3 className="font-black text-emerald-950 text-base sm:text-lg mt-0.5">
+              {todaysAdventure.title}
+            </h3>
+            <p className="text-xs text-emerald-800 font-medium">
+              Step-by-step walkthrough, sensory guide, and practice words.
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="w-5 h-5 text-emerald-700 shrink-0" />
+      </div>
+    );
+  };
+
+  const renderEveningReflection = () => (
+    <div
+      key="evening_reflection"
+      onClick={() => {
+        setShowRecollectionModal(true);
+        playChime('tap');
+      }}
+      className="p-4 rounded-3xl bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 shadow-xs hover:border-indigo-300 transition cursor-pointer flex items-center justify-between gap-3"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="text-3xl p-2 bg-white rounded-2xl shadow-2xs shrink-0">🌙</span>
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+            Evening Check-In
+          </span>
+          <h3 className="font-black text-sm sm:text-base text-slate-800 mt-0.5">
+            Daily Mood Recollection
+          </h3>
+          <p className="text-xs text-slate-600 font-medium">
+            Log today's emotional weather and celebrate daily wins.
+          </p>
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 text-indigo-700 shrink-0" />
+    </div>
+  );
+
+  const renderQuickAAC = () => (
+    <div key="quick_aac" className="space-y-2">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs font-black text-slate-600 uppercase tracking-wider">
+          Quick Communication:
+        </span>
+        <button
+          onClick={() => setChildView('aac')}
+          className="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
+        >
+          <span>Open Full AAC Board</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {[
+          { text: 'I want pizza.', emoji: '🍕', color: 'bg-orange-50 border-orange-300 text-orange-950' },
+          { text: 'I need help.', emoji: '🆘', color: 'bg-rose-50 border-rose-300 text-rose-950' },
+          { text: 'I need a break.', emoji: '🛋️', color: 'bg-teal-50 border-teal-300 text-teal-950' },
+          { text: "What's next?", emoji: '❓', color: 'bg-sky-50 border-sky-300 text-sky-950' },
+        ].map((item, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              speak(item.text);
+              if (item.text.includes('break')) {
+                setShowCopingToolkit(true);
+              }
+            }}
+            className={`p-3.5 rounded-2xl border-2 font-black text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-xs transition-all active:scale-95 cursor-pointer ${item.color}`}
+          >
+            <span className="text-2xl">{item.emoji}</span>
+            <span className="leading-tight">{item.text}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const widgetRenderMap: Record<DashboardWidgetId, () => React.ReactNode> = {
+    mascot_companion: renderMascotCompanion,
+    routine_schedule: renderRoutineSchedule,
+    five_point_scale: renderFivePointScale,
+    spoon_budget: renderSpoonBudget,
+    pie_timer: renderPieTimer,
+    decision_wheel: renderDecisionWheel,
+    fidget_toys: renderFidgetToys,
+    medication_tracker: renderMedicationTracker,
+    mood_journal: renderMoodJournal,
+    cycle_tracker: renderCycleTracker,
+    communication_passport: renderCommunicationPassport,
+    adventure_spotlight: renderAdventureSpotlight,
+    evening_reflection: renderEveningReflection,
+    quick_aac: renderQuickAAC,
+  };
 
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
@@ -102,7 +637,7 @@ export const ChildHomeView: React.FC = () => {
         </div>
       )}
 
-      {/* 2. WELCOME HERO WITH CHILD AVATAR & CURRENT MOOD */}
+      {/* 2. WELCOME HERO WITH CHILD AVATAR & EDITABLE DASHBOARD BUTTON */}
       <div className="bg-gradient-to-r from-amber-50 via-sky-50 to-indigo-50 border-2 border-amber-200/80 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 overflow-hidden">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="relative group shrink-0">
@@ -141,12 +676,13 @@ export const ChildHomeView: React.FC = () => {
                 </button>
               )}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 truncate">
-              {userAgeGroup === 'adult' ? `Welcome back, ${childProfile.name} 👋` : `Hi, ${childProfile.name}! 👋`}
+
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium truncate">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium">
               {userAgeGroup === 'adult'
-                ? 'Your personal executive assistant & communication hub'
+                ? 'Your personalized neurodivergent executive & wellness space'
                 : userAgeGroup === 'teen'
                 ? 'Your daily focus, communication & independence space'
                 : 'Your safe, friendly everyday companion'}
@@ -154,40 +690,40 @@ export const ChildHomeView: React.FC = () => {
           </div>
         </div>
 
+        {/* Action bar including Customize Dashboard */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto lg:justify-end">
-          {/* Emergency Sensory Red Button (Feature 1) */}
+          {/* Customize Dashboard Button */}
+          <button
+            onClick={() => {
+              setShowDashboardCustomizer(true);
+              playChime('tap');
+            }}
+            className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-300 shrink-0"
+            title="Customize your dashboard layout"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-amber-700" />
+            <span>Customize Dashboard ✏️</span>
+          </button>
+
+          {/* Emergency Sensory Red Button */}
           <button
             onClick={() => {
               activateEmergencyMode();
               playChime('tap');
             }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-red-700 hover:bg-red-800 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0 border-2 border-red-500 ring-2 ring-red-400/40"
-            title="Emergency Sensory Red Button: Instant dark sensory mode + large emergency AAC cards"
+            className="px-3 py-2 rounded-2xl bg-red-700 hover:bg-red-800 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0 border-2 border-red-500 ring-2 ring-red-400/40"
+            title="Instant dark sensory mode + emergency AAC cards"
           >
             <ShieldAlert className="w-4 h-4 text-white" />
             <span>Calm Room 🚨</span>
           </button>
-
-          {enabledFeatures?.emergencyAlertSOS !== false && (
-            <button
-              onClick={() => {
-                setShowCaregiverAlertModal(true);
-                playChime('tap');
-              }}
-              className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0"
-              title="Easy Alert to Caregiver - Send your feeling or ask for help"
-            >
-              <ShieldAlert className="w-4 h-4 text-white" />
-              <span>Alert Caregiver 🚨</span>
-            </button>
-          )}
 
           <button
             onClick={() => {
               setShowCaregiverModal(true);
               playChime('tap');
             }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-rose-200 shrink-0"
+            className="px-3 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-rose-200 shrink-0"
             title="Connect with Caregiver"
           >
             <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
@@ -196,587 +732,37 @@ export const ChildHomeView: React.FC = () => {
 
           <button
             onClick={() => {
-              setShowAboutMeModal(true);
-              playChime('tap');
-            }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-200 shrink-0"
-            title="View and show About Me ID Card"
-          >
-            <span>🪪</span>
-            <span>About Me ID</span>
-          </button>
-
-          <button
-            onClick={() => {
               setShowMorningBrief(true);
               playChime('tap');
             }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-300 shrink-0"
+            className="px-3 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-200 shrink-0"
             title="View today's Morning Brief"
           >
             <Sun className="w-4 h-4 text-amber-600" />
             <span>Morning Brief</span>
           </button>
-
-          <button
-            onClick={() => {
-              setShowRecollectionModal(true);
-              playChime('tap');
-            }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-200 shrink-0"
-            title="Log today's mood and recollection chart"
-          >
-            <Moon className="w-4 h-4 text-indigo-600" />
-            <span>Evening Reflection 🌙</span>
-          </button>
-
-          <button
-            onClick={() => {
-              speak(`Hello! I am ${childProfile.name}.`);
-              playChime('star');
-            }}
-            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-bold text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
-          >
-            <Volume2 className="w-4 h-4 text-amber-500" />
-            <span>Say Hello!</span>
-          </button>
         </div>
       </div>
 
-      {/* 2.5 THEMED COMPANION & MOTIVATION BANNER */}
-      {enabledFeatures?.mascotCompanion !== false ? (
-        <div 
-          onClick={() => {
-            setShowThemeModal(true);
-            playChime('star');
-          }}
-          className={`rounded-3xl p-4 sm:p-5 border-2 shadow-xs transition-all hover:shadow-md cursor-pointer active:scale-98 flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
-        >
-          <div className="flex items-center gap-3.5">
-            <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs shrink-0">
-              {activeTheme.mascotEmoji}
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
-                  {activeTheme.name}
-                </span>
-                <span className="text-xs font-bold text-slate-500">
-                  {activeTheme.mascotName}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm font-black text-slate-800 mt-0.5">
-                "{activeTheme.greetingMessage}"
-              </p>
-            </div>
-          </div>
+      {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS */}
+      {dashboardWidgets.map((widget) => {
+        if (!widget.enabled) return null;
+        const renderer = widgetRenderMap[widget.id];
+        return renderer ? renderer() : null;
+      })}
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowThemeModal(true);
-              playChime('tap');
-            }}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
-          >
-            <span>🎨 Themes</span>
-          </button>
-        </div>
-      ) : (
-        <div 
+      {/* 4. FOOTER: EDIT DASHBOARD SHORTCUT */}
+      <div className="pt-2 pb-4 text-center">
+        <button
           onClick={() => {
-            setShowThemeModal(true);
+            setShowDashboardCustomizer(true);
             playChime('tap');
           }}
-          className={`rounded-2xl p-3.5 sm:p-4 border shadow-xs transition-all hover:shadow-sm cursor-pointer flex items-center justify-between gap-3 ${activeTheme.palette.primaryLight} ${activeTheme.palette.primaryBorder}`}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-950 border-2 border-slate-200 hover:border-amber-300 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer active:scale-95"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-xl p-2 rounded-xl bg-white/90 shadow-2xs">
-              {activeTheme.mascotEmoji}
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeTheme.palette.badgeBg} ${activeTheme.palette.textAccent}`}>
-                  {activeTheme.name}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">Personal Theme Active</span>
-              </div>
-              <p className="text-xs font-semibold text-slate-700 mt-0.5">
-                "{activeTheme.greetingMessage}"
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowThemeModal(true);
-              playChime('tap');
-            }}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer flex items-center gap-1"
-          >
-            <span>🎨 Change Theme</span>
-          </button>
-        </div>
-      )}
-
-      {/* 3. CURRENT SCHEDULE & FIRST/THEN SNAPSHOT */}
-      {currentRoutine && (
-        <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{currentRoutine.emoji}</span>
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                  Today's Schedule
-                </span>
-                <h3 className="font-black text-slate-800 text-base">
-                  {currentRoutine.title}
-                </h3>
-              </div>
-            </div>
-            <button
-              onClick={() => setChildView('my-day')}
-              className="text-xs font-black text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer"
-            >
-              <span>Open My Day</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* First / Then quick strip */}
-          {currentRoutine.firstThen && (
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 rounded-2xl bg-sky-50 border border-sky-200 flex items-center gap-2.5">
-                <span className="text-2xl">{currentRoutine.firstThen.firstEmoji}</span>
-                <div className="overflow-hidden">
-                  <span className="text-[10px] font-black uppercase text-sky-800 block">First</span>
-                  <span className="font-bold text-xs sm:text-sm text-sky-950 truncate block">
-                    {currentRoutine.firstThen.first}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-purple-50 border border-purple-200 flex items-center gap-2.5">
-                <span className="text-2xl">{currentRoutine.firstThen.thenEmoji}</span>
-                <div className="overflow-hidden">
-                  <span className="text-[10px] font-black uppercase text-purple-800 block">Then</span>
-                  <span className="font-bold text-xs sm:text-sm text-purple-950 truncate block">
-                    {currentRoutine.firstThen.then}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {nextStep && (
-            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-500">Up next:</span>
-                <span className="text-lg">{nextStep.emoji}</span>
-                <span className="font-black text-slate-800">{nextStep.title}</span>
-              </div>
-              <button
-                onClick={() => setChildView('my-day')}
-                className="px-2.5 py-1 rounded-lg bg-sky-500 text-white font-bold text-[11px] cursor-pointer"
-              >
-                Go
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 3.5. MEDICATION & HEALTH REMINDERS SNAPSHOT */}
-      {enabledFeatures?.medicationReminders !== false && medications.length > 0 && (() => {
-        const pendingMeds = medications.filter(
-          (m) => m.active && m.frequency !== 'as_needed' && m.times.some((t) => !m.takenTimesToday.includes(t))
-        );
-        const nextDueMed = pendingMeds[0] || medications[0];
-        const nextTime = nextDueMed?.times.find((t) => !nextDueMed.takenTimesToday.includes(t)) || nextDueMed?.times[0] || 'As needed';
-        const isAllTaken = pendingMeds.length === 0 && medications.some((m) => m.frequency !== 'as_needed');
-
-        return (
-          <div className="bg-gradient-to-r from-sky-50 via-teal-50 to-indigo-50 rounded-3xl border-2 border-teal-200/90 p-4 sm:p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl">💊</span>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 bg-teal-100 px-2 py-0.5 rounded-full">
-                      Medication Reminders
-                    </span>
-                    {medications.some((m) => m.totalQuantity <= m.refillThreshold) && (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
-                        Low Supply!
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-black text-slate-800 text-base mt-0.5">
-                    {isAllTaken ? 'All doses complete for today! 🎉' : `Next: ${nextDueMed?.name}`}
-                  </h3>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowMedicationModal(true);
-                  playChime('tap');
-                }}
-                className="text-xs font-black text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer bg-white/80 hover:bg-white px-3 py-1.5 rounded-xl border border-teal-200 shadow-2xs"
-              >
-                <span>View All Meds</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Quick Action Card */}
-            {!isAllTaken && nextDueMed && (
-              <div className="bg-white/90 rounded-2xl p-3 sm:p-3.5 border border-teal-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl shrink-0">{nextDueMed.emoji || '💊'}</span>
-                  <div>
-                    <h4 className="font-black text-sm text-slate-800 leading-tight">
-                      {nextDueMed.name}
-                    </h4>
-                    <p className="text-xs font-bold text-teal-800 mt-0.5">
-                      Take {nextDueMed.dosage} {nextDueMed.unit} • Time: {nextTime}
-                    </p>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      Supply: {nextDueMed.totalQuantity} {nextDueMed.unit} remaining
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => takeMedicationDose(nextDueMed.id, nextTime)}
-                  className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer transition-all self-end sm:self-auto shrink-0"
-                >
-                  <Pill className="w-4 h-4" />
-                  <span>Take Dose (+1 ⭐)</span>
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* 3.6. TEEN & ADULT: MOOD JOURNAL & SELF-REFLECTION CARD */}
-      {isTeenOrAdult && enabledFeatures?.moodJournal !== false && (
-        <div 
-          onClick={() => {
-            setShowMoodJournalModal(true);
-            playChime('tap');
-          }}
-          className="bg-gradient-to-r from-purple-50/90 via-indigo-50/70 to-pink-50/80 hover:from-purple-100/90 hover:to-pink-100/90 border-2 border-purple-200 rounded-3xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all active:scale-98"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
-                {latestMoodEntry ? MOOD_META[latestMoodEntry.primaryMood]?.emoji || '📖' : '📖'}
-              </span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-800 bg-purple-200/80 px-2 py-0.5 rounded-md">
-                    Personal Reflection
-                  </span>
-                  {latestMoodEntry && (
-                    <span className="text-xs text-purple-900 font-semibold">
-                      Latest: {MOOD_META[latestMoodEntry.primaryMood]?.label} ({latestMoodEntry.moodIntensity}/10)
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-black text-purple-950 text-base sm:text-lg mt-0.5">
-                  Mood Journal & Deep Reflection
-                </h3>
-                <p className="text-xs text-purple-800 font-medium">
-                  {latestMoodEntry 
-                    ? `"${latestMoodEntry.journalText?.slice(0, 80) || latestMoodEntry.gratitudeOrWin || 'Track energy, sensory load, and triggers.'}"`
-                    : 'Check in with yourself: unpack feelings, sensory overwhelm, and discover helpful coping tools.'
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="hidden sm:inline text-xs font-bold text-purple-800 bg-white/80 px-3 py-1.5 rounded-xl border border-purple-200">
-                {moodJournalEntries.length} {moodJournalEntries.length === 1 ? 'Entry' : 'Entries'}
-              </span>
-              <ArrowRight className="w-5 h-5 text-purple-700" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3.7. TEEN & ADULT: CYCLE & HORMONAL RHYTHM CARD */}
-      {isTeenOrAdult && enabledFeatures?.cycleTracker !== false && cyclePhaseInfo && (
-        <div 
-          onClick={() => {
-            setShowCycleTrackerModal(true);
-            playChime('tap');
-          }}
-          className="bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-rose-50/80 hover:from-rose-100/90 hover:to-amber-100/90 border-2 border-rose-200 rounded-3xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all active:scale-98"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
-                {cycleSettings.discreetMode ? '🌿' : '🌸'}
-              </span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-800 bg-rose-200/80 px-2 py-0.5 rounded-md">
-                    {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Cycle Day ${cyclePhaseInfo.currentCycleDay} of ${cycleSettings.averageCycleLength}`}
-                  </span>
-                  <span className="text-xs font-bold text-rose-950">
-                    {cyclePhaseInfo.phaseLabel}
-                  </span>
-                </div>
-                <h3 className="font-black text-rose-950 text-base sm:text-lg mt-0.5">
-                  {cycleSettings.discreetMode ? 'Hormonal & Sensory Rhythm' : 'Menstrual Cycle & Sensory Wellness'}
-                </h3>
-                <p className="text-xs text-rose-800 font-medium">
-                  {cyclePhaseInfo.sensoryInsight}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowCycleTrackerModal(true);
-                  playChime('tap');
-                }}
-                className="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
-              >
-                Log Today
-              </button>
-              <ArrowRight className="w-5 h-5 text-rose-700" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3.8. NEURODIVERGENT EXECUTIVE & SENSORY TOOLKIT HUB */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-            <span>✨</span>
-            <span>Neurodivergent Toolkit</span>
-          </span>
-          <span className="text-[11px] font-bold text-slate-400">Regulation & executive support</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {/* 1. 5-Point Scale */}
-          <div
-            onClick={() => {
-              setShowFivePointModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🌡️</span>
-              <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                1–5 Scale
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-emerald-950 leading-tight">
-                5-Point Scale
-              </h4>
-              <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
-                Regulation & meltdown tracker
-              </p>
-            </div>
-          </div>
-
-          {/* 2. Spoon Theory Budget */}
-          <div
-            onClick={() => {
-              setShowSpoonModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🥄</span>
-              <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} Left` : 'Check-in'}
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-amber-950 leading-tight">
-                Spoon Budget
-              </h4>
-              <p className="text-[11px] text-amber-700 font-medium mt-0.5">
-                Daily energy & stamina
-              </p>
-            </div>
-          </div>
-
-          {/* 3. Decision Wheel */}
-          <div
-            onClick={() => {
-              setShowDecisionWheelModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-indigo-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🎡</span>
-              <span className="text-[10px] font-black uppercase text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full">
-                Spinner
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-indigo-950 leading-tight">
-                Decision Wheel
-              </h4>
-              <p className="text-[11px] text-indigo-700 font-medium mt-0.5">
-                Break choice paralysis
-              </p>
-            </div>
-          </div>
-
-          {/* 4. Pie Clock (Time Timer) */}
-          <div
-            onClick={() => {
-              setShowPieTimerModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-sky-50 to-cyan-50 hover:from-sky-100 hover:to-cyan-100 border-2 border-sky-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">⏰</span>
-              <span className="text-[10px] font-black uppercase text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full">
-                Pie Clock
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-sky-950 leading-tight">
-                Visual Pie Timer
-              </h4>
-              <p className="text-[11px] text-sky-700 font-medium mt-0.5">
-                Countdown time disk
-              </p>
-            </div>
-          </div>
-
-          {/* 5. Digital Fidget Toys */}
-          <div
-            onClick={() => {
-              setShowFidgetModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🫧</span>
-              <span className="text-[10px] font-black uppercase text-purple-800 bg-purple-100 px-2 py-0.5 rounded-full">
-                Stimming
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-purple-950 leading-tight">
-                Digital Fidgets
-              </h4>
-              <p className="text-[11px] text-purple-700 font-medium mt-0.5">
-                Pop bubbles & sand ripples
-              </p>
-            </div>
-          </div>
-
-          {/* 6. Communication Passport */}
-          <div
-            onClick={() => {
-              setShowPassportModal(true);
-              playChime('tap');
-            }}
-            className="p-3.5 rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border-2 border-slate-300 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🪪</span>
-              <span className="text-[10px] font-black uppercase text-slate-800 bg-slate-200 px-2 py-0.5 rounded-full">
-                1-Page
-              </span>
-            </div>
-            <div>
-              <h4 className="font-black text-xs sm:text-sm text-slate-900 leading-tight">
-                Support Passport
-              </h4>
-              <p className="text-[11px] text-slate-600 font-medium mt-0.5">
-                Print for teachers & doctors
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. TODAY'S ADVENTURE PREPARATION SPOTLIGHT */}
-      {todaysAdventure && (
-        <div
-          onClick={() => setChildView('adventures')}
-          className="bg-emerald-50/80 hover:bg-emerald-100/60 border-2 border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs flex items-center justify-between cursor-pointer transition-all active:scale-98"
-        >
-          <div className="flex items-center gap-3.5">
-            <span className="text-4xl">{todaysAdventure.emoji}</span>
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-200/80 px-2 py-0.5 rounded-md">
-                Preparation Adventure
-              </span>
-              <h3 className="font-black text-emerald-950 text-base sm:text-lg mt-0.5">
-                {todaysAdventure.title}
-              </h3>
-              <p className="text-xs text-emerald-800 font-medium">
-                Step-by-step walkthrough, sensory guide, and practice words.
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="w-5 h-5 text-emerald-700 shrink-0" />
-        </div>
-      )}
-
-      {/* 5. FAST COMMUNICATION TILES (Journey 1: Immediate Pizza Speech!) */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-black text-slate-600 uppercase tracking-wider">
-            Quick Communication:
-          </span>
-          <button
-            onClick={() => setChildView('aac')}
-            className="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
-          >
-            <span>Open Full AAC Board</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {[
-            { text: 'I want pizza.', emoji: '🍕', color: 'bg-orange-50 border-orange-300 text-orange-950' },
-            { text: 'I need help.', emoji: '🆘', color: 'bg-rose-50 border-rose-300 text-rose-950' },
-            { text: 'I need a break.', emoji: '🛋️', color: 'bg-teal-50 border-teal-300 text-teal-950' },
-            { text: "What's next?", emoji: '❓', color: 'bg-sky-50 border-sky-300 text-sky-950' },
-          ].map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                speak(item.text);
-                if (item.text.includes('break')) {
-                  setShowCopingToolkit(true);
-                }
-              }}
-              className={`p-3.5 rounded-2xl border-2 font-black text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-xs transition-all active:scale-95 cursor-pointer ${item.color}`}
-            >
-              <span className="text-2xl">{item.emoji}</span>
-              <span className="leading-tight">{item.text}</span>
-            </button>
-          ))}
-        </div>
+          <SlidersHorizontal className="w-4 h-4 text-amber-600" />
+          <span>Customize Dashboard Layout (+ Add / Remove Features)</span>
+        </button>
       </div>
     </div>
   );

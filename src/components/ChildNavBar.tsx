@@ -5,7 +5,8 @@ import {
   MessageSquare, 
   CalendarDays, 
   Compass, 
-  Smile 
+  Smile,
+  LayoutGrid
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -19,6 +20,7 @@ export const ChildNavBar: React.FC = () => {
     userAgeGroup,
     enabledFeatures,
     activeTheme,
+    setShowToolsHubModal,
   } = useApp();
 
   const allNavItems = [
@@ -59,6 +61,16 @@ export const ChildNavBar: React.FC = () => {
       show: (enabledFeatures?.socialStories !== false) || (enabledFeatures?.lifeSkills !== false),
     },
     {
+      id: 'tools',
+      label: userAgeGroup === 'adult' ? 'Toolkit' : 'Tools',
+      emoji: '🧰',
+      icon: LayoutGrid,
+      color: 'hover:bg-purple-100 text-purple-900 border-purple-300',
+      activeBg: 'bg-purple-500 text-white shadow-md ring-2 ring-purple-500',
+      show: true,
+      action: () => setShowToolsHubModal(true),
+    },
+    {
       id: 'feelings',
       label: userAgeGroup === 'adult' ? 'Reflection' : userAgeGroup === 'teen' ? 'Mood' : 'Feelings',
       emoji: userAgeGroup === 'adult' ? '🧘' : userAgeGroup === 'teen' ? '🎧' : '💛',
@@ -71,12 +83,17 @@ export const ChildNavBar: React.FC = () => {
 
   const navItems = allNavItems.filter(item => item.show);
 
-  const handleNav = (id: any) => {
+  const handleNav = (item: any) => {
+    if (item.action) {
+      item.action();
+      playChime('tap');
+      return;
+    }
     // Clear sub-details when switching tabs
     setActiveAdventureId(null);
     setActiveSkillId(null);
     setActiveStoryId(null);
-    setChildView(id);
+    setChildView(item.id);
     playChime('tap');
   };
 
@@ -88,7 +105,7 @@ export const ChildNavBar: React.FC = () => {
           return (
             <button
               key={item.id}
-              onClick={() => handleNav(item.id)}
+              onClick={() => handleNav(item)}
               className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-2xl transition-all active:scale-95 cursor-pointer ${
                 isActive
                   ? item.activeBg

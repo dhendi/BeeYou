@@ -815,3 +815,29 @@ export interface PieTimerState {
 // Stored in VisualScheduleStep.audioDataUrl (base64 data URI)
 // No new type needed; we extend VisualScheduleStep inline.
 
+// ── FEATURE: Editable & Customizable Dashboard ────────────────────────────────
+export type DashboardWidgetId =
+  | 'routine_schedule'
+  | 'medication_tracker'
+  | 'five_point_scale'
+  | 'spoon_budget'
+  | 'pie_timer'
+  | 'decision_wheel'
+  | 'fidget_toys'
+  | 'mood_journal'
+  | 'cycle_tracker'
+  | 'communication_passport'
+  | 'quick_aac'
+  | 'mascot_companion'
+  | 'adventure_spotlight'
+  | 'evening_reflection';
+
+export interface DashboardWidgetConfig {
+  id: DashboardWidgetId;
+  title: string;
+  emoji: string;
+  description: string;
+  category: 'core' | 'sensory' | 'wellness' | 'support';
+  enabled: boolean;
+}
+
