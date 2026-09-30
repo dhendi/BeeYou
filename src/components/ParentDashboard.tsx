@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   ArrowLeft, 
@@ -152,6 +152,14 @@ export const ParentDashboard: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<TabType>('routines');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const dashboardScrollRef = useRef<HTMLDivElement>(null);
+
+  // Smoothly scroll back to top of page when changing tabs
+  useEffect(() => {
+    if (dashboardScrollRef.current) {
+      dashboardScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [activeTab]);
 
   // --- VOICE TESTING TOOL STATE ---
   const [voiceTestText, setVoiceTestText] = useState('I want pizza please.');
@@ -664,7 +672,10 @@ export const ParentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col text-slate-800">
+    <div 
+      ref={dashboardScrollRef}
+      className="h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain bg-slate-100 flex flex-col text-slate-800"
+    >
       {/* Top Caregiver Header */}
       <header className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
@@ -719,7 +730,7 @@ export const ParentDashboard: React.FC = () => {
       {/* Main Layout: Sidebar Tabs + Content Area */}
       <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-3 sm:p-6 gap-5">
         {/* Navigation Sidebar */}
-        <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0">
+        <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           {[
             { 
               id: 'subscription', 
@@ -791,7 +802,7 @@ export const ParentDashboard: React.FC = () => {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 bg-white rounded-3xl p-5 sm:p-7 border-2 border-slate-200 shadow-xs overflow-y-auto">
+        <main className="flex-1 min-w-0 bg-white rounded-3xl p-5 sm:p-7 border-2 border-slate-200 shadow-xs">
           {/* Quick Access to Routine Templates Library if on another tab */}
           {activeTab !== 'routines' && activeTab !== 'subscription' && (
             <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-2 border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">

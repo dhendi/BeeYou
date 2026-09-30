@@ -150,7 +150,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
   const emotionInfo = getEmotionBadge(status?.currentMood);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+    <div className="h-[100dvh] max-h-[100dvh] overflow-y-auto overscroll-contain bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
