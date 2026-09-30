@@ -38,6 +38,7 @@ import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
 import { MedicationRemindersModal } from './components/MedicationRemindersModal';
 import { MoodJournalModal } from './components/MoodJournalModal';
 import { CycleTrackerModal } from './components/CycleTrackerModal';
+import { SubscriptionModal } from './components/SubscriptionModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -87,7 +88,12 @@ const AppContent: React.FC = () => {
   }
 
   if (isParentMode) {
-    return <ParentDashboard />;
+    return (
+      <>
+        <ParentDashboard />
+        <SubscriptionModal />
+      </>
+    );
   }
 
   return (
@@ -191,6 +197,9 @@ const AppContent: React.FC = () => {
 
       {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
       <CycleTrackerModal />
+
+      {/* Lumina Premium Subscription & Paywall Modal */}
+      <SubscriptionModal />
     </div>
   );
 };

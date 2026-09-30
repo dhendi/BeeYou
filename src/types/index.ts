@@ -694,4 +694,37 @@ export {
   getThemedAacEmoji,
 } from '../data/themesData';
 
+export type SubscriptionTier = 'basic' | 'premium';
+export type SubscriptionStatus = 'basic' | 'trial' | 'active' | 'expired';
+
+export interface SubscriptionInfo {
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  trialStartDate?: string;
+  trialEndDate?: string;
+  monthlyPrice: number; // 12.99
+  trialDays: number; // 30
+  autoRenew: boolean;
+}
+
+export type SoundscapeId = 
+  | 'rain' 
+  | 'ocean' 
+  | 'brown_noise' 
+  | 'stream' 
+  | 'crickets' 
+  | 'space_drone' 
+  | 'wind_chimes' 
+  | 'train_chug';
+
+export interface SoundscapeItem {
+  id: SoundscapeId;
+  name: string;
+  description: string;
+  emoji: string;
+  isPremium: boolean;
+  category: 'nature' | 'noise' | 'focus' | 'special_interest';
+  tags: string[];
+}
+
 

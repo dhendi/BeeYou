@@ -30,6 +30,9 @@ import {
   CycleDailyLog,
   CycleSettings,
   CyclePhase,
+  SubscriptionInfo,
+  SubscriptionTier,
+  SubscriptionStatus,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -274,6 +277,19 @@ interface AppContextType {
     isPeriodToday: boolean;
   };
 
+  // Subscription & Membership Tiering ($12.99/mo, 30-day free trial, Day 1 Basic tier)
+  subscription: SubscriptionInfo;
+  isPremium: boolean;
+  startFreeTrial: () => void;
+  activateSubscription: () => void;
+  cancelSubscription: () => void;
+  setSubscriptionTier: (tier: SubscriptionTier) => void;
+  showPaywallModal: boolean;
+  setShowPaywallModal: (val: boolean) => void;
+  paywallTriggerReason: string;
+  triggerUpgrade: (reason?: string) => void;
+  getTrialDaysRemaining: () => number;
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -297,7 +313,116 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showCaregiverModal, setShowCaregiverModal] = useState<boolean>(false);
   const [showCaregiverAlertModal, setShowCaregiverAlertModal] = useState<boolean>(false);
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
-  const [showAvatarCreator, setShowAvatarCreator] = useState<boolean>(false);
+  const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
+
+  // Subscription state ($12.99/month, 30-day free trial, Day 1 Basic tier available)
+  const [subscription, setSubscription] = useState<SubscriptionInfo>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_subscription');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.tier === 'basic' || parsed.tier === 'premium')) {
+          if (parsed.status === 'trial' && parsed.trialEndDate) {
+            const end = new Date(parsed.trialEndDate).getTime();
+            if (Date.now() > end) {
+              return {
+                ...parsed,
+                tier: 'basic',
+                status: 'expired',
+              };
+            }
+          }
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse lumina_subscription:', e);
+    }
+    return {
+      tier: 'basic',
+      status: 'basic',
+      monthlyPrice: 12.99,
+      trialDays: 30,
+      autoRenew: true,
+    };
+  });
+
+  const [showPaywallModal, setShowPaywallModal] = useState<boolean>(false);
+  const [paywallTriggerReason, setPaywallTriggerReason] = useState<string>('Unlock all Lumina Premium features');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_subscription', JSON.stringify(subscription));
+    } catch (e) {}
+  }, [subscription]);
+
+  const isPremium = subscription.tier === 'premium' || subscription.status === 'trial' || subscription.status === 'active';
+
+  const triggerUpgrade = (reason?: string) => {
+    if (reason) setPaywallTriggerReason(reason);
+    setShowPaywallModal(true);
+  };
+
+  const startFreeTrial = () => {
+    const startDate = new Date();
+    const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    setSubscription({
+      tier: 'premium',
+      status: 'trial',
+      trialStartDate: startDate.toISOString(),
+      trialEndDate: endDate.toISOString(),
+      monthlyPrice: 12.99,
+      trialDays: 30,
+      autoRenew: true,
+    });
+    setShowPaywallModal(false);
+    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+    speakText('Welcome to Lumina Premium! Your 30-day free trial has started.');
+  };
+
+  const activateSubscription = () => {
+    setSubscription((prev) => ({
+      ...prev,
+      tier: 'premium',
+      status: 'active',
+    }));
+    setShowPaywallModal(false);
+    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+    speakText('Thank you for subscribing to Lumina Premium!');
+  };
+
+  const cancelSubscription = () => {
+    setSubscription({
+      tier: 'basic',
+      status: 'basic',
+      monthlyPrice: 12.99,
+      trialDays: 30,
+      autoRenew: false,
+    });
+    speakText('You are now on the Lumina Basic free plan.');
+  };
+
+  const setSubscriptionTier = (tier: SubscriptionTier) => {
+    if (tier === 'premium') {
+      startFreeTrial();
+    } else {
+      cancelSubscription();
+    }
+  };
+
+  const getTrialDaysRemaining = (): number => {
+    if (subscription.status !== 'trial' || !subscription.trialEndDate) return 0;
+    const diff = new Date(subscription.trialEndDate).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  const setShowAvatarCreator = (val: boolean) => {
+    if (val && !isPremium) {
+      triggerUpgrade('Avatar Customizer Studio is a Lumina Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      return;
+    }
+    _setShowAvatarCreator(val);
+  };
   const [incomingCaregiverMessage, setIncomingCaregiverMessage] = useState<CaregiverMessage | null>(null);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
 
@@ -515,7 +640,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem('lumina_active_theme_id');
       if (saved) return saved;
     } catch (e) {}
-    return 'theme-dino'; // Default to dinosaur theme as requested!
+    return 'theme-classic'; // Clean neutral classic theme default for Day 1 Basic
   });
 
   const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
@@ -532,9 +657,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {}
   }, [activeThemeId]);
 
-  const activeTheme = themes.find((t) => t.id === activeThemeId) || themes[0] || PRESET_THEMES[0];
+  // Themes are only for Lumina Premium: Basic tier falls back to theme-classic
+  useEffect(() => {
+    if (!isPremium && activeThemeId !== 'theme-classic') {
+      setActiveThemeId('theme-classic');
+    }
+  }, [isPremium, activeThemeId]);
+
+  const activeTheme = !isPremium
+    ? (themes.find((t) => t.id === 'theme-classic') || PRESET_THEMES.find((t) => t.id === 'theme-classic') || themes[0])
+    : (themes.find((t) => t.id === activeThemeId) || themes[0] || PRESET_THEMES[0]);
 
   const setTheme = (id: string) => {
+    if (!isPremium && id !== 'theme-classic') {
+      triggerUpgrade('Themes are a Lumina Premium feature! Start your 30-day free trial to unlock all themes.');
+      return;
+    }
     const target = themes.find((t) => t.id === id);
     if (target && target.isUnlocked) {
       setActiveThemeId(id);
@@ -544,6 +682,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const buyTheme = (themeId: string): boolean => {
+    if (!isPremium) {
+      triggerUpgrade('Themes are a Lumina Premium feature! Start your 30-day free trial to unlock all themes.');
+      return false;
+    }
     const target = themes.find((t) => t.id === themeId);
     if (!target) return false;
     if (target.isUnlocked) {
@@ -573,6 +715,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
+    if (!isPremium) {
+      triggerUpgrade('Custom Theme Studio is a Lumina Premium feature! Start your 30-day free trial.');
+      throw new Error('Premium required for custom themes');
+    }
     const newTheme: AppTheme = {
       ...themeData,
       id: `custom-theme-${Date.now()}`,
@@ -1040,6 +1186,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addRoutine = (routine: Omit<Routine, 'id'>) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Lumina Basic includes 1 routine. Upgrade to Lumina Premium for unlimited routines, routine templates, and First-Then boards!');
+      return;
+    }
     const newR: Routine = {
       id: `routine-${Date.now()}`,
       ...routine,
@@ -1293,6 +1443,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // World & Avatar
   const updateAvatar = (partial: Partial<AvatarConfig>) => {
+    if (!isPremium) {
+      triggerUpgrade('Avatar Customizer Studio is a Lumina Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      return;
+    }
     setAvatar((prev) => ({ ...prev, ...partial }));
     if (settings.soundEffects) playChime('tap');
   };
@@ -1408,6 +1562,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Medication Actions
   const addMedication = (med: Omit<MedicationReminder, 'id' | 'takenTimesToday'>) => {
+    if (!isPremium && medications.length >= 1) {
+      triggerUpgrade('Lumina Basic includes 1 medication reminder. Upgrade to Lumina Premium for unlimited medications, pill inventory tracking, and refill alerts!');
+      return;
+    }
     const newMed: MedicationReminder = {
       ...med,
       id: `med-${Date.now()}`,
@@ -1841,6 +1999,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         showCycleTrackerModal,
         setShowCycleTrackerModal,
         getCyclePhaseInfo,
+
+        subscription,
+        isPremium,
+        startFreeTrial,
+        activateSubscription,
+        cancelSubscription,
+        setSubscriptionTier,
+        showPaywallModal,
+        setShowPaywallModal,
+        paywallTriggerReason,
+        triggerUpgrade,
+        getTrialDaysRemaining,
 
         resetToDefaults,
       }}

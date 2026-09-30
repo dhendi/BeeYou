@@ -10,9 +10,23 @@ import {
   Eye, 
   Sparkles,
   PhoneCall,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  Crown,
+  Play,
+  Square,
+  Sliders
 } from 'lucide-react';
-import { playChime, toggleSoothingNoise } from '../utils/audio';
+import { 
+  playChime, 
+  playSoundscape, 
+  stopSoundscape, 
+  setSoundscapeVolume, 
+  subscribeToSoundscape, 
+  getActiveSoundscape, 
+  SOUNDSCAPES_CATALOG 
+} from '../utils/audio';
+import { SoundscapeId } from '../types';
 
 export const CopingToolkitModal: React.FC = () => {
   const {
@@ -20,6 +34,8 @@ export const CopingToolkitModal: React.FC = () => {
     setShowCopingToolkit,
     speak,
     childProfile,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'breathing' | 'timer' | 'grounding' | 'sound'>('breathing');
@@ -33,11 +49,20 @@ export const CopingToolkitModal: React.FC = () => {
   const [timerSecondsLeft, setTimerSecondsLeft] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // Soothing noise state
-  const [isAmbientPlaying, setIsAmbientPlaying] = useState(false);
+  // Soundscape state
+  const [activeSoundId, setActiveSoundId] = useState<SoundscapeId | null>(() => getActiveSoundscape());
+  const [soundVolume, setSoundVolume] = useState<number>(0.08);
 
   // Grounding state
   const [groundingStep, setGroundingStep] = useState(0);
+
+  // Subscribe to live soundscape changes
+  useEffect(() => {
+    const unsub = subscribeToSoundscape((id) => {
+      setActiveSoundId(id);
+    });
+    return () => unsub();
+  }, []);
 
   // Breathing loop
   useEffect(() => {
@@ -86,20 +111,14 @@ export const CopingToolkitModal: React.FC = () => {
     return () => clearInterval(interval);
   }, [isTimerRunning, timerSecondsLeft]);
 
-  // Clean up ambient noise on unmount
+  // Clean up soundscapes on unmount
   useEffect(() => {
     return () => {
-      toggleSoothingNoise(false);
+      stopSoundscape();
     };
   }, []);
 
   if (!showCopingToolkit) return null;
-
-  const handleToggleNoise = () => {
-    const next = !isAmbientPlaying;
-    setIsAmbientPlaying(next);
-    toggleSoothingNoise(next, 0.06);
-  };
 
   const startBreakTimer = (mins: number) => {
     setTimerMinutes(mins);
@@ -136,7 +155,7 @@ export const CopingToolkitModal: React.FC = () => {
           </div>
           <button
             onClick={() => {
-              toggleSoothingNoise(false);
+              stopSoundscape();
               setShowCopingToolkit(false);
             }}
             className="p-2 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 active:scale-95 transition-all cursor-pointer"
@@ -190,7 +209,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Volume2 className="w-4 h-4" />
-            <span>Quiet Sound</span>
+            <span>Sensory Sounds</span>
           </button>
         </div>
 
@@ -320,32 +339,156 @@ export const CopingToolkitModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: QUIET SOUND */}
+          {/* TAB 4: SENSORY ROOM SOUNDSCAPES */}
           {activeTab === 'sound' && (
-            <div className="w-full max-w-md flex flex-col items-center py-4">
-              <div
-                className={`w-28 h-28 rounded-full flex items-center justify-center mb-4 transition-all ${
-                  isAmbientPlaying ? 'bg-teal-100 text-teal-600 animate-pulse' : 'bg-slate-100 text-slate-400'
-                }`}
-              >
-                {isAmbientPlaying ? <Volume2 className="w-14 h-14" /> : <VolumeX className="w-14 h-14" />}
+            <div className="w-full flex flex-col items-center py-1 text-left">
+              {/* Header Info */}
+              <div className="w-full mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
+                    <span>Sensory Room Soundscapes</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-bold">
+                      {activeSoundId ? '1 Active' : 'Offline Audio'}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Procedural acoustic masking & soothing sensory frequencies. 100% offline.
+                  </p>
+                </div>
+
+                {activeSoundId && (
+                  <div className="flex items-center gap-2 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
+                    <span className="text-xs font-bold text-teal-800">Volume:</span>
+                    <input
+                      type="range"
+                      min="0.01"
+                      max="0.25"
+                      step="0.01"
+                      value={soundVolume}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setSoundVolume(val);
+                        setSoundscapeVolume(val);
+                      }}
+                      className="w-20 accent-teal-600 cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        stopSoundscape();
+                        playChime('tap');
+                      }}
+                      className="px-2 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-[11px] cursor-pointer"
+                    >
+                      Stop
+                    </button>
+                  </div>
+                )}
               </div>
-              <h3 className="text-lg font-black text-slate-800 mb-1">
-                {isAmbientPlaying ? 'Gentle Ocean / Pink Noise Playing' : 'Soothing Ambient Noise Off'}
-              </h3>
-              <p className="text-slate-600 text-xs sm:text-sm font-medium mb-6">
-                A warm, filtered calming sound that helps mask loud or sudden noises in your environment.
-              </p>
-              <button
-                onClick={handleToggleNoise}
-                className={`px-8 py-3 rounded-2xl font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer ${
-                  isAmbientPlaying
-                    ? 'bg-rose-500 hover:bg-rose-600 text-white'
-                    : 'bg-teal-600 hover:bg-teal-700 text-white'
-                }`}
-              >
-                {isAmbientPlaying ? 'Stop Sound' : 'Play Soothing Noise'}
-              </button>
+
+              {/* Free vs Premium Notice if Basic */}
+              {!isPremium && (
+                <div className="w-full p-2.5 rounded-xl bg-amber-50 border border-amber-200 mb-3 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span className="text-amber-900 font-medium">
+                      2 basic sounds included free. 6 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => triggerUpgrade('Unlock All 8 Sensory Room Ambient Soundscapes')}
+                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
+                  >
+                    30-Day Free Trial
+                  </button>
+                </div>
+              )}
+
+              {/* Soundscape Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-h-[50vh] overflow-y-auto pr-1">
+                {SOUNDSCAPES_CATALOG.map((item) => {
+                  const isPlaying = activeSoundId === item.id;
+                  const isLocked = item.isPremium && !isPremium;
+
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        if (isLocked) {
+                          triggerUpgrade(`Unlock ${item.name} & Full Sensory Room Library`);
+                          return;
+                        }
+                        if (isPlaying) {
+                          stopSoundscape();
+                          playChime('tap');
+                        } else {
+                          playSoundscape(item.id, soundVolume);
+                          playChime('tap');
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                        isPlaying
+                          ? 'border-teal-500 bg-teal-50/80 shadow-md ring-2 ring-teal-300'
+                          : isLocked
+                          ? 'border-slate-200 bg-slate-50/60 opacity-85 hover:border-amber-300'
+                          : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-xs'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0">
+                            {item.emoji}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4 className="font-black text-slate-800 text-xs sm:text-sm">
+                                {item.name}
+                              </h4>
+                              {item.isPremium ? (
+                                <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
+                                  <Crown className="w-2.5 h-2.5" />
+                                  <span>Premium</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
+                                  Free
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[11px] text-slate-500 block line-clamp-1">
+                              {item.tags.join(' • ')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action status pill */}
+                        <div>
+                          {isLocked ? (
+                            <span className="p-1.5 rounded-xl bg-amber-100 text-amber-800 flex items-center gap-1 text-[11px] font-bold">
+                              <Lock className="w-3.5 h-3.5" />
+                            </span>
+                          ) : isPlaying ? (
+                            <span className="px-2 py-1 rounded-xl bg-teal-600 text-white flex items-center gap-1 text-[11px] font-black animate-pulse">
+                              <Volume2 className="w-3.5 h-3.5" />
+                              <span>Playing</span>
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold">
+                              <Play className="w-3 h-3 fill-current" />
+                              <span>Play</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

@@ -15,7 +15,8 @@ import {
   Eye, 
   RotateCcw,
   CheckCircle2,
-  Info
+  Info,
+  Crown
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 
@@ -206,6 +207,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     deleteCustomTheme,
     worldState,
     childProfile,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'shop' | 'studio'>(defaultMode);
@@ -326,6 +329,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           <button
             type="button"
             onClick={() => {
+              if (!isPremium) {
+                triggerUpgrade('Custom Theme Studio is a Lumina Premium feature! Start your 30-day free trial.');
+                return;
+              }
               setActiveTab('studio');
               playChime('tap');
             }}
@@ -337,6 +344,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           >
             <Palette className="w-4 h-4 text-emerald-600" />
             <span>Create Custom Theme ✨</span>
+            {!isPremium && <Crown className="w-3.5 h-3.5 text-amber-300" />}
           </button>
         </div>
       </div>
@@ -413,6 +421,28 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Free vs Premium Notice if Basic */}
+          {!isPremium && (
+            <div className="p-3.5 bg-gradient-to-r from-amber-50 to-purple-50 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs mb-3 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <Crown className="w-6 h-6 text-amber-600 shrink-0" />
+                <div className="text-left">
+                  <p className="font-black text-amber-950 text-sm">Themes are a Lumina Premium feature</p>
+                  <p className="text-amber-800 text-[11px] mt-0.5">
+                    Basic tier uses the clean classic neutral theme. Start your 30-day free trial ($0 today) to unlock all 14+ themes and the custom studio!
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => triggerUpgrade('Unlock All 14+ Themes & Custom Theme Studio')}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-xs shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
+              >
+                Start 30-Day Free Trial
+              </button>
+            </div>
+          )}
 
           {/* Grid of All Themes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
@@ -527,7 +557,16 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
                   {/* Action Buttons: Equip or Unlock */}
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                    {isEquipped ? (
+                    {!isPremium && theme.id !== 'theme-classic' ? (
+                      <button
+                        type="button"
+                        onClick={() => triggerUpgrade(`Unlock ${theme.name} & All 14+ Themes`)}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-95"
+                      >
+                        <Crown className="w-4 h-4 text-amber-200" />
+                        <span>Unlock with Premium (30d Trial)</span>
+                      </button>
+                    ) : isEquipped ? (
                       <div className="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs">
                         <Check className="w-4 h-4 stroke-[3]" />
                         <span>Currently Equipped</span>

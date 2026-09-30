@@ -18,7 +18,8 @@ import {
   Trash2,
   Smile,
   Zap,
-  Info
+  Info,
+  Crown
 } from 'lucide-react';
 import { playChime, playEntitySound } from '../utils/audio';
 import { Rewards } from './Rewards';
@@ -35,6 +36,8 @@ export const MyWorldView: React.FC = () => {
     setShowAvatarCreator,
     speak,
     settings,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'world' | 'avatar' | 'shop' | 'rewards'>('world');
@@ -141,6 +144,7 @@ export const MyWorldView: React.FC = () => {
             }`}
           >
             <span>🎨 My Avatar</span>
+            {!isPremium && <Crown className="w-3.5 h-3.5 text-amber-500" />}
           </button>
           <button
             onClick={() => setActiveTab('shop')}
@@ -354,28 +358,59 @@ export const MyWorldView: React.FC = () => {
       {/* TAB 2: AVATAR BUILDER */}
       {activeTab === 'avatar' && (
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
-            <div className="bg-sky-50 border-2 border-sky-100 p-4 rounded-3xl shadow-inner flex flex-col items-center">
-              <ChildAvatar config={avatar} size="xl" />
-              <span className="text-xs font-bold text-sky-800 mt-2">Your Character</span>
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-lg sm:text-xl font-black text-slate-800">Customize Your Avatar</h3>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Choose what looks and feels most like you! Disabilities and aids like hearing aids, headphones, and wheelchairs are normal, wonderful parts of life.
-              </p>
+          {!isPremium ? (
+            <div className="flex flex-col items-center text-center p-6 sm:p-8 bg-gradient-to-b from-purple-50/70 via-indigo-50/50 to-white rounded-3xl border-2 border-purple-200 space-y-4">
+              <div className="relative">
+                <div className="bg-sky-50 border-2 border-sky-200 p-5 rounded-3xl shadow-md">
+                  <ChildAvatar config={avatar} size="xl" />
+                </div>
+                <div className="absolute -top-3 -right-3 p-2 rounded-full bg-purple-600 text-white shadow-md">
+                  <Crown className="w-5 h-5 text-amber-300" />
+                </div>
+              </div>
+
+              <div className="max-w-md">
+                <h3 className="text-xl font-black text-slate-800">
+                  Avatar Customizer Studio
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1.5">
+                  Lumina Basic includes your friendly classic character. Upgrade to <strong>Lumina Premium</strong> to unlock all hairstyles, custom hair colors, skin tones, hearing aids, sensory headphones, and wheelchairs!
+                </p>
+              </div>
+
               <button
                 type="button"
-                onClick={() => {
-                  setShowAvatarCreator(true);
-                }}
-                className="mt-3 px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+                onClick={() => triggerUpgrade('Unlock Full Avatar Customizer Studio (Hairstyles, Skin Tones & Mobility Aids)')}
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2"
               >
-                <span>🎨</span>
-                <span>Open Full Studio & Themed Hoodies</span>
+                <Crown className="w-4 h-4 text-amber-200" />
+                <span>Start 30-Day Free Trial ($0 Today)</span>
               </button>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
+                <div className="bg-sky-50 border-2 border-sky-100 p-4 rounded-3xl shadow-inner flex flex-col items-center">
+                  <ChildAvatar config={avatar} size="xl" />
+                  <span className="text-xs font-bold text-sky-800 mt-2">Your Character</span>
+                </div>
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="text-lg sm:text-xl font-black text-slate-800">Customize Your Avatar</h3>
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                    Choose what looks and feels most like you! Disabilities and aids like hearing aids, headphones, and wheelchairs are normal, wonderful parts of life.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAvatarCreator(true);
+                    }}
+                    className="mt-3 px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+                  >
+                    <span>🎨</span>
+                    <span>Open Full Studio & Themed Hoodies</span>
+                  </button>
+                </div>
+              </div>
 
           {/* 1. Skin Tone */}
           <div>
@@ -523,8 +558,10 @@ export const MyWorldView: React.FC = () => {
               ))}
             </div>
           </div>
-        </div>
+        </>
       )}
+    </div>
+  )}
 
       {/* TAB 3: REWARD SHOP */}
       {activeTab === 'shop' && (

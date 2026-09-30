@@ -15,7 +15,8 @@ import {
   FileText, 
   TrendingUp, 
   HelpCircle,
-  Share2
+  Share2,
+  Crown
 } from 'lucide-react';
 import { 
   DAY_RATING_OPTIONS, 
@@ -37,6 +38,8 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
     deleteDailyRecollection,
     childProfile,
     activeTheme,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [dateFilter, setDateFilter] = useState<'7' | '14' | 'all'>('7');
@@ -62,6 +65,10 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
   const positivePercentage = totalLogged > 0 ? Math.round((positiveDays / totalLogged) * 100) : 0;
 
   const handleCopyReport = () => {
+    if (!isPremium) {
+      triggerUpgrade('Therapist Clinical Summaries & IEP reports are a Lumina Premium feature! Start your 30-day free trial.');
+      return;
+    }
     const text = generateTherapistSummaryText(filteredEntries, childProfile.name);
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(text);
@@ -190,13 +197,23 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
             </div>
           </div>
 
-          <button
-            onClick={handleCopyReport}
-            className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            {copiedReport ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-            <span>{copiedReport ? 'Report Copied to Clipboard! ✓' : 'Copy Therapist Summary'}</span>
-          </button>
+          {!isPremium ? (
+            <button
+              onClick={() => triggerUpgrade('Therapist Clinical Summaries & IEP reports are a Lumina Premium feature! Start your 30-day free trial.')}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <Crown className="w-4 h-4 text-amber-200" />
+              <span>Unlock Therapist Summary (30d Trial)</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleCopyReport}
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              {copiedReport ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedReport ? 'Report Copied to Clipboard! ✓' : 'Copy Therapist Summary'}</span>
+            </button>
+          )}
         </div>
 
         <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 text-xs text-slate-700 dark:text-slate-300 font-mono whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto">
@@ -215,27 +232,41 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
             <button
               onClick={() => setDateFilter('7')}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                dateFilter === '7' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500'
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                dateFilter === '7' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               7 Days
             </button>
             <button
-              onClick={() => setDateFilter('14')}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                dateFilter === '14' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500'
+              onClick={() => {
+                if (!isPremium) {
+                  triggerUpgrade('14-day & 30-day Journal History is a Lumina Premium feature! Start your 30-day free trial.');
+                  return;
+                }
+                setDateFilter('14');
+              }}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                dateFilter === '14' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              14 Days
+              <span>14 Days</span>
+              {!isPremium && <Crown className="w-3 h-3 text-amber-500" />}
             </button>
             <button
-              onClick={() => setDateFilter('all')}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
-                dateFilter === 'all' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500'
+              onClick={() => {
+                if (!isPremium) {
+                  triggerUpgrade('Unlimited Journal & Mood History is a Lumina Premium feature! Start your 30-day free trial.');
+                  return;
+                }
+                setDateFilter('all');
+              }}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                dateFilter === 'all' ? 'bg-white shadow-xs text-amber-700 font-black' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              All
+              <span>All</span>
+              {!isPremium && <Crown className="w-3 h-3 text-amber-500" />}
             </button>
           </div>
         </div>

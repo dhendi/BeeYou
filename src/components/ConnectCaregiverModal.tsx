@@ -11,7 +11,8 @@ import {
   Smile, 
   MessageSquare, 
   Clock,
-  Radio
+  Radio,
+  Crown
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -29,7 +30,7 @@ interface ConnectCaregiverModalProps {
 }
 
 export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ isOpen, onClose }) => {
-  const { childProfile, currentMood, sentence, speak } = useApp();
+  const { childProfile, currentMood, sentence, speak, isPremium, triggerUpgrade } = useApp();
   const [pairingCode, setPairingCode] = useState<string>('LUMI-101');
   const [copied, setCopied] = useState(false);
   const [sentSuccess, setSentSuccess] = useState<string | null>(null);
@@ -151,16 +152,41 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
 
         {/* Content body */}
         <div className="mt-5 space-y-4 overflow-y-auto flex-1 pr-1">
-          {/* Success Banner */}
-          {sentSuccess && (
-            <div className="p-3.5 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold flex items-center gap-2 animate-in zoom-in-95">
-              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{sentSuccess}</span>
+          {!isPremium ? (
+            <div className="flex flex-col items-center text-center p-6 bg-gradient-to-b from-purple-50 via-indigo-50/50 to-white rounded-3xl border-2 border-purple-200 space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+                <Crown className="w-7 h-7 text-amber-300" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800">
+                Caregiver Live Sync is a Premium Feature
+              </h3>
+              <p className="text-xs text-slate-600 font-medium max-w-sm">
+                Connect parent, teacher, or therapist phones in real time to monitor AAC speech, routine completions, and instant emergency alerts.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerUpgrade('Caregiver Multi-Device Live Sync & Safety Alerts');
+                  onClose();
+                }}
+                className="mt-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+              >
+                <Crown className="w-4 h-4 text-amber-200" />
+                <span>Start 30-Day Free Trial ($0 Today)</span>
+              </button>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Success Banner */}
+              {sentSuccess && (
+                <div className="p-3.5 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold flex items-center gap-2 animate-in zoom-in-95">
+                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{sentSuccess}</span>
+                </div>
+              )}
 
-          {/* Pairing Code Card */}
-          <div className="p-4 rounded-3xl bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Pairing Code Card */}
+              <div className="p-4 rounded-3xl bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-1.5 text-xs font-black text-indigo-700 uppercase tracking-wider mb-1">
                 <Radio className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
@@ -300,7 +326,9 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
               </div>
             )}
           </div>
-        </div>
+        </>
+      )}
+    </div>
 
         {/* Footer */}
         <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">

@@ -38,6 +38,7 @@ import {
   X,
   HeartPulse,
   Lock,
+  Crown
 } from 'lucide-react';
 import { MOOD_META, TRIGGER_META, COPING_META } from '../data/defaultData';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
@@ -118,11 +119,19 @@ export const ParentDashboard: React.FC = () => {
     deleteCycleLog,
     setShowCycleTrackerModal,
     getCyclePhaseInfo,
+    subscription,
+    isPremium,
+    startFreeTrial,
+    cancelSubscription,
+    setSubscriptionTier,
+    triggerUpgrade,
+    getTrialDaysRemaining,
   } = useApp();
 
   const cyclePhaseInfo = getCyclePhaseInfo();
 
   type TabType = 
+    | 'subscription'
     | 'caregiver'
     | 'medications'
     | 'mood-journal'
@@ -320,6 +329,11 @@ export const ParentDashboard: React.FC = () => {
     e.preventDefault();
     if (!newRoutineTitle.trim()) return;
 
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      return;
+    }
+
     addRoutine({
       title: newRoutineTitle.trim(),
       category: newRoutineCategory,
@@ -351,6 +365,10 @@ export const ParentDashboard: React.FC = () => {
   const [routinesSubView, setRoutinesSubView] = useState<'library' | 'active' | 'create'>('library');
 
   const handleQuickImportTemplate = (template: RoutineTemplate) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      return;
+    }
     addRoutine({
       title: template.title,
       category: template.category,
@@ -379,6 +397,10 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleCustomizeTemplate = (template: RoutineTemplate) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      return;
+    }
     setCustomizingRoutine({
       title: template.title,
       category: template.category,
@@ -412,6 +434,10 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleDuplicateRoutine = (routine: Routine) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      return;
+    }
     addRoutine({
       title: `${routine.title} (Copy)`,
       category: routine.category,
@@ -431,6 +457,10 @@ export const ParentDashboard: React.FC = () => {
       });
       showNotification(`Routine "${routineData.title}" updated successfully!`);
     } else {
+      if (!isPremium && routines.length >= 1) {
+        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+        return;
+      }
       addRoutine(routineData);
       showNotification(`Routine "${routineData.title}" saved to schedule!`);
     }
@@ -562,6 +592,10 @@ export const ParentDashboard: React.FC = () => {
   const [quickRestockAmount, setQuickRestockAmount] = useState<number>(30);
 
   const handleOpenAddMed = () => {
+    if (!isPremium && medications.length >= 1) {
+      triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts!');
+      return;
+    }
     setEditingMedId(null);
     setMedName('');
     setMedTotalQuantity(30);
@@ -686,6 +720,13 @@ export const ParentDashboard: React.FC = () => {
         {/* Navigation Sidebar */}
         <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0">
           {[
+            { 
+              id: 'subscription', 
+              label: 'Membership & Plan', 
+              emoji: '👑', 
+              icon: Crown, 
+              badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium ✓') : '30d Free' 
+            },
             { id: 'routines', label: 'Routine Templates Library', emoji: '✨', icon: Calendar, badge: 'Library' },
             { 
               id: 'medications', 
@@ -751,7 +792,7 @@ export const ParentDashboard: React.FC = () => {
         {/* Content Area */}
         <main className="flex-1 bg-white rounded-3xl p-5 sm:p-7 border-2 border-slate-200 shadow-xs overflow-y-auto">
           {/* Quick Access to Routine Templates Library if on another tab */}
-          {activeTab !== 'routines' && (
+          {activeTab !== 'routines' && activeTab !== 'subscription' && (
             <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-2 border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center font-black shrink-0 shadow-xs text-xl">
@@ -782,6 +823,434 @@ export const ParentDashboard: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* TAB: MEMBERSHIP & SUBSCRIPTION */}
+          {activeTab === 'subscription' && (
+            <div className="space-y-8 animate-in fade-in pb-10">
+              {/* Header */}
+              <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">👑</span>
+                    <h2 className="text-xl font-black text-slate-900">
+                      Lumina Membership & Plans
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-xs">
+                      $12.99 / mo
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Transparent, neurodiversity-affirming pricing with a 30-day free trial. Start with $0 today and cancel anytime.
+                  </p>
+                </div>
+
+                {/* Live Tier Status Pill */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-100 border border-slate-200">
+                  <span className="text-xs font-bold text-slate-600">Current Plan:</span>
+                  <span className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
+                    isPremium 
+                      ? 'bg-amber-400 text-amber-950 shadow-xs' 
+                      : 'bg-slate-300 text-slate-800'
+                  }`}>
+                    {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : 'Lumina Premium') : 'Lumina Basic (Free)'}
+                  </span>
+                </div>
+              </div>
+
+              {/* HERO CURRENT STATUS CARD */}
+              <div className={`p-6 sm:p-7 rounded-3xl border-2 relative overflow-hidden shadow-sm ${
+                isPremium
+                  ? 'bg-gradient-to-br from-amber-500/10 via-indigo-500/5 to-purple-500/10 border-amber-300/80'
+                  : 'bg-gradient-to-br from-slate-100 via-indigo-50/50 to-sky-50/50 border-slate-200'
+              }`}>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                  <div className="space-y-2 max-w-xl">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                        isPremium 
+                          ? 'bg-amber-400 text-amber-950' 
+                          : 'bg-slate-800 text-white'
+                      }`}>
+                        {isPremium 
+                          ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : '👑 Lumina Premium Member')
+                          : '🌱 Lumina Basic (Free Plan)'
+                        }
+                      </span>
+                      {isPremium && subscription.status === 'trial' && (
+                        <span className="text-xs font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                          {getTrialDaysRemaining()} Days Remaining
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                      {isPremium 
+                        ? (subscription.status === 'trial' ? 'Full Lumina Premium Trial is Active' : 'Lumina Premium Membership')
+                        : 'You Are Currently on the Basic Plan'
+                      }
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                      {isPremium
+                        ? 'Your family has full, unrestricted access to all 8 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
+                        : 'Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to Lumina Premium for $12.99/mo ($0 today with a 30-day free trial) to unlock the full clinical suite.'
+                      }
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-500 font-bold">
+                      <span className="flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        No ads or tracking ever
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        Cancel anytime in 1 tap
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        100% offline-ready & private
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Column */}
+                  <div className="flex flex-col gap-2.5 w-full md:w-auto shrink-0">
+                    {!isPremium ? (
+                      <button
+                        onClick={() => {
+                          startFreeTrial();
+                          playChime('star');
+                          setSuccessMessage('🎉 30-Day Free Trial activated! All premium features are unlocked.');
+                          setTimeout(() => setSuccessMessage(null), 5000);
+                        }}
+                        className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-200" />
+                        <span>Start 30-Day Free Trial</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          cancelSubscription();
+                          playChime('tap');
+                          setSuccessMessage('Subscription reverted to Lumina Basic.');
+                          setTimeout(() => setSuccessMessage(null), 4000);
+                        }}
+                        className="w-full md:w-auto px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer active:scale-95 transition-all text-center"
+                      >
+                        Cancel Subscription / Revert to Basic
+                      </button>
+                    )}
+
+                    <div className="text-center md:text-right text-[11px] font-bold text-slate-500">
+                      {!isPremium ? '$12.99 / mo after trial • $0 today' : '$12.99 / mo • Auto-renews monthly'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SUCCESS TOAST MESSAGE */}
+              {successMessage && (
+                <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-900 font-black text-xs sm:text-sm flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
+              {/* FEATURE COMPARISON MATRIX */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <span>Feature Comparison: Basic vs. Premium</span>
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
+                      Side-by-side
+                    </span>
+                  </h3>
+                </div>
+
+                <div className="overflow-x-auto rounded-3xl border-2 border-slate-200 shadow-xs bg-white">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="p-4 text-xs font-black text-slate-600 uppercase tracking-wider w-1/3">
+                          Clinical & Daily Feature
+                        </th>
+                        <th className="p-4 text-xs font-black text-slate-600 uppercase tracking-wider w-1/3">
+                          <div className="flex items-center gap-1.5">
+                            <span>Lumina Basic</span>
+                            <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-black">
+                              Free
+                            </span>
+                          </div>
+                        </th>
+                        <th className="p-4 text-xs font-black text-amber-900 uppercase tracking-wider w-1/3 bg-amber-50/50">
+                          <div className="flex items-center gap-1.5">
+                            <Crown className="w-4 h-4 text-amber-600" />
+                            <span>Lumina Premium</span>
+                            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black shadow-xs">
+                              $12.99 / mo
+                            </span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {/* Row 1: AAC */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🗣️</span>
+                            <span>AAC Speech Communication</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          36 Essential Core Tiles (everyday words)
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            Unlimited tiles, custom photo/voice uploads, AI smart sentence prediction
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 2: Routines */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">📅</span>
+                            <span>Visual Schedules & Routines</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          <span className="font-semibold text-slate-700">1 Active Routine</span> ("Routines 1 is good enough")
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            Unlimited routines, Morning/School/Bedtime templates, First-Then visual rewards & step countdown timers
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 3: Medications */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">💊</span>
+                            <span>Medication Reminders & Supply</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          <span className="font-semibold text-slate-700">1 Active Medication</span> reminder
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            Unlimited medications, live pill supply count, dose logs & low-refill alerts
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 4: Sensory Room */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🎧</span>
+                            <span>Sensory Room Soundscapes</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          2 Calming Sounds (Warm Rain, Ocean Waves)
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            All 8 procedural soundscapes (Rain, Ocean, Brown Noise, Stream, Crickets, Deep Space, Wind Chimes, Train Rhythm)
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 5: Avatar Customizer */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">👤</span>
+                            <span>Avatar Customizer Studio</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          Default Avatar (fixed, editing locked)
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            Full Customizer Studio: 12+ hairstyles, outfits, glasses, hearing aids, sensory headphones & skin tones
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 6: Themes */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🎨</span>
+                            <span>Sensory Themes & Custom Studio</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          Classic Neutral Theme
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            All 9 sensory themes (Dinosaur, Oceanic, Turtle, Forest, Space, Train, Racing, Fantasy) + Custom Theme Studio
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 7: Daily Recollection / Therapist */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">📊</span>
+                            <span>Therapist & IEP Summaries</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          7-day basic mood history view
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            1-Click Exportable Reports for Speech-Language Pathologists, OTs, & IEP School Meetings
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Row 8: Caregiver Link */}
+                      <tr className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">❤️</span>
+                            <span>Caregiver Live Sync & Safety</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">
+                          Single offline device
+                        </td>
+                        <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
+                          <span className="flex items-center gap-1 text-emerald-700">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                            Multi-device real-time sync, remote routine updates & instant sensory crisis push alerts
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* QUICK DEMO / TESTING MODE TOGGLE BAR */}
+              <div className="p-5 rounded-3xl bg-slate-50 border-2 border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🧪</span>
+                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Instant Subscription Switcher (Testing & Evaluation)
+                    </h4>
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-500">
+                    Switch states instantly to test free vs. premium behaviors
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      setSubscriptionTier('basic');
+                      playChime('tap');
+                      setSuccessMessage('Switched to Lumina Basic (Free Plan).');
+                      setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'basic'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    Simulate Basic Tier (Free)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      startFreeTrial();
+                      playChime('star');
+                      setSuccessMessage('🎉 Started 30-Day Free Trial ($0 today)!');
+                      setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'trial'
+                        ? 'bg-amber-500 text-white shadow-xs'
+                        : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-50'
+                    }`}
+                  >
+                    Simulate 30-Day Trial ($0)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSubscriptionTier('premium');
+                      playChime('star');
+                      setSuccessMessage('Activated Lumina Premium ($12.99 / mo)!');
+                      setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'active'
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-white border border-indigo-300 text-indigo-900 hover:bg-indigo-50'
+                    }`}
+                  >
+                    Simulate Premium Active ($12.99/mo)
+                  </button>
+                </div>
+              </div>
+
+              {/* FAMILY VALUES & GUARANTEE */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold text-sm">
+                    🛡️
+                  </div>
+                  <h4 className="text-xs font-black text-indigo-950">Clinical Privacy First</h4>
+                  <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                    Local-first storage compliant with clinical data privacy. No advertising, tracking, or selling child data.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
+                    ✨
+                  </div>
+                  <h4 className="text-xs font-black text-emerald-950">30-Day Free Trial</h4>
+                  <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                    Test the complete clinical suite with your child risk-free for 30 full days. $0 charged at sign-up.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                    🔄
+                  </div>
+                  <h4 className="text-xs font-black text-purple-950">1-Tap Cancellation</h4>
+                  <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                    Cancel anytime directly from this dashboard without tricky questions, phone calls, or penalty fees.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB: MEDICATION REMINDERS & SUPPLY MANAGEMENT */}
           {activeTab === 'medications' && (
             <div className="space-y-6">
@@ -800,12 +1269,52 @@ export const ParentDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleOpenAddMed}
-                  className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all shrink-0"
+                  className={`px-4 py-2 rounded-2xl text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all shrink-0 ${
+                    !isPremium && medications.length >= 1
+                      ? 'bg-amber-600 hover:bg-amber-700'
+                      : 'bg-indigo-600 hover:bg-indigo-700'
+                  }`}
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Medication</span>
+                  {!isPremium && medications.length >= 1 ? (
+                    <>
+                      <Crown className="w-4 h-4 text-amber-200" />
+                      <span>Upgrade for More Meds</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Add New Medication</span>
+                    </>
+                  )}
                 </button>
               </div>
+
+              {/* 1-Medication Basic Plan Limit Banner */}
+              {!isPremium && medications.length >= 1 && (
+                <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shrink-0 text-xl shadow-xs">
+                      👑
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-amber-950 uppercase tracking-wide">Basic Plan Limit (1/1 Medication)</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
+                      </div>
+                      <p className="text-xs text-amber-900 font-medium mt-0.5">
+                        You are using your 1 included medication reminder. Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to Lumina Premium for unlimited medications, stock tracking, and refill alerts!')}
+                    className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-200" />
+                    <span>Start 30-Day Free Trial</span>
+                  </button>
+                </div>
+              )}
 
               {/* Add / Edit Medication Form */}
               {showMedForm && (
@@ -2234,6 +2743,10 @@ export const ParentDashboard: React.FC = () => {
                   </button>
                   <button
                     onClick={() => {
+                      if (!isPremium && routines.length >= 1) {
+                        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+                        return;
+                      }
                       setRoutinesSubView('create');
                       playChime('tap');
                     }}
@@ -2243,11 +2756,42 @@ export const ParentDashboard: React.FC = () => {
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <Plus className="w-3.5 h-3.5 text-slate-600" />
+                    {!isPremium && routines.length >= 1 ? (
+                      <Crown className="w-3.5 h-3.5 text-amber-500" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5 text-slate-600" />
+                    )}
                     <span>Create Custom</span>
                   </button>
                 </div>
               </div>
+
+              {/* 1-Routine Basic Plan Limit Banner */}
+              {!isPremium && routines.length >= 1 && (
+                <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shrink-0 text-xl shadow-xs">
+                      👑
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-amber-950 uppercase tracking-wide">Basic Plan Limit (1/1 Routine)</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
+                      </div>
+                      <p className="text-xs text-amber-900 font-medium mt-0.5">
+                        The Basic plan includes 1 active visual routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!')}
+                    className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-200" />
+                    <span>Start 30-Day Free Trial</span>
+                  </button>
+                </div>
+              )}
 
               {/* VIEW 1: ROUTINE TEMPLATES LIBRARY */}
               {routinesSubView === 'library' && (

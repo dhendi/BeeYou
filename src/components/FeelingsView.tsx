@@ -18,7 +18,8 @@ import {
   BookOpen,
   HeartPulse,
   Lock,
-  Plus
+  Plus,
+  Crown
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
@@ -45,6 +46,8 @@ export const FeelingsView: React.FC = () => {
     cycleLogs,
     setShowCycleTrackerModal,
     getCyclePhaseInfo,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -617,11 +620,35 @@ export const FeelingsView: React.FC = () => {
                 >
                   <span>🎨</span>
                   <span>Avatar Studio</span>
+                  {!isPremium && <Crown className="w-3.5 h-3.5 text-amber-900" />}
                 </button>
               </div>
             </div>
 
             {/* ── NONBINARY AVATAR QUICK CONTROLS: HAIRSTYLE, HAIR COLOR & SKIN TONE ── */}
+            {!isPremium ? (
+              <div 
+                onClick={() => triggerUpgrade('Unlock Full Avatar Customizer Studio (Hairstyles, Colors & Accessories)')}
+                className="bg-purple-50/80 dark:bg-purple-950/40 p-3 rounded-2xl border-2 border-purple-200 dark:border-purple-800 shadow-xs mb-3 flex items-center justify-between gap-3 cursor-pointer hover:border-purple-400 transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Crown className="w-4 h-4 text-amber-300" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-purple-950 dark:text-purple-200 block">
+                      Avatar Customizer Studio (Premium)
+                    </span>
+                    <span className="text-[11px] text-purple-700 dark:text-purple-300">
+                      Hairstyles, colors, and adaptive gear are locked on Basic. Tap to start 30-day free trial.
+                    </span>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-black shadow-xs shrink-0">
+                  Unlock
+                </span>
+              </div>
+            ) : (
             <div className="bg-slate-50 dark:bg-slate-800/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs mb-3 space-y-2.5">
               {/* Row 1: Changeable Hairstyle */}
               <div className="flex items-center gap-2 overflow-x-auto py-0.5">
@@ -770,6 +797,7 @@ export const FeelingsView: React.FC = () => {
                 </div>
               </div>
             </div>
+            )}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
               {EMOTIONS.map((emo) => {

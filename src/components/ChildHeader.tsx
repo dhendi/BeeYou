@@ -10,7 +10,8 @@ import {
   AlertCircle,
   Volume2,
   Heart,
-  ShieldAlert
+  ShieldAlert,
+  Crown
 } from 'lucide-react';
 
 import { playChime } from '../utils/audio';
@@ -42,6 +43,10 @@ export const ChildHeader: React.FC = () => {
     setShowCycleTrackerModal,
     cycleSettings,
     getCyclePhaseInfo,
+    subscription,
+    isPremium,
+    triggerUpgrade,
+    getTrialDaysRemaining,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -122,6 +127,30 @@ export const ChildHeader: React.FC = () => {
                 <span><strong className="text-amber-900">{worldState.stars}</strong> Stars</span>
               </button>
             )}
+
+            {/* Lumina Subscription / Trial Status Pill */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerUpgrade();
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-full border cursor-pointer transition-all active:scale-95 shadow-2xs ${
+                isPremium
+                  ? 'bg-purple-100 text-purple-900 border-purple-300 hover:bg-purple-200'
+                  : 'bg-gradient-to-r from-amber-100 to-purple-100 text-purple-950 border-amber-300 hover:from-amber-200 hover:to-purple-200'
+              }`}
+              title="Lumina Premium Membership ($12.99/mo, 30-day free trial)"
+            >
+              <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />
+              <span>
+                {subscription.status === 'trial'
+                  ? `Trial (${getTrialDaysRemaining()}d)`
+                  : isPremium
+                  ? 'Premium'
+                  : '30d Free'}
+              </span>
+            </button>
 
             <button
               type="button"
