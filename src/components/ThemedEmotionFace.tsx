@@ -739,7 +739,17 @@ const PixelFaceEmotion: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PUBLIC COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-const REAL_IMAGE_THEMES = new Set(['dinosaur', 'ocean', 'turtle', 'frog', 'space']);
+const REAL_IMAGE_THEMES = new Set([
+  'dinosaur',
+  'ocean',
+  'turtle',
+  'frog',
+  'space',
+  'train',
+  'racing',
+  'fantasy',
+  'classic',
+]);
 
 export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   emotionId,
@@ -795,7 +805,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
         break;
     }
   }
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=10`;
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=11`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 

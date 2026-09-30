@@ -136,11 +136,21 @@ export async function getRecoloredEmotionImage(
             // 2. Desaturated / Greys (Teeth, Eye whites, Eye corners, Outlines)
             if (sat <= 16 && (lum > 80 || Math.max(r, g, b) < 45)) continue;
 
-            // 3. Green Hoodie & Ocean Blue (NEVER recolor!)
+            // 3. Green Hoodie, Ocean Blue & Theme Outfits (NEVER recolor!)
             if ((g > r + 10 && g > b + 10) || (g > 55 && g > r && g > b)) continue;
-            if (b > r + 20 && b > g + 15 && b > 70) continue; // Ocean theme
+            if (b > r + 15 && b > g + 10 && b > 50) continue; // Ocean theme & Train conductor cap/overalls
             if (r > 60 && b > 90 && b > g + 25) continue; // Space purple headphone pods
             if (g > 150 && b > 150 && r < 100) continue; // Space cyan visor rim
+
+            // Racing theme red suit & cap
+            if (y > 130 && r > 130 && r > g + 35 && r > b + 35) continue;
+            if (y < 85 && r > 130 && r > g + 35 && r > b + 35) continue;
+
+            // Fantasy pastel unicorn hoodie & horn
+            if (b > 110 && b > r + 10 && g > 110) continue;
+
+            // Classic lion mane/fur
+            if ((x < 75 || x > 185 || y < 70) && r > 160 && g > 90 && b < 60 && g - b > 35) continue;
 
             // 4. Golden Dinosaur Spikes & Sailor Anchor (NEVER recolor!)
             const isSpike =
