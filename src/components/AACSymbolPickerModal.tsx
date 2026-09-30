@@ -40,6 +40,7 @@ interface AACSymbolPickerModalProps {
   initialQuery?: string;
   initialColorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   onImportPack?: (pack: IndustryAacPack) => void;
+  onUpgradeAll?: () => void;
 }
 
 export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
@@ -49,12 +50,14 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   initialQuery = '',
   initialColorType = 'noun',
   onImportPack,
+  onUpgradeAll,
 }) => {
   const [activeTab, setActiveTab] = useState<'search' | 'packs' | 'upload' | 'guide'>('search');
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [searchResults, setSearchResults] = useState<AacSymbolItem[]>(CURATED_AAC_SYMBOLS);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<AacSymbolItem | null>(null);
+  const [upgradedAll, setUpgradedAll] = useState(false);
   
   // Custom button builder state within modal
   const [customLabel, setCustomLabel] = useState(initialQuery || '');
@@ -187,16 +190,34 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              onClose();
-              playChime('tap');
-            }}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onUpgradeAll && (
+              <button
+                type="button"
+                onClick={() => {
+                  onUpgradeAll();
+                  setUpgradedAll(true);
+                  playChime('complete');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Apply official ARASAAC clinical pictograms to all AAC buttons in Lumina"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{upgradedAll ? 'Symbols Upgraded ✓' : 'Upgrade All to ARASAAC'}</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                onClose();
+                playChime('tap');
+              }}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}

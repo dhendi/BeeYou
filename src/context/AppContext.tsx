@@ -151,6 +151,7 @@ interface AppContextType {
   addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string }) => void;
   updateAacItem: (item: AACItem) => void;
   importAacPack: (items: Array<Omit<AACItem, 'id' | 'motorIndex'>>) => void;
+  upgradeAllAacToClinicalSymbols: () => void;
   deleteAacItem: (id: string) => void;
   addQuickPhrase: (phrase: Omit<QuickPhrase, 'id'>) => void;
   deleteQuickPhrase: (id: string) => void;
@@ -1004,7 +1005,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.aacItems) setAacItems(parsed.aacItems);
+        if (parsed.aacItems) {
+          const defaultMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.id, item.photoUrl]));
+          const defaultLabelMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.label.toLowerCase().trim(), item.photoUrl]));
+
+          const upgraded = parsed.aacItems.map((item: AACItem) => {
+            const clinicalPhoto = defaultMap.get(item.id) || defaultLabelMap.get(item.label.toLowerCase().trim());
+            if (!item.photoUrl && clinicalPhoto) {
+              return { ...item, photoUrl: clinicalPhoto };
+            }
+            return item;
+          });
+
+          // Check if newly introduced default items (like feelings) are missing
+          const existingIds = new Set(upgraded.map((i: AACItem) => i.id));
+          const missingDefaults = DEFAULT_AAC_ITEMS.filter((d) => !existingIds.has(d.id));
+
+          setAacItems([...upgraded, ...missingDefaults]);
+        }
         if (parsed.quickPhrases) setQuickPhrases(parsed.quickPhrases);
         if (parsed.routines) setRoutines(parsed.routines);
         if (parsed.plansChanged) setPlansChanged(parsed.plansChanged);
@@ -1207,6 +1225,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
       return [...prev, ...newItems];
     });
+    if (settings.soundEffects) playChime('complete');
+  };
+
+  const upgradeAllAacToClinicalSymbols = () => {
+    const defaultLabelMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.label.toLowerCase().trim(), item.photoUrl]));
+    const defaultIdMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.id, item.photoUrl]));
+
+    setAacItems((prev) =>
+      prev.map((item) => {
+        const photo = defaultIdMap.get(item.id) || defaultLabelMap.get(item.label.toLowerCase().trim());
+        return photo ? { ...item, photoUrl: photo } : item;
+      })
+    );
     if (settings.soundEffects) playChime('complete');
   };
 
@@ -2363,6 +2394,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addAacItem,
         updateAacItem,
         importAacPack,
+        upgradeAllAacToClinicalSymbols,
         deleteAacItem,
         addQuickPhrase,
         deleteQuickPhrase,

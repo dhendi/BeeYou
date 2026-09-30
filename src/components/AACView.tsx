@@ -46,6 +46,7 @@ export const AACView: React.FC = () => {
     setShowAacKeyboardModal,
     addAacItem,
     importAacPack,
+    upgradeAllAacToClinicalSymbols,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
@@ -481,6 +482,7 @@ export const AACView: React.FC = () => {
         onImportPack={(pack) => {
           importAacPack(pack.items);
         }}
+        onUpgradeAll={upgradeAllAacToClinicalSymbols}
       />
     </div>
   );

@@ -87,6 +87,7 @@ export const ParentDashboard: React.FC = () => {
     addAacItem,
     updateAacItem,
     importAacPack,
+    upgradeAllAacToClinicalSymbols,
     deleteAacItem,
     quickPhrases,
     addQuickPhrase,
@@ -3206,17 +3207,32 @@ export const ParentDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingAacItem(null);
-                    setShowSymbolPicker(true);
-                  }}
-                  className="px-5 py-2.5 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-900 font-black text-xs sm:text-sm flex items-center gap-2 shrink-0 shadow-sm transition-all cursor-pointer active:scale-95"
-                >
-                  <Search className="w-4 h-4 text-indigo-600" />
-                  <span>Browse Online Symbols</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      upgradeAllAacToClinicalSymbols();
+                      showNotification('Upgraded all AAC buttons to official ARASAAC clinical pictograms!');
+                    }}
+                    className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
+                    title="Convert all AAC buttons to clinical ARASAAC pictograms"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-950" />
+                    <span>Apply ARASAAC to All Buttons</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingAacItem(null);
+                      setShowSymbolPicker(true);
+                    }}
+                    className="px-5 py-2.5 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-900 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
+                  >
+                    <Search className="w-4 h-4 text-indigo-600" />
+                    <span>Browse Online Symbols</span>
+                  </button>
+                </div>
               </div>
 
               {/* Add Custom Word Form */}
@@ -4576,6 +4592,10 @@ export const ParentDashboard: React.FC = () => {
         onImportPack={(pack) => {
           importAacPack(pack.items);
           showNotification(`Imported "${pack.title}" (${pack.items.length} words)!`);
+        }}
+        onUpgradeAll={() => {
+          upgradeAllAacToClinicalSymbols();
+          showNotification('Upgraded all AAC buttons to official ARASAAC clinical pictograms!');
         }}
       />
     </div>
