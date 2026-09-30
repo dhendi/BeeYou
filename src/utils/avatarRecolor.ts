@@ -1,9 +1,17 @@
 /**
- * avatarRecolor.ts — Real-time Palette Swapping Engine for Themed Emotion Icons
+ * avatarRecolor.ts — High-Fidelity Real-time Palette Swapping Engine for Themed Emotion Icons
  *
  * Dynamically recolors 16-bit pixel art emotion sprites so that characters
- * reflect the child's own skin tone, ethnicity (e.g. 1. White, 2. Black, 3. Asian, 4. Hispanic),
- * and hair color (e.g. blonde, red, black, brown).
+ * reflect the child's chosen hair color and skin tone.
+ *
+ * Uses multi-tier pixel art shading ramps (Highlights, Midtones, Shadows)
+ * with strict spatial & color protection for:
+ * - Real black outlines & eye pupils (max < 32)
+ * - Teeth & Eye whites (desaturated greys/whites)
+ * - Green dinosaur hoodie (greens & fold shadows)
+ * - Golden dorsal spikes (yellows/golds)
+ * - Hoodie drawstrings & collar (mint/white)
+ * - Mouth & Tongue (crimson interior & pink tongue)
  */
 
 const recolorCache = new Map<string, string>();
@@ -22,10 +30,34 @@ export function hexToRgb(hex: string): [number, number, number] {
 /** Check if current skin and hair match default baseline sprites */
 export function isDefaultPalette(skinHex?: string, hairHex?: string): boolean {
   if (!skinHex && !hairHex) return true;
-  // Default baseline sprites are warm peach skin (#fed7aa / #fcd34d) with dark brown hair (#451a03 / #78350f)
   const isDefaultSkin = !skinHex || skinHex === '#fcd34d' || skinHex === '#fed7aa';
   const isDefaultHair = !hairHex || hairHex === '#451a03' || hairHex === '#78350f';
   return isDefaultSkin && isDefaultHair;
+}
+
+/**
+ * 16-bit pixel art shading ramp generator
+ * Generates natural highlights, midtones, and deep shadows based on luminance parameter t [0.0 .. 1.0]
+ */
+function makeRamp(baseRgb: [number, number, number], t: number): [number, number, number] {
+  const [r, g, b] = baseRgb;
+  if (t < 0.5) {
+    // Shadow to midtone: deep, rich scaling
+    const scale = 0.45 + 0.55 * (t / 0.5);
+    return [
+      Math.min(255, Math.round(r * scale)),
+      Math.min(255, Math.round(g * scale)),
+      Math.min(255, Math.round(b * scale)),
+    ];
+  } else {
+    // Midtone to highlight: luminous highlight catch
+    const frac = (t - 0.5) / 0.5;
+    return [
+      Math.min(255, Math.round(r + (255 - r) * 0.45 * frac)),
+      Math.min(255, Math.round(g + (255 - g) * 0.45 * frac)),
+      Math.min(255, Math.round(b + (255 - b) * 0.45 * frac)),
+    ];
+  }
 }
 
 /**
@@ -37,25 +69,31 @@ export async function getRecoloredEmotionImage(
   targetSkinHex?: string,
   targetHairHex?: string
 ): Promise<string> {
-  // If baseline default or running server-side, return original URL
+  // If running server-side, return original URL
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return src;
   }
-  if (!targetSkinHex && !targetHairHex) {
-    return src;
-  }
-  if (isDefaultPalette(targetSkinHex, targetHairHex)) {
+
+  const shouldRecolorSkin = Boolean(
+    targetSkinHex && targetSkinHex !== '#fed7aa' && targetSkinHex !== '#fcd34d'
+  );
+  const shouldRecolorHair = Boolean(
+    targetHairHex && targetHairHex !== '#451a03' && targetHairHex !== '#78350f'
+  );
+
+  // If neither skin nor hair needs custom palette swapping, return original sprite directly
+  if (!shouldRecolorSkin && !shouldRecolorHair) {
     return src;
   }
 
-  const cacheKey = `${src}__${targetSkinHex || 'def'}__${targetHairHex || 'def'}`;
+  const cacheKey = `${src}__${shouldRecolorSkin ? targetSkinHex : 'def'}__${shouldRecolorHair ? targetHairHex : 'def'}`;
   const cached = recolorCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const targetSkinRgb = hexToRgb(targetSkinHex || '#fcd34d');
-  const targetHairRgb = hexToRgb(targetHairHex || '#451a03');
+  const targetSkinRgb = shouldRecolorSkin ? hexToRgb(targetSkinHex!) : null;
+  const targetHairRgb = shouldRecolorHair ? hexToRgb(targetHairHex!) : null;
 
   return new Promise<string>((resolve) => {
     const img = new Image();
@@ -75,52 +113,94 @@ export async function getRecoloredEmotionImage(
         ctx.drawImage(img, 0, 0);
         const imgData = ctx.getImageData(0, 0, img.width, img.height);
         const data = imgData.data;
-        const totalPixels = data.length;
+        const w = img.width;
+        const h = img.height;
 
-        const baseSkinLum = 252 * 0.299 + 196 * 0.587 + 154 * 0.114; // ~ 208
-        const baseHairLum = 108 * 0.299 + 56 * 0.587 + 42 * 0.114;   // ~ 70
+        for (let y = 0; y < h; y++) {
+          const rowOffset = y * w * 4;
+          for (let x = 0; x < w; x++) {
+            const i = rowOffset + x * 4;
+            const a = data[i + 3];
+            if (a < 40) continue;
 
-        for (let i = 0; i < totalPixels; i += 4) {
-          const a = data[i + 3];
-          if (a === 0) continue;
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
 
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
+            // 1. Real Black Outlines & Pupils (NEVER recolor!)
+            if (Math.max(r, g, b) < 32) continue;
 
-          // Exclude extreme colors (teeth/eyes white, dark outlines)
-          if (r > 245 && g > 245 && b > 245) continue;
-          if (r < 25 && g < 25 && b < 25) continue;
+            const lum = r * 0.299 + g * 0.587 + b * 0.114;
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
 
-          // Exclude green hoodie
-          if (g > r + 15 && g > b + 15) continue;
-          // Exclude blue ocean/space
-          if (b > r + 20 && b > g + 15) continue;
-          // Exclude dino yellow/gold spikes (r > 180, g > 130, b < 70)
-          if (r > 180 && g > 130 && b < 70) continue;
-          // Exclude pink tongue / inner mouth (r > 180, g < 110, b < 130)
-          if (r > 180 && g < 110 && b < 130) continue;
+            // 2. Desaturated / Greys (Teeth, Eye whites, Eye corners, Outlines)
+            if (sat <= 16 && (lum > 80 || Math.max(r, g, b) < 45)) continue;
 
-          // 1. Detect skin pixels (warm tones with R > G > B and high lightness)
-          if (r > 165 && g > 115 && b > 70 && r > g && r - b >= 25) {
-            const curLum = r * 0.299 + g * 0.587 + b * 0.114;
-            const ratio = curLum / baseSkinLum;
-            data[i] = Math.min(255, Math.round(targetSkinRgb[0] * ratio));
-            data[i + 1] = Math.min(255, Math.round(targetSkinRgb[1] * ratio));
-            data[i + 2] = Math.min(255, Math.round(targetSkinRgb[2] * ratio));
-            continue;
-          }
+            // 3. Green Hoodie & Ocean Blue (NEVER recolor!)
+            if ((g > r + 10 && g > b + 10) || (g > 55 && g > r && g > b)) continue;
+            if (b > r + 20 && b > g + 15 && b > 70) continue; // Ocean theme
 
-          // 2. Detect hair pixels (medium to dark brown / slate-brown / dark chestnut)
-          const maxVal = Math.max(r, g, b);
-          const minVal = Math.min(r, g, b);
-          if (maxVal <= 165 && minVal >= 25 && (r >= b || maxVal - minVal <= 35)) {
-            const curLum = r * 0.299 + g * 0.587 + b * 0.114;
-            const factor = Math.min(1.4, Math.max(0.6, curLum / 75));
-            data[i] = Math.min(255, Math.round(targetHairRgb[0] * factor));
-            data[i + 1] = Math.min(255, Math.round(targetHairRgb[1] * factor));
-            data[i + 2] = Math.min(255, Math.round(targetHairRgb[2] * factor));
-            continue;
+            // 4. Golden Dinosaur Spikes (NEVER recolor!)
+            const isSpike =
+              (r > 160 && g > 110 && b < 95 && g - b >= 30) ||
+              (x < 85 && y < 170 && r > 90 && g > 60 && b < 60 && g - b >= 15);
+            if (isSpike) continue;
+
+            // 5. Hoodie Drawstrings (NEVER recolor!)
+            if (y > 170 && x >= 110 && x <= 170 && g > 150 && g > r) continue;
+
+            // 6. Mouth & Tongue (NEVER recolor!)
+            const isMouth =
+              y > 135 &&
+              x >= 115 &&
+              x <= 165 &&
+              ((r > 50 && g < 65 && b < 65 && r > g + 30 && r > b + 30) ||
+                (r > 160 && g < 115 && b < 125 && r - g >= 75));
+            if (isMouth) continue;
+
+            // 7. Skin (Face opening or waving hand)
+            if (shouldRecolorSkin && targetSkinRgb) {
+              const isFaceSkinLoc = x >= 75 && x <= 195 && y >= 95 && y <= 185;
+              const isHandSkinLoc = x >= 195 && x <= 252 && y >= 120 && y <= 185;
+              const isCentralFace = x >= 105 && x <= 164 && y > 112 && y <= 185;
+              const isSkinTone =
+                r > 90 && g > 55 && b > 30 && r > g && g >= b && r - b >= 15 && r - g <= 85;
+
+              if (
+                (isFaceSkinLoc || isHandSkinLoc) &&
+                (isSkinTone || (isCentralFace && r > 70 && g > 40))
+              ) {
+                const t = Math.min(1.0, Math.max(0.0, (lum - 90) / 130));
+                const [nr, ng, nb] = makeRamp(targetSkinRgb, t);
+                data[i] = nr;
+                data[i + 1] = ng;
+                data[i + 2] = nb;
+                continue;
+              }
+            }
+
+            // 8. Hair
+            if (shouldRecolorHair && targetHairRgb) {
+              const canBeHairLoc =
+                (y <= 114 && x >= 75 && x <= 205) || (y <= 165 && (x < 105 || x > 164));
+              const isHairTone =
+                (r >= 35 &&
+                  r <= 165 &&
+                  g >= 15 &&
+                  g <= 125 &&
+                  b >= 10 &&
+                  b <= 110 &&
+                  (r - b >= 8 || r - g >= 8)) ||
+                (r >= 32 && r <= 70 && g >= 22 && g <= 60 && b >= 40 && b <= 80); // cool tone variant
+              if (canBeHairLoc && isHairTone) {
+                const t = Math.min(1.0, Math.max(0.0, (lum - 32) / 85));
+                const [nr, ng, nb] = makeRamp(targetHairRgb, t);
+                data[i] = nr;
+                data[i + 1] = ng;
+                data[i + 2] = nb;
+                continue;
+              }
+            }
           }
         }
 
