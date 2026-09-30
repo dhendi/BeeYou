@@ -585,6 +585,7 @@ export interface AppSettings {
   autoSpeakSentence: boolean;
   features?: EnabledFeatures;
   onboardingCompleted?: boolean;
+  aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white';
 }
 
 export interface CaregiverMessage {

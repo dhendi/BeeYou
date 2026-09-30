@@ -3235,6 +3235,42 @@ export const ParentDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Tile Color Scheme Quick Selector in AAC Manager */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <Palette className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-black text-slate-800">Button Background Color Mode</h4>
+                    <p className="text-[11px] text-slate-500 font-medium">Controls the background coloring of all AAC tiles across the app.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[
+                    { id: 'fitzgerald', label: '🌈 Clinical Colors (Default)', title: 'Fitzgerald Key: yellow, green, orange, blue, purple' },
+                    { id: 'theme', label: '🎭 Theme Colors', title: 'Matches the active theme palette' },
+                    { id: 'high_contrast_white', label: '⚪ White High-Contrast', title: 'Pure white with bold borders' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        updateSettings({ aacButtonColorMode: m.id as any });
+                        playChime('tap');
+                      }}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        (settings.aacButtonColorMode || 'fitzgerald') === m.id
+                          ? 'bg-indigo-600 text-white shadow-xs font-black'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      }`}
+                      title={m.title}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Add Custom Word Form */}
               <form onSubmit={handleAddCustomWord} className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
@@ -4502,6 +4538,185 @@ export const ParentDashboard: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* ACCESSIBILITY & AAC BUTTON DISPLAY OPTIONS */}
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                  <div>
+                    <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
+                      <Palette className="w-4 h-4 text-indigo-600" />
+                      <span>AAC Tile Colors & Accessibility</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Configure communication tile colors and fine-motor touch options.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 self-start sm:self-auto">
+                    Clinical Standard Available
+                  </span>
+                </div>
+
+                {/* AAC Button Background Modes */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                    Tile Background Color Scheme:
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Option 1: Fitzgerald Key */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSettings({ aacButtonColorMode: 'fitzgerald' });
+                        playChime('tap');
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
+                        (settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald'
+                          ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                          : 'border-slate-200 bg-white/70 hover:bg-white'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">🌈</span>
+                          {(settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald' && (
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                              Active (Default)
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-black text-slate-900 mt-2">
+                          Fitzgerald Key (Clinical)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
+                          Color-codes tiles by speech grammar (Yellow = People, Green = Actions, Orange = Objects, Blue = Descriptors). Recommended by SLPs for visual scanning & motor planning.
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-slate-100">
+                        <span className="w-3.5 h-3.5 rounded bg-amber-200 border border-amber-300" title="Yellow" />
+                        <span className="w-3.5 h-3.5 rounded bg-emerald-200 border border-emerald-300" title="Green" />
+                        <span className="w-3.5 h-3.5 rounded bg-orange-200 border border-orange-300" title="Orange" />
+                        <span className="w-3.5 h-3.5 rounded bg-sky-200 border border-sky-300" title="Blue" />
+                        <span className="w-3.5 h-3.5 rounded bg-purple-200 border border-purple-300" title="Purple" />
+                      </div>
+                    </button>
+
+                    {/* Option 2: Theme Tinted */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSettings({ aacButtonColorMode: 'theme' });
+                        playChime('tap');
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
+                        settings.aacButtonColorMode === 'theme'
+                          ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                          : 'border-slate-200 bg-white/70 hover:bg-white'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">🎭</span>
+                          {settings.aacButtonColorMode === 'theme' && (
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-black text-slate-900 mt-2">
+                          Theme-Tinted Palette
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
+                          Adapts button backgrounds to match the equipped theme colors (e.g. emerald greens for turtles, sunny ambers for Leo). Great for older teens or adults seeking a unified look.
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-slate-100">
+                        <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
+                        <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
+                        <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
+                        <span className="text-[10px] font-bold text-slate-400 ml-1">Theme matching</span>
+                      </div>
+                    </button>
+
+                    {/* Option 3: High Contrast White */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSettings({ aacButtonColorMode: 'high_contrast_white' });
+                        playChime('tap');
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
+                        settings.aacButtonColorMode === 'high_contrast_white'
+                          ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                          : 'border-slate-200 bg-white/70 hover:bg-white'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">⚪</span>
+                          {settings.aacButtonColorMode === 'high_contrast_white' && (
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-black text-slate-900 mt-2">
+                          High-Contrast White
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
+                          Pure white buttons with high-contrast dark borders. Eliminates background colors for communicators with visual sensitivities or CVI.
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-slate-100">
+                        <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
+                        <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
+                        <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
+                        <span className="text-[10px] font-bold text-slate-600 ml-1">High contrast</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Additional Motor & Touch Options */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">🔲</span>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800">Large AAC Buttons</h4>
+                        <p className="text-[11px] text-slate-500 font-medium">Bigger touch targets with larger text.</p>
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.largeButtonMode}
+                      onChange={(e) => updateSettings({ largeButtonMode: e.target.checked })}
+                      className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
+                    />
+                  </label>
+
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">⏱️</span>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800">Touch Hold Delay</h4>
+                        <p className="text-[11px] text-slate-500 font-medium">Accidental touch / tremor protection.</p>
+                      </div>
+                    </div>
+                    <select
+                      value={settings.touchHoldDelayMs || 0}
+                      onChange={(e) => updateSettings({ touchHoldDelayMs: parseInt(e.target.value) })}
+                      className="px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold text-xs bg-slate-50 text-slate-800"
+                    >
+                      <option value={0}>Instant (0 ms)</option>
+                      <option value={200}>Light (200 ms)</option>
+                      <option value={400}>Medium (400 ms)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

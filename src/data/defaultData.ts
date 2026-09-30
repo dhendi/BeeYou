@@ -128,6 +128,7 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   reduceMotion: false,
   soundEffects: true,
   autoSpeakSentence: true,
+  aacButtonColorMode: 'fitzgerald',
 };
 
 export const INITIAL_AVATAR: AvatarConfig = {

@@ -1050,7 +1050,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (parsed.worldState) setWorldState(parsed.worldState);
         if (parsed.avatar) setAvatar(parsed.avatar);
         if (parsed.childProfile) setChildProfile(parsed.childProfile);
-        if (parsed.settings) setSettings(parsed.settings);
+        if (parsed.settings) {
+          setSettings({ ...INITIAL_APP_SETTINGS, ...parsed.settings });
+        }
       }
     } catch (e) {
       console.error('Failed to load state from localStorage:', e);

@@ -21,6 +21,7 @@ import {
   Globe,
   X
 } from 'lucide-react';
+import { playChime } from '../utils/audio';
 
 export const AACView: React.FC = () => {
   const {
@@ -82,8 +83,29 @@ export const AACView: React.FC = () => {
     })
     .sort((a, b) => a.motorIndex - b.motorIndex);
 
-  // Styling based on standard AAC Fitzgerald Color Key
+  // Styling based on AAC Button Color Mode: Fitzgerald Key (default) vs Theme Tinted vs High Contrast White
   const getColorStyles = (colorType: AACItem['colorType']) => {
+    const mode = settings.aacButtonColorMode || 'fitzgerald';
+
+    if (mode === 'theme') {
+      // Emergency buttons always stay high-visibility red for safety
+      if (colorType === 'emergency') {
+        return 'bg-rose-100 hover:bg-rose-200 text-rose-950 border-rose-300 ring-rose-400 font-black';
+      }
+      const primaryLight = activeTheme?.palette?.primaryLight || 'bg-slate-50';
+      const primaryBorder = activeTheme?.palette?.primaryBorder || 'border-slate-300';
+      const textAccent = activeTheme?.palette?.textAccent || 'text-slate-950';
+      return `${primaryLight} hover:brightness-95 ${textAccent} ${primaryBorder} ring-slate-400`;
+    }
+
+    if (mode === 'high_contrast_white') {
+      if (colorType === 'emergency') {
+        return 'bg-rose-100 hover:bg-rose-200 text-rose-950 border-2 border-rose-600 font-black';
+      }
+      return 'bg-white hover:bg-slate-100 text-slate-950 border-2 border-slate-900';
+    }
+
+    // Default: Modified Fitzgerald Key standard
     switch (colorType) {
       case 'subject':
         return 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300 ring-amber-400';
@@ -361,7 +383,7 @@ export const AACView: React.FC = () => {
         </div>
 
         {/* Theme switcher, Online AAC Tools, and accessibility quick toggles */}
-        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
           <button
             type="button"
             onClick={() => setShowSymbolPicker(true)}
@@ -381,6 +403,36 @@ export const AACView: React.FC = () => {
           >
             <span className="text-sm">{activeTheme.mascotEmoji}</span>
             <span className="hidden sm:inline font-bold">{activeTheme.name}</span>
+          </button>
+
+          {/* Button Color Scheme Quick Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const modes: Array<'fitzgerald' | 'theme' | 'high_contrast_white'> = ['fitzgerald', 'theme', 'high_contrast_white'];
+              const current = settings.aacButtonColorMode || 'fitzgerald';
+              const nextIndex = (modes.indexOf(current) + 1) % modes.length;
+              const next = modes[nextIndex];
+              updateSettings({ aacButtonColorMode: next });
+              playChime('tap');
+            }}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              (settings.aacButtonColorMode || 'fitzgerald') === 'theme'
+                ? 'bg-amber-100 text-amber-950 border-amber-300 shadow-2xs font-black'
+                : (settings.aacButtonColorMode || 'fitzgerald') === 'high_contrast_white'
+                ? 'bg-slate-900 text-white border-slate-950 shadow-2xs font-black'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+            }`}
+            title={`Current button style: ${(settings.aacButtonColorMode || 'fitzgerald') === 'theme' ? 'Theme Colors' : (settings.aacButtonColorMode || 'fitzgerald') === 'high_contrast_white' ? 'White High-Contrast' : 'Clinical Fitzgerald Key'}. Tap to toggle.`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">
+              {(settings.aacButtonColorMode || 'fitzgerald') === 'theme'
+                ? 'Theme Tiles'
+                : (settings.aacButtonColorMode || 'fitzgerald') === 'high_contrast_white'
+                ? 'White Tiles'
+                : 'Clinical Colors'}
+            </span>
           </button>
 
           <button
@@ -405,7 +457,7 @@ export const AACView: React.FC = () => {
         aria-label="Vocabulary grid"
       >
         {filteredItems.map((item) => {
-          const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category);
+          const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category) && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
           return (
           <button
             key={item.id}
