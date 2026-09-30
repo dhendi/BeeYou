@@ -214,20 +214,22 @@ export const FeelingsView: React.FC = () => {
                   <span>Hairstyle:</span>
                 </span>
                 {[
-                  { id: 'short', label: 'Short Hair', icon: '🧒' },
+                  { id: 'short', label: 'Short', icon: '🧒' },
+                  { id: 'curly', label: 'Curly', icon: '🌀' },
+                  { id: 'afro', label: 'Afro Puffs', icon: '👑' },
+                  { id: 'spiky', label: 'Spiky', icon: '⚡' },
+                  { id: 'braids', label: 'Braids', icon: '🪢' },
+                  { id: 'ponytail', label: 'Ponytail', icon: '🐎' },
+                  { id: 'bob', label: 'Bob', icon: '🎀' },
                   { id: 'pigtails', label: 'Pigtails', icon: '👧' },
                 ].map((hs) => {
-                  const isCurrent =
-                    hs.id === 'pigtails'
-                      ? ['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle)
-                      : !['pigtails', 'braids', 'bob', 'ponytail'].includes(avatar.hairStyle);
+                  const isCurrent = avatar.hairStyle === hs.id;
                   return (
                     <button
                       key={hs.id}
                       type="button"
                       onClick={() => {
                         updateAvatar({ hairStyle: hs.id as any });
-                        updateChildProfile({ characterGender: hs.id === 'pigtails' ? 'girl' : 'boy' });
                         playChime('tap');
                       }}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${

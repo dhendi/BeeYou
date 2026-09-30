@@ -762,12 +762,43 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const [imageFailed, setImageFailed] = useState(false);
 
   // Hairstyle determination (nonbinary):
-  // For 'pigtails', use the authentic native girl pixel art sprite (which has handcrafted pigtails).
-  // For other styles ('short', 'curly', 'afro', 'spiky', 'braids', 'ponytail', 'bob'),
-  // use the base sprite and overlay the custom pixel art hairstyle!
-  const useGirlFolder = gender ? gender === 'girl' : effectiveHairStyle === 'pigtails';
-  const folder = useGirlFolder ? `${category}_girl` : category;
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=5`;
+  // Dedicated authentic pixel art sprite sets with identical onesie and changeable hair:
+  let folder = category;
+  if (category === 'dinosaur') {
+    switch (effectiveHairStyle) {
+      case 'curly':
+      case 'wavy':
+        folder = 'dinosaur_curly';
+        break;
+      case 'afro':
+        folder = 'dinosaur_afro';
+        break;
+      case 'spiky':
+        folder = 'dinosaur_spiky';
+        break;
+      case 'braids':
+        folder = 'dinosaur_braids';
+        break;
+      case 'ponytail':
+        folder = 'dinosaur_ponytail';
+        break;
+      case 'bob':
+        folder = 'dinosaur_bob';
+        break;
+      case 'pigtails':
+        folder = 'dinosaur_girl';
+        break;
+      case 'short':
+      case 'buzz':
+      default:
+        folder = 'dinosaur';
+        break;
+    }
+  } else {
+    const isPigtailVariant = ['pigtails', 'braids', 'bob', 'ponytail', 'curly'].includes(effectiveHairStyle) || gender === 'girl';
+    folder = isPigtailVariant ? `${category}_girl` : category;
+  }
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=7`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 

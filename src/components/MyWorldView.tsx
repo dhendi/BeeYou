@@ -403,12 +403,14 @@ export const MyWorldView: React.FC = () => {
             </span>
             <div className="flex flex-wrap gap-2">
               {[
-                { id: 'curly', label: 'Curly' },
                 { id: 'short', label: 'Short' },
-                { id: 'pigtails', label: 'Pigtails' },
+                { id: 'curly', label: 'Curly' },
+                { id: 'afro', label: 'Afro Puffs' },
                 { id: 'spiky', label: 'Spiky' },
                 { id: 'braids', label: 'Braids' },
-                { id: 'wavy', label: 'Wavy' },
+                { id: 'ponytail', label: 'Ponytail' },
+                { id: 'bob', label: 'Bob' },
+                { id: 'pigtails', label: 'Pigtails' },
               ].map((style) => (
                 <button
                   key={style.id}
