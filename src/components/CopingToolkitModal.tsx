@@ -55,7 +55,7 @@ export const CopingToolkitModal: React.FC = () => {
 
   // Soundscape state
   const [activeSoundId, setActiveSoundId] = useState<SoundscapeId | null>(() => getActiveSoundscape());
-  const [soundVolume, setSoundVolume] = useState<number>(0.08);
+  const [soundVolume, setSoundVolume] = useState<number>(0.40);
   const [soundFilter, setSoundFilter] = useState<'all' | 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient'>('all');
 
   // Grounding state
@@ -409,12 +409,12 @@ export const CopingToolkitModal: React.FC = () => {
 
                 {activeSoundId && (
                   <div className="flex items-center gap-2 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
-                    <span className="text-xs font-bold text-teal-800">Volume:</span>
+                    <span className="text-xs font-bold text-teal-800">Vol: {Math.round(soundVolume * 100)}%</span>
                     <input
                       type="range"
-                      min="0.01"
-                      max="0.25"
-                      step="0.01"
+                      min="0.05"
+                      max="1.0"
+                      step="0.05"
                       value={soundVolume}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value);

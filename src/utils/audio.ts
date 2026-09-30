@@ -23,8 +23,67 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
+// Audio file mappings for authentic high-fidelity chimes & sound effects
+export const CHIME_AUDIO_FILES: Record<string, string> = {
+  tap: '/sounds/tap.mp3',
+  speak: '/sounds/speak.mp3',
+  star: '/sounds/star.mp3',
+  complete: '/sounds/complete.wav',
+};
+
+export const PET_AUDIO_FILES: Record<string, string> = {
+  puppy: '/sounds/puppy.mp3',
+  kitten: '/sounds/kitten.mp3',
+};
+
+// Reusable audio element pool for instant response without latency
+const sampleAudioPool: Map<string, HTMLAudioElement[]> = new Map();
+
+function playAudioSample(src: string, volume = 0.35): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    let pool = sampleAudioPool.get(src);
+    if (!pool) {
+      pool = [];
+      sampleAudioPool.set(src, pool);
+    }
+    let audio = pool.find((a) => a.paused || a.ended);
+    if (!audio) {
+      if (pool.length < 8) {
+        audio = new Audio(src);
+        pool.push(audio);
+      } else {
+        audio = pool[0];
+      }
+    }
+    audio.currentTime = 0;
+    audio.volume = Math.max(0.01, Math.min(1.0, volume));
+    const p = audio.play();
+    if (p !== undefined) {
+      p.catch(() => {});
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Gentle pleasant musical chime for AAC taps and successes
 export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
+  try {
+    const file = CHIME_AUDIO_FILES[type];
+    if (file) {
+      const vol = type === 'star' || type === 'complete' ? 0.45 : 0.28;
+      const played = playAudioSample(file, vol);
+      if (played) return;
+    }
+  } catch (e) {}
+
+  playProceduralChime(type);
+}
+
+// Procedural synthesizer fallback if audio files are blocked or loading
+export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -104,6 +163,18 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
 
 // Gentle audio effects for interactive animated pets & world objects
 export function playPetSound(petType: 'puppy' | 'kitten' | 'bunny' | 'turtle') {
+  try {
+    const file = PET_AUDIO_FILES[petType];
+    if (file) {
+      const played = playAudioSample(file, 0.45);
+      if (played) return;
+    }
+  } catch (e) {}
+
+  playProceduralPetSound(petType);
+}
+
+export function playProceduralPetSound(petType: 'puppy' | 'kitten' | 'bunny' | 'turtle') {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -404,11 +475,43 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
   },
 ];
 
+// Audio file mappings for authentic, high-quality ambient recordings (100% offline & seamless looping)
+export const SOUNDSCAPE_AUDIO_FILES: Record<SoundscapeId, string> = {
+  rain: '/sounds/rain.mp3',
+  ocean: '/sounds/ocean.mp3',
+  brown_noise: '/sounds/brown_noise.wav',
+  white_noise: '/sounds/white_noise.wav',
+  stream: '/sounds/stream.mp3',
+  crickets: '/sounds/crickets.mp3',
+  space_drone: '/sounds/space_drone.mp3',
+  wind_chimes: '/sounds/wind_chimes.mp3',
+  train_chug: '/sounds/train_chug.mp3',
+  train_tracks: '/sounds/train_tracks.mp3',
+  driving: '/sounds/driving.mp3',
+  city: '/sounds/city.mp3',
+  night_time: '/sounds/night_time.mp3',
+  beach: '/sounds/beach.mp3',
+  forest: '/sounds/forest.mp3',
+  fireplace: '/sounds/fireplace.mp3',
+  medieval_tavern: '/sounds/medieval_tavern.mp3',
+};
+
 let activeSoundscapeId: SoundscapeId | null = null;
+let activeSoundscapeAudioElement: HTMLAudioElement | null = null;
+let activeSoundscapeFadeTimer: any = null;
 let activeSoundscapeGain: GainNode | null = null;
 let activeSoundscapeNodes: AudioNode[] = [];
 let activeSoundscapeTimers: any[] = [];
 const soundscapeChangeListeners: Set<(id: SoundscapeId | null) => void> = new Set();
+
+function normalizeSoundscapeVolume(vol: number): number {
+  if (vol <= 0.001) return 0;
+  // If volume was passed in the legacy 0.01 - 0.25 range, scale to a pleasant 0.1 - 0.85
+  if (vol <= 0.3) {
+    return Math.min(1.0, Math.max(0.04, vol * 3.4));
+  }
+  return Math.min(1.0, Math.max(0.04, vol));
+}
 
 export function subscribeToSoundscape(listener: (id: SoundscapeId | null) => void) {
   soundscapeChangeListeners.add(listener);
@@ -434,15 +537,41 @@ export function getActiveSoundscape(): SoundscapeId | null {
 
 export function stopSoundscape(): void {
   try {
-    const ctx = getAudioContext();
+    if (activeSoundscapeFadeTimer) {
+      clearInterval(activeSoundscapeFadeTimer);
+      activeSoundscapeFadeTimer = null;
+    }
+
+    if (activeSoundscapeAudioElement) {
+      const audioToStop = activeSoundscapeAudioElement;
+      activeSoundscapeAudioElement = null;
+      // Gentle fade out over 200ms
+      const initialVol = audioToStop.volume;
+      const step = initialVol / 5;
+      let cur = initialVol;
+      const fadeOutTimer = setInterval(() => {
+        cur = Math.max(0, cur - step);
+        try {
+          audioToStop.volume = cur;
+        } catch (e) {}
+        if (cur <= 0.01) {
+          clearInterval(fadeOutTimer);
+          audioToStop.pause();
+          audioToStop.currentTime = 0;
+        }
+      }, 40);
+    }
+
+    // Stop procedural synthesizer nodes
     activeSoundscapeTimers.forEach((t) => clearInterval(t));
     activeSoundscapeTimers = [];
 
+    const ctx = getAudioContext();
     if (activeSoundscapeGain && ctx) {
       const now = ctx.currentTime;
       activeSoundscapeGain.gain.cancelScheduledValues(now);
       activeSoundscapeGain.gain.setValueAtTime(activeSoundscapeGain.gain.value, now);
-      activeSoundscapeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+      activeSoundscapeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
 
       const nodesToClean = [...activeSoundscapeNodes];
       setTimeout(() => {
@@ -452,7 +581,7 @@ export function stopSoundscape(): void {
             n.disconnect();
           } catch (e) {}
         });
-      }, 550);
+      }, 350);
     } else {
       activeSoundscapeNodes.forEach((n) => {
         try {
@@ -473,23 +602,85 @@ export function stopSoundscape(): void {
 
 export function setSoundscapeVolume(vol: number): void {
   try {
+    const normalized = normalizeSoundscapeVolume(vol);
+    if (activeSoundscapeAudioElement) {
+      activeSoundscapeAudioElement.volume = normalized;
+    }
     const ctx = getAudioContext();
     if (!ctx || !activeSoundscapeGain) return;
     const clamped = Math.max(0.001, Math.min(0.5, vol));
+    activeSoundscapeGain.gain.cancelScheduledValues(ctx.currentTime);
     activeSoundscapeGain.gain.linearRampToValueAtTime(clamped, ctx.currentTime + 0.1);
   } catch (e) {}
 }
 
-export function playSoundscape(id: SoundscapeId, volume = 0.08): void {
+export function playSoundscape(id: SoundscapeId, volume = 0.12): void {
   try {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-
-    if (activeSoundscapeId === id) {
+    if (activeSoundscapeId === id && activeSoundscapeAudioElement && !activeSoundscapeAudioElement.paused) {
+      setSoundscapeVolume(volume);
       return;
     }
 
     stopSoundscape();
+
+    activeSoundscapeId = id;
+    notifySoundscapeChange(id);
+
+    const soundFile = SOUNDSCAPE_AUDIO_FILES[id];
+    const targetVol = normalizeSoundscapeVolume(volume);
+
+    if (soundFile && typeof window !== 'undefined') {
+      try {
+        const audio = new Audio(soundFile);
+        audio.loop = true;
+        audio.volume = 0.01;
+        activeSoundscapeAudioElement = audio;
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              if (activeSoundscapeAudioElement !== audio) return;
+              // Smooth fade-in over 450ms
+              let cur = 0.01;
+              const step = Math.max(0.02, targetVol / 11);
+              activeSoundscapeFadeTimer = setInterval(() => {
+                if (activeSoundscapeAudioElement !== audio) {
+                  clearInterval(activeSoundscapeFadeTimer);
+                  return;
+                }
+                cur = Math.min(targetVol, cur + step);
+                try {
+                  audio.volume = cur;
+                } catch (e) {}
+                if (cur >= targetVol) {
+                  clearInterval(activeSoundscapeFadeTimer);
+                  activeSoundscapeFadeTimer = null;
+                }
+              }, 40);
+            })
+            .catch((err) => {
+              console.warn(`[Lumina Audio] Audio file playback blocked or failed for ${id}, using procedural fallback:`, err);
+              playProceduralSoundscape(id, volume);
+            });
+        }
+        return;
+      } catch (err) {
+        console.warn(`[Lumina Audio] Could not instantiate audio file for ${id}:`, err);
+      }
+    }
+
+    // Procedural synthesis fallback
+    playProceduralSoundscape(id, volume);
+  } catch (e) {
+    console.error('Error playing soundscape:', e);
+  }
+}
+
+export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
 
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
@@ -498,8 +689,6 @@ export function playSoundscape(id: SoundscapeId, volume = 0.08): void {
     masterGain.connect(ctx.destination);
 
     activeSoundscapeGain = masterGain;
-    activeSoundscapeId = id;
-    notifySoundscapeChange(id);
 
     if (id === 'rain') {
       const bufferSize = ctx.sampleRate * 3;
