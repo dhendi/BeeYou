@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { BillingCycle } from '../types';
 import { 
   X, 
   Sparkles, 
@@ -31,15 +32,18 @@ export const SubscriptionModal: React.FC = () => {
     startFreeTrial,
     cancelSubscription,
     setSubscriptionTier,
+    setBillingCycle,
     getTrialDaysRemaining,
   } = useApp();
+
+  const [selectedCycle, setSelectedCycle] = useState<BillingCycle>(subscription.billingCycle || 'yearly');
 
   if (!showPaywallModal) return null;
 
   const trialDaysLeft = getTrialDaysRemaining();
 
   const handleStartTrial = () => {
-    startFreeTrial();
+    startFreeTrial(selectedCycle);
   };
 
   const handleClose = () => {
@@ -90,6 +94,45 @@ export const SubscriptionModal: React.FC = () => {
 
         {/* Modal Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
+          {/* Billing Switcher (Monthly vs Yearly) */}
+          <div className="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-md mx-auto border border-slate-200 shadow-inner">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCycle('monthly');
+                setBillingCycle('monthly');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
+                selectedCycle === 'monthly'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Monthly • $12.99/mo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCycle('yearly');
+                setBillingCycle('yearly');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                selectedCycle === 'yearly'
+                  ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Yearly • $129.99/yr</span>
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                selectedCycle === 'yearly' ? 'bg-amber-300 text-amber-950' : 'bg-emerald-200 text-emerald-950'
+              }`}>
+                2 Mo Free
+              </span>
+            </button>
+          </div>
+
           {/* 30-Day Free Trial Guarantee Box */}
           <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 via-purple-50 to-indigo-50 border-2 border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-left">
@@ -97,13 +140,20 @@ export const SubscriptionModal: React.FC = () => {
                 <Crown className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-black text-slate-900">$12.99 / month</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg font-black text-slate-900">
+                    {selectedCycle === 'yearly' ? '$129.99 / year' : '$12.99 / month'}
+                  </span>
+                  {selectedCycle === 'yearly' && (
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                      $10.83/mo • 2 Months Free!
+                    </span>
+                  )}
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase">
                     30-Day Free Trial
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 font-medium">
+                <p className="text-xs text-slate-600 font-medium mt-0.5">
                   <strong>$0.00 due today.</strong> Cancel anytime with one tap. Basic plan remains free forever.
                 </p>
               </div>
@@ -197,7 +247,7 @@ export const SubscriptionModal: React.FC = () => {
                     <span>Lumina Premium</span>
                   </h3>
                   <span className="text-xs font-black text-purple-700">
-                    $12.99 / mo
+                    {selectedCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
                   </span>
                 </div>
                 <p className="text-xs text-purple-800 font-medium mb-3">
@@ -219,7 +269,7 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>Sensory Room:</strong> Full 8 ambient soundscapes (Brown Noise, Stream, Crickets, Space Drone, Chimes, Train)</span>
+                    <span><strong>Sensory Room:</strong> All 16 ambient soundscapes (Train tracks, car ride, city rain, night starlight, white noise, beach, pine forest, medieval tavern, brown noise & more)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />

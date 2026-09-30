@@ -696,13 +696,16 @@ export {
 
 export type SubscriptionTier = 'basic' | 'premium';
 export type SubscriptionStatus = 'basic' | 'trial' | 'active' | 'expired';
+export type BillingCycle = 'monthly' | 'yearly';
 
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
   status: SubscriptionStatus;
+  billingCycle: BillingCycle;
   trialStartDate?: string;
   trialEndDate?: string;
   monthlyPrice: number; // 12.99
+  yearlyPrice: number;  // 129.99 (Free 2 months)
   trialDays: number; // 30
   autoRenew: boolean;
 }
@@ -715,7 +718,15 @@ export type SoundscapeId =
   | 'crickets' 
   | 'space_drone' 
   | 'wind_chimes' 
-  | 'train_chug';
+  | 'train_chug'
+  | 'train_tracks'
+  | 'driving'
+  | 'city'
+  | 'night_time'
+  | 'white_noise'
+  | 'beach'
+  | 'forest'
+  | 'medieval_tavern';
 
 export interface SoundscapeItem {
   id: SoundscapeId;
@@ -723,7 +734,7 @@ export interface SoundscapeItem {
   description: string;
   emoji: string;
   isPremium: boolean;
-  category: 'nature' | 'noise' | 'focus' | 'special_interest';
+  category: 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient';
   tags: string[];
 }
 

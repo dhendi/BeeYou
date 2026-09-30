@@ -33,6 +33,7 @@ import {
   SubscriptionInfo,
   SubscriptionTier,
   SubscriptionStatus,
+  BillingCycle,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -277,13 +278,14 @@ interface AppContextType {
     isPeriodToday: boolean;
   };
 
-  // Subscription & Membership Tiering ($12.99/mo, 30-day free trial, Day 1 Basic tier)
+  // Subscription & Membership Tiering ($12.99/mo or $129.99/yr, 30-day free trial, Day 1 Basic tier)
   subscription: SubscriptionInfo;
   isPremium: boolean;
-  startFreeTrial: () => void;
-  activateSubscription: () => void;
+  startFreeTrial: (cycle?: BillingCycle) => void;
+  activateSubscription: (cycle?: BillingCycle) => void;
   cancelSubscription: () => void;
   setSubscriptionTier: (tier: SubscriptionTier) => void;
+  setBillingCycle: (cycle: BillingCycle) => void;
   showPaywallModal: boolean;
   setShowPaywallModal: (val: boolean) => void;
   paywallTriggerReason: string;
@@ -341,7 +343,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return {
       tier: 'basic',
       status: 'basic',
+      billingCycle: 'monthly',
       monthlyPrice: 12.99,
+      yearlyPrice: 129.99,
       trialDays: 30,
       autoRenew: true,
     };
@@ -363,28 +367,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setShowPaywallModal(true);
   };
 
-  const startFreeTrial = () => {
+  const startFreeTrial = (cycle?: BillingCycle) => {
+    const chosenCycle = cycle || subscription.billingCycle || 'monthly';
     const startDate = new Date();
     const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     setSubscription({
       tier: 'premium',
       status: 'trial',
+      billingCycle: chosenCycle,
       trialStartDate: startDate.toISOString(),
       trialEndDate: endDate.toISOString(),
       monthlyPrice: 12.99,
+      yearlyPrice: 129.99,
       trialDays: 30,
       autoRenew: true,
     });
     setShowPaywallModal(false);
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-    speakText('Welcome to Lumina Premium! Your 30-day free trial has started.');
+    speakText(`Welcome to Lumina Premium! Your 30-day free trial on the ${chosenCycle} plan has started.`);
   };
 
-  const activateSubscription = () => {
+  const activateSubscription = (cycle?: BillingCycle) => {
     setSubscription((prev) => ({
       ...prev,
       tier: 'premium',
       status: 'active',
+      billingCycle: cycle || prev.billingCycle || 'monthly',
+      yearlyPrice: 129.99,
     }));
     setShowPaywallModal(false);
     confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
@@ -395,11 +404,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSubscription({
       tier: 'basic',
       status: 'basic',
+      billingCycle: 'monthly',
       monthlyPrice: 12.99,
+      yearlyPrice: 129.99,
       trialDays: 30,
       autoRenew: false,
     });
     speakText('You are now on the Lumina Basic free plan.');
+  };
+
+  const setBillingCycle = (cycle: BillingCycle) => {
+    setSubscription((prev) => ({
+      ...prev,
+      billingCycle: cycle,
+    }));
   };
 
   const setSubscriptionTier = (tier: SubscriptionTier) => {
@@ -2006,6 +2024,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         activateSubscription,
         cancelSubscription,
         setSubscriptionTier,
+        setBillingCycle,
         showPaywallModal,
         setShowPaywallModal,
         paywallTriggerReason,

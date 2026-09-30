@@ -52,6 +52,7 @@ export const CopingToolkitModal: React.FC = () => {
   // Soundscape state
   const [activeSoundId, setActiveSoundId] = useState<SoundscapeId | null>(() => getActiveSoundscape());
   const [soundVolume, setSoundVolume] = useState<number>(0.08);
+  const [soundFilter, setSoundFilter] = useState<'all' | 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient'>('all');
 
   // Grounding state
   const [groundingStep, setGroundingStep] = useState(0);
@@ -392,12 +393,12 @@ export const CopingToolkitModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-amber-600 shrink-0" />
                     <span className="text-amber-900 font-medium">
-                      2 basic sounds included free. 6 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
+                      2 basic sounds included free. 14 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => triggerUpgrade('Unlock All 8 Sensory Room Ambient Soundscapes')}
+                    onClick={() => triggerUpgrade('Unlock All 16 Sensory Room Ambient Soundscapes')}
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
                   >
                     30-Day Free Trial
@@ -405,9 +406,40 @@ export const CopingToolkitModal: React.FC = () => {
                 </div>
               )}
 
+              {/* Soundscape Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-2.5 w-full shrink-0">
+                {[
+                  { id: 'all', label: 'All Sounds (16)', emoji: '✨' },
+                  { id: 'nature', label: 'Nature', emoji: '🌿' },
+                  { id: 'noise', label: 'Noise & Masking', emoji: '📻' },
+                  { id: 'focus', label: 'Focus & Travel', emoji: '🚗' },
+                  { id: 'special_interest', label: 'Trains & Fantasy', emoji: '🚂' },
+                  { id: 'ambient', label: 'Ambience', emoji: '🏙️' },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      setSoundFilter(cat.id as any);
+                      playChime('tap');
+                    }}
+                    className={`px-2.5 py-1 rounded-xl font-black text-[11px] transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+                      soundFilter === cat.id
+                        ? 'bg-teal-600 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span>{cat.emoji}</span>
+                    <span>{cat.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* Soundscape Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-h-[50vh] overflow-y-auto pr-1">
-                {SOUNDSCAPES_CATALOG.map((item) => {
+                {SOUNDSCAPES_CATALOG.filter(
+                  (item) => soundFilter === 'all' || item.category === soundFilter
+                ).map((item) => {
                   const isPlaying = activeSoundId === item.id;
                   const isLocked = item.isPremium && !isPremium;
 

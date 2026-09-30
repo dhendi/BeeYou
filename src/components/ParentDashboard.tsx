@@ -124,6 +124,7 @@ export const ParentDashboard: React.FC = () => {
     startFreeTrial,
     cancelSubscription,
     setSubscriptionTier,
+    setBillingCycle,
     triggerUpgrade,
     getTrialDaysRemaining,
   } = useApp();
@@ -830,14 +831,19 @@ export const ParentDashboard: React.FC = () => {
               {/* Header */}
               <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-2xl">👑</span>
                     <h2 className="text-xl font-black text-slate-900">
                       Lumina Membership & Plans
                     </h2>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-xs">
-                      $12.99 / mo
+                      {subscription.billingCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
                     </span>
+                    {subscription.billingCycle === 'yearly' && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                        2 Months Free (Save 17%)
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 font-medium mt-1">
                     Transparent, neurodiversity-affirming pricing with a 30-day free trial. Start with $0 today and cancel anytime.
@@ -852,9 +858,46 @@ export const ParentDashboard: React.FC = () => {
                       ? 'bg-amber-400 text-amber-950 shadow-xs' 
                       : 'bg-slate-300 text-slate-800'
                   }`}>
-                    {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : 'Lumina Premium') : 'Lumina Basic (Free)'}
+                    {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : `Premium (${subscription.billingCycle})`) : 'Lumina Basic (Free)'}
                   </span>
                 </div>
+              </div>
+
+              {/* Billing Switcher (Monthly vs Yearly) */}
+              <div className="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-md mx-auto border border-slate-200 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBillingCycle('monthly');
+                    playChime('tap');
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
+                    subscription.billingCycle === 'monthly'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>Monthly • $12.99/mo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBillingCycle('yearly');
+                    playChime('tap');
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    subscription.billingCycle === 'yearly'
+                      ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>Yearly • $129.99/yr</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                    subscription.billingCycle === 'yearly' ? 'bg-amber-300 text-amber-950' : 'bg-emerald-200 text-emerald-950'
+                  }`}>
+                    2 Mo Free
+                  </span>
+                </button>
               </div>
 
               {/* HERO CURRENT STATUS CARD */}
@@ -872,7 +915,7 @@ export const ParentDashboard: React.FC = () => {
                           : 'bg-slate-800 text-white'
                       }`}>
                         {isPremium 
-                          ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : '👑 Lumina Premium Member')
+                          ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : `👑 Lumina Premium Member (${subscription.billingCycle})`)
                           : '🌱 Lumina Basic (Free Plan)'
                         }
                       </span>
@@ -892,8 +935,8 @@ export const ParentDashboard: React.FC = () => {
 
                     <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                       {isPremium
-                        ? 'Your family has full, unrestricted access to all 8 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
-                        : 'Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to Lumina Premium for $12.99/mo ($0 today with a 30-day free trial) to unlock the full clinical suite.'
+                        ? 'Your family has full, unrestricted access to all 16 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
+                        : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to Lumina Premium for ${subscription.billingCycle === 'yearly' ? '$129.99/year (Free 2 months • $10.83/mo)' : '$12.99/month'} ($0 today with a 30-day free trial) to unlock the full clinical suite.`
                       }
                     </p>
 
@@ -918,9 +961,9 @@ export const ParentDashboard: React.FC = () => {
                     {!isPremium ? (
                       <button
                         onClick={() => {
-                          startFreeTrial();
+                          startFreeTrial(subscription.billingCycle);
                           playChime('star');
-                          setSuccessMessage('🎉 30-Day Free Trial activated! All premium features are unlocked.');
+                          setSuccessMessage(`🎉 30-Day Free Trial activated on the ${subscription.billingCycle} plan! All premium features are unlocked.`);
                           setTimeout(() => setSuccessMessage(null), 5000);
                         }}
                         className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -943,7 +986,10 @@ export const ParentDashboard: React.FC = () => {
                     )}
 
                     <div className="text-center md:text-right text-[11px] font-bold text-slate-500">
-                      {!isPremium ? '$12.99 / mo after trial • $0 today' : '$12.99 / mo • Auto-renews monthly'}
+                      {!isPremium 
+                        ? (subscription.billingCycle === 'yearly' ? '$129.99 / yr after trial (2 Mo Free) • $0 today' : '$12.99 / mo after trial • $0 today')
+                        : (subscription.billingCycle === 'yearly' ? '$129.99 / yr • Auto-renews yearly' : '$12.99 / mo • Auto-renews monthly')
+                      }
                     </div>
                   </div>
                 </div>
@@ -1066,7 +1112,7 @@ export const ParentDashboard: React.FC = () => {
                         <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
                           <span className="flex items-center gap-1 text-emerald-700">
                             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                            All 8 procedural soundscapes (Rain, Ocean, Brown Noise, Stream, Crickets, Deep Space, Wind Chimes, Train Rhythm)
+                            All 16 procedural soundscapes (Rain, Ocean, Brown Noise, Stream, Crickets, Space Drone, Wind Chimes, Steam Train, Train Tracks, Car Ride, City Rain, Night Starlight, White Noise, Beach Waves, Pine Forest, Medieval Fireside Lute)
                           </span>
                         </td>
                       </tr>
@@ -1173,7 +1219,7 @@ export const ParentDashboard: React.FC = () => {
                       setSuccessMessage('Switched to Lumina Basic (Free Plan).');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
-                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                    className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
                       subscription.tier === 'basic'
                         ? 'bg-slate-900 text-white shadow-xs'
                         : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
@@ -1184,34 +1230,70 @@ export const ParentDashboard: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      startFreeTrial();
+                      setBillingCycle('monthly');
+                      startFreeTrial('monthly');
                       playChime('star');
-                      setSuccessMessage('🎉 Started 30-Day Free Trial ($0 today)!');
+                      setSuccessMessage('🎉 Started 30-Day Free Trial (Monthly - $12.99/mo after trial)!');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
-                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
-                      subscription.tier === 'premium' && subscription.status === 'trial'
+                    className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'trial' && subscription.billingCycle === 'monthly'
                         ? 'bg-amber-500 text-white shadow-xs'
                         : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-50'
                     }`}
                   >
-                    Simulate 30-Day Trial ($0)
+                    Simulate 30d Trial (Monthly)
                   </button>
 
                   <button
                     onClick={() => {
+                      setBillingCycle('yearly');
+                      startFreeTrial('yearly');
+                      playChime('star');
+                      setSuccessMessage('🎉 Started 30-Day Free Trial (Yearly - 2 Mo Free / $129.99/yr)!');
+                      setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'trial' && subscription.billingCycle === 'yearly'
+                        ? 'bg-amber-500 text-white shadow-xs'
+                        : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-50'
+                    }`}
+                  >
+                    Simulate 30d Trial (Yearly - 2 Mo Free)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setBillingCycle('monthly');
                       setSubscriptionTier('premium');
                       playChime('star');
                       setSuccessMessage('Activated Lumina Premium ($12.99 / mo)!');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
-                    className={`px-4 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
-                      subscription.tier === 'premium' && subscription.status === 'active'
+                    className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'active' && subscription.billingCycle === 'monthly'
                         ? 'bg-indigo-600 text-white shadow-xs'
                         : 'bg-white border border-indigo-300 text-indigo-900 hover:bg-indigo-50'
                     }`}
                   >
-                    Simulate Premium Active ($12.99/mo)
+                    Simulate Premium Monthly ($12.99/mo)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setBillingCycle('yearly');
+                      setSubscriptionTier('premium');
+                      playChime('star');
+                      setSuccessMessage('Activated Lumina Premium Yearly ($129.99 / yr - 2 Mo Free)!');
+                      setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
+                      subscription.tier === 'premium' && subscription.status === 'active' && subscription.billingCycle === 'yearly'
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'bg-white border border-purple-300 text-purple-900 hover:bg-purple-50'
+                    }`}
+                  >
+                    Simulate Premium Yearly ($129.99/yr)
                   </button>
                 </div>
               </div>

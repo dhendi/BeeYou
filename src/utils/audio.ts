@@ -321,6 +321,78 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     category: 'special_interest',
     tags: ['Special Interest', 'Rhythmic', 'Premium'],
   },
+  {
+    id: 'train_tracks',
+    name: 'Train Tracks & Rail Cadence',
+    description: 'Hypnotic metallic click-clack rhythms over rail switches and rhythmic sleepers.',
+    emoji: '🛤️',
+    isPremium: true,
+    category: 'special_interest',
+    tags: ['Railways', 'Click-Clack', 'Premium'],
+  },
+  {
+    id: 'driving',
+    name: 'Cozy Highway Car Ride',
+    description: 'Gentle low cabin engine hum, rhythmic pavement texture, and smooth highway air stream.',
+    emoji: '🚗',
+    isPremium: true,
+    category: 'focus',
+    tags: ['Car Ride', 'Cabin Rumble', 'Premium'],
+  },
+  {
+    id: 'city',
+    name: 'Gentle City & Rainy Street',
+    description: 'Soft urban drizzle, distant muffled traffic echoes, and calm evening street ambiance.',
+    emoji: '🏙️',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['City Rain', 'Urban Hum', 'Premium'],
+  },
+  {
+    id: 'night_time',
+    name: 'Peaceful Night & Starlight',
+    description: 'Warm summer night stillness, distant tree crickets, and gentle nocturnal lullaby atmosphere.',
+    emoji: '🌌',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Bedtime', 'Night Sky', 'Premium'],
+  },
+  {
+    id: 'white_noise',
+    name: 'Classic White Noise',
+    description: 'Even full-spectrum static hiss. Blocks sudden household sounds, barking, and chatter.',
+    emoji: '📻',
+    isPremium: true,
+    category: 'noise',
+    tags: ['Full Masking', 'Tinnitus', 'Premium'],
+  },
+  {
+    id: 'beach',
+    name: 'Sunny Beach & Gentle Shoreline',
+    description: 'Rolling warm surf washing over soft sand, gentle seafoam sizzle, and coastal ocean breeze.',
+    emoji: '🏖️',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Warm Beach', 'Shoreline', 'Premium'],
+  },
+  {
+    id: 'forest',
+    name: 'Deep Pine Forest & Breeze',
+    description: 'Wind whispering through ancient tall pines, soft pine needle rustle, and woodland calmness.',
+    emoji: '🌲',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Pine Forest', 'Canopy Breeze', 'Premium'],
+  },
+  {
+    id: 'medieval_tavern',
+    name: 'Medieval Tavern & Fireside Lute',
+    description: 'Cozy crackling stone fireplace hearth, gentle acoustic lute arpeggios, and warm tavern calm.',
+    emoji: '🏰',
+    isPremium: true,
+    category: 'special_interest',
+    tags: ['Fantasy RPG', 'Acoustic Lute', 'Premium'],
+  },
 ];
 
 let activeSoundscapeId: SoundscapeId | null = null;
@@ -726,6 +798,424 @@ export function playSoundscape(id: SoundscapeId, volume = 0.08): void {
         beat = (beat + 1) % 4;
       }, 260);
       activeSoundscapeTimers.push(trainTimer);
+      activeSoundscapeNodes.push(masterGain);
+
+    } else if (id === 'train_tracks') {
+      // 1. Continuous rail resonance hum
+      const humBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const humData = humBuffer.getChannelData(0);
+      let lastHum = 0;
+      for (let i = 0; i < ctx.sampleRate * 2; i++) {
+        const white = Math.random() * 2 - 1;
+        humData[i] = (lastHum + 0.02 * white) / 1.02;
+        lastHum = humData[i];
+      }
+      const humSrc = ctx.createBufferSource();
+      humSrc.buffer = humBuffer;
+      humSrc.loop = true;
+      const humFilter = ctx.createBiquadFilter();
+      humFilter.type = 'lowpass';
+      humFilter.frequency.setValueAtTime(140, now);
+      humSrc.connect(humFilter);
+      humFilter.connect(masterGain);
+      humSrc.start(now);
+      activeSoundscapeNodes.push(humSrc, humFilter, masterGain);
+
+      // 2. Double click-clack rail cadence (wheels crossing track joints)
+      let railStep = 0;
+      const railTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'train_tracks') return;
+        const rCtx = getAudioContext();
+        if (!rCtx || !activeSoundscapeGain) return;
+        const rNow = rCtx.currentTime;
+
+        [0, 0.11].forEach((offset, idx) => {
+          const osc = rCtx.createOscillator();
+          const g = rCtx.createGain();
+          const filter = rCtx.createBiquadFilter();
+          
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(idx === 0 ? 520 : 410, rNow + offset);
+          osc.frequency.exponentialRampToValueAtTime(110, rNow + offset + 0.05);
+
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(950, rNow + offset);
+          filter.Q.setValueAtTime(3.0, rNow + offset);
+
+          g.gain.setValueAtTime(volume * (idx === 0 ? 0.45 : 0.35), rNow + offset);
+          g.gain.exponentialRampToValueAtTime(0.0001, rNow + offset + 0.06);
+
+          osc.connect(filter);
+          filter.connect(g);
+          g.connect(masterGain);
+
+          osc.start(rNow + offset);
+          osc.stop(rNow + offset + 0.07);
+        });
+
+        railStep++;
+      }, 540);
+      activeSoundscapeTimers.push(railTimer);
+
+    } else if (id === 'driving') {
+      // 1. Engine low cabin drone
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+      const engineFilter = ctx.createBiquadFilter();
+
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(46, now);
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(92, now);
+
+      engineFilter.type = 'lowpass';
+      engineFilter.frequency.setValueAtTime(110, now);
+
+      oscGain.gain.setValueAtTime(volume * 0.45, now);
+      osc1.connect(engineFilter);
+      osc2.connect(engineFilter);
+      engineFilter.connect(oscGain);
+      oscGain.connect(masterGain);
+
+      osc1.start(now);
+      osc2.start(now);
+      activeSoundscapeNodes.push(osc1, osc2, engineFilter, oscGain);
+
+      // 2. Cabin road texture & highway air stream
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastRoad = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastRoad + 0.04 * white) / 1.04;
+        lastRoad = data[i];
+      }
+      const roadNoise = ctx.createBufferSource();
+      roadNoise.buffer = buffer;
+      roadNoise.loop = true;
+
+      const roadFilter = ctx.createBiquadFilter();
+      roadFilter.type = 'bandpass';
+      roadFilter.frequency.setValueAtTime(260, now);
+      roadFilter.Q.setValueAtTime(0.8, now);
+
+      roadNoise.connect(roadFilter);
+      roadFilter.connect(masterGain);
+      roadNoise.start(now);
+      activeSoundscapeNodes.push(roadNoise, roadFilter, masterGain);
+
+    } else if (id === 'city') {
+      // 1. Distant city muffled low murmur
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastCity = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastCity + 0.02 * white) / 1.02;
+        lastCity = data[i];
+      }
+      const cityNoise = ctx.createBufferSource();
+      cityNoise.buffer = buffer;
+      cityNoise.loop = true;
+
+      const cityFilter = ctx.createBiquadFilter();
+      cityFilter.type = 'lowpass';
+      cityFilter.frequency.setValueAtTime(220, now);
+
+      cityNoise.connect(cityFilter);
+      cityFilter.connect(masterGain);
+      cityNoise.start(now);
+      activeSoundscapeNodes.push(cityNoise, cityFilter);
+
+      // 2. Soft rain on street pavement
+      const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const rainData = rainBuffer.getChannelData(0);
+      for (let i = 0; i < ctx.sampleRate * 2; i++) {
+        rainData[i] = (Math.random() * 2 - 1) * 0.25;
+      }
+      const rainSource = ctx.createBufferSource();
+      rainSource.buffer = rainBuffer;
+      rainSource.loop = true;
+      const rainBandpass = ctx.createBiquadFilter();
+      rainBandpass.type = 'bandpass';
+      rainBandpass.frequency.setValueAtTime(1400, now);
+      rainBandpass.Q.setValueAtTime(1.1, now);
+      rainSource.connect(rainBandpass);
+      rainBandpass.connect(masterGain);
+      rainSource.start(now);
+      activeSoundscapeNodes.push(rainSource, rainBandpass, masterGain);
+
+    } else if (id === 'night_time') {
+      // 1. Soft dreamy nighttime harmonic pad (F3, C4, A4)
+      const chord = [174.61, 261.63, 440.0];
+      chord.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq + (idx === 1 ? 0.3 : -0.2), now);
+        g.gain.setValueAtTime(volume * 0.28, now);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(now);
+        activeSoundscapeNodes.push(osc, g);
+      });
+
+      // 2. Summer night crickets with soft rhythm
+      const nightTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'night_time') return;
+        const nCtx = getAudioContext();
+        if (!nCtx || !activeSoundscapeGain) return;
+        const nNow = nCtx.currentTime;
+        [0, 0.05, 0.1].forEach((off) => {
+          const osc = nCtx.createOscillator();
+          const g = nCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(5100 + Math.random() * 180, nNow + off);
+          g.gain.setValueAtTime(volume * 0.18, nNow + off);
+          g.gain.exponentialRampToValueAtTime(0.0001, nNow + off + 0.035);
+          osc.connect(g);
+          g.connect(masterGain);
+          osc.start(nNow + off);
+          osc.stop(nNow + off + 0.04);
+        });
+      }, 1600);
+      activeSoundscapeTimers.push(nightTimer);
+      activeSoundscapeNodes.push(masterGain);
+
+    } else if (id === 'white_noise') {
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.55;
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+
+      // Soft lowpass filter to prevent harshness on sensory sensitive ears
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(7000, now);
+
+      source.connect(filter);
+      filter.connect(masterGain);
+      source.start(now);
+      activeSoundscapeNodes.push(source, filter, masterGain);
+
+    } else if (id === 'beach') {
+      // 1. Shoreline wave swells with ocean wash
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.5;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(450, now);
+      filter.Q.setValueAtTime(0.7, now);
+
+      // Slow 6-second wave cycle
+      const lfo = ctx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.setValueAtTime(0.16, now);
+
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.setValueAtTime(320, now);
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(filter.frequency);
+
+      noise.connect(filter);
+      filter.connect(masterGain);
+
+      noise.start(now);
+      lfo.start(now);
+      activeSoundscapeNodes.push(noise, filter, lfo, lfoGain, masterGain);
+
+      // 2. Faint distant seagull call every ~8 seconds
+      const gullTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'beach') return;
+        const bCtx = getAudioContext();
+        if (!bCtx || !activeSoundscapeGain) return;
+        const bNow = bCtx.currentTime;
+        const osc = bCtx.createOscillator();
+        const g = bCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1800, bNow);
+        osc.frequency.exponentialRampToValueAtTime(2400, bNow + 0.18);
+        osc.frequency.exponentialRampToValueAtTime(1900, bNow + 0.45);
+        g.gain.setValueAtTime(volume * 0.08, bNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, bNow + 0.5);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(bNow);
+        osc.stop(bNow + 0.52);
+      }, 7800);
+      activeSoundscapeTimers.push(gullTimer);
+
+    } else if (id === 'forest') {
+      // 1. Wind through canopy pine needles
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastWind = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (lastWind + 0.03 * white) / 1.03;
+        lastWind = data[i];
+      }
+      const wind = ctx.createBufferSource();
+      wind.buffer = buffer;
+      wind.loop = true;
+
+      const windFilter = ctx.createBiquadFilter();
+      windFilter.type = 'lowpass';
+      windFilter.frequency.setValueAtTime(420, now);
+      windFilter.Q.setValueAtTime(1.0, now);
+
+      const windLfo = ctx.createOscillator();
+      windLfo.type = 'sine';
+      windLfo.frequency.setValueAtTime(0.2, now);
+      const windLfoGain = ctx.createGain();
+      windLfoGain.gain.setValueAtTime(180, now);
+      windLfo.connect(windLfoGain);
+      windLfoGain.connect(windFilter.frequency);
+
+      wind.connect(windFilter);
+      windFilter.connect(masterGain);
+      wind.start(now);
+      windLfo.start(now);
+      activeSoundscapeNodes.push(wind, windFilter, windLfo, windLfoGain, masterGain);
+
+      // 2. Occasional sweet woodland bird whistle
+      const birdTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'forest') return;
+        const fCtx = getAudioContext();
+        if (!fCtx || !activeSoundscapeGain) return;
+        const fNow = fCtx.currentTime;
+        const startPitch = 2100 + Math.random() * 500;
+        const osc = fCtx.createOscillator();
+        const g = fCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(startPitch, fNow);
+        osc.frequency.exponentialRampToValueAtTime(startPitch * 1.25, fNow + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(startPitch * 0.9, fNow + 0.28);
+        g.gain.setValueAtTime(volume * 0.14, fNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, fNow + 0.32);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(fNow);
+        osc.stop(fNow + 0.35);
+      }, 4200);
+      activeSoundscapeTimers.push(birdTimer);
+
+    } else if (id === 'medieval_tavern') {
+      // 1. Cozy crackling stone fireplace hearth
+      const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const fireData = fireBuffer.getChannelData(0);
+      let lastFire = 0;
+      for (let i = 0; i < ctx.sampleRate * 2; i++) {
+        const white = Math.random() * 2 - 1;
+        fireData[i] = (lastFire + 0.02 * white) / 1.02;
+        lastFire = fireData[i];
+      }
+      const fireSrc = ctx.createBufferSource();
+      fireSrc.buffer = fireBuffer;
+      fireSrc.loop = true;
+      const fireFilter = ctx.createBiquadFilter();
+      fireFilter.type = 'lowpass';
+      fireFilter.frequency.setValueAtTime(260, now);
+      fireSrc.connect(fireFilter);
+      fireFilter.connect(masterGain);
+      fireSrc.start(now);
+      activeSoundscapeNodes.push(fireSrc, fireFilter);
+
+      // Fire crackle pops
+      const crackleTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'medieval_tavern') return;
+        const mCtx = getAudioContext();
+        if (!mCtx || !activeSoundscapeGain) return;
+        const mNow = mCtx.currentTime;
+        if (Math.random() > 0.4) {
+          const pop = mCtx.createBufferSource();
+          const popBuf = mCtx.createBuffer(1, Math.floor(mCtx.sampleRate * 0.03), mCtx.sampleRate);
+          const pData = popBuf.getChannelData(0);
+          for (let p = 0; p < pData.length; p++) {
+            pData[p] = (Math.random() * 2 - 1) * Math.exp(-p / 150);
+          }
+          pop.buffer = popBuf;
+          const popFilter = mCtx.createBiquadFilter();
+          popFilter.type = 'highpass';
+          popFilter.frequency.setValueAtTime(1800, mNow);
+          const popGain = mCtx.createGain();
+          popGain.gain.setValueAtTime(volume * 0.45, mNow);
+          pop.connect(popFilter);
+          popFilter.connect(popGain);
+          popGain.connect(masterGain);
+          pop.start(mNow);
+        }
+      }, 350);
+      activeSoundscapeTimers.push(crackleTimer);
+
+      // 2. Cozy Medieval Lute Melodies (Arpeggiated chords in D Dorian)
+      const luteNotes = [
+        146.83, // D3
+        220.00, // A3
+        293.66, // D4
+        349.23, // F4
+        329.63, // E4
+        293.66, // D4
+        261.63, // C4
+        196.00, // G3
+      ];
+      let noteIndex = 0;
+      const luteTimer = setInterval(() => {
+        if (activeSoundscapeId !== 'medieval_tavern') return;
+        const lCtx = getAudioContext();
+        if (!lCtx || !activeSoundscapeGain) return;
+        const lNow = lCtx.currentTime;
+
+        const pitch = luteNotes[noteIndex % luteNotes.length];
+        noteIndex++;
+
+        const osc = lCtx.createOscillator();
+        const overtone = lCtx.createOscillator();
+        const g = lCtx.createGain();
+        const filter = lCtx.createBiquadFilter();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(pitch, lNow);
+
+        overtone.type = 'sine';
+        overtone.frequency.setValueAtTime(pitch * 2, lNow);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1600, lNow);
+        filter.frequency.exponentialRampToValueAtTime(350, lNow + 0.8);
+
+        g.gain.setValueAtTime(volume * 0.38, lNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, lNow + 1.2);
+
+        osc.connect(filter);
+        overtone.connect(filter);
+        filter.connect(g);
+        g.connect(masterGain);
+
+        osc.start(lNow);
+        overtone.start(lNow);
+        osc.stop(lNow + 1.25);
+        overtone.stop(lNow + 1.25);
+      }, 480);
+      activeSoundscapeTimers.push(luteTimer);
       activeSoundscapeNodes.push(masterGain);
     }
   } catch (e) {
