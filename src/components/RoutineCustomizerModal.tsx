@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Save, 
@@ -10,7 +10,12 @@ import {
   ArrowRight,
   ChevronUp,
   ChevronDown,
-  Info
+  Info,
+  Mic,
+  MicOff,
+  Play,
+  Square,
+  Wand2
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
@@ -121,6 +126,133 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
     const updated = [...steps];
     updated[index].title = newTitle;
     setSteps(updated);
+  };
+
+  // ─── Magic Task Breakdown ───────────────────────────────────────────────────
+  const MICRO_STEP_TEMPLATES: Record<string, Array<{ title: string; emoji: string }>> = {
+    default: [
+      { title: 'Get everything ready', emoji: '🎒' },
+      { title: 'Start the task', emoji: '▶️' },
+      { title: 'Do the middle part', emoji: '⚙️' },
+      { title: 'Check your work', emoji: '✅' },
+      { title: 'All done — put things away', emoji: '📦' },
+    ],
+    brush: [
+      { title: 'Get toothbrush & paste', emoji: '🪥' },
+      { title: 'Wet brush', emoji: '💧' },
+      { title: 'Brush top teeth', emoji: '😬' },
+      { title: 'Brush bottom teeth', emoji: '😬' },
+      { title: 'Rinse and spit', emoji: '🚿' },
+    ],
+    dress: [
+      { title: 'Pick out clothes', emoji: '👕' },
+      { title: 'Put on underwear', emoji: '🩲' },
+      { title: 'Put on shirt', emoji: '👚' },
+      { title: 'Put on pants / skirt', emoji: '👖' },
+      { title: 'Put on socks and shoes', emoji: '🧦' },
+    ],
+    eat: [
+      { title: 'Sit at the table', emoji: '🪑' },
+      { title: 'Get your food and drink', emoji: '🍽️' },
+      { title: 'Take small bites', emoji: '🥄' },
+      { title: 'Drink some water', emoji: '💧' },
+      { title: 'Clean up when done', emoji: '🧹' },
+    ],
+    shower: [
+      { title: 'Get towel and clothes ready', emoji: '🛁' },
+      { title: 'Adjust water temperature', emoji: '🌡️' },
+      { title: 'Wash hair with shampoo', emoji: '🧴' },
+      { title: 'Wash body with soap', emoji: '🧼' },
+      { title: 'Rinse off and dry', emoji: '🚿' },
+    ],
+  };
+
+  const handleBreakdown = (stepIdx: number) => {
+    const stepTitle = steps[stepIdx].title.toLowerCase();
+    let template = MICRO_STEP_TEMPLATES.default;
+    if (stepTitle.includes('brush') || stepTitle.includes('teeth')) template = MICRO_STEP_TEMPLATES.brush;
+    else if (stepTitle.includes('dress') || stepTitle.includes('cloth') || stepTitle.includes('wear')) template = MICRO_STEP_TEMPLATES.dress;
+    else if (stepTitle.includes('eat') || stepTitle.includes('breakfast') || stepTitle.includes('lunch') || stepTitle.includes('dinner') || stepTitle.includes('snack')) template = MICRO_STEP_TEMPLATES.eat;
+    else if (stepTitle.includes('shower') || stepTitle.includes('bath') || stepTitle.includes('wash')) template = MICRO_STEP_TEMPLATES.shower;
+
+    const microSteps = template.map((t, i) => ({
+      id: `micro-${Date.now()}-${i}`,
+      title: t.title,
+      emoji: t.emoji,
+      completed: false,
+    }));
+
+    const updated = [...steps];
+    updated[stepIdx] = { ...updated[stepIdx], microSteps };
+    setSteps(updated);
+    playChime('complete');
+  };
+
+  const handleRemoveMicroSteps = (stepIdx: number) => {
+    const updated = [...steps];
+    updated[stepIdx] = { ...updated[stepIdx], microSteps: undefined };
+    setSteps(updated);
+    playChime('clear');
+  };
+
+  // ─── Voice Recording per step ───────────────────────────────────────────────
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const [recordingStepIdx, setRecordingStepIdx] = useState<number | null>(null);
+  const [playingStepIdx, setPlayingStepIdx] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleStartRecord = async (stepIdx: number) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string;
+          const updated = [...steps];
+          updated[stepIdx] = { ...updated[stepIdx], audioDataUrl: dataUrl };
+          setSteps(updated);
+          stream.getTracks().forEach((t) => t.stop());
+          setRecordingStepIdx(null);
+          playChime('complete');
+        };
+        reader.readAsDataURL(blob);
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setRecordingStepIdx(stepIdx);
+      // Auto-stop after 10 seconds
+      setTimeout(() => { if (mr.state === 'recording') mr.stop(); }, 10000);
+    } catch (err) {
+      alert('Microphone access denied. Please allow microphone permission.');
+    }
+  };
+
+  const handleStopRecord = () => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const handlePlayAudio = (stepIdx: number) => {
+    const url = steps[stepIdx].audioDataUrl;
+    if (!url) return;
+    if (audioRef.current) { audioRef.current.pause(); }
+    audioRef.current = new Audio(url);
+    audioRef.current.play();
+    setPlayingStepIdx(stepIdx);
+    audioRef.current.onended = () => setPlayingStepIdx(null);
+  };
+
+  const handleDeleteAudio = (stepIdx: number) => {
+    const updated = [...steps];
+    updated[stepIdx] = { ...updated[stepIdx], audioDataUrl: undefined };
+    setSteps(updated);
+    playChime('clear');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -312,62 +444,103 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
               {steps.map((st, idx) => (
                 <div
                   key={st.id || idx}
-                  className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3 group hover:border-sky-300 transition"
+                  className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 group hover:border-sky-300 transition"
                 >
-                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-800 text-xs font-black flex items-center justify-center shrink-0">
-                      {idx + 1}
-                    </span>
-                    <span className="text-xl shrink-0">{st.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
-                        value={st.title}
-                        onChange={(e) => handleUpdateStepTitle(idx, e.target.value)}
-                        className="w-full bg-transparent font-bold text-xs text-slate-900 focus:bg-white focus:ring-1 focus:ring-sky-400 rounded-sm px-1 py-0.5"
-                      />
-                      {st.sensoryNote && (
-                        <p className="text-[10px] text-teal-700 italic truncate px-1">
-                          💡 Sensory tip: {st.sensoryNote}
-                        </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-800 text-xs font-black flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xl shrink-0">{st.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="text"
+                          value={st.title}
+                          onChange={(e) => handleUpdateStepTitle(idx, e.target.value)}
+                          className="w-full bg-transparent font-bold text-xs text-slate-900 focus:bg-white focus:ring-1 focus:ring-sky-400 rounded-sm px-1 py-0.5"
+                        />
+                        {st.sensoryNote && (
+                          <p className="text-[10px] text-teal-700 italic truncate px-1">
+                            💡 Sensory tip: {st.sensoryNote}
+                          </p>
+                        )}
+                      </div>
+                      {st.durationMin && (
+                        <span className="text-[10px] font-bold text-slate-400 shrink-0">
+                          {st.durationMin}m
+                        </span>
                       )}
                     </div>
-                    {st.durationMin && (
-                      <span className="text-[10px] font-bold text-slate-400 shrink-0">
-                        {st.durationMin}m
-                      </span>
-                    )}
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button type="button" onClick={() => handleMoveStep(idx, 'up')} disabled={idx === 0}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer" title="Move up">
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button type="button" onClick={() => handleMoveStep(idx, 'down')} disabled={idx === steps.length - 1}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer" title="Move down">
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {/* ✨ Magic Breakdown */}
+                      <button type="button"
+                        onClick={() => st.microSteps ? handleRemoveMicroSteps(idx) : handleBreakdown(idx)}
+                        className={`p-1 rounded-md cursor-pointer transition-colors ${st.microSteps ? 'text-purple-600 hover:text-red-500' : 'text-slate-400 hover:text-purple-600'}`}
+                        title={st.microSteps ? 'Remove micro-steps' : '✨ Break this into micro-steps'}>
+                        <Wand2 className="w-4 h-4" />
+                      </button>
+                      {/* 🎤 Voice Recording */}
+                      {!st.audioDataUrl ? (
+                        recordingStepIdx === idx ? (
+                          <button type="button" onClick={handleStopRecord}
+                            className="p-1 rounded-md text-red-500 animate-pulse cursor-pointer" title="Stop recording">
+                            <Square className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <button type="button" onClick={() => handleStartRecord(idx)}
+                            className="p-1 rounded-md text-slate-400 hover:text-rose-500 cursor-pointer" title="Record voice clip for this step">
+                            <Mic className="w-4 h-4" />
+                          </button>
+                        )
+                      ) : (
+                        <div className="flex items-center gap-0.5">
+                          <button type="button" onClick={() => handlePlayAudio(idx)}
+                            className={`p-1 rounded-md cursor-pointer ${playingStepIdx === idx ? 'text-green-600 animate-pulse' : 'text-green-500 hover:text-green-700'}`} title="Play voice clip">
+                            <Play className="w-4 h-4" />
+                          </button>
+                          <button type="button" onClick={() => handleDeleteAudio(idx)}
+                            className="p-1 rounded-md text-slate-300 hover:text-red-400 cursor-pointer" title="Delete voice clip">
+                            <MicOff className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                      <button type="button" onClick={() => handleRemoveStep(idx)}
+                        className="p-1 rounded-md text-slate-400 hover:text-rose-600 cursor-pointer" title="Delete step">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Actions: Move up/down, Delete */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStep(idx, 'up')}
-                      disabled={idx === 0}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
-                      title="Move up"
-                    >
-                      <ChevronUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStep(idx, 'down')}
-                      disabled={idx === steps.length - 1}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
-                      title="Move down"
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStep(idx)}
-                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 cursor-pointer"
-                      title="Delete step"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {/* Micro-steps breakdown */}
+                  {st.microSteps && st.microSteps.length > 0 && (
+                    <div className="pl-8 space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-purple-600">✨ Micro-steps:</p>
+                      {st.microSteps.map((ms) => (
+                        <div key={ms.id} className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-xl px-3 py-1.5">
+                          <span className="text-sm">{ms.emoji}</span>
+                          <span className="text-[11px] font-bold text-purple-800">{ms.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Voice clip indicator */}
+                  {st.audioDataUrl && (
+                    <div className="pl-8">
+                      <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
+                        <Mic className="w-3 h-3" /> Parent voice clip recorded ✓
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

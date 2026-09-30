@@ -36,6 +36,10 @@ export const CopingToolkitModal: React.FC = () => {
     childProfile,
     isPremium,
     triggerUpgrade,
+    activateEmergencyMode,
+    setShowFivePointModal,
+    setShowPieTimerModal,
+    setShowFidgetModal,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'breathing' | 'timer' | 'grounding' | 'sound'>('breathing');
@@ -211,6 +215,52 @@ export const CopingToolkitModal: React.FC = () => {
           >
             <Volume2 className="w-4 h-4" />
             <span>Sensory Sounds</span>
+          </button>
+        </div>
+
+        {/* Quick Tools Bar */}
+        <div className="flex items-center gap-1.5 px-4 py-2 bg-teal-50/50 border-b border-teal-100 overflow-x-auto">
+          <span className="text-[10px] font-black uppercase text-teal-800 shrink-0">More Tools:</span>
+          <button
+            onClick={() => {
+              setShowFidgetModal(true);
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+          >
+            <span>🫧</span>
+            <span>Digital Fidgets</span>
+          </button>
+          <button
+            onClick={() => {
+              setShowPieTimerModal(true);
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+          >
+            <span>⏰</span>
+            <span>Pie Clock</span>
+          </button>
+          <button
+            onClick={() => {
+              setShowFivePointModal(true);
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+          >
+            <span>🌡️</span>
+            <span>5-Point Scale</span>
+          </button>
+          <button
+            onClick={() => {
+              setShowCopingToolkit(false);
+              activateEmergencyMode();
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs"
+          >
+            <span>🚨</span>
+            <span>Emergency Mode</span>
           </button>
         </div>
 

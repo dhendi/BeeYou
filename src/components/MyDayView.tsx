@@ -11,11 +11,15 @@ import {
   Volume2,
   Info,
   Timer,
-  Pill
+  Pill,
+  Mic,
+  Wand2,
+  Play
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
 import { getStickerForRoutine } from '../data/rewardsData';
+import { VisualScheduleStep } from '../types';
 
 export const MyDayView: React.FC = () => {
   const {
@@ -42,6 +46,21 @@ export const MyDayView: React.FC = () => {
   );
 
   const timerSectionRef = React.useRef<HTMLDivElement | null>(null);
+  const [playingAudioStepId, setPlayingAudioStepId] = useState<string | null>(null);
+  const [completedMicroSteps, setCompletedMicroSteps] = useState<Record<string, boolean>>({});
+
+  const playParentVoice = (step: VisualScheduleStep) => {
+    if (!step.audioDataUrl) return;
+    try {
+      const audio = new Audio(step.audioDataUrl);
+      setPlayingAudioStepId(step.id);
+      audio.play().catch(() => setPlayingAudioStepId(null));
+      audio.onended = () => setPlayingAudioStepId(null);
+      audio.onerror = () => setPlayingAudioStepId(null);
+    } catch (e) {
+      setPlayingAudioStepId(null);
+    }
+  };
 
   const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || routines[0];
 
@@ -420,11 +439,83 @@ export const MyDayView: React.FC = () => {
                     <span>Sensory tip: {step.sensoryNote}</span>
                   </div>
                 )}
+
+                {/* Magic Micro-Steps Checklist (Feature 4 & 10) */}
+                {step.microSteps && step.microSteps.length > 0 && (
+                  <div 
+                    className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-1.5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 flex items-center gap-1">
+                        <Wand2 className="w-3 h-3 text-purple-600" />
+                        <span>Micro-Steps ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
+                      </span>
+                      <span className="text-[10px] font-bold text-purple-700">Tap to check off</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {step.microSteps.map((ms) => {
+                        const isDone = completedMicroSteps[ms.id];
+                        return (
+                          <div
+                            key={ms.id}
+                            onClick={() => {
+                              setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
+                              playChime('tap');
+                            }}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                              isDone
+                                ? 'bg-purple-100/90 border-purple-300 text-purple-900 line-through opacity-75'
+                                : 'bg-white hover:bg-purple-100/50 border-purple-200 text-purple-950 shadow-2xs'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
+                              <span className="text-sm shrink-0">{ms.emoji}</span>
+                              <span className="truncate">{ms.title}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
+                              }}
+                              className="p-1 rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer"
+                              title="2-min micro-step timer"
+                            >
+                              <Timer className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Action buttons: Start Timer & Hear step */}
+            {/* Action buttons: Start Timer, Parent Voice & Hear step */}
             <div className="flex items-center gap-1.5 ml-2 shrink-0">
+              {/* Parent Voice Recorded Clip (Feature 11) */}
+              {step.audioDataUrl && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playParentVoice(step);
+                  }}
+                  className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
+                    playingAudioStepId === step.id
+                      ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
+                      : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
+                  }`}
+                  title="Listen to parent's voice recording for this step"
+                >
+                  <Mic className="w-4 h-4 text-rose-600" />
+                  <span className="hidden sm:inline">{playingAudioStepId === step.id ? 'Playing...' : "Parent Voice"}</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={(e) => {

@@ -47,6 +47,13 @@ export const ChildHeader: React.FC = () => {
     isPremium,
     triggerUpgrade,
     getTrialDaysRemaining,
+    activateEmergencyMode,
+    setShowFivePointModal,
+    setShowPassportModal,
+    setShowSpoonModal,
+    setShowPieTimerModal,
+    setShowDecisionWheelModal,
+    setShowFidgetModal,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -227,6 +234,90 @@ export const ChildHeader: React.FC = () => {
                 </span>
               </button>
             )}
+
+            {/* Spoon Budget */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSpoonModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-amber-900 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Spoon Theory Daily Energy Budget"
+            >
+              <span>🥄</span>
+              <span className="hidden sm:inline">Spoons</span>
+            </button>
+
+            {/* Pie Clock */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowPieTimerModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-sky-900 bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Visual Pie Clock / Time Timer"
+            >
+              <span>⏰</span>
+              <span className="hidden sm:inline">Timer</span>
+            </button>
+
+            {/* 5-Point Scale */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowFivePointModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Incredible 5-Point Scale"
+            >
+              <span>🌡️</span>
+              <span className="hidden sm:inline">Scale</span>
+            </button>
+
+            {/* Decision Wheel */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowDecisionWheelModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Decision Wheel Spinner"
+            >
+              <span>🎡</span>
+              <span className="hidden sm:inline">Wheel</span>
+            </button>
+
+            {/* Fidget Toys */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowFidgetModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="Sensory Fidget Toys"
+            >
+              <span>🫧</span>
+              <span className="hidden sm:inline">Fidgets</span>
+            </button>
+
+            {/* Communication Passport */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowPassportModal(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1 text-[11px] font-black text-slate-800 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-full border border-slate-300 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              title="How to Support Me - Communication Passport"
+            >
+              <span>🪪</span>
+              <span className="hidden sm:inline">Passport</span>
+            </button>
           </div>
         </div>
       </div>
@@ -285,6 +376,19 @@ export const ChildHeader: React.FC = () => {
         >
           <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
           <span className="hidden md:inline">Caregiver</span>
+        </button>
+
+        {/* Emergency Sensory Red Button (Feature 1) */}
+        <button
+          onClick={() => {
+            activateEmergencyMode();
+            playChime('tap');
+          }}
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-black text-xs sm:text-sm active:scale-95 transition-all shadow-sm cursor-pointer border border-red-500 animate-pulse ring-2 ring-red-400/50"
+          title="Emergency Sensory Red Button: Instant dark sensory mode + large emergency AAC cards"
+        >
+          <span className="text-sm">🚨</span>
+          <span className="hidden xl:inline">Calm Room</span>
         </button>
 
         {/* Easy Emotion Alert Button */}

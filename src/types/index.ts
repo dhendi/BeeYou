@@ -64,6 +64,8 @@ export interface VisualScheduleStep {
   photoUrl?: string;
   sensoryNote?: string;
   communicationShortcutPhrases?: string[];
+  audioDataUrl?: string; // parent voice recording (base64 data URI)
+  microSteps?: Array<{ id: string; title: string; emoji: string; completed: boolean }>; // Magic Task Breakdown
 }
 
 export interface Routine {
@@ -738,4 +740,78 @@ export interface SoundscapeItem {
   tags: string[];
 }
 
+
+// ── FEATURE: Emergency Sensory Mode ──────────────────────────────────────────
+export interface EmergencySensorySettings {
+  isActive: boolean;
+  preferredSoundscape?: SoundscapeId;
+  preferredSoundscapeVolume?: number;
+  activatedAt?: string;
+  pingCaregiverOnActivate: boolean;
+}
+
+// ── FEATURE: Incredible 5-Point Scale ────────────────────────────────────────
+export type FivePointLevel = 1 | 2 | 3 | 4 | 5;
+export interface FivePointCopingAction {
+  label: string;
+  emoji: string;
+}
+export interface FivePointLevelConfig {
+  level: FivePointLevel;
+  label: string;
+  color: string;       // Tailwind bg class e.g. 'bg-green-400'
+  textColor: string;   // Tailwind text class
+  emoji: string;
+  bodyFeelings: string;
+  actions: FivePointCopingAction[]; // 2 recommended by caregiver
+}
+export interface FivePointScaleSettings {
+  levels: FivePointLevelConfig[];
+  showOnChildHome: boolean;
+}
+
+// ── FEATURE: Decision Wheel ───────────────────────────────────────────────────
+export interface DecisionWheelOption {
+  id: string;
+  label: string;
+  emoji: string;
+  color: string; // hex or Tailwind
+}
+export interface DecisionWheelConfig {
+  options: DecisionWheelOption[];
+}
+
+// ── FEATURE: Communication Passport ──────────────────────────────────────────
+export interface CommunicationPassport {
+  communicationStyle: string;       // e.g. "I use AAC to communicate"
+  sensoryTriggers: string[];         // e.g. ["loud noises", "bright lights"]
+  whatHelps: string[];               // e.g. ["quiet space", "fidget toy"]
+  specialInterests: string[];        // e.g. ["trains", "dinosaurs"]
+  comfortItems: string[];            // e.g. ["blue blanket", "noise-cancelling headphones"]
+  emergencyNote?: string;            // e.g. "If overwhelmed, please call Mom: 555-1234"
+  shareCode?: string;
+}
+
+// ── FEATURE: Spoon Theory Budget ─────────────────────────────────────────────
+export type SpoonCost = 1 | 2 | 3;
+export interface SpoonBudgetEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  totalSpoons: number; // morning check-in
+  usedSpoons: number;
+  activityLog: Array<{ label: string; cost: SpoonCost; emoji: string }>;
+  notes?: string;
+}
+
+// ── FEATURE: Visual Pie Clock ─────────────────────────────────────────────────
+export interface PieTimerState {
+  totalSeconds: number;
+  secondsLeft: number;
+  isRunning: boolean;
+  startedAt?: number;
+}
+
+// ── FEATURE: Voice-Recorded Routine Step ─────────────────────────────────────
+// Stored in VisualScheduleStep.audioDataUrl (base64 data URI)
+// No new type needed; we extend VisualScheduleStep inline.
 

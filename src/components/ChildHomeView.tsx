@@ -56,11 +56,20 @@ export const ChildHomeView: React.FC = () => {
     cycleSettings,
     setShowCycleTrackerModal,
     getCyclePhaseInfo,
+    activateEmergencyMode,
+    setShowFivePointModal,
+    setShowPassportModal,
+    setShowSpoonModal,
+    setShowPieTimerModal,
+    setShowDecisionWheelModal,
+    setShowFidgetModal,
+    getTodaySpoonEntry,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const cyclePhaseInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
   const latestMoodEntry = moodJournalEntries[0];
+  const todaySpoonEntry = getTodaySpoonEntry();
 
 
   const currentRoutine = routines[0];
@@ -146,6 +155,19 @@ export const ChildHomeView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto lg:justify-end">
+          {/* Emergency Sensory Red Button (Feature 1) */}
+          <button
+            onClick={() => {
+              activateEmergencyMode();
+              playChime('tap');
+            }}
+            className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-red-700 hover:bg-red-800 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0 border-2 border-red-500 ring-2 ring-red-400/40"
+            title="Emergency Sensory Red Button: Instant dark sensory mode + large emergency AAC cards"
+          >
+            <ShieldAlert className="w-4 h-4 text-white" />
+            <span>Calm Room 🚨</span>
+          </button>
+
           {enabledFeatures?.emergencyAlertSOS !== false && (
             <button
               onClick={() => {
@@ -536,6 +558,163 @@ export const ChildHomeView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 3.8. NEURODIVERGENT EXECUTIVE & SENSORY TOOLKIT HUB */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+            <span>✨</span>
+            <span>Neurodivergent Toolkit</span>
+          </span>
+          <span className="text-[11px] font-bold text-slate-400">Regulation & executive support</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {/* 1. 5-Point Scale */}
+          <div
+            onClick={() => {
+              setShowFivePointModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border-2 border-emerald-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🌡️</span>
+              <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                1–5 Scale
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-emerald-950 leading-tight">
+                5-Point Scale
+              </h4>
+              <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
+                Regulation & meltdown tracker
+              </p>
+            </div>
+          </div>
+
+          {/* 2. Spoon Theory Budget */}
+          <div
+            onClick={() => {
+              setShowSpoonModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🥄</span>
+              <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} Left` : 'Check-in'}
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-amber-950 leading-tight">
+                Spoon Budget
+              </h4>
+              <p className="text-[11px] text-amber-700 font-medium mt-0.5">
+                Daily energy & stamina
+              </p>
+            </div>
+          </div>
+
+          {/* 3. Decision Wheel */}
+          <div
+            onClick={() => {
+              setShowDecisionWheelModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-indigo-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🎡</span>
+              <span className="text-[10px] font-black uppercase text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full">
+                Spinner
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-indigo-950 leading-tight">
+                Decision Wheel
+              </h4>
+              <p className="text-[11px] text-indigo-700 font-medium mt-0.5">
+                Break choice paralysis
+              </p>
+            </div>
+          </div>
+
+          {/* 4. Pie Clock (Time Timer) */}
+          <div
+            onClick={() => {
+              setShowPieTimerModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-sky-50 to-cyan-50 hover:from-sky-100 hover:to-cyan-100 border-2 border-sky-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">⏰</span>
+              <span className="text-[10px] font-black uppercase text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full">
+                Pie Clock
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-sky-950 leading-tight">
+                Visual Pie Timer
+              </h4>
+              <p className="text-[11px] text-sky-700 font-medium mt-0.5">
+                Countdown time disk
+              </p>
+            </div>
+          </div>
+
+          {/* 5. Digital Fidget Toys */}
+          <div
+            onClick={() => {
+              setShowFidgetModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🫧</span>
+              <span className="text-[10px] font-black uppercase text-purple-800 bg-purple-100 px-2 py-0.5 rounded-full">
+                Stimming
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-purple-950 leading-tight">
+                Digital Fidgets
+              </h4>
+              <p className="text-[11px] text-purple-700 font-medium mt-0.5">
+                Pop bubbles & sand ripples
+              </p>
+            </div>
+          </div>
+
+          {/* 6. Communication Passport */}
+          <div
+            onClick={() => {
+              setShowPassportModal(true);
+              playChime('tap');
+            }}
+            className="p-3.5 rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border-2 border-slate-300 shadow-2xs cursor-pointer transition-all active:scale-95 flex flex-col justify-between gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🪪</span>
+              <span className="text-[10px] font-black uppercase text-slate-800 bg-slate-200 px-2 py-0.5 rounded-full">
+                1-Page
+              </span>
+            </div>
+            <div>
+              <h4 className="font-black text-xs sm:text-sm text-slate-900 leading-tight">
+                Support Passport
+              </h4>
+              <p className="text-[11px] text-slate-600 font-medium mt-0.5">
+                Print for teachers & doctors
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 4. TODAY'S ADVENTURE PREPARATION SPOTLIGHT */}
       {todaysAdventure && (

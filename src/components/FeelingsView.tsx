@@ -48,6 +48,7 @@ export const FeelingsView: React.FC = () => {
     getCyclePhaseInfo,
     isPremium,
     triggerUpgrade,
+    setShowFivePointModal,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -179,6 +180,19 @@ export const FeelingsView: React.FC = () => {
         >
           <BarChart3 className="w-4 h-4 text-amber-500" />
           <span>Daily Recollection ({dailyRecollections.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowFivePointModal(true);
+            playChime('tap');
+          }}
+          className="min-w-[130px] py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+          title="Open Incredible 5-Point Scale"
+        >
+          <span>🌡️</span>
+          <span>5-Point Scale</span>
         </button>
       </div>
 

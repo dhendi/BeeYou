@@ -39,6 +39,14 @@ import { MedicationRemindersModal } from './components/MedicationRemindersModal'
 import { MoodJournalModal } from './components/MoodJournalModal';
 import { CycleTrackerModal } from './components/CycleTrackerModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
+import { EmergencySensoryModal } from './components/EmergencySensoryModal';
+import { FivePointScaleModal } from './components/FivePointScaleModal';
+import { DecisionWheelModal } from './components/DecisionWheelModal';
+import { CommunicationPassportModal } from './components/CommunicationPassportModal';
+import { SpoonBudgetModal } from './components/SpoonBudgetModal';
+import { PieTimerModal } from './components/PieTimerModal';
+import { DigitalFidgetModal } from './components/DigitalFidgetModal';
+import { AacKeyboardModal } from './components/AacKeyboardModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -200,6 +208,30 @@ const AppContent: React.FC = () => {
 
       {/* Lumina Premium Subscription & Paywall Modal */}
       <SubscriptionModal />
+
+      {/* Emergency Sensory Red Button Modal */}
+      <EmergencySensoryModal />
+
+      {/* Incredible 5-Point Scale Modal */}
+      <FivePointScaleModal />
+
+      {/* Decision Wheel Modal */}
+      <DecisionWheelModal />
+
+      {/* Communication Passport Modal */}
+      <CommunicationPassportModal />
+
+      {/* Spoon Theory Energy Budget Modal */}
+      <SpoonBudgetModal />
+
+      {/* Visual Pie Clock (Time Timer) Modal */}
+      <PieTimerModal />
+
+      {/* Digital Sensory Fidget Toys Modal */}
+      <DigitalFidgetModal />
+
+      {/* Dyslexia-Friendly AAC Keyboard Modal */}
+      <AacKeyboardModal />
     </div>
   );
 };

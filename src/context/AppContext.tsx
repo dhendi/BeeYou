@@ -34,6 +34,13 @@ import {
   SubscriptionTier,
   SubscriptionStatus,
   BillingCycle,
+  EmergencySensorySettings,
+  FivePointScaleSettings,
+  FivePointLevelConfig,
+  DecisionWheelConfig,
+  DecisionWheelOption,
+  CommunicationPassport,
+  SpoonBudgetEntry,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -291,6 +298,59 @@ interface AppContextType {
   paywallTriggerReason: string;
   triggerUpgrade: (reason?: string) => void;
   getTrialDaysRemaining: () => number;
+
+  // ── 11 New Competitive Features ───────────────────────────────────────────
+
+  // Emergency Sensory Red Button
+  emergencyMode: EmergencySensorySettings;
+  setEmergencyMode: (val: Partial<EmergencySensorySettings>) => void;
+  showEmergencyModal: boolean;
+  setShowEmergencyModal: (val: boolean) => void;
+  activateEmergencyMode: () => void;
+  deactivateEmergencyMode: () => void;
+
+  // Incredible 5-Point Scale
+  fivePointSettings: FivePointScaleSettings;
+  updateFivePointSettings: (updates: Partial<FivePointScaleSettings>) => void;
+  updateFivePointLevel: (level: number, updates: Partial<FivePointLevelConfig>) => void;
+  showFivePointModal: boolean;
+  setShowFivePointModal: (val: boolean) => void;
+
+  // Decision Wheel
+  decisionWheelConfig: DecisionWheelConfig;
+  updateDecisionWheelConfig: (config: Partial<DecisionWheelConfig>) => void;
+  showDecisionWheelModal: boolean;
+  setShowDecisionWheelModal: (val: boolean) => void;
+
+  // Communication Passport
+  communicationPassport: CommunicationPassport;
+  updateCommunicationPassport: (updates: Partial<CommunicationPassport>) => void;
+  showPassportModal: boolean;
+  setShowPassportModal: (val: boolean) => void;
+
+  // Spoon Theory Budget
+  spoonEntries: SpoonBudgetEntry[];
+  addSpoonEntry: (entry: Omit<SpoonBudgetEntry, 'id'>) => void;
+  updateSpoonEntry: (id: string, updates: Partial<SpoonBudgetEntry>) => void;
+  getTodaySpoonEntry: () => SpoonBudgetEntry | null;
+  showSpoonModal: boolean;
+  setShowSpoonModal: (val: boolean) => void;
+
+  // Visual Pie Clock (Time Timer)
+  showPieTimerModal: boolean;
+  setShowPieTimerModal: (val: boolean) => void;
+
+  // Digital Fidget Toys
+  showFidgetModal: boolean;
+  setShowFidgetModal: (val: boolean) => void;
+
+  // AAC Context Scene Switcher (inline in AACView — no modal state needed)
+  aacActiveScene: string | null;
+  setAacActiveScene: (scene: string | null) => void;
+
+  // Dyslexia-Friendly AAC Keyboard
+  showAacKeyboardModal: boolean;
+  setShowAacKeyboardModal: (val: boolean) => void;
 
   // Utilities
   resetToDefaults: () => void;
@@ -1818,6 +1878,189 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   };
 
+  // ─────────────────────────────────────────────────────────────────
+  // 11 NEW FEATURES: State & Handlers
+  // ─────────────────────────────────────────────────────────────────
+
+  // FEATURE 1: Emergency Sensory Mode
+  const [emergencyMode, setEmergencyModeState] = useState<EmergencySensorySettings>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_emergency_mode');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      isActive: false,
+      preferredSoundscape: 'brown_noise',
+      preferredSoundscapeVolume: 0.06,
+      pingCaregiverOnActivate: true,
+    };
+  });
+  const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('lumina_emergency_mode', JSON.stringify(emergencyMode)); } catch (e) {}
+  }, [emergencyMode]);
+
+  const setEmergencyMode = (val: Partial<EmergencySensorySettings>) => {
+    setEmergencyModeState((prev) => ({ ...prev, ...val }));
+  };
+
+  const activateEmergencyMode = () => {
+    setEmergencyModeState((prev) => ({ ...prev, isActive: true, activatedAt: new Date().toISOString() }));
+    setShowEmergencyModal(true);
+    if (settings.soundEffects) playChime('clear');
+  };
+
+  const deactivateEmergencyMode = () => {
+    setEmergencyModeState((prev) => ({ ...prev, isActive: false }));
+    setShowEmergencyModal(false);
+  };
+
+  // FEATURE 2: Incredible 5-Point Scale
+  const DEFAULT_FIVE_POINT_LEVELS: FivePointLevelConfig[] = [
+    {
+      level: 1, label: 'Calm & Happy', emoji: '😊', color: 'bg-green-400', textColor: 'text-green-900',
+      bodyFeelings: 'Body feels relaxed. Breathing is slow and easy. Muscles are loose.',
+      actions: [{ label: 'Keep going!', emoji: '⭐' }, { label: 'Share something nice', emoji: '💬' }],
+    },
+    {
+      level: 2, label: 'Okay / A Little Wiggly', emoji: '🙂', color: 'bg-lime-400', textColor: 'text-lime-900',
+      bodyFeelings: 'A tiny bit excited or distracted. Body is mostly comfortable.',
+      actions: [{ label: 'Take 2 deep breaths', emoji: '🌬️' }, { label: 'Wiggle your fingers', emoji: '🖐️' }],
+    },
+    {
+      level: 3, label: 'Medium / Uneasy', emoji: '😐', color: 'bg-yellow-400', textColor: 'text-yellow-900',
+      bodyFeelings: 'Heart might beat faster. Feeling tense, anxious, or frustrated.',
+      actions: [{ label: 'Try box breathing', emoji: '📦' }, { label: 'Squeeze a fidget', emoji: '🫙' }],
+    },
+    {
+      level: 4, label: 'Very Upset', emoji: '😟', color: 'bg-orange-400', textColor: 'text-orange-900',
+      bodyFeelings: 'Lots of tension. Might want to yell or run away. Hard to think clearly.',
+      actions: [{ label: 'Go to quiet space', emoji: '🤫' }, { label: 'Use Coping Toolkit', emoji: '🎧' }],
+    },
+    {
+      level: 5, label: 'Completely Overwhelmed', emoji: '🌊', color: 'bg-red-500', textColor: 'text-red-100',
+      bodyFeelings: 'Out of control. Very hard to listen or stop. Body may feel like it\'s going to explode.',
+      actions: [{ label: 'Press Emergency Button', emoji: '🚨' }, { label: 'Ask for help now', emoji: '🆘' }],
+    },
+  ];
+
+  const [fivePointSettings, setFivePointSettings] = useState<FivePointScaleSettings>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_five_point');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { levels: DEFAULT_FIVE_POINT_LEVELS, showOnChildHome: true };
+  });
+  const [showFivePointModal, setShowFivePointModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('lumina_five_point', JSON.stringify(fivePointSettings)); } catch (e) {}
+  }, [fivePointSettings]);
+
+  const updateFivePointSettings = (updates: Partial<FivePointScaleSettings>) => {
+    setFivePointSettings((prev) => ({ ...prev, ...updates }));
+  };
+
+  const updateFivePointLevel = (level: number, updates: Partial<FivePointLevelConfig>) => {
+    setFivePointSettings((prev) => ({
+      ...prev,
+      levels: prev.levels.map((l) => l.level === level ? { ...l, ...updates } : l),
+    }));
+  };
+
+  // FEATURE 3: Decision Wheel
+  const DEFAULT_WHEEL_OPTIONS: DecisionWheelOption[] = [
+    { id: 'opt-1', label: 'Watch a Movie', emoji: '🎬', color: '#818cf8' },
+    { id: 'opt-2', label: 'Play Outside', emoji: '⚽', color: '#34d399' },
+    { id: 'opt-3', label: 'Draw or Paint', emoji: '🎨', color: '#fb923c' },
+    { id: 'opt-4', label: 'Read a Book', emoji: '📚', color: '#60a5fa' },
+    { id: 'opt-5', label: 'Build with Legos', emoji: '🧱', color: '#f87171' },
+    { id: 'opt-6', label: 'Listen to Music', emoji: '🎵', color: '#a78bfa' },
+  ];
+
+  const [decisionWheelConfig, setDecisionWheelConfig] = useState<DecisionWheelConfig>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_decision_wheel');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { options: DEFAULT_WHEEL_OPTIONS };
+  });
+  const [showDecisionWheelModal, setShowDecisionWheelModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('lumina_decision_wheel', JSON.stringify(decisionWheelConfig)); } catch (e) {}
+  }, [decisionWheelConfig]);
+
+  const updateDecisionWheelConfig = (config: Partial<DecisionWheelConfig>) => {
+    setDecisionWheelConfig((prev) => ({ ...prev, ...config }));
+  };
+
+  // FEATURE 4: Communication Passport
+  const [communicationPassport, setCommunicationPassport] = useState<CommunicationPassport>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_passport');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      communicationStyle: 'I use AAC to communicate. Please be patient and give me time to respond.',
+      sensoryTriggers: ['loud noises', 'bright lights', 'unexpected changes'],
+      whatHelps: ['quiet space', 'visual schedule', 'fidget toy', 'warning before transitions'],
+      specialInterests: [],
+      comfortItems: [],
+      emergencyNote: '',
+    };
+  });
+  const [showPassportModal, setShowPassportModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('lumina_passport', JSON.stringify(communicationPassport)); } catch (e) {}
+  }, [communicationPassport]);
+
+  const updateCommunicationPassport = (updates: Partial<CommunicationPassport>) => {
+    setCommunicationPassport((prev) => ({ ...prev, ...updates }));
+  };
+
+  // FEATURE 5: Spoon Theory Budget
+  const [spoonEntries, setSpoonEntries] = useState<SpoonBudgetEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_spoon_entries');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+  const [showSpoonModal, setShowSpoonModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('lumina_spoon_entries', JSON.stringify(spoonEntries)); } catch (e) {}
+  }, [spoonEntries]);
+
+  const addSpoonEntry = (entry: Omit<SpoonBudgetEntry, 'id'>) => {
+    setSpoonEntries((prev) => [{ ...entry, id: `spoon-${Date.now()}` }, ...prev.slice(0, 29)]);
+  };
+
+  const updateSpoonEntry = (id: string, updates: Partial<SpoonBudgetEntry>) => {
+    setSpoonEntries((prev) => prev.map((e) => e.id === id ? { ...e, ...updates } : e));
+  };
+
+  const getTodaySpoonEntry = (): SpoonBudgetEntry | null => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return spoonEntries.find((e) => e.date === todayStr) || null;
+  };
+
+  // FEATURE 6: Visual Pie Clock (no persistent state — purely local in modal)
+  const [showPieTimerModal, setShowPieTimerModal] = useState<boolean>(false);
+
+  // FEATURE 7: Digital Fidget Toys (no persistent state)
+  const [showFidgetModal, setShowFidgetModal] = useState<boolean>(false);
+
+  // FEATURE 8 & 9: AAC Context Scene Switcher + Keyboard
+  const [aacActiveScene, setAacActiveScene] = useState<string | null>(null);
+  const [showAacKeyboardModal, setShowAacKeyboardModal] = useState<boolean>(false);
+
+  // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording
+  // These live inside routine steps (microSteps and audioDataUrl fields) — no extra top-level state.
+
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
     setQuickPhrases(DEFAULT_QUICK_PHRASES);
@@ -2030,6 +2273,49 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         paywallTriggerReason,
         triggerUpgrade,
         getTrialDaysRemaining,
+
+        // 11 New Competitive Features
+        emergencyMode,
+        setEmergencyMode,
+        showEmergencyModal,
+        setShowEmergencyModal,
+        activateEmergencyMode,
+        deactivateEmergencyMode,
+
+        fivePointSettings,
+        updateFivePointSettings,
+        updateFivePointLevel,
+        showFivePointModal,
+        setShowFivePointModal,
+
+        decisionWheelConfig,
+        updateDecisionWheelConfig,
+        showDecisionWheelModal,
+        setShowDecisionWheelModal,
+
+        communicationPassport,
+        updateCommunicationPassport,
+        showPassportModal,
+        setShowPassportModal,
+
+        spoonEntries,
+        addSpoonEntry,
+        updateSpoonEntry,
+        getTodaySpoonEntry,
+        showSpoonModal,
+        setShowSpoonModal,
+
+        showPieTimerModal,
+        setShowPieTimerModal,
+
+        showFidgetModal,
+        setShowFidgetModal,
+
+        aacActiveScene,
+        setAacActiveScene,
+
+        showAacKeyboardModal,
+        setShowAacKeyboardModal,
 
         resetToDefaults,
       }}
