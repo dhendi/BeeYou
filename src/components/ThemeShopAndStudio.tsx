@@ -299,12 +299,37 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </p>
           </div>
 
-          {/* Star Wallet */}
-          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/30 shrink-0 self-start sm:self-auto">
-            <Star className="w-5 h-5 text-amber-300 fill-amber-300" />
-            <span className="text-sm font-black tracking-wide">
-              {worldState.stars} Star Coins
-            </span>
+          {/* Action cluster: Default Theme Button + Star Wallet */}
+          <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setTheme('theme-classic');
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xs active:scale-95 ${
+                activeThemeId === 'theme-classic'
+                  ? 'bg-white/20 text-white border border-white/40 ring-1 ring-white/30 cursor-default'
+                  : 'bg-white text-slate-800 hover:bg-amber-50 hover:text-amber-900 border border-white/80'
+              }`}
+              title="Reset Lumina to default Rainbow Meadow theme"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${activeThemeId === 'theme-classic' ? 'text-amber-200' : 'text-amber-600'}`} />
+              <span>Default Theme</span>
+              {activeThemeId === 'theme-classic' ? (
+                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider">
+                  Active
+                </span>
+              ) : null}
+            </button>
+
+            {/* Star Wallet */}
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/30 shrink-0">
+              <Star className="w-5 h-5 text-amber-300 fill-amber-300" />
+              <span className="text-sm font-black tracking-wide">
+                {worldState.stars} Star Coins
+              </span>
+            </div>
           </div>
         </div>
 
@@ -355,11 +380,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           {/* Currently Active Theme Highlight */}
           <div className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <span className="text-4xl sm:text-5xl p-2 rounded-2xl bg-amber-100/70 border border-amber-200">
+              <span className="text-4xl sm:text-5xl p-2 rounded-2xl bg-amber-100/70 border border-amber-200 shrink-0">
                 {activeTheme.mascotEmoji}
               </span>
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase tracking-wider flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Active Theme
                   </span>
@@ -376,50 +401,91 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </div>
             </div>
 
-            {/* Preview of Themed AAC Buttons */}
-            {activeTheme.aacStyling?.customWordEmojis && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                <span className="text-[11px] font-bold text-slate-400 mr-1">AAC Emojis:</span>
-                {Object.entries(activeTheme.aacStyling.customWordEmojis).slice(0, 4).map(([word, icon]) => (
-                  <span
-                    key={word}
-                    className="inline-flex items-center gap-1 text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-xl border border-slate-200 shadow-2xs"
-                  >
-                    <span>{icon}</span>
-                    <span className="text-[10px]">{word}</span>
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Right side of Active Theme card: AAC preview and Reset to Default button */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Preview of Themed AAC Buttons */}
+              {activeTheme.aacStyling?.customWordEmojis && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                  <span className="text-[11px] font-bold text-slate-400 mr-1">AAC Emojis:</span>
+                  {Object.entries(activeTheme.aacStyling.customWordEmojis).slice(0, 4).map(([word, icon]) => (
+                    <span
+                      key={word}
+                      className="inline-flex items-center gap-1 text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-xl border border-slate-200 shadow-2xs"
+                    >
+                      <span>{icon}</span>
+                      <span className="text-[10px]">{word}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Reset to Default Theme Button */}
+              {activeThemeId !== 'theme-classic' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTheme('theme-classic');
+                    playChime('tap');
+                  }}
+                  className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
+                  title="Switch back to classic Lumina default theme"
+                >
+                  <RotateCcw className="w-4 h-4 text-amber-700" />
+                  <span>Reset to Default Theme</span>
+                </button>
+              ) : (
+                <div className="px-3.5 py-2 rounded-2xl bg-amber-50 text-amber-900 border border-amber-200 font-bold text-xs flex items-center gap-1.5 shrink-0">
+                  <span>🌈 Default Theme Active</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Age Group & Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
-            <span className="text-xs font-black text-slate-500 mr-1">Filter by Age:</span>
-            {[
-              { id: 'all', label: 'All Themes', emoji: '🌟' },
-              { id: 'kid', label: 'Kids (3–11)', emoji: '🧒' },
-              { id: 'teen', label: 'Teens (12–17)', emoji: '🎧' },
-              { id: 'adult', label: 'Adults (18+)', emoji: '💼' },
-              { id: 'custom', label: 'Custom Creations', emoji: '✨' },
-            ].map((f) => (
+          {/* Age Group & Category Filter Pills & Default Theme Quick Action */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-slate-500 mr-1">Filter by Age:</span>
+              {[
+                { id: 'all', label: 'All Themes', emoji: '🌟' },
+                { id: 'kid', label: 'Kids (3–11)', emoji: '🧒' },
+                { id: 'teen', label: 'Teens (12–17)', emoji: '🎧' },
+                { id: 'adult', label: 'Adults (18+)', emoji: '💼' },
+                { id: 'custom', label: 'Custom Creations', emoji: '✨' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => {
+                    setAgeFilter(f.id as any);
+                    playChime('tap');
+                  }}
+                  className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    ageFilter === f.id
+                      ? 'bg-amber-500 text-white shadow-xs scale-102 font-black'
+                      : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  <span>{f.emoji}</span>
+                  <span>{f.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Quick Default Theme button in Filter bar */}
+            {activeThemeId !== 'theme-classic' && (
               <button
-                key={f.id}
                 type="button"
                 onClick={() => {
-                  setAgeFilter(f.id as any);
+                  setTheme('theme-classic');
                   playChime('tap');
                 }}
-                className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                  ageFilter === f.id
-                    ? 'bg-amber-500 text-white shadow-xs scale-102 font-black'
-                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
+                className="px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                title="Switch directly to default Lumina theme"
               >
-                <span>{f.emoji}</span>
-                <span>{f.label}</span>
+                <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                <span>Default Theme (Classic)</span>
               </button>
-            ))}
+            )}
           </div>
 
           {/* Free vs Premium Notice if Basic */}
@@ -473,6 +539,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                             <h4 className="font-black text-slate-800 text-base sm:text-lg">
                               {theme.name}
                             </h4>
+                            {theme.id === 'theme-classic' && (
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                                ⭐ Default Theme
+                              </span>
+                            )}
                             {theme.isCustom && (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
                                 Custom
@@ -569,8 +640,17 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     ) : isEquipped ? (
                       <div className="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs">
                         <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Currently Equipped</span>
+                        <span>{theme.id === 'theme-classic' ? 'Default Theme Active' : 'Currently Equipped'}</span>
                       </div>
+                    ) : theme.id === 'theme-classic' ? (
+                      <button
+                        type="button"
+                        onClick={() => setTheme('theme-classic')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-95"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Equip Default Theme</span>
+                      </button>
                     ) : theme.isUnlocked ? (
                       <button
                         type="button"

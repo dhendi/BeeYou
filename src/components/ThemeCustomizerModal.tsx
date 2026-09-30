@@ -1,11 +1,11 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Palette } from 'lucide-react';
+import { X, Palette, RotateCcw } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { playChime } from '../utils/audio';
 
 export const ThemeCustomizerModal: React.FC = () => {
-  const { showThemeModal, setShowThemeModal } = useApp();
+  const { showThemeModal, setShowThemeModal, activeThemeId, setTheme } = useApp();
 
   if (!showThemeModal) return null;
 
@@ -40,14 +40,32 @@ export const ThemeCustomizerModal: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-            aria-label="Close themes modal"
-          >
-            <X className="w-5 h-5 stroke-[2.5]" />
-          </button>
+          <div className="flex items-center gap-2">
+            {activeThemeId !== 'theme-classic' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('theme-classic');
+                  playChime('tap');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95"
+                title="Reset to default Lumina theme"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                <span className="hidden sm:inline">Reset to Default</span>
+                <span className="sm:hidden">Default</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              aria-label="Close themes modal"
+            >
+              <X className="w-5 h-5 stroke-[2.5]" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Scrollable Body */}

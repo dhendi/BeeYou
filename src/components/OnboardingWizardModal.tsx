@@ -899,7 +899,14 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-2xl">{t.mascotEmoji}</span>
-                          {isSelected && <span className="text-xs font-black text-amber-600">✓</span>}
+                          <div className="flex items-center gap-1">
+                            {t.id === 'theme-classic' && (
+                              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                                Default
+                              </span>
+                            )}
+                            {isSelected && <span className="text-xs font-black text-amber-600">✓</span>}
+                          </div>
                         </div>
                         <div className="mt-2">
                           <h4 className="text-xs font-black text-slate-900 truncate">{t.name}</h4>
