@@ -24,12 +24,8 @@ function getAudioContext(): AudioContext | null {
 }
 
 // Audio file mappings for authentic high-fidelity chimes & sound effects
-export const CHIME_AUDIO_FILES: Record<string, string> = {
-  tap: '/sounds/tap.mp3',
-  speak: '/sounds/speak.mp3',
-  star: '/sounds/star.mp3',
-  complete: '/sounds/complete.wav',
-};
+// Audio file mappings for optional sound effects (soundscapes remain authentic recordings in SOUNDSCAPE_AUDIO_FILES)
+export const CHIME_AUDIO_FILES: Record<string, string> = {};
 
 export const PET_AUDIO_FILES: Record<string, string> = {
   puppy: '/sounds/puppy.mp3',
@@ -73,7 +69,7 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
   try {
     const file = CHIME_AUDIO_FILES[type];
     if (file) {
-      const vol = type === 'star' || type === 'complete' ? 0.45 : 0.28;
+      const vol = type === 'star' || type === 'complete' ? 0.35 : 0.20;
       const played = playAudioSample(file, vol);
       if (played) return;
     }
@@ -82,7 +78,7 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
   playProceduralChime(type);
 }
 
-// Procedural synthesizer fallback if audio files are blocked or loading
+// Procedural synthesizer for clean, subtle, soothing UI feedback (zero retro/arcade noise)
 export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
   try {
     const ctx = getAudioContext();
@@ -96,13 +92,14 @@ export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' 
     gain.connect(ctx.destination);
 
     if (type === 'tap') {
+      // Gentle, whisper-quiet 40ms physical tap tick (never loud, never cosmic)
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08); // E5
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(280, now + 0.04);
+      gain.gain.setValueAtTime(0.035, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
       osc.start(now);
-      osc.stop(now + 0.12);
+      osc.stop(now + 0.045);
     } else if (type === 'speak') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(440, now);

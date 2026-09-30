@@ -30,11 +30,6 @@ const sounds = [
   { id: 'fireplace', filename: 'fireplace.mp3', url: 'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/nature/campfire.mp3' },
   { id: 'medieval_tavern', filename: 'medieval_tavern.mp3', url: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Minstrel%20Guild.mp3' },
 
-  // UI Sound Effects & Chimes
-  { id: 'tap', filename: 'tap.mp3', url: 'https://raw.githubusercontent.com/photonstorm/phaser-examples/master/examples/assets/audio/SoundEffects/menu_select.mp3' },
-  { id: 'speak', filename: 'speak.mp3', url: 'https://raw.githubusercontent.com/photonstorm/phaser-examples/master/examples/assets/audio/SoundEffects/menu_switch.mp3' },
-  { id: 'star', filename: 'star.mp3', url: 'https://raw.githubusercontent.com/photonstorm/phaser-examples/master/examples/assets/audio/SoundEffects/p-ping.mp3' },
-  { id: 'complete', filename: 'complete.wav', url: 'https://raw.githubusercontent.com/photonstorm/phaser-examples/master/examples/assets/audio/SoundEffects/pickup.wav' },
 
   // Pet sounds
   { id: 'puppy', filename: 'puppy.mp3', url: 'https://raw.githubusercontent.com/remvze/moodist/main/public/sounds/animals/dog-barking.mp3' },

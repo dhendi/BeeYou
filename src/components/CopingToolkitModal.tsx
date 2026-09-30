@@ -427,7 +427,6 @@ export const CopingToolkitModal: React.FC = () => {
                       type="button"
                       onClick={() => {
                         stopSoundscape();
-                        playChime('tap');
                       }}
                       className="px-2 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-[11px] cursor-pointer"
                     >
@@ -503,10 +502,8 @@ export const CopingToolkitModal: React.FC = () => {
                         }
                         if (isPlaying) {
                           stopSoundscape();
-                          playChime('tap');
                         } else {
                           playSoundscape(item.id, soundVolume);
-                          playChime('tap');
                         }
                       }}
                       className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
