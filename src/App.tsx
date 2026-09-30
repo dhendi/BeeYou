@@ -36,6 +36,8 @@ import { AboutMeIDModal } from './components/AboutMeIDModal';
 import { AvatarCreatorModal } from './components/AvatarCreatorModal';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
 import { MedicationRemindersModal } from './components/MedicationRemindersModal';
+import { MoodJournalModal } from './components/MoodJournalModal';
+import { CycleTrackerModal } from './components/CycleTrackerModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -183,6 +185,12 @@ const AppContent: React.FC = () => {
 
       {/* Medication & Health Reminders Modal */}
       <MedicationRemindersModal />
+
+      {/* Teen & Adult Deep Mood Reflection Journal Modal */}
+      <MoodJournalModal />
+
+      {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
+      <CycleTrackerModal />
     </div>
   );
 };

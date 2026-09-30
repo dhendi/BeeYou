@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { EMOTIONS } from '../data/defaultData';
+import { EMOTIONS, MOOD_META, TRIGGER_META, COPING_META } from '../data/defaultData';
 import { EmotionType } from '../types';
 import { ThemedEmotionFace } from './ThemedEmotionFace';
 import { 
@@ -14,7 +14,11 @@ import {
   SmilePlus,
   Calendar,
   Smile,
-  BarChart3
+  BarChart3,
+  BookOpen,
+  HeartPulse,
+  Lock,
+  Plus
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
@@ -33,9 +37,22 @@ export const FeelingsView: React.FC = () => {
     avatar,
     updateAvatar,
     setShowAvatarCreator,
+    userAgeGroup,
+    enabledFeatures,
+    moodJournalEntries,
+    setShowMoodJournalModal,
+    cycleSettings,
+    cycleLogs,
+    setShowCycleTrackerModal,
+    getCyclePhaseInfo,
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'recollection'>('check-in');
+  const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
+  const showMoodJournalTab = isTeenOrAdult && enabledFeatures?.moodJournal !== false;
+  const showCycleTab = isTeenOrAdult && enabledFeatures?.cycleTracker !== false;
+  const cyclePhaseInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
+
+  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'journal' | 'cycle' | 'recollection'>('check-in');
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionType | null>(currentMood);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
@@ -90,22 +107,60 @@ export const FeelingsView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4 sm:space-y-5">
       {/* SUB-TAB NAVIGATOR */}
-      <div className="flex items-center gap-1.5 p-1 bg-rose-100/60 dark:bg-slate-800 rounded-2xl border border-rose-200 shrink-0">
+      <div className="flex items-center gap-1.5 p-1 bg-rose-100/60 dark:bg-slate-800 rounded-2xl border border-rose-200 shrink-0 overflow-x-auto">
         <button
           type="button"
           onClick={() => {
             setActiveSubTab('check-in');
             playChime('tap');
           }}
-          className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
             activeSubTab === 'check-in'
               ? 'bg-white dark:bg-slate-700 text-rose-950 dark:text-white shadow-xs'
               : 'text-rose-800 hover:text-rose-950 dark:text-slate-300'
           }`}
         >
           <Smile className="w-4 h-4 text-rose-500" />
-          <span>Quick Emotion Check-In</span>
+          <span>Emotion Check-In</span>
         </button>
+
+        {showMoodJournalTab && (
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSubTab('journal');
+              playChime('tap');
+            }}
+            className={`flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'journal'
+                ? 'bg-white dark:bg-slate-700 text-purple-950 dark:text-white shadow-xs'
+                : 'text-purple-800 hover:text-purple-950 dark:text-slate-300'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-purple-600" />
+            <span>Mood Journal ({moodJournalEntries.length})</span>
+          </button>
+        )}
+
+        {showCycleTab && (
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSubTab('cycle');
+              playChime('tap');
+            }}
+            className={`flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'cycle'
+                ? 'bg-white dark:bg-slate-700 text-pink-950 dark:text-white shadow-xs'
+                : 'text-pink-800 hover:text-pink-950 dark:text-slate-300'
+            }`}
+          >
+            <HeartPulse className="w-4 h-4 text-pink-600" />
+            <span>
+              {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Cycle Day ${cyclePhaseInfo?.currentCycleDay || 1}`}
+            </span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -113,19 +168,337 @@ export const FeelingsView: React.FC = () => {
             setActiveSubTab('recollection');
             playChime('tap');
           }}
-          className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
             activeSubTab === 'recollection'
               ? 'bg-white dark:bg-slate-700 text-amber-950 dark:text-white shadow-xs'
               : 'text-amber-800 hover:text-amber-950 dark:text-slate-300'
           }`}
         >
           <BarChart3 className="w-4 h-4 text-amber-500" />
-          <span>Daily Recollection & History ({dailyRecollections.length})</span>
+          <span>Daily Recollection ({dailyRecollections.length})</span>
         </button>
       </div>
 
       {activeSubTab === 'recollection' ? (
         <DailyRecollectionChart />
+      ) : activeSubTab === 'journal' ? (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Hero Banner */}
+          <div className="bg-gradient-to-r from-purple-100 via-pink-50 to-indigo-100 border-2 border-purple-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-black uppercase tracking-wider text-purple-700 bg-purple-200/80 px-2.5 py-0.5 rounded-full">
+                  Teens & Adults
+                </span>
+                <span className="text-xs text-purple-900 font-bold">Deep Emotional & Sensory Reflection</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-purple-950">
+                Your Mood Journal 📖
+              </h2>
+              <p className="text-xs sm:text-sm text-purple-800 font-medium mt-1 max-w-xl">
+                Track intensity, energy, sensory distress, triggers, and the coping tools that actually help your neurotype.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowMoodJournalModal(true);
+                playChime('tap');
+              }}
+              className="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Write Reflection (+3 ⭐)</span>
+            </button>
+          </div>
+
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white p-3.5 rounded-2xl border border-purple-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Total Reflections</span>
+              <span className="text-xl font-black text-purple-900">{moodJournalEntries.length}</span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-purple-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Latest Emotion</span>
+              <span className="text-sm font-black text-purple-900 flex items-center gap-1.5 truncate mt-1">
+                {moodJournalEntries[0] ? `${MOOD_META[moodJournalEntries[0].primaryMood]?.emoji || '🌱'} ${MOOD_META[moodJournalEntries[0].primaryMood]?.label || 'None'}` : 'None yet'}
+              </span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-purple-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Latest Intensity</span>
+              <span className="text-xl font-black text-purple-900">
+                {moodJournalEntries[0] ? `${moodJournalEntries[0].moodIntensity}/10` : '-'}
+              </span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-purple-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Sensory Distress</span>
+              <span className="text-xl font-black text-purple-900">
+                {moodJournalEntries[0] ? `${moodJournalEntries[0].sensoryDistress}%` : '-'}
+              </span>
+            </div>
+          </div>
+
+          {/* Entries Feed */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider">
+              Reflection Log & Insights
+            </h3>
+
+            {moodJournalEntries.length === 0 ? (
+              <div className="bg-white p-8 rounded-3xl border-2 border-dashed border-purple-200 text-center space-y-3">
+                <span className="text-4xl block">📝</span>
+                <h4 className="font-bold text-slate-700">No reflections written yet</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Take a calm moment to explore how your body and thoughts feel right now.
+                </p>
+                <button
+                  onClick={() => setShowMoodJournalModal(true)}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Start First Journal Entry</span>
+                </button>
+              </div>
+            ) : (
+              moodJournalEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="bg-white rounded-3xl border-2 border-slate-100 p-4 sm:p-5 shadow-xs space-y-3 hover:border-purple-200 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl p-2 rounded-2xl bg-purple-50">
+                        {MOOD_META[entry.primaryMood]?.emoji || '💭'}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-black text-slate-900 text-base">
+                            {MOOD_META[entry.primaryMood]?.label || entry.primaryMood}
+                          </h4>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                            Intensity: {entry.moodIntensity}/10
+                          </span>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
+                            Energy: {entry.energyLevel}/5
+                          </span>
+                          {entry.sensoryDistress > 50 && (
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                              Sensory Load: {entry.sensoryDistress}%
+                            </span>
+                          )}
+                          {entry.isPrivate && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-0.5">
+                              <Lock className="w-3 h-3" /> Private
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-slate-400 mt-0.5 block">
+                          {new Date(entry.timestamp).toLocaleDateString(undefined, {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowMoodJournalModal(true)}
+                      className="text-xs font-bold text-purple-600 hover:text-purple-700 px-2.5 py-1 rounded-lg hover:bg-purple-50 cursor-pointer"
+                    >
+                      View / Edit
+                    </button>
+                  </div>
+
+                  {(entry.journalText || entry.gratitudeOrWin) && (
+                    <div className="bg-slate-50/80 rounded-2xl p-3 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                      {entry.gratitudeOrWin && (
+                        <p className="text-[11px] font-bold text-purple-800 mb-1">
+                          Anchor: "{entry.gratitudeOrWin}"
+                        </p>
+                      )}
+                      <p className="whitespace-pre-line">{entry.journalText}</p>
+                    </div>
+                  )}
+
+                  {/* Triggers & Coping Tools Tags */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {entry.triggers.map((t) => (
+                      <span
+                        key={t}
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200"
+                      >
+                        {TRIGGER_META[t] ? `${TRIGGER_META[t].emoji} ${TRIGGER_META[t].label}` : `⚡ ${t}`}
+                      </span>
+                    ))}
+                    {entry.copingStrategies.map((c) => (
+                      <span
+                        key={c}
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-900 border border-teal-200"
+                      >
+                        {COPING_META[c] ? `${COPING_META[c].emoji} ${COPING_META[c].label}` : `🛠️ ${c}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : activeSubTab === 'cycle' ? (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Cycle Tracker Header */}
+          <div className="bg-gradient-to-r from-rose-100 via-pink-50 to-amber-100 border-2 border-rose-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <span className="text-4xl sm:text-5xl p-3 rounded-2xl bg-white shadow-2xs">
+                {cycleSettings.discreetMode ? '🌿' : '🌸'}
+              </span>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-black uppercase tracking-wider text-rose-800 bg-rose-200/80 px-2.5 py-0.5 rounded-full">
+                    {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Day ${cyclePhaseInfo?.currentCycleDay || 1} of ${cycleSettings.averageCycleLength}`}
+                  </span>
+                  <span className="text-xs text-rose-950 font-bold">
+                    {cyclePhaseInfo?.phaseLabel}
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-rose-950">
+                  {cycleSettings.discreetMode ? 'Hormonal & Sensory Rhythm Tracker' : 'Menstrual Cycle & Sensory Wellness'}
+                </h2>
+                <p className="text-xs sm:text-sm text-rose-800 font-medium mt-1 max-w-xl">
+                  {cyclePhaseInfo?.phaseDescription}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowCycleTrackerModal(true);
+                playChime('tap');
+              }}
+              className="px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <HeartPulse className="w-4 h-4" />
+              <span>Log Flow & Symptoms (+2 ⭐)</span>
+            </button>
+          </div>
+
+          {/* Neurodivergent Insight Card */}
+          {cyclePhaseInfo?.sensoryInsight && (
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 shadow-2xs space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🧠</span>
+                <h3 className="font-black text-amber-950 text-sm sm:text-base">
+                  Neurodivergent Sensory & Executive Function Notice
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-amber-900 font-medium leading-relaxed">
+                {cyclePhaseInfo.sensoryInsight}
+              </p>
+            </div>
+          )}
+
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Cycle Length</span>
+              <span className="text-xl font-black text-rose-950">{cycleSettings.averageCycleLength} Days</span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Days Until Next</span>
+              <span className="text-xl font-black text-rose-950">{cyclePhaseInfo?.daysUntilNextPeriod || 0} Days</span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Total Logs</span>
+              <span className="text-xl font-black text-rose-950">{cycleLogs.length}</span>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs">
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Period Length</span>
+              <span className="text-xl font-black text-rose-950">{cycleSettings.averagePeriodLength} Days</span>
+            </div>
+          </div>
+
+          {/* Daily Logs History */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider">
+              Recent Cycle Logs
+            </h3>
+
+            {cycleLogs.length === 0 ? (
+              <div className="bg-white p-8 rounded-3xl border-2 border-dashed border-rose-200 text-center space-y-3">
+                <span className="text-4xl block">🌸</span>
+                <h4 className="font-bold text-slate-700">No cycle logs recorded yet</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Log when your period starts or record physical and sensory symptoms anytime.
+                </p>
+                <button
+                  onClick={() => setShowCycleTrackerModal(true)}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Log Symptoms & Flow</span>
+                </button>
+              </div>
+            ) : (
+              cycleLogs.slice(0, 14).map((log) => (
+                <div
+                  key={log.id}
+                  className="bg-white rounded-3xl border-2 border-slate-100 p-4 sm:p-5 shadow-xs space-y-2.5 hover:border-rose-200 transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-black text-slate-800">
+                        {log.date}
+                      </span>
+                      {log.flow && (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 capitalize">
+                          Flow: {log.flow}
+                        </span>
+                      )}
+                      {log.painLevel !== undefined && log.painLevel > 0 && (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                          Discomfort: {log.painLevel}/10
+                        </span>
+                      )}
+                      {log.energyLevel !== undefined && (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                          Energy: {log.energyLevel}/5
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => setShowCycleTrackerModal(true)}
+                      className="text-xs font-bold text-rose-600 hover:text-rose-700 px-2 py-1 rounded-lg hover:bg-rose-50 cursor-pointer"
+                    >
+                      Update
+                    </button>
+                  </div>
+
+                  {log.symptoms.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {log.symptoms.map((s, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700"
+                        >
+                          • {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {log.notes && (
+                    <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl font-medium">
+                      {log.notes}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       ) : (
         <>
           {/* End-of-Day Recollection Prompt Banner */}
@@ -181,6 +554,49 @@ export const FeelingsView: React.FC = () => {
               <span>Open Calm Toolkit 🛋️</span>
             </button>
           </div>
+
+          {/* Teen/Adult Deeper Reflection Bar */}
+          {isTeenOrAdult && (showMoodJournalTab || showCycleTab) && (
+            <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-amber-50 border-2 border-purple-200/80 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">✨</span>
+                <div>
+                  <span className="text-xs font-black text-purple-950 uppercase tracking-wider block">
+                    Looking for deeper reflection?
+                  </span>
+                  <p className="text-xs text-purple-900 font-medium">
+                    Unpack nuanced emotions, energy levels, sensory triggers, or track your cycle rhythms.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {showMoodJournalTab && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSubTab('journal');
+                      playChime('tap');
+                    }}
+                    className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all active:scale-95"
+                  >
+                    📖 Mood Journal
+                  </button>
+                )}
+                {showCycleTab && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSubTab('cycle');
+                      playChime('tap');
+                    }}
+                    className="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all active:scale-95"
+                  >
+                    🌸 {cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle Tracker'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* 1. EMOTION GRID */}
           <div>

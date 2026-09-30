@@ -15,6 +15,12 @@ import {
   EmotionOption,
   MedicationReminder,
   MedicationDoseLog,
+  MoodJournalEntry,
+  MoodJournalEmotion,
+  MoodTriggerCategory,
+  CopingStrategyUsed,
+  CycleDailyLog,
+  CycleSettings,
 } from '../types';
 
 export const EMOTIONS: EmotionOption[] = [
@@ -939,4 +945,135 @@ export const INITIAL_MEDICATION_LOGS: MedicationDoseLog[] = [
     notes: 'Bedtime routine complete',
   },
 ];
+
+export const INITIAL_MOOD_JOURNAL_ENTRIES: MoodJournalEntry[] = [
+  {
+    id: 'mj-1',
+    date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+    time: '20:30',
+    timestamp: Date.now() - 86400000,
+    primaryMood: 'reflective',
+    moodIntensity: 6,
+    energyLevel: 3,
+    sensoryDistress: 35,
+    triggers: ['social_masking', 'school_work_stress'],
+    copingStrategies: ['noise_cancelling_headphones', 'journaling', 'weighted_blanket'],
+    journalText: 'Today was full of conversations and meetings. Masking took quite a bit of energy, but taking 20 minutes in a dim room with my noise-cancelling headphones helped my nervous system reset.',
+    gratitudeOrWin: 'Finished my priority project and took a quiet walk at dusk.',
+    isPrivate: false,
+  },
+  {
+    id: 'mj-2',
+    date: new Date().toISOString().split('T')[0],
+    time: '14:15',
+    timestamp: Date.now() - 3600000 * 2,
+    primaryMood: 'content',
+    moodIntensity: 7,
+    energyLevel: 4,
+    sensoryDistress: 15,
+    triggers: ['routine_change'],
+    copingStrategies: ['deep_breathing', 'listening_to_music'],
+    journalText: 'Schedule shifted around lunchtime, but instead of spiraling into panic, I used the visual planner and listened to ambient lofi beats. Feeling grounded and clear-headed.',
+    gratitudeOrWin: 'Handled an unexpected plan change with calm self-advocacy.',
+    isPrivate: false,
+  },
+];
+
+export const INITIAL_CYCLE_SETTINGS: CycleSettings = {
+  enabled: true,
+  averageCycleLength: 28,
+  averagePeriodLength: 5,
+  lastPeriodStartDate: new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0], // Day 14
+  trackSensoryAmplification: true,
+  discreetMode: false,
+  remindersEnabled: true,
+};
+
+export const INITIAL_CYCLE_LOGS: CycleDailyLog[] = [
+  {
+    id: 'clog-1',
+    date: new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0],
+    flow: 'medium',
+    symptoms: ['cramps', 'fatigue'],
+    painLevel: 5,
+    energyLevel: 2,
+    moodSummary: 'Sensitive & tired',
+    notes: 'Period started. Used heating pad and weighted blanket.',
+  },
+  {
+    id: 'clog-2',
+    date: new Date(Date.now() - 13 * 86400000).toISOString().split('T')[0],
+    flow: 'heavy',
+    symptoms: ['cramps', 'headache', 'sensory_amplification'],
+    painLevel: 6,
+    energyLevel: 2,
+    moodSummary: 'Sensory sensitivity heightened',
+    notes: 'Lights felt very bright. Kept blinds down and rested.',
+  },
+  {
+    id: 'clog-3',
+    date: new Date(Date.now() - 12 * 86400000).toISOString().split('T')[0],
+    flow: 'medium',
+    symptoms: ['fatigue', 'bloating'],
+    painLevel: 3,
+    energyLevel: 3,
+    moodSummary: 'Calmer, cramps subsiding',
+    notes: 'Hydrated well and took a gentle walk.',
+  },
+];
+
+export const MOOD_META: Record<MoodJournalEmotion, { label: string; emoji: string; bg: string; text: string }> = {
+  peaceful: { label: 'Peaceful', emoji: '😌', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },
+  content: { label: 'Content', emoji: '😊', bg: 'bg-teal-50 border-teal-200', text: 'text-teal-800' },
+  inspired: { label: 'Inspired', emoji: '✨', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
+  energized: { label: 'Energized', emoji: '⚡', bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-800' },
+  confident: { label: 'Confident', emoji: '🦁', bg: 'bg-orange-50 border-orange-200', text: 'text-orange-800' },
+  grateful: { label: 'Grateful', emoji: '🙏', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },
+  focused: { label: 'Focused', emoji: '🎯', bg: 'bg-sky-50 border-sky-200', text: 'text-sky-800' },
+  reflective: { label: 'Reflective', emoji: '💭', bg: 'bg-indigo-50 border-indigo-200', text: 'text-indigo-800' },
+  melancholic: { label: 'Melancholic', emoji: '🍂', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-900' },
+  sensitive: { label: 'Sensitive', emoji: '🌾', bg: 'bg-purple-50 border-purple-200', text: 'text-purple-800' },
+  spacey: { label: 'Spacey', emoji: '🪐', bg: 'bg-slate-100 border-slate-300', text: 'text-slate-800' },
+  restless: { label: 'Restless', emoji: '🌀', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
+  anxious: { label: 'Anxious', emoji: '😟', bg: 'bg-rose-50 border-rose-200', text: 'text-rose-800' },
+  overwhelmed: { label: 'Overwhelmed', emoji: '🌊', bg: 'bg-violet-50 border-violet-200', text: 'text-violet-800' },
+  irritable: { label: 'Irritable', emoji: '⚡', bg: 'bg-red-50 border-red-200', text: 'text-red-800' },
+  exhausted: { label: 'Burnt Out', emoji: '🔋', bg: 'bg-slate-100 border-slate-300', text: 'text-slate-700' },
+  sad: { label: 'Sad', emoji: '🌧️', bg: 'bg-blue-50 border-blue-200', text: 'text-blue-800' },
+  lonely: { label: 'Lonely', emoji: '🕯️', bg: 'bg-indigo-50 border-indigo-200', text: 'text-indigo-800' },
+  frustrated: { label: 'Frustrated', emoji: '😤', bg: 'bg-rose-50 border-rose-200', text: 'text-rose-800' },
+};
+
+export const TRIGGER_META: Record<MoodTriggerCategory, { label: string; emoji: string }> = {
+  sensory_overload: { label: 'Sensory Overload', emoji: '🤯' },
+  bright_lights: { label: 'Bright Lights', emoji: '💡' },
+  loud_noise: { label: 'Loud Noises', emoji: '🔊' },
+  social_masking: { label: 'Social Masking Fatigue', emoji: '🎭' },
+  social_battery_empty: { label: 'Social Battery Drained', emoji: '🪫' },
+  conflict: { label: 'Conflict / Misunderstanding', emoji: '⚡' },
+  school_work_stress: { label: 'School / Work Demands', emoji: '💼' },
+  routine_change: { label: 'Unexpected Plan Change', emoji: '🔄' },
+  lack_of_sleep: { label: 'Poor Sleep / Insomnia', emoji: '🥱' },
+  hormonal_cycle: { label: 'Hormonal / Cycle Shift', emoji: '🌸' },
+  executive_dysfunction: { label: 'Task Paralysis / Brain Fog', emoji: '🌀' },
+  physical_pain: { label: 'Physical Discomfort / Pain', emoji: '🩹' },
+  hunger_dehydration: { label: 'Hunger / Low Hydration', emoji: '💧' },
+  unknown: { label: 'Not Sure / Mystery', emoji: '🤷' },
+};
+
+export const COPING_META: Record<CopingStrategyUsed, { label: string; emoji: string }> = {
+  quiet_sensory_break: { label: 'Quiet Sensory Break', emoji: '🛋️' },
+  noise_cancelling_headphones: { label: 'Noise-Cancelling', emoji: '🎧' },
+  deep_breathing: { label: 'Deep Breathing', emoji: '🫁' },
+  stimming_fidgeting: { label: 'Stimming / Fidget Toy', emoji: '🌀' },
+  weighted_blanket: { label: 'Weighted Blanket / Deep Pressure', emoji: '🛌' },
+  journaling: { label: 'Journaling & Brain Dump', emoji: '✍️' },
+  listening_to_music: { label: 'Calming Music / Audio', emoji: '🎵' },
+  walk_in_nature: { label: 'Walk in Nature', emoji: '🌲' },
+  talking_to_someone: { label: 'Talk with Safe Person', emoji: '💬' },
+  gaming_special_interest: { label: 'Special Interest / Gaming', emoji: '🎮' },
+  nap_rest: { label: 'Rest / Nap', emoji: '💤' },
+  hydration_snack: { label: 'Water & Nutritious Snack', emoji: '🍎' },
+};
+
 

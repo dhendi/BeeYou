@@ -17,9 +17,12 @@ import {
   Heart,
   ShieldAlert,
   Moon,
-  Pill
+  Pill,
+  BookOpen,
+  HeartPulse
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { MOOD_META } from '../data/defaultData';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -48,7 +51,16 @@ export const ChildHomeView: React.FC = () => {
     medications,
     takeMedicationDose,
     setShowMedicationModal,
+    moodJournalEntries,
+    setShowMoodJournalModal,
+    cycleSettings,
+    setShowCycleTrackerModal,
+    getCyclePhaseInfo,
   } = useApp();
+
+  const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
+  const cyclePhaseInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
+  const latestMoodEntry = moodJournalEntries[0];
 
 
   const currentRoutine = routines[0];
@@ -429,6 +441,101 @@ export const ChildHomeView: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* 3.6. TEEN & ADULT: MOOD JOURNAL & SELF-REFLECTION CARD */}
+      {isTeenOrAdult && enabledFeatures?.moodJournal !== false && (
+        <div 
+          onClick={() => {
+            setShowMoodJournalModal(true);
+            playChime('tap');
+          }}
+          className="bg-gradient-to-r from-purple-50/90 via-indigo-50/70 to-pink-50/80 hover:from-purple-100/90 hover:to-pink-100/90 border-2 border-purple-200 rounded-3xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all active:scale-98"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5">
+              <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
+                {latestMoodEntry ? MOOD_META[latestMoodEntry.primaryMood]?.emoji || '📖' : '📖'}
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-800 bg-purple-200/80 px-2 py-0.5 rounded-md">
+                    Personal Reflection
+                  </span>
+                  {latestMoodEntry && (
+                    <span className="text-xs text-purple-900 font-semibold">
+                      Latest: {MOOD_META[latestMoodEntry.primaryMood]?.label} ({latestMoodEntry.moodIntensity}/10)
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-black text-purple-950 text-base sm:text-lg mt-0.5">
+                  Mood Journal & Deep Reflection
+                </h3>
+                <p className="text-xs text-purple-800 font-medium">
+                  {latestMoodEntry 
+                    ? `"${latestMoodEntry.journalText?.slice(0, 80) || latestMoodEntry.gratitudeOrWin || 'Track energy, sensory load, and triggers.'}"`
+                    : 'Check in with yourself: unpack feelings, sensory overwhelm, and discover helpful coping tools.'
+                  }
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="hidden sm:inline text-xs font-bold text-purple-800 bg-white/80 px-3 py-1.5 rounded-xl border border-purple-200">
+                {moodJournalEntries.length} {moodJournalEntries.length === 1 ? 'Entry' : 'Entries'}
+              </span>
+              <ArrowRight className="w-5 h-5 text-purple-700" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3.7. TEEN & ADULT: CYCLE & HORMONAL RHYTHM CARD */}
+      {isTeenOrAdult && enabledFeatures?.cycleTracker !== false && cyclePhaseInfo && (
+        <div 
+          onClick={() => {
+            setShowCycleTrackerModal(true);
+            playChime('tap');
+          }}
+          className="bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-rose-50/80 hover:from-rose-100/90 hover:to-amber-100/90 border-2 border-rose-200 rounded-3xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all active:scale-98"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5">
+              <span className="text-3xl sm:text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
+                {cycleSettings.discreetMode ? '🌿' : '🌸'}
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-800 bg-rose-200/80 px-2 py-0.5 rounded-md">
+                    {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Cycle Day ${cyclePhaseInfo.currentCycleDay} of ${cycleSettings.averageCycleLength}`}
+                  </span>
+                  <span className="text-xs font-bold text-rose-950">
+                    {cyclePhaseInfo.phaseLabel}
+                  </span>
+                </div>
+                <h3 className="font-black text-rose-950 text-base sm:text-lg mt-0.5">
+                  {cycleSettings.discreetMode ? 'Hormonal & Sensory Rhythm' : 'Menstrual Cycle & Sensory Wellness'}
+                </h3>
+                <p className="text-xs text-rose-800 font-medium">
+                  {cyclePhaseInfo.sensoryInsight}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCycleTrackerModal(true);
+                  playChime('tap');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+              >
+                Log Today
+              </button>
+              <ArrowRight className="w-5 h-5 text-rose-700" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 4. TODAY'S ADVENTURE PREPARATION SPOTLIGHT */}
       {todaysAdventure && (

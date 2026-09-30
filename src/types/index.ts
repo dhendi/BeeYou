@@ -295,6 +295,119 @@ export interface MedicationDoseLog {
   notes?: string;
 }
 
+// Mood Journal Types (Teens to Adults)
+export type MoodJournalEmotion =
+  | 'peaceful'
+  | 'content'
+  | 'inspired'
+  | 'energized'
+  | 'confident'
+  | 'grateful'
+  | 'focused'
+  | 'reflective'
+  | 'melancholic'
+  | 'restless'
+  | 'sensitive'
+  | 'spacey'
+  | 'anxious'
+  | 'overwhelmed'
+  | 'irritable'
+  | 'exhausted'
+  | 'sad'
+  | 'lonely'
+  | 'frustrated';
+
+export type MoodTriggerCategory =
+  | 'sensory_overload'
+  | 'bright_lights'
+  | 'loud_noise'
+  | 'social_masking'
+  | 'social_battery_empty'
+  | 'conflict'
+  | 'school_work_stress'
+  | 'routine_change'
+  | 'lack_of_sleep'
+  | 'hormonal_cycle'
+  | 'executive_dysfunction'
+  | 'physical_pain'
+  | 'hunger_dehydration'
+  | 'unknown';
+
+export type CopingStrategyUsed =
+  | 'quiet_sensory_break'
+  | 'noise_cancelling_headphones'
+  | 'deep_breathing'
+  | 'stimming_fidgeting'
+  | 'weighted_blanket'
+  | 'journaling'
+  | 'listening_to_music'
+  | 'walk_in_nature'
+  | 'talking_to_someone'
+  | 'gaming_special_interest'
+  | 'nap_rest'
+  | 'hydration_snack';
+
+export interface MoodJournalEntry {
+  id: string;
+  date: string;               // YYYY-MM-DD
+  time: string;               // HH:MM
+  timestamp: number;
+  primaryMood: MoodJournalEmotion;
+  moodIntensity: number;      // 1 - 10
+  energyLevel: number;        // 1 - 5 (1=Drained, 5=Overcharged)
+  sensoryDistress: number;    // 0 - 100%
+  triggers: MoodTriggerCategory[];
+  copingStrategies: CopingStrategyUsed[];
+  journalText: string;        // Freeform reflection
+  gratitudeOrWin?: string;    // Positive anchor
+  isPrivate?: boolean;        // Optional discreet flag
+}
+
+// Cycle Tracker Types (Teens to Adults)
+export type CyclePhase = 'menstrual' | 'follicular' | 'ovulatory' | 'luteal';
+
+export type FlowIntensity = 'none' | 'spotting' | 'light' | 'medium' | 'heavy';
+
+export type CycleSymptom =
+  | 'cramps'
+  | 'headache'
+  | 'fatigue'
+  | 'bloating'
+  | 'breast_tenderness'
+  | 'backache'
+  | 'nausea'
+  | 'acne'
+  | 'joint_muscle_pain'
+  | 'sensory_amplification'
+  | 'sensory_overload'
+  | 'executive_dysfunction_dip'
+  | 'brain_fog'
+  | 'rejection_sensitivity'
+  | 'mood_swings_irritability'
+  | 'insomnia_restless_sleep'
+  | 'cravings_comfort_food';
+
+export interface CycleDailyLog {
+  id: string;
+  date: string;                  // YYYY-MM-DD
+  flow: FlowIntensity;
+  symptoms: CycleSymptom[];
+  painLevel: number;             // 0 - 10
+  energyLevel: number;           // 1 - 5
+  moodSummary?: string;
+  notes?: string;
+}
+
+export interface CycleSettings {
+  enabled: boolean;
+  averageCycleLength: number;    // default 28 days
+  averagePeriodLength: number;   // default 5 days
+  lastPeriodStartDate: string;   // YYYY-MM-DD
+  trackSensoryAmplification: boolean; // Neurodivergent sensory & PMDD watch
+  discreetMode: boolean;         // Hide period terms for privacy
+  remindersEnabled: boolean;     // Alert a couple days prior
+}
+
 export interface EnabledFeatures {
   starsAndRewards: boolean;       // Star coins, badges, routine stickers (gamification)
   firstThenSchedules: boolean;     // Visual first/then routine cards
@@ -307,6 +420,8 @@ export interface EnabledFeatures {
   aacCommunication: boolean;       // AAC picture & symbol communication board
   sensoryBreathingPacer: boolean;  // Calm sensory breathing pacer & coping toolkit
   medicationReminders: boolean;    // Medication reminders, dose tracking & inventory supply
+  moodJournal: boolean;            // Reflective mood & trigger journal (teens to adults)
+  cycleTracker: boolean;           // Cycle & hormonal tracking with sensory insights (teens to adults)
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
 }
 
@@ -322,6 +437,8 @@ export const DEFAULT_KID_FEATURES: EnabledFeatures = {
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
+  moodJournal: false,
+  cycleTracker: false,
   discreetMode: false,
 };
 
@@ -337,6 +454,8 @@ export const DEFAULT_TEEN_FEATURES: EnabledFeatures = {
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
+  moodJournal: true,
+  cycleTracker: true,
   discreetMode: false,
 };
 
@@ -352,6 +471,8 @@ export const DEFAULT_ADULT_FEATURES: EnabledFeatures = {
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
+  moodJournal: true,
+  cycleTracker: true,
   discreetMode: true,
 };
 

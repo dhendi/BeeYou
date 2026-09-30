@@ -26,6 +26,10 @@ import {
   MedicationReminder,
   MedicationDoseLog,
   MedicationFrequency,
+  MoodJournalEntry,
+  CycleDailyLog,
+  CycleSettings,
+  CyclePhase,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -45,6 +49,9 @@ import {
   DEFAULT_DAILY_CHECKINS,
   INITIAL_MEDICATIONS,
   INITIAL_MEDICATION_LOGS,
+  INITIAL_MOOD_JOURNAL_ENTRIES,
+  INITIAL_CYCLE_SETTINGS,
+  INITIAL_CYCLE_LOGS,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { INITIAL_DAILY_RECOLLECTIONS } from '../data/recollectionData';
@@ -240,6 +247,33 @@ interface AppContextType {
   undoMedicationDose: (medId: string, time?: string) => void;
   restockMedication: (medId: string, addedCount: number) => void;
 
+  // Mood Journal (Teens to Adults)
+  moodJournalEntries: MoodJournalEntry[];
+  addMoodJournalEntry: (entry: Omit<MoodJournalEntry, 'id' | 'timestamp'>) => void;
+  updateMoodJournalEntry: (id: string, updates: Partial<MoodJournalEntry>) => void;
+  deleteMoodJournalEntry: (id: string) => void;
+  showMoodJournalModal: boolean;
+  setShowMoodJournalModal: (val: boolean) => void;
+
+  // Cycle Tracker (Teens to Adults)
+  cycleSettings: CycleSettings;
+  updateCycleSettings: (settings: Partial<CycleSettings>) => void;
+  cycleLogs: CycleDailyLog[];
+  logCycleDay: (log: Omit<CycleDailyLog, 'id'>) => void;
+  deleteCycleLog: (id: string) => void;
+  showCycleTrackerModal: boolean;
+  setShowCycleTrackerModal: (val: boolean) => void;
+  getCyclePhaseInfo: () => {
+    currentCycleDay: number;
+    currentPhase: CyclePhase;
+    phaseLabel: string;
+    phaseDescription: string;
+    sensoryInsight: string;
+    daysUntilNextPeriod: number;
+    nextPeriodDate: string;
+    isPeriodToday: boolean;
+  };
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -400,6 +434,60 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('lumina_medication_logs', JSON.stringify(medicationLogs));
     } catch (e) {}
   }, [medicationLogs]);
+
+  // Mood Journal State (Teens to Adults)
+  const [moodJournalEntries, setMoodJournalEntries] = useState<MoodJournalEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_mood_journal_entries');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse lumina_mood_journal_entries:', e);
+    }
+    return INITIAL_MOOD_JOURNAL_ENTRIES;
+  });
+
+  const [showMoodJournalModal, setShowMoodJournalModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_mood_journal_entries', JSON.stringify(moodJournalEntries));
+    } catch (e) {}
+  }, [moodJournalEntries]);
+
+  // Cycle Tracker State (Teens to Adults)
+  const [cycleSettings, setCycleSettings] = useState<CycleSettings>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_cycle_settings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse lumina_cycle_settings:', e);
+    }
+    return INITIAL_CYCLE_SETTINGS;
+  });
+
+  const [cycleLogs, setCycleLogs] = useState<CycleDailyLog[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_cycle_logs');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse lumina_cycle_logs:', e);
+    }
+    return INITIAL_CYCLE_LOGS;
+  });
+
+  const [showCycleTrackerModal, setShowCycleTrackerModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_cycle_settings', JSON.stringify(cycleSettings));
+    } catch (e) {}
+  }, [cycleSettings]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumina_cycle_logs', JSON.stringify(cycleLogs));
+    } catch (e) {}
+  }, [cycleLogs]);
 
   // Themes & Customization state
   const [themes, setThemes] = useState<AppTheme[]>(() => {
@@ -1436,6 +1524,124 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (settings.soundEffects) playChime('star');
   };
 
+  // Mood Journal Actions (Teens to Adults)
+  const addMoodJournalEntry = (entry: Omit<MoodJournalEntry, 'id' | 'timestamp'>) => {
+    const newEntry: MoodJournalEntry = {
+      ...entry,
+      id: `mj-${Date.now()}`,
+      timestamp: Date.now(),
+    };
+    setMoodJournalEntries((prev) => [newEntry, ...prev]);
+    if (settings.soundEffects) playChime('star');
+    speak('Mood journal reflection saved.');
+  };
+
+  const updateMoodJournalEntry = (id: string, updates: Partial<MoodJournalEntry>) => {
+    setMoodJournalEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
+    );
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const deleteMoodJournalEntry = (id: string) => {
+    setMoodJournalEntries((prev) => prev.filter((e) => e.id !== id));
+    if (settings.soundEffects) playChime('clear');
+  };
+
+  // Cycle Tracker Actions (Teens to Adults)
+  const updateCycleSettings = (updates: Partial<CycleSettings>) => {
+    setCycleSettings((prev) => ({ ...prev, ...updates }));
+    if (settings.soundEffects) playChime('tap');
+  };
+
+  const logCycleDay = (logData: Omit<CycleDailyLog, 'id'>) => {
+    setCycleLogs((prev) => {
+      const existingIdx = prev.findIndex((l) => l.date === logData.date);
+      const newEntry: CycleDailyLog = {
+        ...logData,
+        id: existingIdx !== -1 ? prev[existingIdx].id : `clog-${Date.now()}`,
+      };
+      if (existingIdx !== -1) {
+        const copy = [...prev];
+        copy[existingIdx] = newEntry;
+        return copy;
+      }
+      return [newEntry, ...prev];
+    });
+
+    // If starting a new period flow (light, medium, heavy) and date is recent, update lastPeriodStartDate
+    if (logData.flow && logData.flow !== 'none' && logData.flow !== 'spotting') {
+      const logDate = new Date(logData.date).getTime();
+      const lastStart = new Date(cycleSettings.lastPeriodStartDate).getTime();
+      if (logDate > lastStart + 15 * 86400000) {
+        setCycleSettings((prev) => ({ ...prev, lastPeriodStartDate: logData.date }));
+      }
+    }
+    if (settings.soundEffects) playChime('star');
+    speak('Cycle log recorded.');
+  };
+
+  const deleteCycleLog = (id: string) => {
+    setCycleLogs((prev) => prev.filter((l) => l.id !== id));
+    if (settings.soundEffects) playChime('clear');
+  };
+
+  const getCyclePhaseInfo = () => {
+    const startDate = new Date(cycleSettings.lastPeriodStartDate || new Date().toISOString().split('T')[0]);
+    const today = new Date();
+    const startUtc = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const diffDays = Math.max(0, Math.floor((todayUtc - startUtc) / (1000 * 60 * 60 * 24)));
+
+    const cycleLen = Math.max(20, cycleSettings.averageCycleLength || 28);
+    const periodLen = Math.max(2, cycleSettings.averagePeriodLength || 5);
+
+    const currentCycleDay = (diffDays % cycleLen) + 1;
+    const isPeriodToday = currentCycleDay <= periodLen;
+
+    let currentPhase: CyclePhase = 'follicular';
+    let phaseLabel = 'Follicular Phase';
+    let phaseDescription = 'Estrogen is steadily rising as follicle matures. Energy, focus, and verbal recall increase.';
+    let sensoryInsight = 'Executive function and dopamine are often higher now. Great time for learning new topics or social connection.';
+
+    if (currentCycleDay <= periodLen) {
+      currentPhase = 'menstrual';
+      phaseLabel = 'Menstrual Phase (Rest & Reset)';
+      phaseDescription = 'Hormone levels (estrogen & progesterone) are at their baseline. Your body is resetting.';
+      sensoryInsight = 'Energy may feel lower today. Extra rest, warm tea, weighted blankets, and quiet dim spaces help your nervous system regulate.';
+    } else if (currentCycleDay < cycleLen - 14) {
+      currentPhase = 'follicular';
+      phaseLabel = 'Follicular Phase (Rising Energy)';
+      phaseDescription = 'Estrogen rises towards peak. Creativity, social curiosity, and cognitive stamina build.';
+      sensoryInsight = 'Sensory processing is generally resilient. Ideal window for trying new activities or tackling challenging tasks.';
+    } else if (currentCycleDay <= cycleLen - 12) {
+      currentPhase = 'ovulatory';
+      phaseLabel = 'Ovulatory Phase (Peak Vitality)';
+      phaseDescription = 'Peak estrogen and brief testosterone peak around mid-cycle.';
+      sensoryInsight = 'Communication and motivation are at their highest monthly level. Stay mindful not to overcommit if social battery drains.';
+    } else {
+      currentPhase = 'luteal';
+      phaseLabel = 'Luteal Phase (Inward Focus & Sensory Watch)';
+      phaseDescription = 'Progesterone rises then drops before menstruation.';
+      sensoryInsight = 'Neurodivergent individuals often experience sensory amplification, rejection sensitivity, and lower dopamine during the luteal phase. Keep noise-cancelling headphones nearby and reduce demanding masking.';
+    }
+
+    const daysUntilNextPeriod = cycleLen - currentCycleDay + 1;
+    const nextPeriodDateObj = new Date(today.getTime() + daysUntilNextPeriod * 86400000);
+    const nextPeriodDate = nextPeriodDateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+    return {
+      currentCycleDay,
+      currentPhase,
+      phaseLabel,
+      phaseDescription,
+      sensoryInsight,
+      daysUntilNextPeriod,
+      nextPeriodDate,
+      isPeriodToday,
+    };
+  };
+
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
     setQuickPhrases(DEFAULT_QUICK_PHRASES);
@@ -1451,6 +1657,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setDailyRecollections(INITIAL_DAILY_RECOLLECTIONS);
     setMedications(INITIAL_MEDICATIONS);
     setMedicationLogs(INITIAL_MEDICATION_LOGS);
+    setMoodJournalEntries(INITIAL_MOOD_JOURNAL_ENTRIES);
+    setCycleSettings(INITIAL_CYCLE_SETTINGS);
+    setCycleLogs(INITIAL_CYCLE_LOGS);
     setUserAgeGroupState('kid');
     setEnabledFeatures(getDefaultFeaturesForAge('kid'));
     setSentence([]);
@@ -1458,6 +1667,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.removeItem('lumina_daily_recollections');
     localStorage.removeItem('lumina_medications');
     localStorage.removeItem('lumina_medication_logs');
+    localStorage.removeItem('lumina_mood_journal_entries');
+    localStorage.removeItem('lumina_cycle_settings');
+    localStorage.removeItem('lumina_cycle_logs');
     localStorage.removeItem('lumina_user_age_group');
     localStorage.removeItem('lumina_enabled_features');
     localStorage.removeItem('lumina_onboarding_completed');
@@ -1613,6 +1825,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         takeMedicationDose,
         undoMedicationDose,
         restockMedication,
+
+        moodJournalEntries,
+        addMoodJournalEntry,
+        updateMoodJournalEntry,
+        deleteMoodJournalEntry,
+        showMoodJournalModal,
+        setShowMoodJournalModal,
+
+        cycleSettings,
+        updateCycleSettings,
+        cycleLogs,
+        logCycleDay,
+        deleteCycleLog,
+        showCycleTrackerModal,
+        setShowCycleTrackerModal,
+        getCyclePhaseInfo,
 
         resetToDefaults,
       }}

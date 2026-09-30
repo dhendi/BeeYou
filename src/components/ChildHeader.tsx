@@ -38,7 +38,14 @@ export const ChildHeader: React.FC = () => {
     setShowAvatarCreator,
     medications,
     setShowMedicationModal,
+    setShowMoodJournalModal,
+    setShowCycleTrackerModal,
+    cycleSettings,
+    getCyclePhaseInfo,
   } = useApp();
+
+  const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
+  const cyclePhaseInfo = getCyclePhaseInfo();
 
   const [currentTime, setCurrentTime] = useState<string>('');
 
@@ -157,6 +164,38 @@ export const ChildHeader: React.FC = () => {
                 {medications.some((m) => m.totalQuantity <= m.refillThreshold) && (
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Low supply alert" />
                 )}
+              </button>
+            )}
+
+            {isTeenOrAdult && enabledFeatures?.moodJournal !== false && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMoodJournalModal(true);
+                  playChime('tap');
+                }}
+                className="flex items-center gap-1 text-[11px] font-black text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                title="Mood Journal & Self-Reflection"
+              >
+                <span>📖</span>
+                <span className="hidden sm:inline">Journal</span>
+              </button>
+            )}
+
+            {isTeenOrAdult && enabledFeatures?.cycleTracker !== false && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCycleTrackerModal(true);
+                  playChime('tap');
+                }}
+                className="flex items-center gap-1 text-[11px] font-black text-rose-900 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-full border border-rose-200 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                title={cycleSettings.discreetMode ? "Wellness Rhythm Tracker" : "Cycle Tracker"}
+              >
+                <span>{cycleSettings.discreetMode ? '🌿' : '🌸'}</span>
+                <span className="hidden sm:inline">
+                  {cycleSettings.discreetMode ? 'Rhythm' : `Day ${cyclePhaseInfo.currentCycleDay}`}
+                </span>
               </button>
             )}
           </div>
