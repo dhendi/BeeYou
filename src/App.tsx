@@ -47,6 +47,7 @@ import { SpoonBudgetModal } from './components/SpoonBudgetModal';
 import { PieTimerModal } from './components/PieTimerModal';
 import { DigitalFidgetModal } from './components/DigitalFidgetModal';
 import { AacKeyboardModal } from './components/AacKeyboardModal';
+import { ToolsHubModal } from './components/ToolsHubModal';
 
 const AppContent: React.FC = () => {
   const { 
@@ -232,6 +233,9 @@ const AppContent: React.FC = () => {
 
       {/* Dyslexia-Friendly AAC Keyboard Modal */}
       <AacKeyboardModal />
+
+      {/* Consolidated Tools Hub Modal */}
+      <ToolsHubModal />
     </div>
   );
 };

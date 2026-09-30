@@ -352,6 +352,10 @@ interface AppContextType {
   showAacKeyboardModal: boolean;
   setShowAacKeyboardModal: (val: boolean) => void;
 
+  // Tools Hub (Consolidated Tools Modal)
+  showToolsHubModal: boolean;
+  setShowToolsHubModal: (val: boolean) => void;
+
   // Utilities
   resetToDefaults: () => void;
 }
@@ -2058,6 +2062,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [aacActiveScene, setAacActiveScene] = useState<string | null>(null);
   const [showAacKeyboardModal, setShowAacKeyboardModal] = useState<boolean>(false);
 
+  // Consolidated Tools Hub
+  const [showToolsHubModal, setShowToolsHubModal] = useState<boolean>(false);
+
   // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording
   // These live inside routine steps (microSteps and audioDataUrl fields) — no extra top-level state.
 
@@ -2316,6 +2323,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         showAacKeyboardModal,
         setShowAacKeyboardModal,
+
+        showToolsHubModal,
+        setShowToolsHubModal,
 
         resetToDefaults,
       }}
