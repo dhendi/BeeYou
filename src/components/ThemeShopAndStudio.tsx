@@ -425,7 +425,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   type="button"
                   onClick={() => {
                     setTheme('theme-classic');
-                    playChime('tap');
                   }}
                   className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
                   title="Switch back to classic Lumina default theme"
@@ -477,7 +476,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 type="button"
                 onClick={() => {
                   setTheme('theme-classic');
-                  playChime('tap');
                 }}
                 className="px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 transition-all cursor-pointer active:scale-95 shadow-2xs"
                 title="Switch directly to default Lumina theme"

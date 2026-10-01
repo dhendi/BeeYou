@@ -46,7 +46,6 @@ export const ThemeCustomizerModal: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setTheme('theme-classic');
-                  playChime('tap');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95"
                 title="Reset to default Lumina theme"

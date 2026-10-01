@@ -466,7 +466,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
     setShowPaywallModal(false);
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-    speakText(`Welcome to Lumina Premium! Your 30-day free trial on the ${chosenCycle} plan has started.`);
   };
 
   const activateSubscription = (cycle?: BillingCycle) => {
@@ -479,7 +478,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
     setShowPaywallModal(false);
     confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
-    speakText('Thank you for subscribing to Lumina Premium!');
   };
 
   const cancelSubscription = () => {
@@ -492,7 +490,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       trialDays: 30,
       autoRenew: false,
     });
-    speakText('You are now on the Lumina Basic free plan.');
   };
 
   const setBillingCycle = (cycle: BillingCycle) => {
@@ -776,8 +773,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const target = themes.find((t) => t.id === id);
     if (target && target.isUnlocked) {
       setActiveThemeId(id);
-      if (settings.soundEffects) playChime('star');
-      speakText(`Equipped ${target.name} theme!`);
     }
   };
 
