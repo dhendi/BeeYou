@@ -109,8 +109,8 @@ export async function getRecoloredEmotionImage(
             // 2. Desaturated / Greys (Teeth, Eye whites, Eye corners)
             if (sat <= 18 && (lum > 175 || Math.max(r, g, b) < 45)) continue;
 
-            // 3. Tears, Water & Sweat Drops (Cyan / Blue)
-            if (b > 150 && b > r + 30 && b > g + 10) continue;
+            // 3. Tears, Water & Sweat Drops & Overwhelmed Freezing Face (Cyan / Blue)
+            if (b > 140 && b > r + 15) continue;
 
             // 4. Protected Outfits & Costumes (Across all 9 themes)
             // Green Hoodies & Outfits (Dinosaur, Frog, Turtle)
@@ -165,48 +165,65 @@ export async function getRecoloredEmotionImage(
                 (r > 170 && g < 110 && b < 120 && r - g >= 70));
             if (isMouth) continue;
 
-            // 5. CHARACTER SKIN TONE RECOLORING
-            // Detects face opening, forehead, cheeks, chin, neck, ears, AND all hands
-            // (waving, holding head, grabbing chin, clenched fists, scratching head)
+            // 5. CRISP FACIAL FEATURES CONTRAST ENHANCEMENT FOR DEEP SKIN
+            // For dark skin tones, deepen eyebrows, closed eyes, and mouth lines to crisp jet black
+            // so they never blend into dark melanin skin!
+            const isFaceArea = (x >= 90 && x <= 165 && y >= 90 && y <= 180);
+            const isDarkFacialFeature = (r < 110 && g < 70 && b < 60 && r >= g && g >= b);
+            if (isFaceArea && isDarkFacialFeature && targetSkinRgb[0] < 140) {
+              data[i] = 16;
+              data[i + 1] = 10;
+              data[i + 2] = 8;
+              continue;
+            }
+
+            // 6. CHARACTER SKIN TONE RECOLORING
+            // Strictly matches authentic skin pixels (face opening, forehead, cheeks, chin,
+            // neck, and all hands). Never touches eyebrows, eyes, mouth lines, or hair!
             const isSkinLocation = (x >= 35 && x <= 225 && y >= 60 && y <= 245);
-            const isSkinColor = (
-              (r >= 130 && g >= 85 && b >= 55 && r > g && g >= b && r - b >= 18 && r - b <= 135 && r - g <= 75) ||
-              (r >= 180 && g >= 130 && b >= 90 && r > g && g >= b) ||
-              (r >= 110 && r <= 170 && g >= 65 && g <= 125 && b >= 45 && b <= 95 && r > g && g >= b) // shaded skin creases
+            const isBaseSkin = (
+              r >= 175 && g >= 125 && b >= 85 &&
+              r > g && g >= b &&
+              (r - b >= 15) && (r - b <= 110) &&
+              (r - g <= 65)
+            );
+            const isCheekBlush = (
+              r >= 210 && g >= 105 && b >= 105 &&
+              (r - g >= 45) &&
+              (y >= 120 && y <= 170)
             );
 
-            if (isSkinLocation && isSkinColor) {
-              // Compute relative luminance within original skin range [95 .. 245]
-              const norm = Math.min(1.0, Math.max(0.0, (lum - 95) / 145));
+            if (isSkinLocation && (isBaseSkin || isCheekBlush)) {
+              // Compute relative luminance within original skin range [130 .. 245]
+              const norm = Math.min(1.0, Math.max(0.0, (lum - 130) / 115));
               let nr: number, ng: number, nb: number;
 
-              if (norm >= 0.60) {
-                // Highlight: warm radiant glow that retains authentic skin undertone
-                const delta = (norm - 0.60) / 0.40;
-                nr = Math.min(255, Math.round(targetSkinRgb[0] + (255 - targetSkinRgb[0]) * 0.26 * delta));
-                ng = Math.min(255, Math.round(targetSkinRgb[1] + (255 - targetSkinRgb[1]) * 0.22 * delta));
-                nb = Math.min(255, Math.round(targetSkinRgb[2] + (255 - targetSkinRgb[2]) * 0.18 * delta));
+              if (norm >= 0.65) {
+                // Highlight: warm luminous glow that retains authentic skin undertone
+                const delta = (norm - 0.65) / 0.35;
+                nr = Math.min(255, Math.round(targetSkinRgb[0] + (255 - targetSkinRgb[0]) * 0.22 * delta));
+                ng = Math.min(255, Math.round(targetSkinRgb[1] + (255 - targetSkinRgb[1]) * 0.18 * delta));
+                nb = Math.min(255, Math.round(targetSkinRgb[2] + (255 - targetSkinRgb[2]) * 0.14 * delta));
               } else {
                 // Shadow / Crease: rich, deep melanin depth (never grayish or chalky!)
-                const shadowMult = 0.70 + 0.30 * (norm / 0.60);
+                const shadowMult = 0.78 + 0.22 * (norm / 0.65);
                 nr = Math.min(255, Math.max(0, Math.round(targetSkinRgb[0] * shadowMult)));
                 ng = Math.min(255, Math.max(0, Math.round(targetSkinRgb[1] * shadowMult)));
                 nb = Math.min(255, Math.max(0, Math.round(targetSkinRgb[2] * shadowMult)));
               }
 
               // Rosy blush on cheeks adapting to skin depth
-              const isRosyCheek = (r > 200 && r - g > 50 && y >= 125 && y <= 165 && (x <= 118 || x >= 138));
-              if (isRosyCheek) {
-                if (targetSkinRgb[0] < 160) {
+              if (isCheekBlush) {
+                if (targetSkinRgb[0] < 150) {
                   // Warm terracotta / berry on deep skin
-                  nr = Math.min(255, nr + 35);
+                  nr = Math.min(255, nr + 30);
                   ng = Math.max(0, ng - 8);
                   nb = Math.max(0, nb - 4);
                 } else if (targetSkinRgb[0] < 210) {
                   // Coral blush on medium skin
-                  nr = Math.min(255, nr + 25);
-                  ng = Math.max(0, ng - 15);
-                  nb = Math.max(0, nb - 10);
+                  nr = Math.min(255, nr + 20);
+                  ng = Math.max(0, ng - 12);
+                  nb = Math.max(0, nb - 8);
                 }
               }
 
