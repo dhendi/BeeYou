@@ -43,6 +43,7 @@ import {
   SpoonBudgetEntry,
   DashboardWidgetConfig,
   DashboardWidgetId,
+  LuminaBackupData,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -369,6 +370,9 @@ interface AppContextType {
   resetDashboardWidgets: () => void;
   showDashboardCustomizer: boolean;
   setShowDashboardCustomizer: (val: boolean) => void;
+  // Backup & Restore
+  exportProfileBackup: () => LuminaBackupData;
+  importProfileBackup: (importedJson: string | object) => { success: boolean; message: string };
 
   // Utilities
   resetToDefaults: () => void;
@@ -2332,7 +2336,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('lumina_daily_recollections');
     localStorage.removeItem('lumina_medications');
-    localStorage.removeItem('lumina_medication_logs');
     localStorage.removeItem('lumina_mood_journal_entries');
     localStorage.removeItem('lumina_cycle_settings');
     localStorage.removeItem('lumina_cycle_logs');
@@ -2340,6 +2343,80 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.removeItem('lumina_enabled_features');
     localStorage.removeItem('lumina_onboarding_completed');
     if (settings.soundEffects) playChime('clear');
+  };
+
+  const exportProfileBackup = (): LuminaBackupData => {
+    const backup: LuminaBackupData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      app: 'Lumina',
+      childProfile,
+      avatar,
+      settings,
+      aacItems,
+      quickPhrases,
+      routines,
+      adventures,
+      skills,
+      habits,
+      worldState,
+      socialStories,
+      dailyRecollections,
+      medications,
+      cycleSettings,
+      userAgeGroup,
+      enabledFeatures,
+      activeThemeId: activeTheme?.id || 'classic',
+    };
+
+    try {
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(backup, null, 2))}`;
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', jsonString);
+      const safeName = (childProfile.name || 'lumina').toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const dateStr = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute('download', `lumina-backup-${safeName}-${dateStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      if (settings.soundEffects) playChime('complete');
+    } catch (e) {
+      console.error('Export download error', e);
+    }
+
+    return backup;
+  };
+
+  const importProfileBackup = (importedJson: string | object): { success: boolean; message: string } => {
+    try {
+      const data: any = typeof importedJson === 'string' ? JSON.parse(importedJson) : importedJson;
+      if (!data || typeof data !== 'object') {
+        return { success: false, message: 'Invalid backup file format.' };
+      }
+
+      if (data.childProfile) setChildProfile(data.childProfile);
+      if (data.avatar) setAvatar(data.avatar);
+      if (data.settings) setSettings(data.settings);
+      if (Array.isArray(data.aacItems) && data.aacItems.length > 0) setAacItems(data.aacItems);
+      if (Array.isArray(data.quickPhrases)) setQuickPhrases(data.quickPhrases);
+      if (Array.isArray(data.routines) && data.routines.length > 0) setRoutines(data.routines);
+      if (Array.isArray(data.adventures)) setAdventures(data.adventures);
+      if (Array.isArray(data.skills)) setSkills(data.skills);
+      if (Array.isArray(data.habits)) setHabits(data.habits);
+      if (data.worldState) setWorldState(data.worldState);
+      if (Array.isArray(data.socialStories)) setSocialStories(data.socialStories);
+      if (Array.isArray(data.dailyRecollections)) setDailyRecollections(data.dailyRecollections);
+      if (Array.isArray(data.medications)) setMedications(data.medications);
+      if (data.cycleSettings) setCycleSettings(data.cycleSettings);
+      if (data.userAgeGroup) setUserAgeGroupState(data.userAgeGroup);
+      if (data.enabledFeatures) setEnabledFeatures(data.enabledFeatures);
+      if (data.activeThemeId) setActiveThemeId(data.activeThemeId);
+
+      if (settings.soundEffects) playChime('complete');
+      return { success: true, message: `Successfully restored profile backup for ${data.childProfile?.name || 'child'}!` };
+    } catch (err: any) {
+      return { success: false, message: `Failed to restore: ${err.message || 'Unknown error'}` };
+    }
   };
 
   return (
@@ -2577,6 +2654,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         resetDashboardWidgets,
         showDashboardCustomizer,
         setShowDashboardCustomizer,
+
+        exportProfileBackup,
+        importProfileBackup,
 
         resetToDefaults,
       }}

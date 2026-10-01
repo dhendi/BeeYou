@@ -3,7 +3,7 @@
  * Designed for children and caregivers.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import { playChime } from './utils/audio';
@@ -17,38 +17,40 @@ import { SkillsView } from './components/SkillsView';
 import { FeelingsView } from './components/FeelingsView';
 import { MyWorldView } from './components/MyWorldView';
 import { Rewards } from './components/Rewards';
-import { ParentDashboard } from './components/ParentDashboard';
 import { QuickPhrasesDrawer } from './components/QuickPhrasesDrawer';
-import { CopingToolkitModal } from './components/CopingToolkitModal';
-import { PlansChangedModal } from './components/PlansChangedModal';
 import { PinModal } from './components/PinModal';
-import { MorningBriefModal } from './components/MorningBriefModal';
-import { ConnectCaregiverModal } from './components/ConnectCaregiverModal';
-import { CaregiverAlertModal } from './components/CaregiverAlertModal';
-import { CaregiverLivePortal } from './components/CaregiverLivePortal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import { RoutineStickerCelebrationModal } from './components/RoutineStickerCelebrationModal';
-import { DailyRecollectionModal } from './components/DailyRecollectionModal';
-import { ThemeCustomizerModal } from './components/ThemeCustomizerModal';
-import { OnboardingWizardModal } from './components/OnboardingWizardModal';
-import { AboutMeIDModal } from './components/AboutMeIDModal';
-import { AvatarCreatorModal } from './components/AvatarCreatorModal';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
-import { MedicationRemindersModal } from './components/MedicationRemindersModal';
-import { MoodJournalModal } from './components/MoodJournalModal';
-import { CycleTrackerModal } from './components/CycleTrackerModal';
-import { SubscriptionModal } from './components/SubscriptionModal';
-import { EmergencySensoryModal } from './components/EmergencySensoryModal';
-import { FivePointScaleModal } from './components/FivePointScaleModal';
-import { DecisionWheelModal } from './components/DecisionWheelModal';
-import { CommunicationPassportModal } from './components/CommunicationPassportModal';
-import { SpoonBudgetModal } from './components/SpoonBudgetModal';
-import { PieTimerModal } from './components/PieTimerModal';
-import { DigitalFidgetModal } from './components/DigitalFidgetModal';
-import { AacKeyboardModal } from './components/AacKeyboardModal';
-import { ToolsHubModal } from './components/ToolsHubModal';
-import { DashboardCustomizerModal } from './components/DashboardCustomizerModal';
+
+// Lazy-loaded secondary components & heavy portals for bundle optimization
+const ParentDashboard = lazy(() => import('./components/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
+const CaregiverLivePortal = lazy(() => import('./components/CaregiverLivePortal').then(m => ({ default: m.CaregiverLivePortal })));
+const CopingToolkitModal = lazy(() => import('./components/CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
+const PlansChangedModal = lazy(() => import('./components/PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
+const MorningBriefModal = lazy(() => import('./components/MorningBriefModal').then(m => ({ default: m.MorningBriefModal })));
+const ConnectCaregiverModal = lazy(() => import('./components/ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
+const CaregiverAlertModal = lazy(() => import('./components/CaregiverAlertModal').then(m => ({ default: m.CaregiverAlertModal })));
+const RoutineStickerCelebrationModal = lazy(() => import('./components/RoutineStickerCelebrationModal').then(m => ({ default: m.RoutineStickerCelebrationModal })));
+const DailyRecollectionModal = lazy(() => import('./components/DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
+const ThemeCustomizerModal = lazy(() => import('./components/ThemeCustomizerModal').then(m => ({ default: m.ThemeCustomizerModal })));
+const OnboardingWizardModal = lazy(() => import('./components/OnboardingWizardModal').then(m => ({ default: m.OnboardingWizardModal })));
+const AboutMeIDModal = lazy(() => import('./components/AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
+const AvatarCreatorModal = lazy(() => import('./components/AvatarCreatorModal').then(m => ({ default: m.AvatarCreatorModal })));
+const MedicationRemindersModal = lazy(() => import('./components/MedicationRemindersModal').then(m => ({ default: m.MedicationRemindersModal })));
+const MoodJournalModal = lazy(() => import('./components/MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const CycleTrackerModal = lazy(() => import('./components/CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
+const SubscriptionModal = lazy(() => import('./components/SubscriptionModal').then(m => ({ default: m.SubscriptionModal })));
+const EmergencySensoryModal = lazy(() => import('./components/EmergencySensoryModal').then(m => ({ default: m.EmergencySensoryModal })));
+const FivePointScaleModal = lazy(() => import('./components/FivePointScaleModal').then(m => ({ default: m.FivePointScaleModal })));
+const DecisionWheelModal = lazy(() => import('./components/DecisionWheelModal').then(m => ({ default: m.DecisionWheelModal })));
+const CommunicationPassportModal = lazy(() => import('./components/CommunicationPassportModal').then(m => ({ default: m.CommunicationPassportModal })));
+const SpoonBudgetModal = lazy(() => import('./components/SpoonBudgetModal').then(m => ({ default: m.SpoonBudgetModal })));
+const PieTimerModal = lazy(() => import('./components/PieTimerModal').then(m => ({ default: m.PieTimerModal })));
+const DigitalFidgetModal = lazy(() => import('./components/DigitalFidgetModal').then(m => ({ default: m.DigitalFidgetModal })));
+const AacKeyboardModal = lazy(() => import('./components/AacKeyboardModal').then(m => ({ default: m.AacKeyboardModal })));
+const ToolsHubModal = lazy(() => import('./components/ToolsHubModal').then(m => ({ default: m.ToolsHubModal })));
+const DashboardCustomizerModal = lazy(() => import('./components/DashboardCustomizerModal').then(m => ({ default: m.DashboardCustomizerModal })));
 
 const AppContent: React.FC = () => {
   const { 
@@ -87,22 +89,24 @@ const AppContent: React.FC = () => {
 
   if (isCaregiverRoute) {
     return (
-      <CaregiverLivePortal 
-        onBackToApp={() => {
-          const url = new URL(window.location.href);
-          url.searchParams.delete('caregiver');
-          window.location.href = url.pathname;
-        }} 
-      />
+      <Suspense fallback={null}>
+        <CaregiverLivePortal 
+          onBackToApp={() => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('caregiver');
+            window.location.href = url.pathname;
+          }} 
+        />
+      </Suspense>
     );
   }
 
   if (isParentMode) {
     return (
-      <>
+      <Suspense fallback={null}>
         <ParentDashboard />
         <SubscriptionModal />
-      </>
+      </Suspense>
     );
   }
 
@@ -162,84 +166,87 @@ const AppContent: React.FC = () => {
       {/* Offline Status & Diagnostic Indicator */}
       <OfflineIndicator />
 
-      {/* Global Modals & Drawers */}
+      {/* Global Modals & Drawers with Lazy Suspense Boundaries */}
       <QuickPhrasesDrawer />
-      <CopingToolkitModal />
-      <PlansChangedModal />
       <PinModal />
-      <MorningBriefModal />
-      <ConnectCaregiverModal 
-        isOpen={showCaregiverModal} 
-        onClose={() => setShowCaregiverModal(false)} 
+
+      <Suspense fallback={null}>
+        <CopingToolkitModal />
+        <PlansChangedModal />
+        <MorningBriefModal />
+        <ConnectCaregiverModal 
+          isOpen={showCaregiverModal} 
+          onClose={() => setShowCaregiverModal(false)} 
         />
-      <CaregiverAlertModal
-        isOpen={showCaregiverAlertModal}
-        onClose={() => setShowCaregiverAlertModal(false)}
-      />
-      <RoutineStickerCelebrationModal />
-      <DailyRecollectionModal />
-      <ThemeCustomizerModal />
+        <CaregiverAlertModal
+          isOpen={showCaregiverAlertModal}
+          onClose={() => setShowCaregiverAlertModal(false)}
+        />
+        <RoutineStickerCelebrationModal />
+        <DailyRecollectionModal />
+        <ThemeCustomizerModal />
 
-      {/* First-Run Onboarding Setup Wizard */}
-      <OnboardingWizardModal
-        isOpen={showOnboardingModal}
-        onClose={() => setShowOnboardingModal(false)}
-        canDismiss={true}
-      />
+        {/* First-Run Onboarding Setup Wizard */}
+        <OnboardingWizardModal
+          isOpen={showOnboardingModal}
+          onClose={() => setShowOnboardingModal(false)}
+          canDismiss={true}
+        />
 
-      {/* About Me & Emergency ID Card Modal */}
-      <AboutMeIDModal
-        isOpen={showAboutMeModal}
-        onClose={() => setShowAboutMeModal(false)}
-      />
+        {/* About Me & Emergency ID Card Modal */}
+        <AboutMeIDModal
+          isOpen={showAboutMeModal}
+          onClose={() => setShowAboutMeModal(false)}
+        />
 
-      {/* Avatar Creator Studio Modal */}
-      <AvatarCreatorModal
-        isOpen={showAvatarCreator}
-        onClose={() => setShowAvatarCreator(false)}
-      />
+        {/* Avatar Creator Studio Modal */}
+        <AvatarCreatorModal
+          isOpen={showAvatarCreator}
+          onClose={() => setShowAvatarCreator(false)}
+        />
 
-      {/* Medication & Health Reminders Modal */}
-      <MedicationRemindersModal />
+        {/* Medication & Health Reminders Modal */}
+        <MedicationRemindersModal />
 
-      {/* Teen & Adult Deep Mood Reflection Journal Modal */}
-      <MoodJournalModal />
+        {/* Teen & Adult Deep Mood Reflection Journal Modal */}
+        <MoodJournalModal />
 
-      {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
-      <CycleTrackerModal />
+        {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
+        <CycleTrackerModal />
 
-      {/* Lumina Premium Subscription & Paywall Modal */}
-      <SubscriptionModal />
+        {/* Lumina Premium Subscription & Paywall Modal */}
+        <SubscriptionModal />
 
-      {/* Emergency Sensory Red Button Modal */}
-      <EmergencySensoryModal />
+        {/* Emergency Sensory Red Button Modal */}
+        <EmergencySensoryModal />
 
-      {/* Incredible 5-Point Scale Modal */}
-      <FivePointScaleModal />
+        {/* Incredible 5-Point Scale Modal */}
+        <FivePointScaleModal />
 
-      {/* Decision Wheel Modal */}
-      <DecisionWheelModal />
+        {/* Decision Wheel Modal */}
+        <DecisionWheelModal />
 
-      {/* Communication Passport Modal */}
-      <CommunicationPassportModal />
+        {/* Communication Passport Modal */}
+        <CommunicationPassportModal />
 
-      {/* Spoon Theory Energy Budget Modal */}
-      <SpoonBudgetModal />
+        {/* Spoon Theory Energy Budget Modal */}
+        <SpoonBudgetModal />
 
-      {/* Visual Pie Clock (Time Timer) Modal */}
-      <PieTimerModal />
+        {/* Visual Pie Clock (Time Timer) Modal */}
+        <PieTimerModal />
 
-      {/* Digital Sensory Fidget Toys Modal */}
-      <DigitalFidgetModal />
+        {/* Digital Sensory Fidget Toys Modal */}
+        <DigitalFidgetModal />
 
-      {/* Dyslexia-Friendly AAC Keyboard Modal */}
-      <AacKeyboardModal />
+        {/* Dyslexia-Friendly AAC Keyboard Modal */}
+        <AacKeyboardModal />
 
-      {/* Consolidated Tools Hub Modal */}
-      <ToolsHubModal />
+        {/* Consolidated Tools Hub Modal */}
+        <ToolsHubModal />
 
-      {/* Editable Dashboard Customizer Modal */}
-      <DashboardCustomizerModal />
+        {/* Editable Dashboard Customizer Modal */}
+        <DashboardCustomizerModal />
+      </Suspense>
     </div>
   );
 };

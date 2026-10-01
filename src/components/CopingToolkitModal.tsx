@@ -22,6 +22,7 @@ import {
   playSoundscape, 
   stopSoundscape, 
   setSoundscapeVolume, 
+  getSavedSoundscapeVolume,
   subscribeToSoundscape, 
   getActiveSoundscape, 
   SOUNDSCAPES_CATALOG 
@@ -53,9 +54,9 @@ export const CopingToolkitModal: React.FC = () => {
   const [timerSecondsLeft, setTimerSecondsLeft] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // Soundscape state
+  // Soundscape state with persistent volume memory
   const [activeSoundId, setActiveSoundId] = useState<SoundscapeId | null>(() => getActiveSoundscape());
-  const [soundVolume, setSoundVolume] = useState<number>(0.40);
+  const [soundVolume, setSoundVolume] = useState<number>(() => getSavedSoundscapeVolume(getActiveSoundscape()));
   const [soundFilter, setSoundFilter] = useState<'all' | 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient'>('all');
 
   // Grounding state
@@ -65,6 +66,9 @@ export const CopingToolkitModal: React.FC = () => {
   useEffect(() => {
     const unsub = subscribeToSoundscape((id) => {
       setActiveSoundId(id);
+      if (id) {
+        setSoundVolume(getSavedSoundscapeVolume(id));
+      }
     });
     return () => unsub();
   }, []);

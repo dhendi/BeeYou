@@ -597,8 +597,40 @@ export function stopSoundscape(): void {
   }
 }
 
-export function setSoundscapeVolume(vol: number): void {
+const SOUNDSCAPE_VOLUME_STORAGE_KEY = 'lumina_soundscape_volumes';
+
+export function getSavedSoundscapeVolume(id?: SoundscapeId | null): number {
+  if (typeof window === 'undefined') return 0.40;
   try {
+    const raw = localStorage.getItem(SOUNDSCAPE_VOLUME_STORAGE_KEY);
+    if (!raw) return 0.40;
+    const map = JSON.parse(raw);
+    if (id && typeof map[id] === 'number') {
+      return map[id];
+    }
+    if (typeof map.global === 'number') {
+      return map.global;
+    }
+  } catch (e) {}
+  return 0.40;
+}
+
+export function saveSoundscapeVolume(vol: number, id?: SoundscapeId | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(SOUNDSCAPE_VOLUME_STORAGE_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    map.global = vol;
+    if (id) {
+      map[id] = vol;
+    }
+    localStorage.setItem(SOUNDSCAPE_VOLUME_STORAGE_KEY, JSON.stringify(map));
+  } catch (e) {}
+}
+
+export function setSoundscapeVolume(vol: number, soundId?: SoundscapeId | null): void {
+  try {
+    saveSoundscapeVolume(vol, soundId || activeSoundscapeId);
     const normalized = normalizeSoundscapeVolume(vol);
     if (activeSoundscapeAudioElement) {
       activeSoundscapeAudioElement.volume = normalized;
@@ -611,10 +643,12 @@ export function setSoundscapeVolume(vol: number): void {
   } catch (e) {}
 }
 
-export function playSoundscape(id: SoundscapeId, volume = 0.12): void {
+export function playSoundscape(id: SoundscapeId, volume?: number): void {
   try {
+    const targetVolume = volume !== undefined ? volume : getSavedSoundscapeVolume(id);
+
     if (activeSoundscapeId === id && activeSoundscapeAudioElement && !activeSoundscapeAudioElement.paused) {
-      setSoundscapeVolume(volume);
+      setSoundscapeVolume(targetVolume, id);
       return;
     }
 
@@ -624,7 +658,7 @@ export function playSoundscape(id: SoundscapeId, volume = 0.12): void {
     notifySoundscapeChange(id);
 
     const soundFile = SOUNDSCAPE_AUDIO_FILES[id];
-    const targetVol = normalizeSoundscapeVolume(volume);
+    const targetVol = normalizeSoundscapeVolume(targetVolume);
 
     if (soundFile && typeof window !== 'undefined') {
       try {

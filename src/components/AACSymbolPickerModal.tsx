@@ -66,19 +66,36 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const [customCategory, setCustomCategory] = useState<AACCategory>('food');
   const [importedPackId, setImportedPackId] = useState<string | null>(null);
 
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
+
   // Quick search keywords
   const QUICK_KEYWORDS = [
     'want', 'help', 'stop', 'more', 'water', 'eat', 'drink', 'toilet', 'happy', 'tired', 'break', 'ipad', 'hug', 'play'
   ];
+
+  const CATEGORY_FILTERS = [
+    { id: 'all', label: 'All' },
+    { id: 'core', label: 'Core / Daily' },
+    { id: 'food', label: 'Food & Drinks' },
+    { id: 'actions', label: 'Actions' },
+    { id: 'feelings', label: 'Feelings & Sensory' },
+    { id: 'social', label: 'Social & Fun' },
+    { id: 'places', label: 'Places' },
+  ];
+
+  // Debounced live search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (initialQuery) {
       setSearchQuery(initialQuery);
       setCustomLabel(initialQuery);
       setCustomSpeech(initialQuery);
-      handleSearch(initialQuery);
-    } else {
-      setSearchResults(CURATED_AAC_SYMBOLS);
     }
   }, [initialQuery, isOpen]);
 
@@ -99,6 +116,17 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
       setIsSearching(false);
     }
   };
+
+  const displayedResults = searchResults.filter((sym) => {
+    if (selectedCategoryFilter === 'all') return true;
+    if (selectedCategoryFilter === 'core') return sym.category === 'core' || sym.category === 'personal';
+    if (selectedCategoryFilter === 'food') return sym.category === 'food' || sym.category === 'drinks';
+    if (selectedCategoryFilter === 'actions') return sym.category === 'actions';
+    if (selectedCategoryFilter === 'feelings') return sym.category === 'feelings' || sym.category === 'sensory';
+    if (selectedCategoryFilter === 'social') return sym.category === 'social' || sym.category === 'activities';
+    if (selectedCategoryFilter === 'places') return sym.category === 'places';
+    return true;
+  });
 
   const handleSelect = (symbol: AacSymbolItem) => {
     setSelectedSymbol(symbol);
@@ -288,7 +316,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
           {/* TAB 1: ARASAAC SEARCH */}
           {activeTab === 'search' && (
             <div className="space-y-4">
-              {/* Search Bar */}
+              {/* Search Bar with Live Clear */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
@@ -297,9 +325,22 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-                    placeholder="Search clinical pictograms (e.g. water, pizza, iPad, help, tired, toilet)..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white text-xs sm:text-sm font-medium outline-none transition-all"
+                    placeholder="Search 35,000+ clinical pictograms in real-time (e.g. water, pizza, iPad, help)..."
+                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white text-xs sm:text-sm font-medium outline-none transition-all"
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        handleSearch('');
+                      }}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200 transition-all cursor-pointer"
+                      title="Clear search"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -310,6 +351,28 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   {isSearching ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   <span>Search</span>
                 </button>
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5">
+                <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0">Category:</span>
+                {CATEGORY_FILTERS.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategoryFilter(cat.id);
+                      playChime('tap');
+                    }}
+                    className={`text-[11px] px-3 py-1 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      selectedCategoryFilter === cat.id
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-indigo-50 hover:text-indigo-800 text-slate-600'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
               </div>
 
               {/* Quick Keywords Chips */}
@@ -334,7 +397,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
               <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/50">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-xs font-black text-slate-700 uppercase tracking-wide">
-                    {isSearching ? 'Searching ARASAAC clinical library...' : `Results (${searchResults.length})`}
+                    {isSearching ? 'Searching ARASAAC clinical library...' : `Results (${displayedResults.length})`}
                   </span>
                   <span className="text-[11px] text-slate-500">
                     Click any symbol to preview on button
@@ -342,7 +405,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-72 overflow-y-auto p-1">
-                  {searchResults.map((sym) => {
+                  {displayedResults.map((sym) => {
                     const isSelected = selectedSymbol?.id === sym.id;
                     return (
                       <button

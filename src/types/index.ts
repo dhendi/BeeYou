@@ -843,3 +843,29 @@ export interface DashboardWidgetConfig {
   enabled: boolean;
 }
 
+// ── FEATURE: Full Backup & Restore ──────────────────────────────────────────
+export interface LuminaBackupData {
+  version: number;
+  exportedAt: string;
+  app: 'Lumina';
+  childProfile: ChildProfile;
+  avatar: AvatarConfig;
+  settings: AppSettings;
+  aacItems: AACItem[];
+  quickPhrases: QuickPhrase[];
+  routines: Routine[];
+  adventures: LifeAdventure[];
+  skills: LifeSkill[];
+  habits: DailyHabit[];
+  worldState: MyWorldState;
+  socialStories: SocialStory[];
+  dailyRecollections?: any[];
+  medications?: any[];
+  cycleSettings?: any;
+  userAgeGroup?: UserAgeGroup;
+  enabledFeatures?: EnabledFeatures;
+  activeThemeId?: string;
+  soundscapePreferences?: Record<string, number>;
+}
+
+

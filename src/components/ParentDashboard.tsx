@@ -39,7 +39,9 @@ import {
   HeartPulse,
   Lock,
   Crown,
-  Search
+  Search,
+  Upload,
+  FileJson
 } from 'lucide-react';
 import { MOOD_META, TRIGGER_META, COPING_META } from '../data/defaultData';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
@@ -134,7 +136,33 @@ export const ParentDashboard: React.FC = () => {
     setBillingCycle,
     triggerUpgrade,
     getTrialDaysRemaining,
+    exportProfileBackup,
+    importProfileBackup,
   } = useApp();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleBackupUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
+        const success = importProfileBackup(content);
+        if (success) {
+          showNotification('Profile backup successfully imported and restored!');
+        } else {
+          showNotification('Import failed: Invalid backup file format.');
+        }
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const cyclePhaseInfo = getCyclePhaseInfo();
 
@@ -4758,6 +4786,58 @@ export const ParentDashboard: React.FC = () => {
                     Speak word immediately upon tap (Immediate feedback)
                   </span>
                 </label>
+              </div>
+
+              {/* BACKUP & RESTORE DATA SECTION */}
+              <div className="pt-6 border-t border-slate-200">
+                <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 border border-indigo-100 rounded-2xl p-5 shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <FileJson className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                        Profile Backup & Data Portability
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                          Offline Safe
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        Export all personalized AAC symbols, voice setups, routines, skills, adventures, medication logs, and cycle data into a single offline backup file. Transfer or restore anytime across devices.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-indigo-100/80">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        exportProfileBackup();
+                        showNotification('Backup exported successfully!');
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm inline-flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export Backup (JSON)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-900 border border-indigo-200 font-bold text-xs shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Upload className="w-4 h-4 text-indigo-600" />
+                      Restore from Backup File
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleBackupUpload}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="pt-6 border-t border-slate-200">
