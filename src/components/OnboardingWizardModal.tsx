@@ -40,46 +40,6 @@ interface OnboardingWizardModalProps {
   canDismiss?: boolean;
 }
 
-const AGE_INTEREST_SUGGESTIONS: Record<UserAgeGroup, { label: string; emoji: string }[]> = {
-  kid: [
-    { label: 'Turtles & Sea Life', emoji: '🐢' },
-    { label: 'Dinosaurs', emoji: '🦖' },
-    { label: 'Frogs & Nature', emoji: '🐸' },
-    { label: 'Trains & Railways', emoji: '🚂' },
-    { label: 'Space & Astronauts', emoji: '🚀' },
-    { label: 'Drawing & Art', emoji: '🎨' },
-    { label: 'Safari Animals', emoji: '🦁' },
-    { label: 'LEGO & Blocks', emoji: '🧱' },
-    { label: 'Ocean Creatures', emoji: '🐬' },
-    { label: 'Music & Songs', emoji: '🎵' },
-    { label: 'Superheroes', emoji: '🦸' },
-  ],
-  teen: [
-    { label: 'Lo-Fi Music & Beats', emoji: '🎧' },
-    { label: 'Skateboarding', emoji: '🛹' },
-    { label: 'Gaming & RPGs', emoji: '🎮' },
-    { label: 'Anime & Manga', emoji: '✨' },
-    { label: 'Coding & Tech', emoji: '💻' },
-    { label: 'Digital Photography', emoji: '📸' },
-    { label: 'Astronomy & Stars', emoji: '🌌' },
-    { label: 'Sci-Fi & Graphic Novels', emoji: '📚' },
-    { label: 'Nature & Hiking', emoji: '🌲' },
-    { label: 'Podcasts & Streams', emoji: '🎙️' },
-  ],
-  adult: [
-    { label: 'Work & Focus Routines', emoji: '💼' },
-    { label: 'Indoor Plants & Botany', emoji: '🌿' },
-    { label: 'Coffee & Tea Rituals', emoji: '☕' },
-    { label: 'Reading & Non-Fiction', emoji: '📖' },
-    { label: 'Mindfulness & Meditation', emoji: '🧘' },
-    { label: 'Minimalist Organization', emoji: '📐' },
-    { label: 'Walking & Fitness', emoji: '👟' },
-    { label: 'Ambient & Synthwave', emoji: '🎵' },
-    { label: 'Culinary & Cooking', emoji: '🍳' },
-    { label: 'Low-Sensory Quiet Spaces', emoji: '🌙' },
-  ],
-};
-
 const COMMUNICATION_STYLES = [
   { id: 'aac_tiles', label: 'AAC Picture Tiles & Voice Engine', emoji: '🗣️', desc: 'Symbol board with speech output' },
   { id: 'visual_routines', label: 'Visual Schedules & Time Timers', emoji: '📅', desc: 'Clear step-by-step routine cards' },
@@ -106,7 +66,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
-  const totalSteps = 5;
+  const totalSteps = 4;
 
   // Wizard local form state
   const [selectedAge, setSelectedAge] = useState<UserAgeGroup>(childProfile.ageGroup || currentContextAge || 'kid');
@@ -114,8 +74,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   const [name, setName] = useState<string>(childProfile.name || (selectedAge === 'adult' ? 'Alex' : 'Leo'));
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
   const [commStyle, setCommStyle] = useState<string>('aac_tiles');
-  const [interests, setInterests] = useState<string[]>(childProfile.interests?.length ? childProfile.interests : ['Dinosaurs', 'Drawing & Art']);
-  const [customInterest, setCustomInterest] = useState<string>('');
   
   // Features state
   const [features, setFeatures] = useState<EnabledFeatures>(() => {
@@ -134,39 +92,16 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     const newDefaults = getDefaultFeaturesForAge(newAge);
     setFeatures(newDefaults);
 
-    // Pick top default interests for that age
-    const sampleInterests = AGE_INTEREST_SUGGESTIONS[newAge].slice(0, 2).map(i => i.label);
-    setInterests(sampleInterests);
-
     // Update suggested theme
-    const suggestedId = suggestThemeForUser(newAge, sampleInterests);
+    const suggestedId = suggestThemeForUser(newAge, []);
     setSelectedThemeId(suggestedId);
   };
 
-  // Re-evaluate suggested theme when interests change
+  // Re-evaluate suggested theme when age changes
   useEffect(() => {
-    const suggestedId = suggestThemeForUser(selectedAge, interests);
+    const suggestedId = suggestThemeForUser(selectedAge, []);
     setSelectedThemeId(suggestedId);
-  }, [selectedAge, interests]);
-
-  const toggleInterest = (label: string) => {
-    playChime('tap');
-    if (interests.includes(label)) {
-      setInterests(prev => prev.filter(i => i !== label));
-    } else {
-      setInterests(prev => [...prev, label]);
-    }
-  };
-
-  const handleAddCustomInterest = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = customInterest.trim();
-    if (trimmed && !interests.includes(trimmed)) {
-      setInterests(prev => [...prev, trimmed]);
-      setCustomInterest('');
-      playChime('star');
-    }
-  };
+  }, [selectedAge]);
 
   const toggleFeatureKey = (key: keyof EnabledFeatures) => {
     playChime('tap');
@@ -188,7 +123,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       pronouns: pronouns.trim(),
       ageGroup: selectedAge,
       userRole: role,
-      interests: interests,
+      interests: childProfile.interests || [],
       onboardingCompleted: true,
     });
 
@@ -248,9 +183,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
                 {step === 1 && 'Who is using Lumina?'}
                 {step === 2 && 'Your Profile & Communication'}
-                {step === 3 && 'Passions & Special Interests'}
-                {step === 4 && 'Choose Your Tools & Features'}
-                {step === 5 && 'Your Tailored Look & Theme'}
+                {step === 3 && 'Choose Your Tools & Features'}
+                {step === 4 && 'Your Tailored Look & Theme'}
               </h2>
             </div>
           </div>
@@ -268,7 +202,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
         {/* STEP PROGRESS BAR */}
         <div className="w-full bg-slate-100 h-2 flex shrink-0">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
               className={`flex-1 transition-all duration-300 ${
@@ -496,73 +430,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </div>
           )}
 
-          {/* STEP 3: PASSIONS & SPECIAL INTERESTS */}
+          {/* STEP 3: CURATED TOOLS & FEATURES */}
           {step === 3 && (
-            <div className="space-y-4 animate-in fade-in">
-              <div>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium">
-                  Pick your favorite interests and passions. Lumina will use these to suggest themed wallpapers, icons, and motivation greetings!
-                </p>
-              </div>
-
-              {/* Dynamic Interest Chips */}
-              <div className="flex flex-wrap gap-2">
-                {AGE_INTEREST_SUGGESTIONS[selectedAge].map((item) => {
-                  const isSelected = interests.includes(item.label);
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => toggleInterest(item.label)}
-                      className={`px-3.5 py-2 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border-amber-500 bg-amber-100 text-amber-950 shadow-xs ring-2 ring-amber-300 scale-102'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="text-lg">{item.emoji}</span>
-                      <span>{item.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-amber-800 ml-0.5" />}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Add Custom Interest Form */}
-              <form onSubmit={handleAddCustomInterest} className="flex gap-2 pt-2">
-                <input
-                  type="text"
-                  value={customInterest}
-                  onChange={(e) => setCustomInterest(e.target.value)}
-                  placeholder="Add your own interest (e.g. vintage trains, origami)..."
-                  className="flex-1 px-4 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-medium focus:border-amber-500 outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!customInterest.trim()}
-                  className={`px-4 py-2 rounded-xl font-bold text-xs cursor-pointer ${
-                    customInterest.trim()
-                      ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  + Add
-                </button>
-              </form>
-
-              {interests.length > 0 && (
-                <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 text-xs text-amber-900 font-bold flex items-center gap-2">
-                  <span>✨ Selected ({interests.length}):</span>
-                  <span className="font-semibold text-slate-700 truncate">
-                    {interests.join(', ')}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 4: CURATED TOOLS & FEATURES */}
-          {step === 4 && (
             <div className="space-y-4 animate-in fade-in">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
                 <div>
@@ -826,12 +695,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </div>
           )}
 
-          {/* STEP 5: THEME SUGGESTION & PREVIEW */}
-          {step === 5 && (
+          {/* STEP 4: THEME SUGGESTION & PREVIEW */}
+          {step === 4 && (
             <div className="space-y-4 animate-in fade-in">
               <div>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium">
-                  Based on your age group (<strong className="capitalize">{selectedAge}</strong>) and interests ({interests.slice(0, 3).join(', ')}), Lumina has suggested this theme:
+                  Based on your age group (<strong className="capitalize">{selectedAge}</strong>), Lumina has suggested this theme:
                 </p>
               </div>
 
