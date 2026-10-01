@@ -51,7 +51,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
   // Wizard local form state
   const [selectedAge, setSelectedAge] = useState<UserAgeGroup>(childProfile.ageGroup || currentContextAge || 'kid');
-  const [role, setRole] = useState<'self' | 'caregiver_managing'>(childProfile.userRole || 'self');
+  const [role, setRole] = useState<'self' | 'caregiver_managing'>(() => {
+    if (childProfile.userRole) return childProfile.userRole;
+    return (childProfile.ageGroup === 'adult' || currentContextAge === 'adult') ? 'self' : 'caregiver_managing';
+  });
   const [name, setName] = useState<string>(childProfile.name || (selectedAge === 'adult' ? 'Alex' : 'Leo'));
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
   const [commStyle, setCommStyle] = useState<string>('aac_tiles');
@@ -61,9 +64,14 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     return contextFeatures || getDefaultFeaturesForAge(selectedAge);
   });
 
-  // When selected age changes, update recommended features
+  // When selected age changes, update recommended features and role
   const handleAgeChange = (newAge: UserAgeGroup) => {
     setSelectedAge(newAge);
+    if (newAge === 'kid' || newAge === 'teen') {
+      setRole('caregiver_managing');
+    } else {
+      setRole('self');
+    }
     playChime('tap');
     
     // Suggest default features for this age
@@ -281,39 +289,54 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-2">
                   Who is filling this out?
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRole('self');
-                      playChime('tap');
-                    }}
-                    className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
-                      role === 'self'
-                        ? 'border-amber-500 bg-amber-50 text-amber-950 font-black'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <User className="w-4 h-4 text-amber-600" />
-                    <span>I am setting this up for myself</span>
-                  </button>
+                
+                {selectedAge === 'adult' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRole('self');
+                        playChime('tap');
+                      }}
+                      className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
+                        role === 'self'
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-950 font-black'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <User className="w-4 h-4 text-emerald-600" />
+                      <span>I am setting this up for myself</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRole('caregiver_managing');
-                      playChime('tap');
-                    }}
-                    className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
-                      role === 'caregiver_managing'
-                        ? 'border-rose-500 bg-rose-50 text-rose-950 font-black'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <Heart className="w-4 h-4 text-rose-600" />
-                    <span>I am a parent, caregiver, or SLP/OT</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRole('caregiver_managing');
+                        playChime('tap');
+                      }}
+                      className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
+                        role === 'caregiver_managing'
+                          ? 'border-rose-500 bg-rose-50 text-rose-950 font-black'
+                          : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <Heart className="w-4 h-4 text-rose-600" />
+                      <span>I am a caregiver or support assistant</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl border-2 border-rose-200 bg-rose-50/80 text-rose-950 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                      <Heart className="w-5 h-5 fill-rose-500 text-rose-500" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black block text-slate-900">Parent or Caregiver Setup</span>
+                      <p className="text-[11px] text-rose-800 font-medium leading-tight mt-0.5">
+                        {selectedAge === 'kid' ? 'Kids' : 'Teens'} profiles must be set up and managed by a parent, guardian, or therapist.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
