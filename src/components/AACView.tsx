@@ -105,22 +105,22 @@ export const AACView: React.FC = () => {
       return 'bg-white hover:bg-slate-100 text-slate-950 border-2 border-slate-900';
     }
 
-    // Default: Modified Fitzgerald Key standard
+    // Default: Soft Low-Sensory Fitzgerald Key standard (solid, soothing pastel backgrounds)
     switch (colorType) {
       case 'subject':
-        return 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300 ring-amber-400';
+        return 'bg-amber-50 hover:bg-amber-100/80 text-amber-950 border-amber-200/90 ring-amber-300';
       case 'verb':
-        return 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border-emerald-300 ring-emerald-400';
+        return 'bg-emerald-50 hover:bg-emerald-100/80 text-emerald-950 border-emerald-200/90 ring-emerald-300';
       case 'noun':
-        return 'bg-orange-100 hover:bg-orange-200 text-orange-950 border-orange-300 ring-orange-400';
+        return 'bg-orange-50 hover:bg-orange-100/80 text-orange-950 border-orange-200/90 ring-orange-300';
       case 'adjective':
-        return 'bg-sky-100 hover:bg-sky-200 text-sky-950 border-sky-300 ring-sky-400';
+        return 'bg-sky-50 hover:bg-sky-100/80 text-sky-950 border-sky-200/90 ring-sky-300';
       case 'social':
-        return 'bg-purple-100 hover:bg-purple-200 text-purple-950 border-purple-300 ring-purple-400';
+        return 'bg-purple-50 hover:bg-purple-100/80 text-purple-950 border-purple-200/90 ring-purple-300';
       case 'emergency':
-        return 'bg-rose-100 hover:bg-rose-200 text-rose-950 border-rose-300 ring-rose-400 font-black';
+        return 'bg-rose-50 hover:bg-rose-100 text-rose-950 border-rose-300 ring-rose-400 font-black';
       default:
-        return 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300 ring-slate-400';
+        return 'bg-slate-50 hover:bg-slate-100/80 text-slate-900 border-slate-200 ring-slate-300';
     }
   };
 
