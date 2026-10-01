@@ -582,10 +582,12 @@ export interface AppSettings {
   touchHoldDelayMs: number; // 0 for instant, or e.g. 300ms accidental touch protection
   reduceMotion: boolean;
   soundEffects: boolean;
+  colorCodingEnabled?: boolean;
+  spokenAnnouncements?: boolean;
   autoSpeakSentence: boolean;
   features?: EnabledFeatures;
   onboardingCompleted?: boolean;
-  aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white';
+  aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white' | 'neutral_monochrome';
 }
 
 export interface CaregiverMessage {

@@ -83,9 +83,16 @@ export const AACView: React.FC = () => {
     })
     .sort((a, b) => a.motorIndex - b.motorIndex);
 
-  // Styling based on AAC Button Color Mode: Fitzgerald Key (default) vs Theme Tinted vs High Contrast White
+  // Styling based on AAC Button Color Mode: Fitzgerald Key (default) vs Theme Tinted vs High Contrast White vs Neutral Monochrome
   const getColorStyles = (colorType: AACItem['colorType']) => {
     const mode = settings.aacButtonColorMode || 'fitzgerald';
+
+    if (settings.colorCodingEnabled === false || mode === 'neutral_monochrome') {
+      if (colorType === 'emergency') {
+        return 'bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-300 ring-rose-400 font-bold';
+      }
+      return 'bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 ring-slate-300';
+    }
 
     if (mode === 'theme') {
       // Emergency buttons always stay high-visibility red for safety

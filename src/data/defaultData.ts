@@ -126,7 +126,9 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   highContrast: false,
   touchHoldDelayMs: 0,
   reduceMotion: false,
-  soundEffects: true,
+  soundEffects: false,
+  spokenAnnouncements: false,
+  colorCodingEnabled: true,
   autoSpeakSentence: true,
   aacButtonColorMode: 'fitzgerald',
 };

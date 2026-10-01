@@ -362,6 +362,10 @@ interface AppContextType {
   showToolsHubModal: boolean;
   setShowToolsHubModal: (val: boolean) => void;
 
+  // Accessibility & Sensory Preferences Hub
+  showAccessibilityModal: boolean;
+  setShowAccessibilityModal: (val: boolean) => void;
+
   // Editable & Customizable Dashboard
   dashboardWidgets: DashboardWidgetConfig[];
   setDashboardWidgets: (widgets: DashboardWidgetConfig[]) => void;
@@ -2142,6 +2146,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Consolidated Tools Hub
   const [showToolsHubModal, setShowToolsHubModal] = useState<boolean>(false);
 
+  // Accessibility & Sensory Preferences Hub
+  const [showAccessibilityModal, setShowAccessibilityModal] = useState<boolean>(false);
+
   // ── Customizable Dashboard Widgets (Clean & Minimalist by Default) ──
   const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
     {
@@ -2641,6 +2648,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         showToolsHubModal,
         setShowToolsHubModal,
+
+        showAccessibilityModal,
+        setShowAccessibilityModal,
 
         dashboardWidgets,
         setDashboardWidgets,

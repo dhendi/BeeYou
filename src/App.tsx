@@ -50,6 +50,7 @@ const PieTimerModal = lazy(() => import('./components/PieTimerModal').then(m => 
 const DigitalFidgetModal = lazy(() => import('./components/DigitalFidgetModal').then(m => ({ default: m.DigitalFidgetModal })));
 const AacKeyboardModal = lazy(() => import('./components/AacKeyboardModal').then(m => ({ default: m.AacKeyboardModal })));
 const ToolsHubModal = lazy(() => import('./components/ToolsHubModal').then(m => ({ default: m.ToolsHubModal })));
+const AccessibilityPreferencesModal = lazy(() => import('./components/AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
 const DashboardCustomizerModal = lazy(() => import('./components/DashboardCustomizerModal').then(m => ({ default: m.DashboardCustomizerModal })));
 
 const AppContent: React.FC = () => {
@@ -243,6 +244,9 @@ const AppContent: React.FC = () => {
 
         {/* Consolidated Tools Hub Modal */}
         <ToolsHubModal />
+
+        {/* Accessibility & Sensory Preferences Hub Modal */}
+        <AccessibilityPreferencesModal />
 
         {/* Editable Dashboard Customizer Modal */}
         <DashboardCustomizerModal />

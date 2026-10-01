@@ -7,7 +7,8 @@ import {
   Sparkles, 
   AlertCircle,
   ShieldAlert,
-  LayoutGrid
+  LayoutGrid,
+  SlidersHorizontal
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -29,6 +30,7 @@ export const ChildHeader: React.FC = () => {
     setShowAboutMeModal,
     setShowAvatarCreator,
     setShowToolsHubModal,
+    setShowAccessibilityModal,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -125,6 +127,19 @@ export const ChildHeader: React.FC = () => {
         >
           <LayoutGrid className="w-3.5 h-3.5 text-slate-600" />
           <span>Tools</span>
+        </button>
+
+        {/* 1b. Accessibility & Sensory Preferences */}
+        <button
+          onClick={() => {
+            setShowAccessibilityModal(true);
+            playChime('tap');
+          }}
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-xs active:scale-95 transition-all cursor-pointer border border-indigo-200"
+          title="Accessibility & Sensory Preferences (Colors, Sounds, Features)"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+          <span className="hidden sm:inline">Sensory</span>
         </button>
 
         {/* 2. Break / Calming */}
