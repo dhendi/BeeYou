@@ -6,7 +6,6 @@ import {
   Sparkles, 
   AlertCircle,
   ShieldAlert,
-  LayoutGrid,
   SlidersHorizontal
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
@@ -26,7 +25,6 @@ export const ChildHeader: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
-    setShowToolsHubModal,
     setShowAccessibilityModal,
   } = useApp();
 
@@ -113,30 +111,17 @@ export const ChildHeader: React.FC = () => {
 
       {/* Right: Consolidated, Clean Action Bar */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* 1. Tools Hub */}
-        <button
-          onClick={() => {
-            setShowToolsHubModal(true);
-            playChime('tap');
-          }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs active:scale-95 transition-all cursor-pointer border border-slate-200"
-          title="Tools Hub"
-        >
-          <LayoutGrid className="w-3.5 h-3.5 text-slate-600" />
-          <span>Tools</span>
-        </button>
-
-        {/* 1b. Accessibility & Sensory Preferences */}
+        {/* 1. Accessibility Preferences */}
         <button
           onClick={() => {
             setShowAccessibilityModal(true);
             playChime('tap');
           }}
           className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-xs active:scale-95 transition-all cursor-pointer border border-indigo-200"
-          title="Accessibility & Sensory Preferences (Colors, Sounds, Features)"
+          title="Accessibility Preferences (Colors, Sounds, Features)"
         >
           <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
-          <span className="hidden sm:inline">Sensory</span>
+          <span className="hidden sm:inline">Accessibility</span>
         </button>
 
         {/* 2. Break / Calming */}
