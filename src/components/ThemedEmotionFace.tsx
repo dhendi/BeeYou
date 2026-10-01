@@ -32,7 +32,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppTheme } from '../data/themesData';
 import { useApp } from '../context/AppContext';
-import { getRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
+import { getRecoloredEmotionImage, getCachedRecoloredEmotionImage, isDefaultPalette } from '../utils/avatarRecolor';
 
 export type EmotionId =
   | 'happy'
@@ -810,13 +810,20 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 
   // Dynamically recolor skin & hair if user has customized them
-  const [recoloredSrc, setRecoloredSrc] = useState<string | null>(null);
+  const [recoloredSrc, setRecoloredSrc] = useState<string | null>(() =>
+    getCachedRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair)
+  );
 
   useEffect(() => {
     let active = true;
     if (isDefaultPalette(effectiveSkin, effectiveHair)) {
       setRecoloredSrc(null);
       return;
+    }
+
+    const cached = getCachedRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair);
+    if (cached) {
+      setRecoloredSrc(cached);
     }
 
     getRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair).then((recolored) => {
