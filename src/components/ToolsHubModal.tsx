@@ -226,17 +226,17 @@ export const ToolsHubModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
       onClick={() => setShowToolsHubModal(false)}
     >
       <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-4 border-indigo-200"
+        className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-2 border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-indigo-50 via-sky-50 to-purple-50 border-b border-indigo-100">
+        <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
-            <span className="text-3xl p-2 bg-white rounded-2xl border border-indigo-100 shadow-2xs">
+            <span className="text-2xl p-2 bg-white rounded-2xl border border-slate-200 shadow-2xs">
               🧰
             </span>
             <div>
@@ -257,7 +257,7 @@ export const ToolsHubModal: React.FC = () => {
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 border-b border-slate-200 overflow-x-auto">
+        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-50/70 border-b border-slate-200 overflow-x-auto">
           {[
             { id: 'all' as const, label: 'All Tools', emoji: '✨' },
             { id: 'sensory' as const, label: 'Sensory & Regulation', emoji: '🫧' },
@@ -272,8 +272,8 @@ export const ToolsHubModal: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 activeCategory === cat.id
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
               }`}
             >
               <span>{cat.emoji}</span>
@@ -282,28 +282,28 @@ export const ToolsHubModal: React.FC = () => {
           ))}
         </div>
 
-        {/* Tools Grid */}
+        {/* Tools Grid - Single Clean Neutral Color for Low Stimulation */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredTools.map((tool) => (
             <div
               key={tool.id}
               onClick={tool.action}
-              className={`p-3.5 sm:p-4 rounded-2xl border-2 bg-gradient-to-br ${tool.bg} shadow-2xs hover:shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
+              className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50/80 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-3xl p-2 bg-white/90 rounded-2xl shadow-2xs shrink-0">
+                <span className="w-11 h-11 rounded-2xl bg-slate-100 text-2xl flex items-center justify-center border border-slate-200/80 shrink-0 shadow-2xs">
                   {tool.emoji}
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/80 shadow-2xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60">
                       {tool.badge}
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-slate-900 leading-tight truncate">
+                  <h4 className="font-bold text-sm text-slate-900 leading-tight truncate">
                     {tool.title}
                   </h4>
-                  <p className="text-[11px] text-slate-600 font-medium leading-snug truncate">
+                  <p className="text-[11px] text-slate-500 font-medium leading-snug truncate">
                     {tool.desc}
                   </p>
                 </div>
