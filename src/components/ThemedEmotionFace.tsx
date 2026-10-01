@@ -809,24 +809,24 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 
-  // Dynamically recolor skin & hair if user has customized them
+  // Dynamically recolor skin tone if customized
   const [recoloredSrc, setRecoloredSrc] = useState<string | null>(() =>
-    getCachedRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair)
+    getCachedRecoloredEmotionImage(baseSrc, effectiveSkin)
   );
 
   useEffect(() => {
     let active = true;
-    if (isDefaultPalette(effectiveSkin, effectiveHair)) {
+    if (isDefaultPalette(effectiveSkin)) {
       setRecoloredSrc(null);
       return;
     }
 
-    const cached = getCachedRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair);
+    const cached = getCachedRecoloredEmotionImage(baseSrc, effectiveSkin);
     if (cached) {
       setRecoloredSrc(cached);
     }
 
-    getRecoloredEmotionImage(baseSrc, effectiveSkin, effectiveHair).then((recolored) => {
+    getRecoloredEmotionImage(baseSrc, effectiveSkin).then((recolored) => {
       if (active) {
         setRecoloredSrc(recolored);
       }
@@ -835,10 +835,10 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
     return () => {
       active = false;
     };
-  }, [baseSrc, effectiveSkin, effectiveHair]);
+  }, [baseSrc, effectiveSkin]);
 
   const displaySrc =
-    !isDefaultPalette(effectiveSkin, effectiveHair) && recoloredSrc
+    !isDefaultPalette(effectiveSkin) && recoloredSrc
       ? recoloredSrc
       : baseSrc;
 
@@ -849,7 +849,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
     >
       {hasRealImage ? (
         <img
-          key={`${folder}-${category}-${normalizedId}-${effectiveSkin}-${effectiveHair}`}
+          key={`${folder}-${category}-${normalizedId}-${effectiveSkin}`}
           src={displaySrc}
           alt={label}
           onError={() => setImageFailed(true)}

@@ -1,9 +1,9 @@
 /**
  * avatarRecolor.ts — High-Fidelity Real-time Palette Swapping Engine for Themed Emotion Icons
  *
- * Dynamically recolors 16-bit pixel art emotion sprites so that characters
- * reflect the child's chosen hair color and skin tone with rich, warm melanin
- * depth and vibrant hair tones across all 11 emotion poses and costumes.
+ * Exclusively recolors character skin tones (face, forehead, cheeks, chin, neck,
+ * ears, wrists, and hands across all 11 emotion poses) with rich, warm melanin
+ * depth and natural highlights. Hair remains authentic hand-drawn pixel art.
  */
 
 const recolorCache = new Map<string, string>();
@@ -12,12 +12,11 @@ const recolorCache = new Map<string, string>();
 export function getCachedRecoloredEmotionImage(
   src: string,
   targetSkinHex?: string,
-  targetHairHex?: string
+  _targetHairHex?: string
 ): string | null {
   const shouldRecolorSkin = Boolean(targetSkinHex && targetSkinHex.toLowerCase() !== '#fed7aa');
-  const shouldRecolorHair = Boolean(targetHairHex && targetHairHex.toLowerCase() !== '#451a03');
-  if (!shouldRecolorSkin && !shouldRecolorHair) return src;
-  const cacheKey = `${src}__${shouldRecolorSkin ? targetSkinHex : 'def'}__${shouldRecolorHair ? targetHairHex : 'def'}`;
+  if (!shouldRecolorSkin) return src;
+  const cacheKey = `${src}__skin_${targetSkinHex}`;
   return recolorCache.get(cacheKey) || null;
 }
 
@@ -32,22 +31,20 @@ export function hexToRgb(hex: string): [number, number, number] {
   return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
 }
 
-/** Check if current skin and hair match default baseline sprites */
-export function isDefaultPalette(skinHex?: string, hairHex?: string): boolean {
-  if (!skinHex && !hairHex) return true;
-  const isDefaultSkin = !skinHex || skinHex.toLowerCase() === '#fed7aa';
-  const isDefaultHair = !hairHex || hairHex.toLowerCase() === '#451a03';
-  return isDefaultSkin && isDefaultHair;
+/** Check if current skin matches default baseline sprites */
+export function isDefaultPalette(skinHex?: string, _hairHex?: string): boolean {
+  if (!skinHex) return true;
+  return skinHex.toLowerCase() === '#fed7aa';
 }
 
 /**
  * Palette Swapping function:
- * Loads sprite on an offscreen canvas and transforms face skin and hair pixels in < 2ms.
+ * Loads sprite on an offscreen canvas and transforms face skin and hands in < 2ms.
  */
 export async function getRecoloredEmotionImage(
   src: string,
   targetSkinHex?: string,
-  targetHairHex?: string
+  _targetHairHex?: string
 ): Promise<string> {
   // If running server-side, return original URL
   if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -57,23 +54,19 @@ export async function getRecoloredEmotionImage(
   const shouldRecolorSkin = Boolean(
     targetSkinHex && targetSkinHex.toLowerCase() !== '#fed7aa'
   );
-  const shouldRecolorHair = Boolean(
-    targetHairHex && targetHairHex.toLowerCase() !== '#451a03'
-  );
 
-  // If neither skin nor hair needs custom palette swapping, return original sprite directly
-  if (!shouldRecolorSkin && !shouldRecolorHair) {
+  // If skin matches default baseline, return original sprite directly
+  if (!shouldRecolorSkin) {
     return src;
   }
 
-  const cacheKey = `${src}__${shouldRecolorSkin ? targetSkinHex : 'def'}__${shouldRecolorHair ? targetHairHex : 'def'}`;
+  const cacheKey = `${src}__skin_${targetSkinHex}`;
   const cached = recolorCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const targetSkinRgb = shouldRecolorSkin ? hexToRgb(targetSkinHex!) : null;
-  const targetHairRgb = shouldRecolorHair ? hexToRgb(targetHairHex!) : null;
+  const targetSkinRgb = hexToRgb(targetSkinHex!);
 
   return new Promise<string>((resolve) => {
     const img = new Image();
@@ -107,7 +100,7 @@ export async function getRecoloredEmotionImage(
             const g = data[i + 1];
             const b = data[i + 2];
 
-            // 1. Real Black Outlines, Brows & Pupils (NEVER recolor!)
+            // 1. Real Black Outlines, Brows, Hair & Pupils (NEVER recolor!)
             if (Math.max(r, g, b) < 36) continue;
 
             const lum = r * 0.299 + g * 0.587 + b * 0.114;
@@ -182,7 +175,7 @@ export async function getRecoloredEmotionImage(
               (r >= 110 && r <= 170 && g >= 65 && g <= 125 && b >= 45 && b <= 95 && r > g && g >= b) // shaded skin creases
             );
 
-            if (shouldRecolorSkin && targetSkinRgb && isSkinLocation && isSkinColor) {
+            if (isSkinLocation && isSkinColor) {
               // Compute relative luminance within original skin range [95 .. 245]
               const norm = Math.min(1.0, Math.max(0.0, (lum - 95) / 145));
               let nr: number, ng: number, nb: number;
@@ -215,36 +208,6 @@ export async function getRecoloredEmotionImage(
                   ng = Math.max(0, ng - 15);
                   nb = Math.max(0, nb - 10);
                 }
-              }
-
-              data[i] = nr;
-              data[i + 1] = ng;
-              data[i + 2] = nb;
-              continue;
-            }
-
-            // 6. CHARACTER HAIR RECOLORING
-            // Original hair in sprites is dark brown (r: 25..135, g: 10..90, b: 8..75) around head/hood opening
-            const isHeadHairLoc = (y <= 165 && x >= 55 && x <= 200);
-            const isHairTone = (
-              (r >= 25 && r <= 135 && g >= 10 && g <= 90 && b >= 8 && b <= 75 && r >= g && g >= b) ||
-              (r >= 25 && r <= 80 && g >= 20 && g <= 65 && b >= 25 && b <= 75) // cool tone hair
-            );
-
-            if (shouldRecolorHair && targetHairRgb && isHeadHairLoc && isHairTone) {
-              const hairNorm = Math.min(1.0, Math.max(0.0, (lum - 15) / 80));
-              let nr: number, ng: number, nb: number;
-
-              if (hairNorm >= 0.50) {
-                const delta = (hairNorm - 0.50) / 0.50;
-                nr = Math.min(255, Math.round(targetHairRgb[0] + (255 - targetHairRgb[0]) * 0.32 * delta));
-                ng = Math.min(255, Math.round(targetHairRgb[1] + (255 - targetHairRgb[1]) * 0.28 * delta));
-                nb = Math.min(255, Math.round(targetHairRgb[2] + (255 - targetHairRgb[2]) * 0.24 * delta));
-              } else {
-                const shadowMult = 0.65 + 0.35 * (hairNorm / 0.50);
-                nr = Math.min(255, Math.max(0, Math.round(targetHairRgb[0] * shadowMult)));
-                ng = Math.min(255, Math.max(0, Math.round(targetHairRgb[1] * shadowMult)));
-                nb = Math.min(255, Math.max(0, Math.round(targetHairRgb[2] * shadowMult)));
               }
 
               data[i] = nr;
