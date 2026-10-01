@@ -663,49 +663,9 @@ export const FeelingsView: React.FC = () => {
                 </span>
               </div>
             ) : (
-            <div className="bg-slate-50 dark:bg-slate-800/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs mb-3 space-y-2.5">
-              {/* Row 1: Changeable Hairstyle */}
-              <div className="flex items-center gap-2 overflow-x-auto py-0.5">
-                <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
-                  <span>✂️</span>
-                  <span>Hairstyle:</span>
-                </span>
-                {[
-                  { id: 'short', label: 'Short', icon: '🧒' },
-                  { id: 'curly', label: 'Curly', icon: '🌀' },
-                  { id: 'afro', label: 'Afro Puffs', icon: '👑' },
-                  { id: 'spiky', label: 'Spiky', icon: '⚡' },
-                  { id: 'braids', label: 'Braids', icon: '🪢' },
-                  { id: 'ponytail', label: 'Ponytail', icon: '🐎' },
-                  { id: 'bob', label: 'Bob', icon: '🎀' },
-                  { id: 'pigtails', label: 'Pigtails', icon: '👧' },
-                ].map((hs) => {
-                  const isCurrent = avatar.hairStyle === hs.id;
-                  return (
-                    <button
-                      key={hs.id}
-                      type="button"
-                      onClick={() => {
-                        updateAvatar({ hairStyle: hs.id as any });
-                        playChime('tap');
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
-                        isCurrent
-                          ? 'bg-indigo-600 text-white shadow-xs scale-102 ring-2 ring-indigo-300'
-                          : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 border border-slate-200 dark:border-slate-600'
-                      }`}
-                      title={`Select ${hs.label}`}
-                    >
-                      <span className="text-sm">{hs.icon}</span>
-                      <span>{hs.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Row 2: Changeable Skin Tone */}
-              <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex-wrap">
-                {/* Skin Color Swatches */}
+            <div className="bg-slate-50 dark:bg-slate-800/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs mb-3">
+              {/* Changeable Skin Tone Bar */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 overflow-x-auto py-0.5 w-full">
                   <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
                     <span>🧴</span>

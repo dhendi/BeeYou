@@ -771,40 +771,8 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   const label = emotionId.charAt(0).toUpperCase() + emotionId.slice(1);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // Hairstyle determination:
-  // Dedicated authentic pixel art sprite sets with identical onesie/outfit and changeable hair:
-  let folder: string | undefined = category;
-  if (category && REAL_IMAGE_THEMES.has(category)) {
-    switch (effectiveHairStyle) {
-      case 'curly':
-      case 'wavy':
-        folder = `${category}_curly`;
-        break;
-      case 'afro':
-        folder = `${category}_afro`;
-        break;
-      case 'spiky':
-        folder = `${category}_spiky`;
-        break;
-      case 'braids':
-        folder = `${category}_braids`;
-        break;
-      case 'ponytail':
-        folder = `${category}_ponytail`;
-        break;
-      case 'bob':
-        folder = `${category}_bob`;
-        break;
-      case 'pigtails':
-        folder = `${category}_pigtails`;
-        break;
-      case 'short':
-      case 'buzz':
-      default:
-        folder = (gender === 'girl' && !hairStyle) ? `${category}_pigtails` : category;
-        break;
-    }
-  }
+  // Base authentic pixel art sprite set for the active theme:
+  const folder = category;
   const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=11`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
