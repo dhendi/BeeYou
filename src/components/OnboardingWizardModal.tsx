@@ -1,36 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   UserAgeGroup, 
   EnabledFeatures, 
-  getDefaultFeaturesForAge,
-  DEFAULT_KID_FEATURES,
-  DEFAULT_TEEN_FEATURES,
-  DEFAULT_ADULT_FEATURES
+  getDefaultFeaturesForAge
 } from '../types';
-import { PRESET_THEMES, suggestThemeForUser, getThemesForAgeGroup } from '../data/themesData';
 import { playChime, speakText } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
-  Sparkles, 
-  Check, 
   ArrowRight, 
   ArrowLeft, 
-  Smile, 
-  Headphones, 
-  Briefcase, 
-  Sliders, 
-  Palette, 
   Heart, 
   User, 
-  MessageSquare, 
-  Clock, 
-  ShieldAlert, 
-  Award, 
-  BookOpen, 
-  Compass, 
-  Moon, 
-  Sun,
   X
 } from 'lucide-react';
 
@@ -66,7 +47,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
-  const totalSteps = 4;
+  const totalSteps = 3;
 
   // Wizard local form state
   const [selectedAge, setSelectedAge] = useState<UserAgeGroup>(childProfile.ageGroup || currentContextAge || 'kid');
@@ -80,10 +61,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     return contextFeatures || getDefaultFeaturesForAge(selectedAge);
   });
 
-  // Suggested Theme
-  const [selectedThemeId, setSelectedThemeId] = useState<string>('theme-dino');
-
-  // When selected age changes, update recommended features & suggested theme
+  // When selected age changes, update recommended features
   const handleAgeChange = (newAge: UserAgeGroup) => {
     setSelectedAge(newAge);
     playChime('tap');
@@ -91,17 +69,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     // Suggest default features for this age
     const newDefaults = getDefaultFeaturesForAge(newAge);
     setFeatures(newDefaults);
-
-    // Update suggested theme
-    const suggestedId = suggestThemeForUser(newAge, []);
-    setSelectedThemeId(suggestedId);
   };
-
-  // Re-evaluate suggested theme when age changes
-  useEffect(() => {
-    const suggestedId = suggestThemeForUser(selectedAge, []);
-    setSelectedThemeId(suggestedId);
-  }, [selectedAge]);
 
   const toggleFeatureKey = (key: keyof EnabledFeatures) => {
     playChime('tap');
@@ -142,8 +110,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       localStorage.setItem('lumina_enabled_features', JSON.stringify(features));
     } catch (e) {}
 
-    // 4. Equip selected theme
-    setTheme(selectedThemeId);
+    // 4. Equip default theme
+    const defaultThemeId = selectedAge === 'adult' ? 'theme-executive' : selectedAge === 'teen' ? 'theme-lofi' : 'theme-classic';
+    setTheme(defaultThemeId);
 
     // 5. Celebration
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
@@ -152,12 +121,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
     onClose();
   };
-
-  const availableAgeThemes = useMemo(() => {
-    return getThemesForAgeGroup(selectedAge, themes);
-  }, [selectedAge, themes]);
-
-  const activeSelectedTheme = themes.find(t => t.id === selectedThemeId) || PRESET_THEMES[0];
 
   if (!isOpen) return null;
 
@@ -184,7 +147,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 {step === 1 && 'Who is using Lumina?'}
                 {step === 2 && 'Your Profile & Communication'}
                 {step === 3 && 'Choose Your Tools & Features'}
-                {step === 4 && 'Your Tailored Look & Theme'}
               </h2>
             </div>
           </div>
@@ -202,7 +164,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
         {/* STEP PROGRESS BAR */}
         <div className="w-full bg-slate-100 h-2 flex shrink-0">
-          {[1, 2, 3, 4].map((s) => (
+          {[1, 2, 3].map((s) => (
             <div
               key={s}
               className={`flex-1 transition-all duration-300 ${
@@ -690,100 +652,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     onChange={() => {}}
                     className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
                   />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: THEME SUGGESTION & PREVIEW */}
-          {step === 4 && (
-            <div className="space-y-4 animate-in fade-in">
-              <div>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium">
-                  Based on your age group (<strong className="capitalize">{selectedAge}</strong>), Lumina has suggested this theme:
-                </p>
-              </div>
-
-              {/* RECOMMENDED THEME HERO CARD */}
-              <div className={`p-4 sm:p-5 rounded-3xl border-3 shadow-md ${activeSelectedTheme.palette.primaryLight} ${activeSelectedTheme.palette.primaryBorder}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl p-2.5 rounded-2xl bg-white/90 shadow-2xs">
-                      {activeSelectedTheme.mascotEmoji}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${activeSelectedTheme.palette.badgeBg} ${activeSelectedTheme.palette.textAccent}`}>
-                          Recommended Theme
-                        </span>
-                        <span className="text-xs font-bold text-slate-500">
-                          {activeSelectedTheme.mascotName}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-black text-slate-900 mt-0.5">
-                        {activeSelectedTheme.name}
-                      </h3>
-                      <p className="text-xs text-slate-600 font-medium">
-                        "{activeSelectedTheme.greetingMessage}"
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="px-3 py-1 rounded-full bg-white text-emerald-700 text-xs font-black shadow-2xs border border-emerald-200">
-                    Equipped ✨
-                  </span>
-                </div>
-
-                {/* Mini Theme Palette Swatches */}
-                <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-slate-500">Palette:</span>
-                  <div className="w-5 h-5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: activeSelectedTheme.palette.primary }} />
-                  <span className="text-[11px] font-medium text-slate-400 ml-2">
-                    Wallpaper: {activeSelectedTheme.wallpaperPattern}
-                  </span>
-                </div>
-              </div>
-
-              {/* Alternative Themes Carousel / Grid */}
-              <div>
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-2">
-                  Or pick any other theme:
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {themes.map((t) => {
-                    const isSelected = t.id === selectedThemeId;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedThemeId(t.id);
-                          playChime('tap');
-                        }}
-                        className={`p-2.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? 'border-amber-500 bg-amber-50 shadow-md ring-2 ring-amber-300'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl">{t.mascotEmoji}</span>
-                          <div className="flex items-center gap-1">
-                            {t.id === 'theme-classic' && (
-                              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
-                                Default
-                              </span>
-                            )}
-                            {isSelected && <span className="text-xs font-black text-amber-600">✓</span>}
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          <h4 className="text-xs font-black text-slate-900 truncate">{t.name}</h4>
-                          <span className="text-[10px] text-slate-500 capitalize">{t.category}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
             </div>
