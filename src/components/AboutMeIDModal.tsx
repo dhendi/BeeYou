@@ -30,8 +30,6 @@ import {
   CreditCard
 } from 'lucide-react';
 
-import { ChildAvatar } from './ChildAvatar';
-
 interface AboutMeIDModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -41,8 +39,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   const {
     childProfile,
     updateChildProfile,
-    avatar,
-    setShowAvatarCreator,
     userAgeGroup,
     setShowCaregiverAlertModal,
     activeTheme,
@@ -294,19 +290,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
             <Edit3 className="w-3.5 h-3.5 text-slate-500" />
             <span>{isEditing ? 'Cancel Edit' : 'Edit ID Card'}</span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowAvatarCreator(true);
-              playChime('tap');
-            }}
-            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-            title="Open Avatar Creator Studio 🎨"
-          >
-            <span>🎨</span>
-            <span>Avatar Studio</span>
-          </button>
         </div>
 
         {/* MODAL CONTENT BODY (Scrollable) */}
@@ -372,18 +355,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               {/* Top Hero: Identification Bar */}
               <div className="bg-gradient-to-r from-amber-50 via-sky-50 to-indigo-50 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                  <div 
-                    onClick={() => {
-                      setShowAvatarCreator(true);
-                      playChime('tap');
-                    }}
-                    className="w-16 h-16 rounded-2xl bg-white shadow-md shrink-0 border-2 border-amber-300 flex items-center justify-center cursor-pointer transition-transform hover:scale-105 relative group"
-                    title="Tap to customize avatar in Studio"
-                  >
-                    <ChildAvatar config={avatar} size="sm" />
-                    <span className="absolute -bottom-1 -right-1 bg-amber-400 text-amber-950 text-[10px] w-4 h-4 rounded-full flex items-center justify-center border border-white">
-                      🎨
-                    </span>
+                  <div className="w-14 h-14 rounded-2xl bg-white shadow-xs shrink-0 border border-slate-200 flex items-center justify-center font-black text-indigo-700 text-xl">
+                    {childProfile.name.charAt(0).toUpperCase() || '👤'}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -612,20 +585,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                     onChange={(e) => setProfilePronouns(e.target.value)}
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-bold text-sm outline-none focus:border-amber-500"
                   />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase text-slate-600 block mb-1">Avatar & Look:</label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAvatarCreator(true);
-                      playChime('tap');
-                    }}
-                    className="w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border border-amber-300 bg-amber-100 hover:bg-amber-200 text-amber-950 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>🎨</span>
-                    <span>Customize Avatar Studio</span>
-                  </button>
                 </div>
               </div>
 

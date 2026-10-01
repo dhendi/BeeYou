@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { ChildAvatar } from './ChildAvatar';
 import { 
   Sun, 
   CloudSun, 
@@ -35,7 +34,6 @@ export const MorningBriefModal: React.FC = () => {
     showMorningBrief,
     setShowMorningBrief,
     childProfile,
-    avatar,
     routines,
     adventures,
     recordEmotion,
@@ -148,8 +146,8 @@ export const MorningBriefModal: React.FC = () => {
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-6 text-amber-950 relative flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="p-1 rounded-2xl bg-white/70 shadow-xs shrink-0">
-              <ChildAvatar config={avatar} size="md" />
+            <div className="w-11 h-11 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-2xl shrink-0">
+              ☀️
             </div>
             <div>
               <div className="flex items-center gap-2">

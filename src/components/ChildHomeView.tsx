@@ -1,6 +1,5 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { ChildAvatar } from './ChildAvatar';
 import { 
   MessageSquare, 
   Calendar, 
@@ -30,7 +29,6 @@ import { DashboardWidgetId } from '../types';
 export const ChildHomeView: React.FC = () => {
   const {
     childProfile,
-    avatar,
     worldState,
     setChildView,
     plansChanged,
@@ -50,7 +48,6 @@ export const ChildHomeView: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
-    setShowAvatarCreator,
     medications,
     takeMedicationDose,
     setShowMedicationModal,
@@ -637,18 +634,18 @@ export const ChildHomeView: React.FC = () => {
         </div>
       )}
 
-      {/* 2. WELCOME HERO WITH CHILD AVATAR & EDITABLE DASHBOARD BUTTON */}
+      {/* 2. WELCOME HERO & EDITABLE DASHBOARD BUTTON */}
       <div className="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0">
           <div
             onClick={() => {
-              setShowAvatarCreator(true);
+              setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0"
-            title="Open Avatar Studio 🎨"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-black text-base sm:text-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
+            title="About Me ID Card"
           >
-            <ChildAvatar config={avatar} size="md" />
+            {childProfile.name.charAt(0).toUpperCase() || '✨'}
           </div>
           <div className="min-w-0">
             <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-tight">
@@ -684,20 +681,6 @@ export const ChildHomeView: React.FC = () => {
         const renderer = widgetRenderMap[widget.id];
         return renderer ? renderer() : null;
       })}
-
-      {/* 4. FOOTER: EDIT DASHBOARD SHORTCUT */}
-      <div className="pt-2 pb-4 text-center">
-        <button
-          onClick={() => {
-            setShowDashboardCustomizer(true);
-            playChime('tap');
-          }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-950 border-2 border-slate-200 hover:border-amber-300 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer active:scale-95"
-        >
-          <SlidersHorizontal className="w-4 h-4 text-amber-600" />
-          <span>Customize Dashboard Layout (+ Add / Remove Features)</span>
-        </button>
-      </div>
     </div>
   );
 };

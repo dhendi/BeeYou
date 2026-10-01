@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { ChildAvatar } from './ChildAvatar';
 import { 
   Coffee, 
   Lock, 
@@ -16,7 +15,6 @@ import { PWAInstallButton } from './PWAInstallButton';
 export const ChildHeader: React.FC = () => {
   const {
     childProfile,
-    avatar,
     worldState,
     setShowPinModal,
     setShowCopingToolkit,
@@ -28,7 +26,6 @@ export const ChildHeader: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
-    setShowAvatarCreator,
     setShowToolsHubModal,
     setShowAccessibilityModal,
   } = useApp();
@@ -54,19 +51,19 @@ export const ChildHeader: React.FC = () => {
 
   return (
     <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-slate-200/80'} backdrop-blur px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
-      {/* Left: Avatar + Name + Time + Clean Star Count */}
-      <div className="flex items-center gap-3">
+      {/* Left: Monogram Badge + Name + Time + Clean Star Count */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
         <button 
           type="button"
           onClick={() => {
-            setShowAvatarCreator(true);
+            setShowAboutMeModal(true);
             playChime('tap');
           }}
-          className="relative cursor-pointer transition-transform hover:scale-105 active:scale-95 block shrink-0"
-          title="Open Avatar Studio 🎨"
-          aria-label="Open Avatar Creator"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 font-black text-xs sm:text-sm flex items-center justify-center border border-indigo-200 shadow-2xs hover:scale-105 active:scale-95 transition-transform cursor-pointer shrink-0"
+          title="About Me ID Card"
+          aria-label="About Me ID Card"
         >
-          <ChildAvatar config={avatar} size="sm" />
+          {childProfile.name.charAt(0).toUpperCase() || '✨'}
         </button>
 
         <div className="flex flex-col">

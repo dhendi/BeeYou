@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { WORLD_ITEMS_CATALOG } from '../data/defaultData';
-import { ChildAvatar } from './ChildAvatar';
 import { AnimatedWorldItem } from './AnimatedWorldItem';
 import { 
   Sparkles, 
@@ -12,14 +11,14 @@ import {
   Gamepad2, 
   Check, 
   Lock, 
-  Heart,
-  Volume2,
-  Trophy,
-  Trash2,
-  Smile,
-  Zap,
-  Info,
-  Crown
+  Heart, 
+  Volume2, 
+  Trophy, 
+  Trash2, 
+  Smile, 
+  Zap, 
+  Info, 
+  Crown 
 } from 'lucide-react';
 import { playChime, playEntitySound } from '../utils/audio';
 import { Rewards } from './Rewards';
@@ -31,16 +30,13 @@ export const MyWorldView: React.FC = () => {
     buyWorldItem,
     placeWorldItem,
     removePlacedItem,
-    avatar,
-    updateAvatar,
-    setShowAvatarCreator,
     speak,
     settings,
     isPremium,
     triggerUpgrade,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'world' | 'avatar' | 'shop' | 'rewards'>('world');
+  const [activeTab, setActiveTab] = useState<'world' | 'shop' | 'rewards'>('world');
   const [petFeedback, setPetFeedback] = useState<string | null>(null);
   const [selectedPlacedId, setSelectedPlacedId] = useState<string | null>(null);
 
@@ -134,17 +130,6 @@ export const MyWorldView: React.FC = () => {
             }`}
           >
             <span>🏡 My Room</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('avatar')}
-            className={`px-3 py-2 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'avatar'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <span>🎨 My Avatar</span>
-            {!isPremium && <Crown className="w-3.5 h-3.5 text-amber-500" />}
           </button>
           <button
             onClick={() => setActiveTab('shop')}
@@ -319,17 +304,6 @@ export const MyWorldView: React.FC = () => {
                   </div>
                 );
               })}
-
-              {/* Child Avatar in the Room */}
-              <div className="flex flex-col items-center justify-end">
-                <div className="animate-bounce duration-1000">
-                  <ChildAvatar config={avatar} size="lg" />
-                </div>
-                <div className="w-16 h-2.5 bg-black/15 rounded-full blur-[2px] mt-1" />
-                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white/90 text-slate-800 shadow-xs border mt-1">
-                  You
-                </span>
-              </div>
             </div>
 
             {/* Floor / Ground line */}
@@ -355,215 +329,7 @@ export const MyWorldView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: AVATAR BUILDER */}
-      {activeTab === 'avatar' && (
-        <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
-          {!isPremium ? (
-            <div className="flex flex-col items-center text-center p-6 sm:p-8 bg-gradient-to-b from-purple-50/70 via-indigo-50/50 to-white rounded-3xl border-2 border-purple-200 space-y-4">
-              <div className="relative">
-                <div className="bg-sky-50 border-2 border-sky-200 p-5 rounded-3xl shadow-md">
-                  <ChildAvatar config={avatar} size="xl" />
-                </div>
-                <div className="absolute -top-3 -right-3 p-2 rounded-full bg-purple-600 text-white shadow-md">
-                  <Crown className="w-5 h-5 text-amber-300" />
-                </div>
-              </div>
-
-              <div className="max-w-md">
-                <h3 className="text-xl font-black text-slate-800">
-                  Avatar Customizer Studio
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1.5">
-                  Lumina Basic includes your friendly classic character. Upgrade to <strong>Lumina Premium</strong> to unlock all hairstyles, custom hair colors, skin tones, hearing aids, sensory headphones, and wheelchairs!
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => triggerUpgrade('Unlock Full Avatar Customizer Studio (Hairstyles, Skin Tones & Mobility Aids)')}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-              >
-                <Crown className="w-4 h-4 text-amber-200" />
-                <span>Start 30-Day Free Trial ($0 Today)</span>
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
-                <div className="bg-sky-50 border-2 border-sky-100 p-4 rounded-3xl shadow-inner flex flex-col items-center">
-                  <ChildAvatar config={avatar} size="xl" />
-                  <span className="text-xs font-bold text-sky-800 mt-2">Your Character</span>
-                </div>
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="text-lg sm:text-xl font-black text-slate-800">Customize Your Avatar</h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                    Choose what looks and feels most like you! Disabilities and aids like hearing aids, headphones, and wheelchairs are normal, wonderful parts of life.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAvatarCreator(true);
-                    }}
-                    className="mt-3 px-4 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
-                  >
-                    <span>🎨</span>
-                    <span>Open Full Studio & Themed Hoodies</span>
-                  </button>
-                </div>
-              </div>
-
-          {/* 1. Skin Tone */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Skin Tone
-            </span>
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-              {['#fde047', '#fcd34d', '#f59e0b', '#d97706', '#92400e', '#5a2e12'].map((tone) => (
-                <button
-                  key={tone}
-                  onClick={() => updateAvatar({ skinTone: tone })}
-                  className={`w-9 h-9 rounded-full border-2 transition-transform cursor-pointer ${
-                    avatar.skinTone === tone ? 'scale-120 ring-3 ring-teal-500 border-white' : 'border-slate-300'
-                  }`}
-                  style={{ backgroundColor: tone }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 2. Hair Style */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Hair Style
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: 'short', label: 'Short' },
-                { id: 'curly', label: 'Curly' },
-                { id: 'afro', label: 'Afro Puffs' },
-                { id: 'spiky', label: 'Spiky' },
-                { id: 'braids', label: 'Braids' },
-                { id: 'ponytail', label: 'Ponytail' },
-                { id: 'bob', label: 'Bob' },
-                { id: 'pigtails', label: 'Pigtails' },
-              ].map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => updateAvatar({ hairStyle: style.id as any })}
-                  className={`px-3 py-1.5 rounded-xl font-bold text-xs border transition-all cursor-pointer ${
-                    avatar.hairStyle === style.id
-                      ? 'bg-teal-600 text-white border-teal-700'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  {style.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Hair Color */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Hair Color
-            </span>
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-              {['#18181b', '#451a03', '#78350f', '#d97706', '#ef4444', '#3b82f6'].map((color) => (
-                <button
-                  key={color}
-                  onClick={() => updateAvatar({ hairColor: color })}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
-                    avatar.hairColor === color ? 'scale-120 ring-3 ring-teal-500 border-white' : 'border-slate-300'
-                  }`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 4. Accessories & Hearing / Sensory Aids */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Sensory Aids & Accessories
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {[
-                { id: 'sensory_headphones', label: 'Sensory Headphones 🎧' },
-                { id: 'glasses', label: 'Glasses 👓' },
-                { id: 'hearing_aids', label: 'Hearing Aids 🦻' },
-                { id: 'cap', label: 'Cool Cap 🧢' },
-                { id: 'none', label: 'None' },
-              ].map((acc) => (
-                <button
-                  key={acc.id}
-                  onClick={() => updateAvatar({ accessory: acc.id as any })}
-                  className={`p-2.5 rounded-xl font-bold text-xs border text-left transition-all cursor-pointer ${
-                    avatar.accessory === acc.id
-                      ? 'bg-teal-600 text-white border-teal-700 shadow-sm'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  {acc.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 5. Mobility Aids */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Mobility & Posture
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {[
-                { id: 'none', label: 'Standing 🚶' },
-                { id: 'wheelchair', label: 'Wheelchair 🧑‍🦽' },
-              ].map((aid) => (
-                <button
-                  key={aid.id}
-                  onClick={() => updateAvatar({ mobilityAid: aid.id as any })}
-                  className={`p-2.5 rounded-xl font-bold text-xs border text-left transition-all cursor-pointer ${
-                    avatar.mobilityAid === aid.id
-                      ? 'bg-teal-600 text-white border-teal-700 shadow-sm'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  {aid.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 6. Communication & Companion Device */}
-          <div>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-              Companion Item in Hand
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {[
-                { id: 'aac_tablet', label: 'AAC Tablet 📱' },
-                { id: 'none', label: 'None' },
-              ].map((dev) => (
-                <button
-                  key={dev.id}
-                  onClick={() => updateAvatar({ companionDevice: dev.id as any })}
-                  className={`p-2.5 rounded-xl font-bold text-xs border text-left transition-all cursor-pointer ${
-                    avatar.companionDevice === dev.id
-                      ? 'bg-teal-600 text-white border-teal-700 shadow-sm'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  {dev.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  )}
-
-      {/* TAB 3: REWARD SHOP */}
+      {/* TAB 2: REWARD SHOP */}
       {activeTab === 'shop' && (
         <div className="space-y-4">
           <div className="bg-amber-50 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 flex items-center justify-between">

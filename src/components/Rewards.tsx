@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { REWARD_BADGES, PROFILE_STICKERS, CHARACTER_TITLES, ROUTINE_STICKER_REWARDS } from '../data/rewardsData';
 import { RewardBadge, ProfileSticker } from '../types';
-import { ChildAvatar } from './ChildAvatar';
 import { 
   Trophy, 
   Sparkles, 
@@ -30,7 +29,6 @@ export const Rewards: React.FC = () => {
     worldState,
     childProfile,
     updateChildProfile,
-    avatar,
     routines,
     skills,
     emotionHistory,
@@ -734,13 +732,13 @@ export const Rewards: React.FC = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
-              <div className="relative">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white/20 backdrop-blur-md p-2 flex items-center justify-center shadow-lg border-2 border-white/30">
-                  <ChildAvatar config={avatar} size="lg" />
+              <div className="relative shrink-0">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white/20 backdrop-blur-md p-2 flex items-center justify-center shadow-lg border-2 border-white/30 text-4xl sm:text-5xl">
+                  {childProfile.activeSticker || '🏆'}
                 </div>
-                {/* Active Sticker Flair Badge on Avatar */}
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-2xl shadow-md border-2 border-white">
-                  {childProfile.activeSticker || '☀️'}
+                {/* Active Star Badge */}
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-sm shadow-md border-2 border-white font-black">
+                  ⭐
                 </div>
               </div>
 

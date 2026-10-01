@@ -23,9 +23,6 @@ export const FeelingsView: React.FC = () => {
     setShowCopingToolkit,
     dailyRecollections,
     activeTheme,
-    avatar,
-    updateAvatar,
-    setShowAvatarCreator,
     userAgeGroup,
     enabledFeatures,
     moodJournalEntries,
@@ -324,82 +321,6 @@ export const FeelingsView: React.FC = () => {
                 <Wind className="w-3.5 h-3.5 text-teal-600" />
                 <span>Calm Tools</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAvatarCreator(true);
-                  playChime('tap');
-                }}
-                className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
-                title="Avatar Studio"
-              >
-                <span>🎨</span>
-                <span>Avatar Studio</span>
-              </button>
-            </div>
-          </div>
-
-          {/* ── COMPACT, QUIET SKIN TONE SELECTOR ── */}
-          <div className="bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="flex items-center gap-2 overflow-x-auto py-0.5 w-full">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
-                Skin Tone:
-              </span>
-              {[
-                { color: '#fef3c7', name: 'Porcelain' },
-                { color: '#fed7aa', name: 'Peach' },
-                { color: '#fcd34d', name: 'Warm Gold' },
-                { color: '#f59e0b', name: 'Golden Amber' },
-                { color: '#d97706', name: 'Honey Bronze' },
-                { color: '#a16207', name: 'Almond' },
-                { color: '#92400e', name: 'Chestnut' },
-                { color: '#5a2e12', name: 'Espresso' },
-              ].map((st) => {
-                const isCurrent = avatar.skinTone === st.color;
-                return (
-                  <button
-                    key={st.color}
-                    type="button"
-                    onClick={() => {
-                      updateAvatar({ skinTone: st.color });
-                      playChime('tap');
-                    }}
-                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border transition-transform cursor-pointer shrink-0 flex items-center justify-center relative ${
-                      isCurrent
-                        ? 'scale-110 border-indigo-600 ring-2 ring-indigo-300 z-10'
-                        : 'border-slate-200 hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: st.color }}
-                    title={`Skin tone: ${st.name}`}
-                  >
-                    {isCurrent && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-900" />
-                    )}
-                  </button>
-                );
-              })}
-
-              {/* Custom Skin Tone Color Picker */}
-              <label
-                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl border cursor-pointer shrink-0 flex items-center justify-center relative transition-transform hover:scale-105 bg-gradient-to-tr from-amber-200 via-orange-300 to-amber-800 ${
-                  ![
-                    '#fef3c7', '#fed7aa', '#fcd34d', '#f59e0b',
-                    '#d97706', '#a16207', '#92400e', '#5a2e12',
-                  ].includes(avatar.skinTone)
-                    ? 'scale-110 border-indigo-600 ring-2 ring-indigo-300 z-10'
-                    : 'border-dashed border-slate-300'
-                }`}
-                title="Choose any custom skin tone"
-              >
-                <input
-                  type="color"
-                  value={avatar.skinTone || '#fed7aa'}
-                  onChange={(e) => updateAvatar({ skinTone: e.target.value })}
-                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                />
-                <span className="text-[10px]">🎨</span>
-              </label>
             </div>
           </div>
 

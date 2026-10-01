@@ -36,7 +36,6 @@ const DailyRecollectionModal = lazy(() => import('./components/DailyRecollection
 const ThemeCustomizerModal = lazy(() => import('./components/ThemeCustomizerModal').then(m => ({ default: m.ThemeCustomizerModal })));
 const OnboardingWizardModal = lazy(() => import('./components/OnboardingWizardModal').then(m => ({ default: m.OnboardingWizardModal })));
 const AboutMeIDModal = lazy(() => import('./components/AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
-const AvatarCreatorModal = lazy(() => import('./components/AvatarCreatorModal').then(m => ({ default: m.AvatarCreatorModal })));
 const MedicationRemindersModal = lazy(() => import('./components/MedicationRemindersModal').then(m => ({ default: m.MedicationRemindersModal })));
 const MoodJournalModal = lazy(() => import('./components/MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
 const CycleTrackerModal = lazy(() => import('./components/CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
@@ -67,8 +66,6 @@ const AppContent: React.FC = () => {
     enabledFeatures,
     showAboutMeModal,
     setShowAboutMeModal,
-    showAvatarCreator,
-    setShowAvatarCreator,
     settings,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
@@ -198,12 +195,6 @@ const AppContent: React.FC = () => {
         <AboutMeIDModal
           isOpen={showAboutMeModal}
           onClose={() => setShowAboutMeModal(false)}
-        />
-
-        {/* Avatar Creator Studio Modal */}
-        <AvatarCreatorModal
-          isOpen={showAvatarCreator}
-          onClose={() => setShowAvatarCreator(false)}
         />
 
         {/* Medication & Health Reminders Modal */}
