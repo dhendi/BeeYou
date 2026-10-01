@@ -638,108 +638,42 @@ export const ChildHomeView: React.FC = () => {
       )}
 
       {/* 2. WELCOME HERO WITH CHILD AVATAR & EDITABLE DASHBOARD BUTTON */}
-      <div className="bg-gradient-to-r from-amber-50 via-sky-50 to-indigo-50 border-2 border-amber-200/80 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 overflow-hidden">
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div className="relative group shrink-0">
-            <div
-              onClick={() => {
-                setShowAvatarCreator(true);
-                playChime('tap');
-              }}
-              className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
-              title="Open Avatar Creator Studio 🎨"
-            >
-              <ChildAvatar config={avatar} size="lg" />
-              <span className="absolute -bottom-1 -right-1 bg-amber-400 hover:bg-amber-500 text-amber-950 text-xs font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm border border-white cursor-pointer">
-                <span>🎨</span>
-                <span className="hidden sm:inline">Avatar</span>
-              </span>
-            </div>
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div
+            onClick={() => {
+              setShowAvatarCreator(true);
+              playChime('tap');
+            }}
+            className="cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0"
+            title="Open Avatar Studio 🎨"
+          >
+            <ChildAvatar config={avatar} size="md" />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="inline-flex items-center text-xs font-black uppercase tracking-wider text-amber-800 bg-amber-100/90 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
-                Welcome Back
-              </span>
-              {enabledFeatures?.starsAndRewards !== false && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setChildView('rewards');
-                    playChime('star');
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-100/70 hover:bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/80 cursor-pointer transition-all active:scale-95 whitespace-nowrap shrink-0"
-                  title="View earned badges & rewards"
-                >
-                  <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                  <span>{worldState.stars} Stars • 🏆 Rewards</span>
-                </button>
-              )}
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-tight">
               Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
               {userAgeGroup === 'adult'
-                ? 'Your personalized neurodivergent executive & wellness space'
-                : userAgeGroup === 'teen'
-                ? 'Your daily focus, communication & independence space'
-                : 'Your safe, friendly everyday companion'}
+                ? 'Your personalized daily executive space'
+                : 'Here is your plan and tools for today'}
             </p>
           </div>
         </div>
 
-        {/* Action bar including Customize Dashboard */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto lg:justify-end">
-          {/* Customize Dashboard Button */}
+        {/* Action bar: Customize Dashboard Button */}
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
           <button
             onClick={() => {
               setShowDashboardCustomizer(true);
               playChime('tap');
             }}
-            className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-300 shrink-0"
-            title="Customize your dashboard layout"
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-slate-200"
+            title="Add, remove, or rearrange widgets on your dashboard"
           >
-            <SlidersHorizontal className="w-4 h-4 text-amber-700" />
+            <SlidersHorizontal className="w-4 h-4 text-slate-600" />
             <span>Customize Dashboard ✏️</span>
-          </button>
-
-          {/* Emergency Sensory Red Button */}
-          <button
-            onClick={() => {
-              activateEmergencyMode();
-              playChime('tap');
-            }}
-            className="px-3 py-2 rounded-2xl bg-red-700 hover:bg-red-800 text-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 animate-pulse shrink-0 border-2 border-red-500 ring-2 ring-red-400/40"
-            title="Instant dark sensory mode + emergency AAC cards"
-          >
-            <ShieldAlert className="w-4 h-4 text-white" />
-            <span>Calm Room 🚨</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setShowCaregiverModal(true);
-              playChime('tap');
-            }}
-            className="px-3 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-rose-200 shrink-0"
-            title="Connect with Caregiver"
-          >
-            <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-            <span>Caregiver</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setShowMorningBrief(true);
-              playChime('tap');
-            }}
-            className="px-3 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-black text-xs sm:text-sm shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-200 shrink-0"
-            title="View today's Morning Brief"
-          >
-            <Sun className="w-4 h-4 text-amber-600" />
-            <span>Morning Brief</span>
           </button>
         </div>
       </div>

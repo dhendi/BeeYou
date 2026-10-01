@@ -2142,38 +2142,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Consolidated Tools Hub
   const [showToolsHubModal, setShowToolsHubModal] = useState<boolean>(false);
 
-  // ── Customizable Dashboard Widgets ──
+  // ── Customizable Dashboard Widgets (Clean & Minimalist by Default) ──
   const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
-    {
-      id: 'mascot_companion',
-      title: 'Themed Companion & Motivation',
-      emoji: '🦁',
-      description: 'Daily greeting, mascot companion, and star motivation',
-      category: 'core',
-      enabled: true,
-    },
     {
       id: 'routine_schedule',
       title: 'Visual Schedule & Routine',
       emoji: '📅',
       description: 'Step-by-step routine progress, timers, and sticker unlocks',
       category: 'core',
-      enabled: true,
-    },
-    {
-      id: 'five_point_scale',
-      title: 'Incredible 5-Point Scale',
-      emoji: '🌡️',
-      description: 'Visual regulation thermometer with coping actions',
-      category: 'sensory',
-      enabled: true,
-    },
-    {
-      id: 'spoon_budget',
-      title: 'Spoon Theory Energy Budget',
-      emoji: '🥄',
-      description: 'Morning energy check-in and stamina cost tracker',
-      category: 'wellness',
       enabled: true,
     },
     {
@@ -2185,12 +2161,36 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       enabled: true,
     },
     {
+      id: 'mascot_companion',
+      title: 'Themed Companion & Motivation',
+      emoji: '🦁',
+      description: 'Daily greeting, mascot companion, and star motivation',
+      category: 'core',
+      enabled: false,
+    },
+    {
+      id: 'five_point_scale',
+      title: 'Incredible 5-Point Scale',
+      emoji: '🌡️',
+      description: 'Visual regulation thermometer with coping actions',
+      category: 'sensory',
+      enabled: false,
+    },
+    {
+      id: 'spoon_budget',
+      title: 'Spoon Theory Energy Budget',
+      emoji: '🥄',
+      description: 'Morning energy check-in and stamina cost tracker',
+      category: 'wellness',
+      enabled: false,
+    },
+    {
       id: 'pie_timer',
       title: 'Visual Pie Clock',
       emoji: '⏰',
       description: 'Time Timer visual countdown disk with color warnings',
       category: 'sensory',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'decision_wheel',
@@ -2198,7 +2198,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '🎡',
       description: 'Break choice paralysis with an animated spin wheel',
       category: 'sensory',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'fidget_toys',
@@ -2206,7 +2206,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '🫧',
       description: 'Bubble pop with haptics, sand ripples, and marble roll',
       category: 'sensory',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'medication_tracker',
@@ -2214,7 +2214,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '💊',
       description: 'Upcoming scheduled doses, supply tracking, and logged doses',
       category: 'wellness',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'mood_journal',
@@ -2238,7 +2238,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '🪪',
       description: '1-page printable summary for teachers, doctors & dentists',
       category: 'support',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'adventure_spotlight',
@@ -2246,7 +2246,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '🚀',
       description: 'Social story and life skills preparation walkthrough',
       category: 'core',
-      enabled: true,
+      enabled: false,
     },
     {
       id: 'evening_reflection',
@@ -2254,13 +2254,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       emoji: '🌙',
       description: 'End-of-day recollection chart and mood tracker',
       category: 'wellness',
-      enabled: true,
+      enabled: false,
     },
   ];
 
   const [dashboardWidgets, setDashboardWidgetsState] = useState<DashboardWidgetConfig[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_dashboard_widgets');
+      const saved = localStorage.getItem('lumina_dashboard_widgets_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -2277,7 +2277,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_dashboard_widgets', JSON.stringify(dashboardWidgets));
+      localStorage.setItem('lumina_dashboard_widgets_v3', JSON.stringify(dashboardWidgets));
     } catch (e) {}
   }, [dashboardWidgets]);
 
