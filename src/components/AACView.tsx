@@ -532,13 +532,25 @@ export const AACView: React.FC = () => {
         : activeSceneData.items)
     : filteredItems;
 
-  const gridColsClass = settings.largeButtonMode
-    ? 'grid-cols-3 sm:grid-cols-4'
-    : settings.gridColumns === 3
-    ? 'grid-cols-3 sm:grid-cols-4'
-    : settings.gridColumns === 6
-    ? 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6'
-    : 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6';
+  const gridColsClass = (() => {
+    const cols = settings.gridColumns || 4;
+    if (cols === 2) {
+      return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3';
+    }
+    if (cols === 3) {
+      return 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4';
+    }
+    if (cols === 6) {
+      return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8';
+    }
+    if (cols === 8) {
+      return 'grid-cols-5 sm:grid-cols-7 md:grid-cols-8 lg:grid-cols-10';
+    }
+    // Default: 4 columns standard
+    return settings.largeButtonMode
+      ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'
+      : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6';
+  })();
 
   const handleTileClick = (item: AACItem) => {
     if (isMaskingMode) {
@@ -1016,7 +1028,12 @@ export const AACView: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <span className="relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 text-[11px] sm:text-xs">
+                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-xs w-full mt-1 ${
+                  settings.gridColumns === 2 ? 'text-sm sm:text-base' :
+                  settings.gridColumns === 3 ? 'text-xs sm:text-sm' :
+                  settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' :
+                  'text-[11px] sm:text-xs'
+                }`}>
                   {folder.label}
                 </span>
               </button>
@@ -1057,7 +1074,7 @@ export const AACView: React.FC = () => {
                     activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
                   } ${
                     activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-                  } shadow-sm transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
+                  } shadow-xs transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
                     hasThemedArt ? 'border-opacity-60' : ''
                   } ${getColorStyles(item.colorType)}`}
                 >
@@ -1082,8 +1099,10 @@ export const AACView: React.FC = () => {
 
                   {/* Label */}
                   <span
-                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 ${
-                      settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-[10px] sm:text-xs'
+                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-xs w-full mt-1 ${
+                      settings.largeButtonMode
+                        ? (settings.gridColumns === 2 ? 'text-base sm:text-lg' : settings.gridColumns === 3 ? 'text-sm sm:text-base' : 'text-xs sm:text-sm')
+                        : (settings.gridColumns === 2 ? 'text-sm sm:text-base' : settings.gridColumns === 3 ? 'text-xs sm:text-sm' : settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-xs')
                     }`}
                   >
                     {item.label}

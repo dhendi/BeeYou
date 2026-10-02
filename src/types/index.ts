@@ -579,7 +579,7 @@ export interface AppSettings {
   selectedVoiceURI: string;
   voicePersona?: 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir' | 'system';
   language: 'en' | 'es' | 'fr' | 'fil';
-  gridColumns: 3 | 4 | 6;
+  gridColumns: 2 | 3 | 4 | 6 | 8;
   largeButtonMode: boolean;
   highContrast: boolean;
   touchHoldDelayMs: number; // 0 for instant, or e.g. 300ms accidental touch protection

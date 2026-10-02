@@ -4765,14 +4765,68 @@ export const ParentDashboard: React.FC = () => {
                   </div>
                 </div>
 
+                {/* AAC Button Size & Grid Density Selector */}
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                      AAC Button Size & Grid Density:
+                    </label>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Make buttons bigger for easier tapping and fine-motor needs, or smaller to fit more words on screen.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: '🔍' },
+                      { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: '📐' },
+                      { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', icon: '⚖️' },
+                      { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', icon: '📱' },
+                    ].map((preset) => {
+                      const isSelected = (settings.gridColumns || 4) === preset.cols;
+                      return (
+                        <button
+                          key={preset.cols}
+                          type="button"
+                          onClick={() => {
+                            updateSettings({
+                              gridColumns: preset.cols,
+                              largeButtonMode: preset.cols <= 3,
+                            });
+                            playChime('tap');
+                          }}
+                          className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
+                            isSelected
+                              ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                              : 'border-slate-200 bg-white/70 hover:bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xl">{preset.icon}</span>
+                            {isSelected && (
+                              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2">
+                            <h5 className="font-black text-xs text-slate-900">{preset.label}</h5>
+                            <p className="text-[10px] text-slate-500 font-medium mt-0.5 leading-snug">{preset.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Additional Motor & Touch Options */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer">
                     <div className="flex items-center gap-2.5">
                       <span className="text-lg">🔲</span>
                       <div>
-                        <h4 className="text-xs font-black text-slate-800">Large AAC Buttons</h4>
-                        <p className="text-[11px] text-slate-500 font-medium">Bigger touch targets with larger text.</p>
+                        <h4 className="text-xs font-black text-slate-800">Extra-Large Label Text</h4>
+                        <p className="text-[11px] text-slate-500 font-medium">Enlarge text under AAC pictograms.</p>
                       </div>
                     </div>
                     <input

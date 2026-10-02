@@ -292,25 +292,82 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
-              {/* Big Buttons / Large Touch Target Mode */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
+              {/* AAC & UI Button Size / Grid Density Selector */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
                 <div>
-                  <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                    Large Button & Touch Targets
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
+                    <Sliders className="w-4 h-4 text-indigo-500" />
+                    <span>AAC Button Size & Grid Density</span>
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Enlarges buttons and reduces column density for easier tapping.
+                    Make buttons bigger for easier tapping and fine-motor needs, or smaller to fit more words on a single screen.
                   </p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={settings.largeButtonMode}
-                    onChange={(e) => updateSettings({ largeButtonMode: e.target.checked })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                </label>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { cols: 2, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: '🔍' },
+                    { cols: 3, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: '📐' },
+                    { cols: 4, label: 'Standard', desc: 'Balanced grid (4-5 cols)', icon: '⚖️' },
+                    { cols: 6, label: 'Compact', desc: 'High density (6-7 cols)', icon: '📱' },
+                  ].map((preset) => {
+                    const isSelected = settings.gridColumns === preset.cols;
+                    return (
+                      <button
+                        key={preset.cols}
+                        type="button"
+                        onClick={() => {
+                          updateSettings({
+                            gridColumns: preset.cols as 2 | 3 | 4 | 6 | 8,
+                            largeButtonMode: preset.cols <= 3,
+                          });
+                          playChime('tap');
+                        }}
+                        className={`p-3 rounded-xl border-2 text-left flex flex-col justify-between transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-white shadow-xs font-black'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">{preset.icon}</span>
+                          {isSelected && (
+                            <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2">
+                          <span className="font-bold text-xs block">{preset.label}</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                            {preset.desc}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Additional Text & Symbol Zoom Toggle */}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-xs text-slate-900 dark:text-white block">
+                      Extra-Large Label Text
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Increases text font size on all vocabulary tiles
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.largeButtonMode}
+                      onChange={(e) => updateSettings({ largeButtonMode: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
               </div>
             </div>
           )}
