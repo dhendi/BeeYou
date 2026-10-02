@@ -363,6 +363,7 @@ export interface MoodJournalEntry {
   triggers: MoodTriggerCategory[];
   copingStrategies: CopingStrategyUsed[];
   journalText: string;        // Freeform reflection
+  notes?: string;             // Optional notes alias
   gratitudeOrWin?: string;    // Positive anchor
   isPrivate?: boolean;        // Optional discreet flag
 }

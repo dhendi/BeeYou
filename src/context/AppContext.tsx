@@ -149,6 +149,7 @@ interface AppContextType {
   speakSentence: () => Promise<void>;
   clearSentence: () => void;
   removeLastFromSentence: () => void;
+  saveSentenceAsQuickPhrase: () => void;
   addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => void;
   updateAacItem: (item: AACItem) => void;
   toggleAacFavorite: (id: string) => void;

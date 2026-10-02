@@ -249,9 +249,9 @@ export const FeelingsView: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {entry.notes && (
+                  {(entry.notes || entry.journalText) && (
                     <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl">
-                      {entry.notes}
+                      {entry.notes || entry.journalText}
                     </p>
                   )}
                 </div>

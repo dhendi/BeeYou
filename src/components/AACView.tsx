@@ -527,7 +527,7 @@ export const AACView: React.FC = () => {
     ? (searchQuery.trim()
         ? activeSceneData.items.filter((item) =>
             item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.speechText.toLowerCase().includes(searchQuery.toLowerCase())
+            (item.speechText || '').toLowerCase().includes(searchQuery.toLowerCase())
           )
         : activeSceneData.items)
     : filteredItems;

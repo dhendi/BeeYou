@@ -19,6 +19,7 @@ export const ChildNavBar: React.FC = () => {
     setActiveStoryId,
     userAgeGroup,
     enabledFeatures,
+    settings,
     activeTheme,
     setShowToolsHubModal,
   } = useApp();
