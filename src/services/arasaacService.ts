@@ -99,10 +99,13 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'your turn': 6625,
 
   // Food & Snacks
+  'food': 2527,
+  'foods': 2527,
   'pizza': 2527,
   'mac & cheese': 2455,
   'apple': 2462,
   'fruit / apples': 2462,
+  'fruit': 2462,
   'sandwich': 2281,
   'banana': 2530,
   'crackers': 37883,
@@ -125,6 +128,10 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'take home box': 2281,
 
   // Drinks
+  'drinks': 6061,
+  'drink': 6061,
+  'beverage': 6061,
+  'beverages': 6061,
   'water': 32464,
   'water break': 32464,
   'apple juice': 11403,
@@ -133,22 +140,36 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'smoothie': 11461,
 
   // Activities & Objects
+  'play & fun': 23392,
+  'play and fun': 23392,
+  'activities': 23392,
+  'activity': 23392,
+  'games': 23392,
+  'game': 23392,
   'tablet': 28099,
+  'ipad': 28099,
+  'tablet / ipad': 28099,
   'ipad / tablet': 28099,
   'tablet / video': 28099,
   'playground': 33064,
   'book': 25191,
   'read': 25191,
+  'read book': 25191,
   'drawing': 8088,
   'draw / color': 8088,
   'write': 8088,
   'scissors': 2636,
   'music': 24791,
   'blocks': 8508,
+  'lego': 8508,
   'lego / blocks': 8508,
+  'blocks / lego': 8508,
   'puzzles': 2540,
+  'puzzle': 2540,
   'outside': 5475,
+  'outside / walk': 5475,
   'outside / recess': 33064,
+  'walk': 5475,
   'recess': 33064,
   'slide': 33064,
   'swing': 33065,
@@ -173,6 +194,8 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'bag': 35695,
 
   // Places
+  'places': 2317,
+  'place': 2317,
   'home': 2317,
   'go home': 2317,
   'school': 3082,
@@ -185,6 +208,7 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'leave store': 2317,
   'car': 2339,
   'car / bus': 2339,
+  'bus': 2339,
   'drive': 2339,
   'seatbelt': 2341,
   'window': 2340,
@@ -196,6 +220,8 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'bathroom stop': 5921,
 
   // People
+  'people': 7185,
+  'person': 7185,
   'mom': 2458,
   'dad': 2497,
   'mom / dad': 2458,
@@ -220,6 +246,7 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'ear': 2381,
 
   // Sensory
+  'sensory': 5915,
   'too loud': 2647,
   'too bright': 7252,
   'headphones': 5915,
@@ -227,12 +254,17 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'quiet room': 38050,
   'quiet please': 38050,
   'squishy fidget': 38124,
+  'fidget': 38124,
   'deep hug': 5441,
   'too crowded': 2647,
   'hot sun': 7252,
   'too bumpy': 2339,
 
   // Feelings
+  'feelings': 35533,
+  'feeling': 35533,
+  'emotions': 35533,
+  'emotion': 35533,
   'happy': 35533,
   'sad': 35545,
   'calm': 31310,
@@ -243,11 +275,14 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'scared': 35535,
   'hurt': 2367,
   'hurt / pain': 2367,
+  'pain': 2367,
   'hurt / fell': 2367,
   'car sick': 2367,
   'toilet': 5921,
   'toilet / potty': 5921,
+  'potty': 5921,
   'restroom': 5921,
+  'bathroom': 5921,
   'yummy': 37826,
   'fun!': 35533,
   'fun': 35533,
@@ -264,7 +299,7 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
  * Resolves a clinical ARASAAC image URL for any AAC item.
  * Guarantee: ALWAYS returns an authentic, verified ARASAAC clinical pictogram.
  */
-export function resolveAacImageUrl(item: { arasaacId?: number; photoUrl?: string; label?: string; speechText?: string; id?: string }): string {
+export function resolveAacImageUrl(item: { arasaacId?: number; photoUrl?: string; label?: string; speechText?: string; id?: string; category?: string }): string {
   // 1. Direct explicit ARASAAC ID (100% deterministic & infallible)
   if (item.arasaacId && typeof item.arasaacId === 'number' && item.arasaacId > 0) {
     return getArasaacImageUrl(item.arasaacId, 500);
@@ -277,13 +312,28 @@ export function resolveAacImageUrl(item: { arasaacId?: number; photoUrl?: string
 
   const cleanLabel = (item.label || '').trim().toLowerCase();
 
-  // 2. Strict exact dictionary match (overrides any stale cached URL)
+  // 3. Strict exact dictionary match (overrides any stale cached URL)
   if (cleanLabel && ARASAAC_WORD_MAP[cleanLabel]) {
     return getArasaacImageUrl(ARASAAC_WORD_MAP[cleanLabel], 500);
   }
 
-  // 3. Discrete word token match for compound labels (e.g. "read book" -> "book", "go home" -> "home")
-  // Only matches whole separate tokens with minimum length >= 3 to prevent substring false-matches (like "me" inside "home")
+  // 4. Check folder ID mapping
+  if (item.id) {
+    const folderMap: Record<string, number> = {
+      'folder-food': 2527,
+      'folder-drinks': 6061,
+      'folder-activities': 23392,
+      'folder-places': 2317,
+      'folder-people': 7185,
+      'folder-feelings': 35533,
+      'folder-sensory': 5915,
+    };
+    if (folderMap[item.id]) {
+      return getArasaacImageUrl(folderMap[item.id], 500);
+    }
+  }
+
+  // 5. Discrete word token match for compound labels (e.g. "read book" -> "book", "go home" -> "home")
   if (cleanLabel) {
     const tokens = cleanLabel.split(/[\s/,\-_]+/).filter((t) => t.length >= 3);
     for (const token of tokens) {
@@ -293,12 +343,30 @@ export function resolveAacImageUrl(item: { arasaacId?: number; photoUrl?: string
     }
   }
 
-  // 4. Valid static.arasaac.org URL fallback if explicitly set on a custom item
+  // 6. Valid static.arasaac.org URL fallback if explicitly set on a custom item
   if (item.photoUrl && item.photoUrl.startsWith('https://static.arasaac.org/')) {
     return item.photoUrl;
   }
 
-  // 5. Foundational communication ARASAAC pictogram (Want / Communication ID: 5441)
+  // 7. Category-aware fallback
+  if (item.category) {
+    const categoryFallback: Record<string, number> = {
+      food: 2527,
+      drinks: 6061,
+      activities: 23392,
+      places: 2317,
+      people: 7185,
+      feelings: 35533,
+      sensory: 5915,
+      personal: 5921,
+      core: 5441,
+    };
+    if (categoryFallback[item.category]) {
+      return getArasaacImageUrl(categoryFallback[item.category], 500);
+    }
+  }
+
+  // 8. Foundational communication ARASAAC pictogram (Want / Communication ID: 5441)
   return getArasaacImageUrl(5441, 500);
 }
 
