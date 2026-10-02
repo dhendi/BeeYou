@@ -23,6 +23,7 @@ export const FeelingsView: React.FC = () => {
     setShowCopingToolkit,
     dailyRecollections,
     activeTheme,
+    avatar,
     userAgeGroup,
     enabledFeatures,
     moodJournalEntries,
