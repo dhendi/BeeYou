@@ -61,30 +61,30 @@ const FOLDER_TILES: Array<{
 
 const QUICK_CHAT_GROUPS = [
   {
-    title: '👋 Greetings & Social',
+    title: 'Greetings & Social',
     phrases: [
-      { text: 'Hello! 👋', emoji: '👋' },
-      { text: 'Good morning! ☀️', emoji: '☀️' },
-      { text: 'Goodbye! 👋', emoji: '👋' },
-      { text: 'See you later! ✨', emoji: '✨' },
-      { text: 'How are you? 😊', emoji: '😊' },
+      { text: 'Hello!', emoji: '👋' },
+      { text: 'Good morning!', emoji: '☀️' },
+      { text: 'Goodbye!', emoji: '👋' },
+      { text: 'See you later!', emoji: '✨' },
+      { text: 'How are you?', emoji: '😊' },
       { text: 'Have a great day!', emoji: '🌟' },
     ],
   },
   {
-    title: '🙏 Polite & Courteous',
+    title: 'Polite & Courteous',
     phrases: [
-      { text: 'Please. 🙏', emoji: '🙏' },
-      { text: 'Thank you very much! ❤️', emoji: '❤️' },
-      { text: "You're welcome! 😊", emoji: '😊' },
-      { text: 'Excuse me please. ✋', emoji: '✋' },
-      { text: 'I love you! 💖', emoji: '💖' },
+      { text: 'Please.', emoji: '🙏' },
+      { text: 'Thank you very much!', emoji: '❤️' },
+      { text: "You're welcome!", emoji: '😊' },
+      { text: 'Excuse me please.', emoji: '✋' },
+      { text: 'I love you!', emoji: '💖' },
       { text: 'Yes, please.', emoji: '✅' },
       { text: 'No, thank you.', emoji: '⛔' },
     ],
   },
   {
-    title: '🛡️ Self-Advocacy & AAC',
+    title: 'Self-Advocacy & AAC',
     phrases: [
       { text: 'I communicate using this AAC tablet. Please give me time to reply.', emoji: '🗣️' },
       { text: 'I do not understand. Can you explain differently?', emoji: '❓' },
@@ -95,7 +95,7 @@ const QUICK_CHAT_GROUPS = [
     ],
   },
   {
-    title: '🚨 Urgent Needs',
+    title: 'Urgent Needs',
     phrases: [
       { text: 'Please help me right now!', emoji: '🆘' },
       { text: 'Stop that please, I do not like it.', emoji: '🛑' },

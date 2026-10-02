@@ -1906,10 +1906,36 @@ export function getCategorizedVoices(langPrefix = 'en'): {
 }
 
 /**
- * Format phrases for natural human speech cadence and prosody.
+ * Strips all Unicode emojis, pictograms, and visual symbols from text
+ * so TTS engines only read spoken words and never describe emojis aloud.
+ */
+export function stripEmojis(text: string): string {
+  if (!text) return '';
+  return text
+    // Replace standard Unicode emoji ranges and presentation selectors
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc Symbols and Pictographs
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport and Map
+    .replace(/[\u{1F700}-\u{1F77F}]/gu, '') // Alchemical Symbols
+    .replace(/[\u{1F780}-\u{1F7FF}]/gu, '') // Geometric Shapes Extended
+    .replace(/[\u{1F800}-\u{1F8FF}]/gu, '') // Supplemental Arrows-C
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental Symbols and Pictographs
+    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // Chess Symbols
+    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // Symbols and Pictographs Extended-A
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // Misc symbols (sun, umbrella, etc.)
+    .replace(/[\u{2700}-\u{27BF}]/gu, '')   // Dingbats (sparkles, checkmarks, etc.)
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')   // Variation Selectors
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '') // Flags
+    .replace(/\p{Extended_Pictographic}/gu, '') // Modern Unicode Extended Pictographic
+    .replace(/\s+/g, ' ')                   // Collapse multiple spaces
+    .trim();
+}
+
+/**
+ * Format phrases for natural human speech cadence and prosody without emojis.
  */
 function formatForNaturalSpeech(text: string): string {
-  let cleaned = text.trim();
+  let cleaned = stripEmojis(text.trim());
   if (!cleaned) return '';
 
   // Capitalize first letter
