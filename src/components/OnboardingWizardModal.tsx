@@ -22,10 +22,10 @@ interface OnboardingWizardModalProps {
 }
 
 const COMMUNICATION_STYLES = [
-  { id: 'aac_tiles', label: 'AAC Picture Tiles & Voice Engine', emoji: '🗣️', desc: 'Symbol board with speech output' },
-  { id: 'visual_routines', label: 'Visual Schedules & Time Timers', emoji: '📅', desc: 'Clear step-by-step routine cards' },
-  { id: 'quick_chat', label: 'Quick Chat & Text Phrases', emoji: '💬', desc: 'Instant essential phrases and requests' },
-  { id: 'calm_pacer', label: 'Sensory Breaks & Calm Reflection', emoji: '🫁', desc: 'Breathing circle and daily mood log' },
+  { id: 'aac_tiles', label: 'AAC Picture Board & Speech Engine', emoji: '🗣️', desc: 'Symbol board with voice speech (Enables Communicate Tab)', needsAac: true },
+  { id: 'verbal_speech', label: 'Speaks Verbally / No AAC Board', emoji: '💬', desc: 'User speaks verbally — hides Communicate tab and AAC tiles', needsAac: false },
+  { id: 'visual_routines', label: 'Visual Schedules & Time Timers', emoji: '📅', desc: 'Focus on routines and visual timers (Hides Communicate Tab)', needsAac: false },
+  { id: 'calm_pacer', label: 'Sensory Breaks & Calming Tools', emoji: '🫁', desc: 'Sensory regulation & calming tools (Hides Communicate Tab)', needsAac: false },
 ];
 
 export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
@@ -44,6 +44,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     userAgeGroup: currentContextAge,
     enabledFeatures: contextFeatures,
     updateEnabledFeatures,
+    childView,
+    setChildView,
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
@@ -122,7 +124,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     const defaultThemeId = selectedAge === 'adult' ? 'theme-executive' : selectedAge === 'teen' ? 'theme-lofi' : 'theme-classic';
     setTheme(defaultThemeId);
 
-    // 5. Celebration
+    // 5. If AAC was disabled, reset view to home
+    if (!features.aacCommunication && childView === 'aac' && setChildView) {
+      setChildView('home');
+    }
+
+    // 6. Celebration
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
     playChime('complete');
 
@@ -384,7 +391,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                 <div>
                   <label className="text-xs font-black uppercase tracking-wider text-slate-600 block mb-1.5">
-                    Primary Communication & Support Goal:
+                    What does the user need most?
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {COMMUNICATION_STYLES.map((c) => (
@@ -393,6 +400,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         type="button"
                         onClick={() => {
                           setCommStyle(c.id);
+                          setFeatures(prev => ({
+                            ...prev,
+                            aacCommunication: c.needsAac,
+                          }));
                           playChime('tap');
                         }}
                         className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
@@ -408,6 +419,41 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         <p className="text-[11px] text-slate-500 mt-1 font-medium">{c.desc}</p>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Explicit AAC device inclusion / removal card */}
+                  <div className="mt-3 p-3.5 rounded-2xl border-2 bg-slate-50 border-slate-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl">{features.aacCommunication ? '🗣️' : '🚫'}</span>
+                      <div>
+                        <span className="text-xs font-black text-slate-900 block">
+                          {features.aacCommunication ? 'AAC Communicate Tab: ENABLED' : 'AAC Communicate Tab: REMOVED'}
+                        </span>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          {features.aacCommunication
+                            ? 'The "Communicate" tab will appear on the navigation bar.'
+                            : 'The "Communicate" tab is hidden from the navigation bar.'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleFeatureKey('aacCommunication');
+                        if (features.aacCommunication) {
+                          setCommStyle('verbal_speech');
+                        } else {
+                          setCommStyle('aac_tiles');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all ${
+                        features.aacCommunication
+                          ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 font-black'
+                          : 'bg-amber-400 hover:bg-amber-500 text-amber-950 font-black shadow-2xs'
+                      }`}
+                    >
+                      {features.aacCommunication ? 'Remove AAC' : 'Enable AAC'}
+                    </button>
                   </div>
                 </div>
               </div>

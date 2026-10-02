@@ -40,7 +40,7 @@ export const ChildNavBar: React.FC = () => {
       icon: MessageSquare,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
       activeBg: activeTheme?.palette?.navActiveBg || 'bg-amber-400 text-amber-950 shadow-md ring-2 ring-amber-500',
-      show: enabledFeatures?.aacCommunication !== false,
+      show: (enabledFeatures?.aacCommunication !== false) && (settings?.features?.aacCommunication !== false),
     },
     {
       id: 'my-day',
