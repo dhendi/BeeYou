@@ -30,6 +30,7 @@ export const MyDayView: React.FC = () => {
     plansChanged,
     setShowPlansChangedModal,
     speak,
+    announce,
     setChildView,
     earnedStickers,
     dailyRecollections,
@@ -125,7 +126,7 @@ export const MyDayView: React.FC = () => {
       autoStart,
     });
     playChime('tap');
-    speak(`Timer ready for ${step.title}. ${(step.durationMin || 2)} minutes.`);
+    announce(`Timer ready for ${step.title}. ${(step.durationMin || 2)} minutes.`);
     setTimeout(() => {
       timerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 50);

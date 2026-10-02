@@ -30,6 +30,7 @@ export const AdventuresView: React.FC = () => {
     activeStoryId,
     setActiveStoryId,
     speak,
+    announce,
     completeAdventure,
     setChildView,
   } = useApp();
@@ -118,7 +119,7 @@ export const AdventuresView: React.FC = () => {
                   playChime('tap');
                 } else {
                   playChime('star');
-                  speak('Story complete! Great reading!');
+                  announce('Story complete! Great reading!');
                   setActiveStoryId(null);
                   setCurrentPageIndex(0);
                 }

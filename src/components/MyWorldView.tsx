@@ -31,6 +31,7 @@ export const MyWorldView: React.FC = () => {
     placeWorldItem,
     removePlacedItem,
     speak,
+    announce,
     settings,
     isPremium,
     triggerUpgrade,
@@ -59,60 +60,60 @@ export const MyWorldView: React.FC = () => {
     if (itemCatalogId.includes('puppy')) {
       if (actionType === 'feed') {
         setPetFeedback('Crunch crunch! The puppy happily munches a bone biscuit! 🦴 Yum!');
-        speak('The puppy eats a yummy biscuit! Good boy!');
+        announce('The puppy eats a yummy biscuit! Good boy!');
       } else if (actionType === 'play') {
         setPetFeedback('You throw the tennis ball! The puppy zooms across the room and brings it back! 🎾 Woof!');
-        speak('The puppy fetches the ball and wags its tail!');
+        announce('The puppy fetches the ball and wags its tail!');
       } else {
         setPetFeedback('The puppy wags its tail happily, rolls over, and gives you sweet puppy kisses! 🐶 Woof!');
-        speak('The puppy wags its tail happily!');
+        announce('The puppy wags its tail happily!');
       }
     } else if (itemCatalogId.includes('kitten')) {
       if (actionType === 'feed') {
         setPetFeedback('The kitten licks up some warm milk and purrs softly! 🥛 Purr...');
-        speak('The kitten drinks warm milk and purrs!');
+        announce('The kitten drinks warm milk and purrs!');
       } else if (actionType === 'play') {
         setPetFeedback('The kitten playfully swats at a yarn ball with little paws! 🧶 Pounce!');
-        speak('The kitten swats at yarn!');
+        announce('The kitten swats at yarn!');
       } else {
         setPetFeedback('The fluffy kitten purrs softly in your lap and stretches out cozy paws! 🐱 Purr...');
-        speak('The kitten purrs softly and cuddles close.');
+        announce('The kitten purrs softly and cuddles close.');
       }
     } else if (itemCatalogId.includes('bunny')) {
       if (actionType === 'feed') {
         setPetFeedback('Crunch munch! The calm bunny nibbles on a crisp golden carrot! 🥕');
-        speak('The bunny crunches a sweet carrot!');
+        announce('The bunny crunches a sweet carrot!');
       } else {
         setPetFeedback('The velvety bunny hops joyfully and wiggles its little pink nose! 🐰 Hop hop!');
-        speak('The bunny hops and wiggles its nose.');
+        announce('The bunny hops and wiggles its nose.');
       }
     } else if (itemCatalogId.includes('turtle')) {
       setPetFeedback('The wise turtle breathes slowly and peacefully. Inhale... and exhale. 🐢 Calming breaths...');
-      speak('The wise turtle reminds us: Take a deep, peaceful breath.');
+      announce('The wise turtle reminds us: Take a deep, peaceful breath.');
     } else if (itemCatalogId.includes('train')) {
       setPetFeedback('Choo choo! The wooden steam train chugs along the railway with happy steam puffs! 🚂 Toot!');
-      speak('Choo choo! The train chugs along the tracks.');
+      announce('Choo choo! The train chugs along the tracks.');
     } else if (itemCatalogId.includes('tent')) {
       setPetFeedback('You step inside the cozy sensory hideaway tent. Soft fairy lights twinkle peacefully. ⛺ Quiet sanctuary.');
-      speak('A peaceful hideaway with glowing fairy lights.');
+      announce('A peaceful hideaway with glowing fairy lights.');
     } else if (itemCatalogId.includes('projector') || itemCatalogId.includes('nightlight')) {
       setPetFeedback('The star projector swirls constellations and shooting stars across the room! ✨ Starlight dream.');
-      speak('Stars and galaxies spin across the ceiling.');
+      announce('Stars and galaxies spin across the ceiling.');
     } else if (itemCatalogId.includes('trampoline')) {
       setPetFeedback('Boing! Boing! You bounce high on the rebounder with big happy smiles! 🤸 Springy fun!');
-      speak('Boing! Boing! Fun bounce!');
+      announce('Boing! Boing! Fun bounce!');
     } else if (itemCatalogId.includes('aquarium')) {
       setPetFeedback('Neon fish glide through bubbling aqua water and hide behind swaying sea grass! 🐠 Bubble bubble.');
-      speak('The fish swim peacefully in bubbling water.');
+      announce('The fish swim peacefully in bubbling water.');
     } else if (itemCatalogId.includes('plant')) {
       setPetFeedback('The sunflower friend sways in the warm sunshine and beams a bright smile at you! 🌻 Warmth.');
-      speak('The sunflower friend sways and smiles.');
+      announce('The sunflower friend sways and smiles.');
     } else if (itemCatalogId.includes('beanbag')) {
       setPetFeedback('Squelch! You sink into the ultra-squishy beanbag for a wonderful restful break. 🛋️ Ahhh.');
-      speak('You sink into the cozy beanbag.');
+      announce('You sink into the cozy beanbag.');
     } else {
       setPetFeedback(`You enjoy your ${itemName}!`);
-      speak(`I love my ${itemName}.`);
+      announce(`I love my ${itemName}.`);
     }
   };
 

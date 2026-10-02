@@ -35,6 +35,7 @@ export const SpoonBudgetModal: React.FC = () => {
     updateSpoonEntry,
     getTodaySpoonEntry,
     speak,
+    announce,
   } = useApp();
 
   const today = new Date().toISOString().split('T')[0];
@@ -54,7 +55,7 @@ export const SpoonBudgetModal: React.FC = () => {
     addSpoonEntry(entry);
     setPhase('tracker');
     playChime('complete');
-    speak(`You have ${selectedSpoons} spoons today. Use them wisely.`);
+    announce(`You have ${selectedSpoons} spoons today. Use them wisely.`);
   };
 
   const handleAddTask = (task: { label: string; emoji: string; cost: SpoonCost }) => {
@@ -65,9 +66,9 @@ export const SpoonBudgetModal: React.FC = () => {
     playChime('tap');
     const remaining = todayEntry.totalSpoons - newUsed;
     if (remaining <= 0) {
-      speak('You have used all your spoons. Please rest and recover.');
+      announce('You have used all your spoons. Please rest and recover.');
     } else {
-      speak(`${remaining} spoons remaining.`);
+      announce(`${remaining} spoons remaining.`);
     }
   };
 

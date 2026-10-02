@@ -11,6 +11,7 @@ export const FivePointScaleModal: React.FC = () => {
     setShowCopingToolkit,
     activateEmergencyMode,
     speak,
+    announce,
   } = useApp();
 
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
@@ -22,7 +23,7 @@ export const FivePointScaleModal: React.FC = () => {
     playChime('tap');
     const levelCfg = fivePointSettings.levels.find((l) => l.level === level);
     if (levelCfg) {
-      speak(`You are at level ${level}. ${levelCfg.label}. ${levelCfg.bodyFeelings}`);
+      announce(`You are at level ${level}. ${levelCfg.label}. ${levelCfg.bodyFeelings}`);
     }
   };
 
@@ -35,7 +36,7 @@ export const FivePointScaleModal: React.FC = () => {
       setShowFivePointModal(false);
       activateEmergencyMode();
     } else {
-      speak(action.label);
+      announce(action.label);
     }
   };
 

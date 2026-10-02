@@ -36,6 +36,7 @@ export const CycleTrackerModal: React.FC = () => {
     setShowCycleTrackerModal,
     getCyclePhaseInfo,
     speak,
+    announce,
     childProfile,
     userAgeGroup,
   } = useApp();
@@ -112,7 +113,7 @@ export const CycleTrackerModal: React.FC = () => {
       notes: 'Logged period start today.',
     });
     playChime('star');
-    speak('Period start recorded. Take good care of your body today.');
+    announce('Period start recorded. Take good care of your body today.');
   };
 
   const handleSaveDailyLog = (e: React.FormEvent) => {

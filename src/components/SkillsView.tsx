@@ -25,6 +25,7 @@ export const SkillsView: React.FC = () => {
     completeSkill,
     resetSkill,
     speak,
+    announce,
     habits,
   } = useApp();
 
@@ -47,7 +48,7 @@ export const SkillsView: React.FC = () => {
       playChime('complete');
       if (selectedSkill && activeTimerStepId !== null) {
         toggleSkillStep(selectedSkill.id, activeTimerStepId);
-        speak('Timer complete! Good job!');
+        announce('Timer complete! Good job!');
       }
     }
     return () => clearInterval(interval);

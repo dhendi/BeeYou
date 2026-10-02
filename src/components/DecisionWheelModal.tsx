@@ -20,6 +20,7 @@ export const DecisionWheelModal: React.FC = () => {
     decisionWheelConfig,
     updateDecisionWheelConfig,
     speak,
+    announce,
   } = useApp();
 
   const [spinning, setSpinning] = useState(false);
@@ -70,12 +71,12 @@ export const DecisionWheelModal: React.FC = () => {
         const winnerIdx = Math.floor(normalizedAngle / slice) % count;
         const winnerOption = options[winnerIdx];
         setWinner(winnerOption);
-        speak(`The wheel chose: ${winnerOption.label}!`);
+        announce(`The wheel chose: ${winnerOption.label}!`);
         playChime('complete');
       }
     };
     animRef.current = requestAnimationFrame(animate);
-  }, [spinning, count, rotation, options, speak]);
+  }, [spinning, count, rotation, options, announce]);
 
   useEffect(() => {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };

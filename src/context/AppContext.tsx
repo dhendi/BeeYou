@@ -139,11 +139,12 @@ interface AppContextType {
   stopSpeaking: () => void;
   offlineVoices: SpeechSynthesisVoice[];
 
-  // AAC
+  // AAC & Voice
   aacItems: AACItem[];
   sentence: AACItem[];
   quickPhrases: QuickPhrase[];
   speak: (text: string) => Promise<void>;
+  announce: (text: string) => Promise<void>;
   addToSentence: (item: AACItem) => void;
   speakSentence: () => Promise<void>;
   clearSentence: () => void;
@@ -809,7 +810,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setActiveThemeId(themeId);
     if (settings.soundEffects) playChime('star');
     confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
-    speakText(`Hooray! You unlocked and equipped the ${target.name} theme!`);
+    if (settings.spokenAnnouncements) {
+      speakText(`Hooray! You unlocked and equipped the ${target.name} theme!`);
+    }
     return true;
   };
 
@@ -829,7 +832,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setActiveThemeId(newTheme.id);
     if (settings.soundEffects) playChime('complete');
     confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
-    speakText(`Awesome! Created your custom theme ${newTheme.name}!`);
+    if (settings.spokenAnnouncements) {
+      speakText(`Awesome! Created your custom theme ${newTheme.name}!`);
+    }
     return newTheme;
   };
 
@@ -928,7 +933,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             if (!notifiedMedicationKeysRef.current.has(reminderKey) && !med.takenTimesToday?.includes(scheduledTime)) {
               notifiedMedicationKeysRef.current.add(reminderKey);
               if (settings.soundEffects) playChime('star');
-              speakText(`Medication reminder: It is time for ${childProfile.name}'s ${med.name}. Please take ${med.dosage} ${med.unit}.`);
+              if (settings.spokenAnnouncements) {
+                speakText(`Medication reminder: It is time for ${childProfile.name}'s ${med.name}. Please take ${med.dosage} ${med.unit}.`);
+              }
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                 try {
                   new Notification(`Medication Reminder: ${med.name}`, {
@@ -1139,6 +1146,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       voicePersona: settings.voicePersona || 'Kore',
       lang: settings.language,
     });
+  };
+
+  // Spoken Interface Announcement Helper (strictly respects settings.spokenAnnouncements)
+  const announce = async (text: string) => {
+    if (!settings.spokenAnnouncements) return;
+    await speak(text);
   };
 
   const stopSpeaking = () => {
@@ -1810,7 +1823,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         colors: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
       });
     } catch (e) {}
-    speak(`Great job taking your ${targetMed.name}! You earned 1 star!`);
+    announce(`Great job taking your ${targetMed.name}! You earned 1 star!`);
   };
 
   const undoMedicationDose = (medId: string, time?: string) => {
@@ -1866,7 +1879,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     setMoodJournalEntries((prev) => [newEntry, ...prev]);
     if (settings.soundEffects) playChime('star');
-    speak('Mood journal reflection saved.');
+    announce('Mood journal reflection saved.');
   };
 
   const updateMoodJournalEntry = (id: string, updates: Partial<MoodJournalEntry>) => {
@@ -1911,7 +1924,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     }
     if (settings.soundEffects) playChime('star');
-    speak('Cycle log recorded.');
+    announce('Cycle log recorded.');
   };
 
   const deleteCycleLog = (id: string) => {
@@ -2479,6 +2492,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         sentence,
         quickPhrases,
         speak,
+        announce,
         addToSentence,
         speakSentence,
         clearSentence,

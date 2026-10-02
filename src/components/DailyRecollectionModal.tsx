@@ -40,6 +40,7 @@ export const DailyRecollectionModal: React.FC = () => {
     dailyRecollections,
     childProfile,
     speak,
+    announce,
     activeTheme,
   } = useApp();
 
@@ -235,7 +236,7 @@ export const DailyRecollectionModal: React.FC = () => {
                       onClick={() => {
                         setOverallDay(opt.value);
                         playChime('tap');
-                        speak(opt.label);
+                        announce(opt.label);
                       }}
                       className={`p-3 rounded-2xl border-2 flex flex-col items-center justify-center text-center transition-all cursor-pointer active:scale-95 ${
                         isSelected
@@ -295,7 +296,7 @@ export const DailyRecollectionModal: React.FC = () => {
                       onClick={() => {
                         setEnergyLevel(opt.value);
                         playChime('tap');
-                        speak(opt.label);
+                        announce(opt.label);
                       }}
                       className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer active:scale-95 ${
                         isSelected
@@ -344,7 +345,7 @@ export const DailyRecollectionModal: React.FC = () => {
                     onClick={() => {
                       setPrimaryFeeling(emo.id);
                       playChime('tap');
-                      speak(emo.label);
+                      announce(emo.label);
                     }}
                     className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer active:scale-95 ${
                       isSelected

@@ -19,7 +19,7 @@ function formatTime(s: number) {
 }
 
 export const PieTimerModal: React.FC = () => {
-  const { showPieTimerModal, setShowPieTimerModal, speak } = useApp();
+  const { showPieTimerModal, setShowPieTimerModal, speak, announce } = useApp();
 
   const [totalSeconds, setTotalSeconds] = useState(300);
   const [secondsLeft, setSecondsLeft] = useState(300);
@@ -63,7 +63,7 @@ export const PieTimerModal: React.FC = () => {
           setIsRunning(false);
           setIsFinished(true);
           playChime('complete');
-          speak('Time is up!');
+          announce('Time is up!');
           return 0;
         }
         // Pulse warnings

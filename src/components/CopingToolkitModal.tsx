@@ -34,6 +34,7 @@ export const CopingToolkitModal: React.FC = () => {
     showCopingToolkit,
     setShowCopingToolkit,
     speak,
+    announce,
     childProfile,
     isPremium,
     triggerUpgrade,
@@ -115,7 +116,7 @@ export const CopingToolkitModal: React.FC = () => {
     } else if (timerSecondsLeft === 0 && isTimerRunning) {
       setIsTimerRunning(false);
       playChime('complete');
-      speak('Break timer is complete. Great job taking care of yourself.');
+      announce('Break timer is complete. Great job taking care of yourself.');
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timerSecondsLeft]);
@@ -383,7 +384,7 @@ export const CopingToolkitModal: React.FC = () => {
                     playChime('tap');
                   } else {
                     playChime('complete');
-                    speak('Grounding exercise complete. You are doing great.');
+                    announce('Grounding exercise complete. You are doing great.');
                     setGroundingStep(0);
                   }
                 }}

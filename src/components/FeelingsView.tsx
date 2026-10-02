@@ -10,7 +10,8 @@ import {
   BarChart3,
   BookOpen,
   HeartPulse,
-  Plus
+  Plus,
+  Volume2
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
@@ -20,6 +21,7 @@ export const FeelingsView: React.FC = () => {
     currentMood,
     recordEmotion,
     speak,
+    announce,
     setShowCopingToolkit,
     dailyRecollections,
     activeTheme,
@@ -72,7 +74,15 @@ export const FeelingsView: React.FC = () => {
     setSelectedEmotion(emo);
     setSavedCheckIn(false);
     playChime('tap');
-    speak(`I feel ${label}.`);
+    announce(`I feel ${label}.`);
+  };
+
+  const getCheckInSummary = () => {
+    if (!selectedEmotion) return '';
+    const emotionObj = EMOTIONS.find((e) => e.id === selectedEmotion);
+    return `I feel ${emotionObj?.label}. ${
+      selectedReason ? `Because ${selectedReason.toLowerCase()}. ` : ''
+    }${selectedNeed ? `Right now, ${selectedNeed.toLowerCase()}.` : ''}`;
   };
 
   const handleCompleteCheckIn = () => {
@@ -81,11 +91,8 @@ export const FeelingsView: React.FC = () => {
     setSavedCheckIn(true);
     playChime('star');
 
-    const emotionObj = EMOTIONS.find((e) => e.id === selectedEmotion);
-    const summary = `I feel ${emotionObj?.label}. ${
-      selectedReason ? `Because ${selectedReason.toLowerCase()}. ` : ''
-    }${selectedNeed ? `Right now, ${selectedNeed.toLowerCase()}.` : ''}`;
-    speak(summary);
+    const summary = getCheckInSummary();
+    announce(summary);
   };
 
   return (
@@ -422,14 +429,27 @@ export const FeelingsView: React.FC = () => {
 
           {/* ── 4. SAVE & CONFIRM CHECK-IN ── */}
           {selectedEmotion && (
-            <div className="pt-2 flex flex-col items-center">
-              <button
-                onClick={handleCompleteCheckIn}
-                className="w-full max-w-md py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm sm:text-base shadow-xs active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>Save & Speak My Check-In</span>
-              </button>
+            <div className="pt-2 flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 w-full max-w-md">
+                <button
+                  onClick={handleCompleteCheckIn}
+                  className="flex-1 py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm sm:text-base shadow-xs active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Save Check-In</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const summary = getCheckInSummary();
+                    if (summary) speak(summary);
+                  }}
+                  className="p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 active:scale-95 transition-all cursor-pointer shadow-2xs"
+                  title="Speak check-in aloud"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </button>
+              </div>
 
               {savedCheckIn && (
                 <p className="text-xs font-bold text-emerald-600 mt-2 flex items-center gap-1 animate-in fade-in">
