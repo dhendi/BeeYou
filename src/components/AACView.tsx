@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { AACTileArt } from './AACTileArt';
-import { AACWordIcon } from './AACWordIcon';
+import { resolveAacImageUrl } from '../services/arasaacService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
 import { 
@@ -543,11 +543,11 @@ export const AACView: React.FC = () => {
                         item.colorType
                       )}`}
                     >
-                      {item.photoUrl ? (
-                        <img src={item.photoUrl} alt="" className="w-6 h-6 object-cover rounded" />
-                      ) : (
-                        <span className="text-xl leading-none">{getThemedAacEmoji(item, activeTheme)}</span>
-                      )}
+                      <img
+                        src={resolveAacImageUrl(item)}
+                        alt={item.label}
+                        className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
+                      />
                       <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
                     </div>
                   ))
@@ -872,23 +872,14 @@ export const AACView: React.FC = () => {
                   />
                 )}
 
-                {/* Icon area */}
-                <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95">
-                  {item.photoUrl ? (
-                    <img
-                      src={item.photoUrl}
-                      alt={item.label}
-                      className="w-full h-full object-contain rounded-lg"
-                    />
-                  ) : (
-                    <AACWordIcon
-                      label={item.label}
-                      colorType={item.colorType}
-                      theme={activeTheme}
-                      className="w-full h-full"
-                      fallbackEmoji={item.emoji}
-                    />
-                  )}
+                {/* ARASAAC Clinical Pictogram Area */}
+                <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
+                  <img
+                    src={resolveAacImageUrl(item)}
+                    alt={item.label}
+                    className="w-full h-full object-contain rounded-lg pointer-events-none"
+                    loading="lazy"
+                  />
                 </div>
 
                 {/* Label */}
