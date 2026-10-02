@@ -47,16 +47,17 @@ const FOLDER_TILES: Array<{
   category: AACCategory;
   label: string;
   emoji: string;
+  arasaacId: number;
   colorType: 'noun' | 'subject' | 'social';
   description: string;
 }> = [
-  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', colorType: 'noun', description: 'Meals, snacks & treats' },
-  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', colorType: 'noun', description: 'Water, juice & milk' },
-  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', colorType: 'noun', description: 'Games, toys & hobbies' },
-  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', colorType: 'noun', description: 'Home, school & park' },
-  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', colorType: 'subject', description: 'Family, friends & helpers' },
-  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', colorType: 'noun', description: 'Emotions & how I feel' },
-  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', colorType: 'noun', description: 'Sensory needs & regulation' },
+  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', arasaacId: 2527, colorType: 'noun', description: 'Meals, snacks & treats' },
+  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', arasaacId: 6061, colorType: 'noun', description: 'Water, juice & milk' },
+  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', arasaacId: 23392, colorType: 'noun', description: 'Games, toys & hobbies' },
+  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', arasaacId: 2317, colorType: 'noun', description: 'Home, school & park' },
+  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', arasaacId: 7185, colorType: 'subject', description: 'Family, friends & helpers' },
+  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', arasaacId: 35533, colorType: 'noun', description: 'Emotions & how I feel' },
+  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', arasaacId: 5915, colorType: 'noun', description: 'Sensory needs & regulation' },
 ];
 
 const QUICK_CHAT_GROUPS = [
@@ -1023,7 +1024,7 @@ export const AACView: React.FC = () => {
                 {/* ARASAAC Clinical Pictogram Area */}
                 <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 p-1 mt-1">
                   <img
-                    src={resolveAacImageUrl({ label: folder.label.toLowerCase() })}
+                    src={resolveAacImageUrl(folder)}
                     alt={folder.label}
                     className="w-full h-full object-contain rounded-lg pointer-events-none"
                     loading="lazy"
@@ -1302,6 +1303,7 @@ export const AACView: React.FC = () => {
             label: sym.label,
             speechText: sym.speechText || sym.label,
             photoUrl: sym.photoUrl,
+            arasaacId: sym.arasaacId,
             emoji: sym.emoji || '✨',
             category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
             colorType: sym.colorType || 'noun',

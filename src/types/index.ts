@@ -39,6 +39,7 @@ export interface AACItem {
   speechText?: string;
   emoji: string;
   photoUrl?: string;
+  arasaacId?: number; // Direct official ARASAAC pictogram ID
   category: AACCategory;
   colorType: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   motorIndex: number; // for motor planning consistency

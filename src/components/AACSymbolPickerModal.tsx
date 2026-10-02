@@ -35,6 +35,7 @@ interface AACSymbolPickerModalProps {
     label: string;
     speechText?: string;
     emoji?: string;
+    arasaacId?: number;
     category?: AACCategory;
     colorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   }) => void;
@@ -150,16 +151,19 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     const targetCat = customCategory || activeCategory || symbol.category || 'core';
     const targetColor = symbol.colorType || customColor || 'noun';
     
+    const arasaacNum = typeof symbol.id === 'number' ? symbol.id : (typeof symbol.id === 'string' && /^\d+$/.test(symbol.id) ? parseInt(symbol.id) : undefined);
+
     onSelectSymbol({
       photoUrl: symbol.imageUrl,
       label: symbol.label,
       speechText: symbol.label,
       emoji: '🖼️',
+      arasaacId: arasaacNum,
       category: targetCat,
       colorType: targetColor,
     });
 
-    setAddedIds((prev) => new Set(prev).add(symbol.id));
+    setAddedIds((prev) => new Set(prev).add(String(symbol.id)));
     setToastMessage(`Added "${symbol.label}" directly to your AAC board!`);
     playChime('star');
 
@@ -172,15 +176,18 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const handleConfirmSelection = () => {
     if (!selectedSymbol) return;
     playChime('star');
+    const arasaacNum = typeof selectedSymbol.id === 'number' ? selectedSymbol.id : (typeof selectedSymbol.id === 'string' && /^\d+$/.test(selectedSymbol.id) ? parseInt(selectedSymbol.id) : undefined);
+
     onSelectSymbol({
       photoUrl: selectedSymbol.imageUrl,
       label: customLabel.trim() || selectedSymbol.label,
       speechText: customSpeech.trim() || customLabel.trim() || selectedSymbol.label,
       emoji: '🖼️',
+      arasaacId: arasaacNum,
       category: customCategory,
       colorType: customColor,
     });
-    setAddedIds((prev) => new Set(prev).add(selectedSymbol.id));
+    setAddedIds((prev) => new Set(prev).add(String(selectedSymbol.id)));
     setToastMessage(`Added "${customLabel.trim() || selectedSymbol.label}" to your AAC board!`);
   };
 

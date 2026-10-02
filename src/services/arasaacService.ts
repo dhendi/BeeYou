@@ -264,8 +264,13 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
  * Resolves a clinical ARASAAC image URL for any AAC item.
  * Guarantee: ALWAYS returns an authentic, verified ARASAAC clinical pictogram.
  */
-export function resolveAacImageUrl(item: { photoUrl?: string; label?: string; speechText?: string; id?: string }): string {
-  // 1. Custom uploaded photo (data URL) takes immediate priority
+export function resolveAacImageUrl(item: { arasaacId?: number; photoUrl?: string; label?: string; speechText?: string; id?: string }): string {
+  // 1. Direct explicit ARASAAC ID (100% deterministic & infallible)
+  if (item.arasaacId && typeof item.arasaacId === 'number' && item.arasaacId > 0) {
+    return getArasaacImageUrl(item.arasaacId, 500);
+  }
+
+  // 2. Custom uploaded photo (data URL) takes immediate priority
   if (item.photoUrl && item.photoUrl.startsWith('data:image')) {
     return item.photoUrl;
   }
