@@ -1014,11 +1014,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           const upgraded = parsed.aacItems.map((item: AACItem) => {
             const defaultItem = defaultItemsMap.get(item.id);
             if (defaultItem && !item.isCustom) {
-              // Reset standard items to official ARASAAC clinical pictograms while preserving favorited state
+              // Reset standard items to AAC standard vector illustrations while preserving favorited state
               return {
                 ...defaultItem,
                 isFavorite: item.isFavorite !== undefined ? item.isFavorite : defaultItem.isFavorite,
-                photoUrl: defaultItem.photoUrl,
+                photoUrl: undefined,
               };
             }
             return item;
