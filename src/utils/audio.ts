@@ -23,6 +23,27 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
+// Mobile / Android Global User-Gesture Audio & Speech Unlocker
+if (typeof window !== 'undefined') {
+  const unlockMobileAudioAndSpeech = () => {
+    try {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+    } catch (e) {}
+  };
+
+  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
+    window.addEventListener(evt, unlockMobileAudioAndSpeech, { passive: true, capture: true });
+  });
+}
+
 // Audio file mappings for authentic high-fidelity chimes & sound effects
 // Audio file mappings for optional sound effects (soundscapes remain authentic recordings in SOUNDSCAPE_AUDIO_FILES)
 export const CHIME_AUDIO_FILES: Record<string, string> = {};
@@ -1949,27 +1970,38 @@ function formatForNaturalSpeech(text: string): string {
   return cleaned;
 }
 
+// Active utterance retain set to prevent Android Chrome V8 Garbage Collector from cutting speech
+const activeUtterancesSet = new Set<SpeechSynthesisUtterance>();
+if (typeof window !== 'undefined') {
+  (window as any).__luminaUtterances = activeUtterancesSet;
+}
+
 /**
  * Stop any current vocalization immediately
  */
 export function stopSpeaking() {
   if (activeAudioElement) {
-    activeAudioElement.pause();
-    activeAudioElement.currentTime = 0;
+    try {
+      activeAudioElement.pause();
+      activeAudioElement.currentTime = 0;
+    } catch (e) {}
     activeAudioElement = null;
   }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
     activeUtterance = null;
+    activeUtterancesSet.clear();
   }
   notifySpeechState(false, null);
 }
 
 /**
  * Main vocalization function:
- * 1. Checks memory cache for fast playback.
- * 2. Tries server-side Gemini Neural Voice (Kore, Puck, Zephyr) for human lifelike prosody when online.
- * 3. Fallbacks to the browser's top-ranked Natural on-device voice when offline or if server unavailable.
+ * 1. Executes instantaneous, zero-latency on-device SpeechSynthesis for reliable Android & offline speech.
+ * 2. If memory-cached audio exists from previous server synthesis, plays it immediately.
+ * 3. Never blocks user-gesture activation behind failing network calls.
  */
 export async function speakText(
   text: string,
@@ -1985,57 +2017,23 @@ export async function speakText(
   const formattedText = formatForNaturalSpeech(text);
   if (!formattedText) return;
 
-  stopSpeaking();
-  notifySpeechState(true, formattedText);
+  const selectedPersona = options?.voicePersona || 'system';
 
-  const selectedPersona = options?.voicePersona || 'Kore';
-  const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : false;
-  const isServerThrottled = Date.now() < serverTTSCooldownUntil;
-
-  // 1. Try Lifelike Server Neural Voice if online, not throttled, and not explicitly set to system-only
-  if (isOnline && !isServerThrottled && selectedPersona !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
+  // Check if we already have a cached audio blob for this phrase
+  if (selectedPersona !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
     const cacheKey = `${selectedPersona}_${formattedText}`;
-
-    // Check memory cache
     if (audioMemoryCache.has(cacheKey)) {
       try {
         const audioSrc = audioMemoryCache.get(cacheKey)!;
         await playAudioUrl(audioSrc, formattedText);
         return;
       } catch (e) {
-        // Fallback below
+        // Fallback to device speech synthesis below
       }
-    }
-
-    try {
-      const response = await fetch('/api/ai/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: formattedText,
-          voiceName: selectedPersona,
-          style: 'Warm, clear, natural, friendly, and expressive voice for a child companion',
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.audioData) {
-          const audioSrc = `data:audio/wav;base64,${data.audioData}`;
-          audioMemoryCache.set(cacheKey, audioSrc);
-          await playAudioUrl(audioSrc, formattedText);
-          return;
-        }
-      } else {
-        // If server returns 429 quota or 503, cooldown server requests and smoothly use on-device speech
-        serverTTSCooldownUntil = Date.now() + 5 * 60 * 1000;
-      }
-    } catch (err) {
-      serverTTSCooldownUntil = Date.now() + 2 * 60 * 1000;
     }
   }
 
-  // 2. High-Quality On-Device Natural Voice (Guaranteed Offline)
+  // Speak immediately via on-device Web Speech API for 0ms latency and 100% Android user gesture reliability
   await speakWithBrowserSpeechSynthesis(formattedText, options);
 }
 
@@ -2045,8 +2043,10 @@ export async function speakText(
 function playAudioUrl(src: string, originalText: string): Promise<void> {
   return new Promise((resolve) => {
     try {
+      stopSpeaking();
       const audio = new Audio(src);
       activeAudioElement = audio;
+      notifySpeechState(true, originalText);
 
       audio.onended = () => {
         activeAudioElement = null;
@@ -2060,11 +2060,14 @@ function playAudioUrl(src: string, originalText: string): Promise<void> {
         resolve();
       };
 
-      audio.play().catch(() => {
-        activeAudioElement = null;
-        notifySpeechState(false, null);
-        resolve();
-      });
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          activeAudioElement = null;
+          notifySpeechState(false, null);
+          resolve();
+        });
+      }
     } catch (e) {
       activeAudioElement = null;
       notifySpeechState(false, null);
@@ -2075,6 +2078,7 @@ function playAudioUrl(src: string, originalText: string): Promise<void> {
 
 /**
  * On-Device Web Speech API Engine with Priority for Non-Robotic Fluid Voices
+ * Fully calibrated and hardened for Android Chrome, iOS Safari, and Desktop.
  */
 function speakWithBrowserSpeechSynthesis(
   formattedText: string,
@@ -2094,13 +2098,18 @@ function speakWithBrowserSpeechSynthesis(
     }
 
     try {
+      // 1. Wake up / unpause SpeechSynthesis on Android
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+
+      // 2. Create and retain utterance to prevent Android Chrome GC bug
       const utterance = new SpeechSynthesisUtterance(formattedText);
       activeUtterance = utterance;
+      activeUtterancesSet.add(utterance);
 
-      // Natural Human Cadence Calibration:
-      // High pitches (>1.05) sound metallic/robotic. Keep pitch at 1.0 (natural resonance).
+      // Natural Human Cadence Calibration
       utterance.pitch = Math.max(0.85, Math.min(1.15, options?.pitch ?? 1.0));
-      // Natural conversational rate: 0.96 gives clear, unhurried articulation without robotic staccato.
       utterance.rate = Math.max(0.7, Math.min(1.3, options?.rate ?? 0.96));
 
       const langMap: Record<string, string> = {
@@ -2112,14 +2121,13 @@ function speakWithBrowserSpeechSynthesis(
       const targetLang = langMap[options?.lang ?? 'en'] || 'en-US';
       utterance.lang = targetLang;
 
-      // Select top-ranked non-robotic natural voice
+      // Select system voice if available
       const voices = getAvailableVoices();
       if (options?.voiceURI) {
         const explicit = voices.find((v) => v.voiceURI === options.voiceURI);
         if (explicit) utterance.voice = explicit;
       }
 
-      // If no explicit voice, prioritize non-robotic fluid system voice
       if (!utterance.voice && voices.length > 0) {
         const bestVoice = getBestSystemVoice(targetLang.substring(0, 2));
         if (bestVoice) {
@@ -2127,28 +2135,80 @@ function speakWithBrowserSpeechSynthesis(
         }
       }
 
+      let finished = false;
+      const cleanup = () => {
+        if (finished) return;
+        finished = true;
+        activeUtterancesSet.delete(utterance);
+        if (activeUtterance === utterance) {
+          activeUtterance = null;
+        }
+        notifySpeechState(false, null);
+        resolve();
+      };
+
       utterance.onstart = () => {
         notifySpeechState(true, formattedText);
       };
 
       utterance.onend = () => {
-        activeUtterance = null;
-        notifySpeechState(false, null);
-        resolve();
+        cleanup();
       };
 
-      utterance.onerror = () => {
-        activeUtterance = null;
-        notifySpeechState(false, null);
+      utterance.onerror = (err) => {
+        // If voice failed on Android, retry with default system voice
+        if (utterance.voice) {
+          try {
+            const fallbackUtterance = new SpeechSynthesisUtterance(formattedText);
+            fallbackUtterance.lang = targetLang;
+            fallbackUtterance.pitch = utterance.pitch;
+            fallbackUtterance.rate = utterance.rate;
+            activeUtterancesSet.add(fallbackUtterance);
+            fallbackUtterance.onend = () => {
+              activeUtterancesSet.delete(fallbackUtterance);
+              cleanup();
+            };
+            fallbackUtterance.onerror = () => {
+              activeUtterancesSet.delete(fallbackUtterance);
+              cleanup();
+              playChime('speak');
+            };
+            window.speechSynthesis.speak(fallbackUtterance);
+            return;
+          } catch (e) {}
+        }
+        cleanup();
         playChime('speak');
-        resolve();
       };
 
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
+      // Watchdog timeout in case onend never fires on buggy Android Chrome versions
+      const approxDurationMs = Math.max(2500, (formattedText.split(' ').length / 1.5) * 1000 + 3500);
+      setTimeout(() => {
+        if (!finished && activeUtterance === utterance) {
+          cleanup();
+        }
+      }, approxDurationMs);
 
-      window.speechSynthesis.speak(utterance);
+      // Safe dispatch for Android: if currently speaking, cancel with micro-pause
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+        setTimeout(() => {
+          try {
+            if (window.speechSynthesis.paused) {
+              window.speechSynthesis.resume();
+            }
+            window.speechSynthesis.speak(utterance);
+          } catch (err) {
+            console.error('Android speech dispatch error:', err);
+            cleanup();
+          }
+        }, 30);
+      } else {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.speak(utterance);
+      }
     } catch (e) {
       console.error('SpeechSynthesis error:', e);
       playChime('speak');
