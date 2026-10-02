@@ -42,6 +42,7 @@ interface AACSymbolPickerModalProps {
   initialQuery?: string;
   initialColorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   activeCategory?: AACCategory;
+  existingItems?: AACItem[];
   onImportPack?: (pack: IndustryAacPack) => void;
   onUpgradeAll?: () => void;
 }
@@ -53,6 +54,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   initialQuery = '',
   initialColorType = 'noun',
   activeCategory = 'core',
+  existingItems = [],
   onImportPack,
   onUpgradeAll,
 }) => {
@@ -67,6 +69,37 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const [quickAddMode, setQuickAddMode] = useState<boolean>(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Set of existing labels and IDs already present on the AAC board
+  const existingLabelSet = React.useMemo(() => {
+    const set = new Set<string>();
+    if (existingItems) {
+      for (const it of existingItems) {
+        if (it.label) set.add(it.label.toLowerCase().trim());
+      }
+    }
+    return set;
+  }, [existingItems]);
+
+  const existingIdSet = React.useMemo(() => {
+    const set = new Set<string | number>();
+    if (existingItems) {
+      for (const it of existingItems) {
+        if (it.arasaacId) set.add(it.arasaacId);
+        if (it.id) set.add(it.id);
+      }
+    }
+    return set;
+  }, [existingItems]);
+
+  const isSymbolAlreadyAdded = (sym: AacSymbolItem): boolean => {
+    const clean = (sym.label || '').toLowerCase().trim();
+    if (existingLabelSet.has(clean)) return true;
+    if (addedIds.has(String(sym.id))) return true;
+    const numId = typeof sym.id === 'number' ? sym.id : (typeof sym.id === 'string' && /^\d+$/.test(sym.id) ? parseInt(sym.id) : null);
+    if (numId && existingIdSet.has(numId)) return true;
+    return false;
+  };
 
   // Custom button builder state within modal
   const [customLabel, setCustomLabel] = useState(initialQuery || '');
@@ -148,6 +181,14 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
   const handleQuickAdd = (symbol: AacSymbolItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
+
+    if (isSymbolAlreadyAdded(symbol)) {
+      setToastMessage(`"${symbol.label}" is already on your AAC board!`);
+      playChime('tap');
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+
     const targetCat = customCategory || activeCategory || symbol.category || 'core';
     const targetColor = symbol.colorType || customColor || 'noun';
     
@@ -175,20 +216,29 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
   const handleConfirmSelection = () => {
     if (!selectedSymbol) return;
+
+    const labelToUse = customLabel.trim() || selectedSymbol.label;
+    if (existingLabelSet.has(labelToUse.toLowerCase().trim()) || addedIds.has(String(selectedSymbol.id))) {
+      setToastMessage(`"${labelToUse}" is already on your AAC board!`);
+      playChime('tap');
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+
     playChime('star');
     const arasaacNum = typeof selectedSymbol.id === 'number' ? selectedSymbol.id : (typeof selectedSymbol.id === 'string' && /^\d+$/.test(selectedSymbol.id) ? parseInt(selectedSymbol.id) : undefined);
 
     onSelectSymbol({
       photoUrl: selectedSymbol.imageUrl,
-      label: customLabel.trim() || selectedSymbol.label,
-      speechText: customSpeech.trim() || customLabel.trim() || selectedSymbol.label,
+      label: labelToUse,
+      speechText: customSpeech.trim() || labelToUse,
       emoji: '🖼️',
       arasaacId: arasaacNum,
       category: customCategory,
       colorType: customColor,
     });
     setAddedIds((prev) => new Set(prev).add(String(selectedSymbol.id)));
-    setToastMessage(`Added "${customLabel.trim() || selectedSymbol.label}" to your AAC board!`);
+    setToastMessage(`Added "${labelToUse}" to your AAC board!`);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -489,26 +539,39 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-72 sm:max-h-80 overflow-y-auto p-1">
                   {displayedResults.map((sym) => {
-                    const isAdded = addedIds.has(sym.id);
+                    const isAdded = isSymbolAlreadyAdded(sym);
                     const isSelected = selectedSymbol?.id === sym.id;
                     return (
                       <div
                         key={sym.id}
                         onClick={() => {
+                          if (isAdded) {
+                            setToastMessage(`"${sym.label}" is already on your AAC board!`);
+                            playChime('tap');
+                            setTimeout(() => setToastMessage(null), 3000);
+                            return;
+                          }
                           if (quickAddMode) {
                             handleQuickAdd(sym);
                           } else {
                             handleSelect(sym);
                           }
                         }}
-                        className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between gap-1.5 bg-white transition-all cursor-pointer text-center relative group select-none ${
+                        className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between gap-1.5 bg-white transition-all text-center relative group select-none ${
                           isAdded
-                            ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-300'
+                            ? 'border-emerald-500 bg-emerald-50/50 shadow-xs ring-2 ring-emerald-300 cursor-default'
                             : isSelected
-                            ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-sm bg-indigo-50/30'
-                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs hover:bg-slate-50'
+                            ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-sm bg-indigo-50/30 cursor-pointer'
+                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs hover:bg-slate-50 cursor-pointer'
                         }`}
                       >
+                        {/* Added Checkmark Badge in Top Right */}
+                        {isAdded && (
+                          <div className="absolute top-1.5 right-1.5 z-10 bg-emerald-600 text-white rounded-full p-0.5 shadow-xs">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+
                         {/* Pictogram Image */}
                         <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1">
                           <img
@@ -527,18 +590,19 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                         {/* 1-Tap Quick Add Action Button */}
                         <button
                           type="button"
+                          disabled={isAdded}
                           onClick={(e) => handleQuickAdd(sym, e)}
-                          className={`w-full py-1 px-1.5 rounded-xl font-black text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                          className={`w-full py-1 px-1.5 rounded-xl font-black text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all ${
                             isAdded
-                              ? 'bg-emerald-600 text-white shadow-2xs active:scale-95'
-                              : 'bg-indigo-50 hover:bg-indigo-600 text-indigo-800 hover:text-white border border-indigo-200 shadow-2xs active:scale-95'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-not-allowed opacity-90'
+                              : 'bg-indigo-50 hover:bg-indigo-600 text-indigo-800 hover:text-white border border-indigo-200 shadow-2xs active:scale-95 cursor-pointer'
                           }`}
-                          title={`Add "${sym.label}" immediately to ${customCategory}`}
+                          title={isAdded ? `"${sym.label}" is already in your AAC board` : `Add "${sym.label}" immediately to ${customCategory}`}
                         >
                           {isAdded ? (
                             <>
-                              <Check className="w-3 h-3" />
-                              <span>Added ✓</span>
+                              <Check className="w-3 h-3 text-emerald-700" />
+                              <span>Already Added ✓</span>
                             </>
                           ) : (
                             <>

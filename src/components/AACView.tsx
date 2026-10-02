@@ -1276,6 +1276,7 @@ export const AACView: React.FC = () => {
         }}
         editingItem={editingItem}
         defaultCategory={activeCategory}
+        existingItems={aacItems}
         onSave={(wordData) => {
           if (editingItem) {
             updateAacItem({
@@ -1298,6 +1299,7 @@ export const AACView: React.FC = () => {
         isOpen={showSymbolPicker}
         onClose={() => setShowSymbolPicker(false)}
         activeCategory={activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory}
+        existingItems={aacItems}
         onSelectSymbol={(sym) => {
           addAacItem({
             label: sym.label,

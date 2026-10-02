@@ -1042,12 +1042,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             return item;
           });
 
+          // Deduplicate items by normalized label to fix and clean existing boards with duplicate tiles
+          const seenLabels = new Set<string>();
+          const deduped: AACItem[] = [];
+          for (const it of upgraded) {
+            const norm = (it.label || '').toLowerCase().trim();
+            if (norm && !seenLabels.has(norm)) {
+              seenLabels.add(norm);
+              deduped.push(it);
+            } else if (!norm) {
+              deduped.push(it);
+            }
+          }
+
           // Check if newly introduced default items (like feelings) are missing
-          const existingIds = new Set(upgraded.map((i: AACItem) => i.id));
-          const existingLabels = new Set(upgraded.map((i: AACItem) => (i.label || '').toLowerCase().trim()));
+          const existingIds = new Set(deduped.map((i: AACItem) => i.id));
+          const existingLabels = new Set(deduped.map((i: AACItem) => (i.label || '').toLowerCase().trim()));
           const missingDefaults = DEFAULT_AAC_ITEMS.filter((d) => !existingIds.has(d.id) && !existingLabels.has(d.label.toLowerCase().trim()));
 
-          setAacItems([...upgraded, ...missingDefaults]);
+          setAacItems([...deduped, ...missingDefaults]);
         }
         if (parsed.quickPhrases) setQuickPhrases(parsed.quickPhrases);
         if (parsed.routines) setRoutines(parsed.routines);
@@ -1215,19 +1228,45 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addAacItem = (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => {
-    const newItem: AACItem = {
-      id: item.id || `aac-${Date.now()}`,
-      label: item.label,
-      speechText: item.speechText || item.label,
-      emoji: item.emoji || '✨',
-      photoUrl: item.photoUrl,
-      category: item.category,
-      colorType: item.colorType,
-      motorIndex: aacItems.length,
-      isCustom: true,
-      isFavorite: item.isFavorite !== undefined ? item.isFavorite : (item.category === 'favorites'),
-    };
-    setAacItems((prev) => [...prev, newItem]);
+    const cleanLabel = (item.label || '').trim().toLowerCase();
+    
+    setAacItems((prev) => {
+      // Check if item with same label already exists
+      const existingIdx = prev.findIndex((i) => (i.label || '').trim().toLowerCase() === cleanLabel);
+      if (existingIdx !== -1) {
+        // Update the existing item rather than creating a duplicate
+        return prev.map((it, idx) =>
+          idx === existingIdx
+            ? {
+                ...it,
+                speechText: item.speechText || it.speechText,
+                emoji: item.emoji || it.emoji,
+                photoUrl: item.photoUrl || it.photoUrl,
+                arasaacId: item.arasaacId !== undefined ? item.arasaacId : it.arasaacId,
+                category: item.category || it.category,
+                colorType: item.colorType || it.colorType,
+                isFavorite: item.isFavorite !== undefined ? item.isFavorite : it.isFavorite,
+              }
+            : it
+        );
+      }
+
+      const newItem: AACItem = {
+        id: item.id || `aac-${Date.now()}`,
+        label: item.label,
+        speechText: item.speechText || item.label,
+        emoji: item.emoji || '✨',
+        photoUrl: item.photoUrl,
+        arasaacId: item.arasaacId,
+        category: item.category,
+        colorType: item.colorType,
+        motorIndex: prev.length,
+        isCustom: true,
+        isFavorite: item.isFavorite !== undefined ? item.isFavorite : (item.category === 'favorites'),
+      };
+      return [...prev, newItem];
+    });
+
     if (settings.soundEffects) playChime('star');
   };
 

@@ -11,6 +11,7 @@ interface AACWordEditorModalProps {
   onSave: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => void;
   onDelete?: (id: string) => void;
   defaultCategory?: AACCategory | 'all';
+  existingItems?: AACItem[];
 }
 
 const CATEGORY_OPTIONS: { id: AACCategory; label: string; emoji: string }[] = [
@@ -92,6 +93,7 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
   onSave,
   onDelete,
   defaultCategory,
+  existingItems = [],
 }) => {
   const [label, setLabel] = useState('');
   const [speechText, setSpeechText] = useState('');
@@ -327,9 +329,16 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
 
           {/* Word Label Input */}
           <div>
-            <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">
-              Word or Phrase Label *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                Word or Phrase Label *
+              </label>
+              {!editingItem && label.trim() && existingItems.some((i) => (i.label || '').trim().toLowerCase() === label.trim().toLowerCase()) && (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">
+                  ⚠️ Word already exists (will update)
+                </span>
+              )}
+            </div>
             <input
               type="text"
               required
