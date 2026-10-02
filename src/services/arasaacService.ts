@@ -173,16 +173,16 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'bag': 35695,
 
   // Places
-  'home': 6964,
-  'go home': 6964,
-  'school': 32446,
+  'home': 2317,
+  'go home': 2317,
+  'school': 3082,
   'park': 5379,
   'dentist': 2733,
   'doctor': 6561,
   'doctor / clinic': 6561,
   'restaurant': 32408,
   'store': 35695,
-  'leave store': 6964,
+  'leave store': 2317,
   'car': 2339,
   'car / bus': 2339,
   'drive': 2339,
@@ -191,8 +191,8 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'open door': 2340,
   'cold air': 2377,
   'heater': 2376,
-  'are we there?': 6964,
-  'arrived': 6964,
+  'are we there?': 2317,
+  'arrived': 2317,
   'bathroom stop': 5921,
 
   // People
@@ -236,7 +236,9 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'happy': 35533,
   'sad': 35545,
   'calm': 31310,
-  'tired': 35537,
+  'tired': 2314,
+  'sleepy': 2314,
+  'sleep': 2314,
   'angry': 35539,
   'scared': 35535,
   'hurt': 2367,
@@ -253,35 +255,45 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'high up': 8142,
   'fast': 8142,
   'sit down': 6604,
-  'sleep / nap': 35537,
+  'sleep / nap': 2314,
   'too long': 36914,
+  'feel': 30197,
 };
 
 /**
  * Resolves a clinical ARASAAC image URL for any AAC item.
- * Guarantee: ALWAYS returns an authentic ARASAAC clinical pictogram, never vector shapes.
+ * Guarantee: ALWAYS returns an authentic, verified ARASAAC clinical pictogram.
  */
 export function resolveAacImageUrl(item: { photoUrl?: string; label?: string; speechText?: string; id?: string }): string {
-  if (item.photoUrl && item.photoUrl.startsWith('http')) {
-    return item.photoUrl;
-  }
+  // 1. Custom uploaded photo (data URL) takes immediate priority
   if (item.photoUrl && item.photoUrl.startsWith('data:image')) {
     return item.photoUrl;
   }
 
   const cleanLabel = (item.label || '').trim().toLowerCase();
+
+  // 2. Strict exact dictionary match (overrides any stale cached URL)
   if (cleanLabel && ARASAAC_WORD_MAP[cleanLabel]) {
     return getArasaacImageUrl(ARASAAC_WORD_MAP[cleanLabel], 500);
   }
 
-  // Try matching individual words
-  for (const key of Object.keys(ARASAAC_WORD_MAP)) {
-    if (cleanLabel.includes(key) || key.includes(cleanLabel)) {
-      return getArasaacImageUrl(ARASAAC_WORD_MAP[key], 500);
+  // 3. Discrete word token match for compound labels (e.g. "read book" -> "book", "go home" -> "home")
+  // Only matches whole separate tokens with minimum length >= 3 to prevent substring false-matches (like "me" inside "home")
+  if (cleanLabel) {
+    const tokens = cleanLabel.split(/[\s/,\-_]+/).filter((t) => t.length >= 3);
+    for (const token of tokens) {
+      if (ARASAAC_WORD_MAP[token]) {
+        return getArasaacImageUrl(ARASAAC_WORD_MAP[token], 500);
+      }
     }
   }
 
-  // Fallback to foundational communication ARASAAC pictogram (Want / Communication ID: 5441)
+  // 4. Valid static.arasaac.org URL fallback if explicitly set on a custom item
+  if (item.photoUrl && item.photoUrl.startsWith('https://static.arasaac.org/')) {
+    return item.photoUrl;
+  }
+
+  // 5. Foundational communication ARASAAC pictogram (Want / Communication ID: 5441)
   return getArasaacImageUrl(5441, 500);
 }
 

@@ -86,6 +86,7 @@ import {
   onCaregiverMessage, 
   getPairingCode 
 } from '../services/caregiverSync';
+import { resolveAacImageUrl } from '../services/arasaacService';
 
 type ChildViewType = 
   | 'home'
@@ -1018,15 +1019,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         const parsed = JSON.parse(saved);
         if (parsed.aacItems) {
           const defaultItemsMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.id, item]));
+          const defaultLabelMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.label.toLowerCase().trim(), item]));
 
           const upgraded = parsed.aacItems.map((item: AACItem) => {
-            const defaultItem = defaultItemsMap.get(item.id);
+            const cleanLabel = (item.label || '').toLowerCase().trim();
+            const defaultItem = defaultItemsMap.get(item.id) || defaultLabelMap.get(cleanLabel);
             if (defaultItem && !item.isCustom) {
-              // Reset standard items to official ARASAAC clinical pictograms while preserving favorited state
+              // Always sync standard default items with verified ARASAAC clinical URL while preserving favorites
               return {
                 ...defaultItem,
                 isFavorite: item.isFavorite !== undefined ? item.isFavorite : defaultItem.isFavorite,
                 photoUrl: defaultItem.photoUrl,
+              };
+            }
+            // Auto-heal photoUrl for custom/imported items unless it is a user-uploaded photo
+            if (!item.photoUrl?.startsWith('data:image')) {
+              return {
+                ...item,
+                photoUrl: resolveAacImageUrl(item),
               };
             }
             return item;
@@ -1034,7 +1044,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
           // Check if newly introduced default items (like feelings) are missing
           const existingIds = new Set(upgraded.map((i: AACItem) => i.id));
-          const missingDefaults = DEFAULT_AAC_ITEMS.filter((d) => !existingIds.has(d.id));
+          const existingLabels = new Set(upgraded.map((i: AACItem) => (i.label || '').toLowerCase().trim()));
+          const missingDefaults = DEFAULT_AAC_ITEMS.filter((d) => !existingIds.has(d.id) && !existingLabels.has(d.label.toLowerCase().trim()));
 
           setAacItems([...upgraded, ...missingDefaults]);
         }
@@ -1265,8 +1276,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setAacItems((prev) =>
       prev.map((item) => {
-        const photo = defaultIdMap.get(item.id) || defaultLabelMap.get(item.label.toLowerCase().trim());
-        return photo ? { ...item, photoUrl: photo } : item;
+        if (item.photoUrl?.startsWith('data:image')) return item;
+        const verifiedPhoto = defaultIdMap.get(item.id) || defaultLabelMap.get((item.label || '').toLowerCase().trim()) || resolveAacImageUrl(item);
+        return { ...item, photoUrl: verifiedPhoto };
       })
     );
     if (settings.soundEffects) playChime('complete');

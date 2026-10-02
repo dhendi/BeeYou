@@ -205,8 +205,8 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   { id: 'a-8', label: 'Outside / Walk', speechText: 'Go outside', emoji: '🌳', photoUrl: arasaac(5475), category: 'activities', colorType: 'noun', motorIndex: 43 },
 
   // --- PLACES ---
-  { id: 'p-1', label: 'Home', speechText: 'Home', emoji: '🏠', photoUrl: arasaac(6964), category: 'places', colorType: 'noun', motorIndex: 44, isFavorite: true },
-  { id: 'p-2', label: 'School', speechText: 'School', emoji: '🏫', photoUrl: arasaac(32446), category: 'places', colorType: 'noun', motorIndex: 45 },
+  { id: 'p-1', label: 'Home', speechText: 'Home', emoji: '🏠', photoUrl: arasaac(2317), category: 'places', colorType: 'noun', motorIndex: 44, isFavorite: true },
+  { id: 'p-2', label: 'School', speechText: 'School', emoji: '🏫', photoUrl: arasaac(3082), category: 'places', colorType: 'noun', motorIndex: 45 },
   { id: 'p-3', label: 'Park', speechText: 'Park', emoji: '🌲', photoUrl: arasaac(5379), category: 'places', colorType: 'noun', motorIndex: 46 },
   { id: 'p-4', label: 'Dentist', speechText: 'Dentist office', emoji: '🦷', photoUrl: arasaac(2733), category: 'places', colorType: 'noun', motorIndex: 47 },
   { id: 'p-5', label: 'Doctor', speechText: "Doctor's office", emoji: '🩺', photoUrl: arasaac(6561), category: 'places', colorType: 'noun', motorIndex: 48 },
@@ -234,7 +234,7 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   { id: 'fl-1', label: 'Happy', speechText: 'I am happy', emoji: '😊', photoUrl: arasaac(35533), category: 'feelings', colorType: 'adjective', motorIndex: 64, isFavorite: true },
   { id: 'fl-2', label: 'Sad', speechText: 'I feel sad', emoji: '😢', photoUrl: arasaac(35545), category: 'feelings', colorType: 'adjective', motorIndex: 65 },
   { id: 'fl-3', label: 'Calm', speechText: 'I feel calm', emoji: '😌', photoUrl: arasaac(31310), category: 'feelings', colorType: 'adjective', motorIndex: 66 },
-  { id: 'fl-4', label: 'Tired', speechText: 'I am tired', emoji: '🥱', photoUrl: arasaac(35537), category: 'feelings', colorType: 'adjective', motorIndex: 67 },
+  { id: 'fl-4', label: 'Tired', speechText: 'I am tired', emoji: '🥱', photoUrl: arasaac(2314), category: 'feelings', colorType: 'adjective', motorIndex: 67 },
   { id: 'fl-5', label: 'Angry', speechText: 'I feel angry', emoji: '😠', photoUrl: arasaac(35539), category: 'feelings', colorType: 'adjective', motorIndex: 68 },
   { id: 'fl-6', label: 'Scared', speechText: 'I am scared', emoji: '😨', photoUrl: arasaac(35535), category: 'feelings', colorType: 'emergency', motorIndex: 69 },
   { id: 'fl-7', label: 'Hurt / Pain', speechText: 'Something hurts', emoji: '🤕', photoUrl: arasaac(2367), category: 'feelings', colorType: 'emergency', motorIndex: 70, isFavorite: true },
