@@ -928,14 +928,17 @@ export const AACView: React.FC = () => {
               <span className="hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
             </button>
 
-            {/* ARASAAC Symbol Picker */}
+            {/* ARASAAC Clinical Symbol Picker */}
             <button
               type="button"
-              onClick={() => setShowSymbolPicker(true)}
-              className="px-2 py-1 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 flex items-center gap-1 transition-all cursor-pointer shadow-2xs hidden md:flex"
-              title="Online AAC Symbols & Real Photos (ARASAAC Library)"
+              onClick={() => {
+                setShowSymbolPicker(true);
+                playChime('tap');
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs ring-1 ring-indigo-200 shrink-0"
+              title="Add words directly from the 35,000+ ARASAAC clinical pictogram library"
             >
-              <Globe className="w-3.5 h-3.5 text-indigo-600" />
+              <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
               <span>ARASAAC</span>
             </button>
 
@@ -1293,13 +1296,14 @@ export const AACView: React.FC = () => {
       <AACSymbolPickerModal
         isOpen={showSymbolPicker}
         onClose={() => setShowSymbolPicker(false)}
+        activeCategory={activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory}
         onSelectSymbol={(sym) => {
           addAacItem({
             label: sym.label,
             speechText: sym.speechText || sym.label,
             photoUrl: sym.photoUrl,
             emoji: sym.emoji || '✨',
-            category: sym.category || 'food',
+            category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
             colorType: sym.colorType || 'noun',
             isFavorite: true,
           });

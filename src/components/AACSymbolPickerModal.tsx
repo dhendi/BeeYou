@@ -40,6 +40,7 @@ interface AACSymbolPickerModalProps {
   }) => void;
   initialQuery?: string;
   initialColorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
+  activeCategory?: AACCategory;
   onImportPack?: (pack: IndustryAacPack) => void;
   onUpgradeAll?: () => void;
 }
@@ -50,6 +51,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   onSelectSymbol,
   initialQuery = '',
   initialColorType = 'noun',
+  activeCategory = 'core',
   onImportPack,
   onUpgradeAll,
 }) => {
@@ -60,11 +62,16 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const [selectedSymbol, setSelectedSymbol] = useState<AacSymbolItem | null>(null);
   const [upgradedAll, setUpgradedAll] = useState(false);
   
+  // Quick 1-Tap Add Mode
+  const [quickAddMode, setQuickAddMode] = useState<boolean>(true);
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   // Custom button builder state within modal
   const [customLabel, setCustomLabel] = useState(initialQuery || '');
   const [customSpeech, setCustomSpeech] = useState(initialQuery || '');
   const [customColor, setCustomColor] = useState<'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency'>(initialColorType);
-  const [customCategory, setCustomCategory] = useState<AACCategory>('food');
+  const [customCategory, setCustomCategory] = useState<AACCategory>(activeCategory || 'food');
   const [importedPackId, setImportedPackId] = useState<string | null>(null);
 
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
@@ -138,6 +145,30 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     playChime('tap');
   };
 
+  const handleQuickAdd = (symbol: AacSymbolItem, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const targetCat = customCategory || activeCategory || symbol.category || 'core';
+    const targetColor = symbol.colorType || customColor || 'noun';
+    
+    onSelectSymbol({
+      photoUrl: symbol.imageUrl,
+      label: symbol.label,
+      speechText: symbol.label,
+      emoji: '🖼️',
+      category: targetCat,
+      colorType: targetColor,
+    });
+
+    setAddedIds((prev) => new Set(prev).add(symbol.id));
+    setToastMessage(`Added "${symbol.label}" directly to your AAC board!`);
+    playChime('star');
+
+    // Auto clear toast after 3 seconds
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   const handleConfirmSelection = () => {
     if (!selectedSymbol) return;
     playChime('star');
@@ -149,7 +180,8 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
       category: customCategory,
       colorType: customColor,
     });
-    onClose();
+    setAddedIds((prev) => new Set(prev).add(selectedSymbol.id));
+    setToastMessage(`Added "${customLabel.trim() || selectedSymbol.label}" to your AAC board!`);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,48 +426,121 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                 ))}
               </div>
 
+              {/* 1-Tap Quick Add Mode Banner */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-2 border-emerald-300 rounded-2xl">
+                <div className="flex items-center gap-2">
+                  <span className="p-1 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Instant 1-Tap Add</span>
+                  </span>
+                  <span className="text-xs font-bold text-emerald-950">
+                    Tap any picture to add it to your AAC board immediately!
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">Target Folder:</span>
+                  <select
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value as AACCategory)}
+                    className="px-2.5 py-1 rounded-xl bg-white border border-emerald-300 font-bold text-xs text-slate-800 outline-none shadow-2xs cursor-pointer"
+                  >
+                    <option value="core">⭐ Core Board</option>
+                    <option value="food">🍕 Food</option>
+                    <option value="drinks">🧃 Drinks</option>
+                    <option value="activities">🎮 Play & Fun</option>
+                    <option value="places">🏠 Places</option>
+                    <option value="people">👥 People</option>
+                    <option value="feelings">💛 Feelings</option>
+                    <option value="sensory">🎧 Sensory</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Toast Notification Banner */}
+              {toastMessage && (
+                <div className="p-2.5 bg-emerald-600 text-white rounded-2xl flex items-center justify-between text-xs font-black shadow-md animate-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                    <span>{toastMessage}</span>
+                  </div>
+                  <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">
+                    {addedIds.size} Added
+                  </span>
+                </div>
+              )}
+
               {/* Search Results Grid */}
               <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/50">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-xs font-black text-slate-700 uppercase tracking-wide">
                     {isSearching ? 'Searching ARASAAC clinical library...' : `Results (${displayedResults.length})`}
                   </span>
-                  <span className="text-[11px] text-slate-500">
-                    Click any symbol to preview on button
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {quickAddMode ? '⚡ Tap any tile to add right away' : 'Tap to customize & add'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-64 sm:max-h-72 overflow-y-auto p-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-72 sm:max-h-80 overflow-y-auto p-1">
                   {displayedResults.map((sym) => {
+                    const isAdded = addedIds.has(sym.id);
                     const isSelected = selectedSymbol?.id === sym.id;
                     return (
-                      <button
+                      <div
                         key={sym.id}
-                        type="button"
-                        onClick={() => handleSelect(sym)}
-                        className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 bg-white transition-all cursor-pointer text-center relative group ${
-                          isSelected
+                        onClick={() => {
+                          if (quickAddMode) {
+                            handleQuickAdd(sym);
+                          } else {
+                            handleSelect(sym);
+                          }
+                        }}
+                        className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between gap-1.5 bg-white transition-all cursor-pointer text-center relative group select-none ${
+                          isAdded
+                            ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-300'
+                            : isSelected
                             ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-sm bg-indigo-50/30'
-                            : 'border-slate-200 hover:border-indigo-300 hover:shadow-xs'
+                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs hover:bg-slate-50'
                         }`}
                       >
+                        {/* Pictogram Image */}
                         <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1">
                           <img
                             src={sym.imageUrl}
                             alt={sym.label}
                             loading="lazy"
-                            className="max-h-full max-w-full object-contain"
+                            className="max-h-full max-w-full object-contain pointer-events-none group-hover:scale-105 transition-transform"
                           />
                         </div>
-                        <span className="text-[11px] font-bold text-slate-800 truncate w-full">
+
+                        {/* Label */}
+                        <span className="text-[11px] font-black text-slate-800 truncate w-full leading-tight">
                           {sym.label}
                         </span>
-                        {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
-                            ✓
-                          </div>
-                        )}
-                      </button>
+
+                        {/* 1-Tap Quick Add Action Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleQuickAdd(sym, e)}
+                          className={`w-full py-1 px-1.5 rounded-xl font-black text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                            isAdded
+                              ? 'bg-emerald-600 text-white shadow-2xs active:scale-95'
+                              : 'bg-indigo-50 hover:bg-indigo-600 text-indigo-800 hover:text-white border border-indigo-200 shadow-2xs active:scale-95'
+                          }`}
+                          title={`Add "${sym.label}" immediately to ${customCategory}`}
+                        >
+                          {isAdded ? (
+                            <>
+                              <Check className="w-3 h-3" />
+                              <span>Added ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3 h-3 text-indigo-500 group-hover:text-white" />
+                              <span>+ Add Word</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -717,35 +822,49 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-500 font-medium">
-            {selectedSymbol ? (
+        <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="text-xs text-slate-600 font-medium">
+            {addedIds.size > 0 ? (
+              <span className="text-emerald-700 font-black flex items-center gap-1.5 bg-emerald-100/80 px-3 py-1.5 rounded-xl border border-emerald-200">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{addedIds.size} word{addedIds.size > 1 ? 's' : ''} added to your AAC board!</span>
+              </span>
+            ) : selectedSymbol ? (
               <span className="text-indigo-700 font-bold flex items-center gap-1">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>Selected: "{customLabel || selectedSymbol.label}"</span>
               </span>
             ) : (
-              <span>Select any symbol above to preview</span>
+              <span>Tap any symbol or "+ Add Word" to add immediately</span>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 text-xs font-bold transition cursor-pointer"
+              className={`px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
+                addedIds.size > 0
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                  : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+              }`}
             >
-              Cancel
+              {addedIds.size > 0 ? '✓ Done / View on AAC Board' : 'Close'}
             </button>
-            <button
-              type="button"
-              onClick={handleConfirmSelection}
-              disabled={!selectedSymbol}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black transition cursor-pointer shadow-xs disabled:opacity-40 flex items-center gap-1.5"
-            >
-              <Check className="w-4 h-4" />
-              <span>Use This AAC Symbol</span>
-            </button>
+            
+            {selectedSymbol && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleConfirmSelection();
+                  onClose();
+                }}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Add "{customLabel || selectedSymbol.label}" & Close</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
