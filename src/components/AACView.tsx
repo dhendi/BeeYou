@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
@@ -6,6 +6,7 @@ import { AACTileArt } from './AACTileArt';
 import { resolveAacImageUrl } from '../services/arasaacService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
+import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { 
   Volume2, 
   Trash2, 
@@ -27,9 +28,84 @@ import {
   Zap,
   Check,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Folder,
+  ArrowLeft,
+  Home as HomeIcon,
+  Eye,
+  EyeOff,
+  MessageSquare,
+  MessageCircle,
+  HelpCircle,
+  ShieldAlert
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+
+// Standard Category Folder Tiles (Proloquo2Go Style)
+const FOLDER_TILES: Array<{
+  id: string;
+  category: AACCategory;
+  label: string;
+  emoji: string;
+  colorType: 'noun' | 'subject' | 'social';
+  description: string;
+}> = [
+  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', colorType: 'noun', description: 'Meals, snacks & treats' },
+  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', colorType: 'noun', description: 'Water, juice & milk' },
+  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', colorType: 'noun', description: 'Games, toys & hobbies' },
+  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', colorType: 'noun', description: 'Home, school & park' },
+  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', colorType: 'subject', description: 'Family, friends & helpers' },
+  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', colorType: 'noun', description: 'Emotions & how I feel' },
+  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', colorType: 'noun', description: 'Sensory needs & regulation' },
+];
+
+const QUICK_CHAT_GROUPS = [
+  {
+    title: '👋 Greetings & Social',
+    phrases: [
+      { text: 'Hello! 👋', emoji: '👋' },
+      { text: 'Good morning! ☀️', emoji: '☀️' },
+      { text: 'Goodbye! 👋', emoji: '👋' },
+      { text: 'See you later! ✨', emoji: '✨' },
+      { text: 'How are you? 😊', emoji: '😊' },
+      { text: 'Have a great day!', emoji: '🌟' },
+    ],
+  },
+  {
+    title: '🙏 Polite & Courteous',
+    phrases: [
+      { text: 'Please. 🙏', emoji: '🙏' },
+      { text: 'Thank you very much! ❤️', emoji: '❤️' },
+      { text: "You're welcome! 😊", emoji: '😊' },
+      { text: 'Excuse me please. ✋', emoji: '✋' },
+      { text: 'I love you! 💖', emoji: '💖' },
+      { text: 'Yes, please.', emoji: '✅' },
+      { text: 'No, thank you.', emoji: '⛔' },
+    ],
+  },
+  {
+    title: '🛡️ Self-Advocacy & AAC',
+    phrases: [
+      { text: 'I communicate using this AAC tablet. Please give me time to reply.', emoji: '🗣️' },
+      { text: 'I do not understand. Can you explain differently?', emoji: '❓' },
+      { text: 'Can you please repeat that?', emoji: '🔄' },
+      { text: 'It is too loud and overwhelming here.', emoji: '🔊' },
+      { text: 'I need a sensory quiet break.', emoji: '🛋️' },
+      { text: 'Please do not rush me.', emoji: '⏳' },
+    ],
+  },
+  {
+    title: '🚨 Urgent Needs',
+    phrases: [
+      { text: 'Please help me right now!', emoji: '🆘' },
+      { text: 'Stop that please, I do not like it.', emoji: '🛑' },
+      { text: 'I need to use the restroom.', emoji: '🚽' },
+      { text: 'Something hurts.', emoji: '🤕' },
+      { text: 'I feel sick to my tummy.', emoji: '🤢' },
+      { text: 'I want my caregiver or mom.', emoji: '👩' },
+    ],
+  },
+];
 
 export const AACView: React.FC = () => {
   const {
@@ -41,13 +117,11 @@ export const AACView: React.FC = () => {
     removeLastFromSentence,
     saveSentenceAsQuickPhrase,
     settings,
-    updateSettings,
     plansChanged,
     adventures,
     speak,
     isSpeaking,
     stopSpeaking,
-    isOffline,
     activeTheme,
     setShowThemeModal,
     aacActiveScene,
@@ -61,7 +135,7 @@ export const AACView: React.FC = () => {
     upgradeAllAacToClinicalSymbols,
   } = useApp();
 
-  const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('favorites');
+  const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
   const [showWordEditor, setShowWordEditor] = useState(false);
@@ -70,14 +144,40 @@ export const AACView: React.FC = () => {
   const [instantSpeakMode, setInstantSpeakMode] = useState(false);
   const [isSentenceBarCollapsed, setIsSentenceBarCollapsed] = useState(false);
 
+  // Proloquo2Go Features State
+  const [showQuickChatDrawer, setShowQuickChatDrawer] = useState(false);
+  const [isMaskingMode, setIsMaskingMode] = useState(false);
+  const [inflectionTarget, setInflectionTarget] = useState<{ item: AACItem; inflections: WordInflection[] } | null>(null);
+
+  const [maskedItemIds, setMaskedItemIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('lumina_aac_masked_ids');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const longPressTimerRef = useRef<any>(null);
+
+  const toggleMaskItem = (id: string) => {
+    setMaskedItemIds((prev) => {
+      const updated = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        localStorage.setItem('lumina_aac_masked_ids', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    playChime('tap');
+  };
+
   // Contextual phrases detection
   const isDentistDay = true;
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
   const categories: { id: AACCategory | 'all'; label: string; emoji: string }[] = [
+    { id: 'core', label: 'Core Board', emoji: '⭐' },
     { id: 'favorites', label: 'Favorites', emoji: '❤️' },
-    { id: 'core', label: 'Core Words', emoji: '⭐' },
-    { id: 'all', label: 'All Words', emoji: '🌐' },
     { id: 'food', label: 'Food', emoji: '🍕' },
     { id: 'drinks', label: 'Drinks', emoji: '🧃' },
     { id: 'activities', label: 'Play & Fun', emoji: '🎮' },
@@ -85,6 +185,7 @@ export const AACView: React.FC = () => {
     { id: 'people', label: 'People', emoji: '👥' },
     { id: 'feelings', label: 'Feelings', emoji: '💛' },
     { id: 'sensory', label: 'Sensory', emoji: '🎧' },
+    { id: 'all', label: 'All Words', emoji: '🌐' },
   ];
 
   // Filter items while keeping consistent motor planning order (sorted by motorIndex)
@@ -440,6 +541,10 @@ export const AACView: React.FC = () => {
     : 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6';
 
   const handleTileClick = (item: AACItem) => {
+    if (isMaskingMode) {
+      toggleMaskItem(item.id);
+      return;
+    }
     if (isEditMode) {
       setEditingItem(item);
       setShowWordEditor(true);
@@ -449,53 +554,51 @@ export const AACView: React.FC = () => {
       speak(item.speechText || item.label);
     } else {
       addToSentence(item);
+      speak(item.speechText || item.label);
+    }
+    playChime('tap');
+  };
+
+  const handleLongPressStart = (item: AACItem) => {
+    const inflections = getWordInflections(item.label, item.colorType);
+    if (inflections.length > 1) {
+      longPressTimerRef.current = setTimeout(() => {
+        setInflectionTarget({ item, inflections });
+        playChime('star');
+      }, 450);
     }
   };
 
-  return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto w-full px-1 sm:px-3 min-h-0 overflow-hidden">
-      
-      {/* TOP PINNED CONTROLS PANEL (Never hidden, never overlapping, always accessible) */}
-      <div className="shrink-0 space-y-1.5 pb-1.5 z-20">
-        
-        {/* 1. CONTEXT SCENE SWITCHER & KEYBOARD */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-thin">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 shrink-0 flex items-center gap-1">
-            <MapPin className="w-3 h-3" /> Scene:
-          </span>
-          {aacActiveScene && (
-            <button
-              onClick={() => setAacActiveScene(null)}
-              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-800 text-white text-xs font-bold cursor-pointer shrink-0"
-            >
-              <X className="w-3 h-3" /> Clear
-            </button>
-          )}
-          {AAC_SCENES.map((scene) => (
-            <button
-              key={scene.id}
-              onClick={() => setAacActiveScene(aacActiveScene === scene.id ? null : scene.id)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
-                aacActiveScene === scene.id
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <span>{scene.emoji}</span>
-              <span>{scene.label}</span>
-            </button>
-          ))}
-          <button
-            onClick={() => setShowAacKeyboardModal(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold cursor-pointer shrink-0 hover:bg-amber-100 transition-all ml-auto"
-            title="Open Dyslexia-Friendly Typing Keyboard"
-          >
-            <Keyboard className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Type</span>
-          </button>
-        </div>
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
 
-        {/* Scene phrases strip (when scene active) */}
+  const handleSelectInflection = (inf: WordInflection) => {
+    if (!inflectionTarget) return;
+    const modifiedItem: AACItem = {
+      ...inflectionTarget.item,
+      label: inf.label,
+      speechText: inf.speechText,
+    };
+    if (instantSpeakMode) {
+      speak(inf.speechText || inf.label);
+    } else {
+      addToSentence(modifiedItem);
+      speak(inf.speechText || inf.label);
+    }
+    playChime('tap');
+    setInflectionTarget(null);
+  };
+
+  return (
+    <div className="flex flex-col flex-1 h-full min-h-0 relative max-w-6xl mx-auto w-full px-2 sm:px-4 py-1">
+      {/* TOP CONTROLS & HEADER */}
+      <div className="space-y-1.5 shrink-0 z-20">
+        
+        {/* 1. SITUATIONAL SCENE PHRASES (If Active) */}
         {activeSceneData && (
           <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-2 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
@@ -516,7 +619,7 @@ export const AACView: React.FC = () => {
           </div>
         )}
 
-        {/* 2. SENTENCE BUILDER STRIP */}
+        {/* 2. SENTENCE BUILDER STRIP (Message Window) */}
         {!isSentenceBarCollapsed && (
           <section
             aria-label="Sentence builder"
@@ -524,7 +627,13 @@ export const AACView: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               {/* Sentence Display Area */}
-              <div className="flex-1 min-w-0 min-h-[52px] sm:min-h-[58px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-thin">
+              <div 
+                onClick={sentence.length > 0 ? speakSentence : undefined}
+                className={`flex-1 min-w-0 min-h-[52px] sm:min-h-[58px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-thin transition-colors ${
+                  sentence.length > 0 ? 'cursor-pointer hover:bg-amber-50/50' : ''
+                }`}
+                title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
+              >
                 {sentence.length === 0 ? (
                   <div className="flex items-center gap-2 text-slate-400 text-xs sm:text-sm font-medium px-2 select-none truncate">
                     {instantSpeakMode ? (
@@ -532,7 +641,7 @@ export const AACView: React.FC = () => {
                         <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
                       </span>
                     ) : (
-                      <span>Tap words below to build a sentence...</span>
+                      <span>Tap words below to build a sentence... (tap message window to speak)</span>
                     )}
                   </div>
                 ) : (
@@ -641,7 +750,7 @@ export const AACView: React.FC = () => {
           </div>
         )}
 
-        {/* 3. CONTEXTUAL AAC STRIP */}
+        {/* 3. CONTEXTUAL AAC STRIP (Plans changed / Dentist visit) */}
         {plansChanged.active ? (
           <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-2 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
@@ -660,33 +769,42 @@ export const AACView: React.FC = () => {
               ))}
             </div>
           </div>
-        ) : isDentistDay && dentistAdventure ? (
-          <div className="bg-teal-50 border-2 border-teal-200 rounded-xl p-2 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-teal-900">
-                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>Dentist Visit Helper Phrases</span>
-              </span>
-              <span className="text-[10px] text-teal-700 font-medium">Tap to speak instantly</span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
-              {dentistAdventure.thingsICanSay.map((phrase, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => speak(phrase)}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-teal-100 text-teal-950 font-bold text-xs border border-teal-300 shadow-2xs shrink-0 active:scale-95 cursor-pointer flex items-center gap-1"
-                >
-                  <span>🦷</span>
-                  <span>{phrase}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         ) : null}
 
-        {/* 4. CATEGORY PILLS & VOCABULARY TOOLBAR */}
+        {/* 4. PROLOQUO2GO BREADCRUMB STRIP (If Inside A Category Folder) */}
+        {activeCategory !== 'core' && activeCategory !== 'all' && activeCategory !== 'favorites' && !activeSceneData && (
+          <div className="flex items-center justify-between bg-white border-2 border-slate-300 rounded-2xl px-3 py-2 shadow-xs animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory('core');
+                  playChime('tap');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+              >
+                <HomeIcon className="w-4 h-4" />
+                <span>Core Board</span>
+              </button>
+              <span className="text-slate-300 font-bold text-sm">/</span>
+              <span className="font-black text-xs sm:text-sm text-slate-800 flex items-center gap-1.5">
+                <span>{categories.find(c => c.id === activeCategory)?.emoji}</span>
+                <span>{categories.find(c => c.id === activeCategory)?.label} Folder</span>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">
+                {displayedItems.length} words
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* 5. TOOLBAR & PROLOQUO2GO QUICK ACTIONS */}
         <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-0.5 scrollbar-thin">
-          {/* Category Pills */}
+          
+          {/* Category Navigation Pills */}
           <div className="flex items-center gap-1 shrink-0">
             {categories.map((cat) => (
               <button
@@ -699,7 +817,9 @@ export const AACView: React.FC = () => {
                 }}
                 className={`px-2.5 py-1 rounded-xl font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
                   !activeSceneData && activeCategory === cat.id
-                    ? cat.id === 'favorites'
+                    ? cat.id === 'core'
+                      ? 'bg-amber-400 text-amber-950 shadow-xs ring-2 ring-amber-500 font-black'
+                      : cat.id === 'favorites'
                       ? 'bg-rose-500 text-white shadow-xs ring-2 ring-rose-600 font-black'
                       : 'bg-slate-800 text-white shadow-xs ring-2 ring-slate-800 font-black'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
@@ -711,39 +831,39 @@ export const AACView: React.FC = () => {
             ))}
           </div>
 
-          {/* Customization Actions: Add Word, Edit Mode, Instant Speak Toggle, Online Tools */}
+          {/* Clinical AAC Tools: Quick-Chat, Masking Mode, Instant Speak, Add Word, Symbol Picker */}
           <div className="flex items-center gap-1 shrink-0 ml-auto flex-wrap">
             
-            {/* Add Word Button */}
+            {/* Quick-Chat Expressions Drawer Button (Instant Speech without clearing sentence) */}
             <button
               type="button"
               onClick={() => {
-                setEditingItem(null);
-                setShowWordEditor(true);
+                setShowQuickChatDrawer(true);
+                playChime('tap');
               }}
-              className="px-2 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-              title="Add a custom word or favorite phrase"
+              className="px-2.5 py-1 rounded-xl text-xs font-black border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              title="Quick-Chat: Instant expressions that won't clear your sentence"
             >
-              <Plus className="w-3.5 h-3.5 text-amber-700" />
-              <span>Add Word</span>
+              <MessageCircle className="w-3.5 h-3.5 text-purple-600" />
+              <span>Quick Chat</span>
             </button>
 
-            {/* Edit Mode Toggle */}
+            {/* Motor Masking / Blank Slots Mode */}
             <button
               type="button"
               onClick={() => {
-                setIsEditMode(!isEditMode);
+                setIsMaskingMode(!isMaskingMode);
                 playChime('tap');
               }}
               className={`px-2 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
-                isEditMode
-                  ? 'bg-indigo-600 text-white border-indigo-700 font-black shadow-xs ring-2 ring-indigo-400'
+                isMaskingMode
+                  ? 'bg-emerald-600 text-white border-emerald-700 font-black shadow-xs ring-2 ring-emerald-400'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
               }`}
-              title="Toggle Edit Mode to customize words or set favorites"
+              title="Vocabulary Masking: Hide words while preserving exact motor planning coordinates"
             >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
+              {isMaskingMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{isMaskingMode ? 'Masking ON' : 'Mask'}</span>
             </button>
 
             {/* Instant Speak Mode */}
@@ -764,7 +884,39 @@ export const AACView: React.FC = () => {
               <span className="hidden sm:inline">Instant</span>
             </button>
 
-            {/* Online AAC Tools */}
+            {/* Add Word Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setEditingItem(null);
+                setShowWordEditor(true);
+              }}
+              className="px-2 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              title="Add a custom word or favorite phrase"
+            >
+              <Plus className="w-3.5 h-3.5 text-amber-700" />
+              <span className="hidden sm:inline">Add Word</span>
+            </button>
+
+            {/* Edit Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditMode(!isEditMode);
+                playChime('tap');
+              }}
+              className={`px-2 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                isEditMode
+                  ? 'bg-indigo-600 text-white border-indigo-700 font-black shadow-xs ring-2 ring-indigo-400'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}
+              title="Toggle Edit Mode to customize words or set favorites"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
+            </button>
+
+            {/* ARASAAC Symbol Picker */}
             <button
               type="button"
               onClick={() => setShowSymbolPicker(true)}
@@ -772,34 +924,24 @@ export const AACView: React.FC = () => {
               title="Online AAC Symbols & Real Photos (ARASAAC Library)"
             >
               <Globe className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Symbols</span>
-            </button>
-
-            {/* Theme customizer button */}
-            <button
-              type="button"
-              onClick={() => setShowThemeModal(true)}
-              className="px-2 py-1 rounded-xl text-xs font-black border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-              title="Change theme or mascot"
-            >
-              <span className="text-sm">{activeTheme.mascotEmoji}</span>
+              <span>ARASAAC</span>
             </button>
 
           </div>
         </div>
 
-        {/* Edit Mode Notice Banner */}
-        {isEditMode && (
-          <div className="bg-indigo-50 border-2 border-indigo-300 rounded-xl p-2 flex items-center justify-between text-indigo-950 animate-in fade-in">
+        {/* Masking Mode Helper Banner */}
+        {isMaskingMode && (
+          <div className="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-2 flex items-center justify-between text-emerald-950 animate-in fade-in">
             <div className="flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-indigo-600" />
+              <EyeOff className="w-4 h-4 text-emerald-600" />
               <span className="text-xs font-bold">
-                <strong>Edit Mode:</strong> Tap ❤️ on any tile to toggle Favorites, or ✏️ to customize.
+                <strong>Vocabulary Masking:</strong> Tap any tile to hide/unhide it. Blank slots preserve motor planning!
               </span>
             </div>
             <button
-              onClick={() => setIsEditMode(false)}
-              className="px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white text-xs font-bold cursor-pointer"
+              onClick={() => setIsMaskingMode(false)}
+              className="px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer"
             >
               Done
             </button>
@@ -807,11 +949,12 @@ export const AACView: React.FC = () => {
         )}
       </div>
 
-      {/* 5. SCROLLABLE MOTOR-PLANNING VOCABULARY GRID */}
-      <div className="flex-1 overflow-y-auto min-h-0 pr-0.5 pb-20 scrollbar-thin">
+      {/* 6. SCROLLABLE MOTOR-PLANNING VOCABULARY GRID */}
+      <div className="flex-1 overflow-y-auto min-h-0 pr-0.5 pb-20 scrollbar-thin mt-1">
+        
         {/* Active Scene Banner */}
         {activeSceneData && (
-          <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white rounded-2xl p-2.5 sm:p-3 flex items-center justify-between shadow-xs mb-2 mt-1 animate-in fade-in">
+          <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white rounded-2xl p-2.5 sm:p-3 flex items-center justify-between shadow-xs mb-2 animate-in fade-in">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl sm:text-3xl p-1 bg-white/20 rounded-xl">{activeSceneData.emoji}</span>
               <div>
@@ -836,134 +979,270 @@ export const AACView: React.FC = () => {
               title="Return to Core Words"
             >
               <X className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Back to Categories</span>
+              <span className="hidden sm:inline">Back to Core</span>
             </button>
           </div>
         )}
 
         <main
-          className={`grid ${gridColsClass} gap-1.5 sm:gap-2 mt-1 pb-10`}
+          className={`grid ${gridColsClass} gap-1.5 sm:gap-2 pb-10`}
           aria-label="Vocabulary grid"
         >
-        {displayedItems.map((item) => {
-          const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category) && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
-          return (
-            <div
-              key={item.id}
-              className="relative group aspect-square"
-            >
+          {/* FOLDER TILES (Rendered at top of Core View for Proloquo2Go architecture) */}
+          {activeCategory === 'core' && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => (
+            <div key={folder.id} className="relative group aspect-square">
               <button
                 type="button"
-                onClick={() => handleTileClick(item)}
-                className={`w-full h-full flex flex-col items-center p-1.5 sm:p-2 ${
-                  activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
-                } ${
-                  activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-                } shadow-sm transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
-                  hasThemedArt ? 'border-opacity-60' : ''
-                } ${getColorStyles(item.colorType)}`}
+                onClick={() => {
+                  setActiveCategory(folder.category);
+                  playChime('tap');
+                }}
+                className={`w-full h-full flex flex-col items-center p-1.5 sm:p-2 rounded-2xl border-3 shadow-md transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-slate-100 hover:bg-slate-200 border-slate-400/80 text-slate-950`}
               >
-                {/* Themed SVG art layer */}
-                {hasThemedArt && activeTheme && (
-                  <AACTileArt
-                    theme={activeTheme}
-                    colorType={item.colorType}
-                    label={item.label}
-                  />
-                )}
+                {/* Folder Top-Right Corner Tab / Badge */}
+                <div className="absolute top-1 right-1 z-10 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
+                  <Folder className="w-2.5 h-2.5 fill-white" />
+                  <span>FOLDER</span>
+                </div>
 
                 {/* ARASAAC Clinical Pictogram Area */}
-                <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
+                <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 p-1 mt-1">
                   <img
-                    src={resolveAacImageUrl(item)}
-                    alt={item.label}
+                    src={resolveAacImageUrl({ label: folder.label.toLowerCase() })}
+                    alt={folder.label}
                     className="w-full h-full object-contain rounded-lg pointer-events-none"
                     loading="lazy"
                   />
                 </div>
 
                 {/* Label */}
-                <span
-                  className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 ${
-                    settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-[10px] sm:text-xs'
-                  }`}
-                >
-                  {item.label}
+                <span className="relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 text-[11px] sm:text-xs">
+                  {folder.label}
                 </span>
               </button>
+            </div>
+          ))}
 
-              {/* Heart (Favorite) Toggle Button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleAacFavorite(item.id);
-                }}
-                className={`absolute top-1 right-1 z-20 p-1.5 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-xs ${
-                  item.isFavorite
-                    ? 'bg-rose-500 text-white scale-100 hover:scale-110'
-                    : isEditMode
-                    ? 'bg-white/90 text-slate-400 hover:text-rose-500 border border-slate-200'
-                    : 'opacity-0 group-hover:opacity-100 bg-white/80 text-slate-400 hover:text-rose-500'
-                }`}
-                title={item.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+          {/* MAIN VOCABULARY TILES */}
+          {displayedItems.map((item) => {
+            const isMasked = maskedItemIds.includes(item.id);
+            const inflections = getWordInflections(item.label, item.colorType);
+            const hasInflections = inflections.length > 1;
+            const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category) && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
+
+            // When masked and not in masking mode, render as a fixed blank placeholder
+            if (isMasked && !isMaskingMode) {
+              return (
+                <div
+                  key={item.id}
+                  className="relative aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/40 select-none"
+                  aria-hidden="true"
+                />
+              );
+            }
+
+            return (
+              <div
+                key={item.id}
+                className={`relative group aspect-square ${isMasked ? 'opacity-40 grayscale ring-2 ring-emerald-500 rounded-2xl' : ''}`}
+                onMouseDown={() => handleLongPressStart(item)}
+                onMouseUp={handleLongPressEnd}
+                onTouchStart={() => handleLongPressStart(item)}
+                onTouchEnd={handleLongPressEnd}
               >
-                <Heart className={`w-3 h-3 ${item.isFavorite ? 'fill-white text-white' : ''}`} />
-              </button>
-
-              {/* Edit Word Button (Pencil) */}
-              {isEditMode && (
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingItem(item);
-                    setShowWordEditor(true);
-                  }}
-                  className="absolute top-1 left-1 z-20 p-1.5 rounded-full bg-indigo-600 text-white hover:scale-110 transition-transform cursor-pointer shadow-xs"
-                  title="Edit word details"
+                  onClick={() => handleTileClick(item)}
+                  className={`w-full h-full flex flex-col items-center p-1.5 sm:p-2 ${
+                    activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
+                  } ${
+                    activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
+                  } shadow-sm transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
+                    hasThemedArt ? 'border-opacity-60' : ''
+                  } ${getColorStyles(item.colorType)}`}
                 >
-                  <Edit3 className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </main>
+                  {/* Themed SVG art layer */}
+                  {hasThemedArt && activeTheme && (
+                    <AACTileArt
+                      theme={activeTheme}
+                      colorType={item.colorType}
+                      label={item.label}
+                    />
+                  )}
 
-      {/* Empty State / Helpful Prompts */}
-      {displayedItems.length === 0 && (
-        <div className="text-center py-10 px-4 bg-white rounded-3xl border-2 border-dashed border-slate-300 mt-4 text-slate-600 max-w-md mx-auto">
-          {activeCategory === 'favorites' ? (
-            <div className="space-y-3">
-              <span className="text-4xl block">❤️</span>
-              <h3 className="font-black text-slate-900 text-base">No Favorite Words Yet</h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Tap the heart on any word to pin it here, or create your own custom favorite phrases!
-              </p>
+                  {/* ARASAAC Clinical Pictogram Area */}
+                  <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
+                    <img
+                      src={resolveAacImageUrl(item)}
+                      alt={item.label}
+                      className="w-full h-full object-contain rounded-lg pointer-events-none"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Label */}
+                  <span
+                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-sm w-full mt-1 ${
+                      settings.largeButtonMode ? 'text-sm sm:text-base' : 'text-[10px] sm:text-xs'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+
+                {/* Grammar Inflections Trigger Button (Proloquo2Go grammar popup indicator) */}
+                {hasInflections && !isMaskingMode && !isEditMode && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInflectionTarget({ item, inflections });
+                      playChime('tap');
+                    }}
+                    className="absolute top-1 left-1 z-20 p-1 rounded-md bg-white/90 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs text-[9px] font-black flex items-center gap-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
+                    title="Grammar forms (+ed, -ing, plurals)"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                  </button>
+                )}
+
+                {/* Heart (Favorite) Toggle Button */}
+                {!isMaskingMode && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAacFavorite(item.id);
+                    }}
+                    className={`absolute top-1 right-1 z-20 p-1.5 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-xs ${
+                      item.isFavorite
+                        ? 'bg-rose-500 text-white scale-100 hover:scale-110'
+                        : isEditMode
+                        ? 'bg-white/90 text-slate-400 hover:text-rose-500 border border-slate-200'
+                        : 'opacity-0 group-hover:opacity-100 bg-white/80 text-slate-400 hover:text-rose-500'
+                    }`}
+                    title={item.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                  >
+                    <Heart className={`w-3 h-3 ${item.isFavorite ? 'fill-white text-white' : ''}`} />
+                  </button>
+                )}
+
+                {/* Edit Word Button (Pencil) */}
+                {isEditMode && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingItem(item);
+                      setShowWordEditor(true);
+                    }}
+                    className="absolute top-1 left-1 z-20 p-1.5 rounded-full bg-indigo-600 text-white hover:scale-110 transition-transform cursor-pointer shadow-xs"
+                    title="Edit word details"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </main>
+      </div>
+
+      {/* GRAMMAR INFLECTIONS POPUP (Proloquo2Go Style) */}
+      {inflectionTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border-4 border-amber-300 space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src={resolveAacImageUrl(inflectionTarget.item)}
+                  alt=""
+                  className="w-8 h-8 object-contain rounded-lg"
+                />
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">
+                    Grammar Forms: {inflectionTarget.item.label}
+                  </h3>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    Pick a variation to speak or insert
+                  </span>
+                </div>
+              </div>
               <button
-                type="button"
-                onClick={() => {
-                  setEditingItem(null);
-                  setShowWordEditor(true);
-                }}
-                className="px-4 py-2 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer inline-flex items-center gap-1.5"
+                onClick={() => setInflectionTarget(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
-                <span>Create First Favorite Word</span>
+                <X className="w-5 h-5" />
               </button>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="font-bold text-base">No words found in this category.</p>
-              <p className="text-xs text-slate-400">
-                You can add new words anytime using the "Add Word" button or Online AAC Tools!
-              </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {inflectionTarget.inflections.map((inf, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSelectInflection(inf)}
+                  className="p-3 rounded-2xl border-2 border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 text-left transition-all active:scale-95 cursor-pointer flex flex-col justify-between"
+                >
+                  <span className="font-black text-slate-900 text-sm">{inf.label}</span>
+                  <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mt-1">
+                    {inf.badge}
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
-      </div>
+
+      {/* QUICK-CHAT DRAWER (Instant Speech without clearing sentence builder) */}
+      {showQuickChatDrawer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl border-4 border-purple-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl p-1 bg-white/20 rounded-xl">💬</span>
+                <div>
+                  <h3 className="font-black text-base">Quick Chat Expressions</h3>
+                  <p className="text-xs text-purple-100 font-medium">
+                    Tap any phrase to speak instantly — active sentence is preserved!
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowQuickChatDrawer(false)}
+                className="p-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {QUICK_CHAT_GROUPS.map((grp, gIdx) => (
+                <div key={gIdx} className="space-y-2">
+                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                    {grp.title}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {grp.phrases.map((phrase, pIdx) => (
+                      <button
+                        key={pIdx}
+                        onClick={() => {
+                          speak(phrase.text);
+                          playChime('tap');
+                        }}
+                        className="p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 bg-slate-50 hover:bg-purple-50 text-slate-900 font-bold text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                      >
+                        <span className="text-xl shrink-0">{phrase.emoji}</span>
+                        <span className="leading-tight">{phrase.text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Word & Favorite Phrase Editor Modal */}
       <AACWordEditorModal
