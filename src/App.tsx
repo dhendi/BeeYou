@@ -123,7 +123,10 @@ const AppContent: React.FC = () => {
       </header>
 
       {/* Main Content View Switcher (scrolls inside itself) */}
-      <main ref={mainScrollRef} className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4 relative z-10">
+      <main 
+        ref={mainScrollRef} 
+        className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'} overscroll-contain p-2 sm:p-4 relative z-10`}
+      >
         {childView === 'home' && <ChildHomeView />}
         {childView === 'aac' && <AACView />}
         {childView === 'my-day' && <MyDayView />}

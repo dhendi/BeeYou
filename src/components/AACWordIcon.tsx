@@ -18,6 +18,8 @@ interface AACWordIconProps {
   theme?: AppTheme | null;
   /** CSS class for width/height (e.g. "w-10 h-10") */
   className?: string;
+  /** Optional fallback emoji */
+  fallbackEmoji?: string;
 }
 
 // ─── Theme accent colour helper ───────────────────────────────────────────────
@@ -850,15 +852,116 @@ const IconQuietRoom: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) =
   </Svg>
 );
 
-const IconFidget: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
-  <Svg title="Squishy Fidget">
-    {/* Squishy toy / star shape */}
-    <path d="M24 6 Q28 12 34 10 Q32 16 38 18 Q32 22 36 28 Q30 26 28 32 Q24 28 20 32 Q18 26 12 28 Q16 22 10 18 Q16 16 14 10 Q20 12 24 6 Z"
-      fill={a.main} />
-    {/* Shine */}
-    <circle cx="20" cy="16" r="3" fill="white" opacity="0.4" />
-    {/* Squeeze marks */}
-    <path d="M22 24 Q24 26 26 24" stroke={a.dark} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+// ── FEELINGS & PERSONAL ────────────────────────────────────────────────────────
+
+const IconHappy: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Happy">
+    {/* Smiling face */}
+    <circle cx="24" cy="24" r="18" fill="#facc15" stroke="#ca8a04" strokeWidth="2" />
+    {/* Happy eyes */}
+    <path d="M16 19 Q18 15 20 19" stroke="#713f12" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <path d="M28 19 Q30 15 32 19" stroke="#713f12" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    {/* Big smile */}
+    <path d="M15 26 Q24 36 33 26" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none" />
+    {/* Rosy cheeks */}
+    <circle cx="13" cy="25" r="3" fill="#f87171" opacity="0.6" />
+    <circle cx="35" cy="25" r="3" fill="#f87171" opacity="0.6" />
+  </Svg>
+);
+
+const IconSad: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Sad">
+    {/* Sad face */}
+    <circle cx="24" cy="24" r="18" fill="#93c5fd" stroke="#3b82f6" strokeWidth="2" />
+    {/* Downward eyes */}
+    <circle cx="17" cy="20" r="2.5" fill="#1e3a8a" />
+    <circle cx="31" cy="20" r="2.5" fill="#1e3a8a" />
+    {/* Frown */}
+    <path d="M16 32 Q24 24 32 32" stroke="#1e3a8a" strokeWidth="3" strokeLinecap="round" fill="none" />
+    {/* Tear drop */}
+    <path d="M33 24 Q36 28 33 30 Q30 28 33 24 Z" fill="#60a5fa" />
+  </Svg>
+);
+
+const IconCalm: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Calm">
+    {/* Peaceful serene face */}
+    <circle cx="24" cy="24" r="18" fill="#bae6fd" stroke="#0284c7" strokeWidth="2" />
+    {/* Relaxed closed eyes */}
+    <path d="M15 20 Q18 24 21 20" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <path d="M27 20 Q30 24 33 20" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    {/* Gentle smile */}
+    <path d="M18 28 Q24 33 30 28" stroke="#0369a1" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+  </Svg>
+);
+
+const IconTired: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Tired">
+    {/* Sleepy face */}
+    <circle cx="24" cy="24" r="18" fill="#e2e8f0" stroke="#64748b" strokeWidth="2" />
+    {/* Droopy eyes */}
+    <path d="M15 19 L21 21" stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M33 19 L27 21" stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
+    {/* Yawn mouth */}
+    <ellipse cx="24" cy="30" rx="5" ry="7" fill="#475569" />
+    {/* Floating Zzz */}
+    <text x="32" y="14" fontSize="9" fill="#6366f1" fontWeight="bold" fontFamily="sans-serif">Z</text>
+    <text x="37" y="9" fontSize="7" fill="#6366f1" fontWeight="bold" fontFamily="sans-serif">z</text>
+  </Svg>
+);
+
+const IconAngry: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Angry">
+    {/* Red face */}
+    <circle cx="24" cy="24" r="18" fill="#fca5a5" stroke="#dc2626" strokeWidth="2" />
+    {/* Angled eyebrows */}
+    <path d="M14 16 L22 21" stroke="#7f1d1d" strokeWidth="3" strokeLinecap="round" />
+    <path d="M34 16 L26 21" stroke="#7f1d1d" strokeWidth="3" strokeLinecap="round" />
+    {/* Staring eyes */}
+    <circle cx="18" cy="23" r="2.5" fill="#7f1d1d" />
+    <circle cx="30" cy="23" r="2.5" fill="#7f1d1d" />
+    {/* Angry grimace mouth */}
+    <path d="M16 32 Q24 27 32 32" stroke="#7f1d1d" strokeWidth="3" strokeLinecap="round" fill="none" />
+  </Svg>
+);
+
+const IconScared: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Scared">
+    {/* Scared face */}
+    <circle cx="24" cy="24" r="18" fill="#c7d2fe" stroke="#4f46e5" strokeWidth="2" />
+    {/* Wide open eyes */}
+    <circle cx="17" cy="19" r="4.5" fill="white" stroke="#312e81" strokeWidth="1.5" />
+    <circle cx="17" cy="19" r="2" fill="#312e81" />
+    <circle cx="31" cy="19" r="4.5" fill="white" stroke="#312e81" strokeWidth="1.5" />
+    <circle cx="31" cy="19" r="2" fill="#312e81" />
+    {/* Wobbly mouth */}
+    <path d="M17 31 Q20 28 24 31 Q28 34 31 31" stroke="#312e81" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+  </Svg>
+);
+
+const IconHurtPain: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Hurt / Pain">
+    {/* Band-aid / First aid */}
+    <rect x="10" y="16" width="28" height="16" rx="8" fill="#fde68a" stroke="#d97706" strokeWidth="2" transform="rotate(-25,24,24)" />
+    {/* Center pad */}
+    <rect x="18" y="18" width="12" height="12" rx="2" fill="white" stroke="#d97706" strokeWidth="1.5" transform="rotate(-25,24,24)" />
+    {/* Red cross on pad */}
+    <path d="M24 19 L24 29 M19 24 L29 24" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" />
+  </Svg>
+);
+
+const IconToiletPotty: React.FC<{ a: ReturnType<typeof themeAccent> }> = ({ a }) => (
+  <Svg title="Toilet / Potty">
+    {/* Toilet tank */}
+    <rect x="14" y="6" width="20" height="14" rx="3" fill="white" stroke="#94a3b8" strokeWidth="2" />
+    {/* Flush handle */}
+    <circle cx="30" cy="10" r="1.5" fill="#64748b" />
+    {/* Bowl */}
+    <path d="M16 20 L32 20 L30 36 Q30 42 24 42 Q18 42 18 36 Z" fill="white" stroke="#94a3b8" strokeWidth="2" />
+    {/* Toilet seat oval */}
+    <ellipse cx="24" cy="22" rx="9" ry="3.5" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+    {/* Base */}
+    <path d="M20 38 L28 38 L30 44 L18 44 Z" fill="#cbd5e1" />
   </Svg>
 );
 
@@ -890,14 +993,20 @@ type IconRenderer = (props: { a: ReturnType<typeof themeAccent>; label: string }
 
 const ICON_MAP: Record<string, IconRenderer> = {
   'i / me':            ({ a }) => <IconIMe a={a} />,
+  'i':                 ({ a }) => <IconIMe a={a} />,
+  'me':                ({ a }) => <IconIMe a={a} />,
   'you':               ({ a }) => <IconYou a={a} />,
   'we':                ({ a }) => <IconWe a={a} />,
   'my / mine':         ({ a }) => <IconMyMine a={a} />,
+  'my':                ({ a }) => <IconMyMine a={a} />,
+  'mine':              ({ a }) => <IconMyMine a={a} />,
   'want':              ({ a }) => <IconWant a={a} />,
   'need':              ({ a }) => <IconNeed a={a} />,
   'like':              ({ a }) => <IconLike a={a} />,
   'go':                ({ a }) => <IconGo a={a} />,
   'see / look':        ({ a }) => <IconSee a={a} />,
+  'see':               ({ a }) => <IconSee a={a} />,
+  'look':              ({ a }) => <IconSee a={a} />,
   'feel':              ({ a }) => <IconFeel a={a} />,
   'eat':               ({ a }) => <IconEat a={a} />,
   'drink':             ({ a }) => <IconDrink a={a} />,
@@ -907,32 +1016,50 @@ const ICON_MAP: Record<string, IconRenderer> = {
   'wait':              ({ a }) => <IconWait a={a} />,
   'more':              ({ a }) => <IconMore a={a} />,
   'all done':          ({ a }) => <IconAllDone a={a} />,
+  'done':              ({ a }) => <IconAllDone a={a} />,
   "don't / not":       ({ a }) => <IconDontNot a={a} />,
+  "don't":             ({ a }) => <IconDontNot a={a} />,
+  'not':               ({ a }) => <IconDontNot a={a} />,
   'yes':               ({ a }) => <IconYes a={a} />,
   'no':                ({ a }) => <IconNo a={a} />,
   'break':             ({ a }) => <IconBreak a={a} />,
   'please':            ({ a }) => <IconPlease a={a} />,
   'what next?':        ({ a }) => <IconWhatNext a={a} />,
+  'what next':         ({ a }) => <IconWhatNext a={a} />,
   'pizza':             ({ a }) => <IconPizza a={a} />,
   'mac & cheese':      ({ a }) => <IconMacCheese a={a} />,
+  'mac and cheese':    ({ a }) => <IconMacCheese a={a} />,
   'apple':             ({ a }) => <IconApple a={a} />,
   'sandwich':          ({ a }) => <IconSandwich a={a} />,
   'banana':            ({ a }) => <IconBanana a={a} />,
   'crackers':          ({ a }) => <IconCrackers a={a} />,
   'cookie':            ({ a }) => <IconCookie a={a} />,
+  'cookies':           ({ a }) => <IconCookie a={a} />,
   'strawberries':      ({ a }) => <IconStrawberries a={a} />,
+  'strawberry':        ({ a }) => <IconStrawberries a={a} />,
   'water':             ({ a }) => <IconWater a={a} />,
   'apple juice':       ({ a }) => <IconAppleJuice a={a} />,
+  'juice':             ({ a }) => <IconAppleJuice a={a} />,
   'milk':              ({ a }) => <IconMilk a={a} />,
   'smoothie':          ({ a }) => <IconSmoothie a={a} />,
   'tablet / ipad':     ({ a }) => <IconTablet a={a} />,
+  'tablet':            ({ a }) => <IconTablet a={a} />,
+  'ipad':              ({ a }) => <IconTablet a={a} />,
   'playground':        ({ a }) => <IconPlayground a={a} />,
   'read book':         ({ a }) => <IconReadBook a={a} />,
+  'book':              ({ a }) => <IconReadBook a={a} />,
+  'read':              ({ a }) => <IconReadBook a={a} />,
   'drawing':           ({ a }) => <IconDrawing a={a} />,
+  'draw':              ({ a }) => <IconDrawing a={a} />,
   'music':             ({ a }) => <IconMusic a={a} />,
   'blocks / lego':     ({ a }) => <IconBlocks a={a} />,
+  'blocks':            ({ a }) => <IconBlocks a={a} />,
+  'lego':              ({ a }) => <IconBlocks a={a} />,
   'puzzles':           ({ a }) => <IconPuzzles a={a} />,
+  'puzzle':            ({ a }) => <IconPuzzles a={a} />,
   'outside / walk':    ({ a }) => <IconOutside a={a} />,
+  'outside':           ({ a }) => <IconOutside a={a} />,
+  'walk':              ({ a }) => <IconOutside a={a} />,
   'home':              ({ a }) => <IconHome a={a} />,
   'school':            ({ a }) => <IconSchool a={a} />,
   'park':              ({ a }) => <IconPark a={a} />,
@@ -941,6 +1068,8 @@ const ICON_MAP: Record<string, IconRenderer> = {
   'restaurant':        ({ a }) => <IconRestaurant a={a} />,
   'store':             ({ a }) => <IconStore a={a} />,
   'car / bus':         ({ a }) => <IconCarBus a={a} />,
+  'car':               ({ a }) => <IconCarBus a={a} />,
+  'bus':               ({ a }) => <IconCarBus a={a} />,
   'mom':               ({ a }) => <IconMom a={a} />,
   'dad':               ({ a }) => <IconDad a={a} />,
   'teacher':           ({ a }) => <IconTeacher a={a} />,
@@ -951,6 +1080,21 @@ const ICON_MAP: Record<string, IconRenderer> = {
   'weighted blanket':  ({ a }) => <IconWeightedBlanket a={a} />,
   'quiet room':        ({ a }) => <IconQuietRoom a={a} />,
   'squishy fidget':    ({ a }) => <IconFidget a={a} />,
+  'fidget':            ({ a }) => <IconFidget a={a} />,
+  'happy':             ({ a }) => <IconHappy a={a} />,
+  'sad':               ({ a }) => <IconSad a={a} />,
+  'calm':              ({ a }) => <IconCalm a={a} />,
+  'tired':             ({ a }) => <IconTired a={a} />,
+  'angry':             ({ a }) => <IconAngry a={a} />,
+  'scared':            ({ a }) => <IconScared a={a} />,
+  'hurt / pain':       ({ a }) => <IconHurtPain a={a} />,
+  'hurt':              ({ a }) => <IconHurtPain a={a} />,
+  'pain':              ({ a }) => <IconHurtPain a={a} />,
+  'toilet / potty':    ({ a }) => <IconToiletPotty a={a} />,
+  'toilet':            ({ a }) => <IconToiletPotty a={a} />,
+  'potty':             ({ a }) => <IconToiletPotty a={a} />,
+  'bathroom':          ({ a }) => <IconToiletPotty a={a} />,
+  'restroom':          ({ a }) => <IconToiletPotty a={a} />,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -962,14 +1106,31 @@ export const AACWordIcon: React.FC<AACWordIconProps> = ({
   colorType,
   theme,
   className = 'w-10 h-10',
+  fallbackEmoji,
 }) => {
   const accent = themeAccent(theme?.category);
   const key = label.toLowerCase().trim();
   const renderer = ICON_MAP[key];
 
+  if (renderer) {
+    return (
+      <span className={`${className} block drop-shadow-sm`} aria-hidden="true">
+        {renderer({ a: accent, label })}
+      </span>
+    );
+  }
+
+  if (fallbackEmoji && fallbackEmoji !== '💬') {
+    return (
+      <span className={`${className} flex items-center justify-center text-3xl sm:text-4xl leading-none select-none drop-shadow-sm`} aria-hidden="true">
+        {fallbackEmoji}
+      </span>
+    );
+  }
+
   return (
     <span className={`${className} block drop-shadow-sm`} aria-hidden="true">
-      {renderer ? renderer({ a: accent, label }) : <IconFallback a={accent} label={label} />}
+      <IconFallback a={accent} label={label} />
     </span>
   );
 };

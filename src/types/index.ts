@@ -20,6 +20,7 @@ export interface EmotionOption {
 }
 
 export type AACCategory = 
+  | 'favorites'
   | 'core'
   | 'food'
   | 'drinks'
@@ -42,6 +43,7 @@ export interface AACItem {
   colorType: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   motorIndex: number; // for motor planning consistency
   isCustom?: boolean;
+  isFavorite?: boolean;
 }
 
 export interface QuickPhrase {

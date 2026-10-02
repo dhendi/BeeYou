@@ -331,6 +331,45 @@ export const ParentDashboard: React.FC = () => {
   const [newWordColorType, setNewWordColorType] = useState<any>('noun');
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
   const [editingAacItem, setEditingAacItem] = useState<AACItem | null>(null);
+  const parentAacFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleParentAacPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 320;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            width = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          setNewWordPhotoUrl(canvas.toDataURL('image/jpeg', 0.85));
+        } else {
+          setNewWordPhotoUrl(event.target?.result as string);
+        }
+        showNotification('Photo uploaded and compressed for AAC button!');
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handlePickSymbol = (symbol: {
     photoUrl: string;
@@ -3412,26 +3451,43 @@ export const ParentDashboard: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="flex items-end">
+                  <div className="flex items-end gap-2">
+                    <input
+                      ref={parentAacFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleParentAacPhotoUpload}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => parentAacFileInputRef.current?.click()}
+                      className="flex-1 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-300 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      title="Upload a photo from your camera or computer"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Upload Photo</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
                         setEditingAacItem(null);
                         setShowSymbolPicker(true);
                       }}
-                      className="w-full px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 cursor-pointer flex items-center justify-center gap-1.5"
+                      className="flex-1 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Search className="w-3.5 h-3.5" />
-                      <span>{newWordPhotoUrl ? 'Change Symbol' : 'Pick Online Symbol'}</span>
+                      <span>{newWordPhotoUrl ? 'Change' : 'Online'}</span>
                     </button>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs cursor-pointer flex items-center gap-1.5"
                 >
-                  Add to Child's AAC Board
+                  <Plus className="w-4 h-4" />
+                  <span>Add to Child's AAC Board</span>
                 </button>
               </form>
 

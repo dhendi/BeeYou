@@ -148,9 +148,9 @@ interface AppContextType {
   speakSentence: () => Promise<void>;
   clearSentence: () => void;
   removeLastFromSentence: () => void;
-  saveSentenceAsQuickPhrase: () => void;
-  addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string }) => void;
+  addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => void;
   updateAacItem: (item: AACItem) => void;
+  toggleAacFavorite: (id: string) => void;
   importAacPack: (items: Array<Omit<AACItem, 'id' | 'motorIndex'>>) => void;
   upgradeAllAacToClinicalSymbols: () => void;
   deleteAacItem: (id: string) => void;
@@ -1009,13 +1009,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.aacItems) {
-          const defaultMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.id, item.photoUrl]));
-          const defaultLabelMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.label.toLowerCase().trim(), item.photoUrl]));
+          const defaultItemsMap = new Map(DEFAULT_AAC_ITEMS.map((item) => [item.id, item]));
 
           const upgraded = parsed.aacItems.map((item: AACItem) => {
-            const clinicalPhoto = defaultMap.get(item.id) || defaultLabelMap.get(item.label.toLowerCase().trim());
-            if (!item.photoUrl && clinicalPhoto) {
-              return { ...item, photoUrl: clinicalPhoto };
+            const defaultItem = defaultItemsMap.get(item.id);
+            if (defaultItem && !item.isCustom) {
+              // Reset standard items to clean matching SVGs and correct emojis while preserving favorited state
+              return {
+                ...defaultItem,
+                isFavorite: item.isFavorite !== undefined ? item.isFavorite : defaultItem.isFavorite,
+                photoUrl: undefined,
+              };
             }
             return item;
           });
@@ -1185,7 +1189,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (settings.soundEffects) playChime('star');
   };
 
-  const addAacItem = (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string }) => {
+  const addAacItem = (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => {
     const newItem: AACItem = {
       id: item.id || `aac-${Date.now()}`,
       label: item.label,
@@ -1196,6 +1200,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       colorType: item.colorType,
       motorIndex: aacItems.length,
       isCustom: true,
+      isFavorite: item.isFavorite !== undefined ? item.isFavorite : (item.category === 'favorites'),
     };
     setAacItems((prev) => [...prev, newItem]);
     if (settings.soundEffects) playChime('star');
@@ -1204,6 +1209,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const updateAacItem = (updated: AACItem) => {
     setAacItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
     if (settings.soundEffects) playChime('tap');
+  };
+
+  const toggleAacFavorite = (id: string) => {
+    setAacItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, isFavorite: !item.isFavorite } : item))
+    );
+    if (settings.soundEffects) playChime('star');
   };
 
   const importAacPack = (items: Array<Omit<AACItem, 'id' | 'motorIndex'>>) => {
@@ -2474,6 +2486,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         saveSentenceAsQuickPhrase,
         addAacItem,
         updateAacItem,
+        toggleAacFavorite,
         importAacPack,
         upgradeAllAacToClinicalSymbols,
         deleteAacItem,

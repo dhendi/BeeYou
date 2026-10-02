@@ -125,7 +125,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     // 5. Celebration
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
     playChime('complete');
-    speakText(`Welcome to Lumina, ${name}! Your personalized setup is ready.`);
 
     onClose();
   };

@@ -659,52 +659,24 @@ export function getThemedAacEmoji(item: AACItem, theme?: AppTheme): string {
     }
   }
 
-  // 2. Dynamic theme-wide visual adaptation across all AAC tiles
+  // 2. Dynamic theme-wide visual adaptation across all AAC tiles (strict exact matching only)
+  const l = item.label.toLowerCase().trim();
+
   if (theme.category === 'turtle') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🐢';
-    if (item.label.includes('Eat') || item.label.includes('Food')) return '🥬';
-    if (item.label.includes('Drink') || item.label.includes('Water')) return '🌊';
-    if (item.label.includes('Break')) return '🧘';
-    if (item.label.includes('Wait')) return '⏳';
-    if (item.label.includes('Help')) return '🛟';
-    if (item.label.includes('Play')) return '🏝️';
-    if (item.label.includes('Go')) return '🐢💨';
-    if (item.label.includes('Good') || item.label.includes('Happy')) return '🐢✨';
-    if (item.label.includes('Like')) return '💚';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🐢';
   } else if (theme.category === 'dinosaur') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🦖';
-    if (item.label.includes('Eat')) return '🌿';
-    if (item.label.includes('Help')) return '🌋';
-    if (item.label.includes('Play')) return '🦕';
-    if (item.label.includes('Break')) return '🏕️';
-    if (item.label.includes('Go')) return '🦖💨';
-    if (item.label.includes('Good') || item.label.includes('Happy')) return '🌟';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🦖';
   } else if (theme.category === 'frog') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🐸';
-    if (item.label.includes('Eat')) return '🪰';
-    if (item.label.includes('Play')) return '🪷';
-    if (item.label.includes('Help')) return '🛟';
-    if (item.label.includes('Go') || item.label.includes('Jump')) return '🦗';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🐸';
   } else if (theme.category === 'train') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🚂';
-    if (item.label.includes('Play')) return '🛤️';
-    if (item.label.includes('Break')) return '🚃';
-    if (item.label.includes('Go')) return '💨';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🚂';
   } else if (theme.category === 'space') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🚀';
-    if (item.label.includes('Help')) return '🛰️';
-    if (item.label.includes('Play')) return '👾';
-    if (item.label.includes('Break')) return '🌌';
-    if (item.label.includes('Eat')) return '🪐';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🚀';
   } else if (theme.category === 'ocean') {
-    if (item.label.includes('I') || item.speechText === 'I') return '🐬';
-    if (item.label.includes('Help')) return '🛟';
-    if (item.label.includes('Play')) return '🏖️';
-    if (item.label.includes('Drink') || item.label.includes('Water')) return '🌊';
-    if (item.label.includes('Break')) return '🐚';
+    if (l === 'i / me' || l === 'i' || l === 'me') return '🐬';
   }
 
-  return item.emoji;
+  return item.emoji || '💬';
 }
 
 /**

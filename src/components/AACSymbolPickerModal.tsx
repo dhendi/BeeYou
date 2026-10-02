@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Search, 
   Sparkles, 
@@ -189,14 +190,14 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Online AAC Symbol & Button Tools"
-      className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in"
+      className="fixed inset-0 z-[9999] bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in"
     >
-      <div className="bg-white border-2 border-indigo-200 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white border-2 border-indigo-200 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] my-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -404,7 +405,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-72 overflow-y-auto p-1">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-64 sm:max-h-72 overflow-y-auto p-2">
                   {displayedResults.map((sym) => {
                     const isSelected = selectedSymbol?.id === sym.id;
                     return (
@@ -748,6 +749,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
