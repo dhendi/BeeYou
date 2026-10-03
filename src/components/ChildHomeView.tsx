@@ -25,6 +25,7 @@ import {
 import { playChime } from '../utils/audio';
 import { MOOD_META } from '../data/defaultData';
 import { DashboardWidgetId } from '../types';
+import { isWidgetAvailable } from '../data/navigation';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -675,9 +676,53 @@ export const ChildHomeView: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS */}
+      {/* 2b. QUICK HELP: talk, calm down, ask for help (respects feature toggles) */}
+      {(enabledFeatures?.aacCommunication !== false ||
+        enabledFeatures?.sensoryBreathingPacer !== false ||
+        enabledFeatures?.emergencyAlertSOS !== false) && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3" role="group" aria-label="Quick help">
+          {enabledFeatures?.aacCommunication !== false && (
+            <button
+              onClick={() => {
+                setChildView('aac');
+                playChime('tap');
+              }}
+              className="min-h-[72px] rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 text-amber-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+            >
+              <span className="text-2xl" aria-hidden="true">💬</span>
+              Talk
+            </button>
+          )}
+          {enabledFeatures?.sensoryBreathingPacer !== false && (
+            <button
+              onClick={() => {
+                setShowCopingToolkit(true);
+                playChime('tap');
+              }}
+              className="min-h-[72px] rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 text-sky-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+            >
+              <span className="text-2xl" aria-hidden="true">🛋️</span>
+              Calm down
+            </button>
+          )}
+          {enabledFeatures?.emergencyAlertSOS !== false && (
+            <button
+              onClick={() => {
+                setShowCaregiverAlertModal(true);
+                playChime('tap');
+              }}
+              className="min-h-[72px] rounded-2xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 text-rose-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+            >
+              <span className="text-2xl" aria-hidden="true">🆘</span>
+              I need help
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS (hidden when their feature is switched off) */}
       {dashboardWidgets.map((widget) => {
-        if (!widget.enabled) return null;
+        if (!widget.enabled || !isWidgetAvailable(widget.id, enabledFeatures)) return null;
         const renderer = widgetRenderMap[widget.id];
         return renderer ? renderer() : null;
       })}

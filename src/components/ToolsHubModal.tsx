@@ -220,9 +220,27 @@ export const ToolsHubModal: React.FC = () => {
     },
   ];
 
-  const filteredTools = activeCategory === 'all' 
-    ? tools 
-    : tools.filter((t) => t.category === activeCategory);
+  // Tools tied to a feature toggle disappear when that feature is switched off.
+  const TOOL_GATE: Record<string, 'sensoryBreathingPacer' | 'visualCountdownTimer' | 'emergencyAlertSOS'> = {
+    scale: 'sensoryBreathingPacer',
+    fidgets: 'sensoryBreathingPacer',
+    coping: 'sensoryBreathingPacer',
+    'pie-timer': 'visualCountdownTimer',
+    emergency: 'emergencyAlertSOS',
+  };
+  const CATEGORY_BLURB: Record<'sensory' | 'wellness' | 'support', string> = {
+    sensory: 'Calm down, reset and make choices when things feel like too much.',
+    wellness: 'Track energy, mood, medication and your body.',
+    support: 'Help others understand you, plus your look and settings.',
+  };
+
+  const availableTools = tools.filter((t) => {
+    const gate = TOOL_GATE[t.id];
+    return !gate || enabledFeatures?.[gate] !== false;
+  });
+  const filteredTools = activeCategory === 'all'
+    ? availableTools
+    : availableTools.filter((t) => t.category === activeCategory);
 
   return (
     <div
@@ -260,10 +278,10 @@ export const ToolsHubModal: React.FC = () => {
         <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-50/70 border-b border-slate-200 overflow-x-auto">
           {[
             { id: 'all' as const, label: 'All Tools', emoji: '✨' },
-            { id: 'sensory' as const, label: 'Sensory & Regulation', emoji: '🫧' },
+            { id: 'sensory' as const, label: 'Calm & Regulate', emoji: '🫧' },
             { id: 'wellness' as const, label: 'Health & Energy', emoji: '🥄' },
             { id: 'support' as const, label: 'Support & Profile', emoji: '🪪' },
-          ].map((cat) => (
+          ].filter((cat) => cat.id === 'all' || availableTools.some((t) => t.category === cat.id)).map((cat) => (
             <button
               key={cat.id}
               onClick={() => {
@@ -282,16 +300,27 @@ export const ToolsHubModal: React.FC = () => {
           ))}
         </div>
 
+        {/* Category description */}
+        {activeCategory !== 'all' && (
+          <p className="px-5 pt-3 text-xs text-slate-600 font-medium">{CATEGORY_BLURB[activeCategory]}</p>
+        )}
+
         {/* Tools Grid - Single Clean Neutral Color for Low Stimulation */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {filteredTools.length === 0 && (
+            <p className="col-span-full text-center text-sm text-slate-600 font-medium py-6">
+              Nothing here right now. You can turn tools on in Accessibility &amp; Sensory Hub.
+            </p>
+          )}
           {filteredTools.map((tool) => (
-            <div
+            <button
+              type="button"
               key={tool.id}
               onClick={tool.action}
-              className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50/80 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+              className="min-h-[64px] text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50/80 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-11 h-11 rounded-2xl bg-slate-100 text-2xl flex items-center justify-center border border-slate-200/80 shrink-0 shadow-2xs">
+                <span className="w-11 h-11 rounded-2xl bg-slate-100 text-2xl flex items-center justify-center border border-slate-200/80 shrink-0 shadow-2xs" aria-hidden="true">
                   {tool.emoji}
                 </span>
                 <div className="min-w-0">
@@ -300,16 +329,16 @@ export const ToolsHubModal: React.FC = () => {
                       {tool.badge}
                     </span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 leading-tight truncate">
+                  <h4 className="font-bold text-sm text-slate-900 leading-tight">
                     {tool.title}
                   </h4>
-                  <p className="text-[11px] text-slate-500 font-medium leading-snug truncate">
+                  <p className="text-[11px] text-slate-600 font-medium leading-snug">
                     {tool.desc}
                   </p>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
-            </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
+            </button>
           ))}
         </div>
 

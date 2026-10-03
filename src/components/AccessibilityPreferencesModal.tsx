@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { EnabledFeatures } from '../types';
+import { FEATURE_GROUPS } from '../data/navigation';
 
 export const AccessibilityPreferencesModal: React.FC = () => {
   const {
@@ -68,8 +69,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     },
     {
       key: 'emergencyAlertSOS',
-      title: 'Emergency SOS & Calm Room',
-      desc: '1-tap caregiver alert and emergency dark sensory room',
+      title: 'Ask for help (caregiver alert)',
+      desc: 'One-tap alert to a trusted person, plus the quiet sensory room',
       emoji: '🚨',
     },
     {
@@ -104,9 +105,21 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     },
     {
       key: 'socialStories',
-      title: 'Preparation Adventures & Social Stories',
+      title: 'Social stories & scenarios',
       desc: 'Step-by-step walkthroughs for dentist, haircut, school, etc.',
       emoji: '🚀',
+    },
+    {
+      key: 'lifeSkills',
+      title: 'Life skills',
+      desc: 'Break everyday skills into small steps',
+      emoji: '🧺',
+    },
+    {
+      key: 'visualCountdownTimer',
+      title: 'Visual timers',
+      desc: 'Pie clock and countdown timers',
+      emoji: '⏰',
     },
   ];
 
@@ -465,49 +478,65 @@ export const AccessibilityPreferencesModal: React.FC = () => {
           )}
 
           {activeTab === 'features' && (
-            <div className="space-y-3 animate-in fade-in duration-150">
+            <div className="space-y-4 animate-in fade-in duration-150">
               <div className="pb-1">
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                  Choose Features on Lumina
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                  Choose what Lumina helps you with
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Toggle off any sections or tools you don't use to keep your workspace simple and clean.
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  Switch off anything you don't need. It will disappear from your home screen, menus and shortcuts.
+                  You can switch it back on any time.
                 </p>
               </div>
 
-              <div className="space-y-2">
-                {featureList.map((f) => {
-                  const isEnabled = enabledFeatures?.[f.key] !== false;
-                  return (
-                    <div
-                      key={f.key}
-                      className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-2xl shrink-0">{f.emoji}</span>
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
-                            {f.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                            {f.desc}
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={isEnabled}
-                          onChange={(e) => updateEnabledFeatures({ [f.key]: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                      </label>
+              {FEATURE_GROUPS.map((group) => {
+                const rows = group.keys
+                  .map((k) => featureList.find((f) => f.key === k))
+                  .filter((f): f is NonNullable<typeof f> => !!f);
+                if (rows.length === 0) return null;
+                return (
+                  <section key={group.id} aria-labelledby={`fg-${group.id}`} className="space-y-2">
+                    <div>
+                      <h4 id={`fg-${group.id}`} className="font-black text-slate-900 dark:text-white text-sm">
+                        <span aria-hidden="true">{group.emoji}</span> {group.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{group.blurb}</p>
                     </div>
-                  );
-                })}
-              </div>
+                    {rows.map((f) => {
+                      const isEnabled = enabledFeatures?.[f.key] !== false;
+                      return (
+                        <div
+                          key={f.key}
+                          className="p-3.5 min-h-[64px] rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-2xl shrink-0" aria-hidden="true">{f.emoji}</span>
+                            <div className="min-w-0">
+                              <h5 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                                {f.title}
+                              </h5>
+                              <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                                {f.desc}
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <span className="sr-only">{f.title}</span>
+                            <input
+                              type="checkbox"
+                              checked={isEnabled}
+                              onChange={(e) => updateEnabledFeatures({ [f.key]: e.target.checked })}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </section>
+                );
+              })}
             </div>
           )}
         </div>

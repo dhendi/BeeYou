@@ -68,6 +68,7 @@ import {
   INITIAL_CYCLE_LOGS,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
+import { AGE_DEFAULT_WIDGETS } from '../data/navigation';
 import { INITIAL_DAILY_RECOLLECTIONS } from '../data/recollectionData';
 
 import { 
@@ -96,7 +97,8 @@ type ChildViewType =
   | 'skills'
   | 'feelings'
   | 'my-world'
-  | 'rewards';
+  | 'rewards'
+  | 'more';
 
 interface AppContextType {
   // Navigation & Views
@@ -882,6 +884,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUserAgeGroupState(age);
     try {
       localStorage.setItem('lumina_user_age_group', age);
+      // Re-apply age defaults to Home only if the user hasn't customised their dashboard.
+      if (localStorage.getItem('lumina_dashboard_customized') !== 'true') {
+        setDashboardWidgetsState(getDefaultDashboardWidgets(age));
+      }
     } catch (e) {}
   };
 
@@ -2342,6 +2348,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     },
   ];
 
+  /** Default layout for an age group: same widgets, different ones switched on. */
+  const getDefaultDashboardWidgets = (age: UserAgeGroup): DashboardWidgetConfig[] => {
+    const on = new Set<string>(AGE_DEFAULT_WIDGETS[age] ?? AGE_DEFAULT_WIDGETS.kid);
+    const base = DEFAULT_DASHBOARD_WIDGETS.map((w) => ({ ...w, enabled: on.has(w.id) }));
+    // Enabled widgets first (in the order listed for the age group), the rest after.
+    const order = AGE_DEFAULT_WIDGETS[age] ?? AGE_DEFAULT_WIDGETS.kid;
+    return [
+      ...order.map((id) => base.find((w) => w.id === id)).filter((w): w is DashboardWidgetConfig => !!w),
+      ...base.filter((w) => !on.has(w.id)),
+    ];
+  };
+
   const [dashboardWidgets, setDashboardWidgetsState] = useState<DashboardWidgetConfig[]>(() => {
     try {
       const saved = localStorage.getItem('lumina_dashboard_widgets_v3');
@@ -2354,7 +2372,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     } catch (e) {}
-    return DEFAULT_DASHBOARD_WIDGETS;
+    return getDefaultDashboardWidgets(userAgeGroup);
   });
 
   const [showDashboardCustomizer, setShowDashboardCustomizer] = useState<boolean>(false);
@@ -2365,17 +2383,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {}
   }, [dashboardWidgets]);
 
+  const markDashboardCustomized = (value: boolean) => {
+    try {
+      if (value) localStorage.setItem('lumina_dashboard_customized', 'true');
+      else localStorage.removeItem('lumina_dashboard_customized');
+    } catch (e) {}
+  };
+
   const setDashboardWidgets = (widgets: DashboardWidgetConfig[]) => {
+    markDashboardCustomized(true);
     setDashboardWidgetsState(widgets);
   };
 
   const toggleDashboardWidget = (id: DashboardWidgetId) => {
+    markDashboardCustomized(true);
     setDashboardWidgetsState((prev) =>
       prev.map((w) => (w.id === id ? { ...w, enabled: !w.enabled } : w))
     );
   };
 
   const reorderDashboardWidgets = (fromIndex: number, toIndex: number) => {
+    markDashboardCustomized(true);
     setDashboardWidgetsState((prev) => {
       const updated = [...prev];
       const [moved] = updated.splice(fromIndex, 1);
@@ -2385,7 +2413,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const resetDashboardWidgets = () => {
-    setDashboardWidgetsState(DEFAULT_DASHBOARD_WIDGETS);
+    markDashboardCustomized(false);
+    setDashboardWidgetsState(getDefaultDashboardWidgets(userAgeGroup));
   };
 
   // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording

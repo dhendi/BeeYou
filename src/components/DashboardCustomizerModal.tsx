@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DashboardWidgetId } from '../types';
+import { isWidgetAvailable, MINIMAL_WIDGETS } from '../data/navigation';
 
 export const DashboardCustomizerModal: React.FC = () => {
   const {
@@ -23,13 +24,13 @@ export const DashboardCustomizerModal: React.FC = () => {
     reorderDashboardWidgets,
     resetDashboardWidgets,
     setDashboardWidgets,
+    enabledFeatures,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'core' | 'sensory' | 'wellness' | 'support'>('all');
 
   if (!showDashboardCustomizer) return null;
 
-  const enabledCount = dashboardWidgets.filter((w) => w.enabled).length;
 
   const handleToggle = (id: DashboardWidgetId) => {
     toggleDashboardWidget(id);
@@ -43,25 +44,29 @@ export const DashboardCustomizerModal: React.FC = () => {
     playChime('tap');
   };
 
+  const available = (id: DashboardWidgetId) => isWidgetAvailable(id, enabledFeatures);
+  const visibleWidgets = dashboardWidgets.filter((w) => available(w.id));
+  const hiddenByFeatures = dashboardWidgets.length - visibleWidgets.length;
+
   const handleEnableAll = () => {
-    setDashboardWidgets(dashboardWidgets.map((w) => ({ ...w, enabled: true })));
+    setDashboardWidgets(dashboardWidgets.map((w) => ({ ...w, enabled: available(w.id) })));
     playChime('star');
   };
 
   const handleMinimalMode = () => {
-    // Only keep essential schedule, companion and quick phrases
+    // Just the day plan and quick communication.
     setDashboardWidgets(
       dashboardWidgets.map((w) => ({
         ...w,
-        enabled: ['mascot_companion', 'routine_schedule', 'quick_aac'].includes(w.id),
+        enabled: MINIMAL_WIDGETS.includes(w.id),
       }))
     );
     playChime('clear');
   };
 
   const filteredWidgets = activeCategory === 'all'
-    ? dashboardWidgets
-    : dashboardWidgets.filter((w) => w.category === activeCategory);
+    ? visibleWidgets
+    : visibleWidgets.filter((w) => w.category === activeCategory);
 
   return (
     <div
@@ -98,18 +103,19 @@ export const DashboardCustomizerModal: React.FC = () => {
         {/* Quick presets and active count bar */}
         <div className="px-5 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
           <span className="font-bold text-slate-600">
-            Active: <strong className="text-amber-800">{enabledCount}</strong> of {dashboardWidgets.length} widgets
+            Showing: <strong className="text-amber-800">{visibleWidgets.filter((w) => w.enabled).length}</strong> of {visibleWidgets.length} widgets
           </span>
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleMinimalMode}
-              className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold transition-all cursor-pointer"
+              className="px-3 min-h-[40px] rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer"
+              title="Just your day plan and quick communication"
             >
               Minimal
             </button>
             <button
               onClick={handleEnableAll}
-              className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold transition-all cursor-pointer"
+              className="px-3 min-h-[40px] rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer"
             >
               Show All
             </button>
@@ -156,6 +162,12 @@ export const DashboardCustomizerModal: React.FC = () => {
 
         {/* Reorderable Widgets List */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-2.5">
+          {hiddenByFeatures > 0 && (
+            <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3 font-medium">
+              {hiddenByFeatures} widget{hiddenByFeatures === 1 ? ' is' : 's are'} hidden because that part of Lumina is turned off.
+              You can turn it back on in More &gt; Accessibility &amp; features.
+            </p>
+          )}
           {filteredWidgets.map((widget) => {
             const actualIndex = dashboardWidgets.findIndex((w) => w.id === widget.id);
             return (

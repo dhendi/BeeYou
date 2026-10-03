@@ -4,11 +4,11 @@ import {
   Home,
   MessageSquare, 
   CalendarDays, 
-  Compass, 
-  Smile,
-  LayoutGrid
+  LayoutGrid,
+  MoreHorizontal
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { isMoreView } from '../data/navigation';
 
 export const ChildNavBar: React.FC = () => {
   const { 
@@ -36,7 +36,7 @@ export const ChildNavBar: React.FC = () => {
     },
     {
       id: 'aac',
-      label: userAgeGroup === 'adult' ? 'AAC Speech' : userAgeGroup === 'teen' ? 'Voice / AAC' : 'Communicate',
+      label: 'Communicate',
       emoji: activeTheme?.mascotEmoji || '🗣️',
       icon: MessageSquare,
       color: 'hover:bg-amber-100 text-amber-900 border-amber-300',
@@ -53,15 +53,6 @@ export const ChildNavBar: React.FC = () => {
       show: true,
     },
     {
-      id: 'adventures',
-      label: userAgeGroup === 'adult' ? 'Guides' : userAgeGroup === 'teen' ? 'Scenarios' : 'Adventures',
-      emoji: userAgeGroup === 'adult' ? '🧭' : '🚀',
-      icon: Compass,
-      color: 'hover:bg-emerald-100 text-emerald-900 border-emerald-300',
-      activeBg: 'bg-emerald-400 text-emerald-950 shadow-md ring-2 ring-emerald-500',
-      show: (enabledFeatures?.socialStories !== false) || (enabledFeatures?.lifeSkills !== false),
-    },
-    {
       id: 'tools',
       label: userAgeGroup === 'adult' ? 'Toolkit' : 'Tools',
       emoji: '🧰',
@@ -72,13 +63,13 @@ export const ChildNavBar: React.FC = () => {
       action: () => setShowToolsHubModal(true),
     },
     {
-      id: 'feelings',
-      label: userAgeGroup === 'adult' ? 'Reflection' : userAgeGroup === 'teen' ? 'Mood' : 'Feelings',
-      emoji: userAgeGroup === 'adult' ? '🧘' : userAgeGroup === 'teen' ? '🎧' : '💛',
-      icon: Smile,
-      color: 'hover:bg-rose-100 text-rose-900 border-rose-300',
-      activeBg: 'bg-rose-400 text-rose-950 shadow-md ring-2 ring-rose-500',
-      show: enabledFeatures?.dailyMoodRecollection !== false || enabledFeatures?.sensoryBreathingPacer !== false,
+      id: 'more',
+      label: 'More',
+      emoji: '✨',
+      icon: MoreHorizontal,
+      color: 'hover:bg-sky-100 text-sky-900 border-sky-300',
+      activeBg: 'bg-sky-400 text-sky-950 shadow-md ring-2 ring-sky-500',
+      show: true,
     },
   ];
 
@@ -102,11 +93,12 @@ export const ChildNavBar: React.FC = () => {
     <nav className="w-full bg-white/95 backdrop-blur-md border-t-2 border-slate-200 px-2 sm:px-6 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shadow-lg select-none">
       <div className="max-w-4xl mx-auto flex items-center justify-around gap-1 sm:gap-2">
         {navItems.map((item) => {
-          const isActive = childView === item.id;
+          const isActive = item.id === 'more' ? isMoreView(childView) : childView === item.id;
           return (
             <button
               key={item.id}
               onClick={() => handleNav(item)}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-2xl transition-all active:scale-95 cursor-pointer ${
                 isActive
                   ? item.activeBg
