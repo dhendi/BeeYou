@@ -213,7 +213,6 @@ interface AppContextType {
   removePlacedItem: (placedId: string) => void;
   setCurrentRoom: (room: 'bedroom' | 'playroom' | 'yard') => void;
   awardStars: (amount: number) => void;
-  updateCompanion: (partial: { petSpecies?: string; petName?: string }) => void;
 
   // Profile & Settings
   childProfile: ChildProfile;
@@ -1693,16 +1692,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const awardStars = (amount: number) => {
-    setWorldState((prev) => ({
-      ...prev,
-      stars: prev.stars + amount,
-      lifetimeStars: (prev.lifetimeStars ?? prev.stars) + Math.max(0, amount),
-    }));
-  };
-
-  const updateCompanion = (partial: { petSpecies?: string; petName?: string }) => {
-    setWorldState((prev) => ({ ...prev, ...partial }));
-    if (settings.soundEffects) playChime('tap');
+    setWorldState((prev) => ({ ...prev, stars: prev.stars + amount }));
   };
 
   const buyWorldItem = (itemId: string): boolean => {
@@ -2614,7 +2604,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         removePlacedItem,
         setCurrentRoom,
         awardStars,
-        updateCompanion,
 
         childProfile,
         updateChildProfile,

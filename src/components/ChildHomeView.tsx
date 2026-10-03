@@ -25,7 +25,6 @@ import {
 import { playChime } from '../utils/audio';
 import { MOOD_META } from '../data/defaultData';
 import { DashboardWidgetId } from '../types';
-import { CompanionPet } from './CompanionPet';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -675,8 +674,6 @@ export const ChildHomeView: React.FC = () => {
           </button>
         </div>
       </div>
-
-      <CompanionPet />
 
       {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS */}
       {dashboardWidgets.map((widget) => {
