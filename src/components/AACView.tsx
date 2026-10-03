@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { AACTileArt } from './AACTileArt';
-import { resolveAacImageUrl } from '../services/arasaacService';
+import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
@@ -37,7 +37,9 @@ import {
   MessageSquare,
   MessageCircle,
   HelpCircle,
-  ShieldAlert
+  ShieldAlert,
+  Info,
+  ExternalLink
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -47,17 +49,18 @@ const FOLDER_TILES: Array<{
   category: AACCategory;
   label: string;
   emoji: string;
-  arasaacId: number;
+  symbolId: string;
+  arasaacId?: number;
   colorType: 'noun' | 'subject' | 'social';
   description: string;
 }> = [
-  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', arasaacId: 2527, colorType: 'noun', description: 'Meals, snacks & treats' },
-  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', arasaacId: 6061, colorType: 'noun', description: 'Water, juice & milk' },
-  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', arasaacId: 23392, colorType: 'noun', description: 'Games, toys & hobbies' },
-  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', arasaacId: 2317, colorType: 'noun', description: 'Home, school & park' },
-  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', arasaacId: 7185, colorType: 'subject', description: 'Family, friends & helpers' },
-  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', arasaacId: 35533, colorType: 'noun', description: 'Emotions & how I feel' },
-  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', arasaacId: 5915, colorType: 'noun', description: 'Sensory needs & regulation' },
+  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
+  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
+  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
+  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
+  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
+  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
+  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
 ];
 
 const QUICK_CHAT_GROUPS = [
@@ -148,6 +151,7 @@ export const AACView: React.FC = () => {
   // Proloquo2Go Features State
   const [showQuickChatDrawer, setShowQuickChatDrawer] = useState(false);
   const [isMaskingMode, setIsMaskingMode] = useState(false);
+  const [showAttributionModal, setShowAttributionModal] = useState(false);
   const [inflectionTarget, setInflectionTarget] = useState<{ item: AACItem; inflections: WordInflection[] } | null>(null);
 
   const [maskedItemIds, setMaskedItemIds] = useState<string[]>(() => {
@@ -933,19 +937,32 @@ export const AACView: React.FC = () => {
               <span className="hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
             </button>
 
-            {/* ARASAAC Clinical Symbol Picker */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowSymbolPicker(true);
-                playChime('tap');
-              }}
-              className="px-2.5 py-1 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs ring-1 ring-indigo-200 shrink-0"
-              title="Add words directly from the 35,000+ ARASAAC clinical pictogram library"
-            >
-              <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-              <span>ARASAAC</span>
-            </button>
+            {/* Mulberry Symbols Picker */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSymbolPicker(true);
+                  playChime('tap');
+                }}
+                className="px-2.5 py-1 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs ring-1 ring-indigo-200"
+                title="Add words from the Mulberry Symbols AAC library (CC BY-SA)"
+              >
+                <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span>Symbols</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAttributionModal(true);
+                  playChime('tap');
+                }}
+                className="p-1 rounded-xl text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 transition-all cursor-pointer"
+                title="Mulberry Symbols License & Attribution"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
           </div>
         </div>
@@ -1025,7 +1042,7 @@ export const AACView: React.FC = () => {
                   <span>FOLDER</span>
                 </div>
 
-                {/* ARASAAC Clinical Pictogram Area */}
+                {/* Mulberry Symbol Area */}
                 <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 p-1 mt-1">
                   <img
                     src={resolveAacImageUrl(folder)}
@@ -1095,7 +1112,7 @@ export const AACView: React.FC = () => {
                     />
                   )}
 
-                  {/* ARASAAC Clinical Pictogram Area */}
+                  {/* Mulberry Symbol Area */}
                   <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
                     <img
                       src={resolveAacImageUrl(item)}
@@ -1309,6 +1326,8 @@ export const AACView: React.FC = () => {
             label: sym.label,
             speechText: sym.speechText || sym.label,
             photoUrl: sym.photoUrl,
+            symbolId: sym.symbolId,
+            symbolSource: sym.symbolSource || 'mulberry',
             arasaacId: sym.arasaacId,
             emoji: sym.emoji || '✨',
             category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
@@ -1321,6 +1340,85 @@ export const AACView: React.FC = () => {
         }}
         onUpgradeAll={upgradeAllAacToClinicalSymbols}
       />
+
+      {/* Mulberry Symbols Licensing & Attribution Modal */}
+      {showAttributionModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[9999] bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in"
+        >
+          <div className="bg-white border-2 border-emerald-200 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl">
+                  🌿
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Mulberry Symbols Attribution</h3>
+                  <span className="text-xs font-bold text-emerald-700">Open AAC Standard (CC BY-SA)</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAttributionModal(false);
+                  playChime('tap');
+                }}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
+                aria-label="Close attribution modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-700 leading-relaxed">
+              <p className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 font-medium text-emerald-950">
+                {MULBERRY_ATTRIBUTION.notice}
+              </p>
+              <div className="space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                <div className="font-bold text-slate-800">License Information:</div>
+                <div className="text-slate-600">
+                  Mulberry Symbols are licensed under the Creative Commons Attribution-ShareAlike 2.0 / 4.0 License. They are free to use, share, adapt, and incorporate into commercial and non-commercial assistive technology applications.
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                <a
+                  href={MULBERRY_ATTRIBUTION.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <span>MulberrySymbols.org</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href={MULBERRY_ATTRIBUTION.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5"
+                >
+                  <span>View CC BY-SA License</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAttributionModal(false);
+                  playChime('tap');
+                }}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -87,7 +87,7 @@ import {
   onCaregiverMessage, 
   getPairingCode 
 } from '../services/caregiverSync';
-import { resolveAacImageUrl } from '../services/arasaacService';
+import { resolveAacImageUrl } from '../services/symbolService';
 
 type ChildViewType = 
   | 'home'
@@ -1031,7 +1031,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const cleanLabel = (item.label || '').toLowerCase().trim();
             const defaultItem = defaultItemsMap.get(item.id) || defaultLabelMap.get(cleanLabel);
             if (defaultItem && !item.isCustom) {
-              // Always sync standard default items with verified ARASAAC clinical URL while preserving favorites
+              // Always sync standard default items with verified Mulberry Symbols URL while preserving favorites
               return {
                 ...defaultItem,
                 isFavorite: item.isFavorite !== undefined ? item.isFavorite : defaultItem.isFavorite,
@@ -1248,6 +1248,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 speechText: item.speechText || it.speechText,
                 emoji: item.emoji || it.emoji,
                 photoUrl: item.photoUrl || it.photoUrl,
+                symbolId: item.symbolId !== undefined ? item.symbolId : it.symbolId,
+                symbolSource: item.symbolSource !== undefined ? item.symbolSource : it.symbolSource,
                 arasaacId: item.arasaacId !== undefined ? item.arasaacId : it.arasaacId,
                 category: item.category || it.category,
                 colorType: item.colorType || it.colorType,
@@ -1263,6 +1265,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         speechText: item.speechText || item.label,
         emoji: item.emoji || '✨',
         photoUrl: item.photoUrl,
+        symbolId: item.symbolId,
+        symbolSource: item.symbolSource || 'mulberry',
         arasaacId: item.arasaacId,
         category: item.category,
         colorType: item.colorType,

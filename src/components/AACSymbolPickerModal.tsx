@@ -6,24 +6,23 @@ import {
   X, 
   Check, 
   Upload, 
-  Image as ImageIcon, 
   BookOpen, 
   Layers, 
   Volume2, 
-  AlertCircle,
-  ExternalLink,
   Info,
   CheckCircle2,
   RefreshCw,
-  Palette
+  Palette,
+  ExternalLink
 } from 'lucide-react';
 import { 
   AacSymbolItem, 
-  searchArasaacPictograms, 
+  searchMulberrySymbols, 
   CURATED_AAC_SYMBOLS, 
   INDUSTRY_AAC_PACKS, 
-  IndustryAacPack 
-} from '../services/arasaacService';
+  IndustryAacPack,
+  MULBERRY_ATTRIBUTION
+} from '../services/symbolService';
 import { AACCategory, AACItem } from '../types';
 import { playChime, speakText } from '../utils/audio';
 
@@ -35,6 +34,8 @@ interface AACSymbolPickerModalProps {
     label: string;
     speechText?: string;
     emoji?: string;
+    symbolId?: string | number;
+    symbolSource?: 'mulberry' | 'custom' | 'pack';
     arasaacId?: number;
     category?: AACCategory;
     colorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
@@ -66,7 +67,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const [upgradedAll, setUpgradedAll] = useState(false);
   
   // Quick 1-Tap Add Mode
-  const [quickAddMode, setQuickAddMode] = useState<boolean>(true);
+  const [quickAddMode] = useState<boolean>(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -85,6 +86,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     const set = new Set<string | number>();
     if (existingItems) {
       for (const it of existingItems) {
+        if (it.symbolId) set.add(it.symbolId);
         if (it.arasaacId) set.add(it.arasaacId);
         if (it.id) set.add(it.id);
       }
@@ -96,8 +98,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     const clean = (sym.label || '').toLowerCase().trim();
     if (existingLabelSet.has(clean)) return true;
     if (addedIds.has(String(sym.id))) return true;
-    const numId = typeof sym.id === 'number' ? sym.id : (typeof sym.id === 'string' && /^\d+$/.test(sym.id) ? parseInt(sym.id) : null);
-    if (numId && existingIdSet.has(numId)) return true;
+    if (existingIdSet.has(sym.id)) return true;
     return false;
   };
 
@@ -112,7 +113,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
   // Quick search keywords
   const QUICK_KEYWORDS = [
-    'want', 'help', 'stop', 'more', 'water', 'eat', 'drink', 'toilet', 'happy', 'tired', 'break', 'ipad', 'hug', 'play'
+    'want', 'help', 'stop', 'more', 'water', 'eat', 'drink', 'toilet', 'happy', 'tired', 'break', 'touch_screen', 'hug', 'play'
   ];
 
   const CATEGORY_FILTERS = [
@@ -125,11 +126,11 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     { id: 'places', label: 'Places' },
   ];
 
-  // Debounced live search
+  // Live search
   useEffect(() => {
     const timer = setTimeout(() => {
       handleSearch(searchQuery);
-    }, 350);
+    }, 200);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -149,7 +150,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     }
     setIsSearching(true);
     try {
-      const results = await searchArasaacPictograms(q);
+      const results = await searchMulberrySymbols(q);
       setSearchResults(results.length > 0 ? results : CURATED_AAC_SYMBOLS);
     } catch (e) {
       console.warn('Search error', e);
@@ -191,15 +192,14 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
     const targetCat = customCategory || activeCategory || symbol.category || 'core';
     const targetColor = symbol.colorType || customColor || 'noun';
-    
-    const arasaacNum = typeof symbol.id === 'number' ? symbol.id : (typeof symbol.id === 'string' && /^\d+$/.test(symbol.id) ? parseInt(symbol.id) : undefined);
 
     onSelectSymbol({
       photoUrl: symbol.imageUrl,
       label: symbol.label,
       speechText: symbol.label,
       emoji: '🖼️',
-      arasaacId: arasaacNum,
+      symbolId: symbol.id,
+      symbolSource: 'mulberry',
       category: targetCat,
       colorType: targetColor,
     });
@@ -226,14 +226,14 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     }
 
     playChime('star');
-    const arasaacNum = typeof selectedSymbol.id === 'number' ? selectedSymbol.id : (typeof selectedSymbol.id === 'string' && /^\d+$/.test(selectedSymbol.id) ? parseInt(selectedSymbol.id) : undefined);
 
     onSelectSymbol({
       photoUrl: selectedSymbol.imageUrl,
       label: labelToUse,
       speechText: customSpeech.trim() || labelToUse,
       emoji: '🖼️',
-      arasaacId: arasaacNum,
+      symbolId: selectedSymbol.id,
+      symbolSource: selectedSymbol.source,
       category: customCategory,
       colorType: customColor,
     });
@@ -291,19 +291,19 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
         <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shrink-0">
-              🌐
+              🌿
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
-                  Online AAC Symbol Tools
+                  AAC Symbol Studio
                 </span>
                 <span className="text-xs text-indigo-200 font-medium">
-                  ARASAAC & Clinical Standards
+                  Mulberry Symbols (CC BY-SA)
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black mt-0.5">
-                AAC Button & Logo Studio
+                AAC Button & Symbol Studio
               </h2>
             </div>
           </div>
@@ -318,10 +318,10 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   playChime('complete');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                title="Apply official ARASAAC clinical pictograms to all AAC buttons in Lumina"
+                title="Apply official Mulberry Symbols to all AAC buttons in Lumina"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{upgradedAll ? 'Symbols Upgraded ✓' : 'Upgrade All to ARASAAC'}</span>
+                <span>{upgradedAll ? 'Symbols Upgraded ✓' : 'Upgrade All to Mulberry'}</span>
               </button>
             )}
 
@@ -352,7 +352,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             }`}
           >
             <Search className="w-4 h-4 text-indigo-500" />
-            <span>Search 35,000+ Pictograms (ARASAAC)</span>
+            <span>Search 3,400+ Mulberry Symbols</span>
           </button>
 
           <button
@@ -367,7 +367,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             }`}
           >
             <Layers className="w-4 h-4 text-purple-500" />
-            <span>Industry Standard Button Packs</span>
+            <span>Curated Button Packs</span>
           </button>
 
           <button
@@ -397,13 +397,13 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             }`}
           >
             <BookOpen className="w-4 h-4 text-amber-500" />
-            <span>What Other Apps Use</span>
+            <span>Symbol Guide & Attribution</span>
           </button>
         </div>
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
-          {/* TAB 1: ARASAAC SEARCH */}
+          {/* TAB 1: MULBERRY SEARCH */}
           {activeTab === 'search' && (
             <div className="space-y-4">
               {/* Search Bar with Live Clear */}
@@ -415,7 +415,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-                    placeholder="Search 35,000+ clinical pictograms in real-time (e.g. water, pizza, iPad, help)..."
+                    placeholder="Search 3,400+ Mulberry symbols (e.g. water, pizza, help, sleep, happy)..."
                     className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white text-xs sm:text-sm font-medium outline-none transition-all"
                   />
                   {searchQuery && (
@@ -450,14 +450,11 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => {
-                      setSelectedCategoryFilter(cat.id);
-                      playChime('tap');
-                    }}
-                    className={`text-[11px] px-3 py-1 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    onClick={() => setSelectedCategoryFilter(cat.id)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
                       selectedCategoryFilter === cat.id
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'bg-slate-100 hover:bg-indigo-50 hover:text-indigo-800 text-slate-600'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
                     {cat.label}
@@ -467,7 +464,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
               {/* Quick Keywords Chips */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-bold text-slate-400 mr-1">Popular AAC:</span>
+                <span className="text-[11px] font-bold text-slate-400 mr-1">Quick:</span>
                 {QUICK_KEYWORDS.map((kw) => (
                   <button
                     key={kw}
@@ -475,8 +472,9 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     onClick={() => {
                       setSearchQuery(kw);
                       handleSearch(kw);
+                      playChime('tap');
                     }}
-                    className="text-[11px] px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-indigo-100 hover:text-indigo-900 text-slate-700 font-semibold transition-all cursor-pointer capitalize"
+                    className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 text-xs font-semibold transition-all cursor-pointer"
                   >
                     {kw}
                   </button>
@@ -530,7 +528,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
               <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/50">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-xs font-black text-slate-700 uppercase tracking-wide">
-                    {isSearching ? 'Searching ARASAAC clinical library...' : `Results (${displayedResults.length})`}
+                    {isSearching ? 'Searching Mulberry Symbols library...' : `Results (${displayedResults.length})`}
                   </span>
                   <span className="text-[11px] text-slate-500 font-medium">
                     {quickAddMode ? '⚡ Tap any tile to add right away' : 'Tap to customize & add'}
@@ -559,58 +557,70 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                         }}
                         className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between gap-1.5 bg-white transition-all text-center relative group select-none ${
                           isAdded
-                            ? 'border-emerald-500 bg-emerald-50/50 shadow-xs ring-2 ring-emerald-300 cursor-default'
+                            ? 'opacity-85 border-emerald-400 bg-emerald-50/40 ring-2 ring-emerald-300'
                             : isSelected
-                            ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-sm bg-indigo-50/30 cursor-pointer'
-                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs hover:bg-slate-50 cursor-pointer'
+                            ? 'border-indigo-600 ring-2 ring-indigo-400 shadow-md scale-[1.02]'
+                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs cursor-pointer active:scale-95'
                         }`}
                       >
-                        {/* Added Checkmark Badge in Top Right */}
-                        {isAdded && (
-                          <div className="absolute top-1.5 right-1.5 z-10 bg-emerald-600 text-white rounded-full p-0.5 shadow-xs">
+                        {/* Status Badges */}
+                        {isAdded ? (
+                          <div className="absolute top-1.5 right-1.5 bg-emerald-600 text-white rounded-full p-0.5 shadow-xs">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => handleQuickAdd(sym, e)}
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer"
+                            title="Add directly to AAC board"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                          </button>
                         )}
 
-                        {/* Pictogram Image */}
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1 bg-slate-50 rounded-xl">
                           <img
                             src={sym.imageUrl}
                             alt={sym.label}
+                            className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-2xs"
                             loading="lazy"
-                            className="max-h-full max-w-full object-contain pointer-events-none group-hover:scale-105 transition-transform"
                           />
                         </div>
 
-                        {/* Label */}
-                        <span className="text-[11px] font-black text-slate-800 truncate w-full leading-tight">
+                        <span className="font-bold text-xs text-slate-800 line-clamp-1 w-full">
                           {sym.label}
                         </span>
 
-                        {/* 1-Tap Quick Add Action Button */}
-                        <button
-                          type="button"
-                          disabled={isAdded}
-                          onClick={(e) => handleQuickAdd(sym, e)}
-                          className={`w-full py-1 px-1.5 rounded-xl font-black text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all ${
-                            isAdded
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-not-allowed opacity-90'
-                              : 'bg-indigo-50 hover:bg-indigo-600 text-indigo-800 hover:text-white border border-indigo-200 shadow-2xs active:scale-95 cursor-pointer'
-                          }`}
-                          title={isAdded ? `"${sym.label}" is already in your AAC board` : `Add "${sym.label}" immediately to ${customCategory}`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="w-3 h-3 text-emerald-700" />
-                              <span>Already Added ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-3 h-3 text-indigo-500 group-hover:text-white" />
-                              <span>+ Add Word</span>
-                            </>
-                          )}
-                        </button>
+                        <div className="w-full flex items-center justify-between pt-1 border-t border-slate-100">
+                          <span
+                            className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                              sym.colorType === 'verb'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : sym.colorType === 'subject'
+                                ? 'bg-amber-100 text-amber-800'
+                                : sym.colorType === 'emergency'
+                                ? 'bg-rose-100 text-rose-800'
+                                : sym.colorType === 'adjective'
+                                ? 'bg-sky-100 text-sky-800'
+                                : 'bg-orange-100 text-orange-800'
+                            }`}
+                          >
+                            {sym.colorType}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelect(sym);
+                            }}
+                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                            title="Customize title or color"
+                          >
+                            Edit
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -619,99 +629,108 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             </div>
           )}
 
-          {/* TAB 2: INDUSTRY STANDARD PACKS */}
+          {/* TAB 2: INDUSTRY AAC PACKS */}
           {activeTab === 'packs' && (
             <div className="space-y-4">
-              <div className="p-3.5 bg-purple-50 rounded-2xl border border-purple-200 text-xs text-purple-900 leading-relaxed">
-                💡 <strong>Pre-Built AAC Standard Packs:</strong> These bundles are structured using the clinical vocabulary systems found in market leaders like <strong>TouchChat</strong>, <strong>LAMP Words for Life</strong>, and <strong>Proloquo2Go</strong>.
+              <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-950 flex items-center justify-between">
+                <div>
+                  <h3 className="font-black text-sm">Pre-built Standard Button Packs</h3>
+                  <p className="text-xs text-purple-800 mt-0.5">
+                    1-Tap install high-frequency vocabulary designed for clinical AAC devices.
+                  </p>
+                </div>
+                <span className="text-2xl">✨</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {INDUSTRY_AAC_PACKS.map((pack) => (
-                  <div
-                    key={pack.id}
-                    className="p-4 rounded-2xl bg-white border-2 border-slate-200 flex flex-col justify-between shadow-xs hover:border-purple-300 transition-all"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-3xl">{pack.icon}</span>
-                        <span className="text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-                          {pack.badge}
-                        </span>
-                      </div>
-                      <h3 className="font-black text-slate-900 text-sm">
-                        {pack.title}
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-medium mt-1 leading-relaxed">
-                        {pack.description}
-                      </p>
-                      <div className="mt-2 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">
-                        Used by: {pack.usedBy}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                {INDUSTRY_AAC_PACKS.map((pack) => {
+                  const isImported = importedPackId === pack.id;
+                  return (
+                    <div
+                      key={pack.id}
+                      className="p-4 rounded-3xl border-2 border-slate-200 bg-white hover:border-purple-300 hover:shadow-md transition-all flex flex-col justify-between space-y-3"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl p-2 rounded-2xl bg-purple-100">{pack.icon}</span>
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                            {pack.badge}
+                          </span>
+                        </div>
+                        <h4 className="font-black text-sm text-slate-900 leading-snug">{pack.title}</h4>
+                        <p className="text-[11px] text-slate-500 font-medium line-clamp-2">{pack.description}</p>
+                        <div className="text-[10px] font-bold text-slate-400">
+                          {pack.items.length} Essential Words
+                        </div>
                       </div>
 
-                      {/* Mini preview of symbols in pack */}
-                      <div className="grid grid-cols-4 gap-1.5 mt-3 pt-3 border-t border-slate-100">
-                        {pack.items.slice(0, 4).map((it, idx) => (
-                          <div key={idx} className="p-1 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center">
-                            <img src={it.photoUrl} alt="" className="w-8 h-8 object-contain" />
-                            <span className="text-[9px] font-bold text-slate-700 truncate w-full text-center mt-0.5">
-                              {it.label}
-                            </span>
+                      {/* Items preview preview strip */}
+                      <div className="flex items-center gap-1 overflow-x-auto py-1">
+                        {pack.items.slice(0, 5).map((it, idx) => (
+                          <div key={idx} className="w-8 h-8 rounded-lg bg-slate-100 p-0.5 shrink-0 flex items-center justify-center" title={it.label}>
+                            <img src={it.photoUrl} alt={it.label} className="w-6 h-6 object-contain" />
                           </div>
                         ))}
+                        {pack.items.length > 5 && (
+                          <span className="text-[10px] font-bold text-slate-400 shrink-0">+{pack.items.length - 5}</span>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-bold text-slate-500">
-                        {pack.items.length} words
-                      </span>
-                      {onImportPack && (
-                        <button
-                          type="button"
-                          onClick={() => {
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onImportPack) {
                             onImportPack(pack);
                             setImportedPackId(pack.id);
                             playChime('complete');
-                          }}
-                          className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition cursor-pointer ${
-                            importedPackId === pack.id
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-purple-600 hover:bg-purple-700 text-white shadow-xs'
-                          }`}
-                        >
-                          {importedPackId === pack.id ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-                          <span>{importedPackId === pack.id ? 'Imported!' : 'Import Pack'}</span>
-                        </button>
-                      )}
+                            setTimeout(() => setImportedPackId(null), 3000);
+                          }
+                        }}
+                        className={`w-full py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
+                          isImported
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }`}
+                      >
+                        {isImported ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Installed to Board!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Install Pack Words</span>
+                          </>
+                        )}
+                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* TAB 3: REAL PHOTO UPLOAD */}
+          {/* TAB 3: CUSTOM PHOTO UPLOAD */}
           {activeTab === 'upload' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 leading-relaxed">
-                📸 <strong>Speech-Language Pathologist Tip (Real Photo Modeling):</strong> For many children, real photos of their actual cup, favorite blanket, mom, dad, pet dog, or bedroom are significantly easier to recognize than drawings.
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950">
+                <h3 className="font-black text-sm mb-1">Upload Real Photos of People, Toys, or Meals</h3>
+                <p className="text-xs text-emerald-800">
+                  Many autistic communicators recognize real-life photos of their actual family, bedroom, or favourite snacks faster than abstract symbols.
+                </p>
               </div>
 
-              <div className="border-2 border-dashed border-slate-300 rounded-3xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition-all flex flex-col items-center justify-center">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mb-3 shadow-xs">
+              <div className="p-8 border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl bg-slate-50 flex flex-col items-center justify-center text-center space-y-3 transition-all">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
                   <Upload className="w-7 h-7" />
                 </div>
-                <h4 className="font-black text-slate-800 text-base">
-                  Upload Real Photo from Phone or Computer
-                </h4>
-                <p className="text-xs text-slate-500 max-w-sm mt-1">
-                  Supports JPEG, PNG, WebP. Photos are stored securely in local browser storage for 100% offline access.
-                </p>
-
-                <label className="mt-4 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm cursor-pointer shadow-xs transition-all flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  <span>Choose Photo File / Camera</span>
+                <div>
+                  <h4 className="font-black text-slate-800 text-sm">Choose an Image File</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">Supports PNG, JPG, WEBP (Saved 100% offline)</p>
+                </div>
+                <label className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition-all">
+                  <span>Browse Photos...</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -723,53 +742,68 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: EDUCATIONAL GUIDE */}
+          {/* TAB 4: EDUCATIONAL GUIDE & ATTRIBUTION */}
           {activeTab === 'guide' && (
             <div className="space-y-4 text-xs text-slate-700 leading-relaxed">
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950">
+              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-950">
                 <h3 className="font-black text-sm mb-1 flex items-center gap-1.5">
-                  <Info className="w-4 h-4 text-amber-700" />
-                  <span>The Worldwide Standard AAC Symbol Systems</span>
+                  <Info className="w-4 h-4 text-indigo-700" />
+                  <span>Mulberry Symbols & AAC Standards</span>
                 </h3>
                 <p>
-                  Here is what top communication apps, schools, and speech therapy clinics use across the globe:
+                  Lumina uses the open-access <strong>Mulberry Symbols</strong> set, created specifically for augmentative and alternative communication (AAC).
                 </p>
+              </div>
+
+              {/* Attribution Callout */}
+              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-black text-sm text-emerald-900 flex items-center gap-1.5">
+                    <span>🌿 Mulberry Symbols Attribution</span>
+                  </h4>
+                  <span className="text-[10px] font-black bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
+                    CC BY-SA License
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-800">
+                  {MULBERRY_ATTRIBUTION.notice}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                  <a
+                    href={MULBERRY_ATTRIBUTION.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
+                  >
+                    <span>Visit MulberrySymbols.org</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                  <a
+                    href={MULBERRY_ATTRIBUTION.licenseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
+                  >
+                    <span>CC BY-SA 2.0 / 4.0 License</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-black text-slate-900 text-sm">1. ARASAAC (Integrated in Lumina)</h4>
+                    <h4 className="font-black text-slate-900 text-sm">1. Mulberry Symbols (In Lumina)</h4>
                     <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Open Standard</span>
                   </div>
                   <p className="text-[11px] text-slate-600">
-                    Created by the Government of Aragon. Used by open AAC apps (Cboard, AsTeRICS, LetMeTalk) and public healthcare across Europe and the Americas. Over 35,000+ standardized clinical pictograms.
+                    Created by Straight Street / Paxtoncrafts Charitable Trust. Standardized vector symbols crafted specifically for speech generation, literacy, and motor-planning AAC devices.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-black text-slate-900 text-sm">2. SymbolStix (n2y)</h4>
-                    <span className="text-[10px] font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Proprietary</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Stick-figure illustrations with lively expressions. Used in <strong>TouchChat</strong> and <strong>Proloquo2Go</strong>. Requires private enterprise licensing.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-black text-slate-900 text-sm">3. Boardmaker PCS (Tobii Dynavox)</h4>
-                    <span className="text-[10px] font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Proprietary</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Picture Communication Symbols (classic egg-head characters). Used in <strong>TD Snap</strong> and special education classrooms worldwide.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-black text-slate-900 text-sm">4. Modified Fitzgerald Key Color System</h4>
+                    <h4 className="font-black text-slate-900 text-sm">2. Modified Fitzgerald Key Color System</h4>
                     <span className="text-[10px] font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">Color Standard</span>
                   </div>
                   <p className="text-[11px] text-slate-600">
@@ -800,72 +834,89 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     customColor
                   )}`}
                 >
-                  <div className="flex-1 w-full flex items-center justify-center p-1">
+                  <div className="flex-1 flex items-center justify-center p-1">
                     <img
                       src={selectedSymbol.imageUrl}
-                      alt={customLabel}
-                      className="max-h-full max-w-full object-contain"
+                      alt={customLabel || selectedSymbol.label}
+                      className="max-h-16 max-w-16 object-contain"
                     />
                   </div>
-                  <span className="font-black text-xs sm:text-sm tracking-tight text-center truncate w-full">
+                  <span className="font-black text-xs text-center line-clamp-1 w-full">
                     {customLabel || selectedSymbol.label}
                   </span>
                 </div>
 
-                {/* Button Customization Controls */}
+                {/* Edit details form */}
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Button Label:
+                      Button Label (Printed on Tile):
                     </label>
                     <input
                       type="text"
                       value={customLabel}
                       onChange={(e) => setCustomLabel(e.target.value)}
+                      placeholder={selectedSymbol.label}
                       className="w-full px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs outline-none focus:border-indigo-400"
                     />
                   </div>
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Spoken Phrase:
+                      Spoken Phrase (Text-To-Speech):
                     </label>
                     <div className="flex gap-1.5">
                       <input
                         type="text"
                         value={customSpeech}
                         onChange={(e) => setCustomSpeech(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs outline-none focus:border-indigo-400"
+                        placeholder={selectedSymbol.label}
+                        className="flex-1 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs outline-none focus:border-indigo-400"
                       />
                       <button
                         type="button"
-                        onClick={() => speakText(customSpeech || customLabel)}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 cursor-pointer"
-                        title="Audition speech"
+                        onClick={() => speakText(customSpeech || customLabel || selectedSymbol.label)}
+                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer"
+                        title="Listen to speech"
                       >
-                        <Volume2 className="w-3.5 h-3.5" />
+                        <Volume2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
+                  {/* Fitzgerald Color Category */}
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Color Coding (Fitzgerald):
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                      <Palette className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Fitzgerald Color Coding:</span>
                     </label>
-                    <select
-                      value={customColor}
-                      onChange={(e) => setCustomColor(e.target.value as any)}
-                      className="w-full px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs outline-none"
-                    >
-                      <option value="noun">Noun (Orange)</option>
-                      <option value="verb">Verb (Green)</option>
-                      <option value="subject">Subject/Person (Yellow)</option>
-                      <option value="adjective">Adjective (Blue)</option>
-                      <option value="social">Social/Polite (Purple)</option>
-                      <option value="emergency">Emergency/Stop (Red)</option>
-                    </select>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: 'subject', label: 'Yellow (People)', bg: 'bg-amber-400' },
+                        { id: 'verb', label: 'Green (Action)', bg: 'bg-emerald-400' },
+                        { id: 'noun', label: 'Orange (Thing)', bg: 'bg-orange-400' },
+                        { id: 'adjective', label: 'Blue (Mod)', bg: 'bg-sky-400' },
+                        { id: 'social', label: 'Purple (Social)', bg: 'bg-purple-400' },
+                        { id: 'emergency', label: 'Red (Stop/Help)', bg: 'bg-rose-400' },
+                      ].map((col) => (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => setCustomColor(col.id as any)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer ${
+                            customColor === col.id
+                              ? 'bg-slate-700 text-white ring-2 ring-indigo-400'
+                              : 'bg-slate-800/80 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${col.bg}`} />
+                          <span className="truncate">{col.id}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
+                  {/* Target AAC Tab */}
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
                       Category Tab:
@@ -892,7 +943,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
           )}
         </div>
 
-        {/* Modal Footer */}
+        {/* Modal Footer with Attribution notice */}
         <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <div className="text-xs text-slate-600 font-medium">
             {addedIds.size > 0 ? (
@@ -906,7 +957,9 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                 <span>Selected: "{customLabel || selectedSymbol.label}"</span>
               </span>
             ) : (
-              <span>Tap any symbol or "+ Add Word" to add immediately</span>
+              <span className="text-[11px] text-slate-500">
+                Mulberry Symbols © Straight Street / Paxtoncrafts Charitable Trust (CC BY-SA)
+              </span>
             )}
           </div>
 

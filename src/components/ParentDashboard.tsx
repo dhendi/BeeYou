@@ -67,7 +67,7 @@ import { DailyRecollectionChart } from './DailyRecollectionChart';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorage';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
-import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/arasaacService';
+import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/symbolService';
 
 import { getPairingCode } from '../services/caregiverSync';
 
@@ -3154,14 +3154,14 @@ export const ParentDashboard: React.FC = () => {
                         Clinical Standard
                       </span>
                       <span className="text-xs text-indigo-200 font-bold">
-                        35,000+ Pictograms (ARASAAC)
+                        3,400+ Mulberry Symbols (CC BY-SA)
                       </span>
                     </div>
                     <h3 className="text-base sm:text-lg font-black mt-0.5">
                       Online AAC Symbol & Logo Studio
                     </h3>
                     <p className="text-xs text-indigo-100 font-medium max-w-xl">
-                      Access the same clinical pictograms used in European and global AAC apps (TouchChat, LAMP, Cboard, OpenSymbols), or upload real photos from your camera for photo modeling.
+                      Access official Mulberry Symbols (CC BY-SA Straight Street / Paxtoncrafts Charitable Trust) crafted for AAC devices, or upload real photos from your camera for photo modeling.
                     </p>
                   </div>
                 </div>
@@ -3171,13 +3171,13 @@ export const ParentDashboard: React.FC = () => {
                     type="button"
                     onClick={() => {
                       upgradeAllAacToClinicalSymbols();
-                      showNotification('Upgraded all AAC buttons to official ARASAAC clinical pictograms!');
+                      showNotification('Upgraded all AAC buttons to official Mulberry Symbols!');
                     }}
                     className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
-                    title="Convert all AAC buttons to clinical ARASAAC pictograms"
+                    title="Convert all AAC buttons to Mulberry symbols"
                   >
                     <Sparkles className="w-4 h-4 text-amber-950" />
-                    <span>Apply ARASAAC to All Buttons</span>
+                    <span>Apply Mulberry to All Buttons</span>
                   </button>
 
                   <button
@@ -3257,7 +3257,7 @@ export const ParentDashboard: React.FC = () => {
                           {newWordLabel || 'Selected Symbol'}
                         </div>
                         <div className="text-[10px] text-slate-500 truncate max-w-xs">
-                          {newWordPhotoUrl.startsWith('data:') ? 'Custom Photo Upload' : 'ARASAAC Clinical Pictogram'}
+                          {newWordPhotoUrl.startsWith('data:') ? 'Custom Photo Upload' : 'Mulberry Symbol (CC BY-SA)'}
                         </div>
                       </div>
                     </div>
@@ -3440,7 +3440,7 @@ export const ParentDashboard: React.FC = () => {
                       <span>Active Vocabulary Buttons ({aacItems.length})</span>
                     </h3>
                     <p className="text-[11px] text-slate-500">
-                      Click "Change Symbol" on any button to swap its logo with an online ARASAAC pictogram or personal photo.
+                      Click "Change Symbol" on any button to swap its logo with an online Mulberry symbol or personal photo.
                     </p>
                   </div>
                 </div>
@@ -4759,7 +4759,7 @@ export const ParentDashboard: React.FC = () => {
         }}
         onUpgradeAll={() => {
           upgradeAllAacToClinicalSymbols();
-          showNotification('Upgraded all AAC buttons to official ARASAAC clinical pictograms!');
+          showNotification('Upgraded all AAC buttons to official Mulberry Symbols!');
         }}
       />
     </div>
