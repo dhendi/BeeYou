@@ -6,7 +6,8 @@ import {
   CalendarDays, 
   Compass, 
   Smile,
-  LayoutGrid
+  LayoutGrid,
+  Hand
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -79,6 +80,15 @@ export const ChildNavBar: React.FC = () => {
       color: 'hover:bg-rose-100 text-rose-900 border-rose-300',
       activeBg: 'bg-rose-400 text-rose-950 shadow-md ring-2 ring-rose-500',
       show: enabledFeatures?.dailyMoodRecollection !== false || enabledFeatures?.sensoryBreathingPacer !== false,
+    },
+    {
+      id: 'asl',
+      label: 'ASL',
+      emoji: '🤟',
+      icon: Hand,
+      color: 'hover:bg-purple-100 text-purple-900 border-purple-300',
+      activeBg: 'bg-purple-400 text-purple-950 shadow-md ring-2 ring-purple-500',
+      show: true,
     },
   ];
 
