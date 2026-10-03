@@ -16,7 +16,6 @@ import { AdventuresView } from './components/AdventuresView';
 import { SkillsView } from './components/SkillsView';
 import { FeelingsView } from './components/FeelingsView';
 import { MyWorldView } from './components/MyWorldView';
-import { ASLView } from './components/ASLView';
 import { Rewards } from './components/Rewards';
 import { QuickPhrasesDrawer } from './components/QuickPhrasesDrawer';
 import { PinModal } from './components/PinModal';
@@ -136,7 +135,6 @@ const AppContent: React.FC = () => {
         {childView === 'feelings' && <FeelingsView />}
         {childView === 'my-world' && <MyWorldView />}
         {childView === 'rewards' && <Rewards />}
-            {childView === 'asl' && <ASLView />}
       </main>
 
       {/* Easy Floating Caregiver Alert / SOS Button: Anchored above bottom bar */}

@@ -96,8 +96,7 @@ type ChildViewType =
   | 'skills'
   | 'feelings'
   | 'my-world'
-  | 'rewards'
-  | 'asl';
+  | 'rewards';
 
 interface AppContextType {
   // Navigation & Views
