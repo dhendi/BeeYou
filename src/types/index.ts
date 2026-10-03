@@ -258,6 +258,11 @@ export interface MyWorldState {
   unlockedItemIds: string[];
   placedItems: PlacedWorldItem[];
   currentRoom: 'bedroom' | 'playroom' | 'yard';
+  /** Total stars ever earned (never decreases). Drives companion level/growth. */
+  lifetimeStars?: number;
+  /** Companion pet choice */
+  petSpecies?: string;
+  petName?: string;
 }
 
 export type UserAgeGroup = 'kid' | 'teen' | 'adult';
