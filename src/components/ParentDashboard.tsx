@@ -12,7 +12,6 @@ import {
   Compass, 
   CheckCircle2, 
   User, 
-  Bot, 
   Settings as SettingsIcon, 
   Volume2, 
   Image as ImageIcon,
@@ -182,7 +181,6 @@ export const ParentDashboard: React.FC = () => {
     | 'skills'
     | 'profile'
     | 'themes'
-    | 'ai'
     | 'settings';
 
   const [activeTab, setActiveTab] = useState<TabType>('routines');
@@ -582,112 +580,7 @@ export const ParentDashboard: React.FC = () => {
     }
   };
 
-  // --- 4. AI ASSISTANT GENERATION WITH GEMINI ---
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiType, setAiType] = useState<'adventure' | 'routine' | 'social-story'>('adventure');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiDraft, setAiDraft] = useState<any | null>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
 
-  const handleGenerateAI = async () => {
-    if (!aiPrompt.trim()) return;
-    setAiLoading(true);
-    setAiError(null);
-    setAiDraft(null);
-
-    try {
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: aiType,
-          prompt: aiPrompt,
-          childContext: {
-            name: childProfile.name,
-            interests: childProfile.interests,
-            dislikes: childProfile.dislikes,
-            sensoryNotes: childProfile.sensoryNotes,
-          },
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Generation failed');
-      }
-
-      setAiDraft(data.result);
-      playChime('complete');
-    } catch (err: any) {
-      console.error(err);
-      setAiError(err.message || 'Could not connect to AI service. Ensure GEMINI_API_KEY is configured.');
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const handleApproveDraft = () => {
-    if (!aiDraft) return;
-
-    if (aiType === 'adventure') {
-      addAdventure({
-        title: aiDraft.title || 'New Adventure',
-        category: aiDraft.category || 'Preparation',
-        emoji: aiDraft.icon || '🚀',
-        summary: aiDraft.summary || 'A preparation guide created by caregiver & AI.',
-        steps: (aiDraft.steps || []).map((s: any, idx: number) => ({
-          order: idx + 1,
-          title: s.title || `Step ${idx + 1}`,
-          description: s.description || '',
-          emoji: s.icon || '✨',
-        })),
-        sensoryPreview: aiDraft.sensoryPreview || {},
-        thingsICanSay: aiDraft.thingsICanSay || ['I need a break.', 'Stop please.'],
-        thingsICanAskFor: aiDraft.thingsICanAskFor || ['Can I hold my comfort toy?'],
-        whatHappensAfter: aiDraft.whatHappensAfter || 'We head home and relax.',
-      });
-      showNotification('AI Adventure approved and added to Child Adventures!');
-    } else if (aiType === 'routine') {
-      addRoutine({
-        title: aiDraft.title || 'New Routine',
-        category: aiDraft.category || 'custom',
-        emoji: aiDraft.icon || '📅',
-        steps: (aiDraft.steps || []).map((s: any, idx: number) => ({
-          id: `step-${Date.now()}-${idx}`,
-          title: s.title,
-          instruction: s.instruction,
-          durationMin: s.durationMin || 5,
-          completed: false,
-          emoji: s.icon || '⭐',
-        })),
-        firstThen: aiDraft.firstThen ? {
-          first: aiDraft.firstThen.first,
-          firstEmoji: '🪥',
-          then: aiDraft.firstThen.then,
-          thenEmoji: '📱',
-          completedFirst: false,
-          completedThen: false,
-        } : undefined,
-      });
-      showNotification('AI Routine approved and added to Visual Schedules!');
-    } else if (aiType === 'social-story') {
-      addSocialStory({
-        title: aiDraft.title || 'New Story',
-        emoji: aiDraft.icon || '📖',
-        pages: (aiDraft.pages || []).map((p: any, idx: number) => ({
-          pageNumber: idx + 1,
-          text: p.text,
-          emoji: p.icon || '🌈',
-        })),
-        keyTakeaways: aiDraft.keyTakeaways || [],
-        suggestedPhrases: aiDraft.suggestedPhrases || [],
-      });
-      showNotification('AI Social Story approved and added to Stories!');
-    }
-
-    setAiDraft(null);
-    setAiPrompt('');
-  };
 
   // --- MEDICATIONS MANAGEMENT STATE ---
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
@@ -878,7 +771,6 @@ export const ParentDashboard: React.FC = () => {
             { id: 'skills', label: 'Life Skills', emoji: '⭐', icon: CheckCircle2 },
             { id: 'profile', label: 'Child Profile', emoji: '👤', icon: User },
             { id: 'themes', label: 'Themes & Studio', emoji: '🎨', icon: Palette, badge: 'Studio' },
-            { id: 'ai', label: 'AI Helper (Gemini)', emoji: '🤖', icon: Bot },
             { id: 'settings', label: 'Settings & PIN', emoji: '⚙️', icon: SettingsIcon },
           ].map((tab) => (
             <button
@@ -1173,7 +1065,7 @@ export const ParentDashboard: React.FC = () => {
                         <td className="p-4 font-bold text-indigo-950 bg-amber-50/30">
                           <span className="flex items-center gap-1 text-emerald-700">
                             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                            Unlimited tiles, custom photo/voice uploads, AI smart sentence prediction
+                            Unlimited tiles, custom photo/voice uploads, quick phrases & motor planning
                           </span>
                         </td>
                       </tr>
@@ -4338,140 +4230,7 @@ export const ParentDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 7: AI ASSISTANT (Powered by Gemini) - Journey 7 */}
-          {activeTab === 'ai' && (
-            <div className="space-y-6">
-              <div className="border-b border-slate-100 pb-3">
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                  <Bot className="w-5 h-5 text-indigo-600" />
-                  <span>AI Preparation Assistant (Gemini)</span>
-                </h2>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Describe an upcoming event or routine. AI creates a draft which you review and approve before your child sees it.
-                </p>
-              </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  {[
-                    { id: 'adventure', label: 'Life Adventure 🚀' },
-                    { id: 'routine', label: 'Visual Routine 📅' },
-                    { id: 'social-story', label: 'Social Story 📖' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setAiType(type.id as any)}
-                      className={`px-3 py-1.5 rounded-xl font-black text-xs border transition-all cursor-pointer ${
-                        aiType === type.id
-                          ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm'
-                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-
-                <textarea
-                  rows={4}
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="e.g. My child is going to a birthday party tomorrow. He doesn't like loud noises and doesn't know the other children well. Create a step-by-step preparation with sensory tips and phrases he can say."
-                  className="w-full p-3 rounded-2xl border-2 border-slate-300 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
-                />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    Uses Gemini 3.8 Flash via secure server proxy. You always review before saving.
-                  </span>
-                  <button
-                    onClick={handleGenerateAI}
-                    disabled={aiLoading || !aiPrompt.trim()}
-                    className={`px-5 py-2.5 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer ${
-                      aiLoading || !aiPrompt.trim()
-                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95'
-                    }`}
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span>{aiLoading ? 'Drafting...' : 'Generate Draft'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {aiError && (
-                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs font-bold text-rose-700">
-                  {aiError}
-                </div>
-              )}
-
-              {/* DRAFT REVIEW BOX */}
-              {aiDraft && (
-                <div className="bg-indigo-50/70 border-2 border-indigo-200 rounded-3xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between border-b border-indigo-200 pb-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-indigo-900">
-                      AI Generated Draft (Review & Approve)
-                    </span>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                      Ready for Review
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-black text-indigo-950 flex items-center gap-2">
-                      <span>{aiDraft.icon || '⭐'}</span>
-                      <span>{aiDraft.title}</span>
-                    </h3>
-                    {aiDraft.summary && (
-                      <p className="text-xs text-indigo-900 font-medium mt-1">{aiDraft.summary}</p>
-                    )}
-                  </div>
-
-                  {aiDraft.steps && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-bold text-indigo-950 block">Steps:</span>
-                      {aiDraft.steps.map((st: any, idx: number) => (
-                        <div key={idx} className="bg-white p-2.5 rounded-xl border border-indigo-200 text-xs flex items-center gap-2">
-                          <span className="font-bold text-indigo-800">{idx + 1}.</span>
-                          <span className="font-bold text-slate-800">{st.title}</span>
-                          {st.description && <span className="text-slate-500">— {st.description}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {aiDraft.thingsICanSay && (
-                    <div>
-                      <span className="text-xs font-bold text-indigo-950 block mb-1">Phrases:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {aiDraft.thingsICanSay.map((ph: string, idx: number) => (
-                          <span key={idx} className="px-2 py-1 rounded bg-white border border-indigo-200 text-xs font-bold text-indigo-900">
-                            💬 {ph}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-indigo-200">
-                    <button
-                      onClick={() => setAiDraft(null)}
-                      className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
-                    >
-                      Discard Draft
-                    </button>
-                    <button
-                      onClick={handleApproveDraft}
-                      className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Check className="w-4 h-4" />
-                      <span>Approve & Add to Child App</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* TAB 8: SETTINGS & PIN */}
           {activeTab === 'settings' && (

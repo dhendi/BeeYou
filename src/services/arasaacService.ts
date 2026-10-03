@@ -129,7 +129,6 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
 
   // Drinks
   'drinks': 6061,
-  'drink': 6061,
   'beverage': 6061,
   'beverages': 6061,
   'water': 32464,
@@ -292,7 +291,6 @@ export const ARASAAC_WORD_MAP: Record<string, number> = {
   'sit down': 6604,
   'sleep / nap': 2314,
   'too long': 36914,
-  'feel': 30197,
 };
 
 /**

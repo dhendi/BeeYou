@@ -2,5 +2,5 @@
   "name": "Lumina: Everyday Companion & Communication",
   "description": "An all-in-one everyday companion for children and caregivers, supporting AAC communication, visual schedules, life adventures, routines, emotion check-ins, and independence.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

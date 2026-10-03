@@ -257,7 +257,7 @@ export const SubscriptionModal: React.FC = () => {
                 <ul className="space-y-2 text-xs text-purple-950">
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>AAC:</strong> Custom photos, voice recordings & AI predictive phrases</span>
+                    <span><strong>AAC:</strong> Custom photos, voice recordings &amp; motor planning phrases</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
