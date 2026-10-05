@@ -168,14 +168,16 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       location: selectedLocation,
     });
 
+    const alertUid = 'alert-' + Date.now();
     await sendCaregiverAlert({
+      id: alertUid,
       childName: childProfile.name,
       emotion: choice.id as any,
       alertId: choice.id,
       label: choice.label,
       emoji: choice.emoji,
       location: selectedLocation,
-      note: `Location: ${selectedLocation}`,
+      note: '',
     });
 
     if (settings?.spokenAlerts !== false) {

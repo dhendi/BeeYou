@@ -728,10 +728,10 @@ app.post('/api/family/alert/:code', (req, res) => {
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
-  const { childName, emotion, alertId, label, emoji, location, note } = req.body || {};
+  const { id, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
 
   const alert = {
-    id: 'alert-' + Date.now(),
+    id: id || ('alert-' + Date.now()),
     familyCode: code,
     childName: childName || current.childProfile.name || 'Leo',
     emotion: emotion || 'need_help',
@@ -1209,7 +1209,7 @@ app.get('/api/caregiver/messages/:code', (req, res) => {
 
 // Child triggers an alert (predefined 5 options supported)
 app.post('/api/caregiver/alert', (req, res) => {
-  const { pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body;
+  const { id, pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body;
   const code = (pairingCode || 'LUMI-101').trim().toUpperCase();
 
   let session = caregiverSessions.get(code);
@@ -1241,7 +1241,7 @@ app.post('/api/caregiver/alert', (req, res) => {
   }
 
   const alert = {
-    id: 'alert-' + Date.now(),
+    id: id || ('alert-' + Date.now()),
     childName: childName || session.childName || 'Child',
     pairingCode: code,
     emotion: emotion || 'need_help',

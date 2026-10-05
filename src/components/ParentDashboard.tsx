@@ -254,6 +254,22 @@ export const ParentDashboard: React.FC = () => {
   const [alertHistoryList, setAlertHistoryList] = useState<CaregiverAlert[]>(() => getAlertHistory());
   const [liveChildStatus, setLiveChildStatus] = useState<CaregiverChildStatus | null>(null);
 
+  const deduplicateAlerts = (alerts: CaregiverAlert[]): CaregiverAlert[] => {
+    const seen = new Set<string>();
+    const result: CaregiverAlert[] = [];
+    for (const a of alerts) {
+      if (!a || a.status !== 'active') continue;
+      const timeKey = Math.floor(new Date(a.timestamp).getTime() / 6000);
+      const contentKey = `${a.label || a.emotion || ''}-${timeKey}`;
+      if (!seen.has(a.id) && !seen.has(contentKey)) {
+        seen.add(a.id);
+        seen.add(contentKey);
+        result.push(a);
+      }
+    }
+    return result;
+  };
+
   useEffect(() => {
     const code = getPairingCode();
     subscribeToCloudChannel(code);
@@ -264,10 +280,7 @@ export const ParentDashboard: React.FC = () => {
           setLiveChildStatus(session);
           if (session.activeAlert && session.activeAlert.status === 'active') {
             const current = session.activeAlert;
-            setActiveAlerts((prev) => [
-              current,
-              ...prev.filter((a) => a.id !== current.id),
-            ]);
+            setActiveAlerts((prev) => deduplicateAlerts([current, ...prev]));
             setAlertHistoryList(getAlertHistory());
           }
         }
@@ -278,7 +291,7 @@ export const ParentDashboard: React.FC = () => {
     const pollInterval = setInterval(refreshSession, 2000);
 
     const unsubAlert = onCaregiverAlert((alert) => {
-      setActiveAlerts((prev) => [alert, ...prev.filter((a) => a.id !== alert.id)]);
+      setActiveAlerts((prev) => deduplicateAlerts([alert, ...prev]));
       setAlertHistoryList(getAlertHistory());
       playChime('star');
       showNotification(`🚨 Incoming Alert from ${alert.childName}: ${alert.label}`);
@@ -1199,9 +1212,30 @@ export const ParentDashboard: React.FC = () => {
                         <ShieldAlert className="w-5 h-5 text-rose-600" />
                         <span>🚨 Live Emergency Alert from {childProfile.name}</span>
                       </div>
-                      <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full">
-                        Action Required
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {activeAlerts.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              activeAlerts.forEach((a) => {
+                                resolveEmergencyAlert(a.id, getPairingCode());
+                              });
+                              acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'All resolved', 'im_here');
+                              setActiveAlerts([]);
+                              try { localStorage.removeItem('beeyou_active_caregiver_alert'); } catch {}
+                              setAlertHistoryList(getAlertHistory());
+                              showNotification('All active alerts marked resolved.');
+                              playChime('tap');
+                            }}
+                            className="text-xs font-bold text-rose-800 bg-rose-200 hover:bg-rose-300 px-2.5 py-1 rounded-full cursor-pointer transition active:scale-95"
+                          >
+                            Resolve All ({activeAlerts.length}) ✓
+                          </button>
+                        )}
+                        <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full">
+                          Action Required
+                        </span>
+                      </div>
                     </div>
 
                     {activeAlerts.map((alert) => (
@@ -1214,7 +1248,8 @@ export const ParentDashboard: React.FC = () => {
                             <div>
                               <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
                               <p className="text-xs text-slate-500 font-medium">
-                                {alert.note || 'Help requested'} {alert.location ? `• Location: ${alert.location}` : ''}
+                                {alert.location ? `Location: ${alert.location}` : (alert.note || 'Help requested')}
+                                {alert.note && !alert.note.toLowerCase().includes('location') ? ` • ${alert.note}` : ''}
                               </p>
                             </div>
                           </div>
@@ -1546,7 +1581,8 @@ export const ParentDashboard: React.FC = () => {
                                 </span>
                               </div>
                               <p className="text-xs text-slate-600 font-medium mt-0.5">
-                                Sent by: <strong>{alert.childName}</strong> • {alert.location ? `Location: ${alert.location}` : 'Location unknown'} {alert.note ? `• "${alert.note}"` : ''}
+                                Sent by: <strong>{alert.childName}</strong> • {alert.location ? `Location: ${alert.location}` : 'Location unknown'}
+                                {alert.note && !alert.note.toLowerCase().includes('location') ? ` • "${alert.note}"` : ''}
                               </p>
                             </div>
                           </div>

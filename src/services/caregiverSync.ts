@@ -989,10 +989,12 @@ export async function sendCaregiverAlert(alertData: {
   emoji: string;
   location?: 'school' | 'therapy' | 'bus' | 'home' | 'other';
   note?: string;
+  id?: string;
 }): Promise<CaregiverAlert> {
   const code = getPairingCode();
+  const alertUniqueId = alertData.id || ('alert-' + Date.now());
   const alert: CaregiverAlert = {
-    id: 'alert-' + Date.now(),
+    id: alertUniqueId,
     pairingCode: code,
     timestamp: new Date().toISOString(),
     status: 'active',
@@ -1004,7 +1006,7 @@ export async function sendCaregiverAlert(alertData: {
     saveAlertToHistory(alert);
   } catch {}
 
-  // 1. Send to server alert endpoint
+  // 1. Send to server alert endpoint (server broadcasts CAREGIVER_ALERT over SSE to all listeners)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -1012,6 +1014,7 @@ export async function sendCaregiverAlert(alertData: {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        id: alertUniqueId,
         pairingCode: code,
         ...alertData,
       }),
@@ -1022,11 +1025,8 @@ export async function sendCaregiverAlert(alertData: {
     console.warn('Server alert sync error:', err);
   }
 
-  // 2. Publish to live event stream
-  await publishCloudEvent(code, {
-    type: 'CAREGIVER_ALERT',
-    alert,
-  });
+  // NOTE: /api/caregiver/alert already persists and broadcasts CAREGIVER_ALERT.
+  // We do not call publishCloudEvent here to prevent duplicate alert reception.
 
   return alert;
 }
