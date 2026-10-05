@@ -86,7 +86,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     return contextFeatures || getDefaultFeaturesForAge(selectedPersona === 'caregiver' ? 'kid' : selectedPersona);
   });
 
-  const totalSteps = 5;
+  const isCaregiver = selectedPersona === 'caregiver';
+  const totalSteps = isCaregiver ? 4 : 5;
 
   const handlePersonaSelect = (persona: OnboardingPersona) => {
     setSelectedPersona(persona);
@@ -97,6 +98,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       setName('Alex');
     } else if (persona === 'caregiver' && (name === 'Leo' || !name)) {
       setName('Caregiver');
+    }
+    if (persona === 'caregiver' && step > 4) {
+      setStep(4);
     }
   };
 
@@ -212,7 +216,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   {step === 1 && 'Your Friendly Visual Companion'}
                   {step === 2 && 'Who will be using BeeYou?'}
                   {step === 3 && `What BeeYou is all about for ${selectedPersona === 'kid' ? 'Kids 🧒' : selectedPersona === 'teen' ? 'Teens 🎧' : selectedPersona === 'adult' ? 'Adults 💼' : 'Caregivers 💛'}`}
-                  {step === 4 && 'Features You Can Have'}
+                  {step === 4 && (isCaregiver ? 'Personalize Caregiver Space' : 'Features You Can Have')}
                   {step === 5 && 'Personalize Your Space'}
                 </h2>
               </div>
@@ -718,8 +722,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
             {/* ══════════════════════════════════════════════════════
                 SCREEN 4: FEATURES YOU CAN HAVE (INTERACTIVE TOGGLES)
+                (Skipped for caregivers who only use the Caregiver Hub)
             ══════════════════════════════════════════════════════ */}
-            {step === 4 && (
+            {!isCaregiver && step === 4 && (
               <div className="space-y-5 animate-in fade-in">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -886,9 +891,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             )}
 
             {/* ══════════════════════════════════════════════════════
-                SCREEN 5: PERSONALIZE YOUR SPACE
+                FINAL SCREEN: PERSONALIZE YOUR SPACE
+                (Step 4 for caregivers, Step 5 for others)
             ══════════════════════════════════════════════════════ */}
-            {step === 5 && (
+            {((isCaregiver && step === 4) || (!isCaregiver && step === 5)) && (
               <div className="space-y-5 animate-in fade-in">
                 <div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
