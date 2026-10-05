@@ -173,6 +173,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
     if (selectedPersona === 'caregiver' || actionAfter === 'caregiver_setup') {
       if (setIsParentMode) setIsParentMode(true);
+      if (setShowCaregiverModal) setShowCaregiverModal(true);
     } else if (actionAfter === 'morning_routine') {
       if (setChildView) setChildView('my-day');
     } else {

@@ -59,6 +59,7 @@ const AppContent: React.FC = () => {
   const { 
     childView, 
     isParentMode, 
+    userRole,
     showCaregiverModal, 
     setShowCaregiverModal,
     showCaregiverAlertModal,
@@ -102,11 +103,21 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (isParentMode) {
+  if (isParentMode || userRole === 'caregiver') {
     return (
       <Suspense fallback={null}>
         <ParentDashboard />
         <SubscriptionModal />
+        <ConnectCaregiverModal 
+          isOpen={showCaregiverModal} 
+          onClose={() => setShowCaregiverModal(false)} 
+          initialTab={userRole === 'caregiver' ? 'enter_code' : 'pair_code'}
+        />
+        <OnboardingWizardModal
+          isOpen={showOnboardingModal}
+          onClose={() => setShowOnboardingModal(false)}
+          canDismiss={true}
+        />
       </Suspense>
     );
   }

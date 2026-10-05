@@ -39,13 +39,19 @@ import {
 import { CaregiverMessage, TemporaryPairingSession, EmergencySupportContact } from '../types';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import { QRCodeView } from './QRCodeView';
 
 interface ConnectCaregiverModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'pair_code' | 'enter_code' | 'support_contact';
 }
 
-export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ isOpen, onClose }) => {
+export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ 
+  isOpen, 
+  onClose,
+  initialTab 
+}) => {
   const { 
     childProfile, 
     currentMood, 
@@ -65,8 +71,14 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
 
   // Tabs: 'pair_code' | 'enter_code' | 'support_contact'
   const [activeTab, setActiveTab] = useState<'pair_code' | 'enter_code' | 'support_contact'>(
-    isAdult ? 'support_contact' : 'pair_code'
+    initialTab || (isAdult ? 'support_contact' : 'pair_code')
   );
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const [pairingCode, setPairingCode] = useState<string>(linkedDeviceCode || 'BEE-101');
   const [copied, setCopied] = useState(false);
@@ -76,7 +88,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
   // Temporary session state
   const [tempSession, setTempSession] = useState<TemporaryPairingSession | null>(null);
   const [timeLeftSec, setTimeLeftSec] = useState<number>(600);
-  const [showQr, setShowQr] = useState(false);
+  const [showQr, setShowQr] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
 
   // Enter code flow
@@ -401,11 +413,9 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
                 {/* QR Code SVG Display */}
                 {showQr && (
                   <div className="p-4 bg-white border border-stone-200 rounded-2xl flex flex-col items-center gap-2 animate-in zoom-in-95">
-                    <div className="w-36 h-36 bg-amber-50 p-2 rounded-xl border-2 border-amber-300 flex items-center justify-center">
-                      <QrCode className="w-28 h-28 text-slate-800" />
-                    </div>
+                    <QRCodeView value={pairingCode} size={150} />
                     <span className="text-[11px] text-slate-500 font-medium">
-                      Point caregiver's phone camera or BeeYou app at this QR code.
+                      Point caregiver's phone camera or BeeYou app at this QR code to connect instantly.
                     </span>
                   </div>
                 )}

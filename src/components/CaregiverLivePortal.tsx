@@ -45,6 +45,8 @@ import {
 import { playChime } from '../utils/audio';
 import { BeeMascot, BeeYouLogo } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import { QRCodeView } from './QRCodeView';
+import { useApp } from '../context/AppContext';
 
 interface CaregiverLivePortalProps {
   initialCode?: string;
@@ -67,6 +69,9 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
   initialCode, 
   onBackToApp 
 }) => {
+  const { userRole } = useApp();
+  const isCaregiverOnly = userRole === 'caregiver';
+
   const [code, setCode] = useState<string>(() => {
     if (initialCode) return initialCode.trim().toUpperCase();
     if (typeof window !== 'undefined') {
@@ -191,7 +196,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
       <header className="bg-slate-900 text-white p-4 sm:p-5 sticky top-0 z-30 shadow-md border-b border-slate-800">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            {onBackToApp && (
+            {onBackToApp && !isCaregiverOnly && (
               <button
                 onClick={onBackToApp}
                 className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
@@ -471,8 +476,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                   </span>
                 </div>
 
-                <div className="w-36 h-36 bg-amber-50 p-2 mx-auto rounded-xl border-2 border-amber-300 flex items-center justify-center">
-                  <QrCode className="w-28 h-28 text-slate-800" />
+                <div className="flex flex-col items-center justify-center p-2">
+                  <QRCodeView value={createdSession.pairingCode} size={150} />
                 </div>
 
                 <p className="text-xs text-slate-600 font-medium">
