@@ -10,12 +10,14 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
+import { setActiveDeviceView } from '../services/authService';
 
 export const ChildHeader: React.FC = () => {
   const {
     childProfile,
     worldState,
     setShowPinModal,
+    setIsParentMode,
     setShowCopingToolkit,
     setShowCaregiverAlertModal,
     setShowCaregiverModal,
@@ -191,16 +193,34 @@ export const ChildHeader: React.FC = () => {
         {/* PWA Install Button */}
         <PWAInstallButton variant="compact" />
 
-        {/* 4. Parent / Settings Lock */}
+        {/* 4. Switch to Caregiver Hub */}
+        <button
+          type="button"
+          onClick={() => {
+            setActiveDeviceView('caregiver');
+            setIsParentMode(true);
+            playChime('tap');
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href);
+              url.searchParams.set('role', 'caregiver');
+              url.searchParams.delete('child');
+              window.location.href = url.pathname + '?role=caregiver';
+            }
+          }}
+          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
+          title="Switch to Caregiver Hub & Controller 👑"
+        >
+          <span className="hidden sm:inline">Caregiver Hub 👑</span>
+          <span className="sm:hidden">👑</span>
+        </button>
+
+        {/* 5. Parent / Settings Lock */}
         <button
           onClick={() => setShowPinModal(true)}
-          className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 font-bold text-xs active:scale-95 transition-all flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"
-          title={userAgeGroup === 'adult' ? 'Settings (Protected by PIN)' : 'Caregiver Dashboard (Protected by PIN)'}
+          className="p-2 sm:px-2.5 sm:py-2 rounded-2xl bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 font-bold text-xs active:scale-95 transition-all flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"
+          title={userAgeGroup === 'adult' ? 'Settings (Protected by PIN)' : 'Caregiver PIN Lock'}
         >
           <Lock className="w-3.5 h-3.5 text-stone-500" />
-          <span className="hidden lg:inline">
-            {userAgeGroup === 'adult' ? 'Settings' : 'Caregiver'}
-          </span>
         </button>
       </div>
     </header>

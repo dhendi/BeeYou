@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -83,6 +84,195 @@ interface CloudSyncEvent {
   senderDeviceId?: string;
   [key: string]: any;
 }
+
+export interface SharedFamilyState {
+  familyCode: string;
+  email: string;
+  caregiverName: string;
+  caregiverRole: string;
+  childProfile: {
+    name: string;
+    ageGroup: string;
+    pin: string;
+    interests: string[];
+    pronouns: string;
+  };
+  childState: {
+    lastActiveTime: string;
+    currentActivity: string;
+    currentMood: string;
+    habitsCompletedToday: number;
+    totalHabits: number;
+    stars: number;
+    isOnline: boolean;
+  };
+  routines: any[];
+  aacItems: any[];
+  plansChanged: {
+    active: boolean;
+    originalPlanTitle: string;
+    reason: string;
+    newPlanTitle: string;
+    calmingMessage: string;
+    newSteps: any[];
+    relevantPhrases: string[];
+  };
+  activeAlert: any | null;
+  alertHistory: any[];
+  messages: any[];
+  lastUpdated: number;
+}
+
+const DEFAULT_DEMO_ROUTINES = [
+  {
+    id: 'demo-rt-morning',
+    title: 'Morning Sunshine Schedule',
+    emoji: '☀️',
+    targetMinutes: 25,
+    rewardSticker: '🌟 Morning Champion',
+    firstThen: {
+      firstTaskTitle: 'Get dressed & Brush teeth',
+      firstTaskEmoji: '👕',
+      thenRewardTitle: '10 Minutes Favorite Lego Time',
+      thenRewardEmoji: '🧱',
+    },
+    steps: [
+      { id: 'ms-1', title: 'Wake up gently & stretch', emoji: '🥱', time: '7:30 AM', completed: false },
+      { id: 'ms-2', title: 'Put on cozy clothes', emoji: '👕', time: '7:40 AM', completed: false },
+      { id: 'ms-3', title: 'Brush teeth & wash face', emoji: '🪥', time: '7:50 AM', completed: false },
+      { id: 'ms-4', title: 'Healthy breakfast snack', emoji: '🥞', time: '8:00 AM', completed: false },
+      { id: 'ms-5', title: 'Pack backpack for day', emoji: '🎒', time: '8:15 AM', completed: false },
+    ],
+  },
+  {
+    id: 'demo-rt-bedtime',
+    title: 'Cozy Evening & Bedtime Wind Down',
+    emoji: '🌙',
+    targetMinutes: 30,
+    rewardSticker: '🌙 Peaceful Star',
+    steps: [
+      { id: 'bs-1', title: 'Put away toys & cleanup', emoji: '🧸', time: '8:00 PM', completed: false },
+      { id: 'bs-2', title: 'Put on soft pajamas', emoji: '🛌', time: '8:15 PM', completed: false },
+      { id: 'bs-3', title: 'Brush teeth calmly', emoji: '🪥', time: '8:25 PM', completed: false },
+      { id: 'bs-4', title: 'Read bedtime story or listen to calm music', emoji: '📖', time: '8:35 PM', completed: false },
+      { id: 'bs-5', title: 'Cozy lights off and deep slow breath', emoji: '✨', time: '8:50 PM', completed: false },
+    ],
+  },
+];
+
+const DEFAULT_DEMO_AAC = [
+  { id: 'aac-1', label: 'I want', emoji: '👉', category: 'core', soundWord: 'I want' },
+  { id: 'aac-2', label: 'Help please', emoji: '🙋', category: 'emergency', soundWord: 'Help please' },
+  { id: 'aac-3', label: 'Need break', emoji: '🛑', category: 'emergency', soundWord: 'I need a break' },
+  { id: 'aac-4', label: 'Water', emoji: '💧', category: 'basic', soundWord: 'Water' },
+  { id: 'aac-5', label: 'Food / Snack', emoji: '🍎', category: 'basic', soundWord: 'Food' },
+  { id: 'aac-6', label: 'Bathroom', emoji: '🚻', category: 'basic', soundWord: 'Bathroom' },
+  { id: 'aac-7', label: 'Happy', emoji: '😊', category: 'emotions', soundWord: 'Happy' },
+  { id: 'aac-8', label: 'Overwhelmed', emoji: '😫', category: 'emotions', soundWord: 'I feel overwhelmed' },
+  { id: 'aac-9', label: 'Quiet space', emoji: '🎧', category: 'comfort', soundWord: 'I want a quiet space' },
+  { id: 'aac-10', label: 'Yes', emoji: '✅', category: 'core', soundWord: 'Yes' },
+  { id: 'aac-11', label: 'No', emoji: '❌', category: 'core', soundWord: 'No' },
+  { id: 'aac-12', label: 'Thank you', emoji: '🙏', category: 'social', soundWord: 'Thank you' },
+];
+
+const DEFAULT_DEMO_PLANS_CHANGED = {
+  active: false,
+  originalPlanTitle: 'Trip to Playground',
+  reason: 'It started raining heavily outside.',
+  newPlanTitle: 'Living Room Blanket Fort & Lego Fun',
+  calmingMessage: 'It is okay to feel disappointed when plans change. Take a slow, deep breath. You are safe, and here is our new cozy plan.',
+  newSteps: [
+    { title: 'Gather soft pillows & blankets', emoji: '⛺', time: '1:00 PM' },
+    { title: 'Build living room fort together', emoji: '🛋️', time: '1:15 PM' },
+    { title: 'Warm cocoa or juice snack', emoji: '☕', time: '1:45 PM' },
+  ],
+  relevantPhrases: [
+    'Why did it change?',
+    'I feel disappointed.',
+    'I need a quiet moment.',
+    'What do we do now?',
+  ],
+};
+
+const DATA_DIR = path.join(process.cwd(), '.data');
+const STATE_FILE = path.join(DATA_DIR, 'shared_families.json');
+
+function loadAllFamilyStates(): Map<string, SharedFamilyState> {
+  const map = new Map<string, SharedFamilyState>();
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      const raw = fs.readFileSync(STATE_FILE, 'utf-8');
+      const data = JSON.parse(raw);
+      if (data && typeof data === 'object') {
+        for (const [code, val] of Object.entries(data)) {
+          map.set(code.toUpperCase(), val as SharedFamilyState);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Persistent family state file not found or corrupted, will recreate:', err);
+  }
+  return map;
+}
+
+function saveAllFamilyStates(map: Map<string, SharedFamilyState>): void {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const obj: Record<string, any> = {};
+    for (const [k, v] of map.entries()) {
+      obj[k] = v;
+    }
+    fs.writeFileSync(STATE_FILE, JSON.stringify(obj, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error saving persistent family state:', err);
+  }
+}
+
+function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState {
+  const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  let state = allStates.get(cleanCode);
+
+  if (!state) {
+    state = {
+      familyCode: cleanCode,
+      email: email || (cleanCode === 'BEE-DEMO' ? 'demo@beeyou.app' : `${cleanCode.toLowerCase()}@family.beeyou.app`),
+      caregiverName: 'Sarah (Mom)',
+      caregiverRole: 'Mom',
+      childProfile: {
+        name: 'Leo',
+        ageGroup: 'kid',
+        pin: '1234',
+        interests: ['Lego building', 'Visual schedules'],
+        pronouns: 'they/them',
+      },
+      childState: {
+        lastActiveTime: new Date().toISOString(),
+        currentActivity: 'Using BeeYou',
+        currentMood: 'happy',
+        habitsCompletedToday: 2,
+        totalHabits: 4,
+        stars: 15,
+        isOnline: true,
+      },
+      routines: DEFAULT_DEMO_ROUTINES,
+      aacItems: DEFAULT_DEMO_AAC,
+      plansChanged: DEFAULT_DEMO_PLANS_CHANGED,
+      activeAlert: null,
+      alertHistory: [],
+      messages: [],
+      lastUpdated: Date.now(),
+    };
+    allStates.set(cleanCode, state);
+    saveAllFamilyStates(allStates);
+  }
+  return state;
+}
+
+// Pre-seed Demo family immediately on startup
+getOrCreateFamilyState('BEE-DEMO', 'demo@beeyou.app');
 
 interface ServerFamilyAccount {
   id: string;
@@ -425,13 +615,11 @@ app.get('/api/caregiver/events/:code', (req, res) => {
   // Send initial connection ACK
   res.write(`data: ${JSON.stringify({ type: 'CONNECTED', pairingCode: code, timestamp: Date.now() })}\n\n`);
 
-  // Send current active session state immediately
-  const session = caregiverSessions.get(code);
-  if (session) {
-    res.write(`data: ${JSON.stringify({ type: 'CHILD_STATUS_UPDATE', status: session, sentAt: Date.now() })}\n\n`);
-    if (session.activeAlert && session.activeAlert.status === 'active') {
-      res.write(`data: ${JSON.stringify({ type: 'CAREGIVER_ALERT', alert: session.activeAlert, sentAt: Date.now() })}\n\n`);
-    }
+  // Send current active persistent family state immediately
+  const familyState = getOrCreateFamilyState(code);
+  res.write(`data: ${JSON.stringify({ type: 'SYNC_INIT', state: familyState, pairingCode: code, sentAt: Date.now() })}\n\n`);
+  if (familyState.activeAlert && familyState.activeAlert.status === 'active') {
+    res.write(`data: ${JSON.stringify({ type: 'CAREGIVER_ALERT', alert: familyState.activeAlert, state: familyState, sentAt: Date.now() })}\n\n`);
   }
 
   // Send recent events from last 45 seconds to catch up
@@ -464,14 +652,251 @@ app.get('/api/caregiver/poll/:code', (req, res) => {
   const since = Number(req.query.since) || 0;
   const history = eventHistoryByCode.get(code) || [];
   const newEvents = history.filter((e) => e.sentAt > since);
-  const session = caregiverSessions.get(code) || null;
+  const familyState = getOrCreateFamilyState(code);
 
   return res.json({
     success: true,
     events: newEvents,
-    session,
+    session: familyState.childState,
+    state: familyState,
     serverTime: Date.now(),
   });
+});
+
+// -------------------------------------------------------------
+// Unified Persistent Family Sync API
+// -------------------------------------------------------------
+
+// 1. Fetch entire family state
+app.get('/api/family/state/:code', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const state = getOrCreateFamilyState(code);
+  return res.json({ success: true, state });
+});
+
+// 2. Update family state remotely (routines, aac, plansChanged, childState, childProfile)
+app.post('/api/family/state/:code', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  const current = getOrCreateFamilyState(code);
+
+  const { routines, aacItems, plansChanged, childState, childProfile, caregiverName } = req.body || {};
+
+  if (Array.isArray(routines)) current.routines = routines;
+  if (Array.isArray(aacItems)) current.aacItems = aacItems;
+  if (plansChanged && typeof plansChanged === 'object') current.plansChanged = { ...current.plansChanged, ...plansChanged };
+  if (childState && typeof childState === 'object') current.childState = { ...current.childState, ...childState };
+  if (childProfile && typeof childProfile === 'object') current.childProfile = { ...current.childProfile, ...childProfile };
+  if (caregiverName) current.caregiverName = caregiverName;
+  current.lastUpdated = Date.now();
+
+  allStates.set(code, current);
+  saveAllFamilyStates(allStates);
+
+  // Sync with caregiverSessions map for backwards compatibility
+  const session = caregiverSessions.get(code);
+  if (session && current.childState) {
+    Object.assign(session, current.childState);
+  }
+
+  broadcastEvent(code, {
+    eventId: `ev-state-${Date.now()}`,
+    type: 'FAMILY_STATE_UPDATED',
+    pairingCode: code,
+    state: current,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, state: current });
+});
+
+// 3. Child triggers an emergency / sensory overload alert
+app.post('/api/family/alert/:code', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  const current = getOrCreateFamilyState(code);
+
+  const { childName, emotion, alertId, label, emoji, location, note } = req.body || {};
+
+  const alert = {
+    id: 'alert-' + Date.now(),
+    familyCode: code,
+    childName: childName || current.childProfile.name || 'Leo',
+    emotion: emotion || 'need_help',
+    alertId: alertId || 'need_help',
+    label: label || 'Needs Support',
+    emoji: emoji || '🚨',
+    location: location || 'home',
+    note: note || '',
+    timestamp: new Date().toISOString(),
+    status: 'active',
+  };
+
+  current.activeAlert = alert;
+  current.alertHistory = [alert, ...(current.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
+  current.lastUpdated = Date.now();
+
+  allStates.set(code, current);
+  saveAllFamilyStates(allStates);
+
+  // Sync legacy caregiverSessions map
+  const session = caregiverSessions.get(code);
+  if (session) {
+    session.activeAlert = alert;
+    session.quickAlert = `ALERT: ${alert.label}`;
+  }
+
+  broadcastEvent(code, {
+    eventId: `ev-alert-${Date.now()}`,
+    type: 'CAREGIVER_ALERT',
+    pairingCode: code,
+    alert,
+    state: current,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, alert, deliveryStatus: 'delivered', state: current });
+});
+
+// 4. Caregiver acknowledges alert with reassurance message
+app.post('/api/family/alert/:code/ack', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  const current = getOrCreateFamilyState(code);
+
+  const { acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
+
+  if (current.activeAlert) {
+    current.activeAlert.status = 'acknowledged';
+    current.activeAlert.acknowledgedBy = acknowledgedBy || current.caregiverName || 'Caregiver';
+    current.activeAlert.acknowledgedAt = new Date().toISOString();
+    current.activeAlert.responseMessage = responseMessage;
+    current.activeAlert.responseId = responseId;
+  }
+
+  // Update item in alert history
+  if (Array.isArray(current.alertHistory)) {
+    current.alertHistory = current.alertHistory.map((a: any) => {
+      if (a.id === alertId || (current.activeAlert && a.id === current.activeAlert.id)) {
+        return {
+          ...a,
+          status: 'acknowledged',
+          acknowledgedBy: acknowledgedBy || 'Caregiver',
+          responseMessage,
+        };
+      }
+      return a;
+    });
+  }
+
+  // Also append response message to messages stream for the child
+  if (responseMessage) {
+    const newMsg: CaregiverMessageItem = {
+      id: 'msg-' + Date.now(),
+      senderName: acknowledgedBy || current.caregiverName || 'Caregiver',
+      text: responseMessage,
+      emoji: '❤️',
+      timestamp: new Date().toISOString(),
+      read: false,
+      responseId,
+    };
+    current.messages = [...(current.messages || []).slice(-29), newMsg];
+  }
+
+  current.lastUpdated = Date.now();
+  allStates.set(code, current);
+  saveAllFamilyStates(allStates);
+
+  broadcastEvent(code, {
+    eventId: `ev-ack-${Date.now()}`,
+    type: 'CAREGIVER_ALERT_ACK',
+    pairingCode: code,
+    ack: {
+      alertId: alertId || (current.activeAlert?.id),
+      responseMessage,
+      responseId,
+      by: acknowledgedBy || 'Caregiver',
+    },
+    state: current,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, state: current });
+});
+
+// 5. Caregiver marks alert resolved / all clear
+app.post('/api/family/alert/:code/resolve', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  const current = getOrCreateFamilyState(code);
+  const { alertId } = req.body || {};
+
+  current.activeAlert = null;
+  if (Array.isArray(current.alertHistory)) {
+    current.alertHistory = current.alertHistory.map((a: any) => {
+      if (!alertId || a.id === alertId) {
+        return { ...a, status: 'resolved' };
+      }
+      return a;
+    });
+  }
+
+  current.lastUpdated = Date.now();
+  allStates.set(code, current);
+  saveAllFamilyStates(allStates);
+
+  // Sync legacy session
+  const session = caregiverSessions.get(code);
+  if (session) session.activeAlert = null;
+
+  broadcastEvent(code, {
+    eventId: `ev-res-${Date.now()}`,
+    type: 'ALERT_RESOLVED',
+    pairingCode: code,
+    alertId,
+    state: current,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, state: current });
+});
+
+// 6. Caregiver sends instant nudge or reminder message to child
+app.post('/api/family/message/:code', (req, res) => {
+  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+  const allStates = loadAllFamilyStates();
+  const current = getOrCreateFamilyState(code);
+
+  const { senderName, text, emoji, responseId } = req.body || {};
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Message text is required' });
+  }
+
+  const newMsg: CaregiverMessageItem = {
+    id: 'msg-' + Date.now(),
+    senderName: senderName || current.caregiverName || 'Caregiver',
+    text: text.trim(),
+    emoji: emoji || '❤️',
+    timestamp: new Date().toISOString(),
+    read: false,
+    responseId,
+  };
+
+  current.messages = [...(current.messages || []).slice(-29), newMsg];
+  current.lastUpdated = Date.now();
+  allStates.set(code, current);
+  saveAllFamilyStates(allStates);
+
+  broadcastEvent(code, {
+    eventId: `ev-msg-${Date.now()}`,
+    type: 'CAREGIVER_MESSAGE',
+    pairingCode: code,
+    message: newMsg,
+    state: current,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, message: newMsg, state: current });
 });
 
 // -------------------------------------------------------------
@@ -822,15 +1247,25 @@ app.post('/api/caregiver/alert', (req, res) => {
   session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
 
+  // Also sync persistent family state on disk
+  const allStates = loadAllFamilyStates();
+  const familyState = getOrCreateFamilyState(code);
+  familyState.activeAlert = alert;
+  familyState.alertHistory = [alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
+  familyState.lastUpdated = Date.now();
+  allStates.set(code, familyState);
+  saveAllFamilyStates(allStates);
+
   broadcastEvent(code, {
     eventId: `ev-alert-${Date.now()}`,
     type: 'CAREGIVER_ALERT',
     pairingCode: code,
     alert,
+    state: familyState,
     sentAt: Date.now(),
   });
 
-  return res.json({ success: true, alert });
+  return res.json({ success: true, alert, deliveryStatus: 'delivered', state: familyState });
 });
 
 // Caregiver acknowledges the alert and sends instant predefined reassurance response
@@ -839,23 +1274,39 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   const code = (pairingCode || '').trim().toUpperCase();
   const session = caregiverSessions.get(code);
 
-  if (!session || !session.activeAlert) {
-    return res.status(404).json({ error: 'No active alert found for this code' });
+  // Sync persistent family state on disk
+  const allStates = loadAllFamilyStates();
+  const familyState = getOrCreateFamilyState(code);
+
+  if (session && session.activeAlert) {
+    session.activeAlert.status = 'acknowledged';
+    session.activeAlert.acknowledgedBy = acknowledgedBy || 'Caregiver';
+    session.activeAlert.acknowledgedAt = new Date().toISOString();
+    session.activeAlert.responseMessage = responseMessage;
+    session.activeAlert.responseId = responseId;
   }
 
-  session.activeAlert.status = 'acknowledged';
-  session.activeAlert.acknowledgedBy = acknowledgedBy || 'Caregiver';
-  session.activeAlert.acknowledgedAt = new Date().toISOString();
-  session.activeAlert.responseMessage = responseMessage;
-  session.activeAlert.responseId = responseId;
+  if (familyState.activeAlert) {
+    familyState.activeAlert.status = 'acknowledged';
+    familyState.activeAlert.acknowledgedBy = acknowledgedBy || familyState.caregiverName || 'Caregiver';
+    familyState.activeAlert.acknowledgedAt = new Date().toISOString();
+    familyState.activeAlert.responseMessage = responseMessage;
+    familyState.activeAlert.responseId = responseId;
+  }
 
-  broadcastEvent(code, {
-    eventId: `ev-ack-${Date.now()}`,
-    type: 'CAREGIVER_ALERT_ACK',
-    pairingCode: code,
-    ack: { alertId: code, responseMessage, responseId, by: acknowledgedBy || 'Caregiver' },
-    sentAt: Date.now(),
-  });
+  if (Array.isArray(familyState.alertHistory)) {
+    familyState.alertHistory = familyState.alertHistory.map((a: any) => {
+      if (familyState.activeAlert && a.id === familyState.activeAlert.id) {
+        return {
+          ...a,
+          status: 'acknowledged',
+          acknowledgedBy: acknowledgedBy || 'Caregiver',
+          responseMessage,
+        };
+      }
+      return a;
+    });
+  }
 
   // Push response message to child's message stream
   if (responseMessage) {
@@ -868,18 +1319,33 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
       read: false,
       responseId,
     };
-    session.messages.push(newMessage);
+    if (session) session.messages.push(newMessage);
+    familyState.messages = [...(familyState.messages || []).slice(-29), newMessage];
 
     broadcastEvent(code, {
       eventId: `ev-msg-${Date.now()}`,
       type: 'CAREGIVER_MESSAGE',
       pairingCode: code,
       message: newMessage,
+      state: familyState,
       sentAt: Date.now(),
     });
   }
 
-  return res.json({ success: true, alert: session.activeAlert });
+  familyState.lastUpdated = Date.now();
+  allStates.set(code, familyState);
+  saveAllFamilyStates(allStates);
+
+  broadcastEvent(code, {
+    eventId: `ev-ack-${Date.now()}`,
+    type: 'CAREGIVER_ALERT_ACK',
+    pairingCode: code,
+    ack: { alertId: code, responseMessage, responseId, by: acknowledgedBy || 'Caregiver' },
+    state: familyState,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, alert: session?.activeAlert || familyState.activeAlert, state: familyState });
 });
 
 async function startServer() {

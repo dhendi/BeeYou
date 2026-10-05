@@ -23,8 +23,9 @@ import { PinModal } from './components/PinModal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
-import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from './services/caregiverSync';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './components/ConnectionFeedbackModal';
+import { setActiveDeviceView, getActiveDeviceView } from './services/authService';
+import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from './services/caregiverSync';
 
 // Lazy-loaded secondary components & heavy portals for bundle optimization
 const ParentDashboard = lazy(() => import('./components/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
@@ -84,8 +85,12 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const isCaregiver = params.get('caregiver') === 'true';
-      setIsCaregiverRoute(isCaregiver);
+      const roleParam = params.get('role') || params.get('mode') || (params.get('caregiver') === 'true' ? 'caregiver' : null);
+      if (roleParam === 'caregiver') {
+        setActiveDeviceView('caregiver');
+      } else if (roleParam === 'child') {
+        setActiveDeviceView('child');
+      }
       const codeParam = params.get('code');
       if (codeParam) {
         const cleanCode = codeParam.trim().toUpperCase();
@@ -120,21 +125,9 @@ const AppContent: React.FC = () => {
     }
   }, [childView]);
 
-  if (isCaregiverRoute) {
-    return (
-      <Suspense fallback={null}>
-        <CaregiverLivePortal 
-          onBackToApp={() => {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('caregiver');
-            window.location.href = url.pathname;
-          }} 
-        />
-      </Suspense>
-    );
-  }
+  const isCaregiverView = isParentMode || userRole === 'caregiver' || getActiveDeviceView() === 'caregiver';
 
-  if (isParentMode || userRole === 'caregiver') {
+  if (isCaregiverView) {
     return (
       <Suspense fallback={null}>
         <ParentDashboard />

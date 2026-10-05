@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import confetti from 'canvas-confetti';
 import {
   AACItem,
@@ -108,6 +108,11 @@ import {
   subscribeToCloudChannel,
   ConnectionStatusInfo
 } from '../services/caregiverSync';
+import {
+  startFamilyLiveSync,
+  onFamilyStateChange,
+  pushFamilyStateUpdate
+} from '../services/familySync';
 import { resolveAacImageUrl } from '../services/symbolService';
 
 type ChildViewType = 
@@ -1199,6 +1204,103 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       clearInterval(interval);
     };
   }, [userRole, childProfile.name, currentMood, childView, worldState.stars]);
+
+  const isSyncingFromRemoteRef = useRef(false);
+
+  // Unified Family Cloud Sync (Real-time remote control + live alert relay)
+  useEffect(() => {
+    const code = getPairingCode();
+    const unsubSync = startFamilyLiveSync(code);
+
+    const unsubState = onFamilyStateChange((remoteState) => {
+      if (!remoteState) return;
+
+      isSyncingFromRemoteRef.current = true;
+
+      // Remote routines sync
+      if (Array.isArray(remoteState.routines) && remoteState.routines.length > 0) {
+        setRoutines((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(remoteState.routines)) {
+            return remoteState.routines;
+          }
+          return prev;
+        });
+      }
+
+      // Remote AAC vocabulary sync
+      if (Array.isArray(remoteState.aacItems) && remoteState.aacItems.length > 0) {
+        setAacItems((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(remoteState.aacItems)) {
+            return remoteState.aacItems;
+          }
+          return prev;
+        });
+      }
+
+      // Remote Plans Changed trigger
+      if (remoteState.plansChanged) {
+        setPlansChanged((prev) => {
+          if (remoteState.plansChanged.active && !prev.active) {
+            setShowPlansChangedModal(true);
+            playChime('tap');
+            speakText(`Our plans have changed: ${remoteState.plansChanged.newPlanTitle || 'New Plan'}`);
+          }
+          return { ...prev, ...remoteState.plansChanged };
+        });
+      }
+
+      // Remote Child Profile sync
+      if (remoteState.childProfile && remoteState.childProfile.name) {
+        setChildProfile((prev) => {
+          if (prev.name !== remoteState.childProfile.name) {
+            const validAgeGroup = (remoteState.childProfile.ageGroup === 'kid' || remoteState.childProfile.ageGroup === 'teen' || remoteState.childProfile.ageGroup === 'adult')
+              ? remoteState.childProfile.ageGroup
+              : prev.ageGroup;
+            return {
+              ...prev,
+              name: remoteState.childProfile.name,
+              ...(remoteState.childProfile.interests ? { interests: remoteState.childProfile.interests } : {}),
+              ...(remoteState.childProfile.pronouns ? { pronouns: remoteState.childProfile.pronouns } : {}),
+              ageGroup: validAgeGroup,
+            };
+          }
+          return prev;
+        });
+      }
+
+      setTimeout(() => {
+        isSyncingFromRemoteRef.current = false;
+      }, 600);
+    });
+
+    return () => {
+      unsubSync();
+      unsubState();
+    };
+  }, []);
+
+  // Remote Push Debounce: When user or caregiver updates routines, AAC, or plansChanged, push to cloud
+  useEffect(() => {
+    if (isSyncingFromRemoteRef.current) return;
+    const timeout = setTimeout(() => {
+      pushFamilyStateUpdate({
+        routines,
+        aacItems,
+        plansChanged,
+        childState: {
+          lastActiveTime: new Date().toISOString(),
+          currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : 'BeeYou'}`,
+          currentMood: currentMood || 'happy',
+          habitsCompletedToday: habits.filter((h) => h.completedToday).length,
+          totalHabits: habits.length,
+          stars: worldState.stars,
+          isOnline: true,
+        },
+      });
+    }, 1200);
+
+    return () => clearTimeout(timeout);
+  }, [routines, aacItems, plansChanged, currentMood, childView, worldState.stars]);
 
   // Hydrate from localStorage on initial mount
   useEffect(() => {

@@ -106,6 +106,8 @@ import {
   clearAlertHistory,
   sendTestCaregiverAlert
 } from '../services/caregiverSync';
+import { resolveEmergencyAlert } from '../services/familySync';
+import { setActiveDeviceView } from '../services/authService';
 
 export const ParentDashboard: React.FC = () => {
   const {
@@ -333,6 +335,7 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleResolveAlert = (alertId: string) => {
+    resolveEmergencyAlert(alertId, getPairingCode());
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     try {
       localStorage.removeItem('beeyou_active_caregiver_alert');
@@ -873,22 +876,28 @@ export const ParentDashboard: React.FC = () => {
       {/* Top Caregiver Header */}
       <header className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
-          {!isCaregiverOnly ? (
-            <button
-              onClick={() => {
-                setIsParentMode(false);
-                playChime('tap');
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-slate-700"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Return to Child App</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black shadow-2xs">
-              <span>👑 Caregiver View</span>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveDeviceView('child');
+              setIsParentMode(false);
+              playChime('tap');
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href);
+                url.searchParams.set('role', 'child');
+                url.searchParams.delete('caregiver');
+                window.location.href = url.pathname + '?role=child';
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-slate-700 shadow-2xs"
+            title="Switch to Child Tablet View"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Switch to Child Tablet 🧒</span>
+          </button>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black shadow-2xs">
+            <span>👑 Caregiver Controller</span>
+          </div>
           <div>
             <h1 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
               <span>Parent & Caregiver Hub</span>
