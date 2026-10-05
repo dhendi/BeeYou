@@ -636,26 +636,26 @@ export const ChildHomeView: React.FC = () => {
       )}
 
       {/* 2. WELCOME HERO & EDITABLE DASHBOARD BUTTON */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white border border-amber-200/60 rounded-3xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0">
           <div
             onClick={() => {
               setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-black text-base sm:text-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
+            className="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-amber-300/80 text-amber-950 font-black text-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
             title="About Me ID Card"
           >
-            {childProfile.name.charAt(0).toUpperCase() || '✨'}
+            {childProfile.name.charAt(0).toUpperCase() || '🐝'}
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-[#1E293B] tracking-tight leading-tight">
               Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+            <p className="text-xs sm:text-sm text-stone-500 font-medium mt-0.5">
               {userAgeGroup === 'adult'
-                ? 'Your personalized daily executive space'
-                : 'Here is your plan and tools for today'}
+                ? 'Your personalized daily executive space • You can be yourself here'
+                : 'Here is your space for today • You can be yourself here'}
             </p>
           </div>
         </div>
@@ -667,10 +667,10 @@ export const ChildHomeView: React.FC = () => {
               setShowDashboardCustomizer(true);
               playChime('tap');
             }}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-slate-200"
+            className="px-3.5 py-2 rounded-2xl bg-[#FAF8F5] hover:bg-amber-50 text-stone-700 font-bold text-xs sm:text-sm shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-200/80 transition-all"
             title="Add, remove, or rearrange widgets on your dashboard"
           >
-            <SlidersHorizontal className="w-4 h-4 text-slate-600" />
+            <SlidersHorizontal className="w-4 h-4 text-amber-700" />
             <span>Customize Dashboard ✏️</span>
           </button>
         </div>
@@ -680,14 +680,14 @@ export const ChildHomeView: React.FC = () => {
       {(enabledFeatures?.aacCommunication !== false ||
         enabledFeatures?.sensoryBreathingPacer !== false ||
         enabledFeatures?.emergencyAlertSOS !== false) && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3" role="group" aria-label="Quick help">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3" role="group" aria-label="Quick help">
           {enabledFeatures?.aacCommunication !== false && (
             <button
               onClick={() => {
                 setChildView('aac');
                 playChime('tap');
               }}
-              className="min-h-[72px] rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 text-amber-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+              className="min-h-[76px] rounded-3xl bg-amber-50/90 hover:bg-amber-100 border-2 border-amber-300/90 text-amber-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
             >
               <span className="text-2xl" aria-hidden="true">💬</span>
               Talk
@@ -699,7 +699,7 @@ export const ChildHomeView: React.FC = () => {
                 setShowCopingToolkit(true);
                 playChime('tap');
               }}
-              className="min-h-[72px] rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 text-sky-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+              className="min-h-[76px] rounded-3xl bg-[#E8F0EB] hover:bg-[#DCEAE1] border-2 border-[#82A792]/50 text-[#2F5233] font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
             >
               <span className="text-2xl" aria-hidden="true">🛋️</span>
               Calm down
@@ -711,7 +711,7 @@ export const ChildHomeView: React.FC = () => {
                 setShowCaregiverAlertModal(true);
                 playChime('tap');
               }}
-              className="min-h-[72px] rounded-2xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 text-rose-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer"
+              className="min-h-[76px] rounded-3xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 text-rose-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
             >
               <span className="text-2xl" aria-hidden="true">🆘</span>
               I need help

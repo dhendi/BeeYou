@@ -6,21 +6,12 @@ import {
   Sparkles, 
   Check, 
   ShieldCheck, 
-  Zap, 
   Heart, 
-  Clock, 
   RotateCcw,
-  Crown,
-  Volume2,
-  Calendar,
-  Pill,
-  Palette,
-  User,
-  Share2,
-  FileText,
-  Lock
+  Crown
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { BeeMascot } from './BeeYouLogo';
 
 export const SubscriptionModal: React.FC = () => {
   const {
@@ -57,35 +48,37 @@ export const SubscriptionModal: React.FC = () => {
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-4 border-amber-300 my-auto"
+        className="bg-[#FAF8F5] rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-2 border-amber-200/90 my-auto text-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header with Gradient */}
-        <div className="relative bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 p-5 sm:p-6 text-white text-center shrink-0">
+        {/* Top Header */}
+        <div className="relative bg-slate-900 p-5 sm:p-6 text-white text-center shrink-0 border-b border-slate-800">
           <button
             type="button"
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer active:scale-95"
+            className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer active:scale-95"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-black uppercase tracking-wider mb-2">
-            <Crown className="w-4 h-4 text-amber-200" />
-            <span>BeeYou Premium</span>
+          <div className="flex justify-center mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
+              <BeeMascot size="xs" pose="celebrating" />
+              <span>BeeYou Plus</span>
+            </div>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             Unlock Full Independence & Calming Tools
           </h2>
-          <p className="text-white/90 text-xs sm:text-sm font-medium mt-1 max-w-lg mx-auto">
-            Give your child, teen, or client the complete communication toolkit with unlimited routines, soundscapes, and themes.
+          <p className="text-slate-300 text-xs sm:text-sm font-medium mt-1.5 max-w-lg mx-auto leading-relaxed">
+            Give your loved one or client the complete communication toolkit with unlimited routines, soundscapes, and customizable themes.
           </p>
 
           {/* Trigger Reason Highlight */}
           {paywallTriggerReason && (
-            <div className="mt-3.5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs shadow-sm">
+            <div className="mt-3.5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs shadow-xs">
               <Sparkles className="w-4 h-4 shrink-0" />
               <span>{paywallTriggerReason}</span>
             </div>
@@ -95,7 +88,7 @@ export const SubscriptionModal: React.FC = () => {
         {/* Modal Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
           {/* Billing Switcher (Monthly vs Yearly) */}
-          <div className="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-md mx-auto border border-slate-200 shadow-inner">
+          <div className="flex items-center justify-center p-1.5 bg-stone-200/70 rounded-2xl max-w-md mx-auto border border-stone-300/60 shadow-inner">
             <button
               type="button"
               onClick={() => {
@@ -103,7 +96,7 @@ export const SubscriptionModal: React.FC = () => {
                 setBillingCycle('monthly');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
+              className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center ${
                 selectedCycle === 'monthly'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -118,15 +111,15 @@ export const SubscriptionModal: React.FC = () => {
                 setBillingCycle('yearly');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 selectedCycle === 'yearly'
-                  ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-xs'
+                  ? 'bg-amber-500 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <span>Yearly • $129.99/yr</span>
-              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                selectedCycle === 'yearly' ? 'bg-amber-300 text-amber-950' : 'bg-emerald-200 text-emerald-950'
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                selectedCycle === 'yearly' ? 'bg-amber-100 text-amber-950' : 'bg-emerald-200 text-emerald-950'
               }`}>
                 2 Mo Free
               </span>
@@ -134,22 +127,22 @@ export const SubscriptionModal: React.FC = () => {
           </div>
 
           {/* 30-Day Free Trial Guarantee Box */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 via-purple-50 to-indigo-50 border-2 border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-left">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+          <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 text-left">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
                 <Crown className="w-6 h-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-lg font-black text-slate-900">
+                  <span className="text-lg font-bold text-slate-900">
                     {selectedCycle === 'yearly' ? '$129.99 / year' : '$12.99 / month'}
                   </span>
                   {selectedCycle === 'yearly' && (
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
                       $10.83/mo • 2 Months Free!
                     </span>
                   )}
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase">
                     30-Day Free Trial
                   </span>
                 </div>
@@ -161,7 +154,7 @@ export const SubscriptionModal: React.FC = () => {
 
             {isPremium ? (
               <div className="shrink-0 text-center sm:text-right">
-                <span className="inline-block px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-xs">
+                <span className="inline-block px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs">
                   {subscription.status === 'trial' ? `Trial Active (${trialDaysLeft}d left)` : 'Premium Active ✓'}
                 </span>
               </div>
@@ -169,7 +162,7 @@ export const SubscriptionModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleStartTrial}
-                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 Start 30-Day Free Trial
               </button>
@@ -179,11 +172,11 @@ export const SubscriptionModal: React.FC = () => {
           {/* Tier Comparison Table */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Basic Tier Card */}
-            <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between">
+            <div className="p-4 rounded-2xl bg-white border-2 border-stone-200 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-black text-slate-800 text-base">BeeYou Basic</h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[11px] font-black uppercase">
+                  <h3 className="font-bold text-slate-800 text-base">BeeYou Basic</h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-[11px] font-bold uppercase">
                     Free Forever
                   </span>
                 </div>
@@ -214,11 +207,11 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Theme:</strong> Classic clean neutral theme</span>
+                    <span><strong>Theme:</strong> BeeYou Sanctuary theme</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Avatar:</strong> Standard default avatar</span>
+                    <span><strong>Avatar:</strong> Standard avatar customization</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -228,77 +221,77 @@ export const SubscriptionModal: React.FC = () => {
               </div>
 
               {!isPremium && (
-                <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+                <div className="mt-4 pt-3 border-t border-stone-100 text-center">
                   <span className="text-xs font-bold text-slate-500">Currently on Basic Plan</span>
                 </div>
               )}
             </div>
 
             {/* Premium Tier Card */}
-            <div className="p-4 rounded-2xl bg-purple-50/70 border-2 border-purple-300 ring-2 ring-purple-200 flex flex-col justify-between relative shadow-sm">
-              <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
-                Most Popular
+            <div className="p-4 rounded-2xl bg-amber-50/70 border-2 border-amber-300 ring-2 ring-amber-200/50 flex flex-col justify-between relative shadow-xs">
+              <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                Complete Access
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-black text-purple-950 text-base flex items-center gap-1.5">
+                  <h3 className="font-bold text-slate-900 text-base flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>BeeYou Premium</span>
+                    <span>BeeYou Plus</span>
                   </h3>
-                  <span className="text-xs font-black text-purple-700">
+                  <span className="text-xs font-bold text-amber-800">
                     {selectedCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
                   </span>
                 </div>
-                <p className="text-xs text-purple-800 font-medium mb-3">
-                  Complete neurodivergent independence, rich sensory soundscapes, and themes.
+                <p className="text-xs text-amber-900/80 font-medium mb-3">
+                  Full neurodivergent independence, rich sensory soundscapes, and customizable themes.
                 </p>
 
-                <ul className="space-y-2 text-xs text-purple-950">
+                <ul className="space-y-2 text-xs text-slate-800">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>AAC:</strong> Custom photos, voice recordings &amp; motor planning phrases</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>Visual Routines:</strong> Unlimited routines & First-Then boards</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>Medications:</strong> Unlimited medications, stock counts & refill alerts</span>
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <span><strong>Medications:</strong> Unlimited medications & refill alerts</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>Sensory Room:</strong> All 17 ambient soundscapes (Train tracks, car ride, city rain, night starlight, white noise, beach, pine forest, cozy fireplace, medieval castle, brown noise & more)</span>
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <span><strong>Sensory Room:</strong> All 17 ambient soundscapes (Train tracks, night starlight, white noise, campfire & more)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>Themes:</strong> All 14+ themes + Custom Theme Studio</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>Avatar Studio:</strong> Full customization (hairstyles, colors, wheelchairs, sensory aids)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>Therapist / IEP:</strong> Exportable clinical PDF summaries for SLPs & OTs</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-purple-600 shrink-0 mt-0.5 stroke-[3]" />
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
                     <span><strong>Caregiver Sync:</strong> Real-time multi-device portal & safety alerts</span>
                   </li>
                 </ul>
               </div>
 
               {isPremium ? (
-                <div className="mt-4 pt-3 border-t border-purple-200 text-center">
-                  <span className="text-xs font-black text-purple-700">✓ Your Premium Plan is Active</span>
+                <div className="mt-4 pt-3 border-t border-amber-200 text-center">
+                  <span className="text-xs font-bold text-amber-800">✓ Your BeeYou Plus Plan is Active</span>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={handleStartTrial}
-                  className="mt-4 w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm cursor-pointer transition-all active:scale-95"
+                  className="mt-4 w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95"
                 >
                   Start 30-Day Free Trial
                 </button>
@@ -307,7 +300,7 @@ export const SubscriptionModal: React.FC = () => {
           </div>
 
           {/* Trust Guarantees */}
-          <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-stone-200">
             <div className="p-2">
               <ShieldCheck className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
               <span className="text-[11px] font-bold text-slate-700 block">30-Day Free Trial</span>
@@ -327,18 +320,18 @@ export const SubscriptionModal: React.FC = () => {
         </div>
 
         {/* Footer with Dev / Quick Test Mode */}
-        <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <div className="bg-stone-100 p-3 sm:p-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           {/* Quick Dev Switcher for Testing */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-bold text-slate-500">Quick Test Switcher:</span>
+            <span className="font-bold text-slate-500">Quick Test:</span>
             <button
               type="button"
               onClick={() => {
                 setSubscriptionTier(isPremium ? 'basic' : 'premium');
               }}
-              className="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-black text-[11px] transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-stone-200 hover:bg-stone-300 text-slate-700 font-bold text-[11px] transition-colors cursor-pointer"
             >
-              Switch to {isPremium ? 'Basic (Free)' : 'Premium (Trial)'}
+              Switch to {isPremium ? 'Basic (Free)' : 'Plus (Trial)'}
             </button>
           </div>
 
@@ -355,7 +348,7 @@ export const SubscriptionModal: React.FC = () => {
             <button
               type="button"
               onClick={handleClose}
-              className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black text-xs cursor-pointer active:scale-95 transition-all shadow-xs"
+              className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs cursor-pointer active:scale-95 transition-all shadow-xs"
             >
               {isPremium ? 'Done' : 'Continue with Basic'}
             </button>

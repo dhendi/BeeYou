@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+:root {
+  --beeyou-honey: #D97706;
+  --beeyou-honey-light: #FEF3C7;
+  --beeyou-navy: #1E293B;
+  --beeyou-sage: #5B8266;
+  --beeyou-sage-light: #E8F0EB;
+  --beeyou-cream: #FAF8F5;
+  --beeyou-card: #FFFFFF;
+}
+
 @layer base {
   html, body, #root {
     height: 100%;
@@ -7,14 +17,20 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+    background-color: #FAF8F5;
   }
 
   body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     touch-action: manipulation;
     overscroll-behavior: none;
+    color: #1E293B;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   }
 }
 
@@ -29,12 +45,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(217, 119, 6, 0.25);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(217, 119, 6, 0.45);
 }
 
 @keyframes shake {
@@ -45,4 +61,14 @@
 
 .animate-shake {
   animation: shake 0.4s ease-in-out;
+}
+
+/* Reduced motion preference respect */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -12,8 +12,10 @@ import {
   ArrowLeft, 
   Heart, 
   User, 
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
+import { BeeMascot } from './BeeYouLogo';
 
 interface OnboardingWizardModalProps {
   isOpen: boolean;
@@ -140,24 +142,24 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl border-4 border-amber-300 overflow-hidden text-slate-800">
+      <div className="bg-[#FAF8F5] rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2 border-amber-200/80 overflow-hidden text-slate-800">
         
         {/* WIZARD HEADER */}
-        <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-2xl shadow-inner">
-              ✨
+        <div className="bg-slate-900 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center shadow-inner">
+              <BeeMascot size="sm" pose={step === 1 ? 'waving' : step === 2 ? 'listening' : 'celebrating'} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/30 text-white">
+                <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
                   Welcome to BeeYou
                 </span>
-                <span className="text-xs font-semibold text-white/90">
+                <span className="text-xs font-semibold text-slate-400">
                   Step {step} of {totalSteps}
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight leading-tight mt-1 text-white">
                 {step === 1 && 'Who is using BeeYou?'}
                 {step === 2 && 'Your Profile & Communication'}
                 {step === 3 && 'Choose Your Tools & Features'}
@@ -168,7 +170,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
           {canDismiss && (
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
               title="Close wizard"
             >
               <X className="w-5 h-5" />
@@ -177,12 +179,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         </div>
 
         {/* STEP PROGRESS BAR */}
-        <div className="w-full bg-slate-100 h-2 flex shrink-0">
+        <div className="w-full bg-amber-100/60 h-1.5 flex shrink-0">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
               className={`flex-1 transition-all duration-300 ${
-                s <= step ? 'bg-amber-400' : 'bg-slate-200'
+                s <= step ? 'bg-amber-500' : 'bg-transparent'
               }`}
             />
           ))}
@@ -195,8 +197,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
           {step === 1 && (
             <div className="space-y-5 animate-in fade-in">
               <div>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium">
-                  BeeYou adapts its visuals, wording, and tools to fit you perfectly. Choose an experience to start with (you can always customize any feature later):
+                <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                  BeeYou adapts its visuals, wording, and tools to fit you comfortably. You can always customize any feature later:
                 </p>
               </div>
 
@@ -206,27 +208,27 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAgeChange('kid')}
-                  className={`p-4 rounded-3xl border-3 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
                     selectedAge === 'kid'
-                      ? 'border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-400'
-                      : 'border-slate-200 hover:border-amber-300 bg-white'
+                      ? 'border-amber-400 bg-amber-50/90 shadow-md ring-2 ring-amber-300/60'
+                      : 'border-stone-200/90 hover:border-amber-300 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-3xl">🧒</span>
                     {selectedAge === 'kid' && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs">
+                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
                         ✓
                       </span>
                     )}
                   </div>
                   <div className="mt-3">
-                    <h3 className="font-black text-slate-900 text-base">Kids</h3>
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                    <h3 className="font-bold text-slate-900 text-base">Kids</h3>
+                    <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
                       Ages 3–11
                     </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium">
-                      Cheerful colors, friendly dino & frog mascots, star stickers, and simple First/Then cards.
+                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
+                      Warm colors, cozy bee & animal companions, star rewards, and simple First/Then cards.
                     </p>
                   </div>
                 </button>
@@ -235,27 +237,27 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAgeChange('teen')}
-                  className={`p-4 rounded-3xl border-3 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
                     selectedAge === 'teen'
-                      ? 'border-indigo-500 bg-indigo-50/80 shadow-md ring-2 ring-indigo-400'
-                      : 'border-slate-200 hover:border-indigo-300 bg-white'
+                      ? 'border-indigo-400 bg-indigo-50/90 shadow-md ring-2 ring-indigo-300/60'
+                      : 'border-stone-200/90 hover:border-indigo-300 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-3xl">🎧</span>
                     {selectedAge === 'teen' && (
-                      <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs">
+                      <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
                         ✓
                       </span>
                     )}
                   </div>
                   <div className="mt-3">
-                    <h3 className="font-black text-slate-900 text-base">Teens</h3>
-                    <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                    <h3 className="font-bold text-slate-900 text-base">Teens</h3>
+                    <span className="text-[11px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
                       Ages 12–17
                     </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium">
-                      Lo-Fi and cyberpunk styles, focused visual countdowns, independence habits, and zero baby talk.
+                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
+                      Calm and lo-fi styles, focused countdowns, independence habits, and zero baby talk.
                     </p>
                   </div>
                 </button>
@@ -264,27 +266,27 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAgeChange('adult')}
-                  className={`p-4 rounded-3xl border-3 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
                     selectedAge === 'adult'
-                      ? 'border-emerald-600 bg-emerald-50/80 shadow-md ring-2 ring-emerald-400'
-                      : 'border-slate-200 hover:border-emerald-300 bg-white'
+                      ? 'border-emerald-600 bg-emerald-50/90 shadow-md ring-2 ring-emerald-300/60'
+                      : 'border-stone-200/90 hover:border-emerald-300 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-3xl">💼</span>
                     {selectedAge === 'adult' && (
-                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">
+                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
                         ✓
                       </span>
                     )}
                   </div>
                   <div className="mt-3">
-                    <h3 className="font-black text-slate-900 text-base">Adults</h3>
+                    <h3 className="font-bold text-slate-900 text-base">Adults</h3>
                     <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
                       Ages 18+
                     </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium">
-                      Executive function tools, dignified AAC boards, discreet calm styling, OLED dark mode, and therapy logs.
+                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
+                      Executive function tools, dignified AAC boards, discreet calm styling, dark mode, and therapy logs.
                     </p>
                   </div>
                 </button>
@@ -598,10 +600,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🦕</span>
+                    <span className="text-2xl">🐝</span>
                     <div>
-                      <h4 className="text-xs font-black text-slate-800">Playful Mascot Companion</h4>
-                      <p className="text-[11px] text-slate-500">Rex / Hopper greetings & cheers</p>
+                      <h4 className="text-xs font-black text-slate-800">Bee Mascot Companion</h4>
+                      <p className="text-[11px] text-slate-500">Cozy encouragement & friendly cheers</p>
                     </div>
                   </div>
                   <input
@@ -752,7 +754,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 setStep(s => s + 1);
                 playChime('tap');
               }}
-              className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+              className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
             >
               <span>Continue</span>
               <ArrowRight className="w-4 h-4" />
@@ -761,9 +763,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             <button
               type="button"
               onClick={handleFinish}
-              className="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-200 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+              className="px-7 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm sm:text-base shadow-md shadow-amber-500/20 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
             >
-              <span>🚀 Launch BeeYou</span>
+              <Sparkles className="w-4 h-4 text-amber-100" />
+              <span>Enter BeeYou</span>
             </button>
           )}
         </div>

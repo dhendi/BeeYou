@@ -219,7 +219,7 @@ export const MoreView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-5">
       <header>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">More</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">More</h1>
         <p className="text-sm text-slate-600 font-medium">
           Everything else in BeeYou. Turn sections on or off in Accessibility &amp; features.
         </p>
@@ -230,15 +230,17 @@ export const MoreView: React.FC = () => {
           setShowToolsHubModal(true);
           playChime('tap');
         }}
-        className="w-full min-h-[64px] rounded-2xl bg-purple-50 border-2 border-purple-200 text-purple-950 font-black text-base flex items-center justify-center gap-2 active:scale-98"
+        className="w-full min-h-[58px] rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border-2 border-amber-200/90 text-amber-950 font-bold text-base flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer transition-all shadow-xs"
       >
-        <span aria-hidden="true">🧰</span> Open Tools
+        <span aria-hidden="true" className="text-xl">🧰</span>
+        <span>Open Tools Hub</span>
       </button>
 
       {visibleSections.map((section) => (
         <section key={section.id} aria-labelledby={`more-${section.id}`}>
-          <h2 id={`more-${section.id}`} className="text-sm font-black uppercase tracking-wide text-slate-500 mb-2">
-            <span aria-hidden="true">{section.emoji}</span> {section.title}
+          <h2 id={`more-${section.id}`} className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+            <span aria-hidden="true">{section.emoji}</span>
+            <span>{section.title}</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {section.items.map((item) => (
@@ -248,12 +250,12 @@ export const MoreView: React.FC = () => {
                   playChime('tap');
                   item.onOpen();
                 }}
-                className="min-h-[72px] p-4 rounded-2xl bg-white border-2 border-slate-200 hover:bg-slate-50 text-left flex items-center gap-3 active:scale-98 transition"
+                className="min-h-[72px] p-4 rounded-2xl bg-white hover:bg-amber-50/40 border-2 border-stone-200/90 hover:border-amber-300/80 text-left flex items-center gap-3.5 active:scale-98 transition-all cursor-pointer shadow-xs"
               >
                 <span className="text-3xl shrink-0" aria-hidden="true">{item.emoji}</span>
                 <span className="min-w-0">
-                  <span className="block font-black text-slate-900 text-base">{item.title}</span>
-                  <span className="block text-xs text-slate-600 font-medium">{item.desc}</span>
+                  <span className="block font-bold text-slate-900 text-base">{item.title}</span>
+                  <span className="block text-xs text-slate-600 font-medium mt-0.5 leading-normal">{item.desc}</span>
                 </span>
               </button>
             ))}
