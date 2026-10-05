@@ -237,9 +237,20 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     } catch (e) {}
   }
 
-  // 2. Cloud Relay (ntfy.sh) for cross-device (Phone <-> Tablet)
+  // 2. Cloud Relay (ntfy.sh) for cross-device (Phone <-> Tablet) with strict 3.5s timeout
   if (typeof navigator !== 'undefined' && navigator.onLine) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      // Attempt local backend endpoint if running on full-stack server
+      fetch('/api/caregiver/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(envelope),
+        signal: controller.signal,
+      }).catch(() => {});
+
       await fetch(`https://ntfy.sh/${topic}`, {
         method: 'POST',
         headers: {
@@ -247,9 +258,11 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
           'Priority': eventData.type === 'CAREGIVER_ALERT' ? '5' : '3',
         },
         body: JSON.stringify(envelope),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
     } catch (e) {
-      console.warn('Cloud publish failed, fallback active:', e);
+      console.warn('Cloud publish fallback:', e);
     }
   }
 }
@@ -312,7 +325,14 @@ export function subscribeToCloudChannel(code: string): void {
   const pollCloud = async () => {
     if (typeof navigator === 'undefined' || !navigator.onLine) return;
     try {
-      const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=15s`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=15s`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const text = await res.text();
         const lines = text.split('\n').filter(Boolean);
