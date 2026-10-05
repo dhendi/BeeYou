@@ -28,6 +28,23 @@ interface CaregiverMessageItem {
   emoji?: string;
   timestamp: string;
   read: boolean;
+  responseId?: string;
+}
+
+interface TemporaryPairingSessionData {
+  pairingCode: string;
+  token: string;
+  createdAt: number;
+  expiresAt: number;
+  status: 'pending' | 'paired' | 'expired' | 'revoked';
+  initiatedBy: 'child_device' | 'caregiver';
+  childName?: string;
+  childAge?: number;
+  ageGroup?: string;
+  caregiverName?: string;
+  caregiverPhone?: string;
+  caregiverEmail?: string;
+  permissions?: any;
 }
 
 interface CaregiverSessionData {
@@ -48,9 +65,179 @@ interface CaregiverSessionData {
   quickAlert?: string | null;
   activeAlert?: any | null;
   messages: CaregiverMessageItem[];
+  caregiverPhone?: string;
+  userRole?: string;
+  permissions?: any;
+  unlinked?: boolean;
 }
 
 const caregiverSessions = new Map<string, CaregiverSessionData>();
+const pairingSessions = new Map<string, TemporaryPairingSessionData>();
+
+// Helper to generate a clean, readable temporary pairing code (e.g., K7P4-92)
+function generatePairingCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let part1 = '';
+  for (let i = 0; i < 4; i++) {
+    part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  let part2 = '';
+  for (let i = 0; i < 2; i++) {
+    part2 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `${part1}-${part2}`;
+}
+
+// -------------------------------------------------------------
+// 1. Temporary Pairing Sessions (Flow A & Flow B)
+// -------------------------------------------------------------
+
+// Create a new temporary single-use expirable pairing session
+app.post('/api/caregiver/pairing/create', (req, res) => {
+  const { initiatedBy, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body;
+  
+  let pairingCode = generatePairingCode();
+  // Ensure unique
+  while (pairingSessions.has(pairingCode)) {
+    pairingCode = generatePairingCode();
+  }
+
+  const token = 'tok-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+  const now = Date.now();
+  const session: TemporaryPairingSessionData = {
+    pairingCode,
+    token,
+    createdAt: now,
+    expiresAt: now + 10 * 60 * 1000, // 10 minutes
+    status: 'pending',
+    initiatedBy: initiatedBy === 'caregiver' ? 'caregiver' : 'child_device',
+    childName: childName || (initiatedBy === 'caregiver' ? 'Child' : undefined),
+    childAge: childAge ? Number(childAge) : undefined,
+    ageGroup: ageGroup || 'kid',
+    caregiverName: caregiverName || (initiatedBy === 'child_device' ? undefined : 'Caregiver'),
+    caregiverPhone,
+    caregiverEmail,
+    permissions: permissions || {
+      receiveAlerts: true,
+      receiveMood: true,
+      receiveRoutines: true,
+      canEditRoutines: true,
+      canEditAac: true,
+      allowLocationTag: true,
+    },
+  };
+
+  pairingSessions.set(pairingCode, session);
+  return res.json({ success: true, session });
+});
+
+// Check status of a pairing code (for live polling during setup)
+app.get('/api/caregiver/pairing/status/:code', (req, res) => {
+  const code = (req.params.code || '').trim().toUpperCase();
+  const session = pairingSessions.get(code);
+
+  if (!session) {
+    return res.status(404).json({ error: 'Pairing session not found or expired', status: 'not_found' });
+  }
+
+  if (Date.now() > session.expiresAt && session.status === 'pending') {
+    session.status = 'expired';
+  }
+
+  return res.json({ success: true, session });
+});
+
+// Claim/complete pairing (from caregiver or child)
+app.post('/api/caregiver/pairing/claim', (req, res) => {
+  const { pairingCode, claimerRole, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body;
+  const code = (pairingCode || '').trim().toUpperCase();
+  const session = pairingSessions.get(code);
+
+  if (!session) {
+    return res.status(404).json({ error: 'Invalid or expired pairing code.' });
+  }
+
+  if (Date.now() > session.expiresAt || session.status === 'expired') {
+    session.status = 'expired';
+    return res.status(400).json({ error: 'Pairing code has expired. Please generate a new code.' });
+  }
+
+  if (session.status === 'paired') {
+    return res.status(400).json({ error: 'This pairing code has already been used.' });
+  }
+
+  // Update session with claimed details
+  if (childName) session.childName = childName;
+  if (childAge) session.childAge = Number(childAge);
+  if (ageGroup) session.ageGroup = ageGroup;
+  if (caregiverName) session.caregiverName = caregiverName;
+  if (caregiverPhone) session.caregiverPhone = caregiverPhone;
+  if (caregiverEmail) session.caregiverEmail = caregiverEmail;
+  if (permissions) session.permissions = permissions;
+
+  session.status = 'paired';
+
+  // Initialize or update the permanent live caregiver session for this linked pairing
+  const permanentSession: CaregiverSessionData = {
+    pairingCode: code,
+    childName: session.childName || 'Child',
+    lastActiveTime: new Date().toISOString(),
+    currentActivity: 'Connected to BeeYou Companion',
+    currentMood: 'calm',
+    habitsCompletedToday: 0,
+    totalHabits: 4,
+    routineProgress: null,
+    stars: 10,
+    isOffline: false,
+    messages: [
+      {
+        id: 'msg-welcome-' + Date.now(),
+        senderName: session.caregiverName || 'Caregiver',
+        text: `Connected! You can be yourself here. 🐝`,
+        emoji: '🐝',
+        timestamp: new Date().toISOString(),
+        read: false,
+      }
+    ],
+    caregiverPhone: session.caregiverPhone,
+    userRole: session.ageGroup === 'adult' ? 'independent_adult' : session.ageGroup === 'teen' ? 'teen_dependent' : 'child_dependent',
+    permissions: session.permissions,
+    unlinked: false,
+  };
+
+  caregiverSessions.set(code, permanentSession);
+
+  return res.json({ 
+    success: true, 
+    session,
+    permanentSession,
+    message: 'Device successfully paired and linked!' 
+  });
+});
+
+// Unlink a paired device
+app.post('/api/caregiver/device/unlink', (req, res) => {
+  const { pairingCode } = req.body;
+  const code = (pairingCode || '').trim().toUpperCase();
+
+  const session = caregiverSessions.get(code);
+  if (session) {
+    session.unlinked = true;
+    session.activeAlert = null;
+    session.quickAlert = 'Device unlinked.';
+  }
+
+  const pairing = pairingSessions.get(code);
+  if (pairing) {
+    pairing.status = 'revoked';
+  }
+
+  return res.json({ success: true, message: 'Device unlinked successfully.' });
+});
+
+// -------------------------------------------------------------
+// 2. Live Status & Caregiver Session Endpoints
+// -------------------------------------------------------------
 
 // Get caregiver session for a pairing code
 app.get('/api/caregiver/session/:code', (req, res) => {
@@ -59,19 +246,32 @@ app.get('/api/caregiver/session/:code', (req, res) => {
     return res.status(400).json({ error: 'Pairing code is required' });
   }
 
-  const session = caregiverSessions.get(code) || {
-    pairingCode: code,
-    childName: 'Alex',
-    lastActiveTime: new Date().toISOString(),
-    currentActivity: 'Exploring BeeYou Home',
-    currentMood: 'calm',
-    habitsCompletedToday: 2,
-    totalHabits: 4,
-    routineProgress: null,
-    stars: 15,
-    isOffline: false,
-    messages: [],
-  };
+  const session = caregiverSessions.get(code);
+  if (!session) {
+    // Check if pairing session exists
+    const pairing = pairingSessions.get(code);
+    const fallback: CaregiverSessionData = {
+      pairingCode: code,
+      childName: pairing?.childName || 'Alex',
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Exploring BeeYou Home',
+      currentMood: 'calm',
+      habitsCompletedToday: 2,
+      totalHabits: 4,
+      routineProgress: null,
+      stars: 15,
+      isOffline: false,
+      messages: [],
+      caregiverPhone: pairing?.caregiverPhone,
+      permissions: pairing?.permissions,
+      unlinked: false,
+    };
+    return res.json({ session: fallback });
+  }
+
+  if (session.unlinked) {
+    return res.status(403).json({ error: 'This device has been unlinked.', session: { ...session, unlinked: true } });
+  }
 
   return res.json({ session });
 });
@@ -92,10 +292,16 @@ app.post('/api/caregiver/sync', (req, res) => {
     stars,
     isOffline,
     quickAlert,
+    caregiverPhone,
+    permissions,
   } = req.body;
 
   const code = (pairingCode || 'LUMI-101').trim().toUpperCase();
   const existing = caregiverSessions.get(code);
+
+  if (existing && existing.unlinked) {
+    return res.status(403).json({ error: 'Device unlinked. Sync halted.' });
+  }
 
   const updated: CaregiverSessionData = {
     pairingCode: code,
@@ -114,15 +320,18 @@ app.post('/api/caregiver/sync', (req, res) => {
     isOffline: !!isOffline,
     quickAlert: quickAlert !== undefined ? quickAlert : existing?.quickAlert,
     messages: existing?.messages || [],
+    caregiverPhone: caregiverPhone || existing?.caregiverPhone,
+    permissions: permissions || existing?.permissions,
+    unlinked: false,
   };
 
   caregiverSessions.set(code, updated);
   return res.json({ success: true, session: updated });
 });
 
-// Caregiver sends a warm reassurance / encouragement note to child
+// Caregiver sends a predefined or custom message to child
 app.post('/api/caregiver/message', (req, res) => {
-  const { pairingCode, senderName, text, emoji } = req.body;
+  const { pairingCode, senderName, text, emoji, responseId } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
 
   if (!code || !text) {
@@ -143,8 +352,13 @@ app.post('/api/caregiver/message', (req, res) => {
       stars: 10,
       isOffline: false,
       messages: [],
+      unlinked: false,
     };
     caregiverSessions.set(code, session);
+  }
+
+  if (session.unlinked) {
+    return res.status(403).json({ error: 'Cannot send message to unlinked device.' });
   }
 
   const newMessage: CaregiverMessageItem = {
@@ -154,10 +368,10 @@ app.post('/api/caregiver/message', (req, res) => {
     emoji: emoji || '❤️',
     timestamp: new Date().toISOString(),
     read: false,
+    responseId,
   };
 
   session.messages.push(newMessage);
-  // Keep last 30 messages max
   if (session.messages.length > 30) {
     session.messages = session.messages.slice(-30);
   }
@@ -169,12 +383,11 @@ app.post('/api/caregiver/message', (req, res) => {
 app.get('/api/caregiver/messages/:code', (req, res) => {
   const code = (req.params.code || '').trim().toUpperCase();
   const session = caregiverSessions.get(code);
-  if (!session) {
+  if (!session || session.unlinked) {
     return res.json({ messages: [], unreadCount: 0 });
   }
 
   const unreadCount = session.messages.filter((m) => !m.read).length;
-  // Mark as read
   session.messages.forEach((m) => {
     m.read = true;
   });
@@ -182,9 +395,9 @@ app.get('/api/caregiver/messages/:code', (req, res) => {
   return res.json({ messages: session.messages, unreadCount });
 });
 
-// Child triggers an urgent emotion alert (e.g. sad, needs help, overwhelmed at school or therapy)
+// Child triggers an alert (predefined 5 options supported)
 app.post('/api/caregiver/alert', (req, res) => {
-  const { pairingCode, childName, emotion, label, emoji, location, note } = req.body;
+  const { pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body;
   const code = (pairingCode || 'LUMI-101').trim().toUpperCase();
 
   let session = caregiverSessions.get(code);
@@ -194,15 +407,25 @@ app.post('/api/caregiver/alert', (req, res) => {
       childName: childName || 'Child',
       lastActiveTime: new Date().toISOString(),
       currentActivity: 'Alert Triggered',
-      currentMood: emotion || 'overwhelmed',
+      currentMood: emotion || 'need_help',
       habitsCompletedToday: 0,
       totalHabits: 4,
       routineProgress: null,
       stars: 10,
       isOffline: false,
       messages: [],
+      unlinked: false,
     };
     caregiverSessions.set(code, session);
+  }
+
+  if (session.unlinked) {
+    return res.status(403).json({ error: 'Device is unlinked.' });
+  }
+
+  // Check permissions: if alerts disabled in permissions, reject
+  if (session.permissions && session.permissions.receiveAlerts === false) {
+    return res.status(403).json({ error: 'Alerts are disabled by user permissions.' });
   }
 
   const alert = {
@@ -210,6 +433,7 @@ app.post('/api/caregiver/alert', (req, res) => {
     childName: childName || session.childName || 'Child',
     pairingCode: code,
     emotion: emotion || 'need_help',
+    alertId: alertId || 'need_help',
     label: label || 'Needs Support',
     emoji: emoji || '🚨',
     location: location || 'school',
@@ -220,15 +444,15 @@ app.post('/api/caregiver/alert', (req, res) => {
 
   session.activeAlert = alert;
   session.currentMood = emotion;
-  session.quickAlert = `URGENT ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
+  session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
 
   return res.json({ success: true, alert });
 });
 
-// Caregiver acknowledges the alert and sends instant reassurance response
+// Caregiver acknowledges the alert and sends instant predefined reassurance response
 app.post('/api/caregiver/alert/acknowledge', (req, res) => {
-  const { pairingCode, acknowledgedBy, responseMessage } = req.body;
+  const { pairingCode, acknowledgedBy, responseMessage, responseId } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
   const session = caregiverSessions.get(code);
 
@@ -240,16 +464,18 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   session.activeAlert.acknowledgedBy = acknowledgedBy || 'Caregiver';
   session.activeAlert.acknowledgedAt = new Date().toISOString();
   session.activeAlert.responseMessage = responseMessage;
+  session.activeAlert.responseId = responseId;
 
-  // Also push response message to child's message stream
+  // Push response message to child's message stream
   if (responseMessage) {
-    const newMessage = {
+    const newMessage: CaregiverMessageItem = {
       id: 'msg-ack-' + Date.now(),
       senderName: acknowledgedBy || 'Caregiver',
       text: responseMessage,
-      emoji: '🚗',
+      emoji: responseId === 'coming' ? '🚗' : responseId === 'im_here' ? '❤️' : '👍',
       timestamp: new Date().toISOString(),
       read: false,
+      responseId,
     };
     session.messages.push(newMessage);
   }

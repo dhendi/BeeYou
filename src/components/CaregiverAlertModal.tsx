@@ -1,125 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  AlertCircle, 
   X, 
   Send, 
   Heart, 
   CheckCircle2, 
   Volume2, 
-  Sparkles, 
-  Coffee, 
   ShieldAlert, 
   Wind,
   School,
   Activity,
   Bus,
   MapPin,
-  Clock
+  Clock,
+  Phone,
+  MessageCircle,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { sendCaregiverAlert, onCaregiverAlertAck } from '../services/caregiverSync';
+import { 
+  sendCaregiverAlert, 
+  onCaregiverAlertAck,
+  launchNativePhoneCall,
+  launchNativeSms,
+  getPairingCode
+} from '../services/caregiverSync';
+import { PredefinedAlertId, PredefinedCaregiverResponseId } from '../types';
 import { playChime } from '../utils/audio';
+import { BeeMascot } from './BeeYouLogo';
 
 interface CaregiverAlertModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface AlertChoice {
-  id: string;
+interface PredefinedAlertChoice {
+  id: PredefinedAlertId;
   label: string;
   sublabel: string;
   emoji: string;
-  emotion: any;
   colorClass: string;
   borderClass: string;
-  bgClass: string;
   ttsAnnouncement: string;
 }
 
-const ALERT_CHOICES: AlertChoice[] = [
+const PREDEFINED_ALERTS: PredefinedAlertChoice[] = [
   {
-    id: 'help',
+    id: 'need_help',
     label: 'I Need Help',
     sublabel: 'I need adult assistance right now',
     emoji: '🆘',
-    emotion: 'need_help',
     colorClass: 'text-rose-900',
     borderClass: 'border-rose-400 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
-    bgClass: 'bg-rose-500 text-white',
     ttsAnnouncement: 'I sent an alert asking for help right now.',
   },
   {
-    id: 'sad',
-    label: "I'm Sad / Missing You",
-    sublabel: 'Feeling down, tearful, or homesick',
-    emoji: '😢',
-    emotion: 'sad',
-    colorClass: 'text-blue-900',
-    borderClass: 'border-blue-400 hover:border-blue-500 bg-blue-50 hover:bg-blue-100',
-    bgClass: 'bg-blue-500 text-white',
-    ttsAnnouncement: 'I sent an alert that I am feeling sad and miss you.',
-  },
-  {
     id: 'overwhelmed',
-    label: 'Too Loud / Overwhelmed',
-    sublabel: 'Sensory overload, too noisy, too bright',
-    emoji: '😵‍💫',
-    emotion: 'overwhelmed',
-    colorClass: 'text-purple-900',
-    borderClass: 'border-purple-400 hover:border-purple-500 bg-purple-50 hover:bg-purple-100',
-    bgClass: 'bg-purple-500 text-white',
-    ttsAnnouncement: 'I sent an alert that I feel overwhelmed and need quiet.',
+    label: "I'm Overwhelmed",
+    sublabel: 'Sensory overload, too loud or too bright',
+    emoji: '😣',
+    colorClass: 'text-amber-900',
+    borderClass: 'border-amber-400 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
+    ttsAnnouncement: 'I sent an alert that I feel overwhelmed.',
   },
   {
-    id: 'break',
+    id: 'need_break',
     label: 'I Need a Break',
-    sublabel: 'Pause from class, activity, or therapy',
-    emoji: '☕',
-    emotion: 'need_break',
+    sublabel: 'Pause from activity, class, or therapy',
+    emoji: '🧘',
     colorClass: 'text-teal-900',
     borderClass: 'border-teal-400 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
-    bgClass: 'bg-teal-500 text-white',
     ttsAnnouncement: 'I sent an alert that I need a calm break.',
   },
   {
-    id: 'worried',
-    label: "I'm Worried / Scared",
-    sublabel: 'Anxious, nervous, or uncomfortable',
-    emoji: '😟',
-    emotion: 'worried',
-    colorClass: 'text-amber-900',
-    borderClass: 'border-amber-400 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
-    bgClass: 'bg-amber-500 text-white',
-    ttsAnnouncement: 'I sent an alert that I feel worried and need reassurance.',
+    id: 'want_to_talk',
+    label: 'I Want to Talk',
+    sublabel: 'I would like to speak with you when possible',
+    emoji: '💬',
+    colorClass: 'text-blue-900',
+    borderClass: 'border-blue-400 hover:border-blue-500 bg-blue-50 hover:bg-blue-100',
+    ttsAnnouncement: 'I sent an alert that I want to talk.',
   },
   {
-    id: 'comfort',
-    label: 'I Want a Hug / Comfort',
-    sublabel: 'Need reassuring words and love',
-    emoji: '🫂',
-    emotion: 'calm',
-    colorClass: 'text-pink-900',
-    borderClass: 'border-pink-400 hover:border-pink-500 bg-pink-50 hover:bg-pink-100',
-    bgClass: 'bg-pink-500 text-white',
-    ttsAnnouncement: 'I sent an alert that I need comfort and a hug.',
+    id: 'im_okay',
+    label: "I'm Okay",
+    sublabel: 'Just checking in to let you know I am safe',
+    emoji: '❤️',
+    colorClass: 'text-emerald-900',
+    borderClass: 'border-emerald-400 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
+    ttsAnnouncement: 'I sent an alert letting my caregiver know I am okay.',
   },
 ];
 
 export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen, onClose }) => {
-  const { childProfile, speak } = useApp();
+  const { childProfile, speak, emergencyContact, userAgeGroup } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<'school' | 'therapy' | 'bus' | 'home' | 'other'>('school');
   const [sentAlert, setSentAlert] = useState<{
+    alertId: PredefinedAlertId;
     label: string;
     emoji: string;
     time: string;
     location: string;
   } | null>(null);
-  const [caregiverResponse, setCaregiverResponse] = useState<string | null>(null);
+  
+  const [caregiverResponse, setCaregiverResponse] = useState<{
+    text: string;
+    responseId?: PredefinedCaregiverResponseId;
+    by: string;
+  } | null>(null);
+
   const [breathingStep, setBreathingStep] = useState<'Inhale slowly...' | 'Hold gently...' | 'Exhale softly...'>('Inhale slowly...');
 
-  React.useEffect(() => {
+  const isAdult = userAgeGroup === 'adult';
+  const activePhone = emergencyContact?.phone;
+
+  useEffect(() => {
     if (!sentAlert) return;
+
     const interval = setInterval(() => {
       setBreathingStep((prev) => {
         if (prev === 'Inhale slowly...') return 'Hold gently...';
@@ -130,28 +126,29 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
     const unsubAck = onCaregiverAlertAck((ack) => {
       playChime('star');
-      if (ack.responseMessage) {
-        setCaregiverResponse(ack.responseMessage);
-        speak(`Message from ${ack.by}: ${ack.responseMessage}`);
-      } else {
-        setCaregiverResponse(`${ack.by} saw your alert and is responding!`);
-        speak(`${ack.by} saw your alert and is responding.`);
-      }
+      const text = ack.responseMessage || 'Response received.';
+      setCaregiverResponse({
+        text,
+        responseId: ack.responseId,
+        by: ack.by,
+      });
+      speak(`Message from ${ack.by}: ${text}`);
     });
 
     return () => {
       clearInterval(interval);
       unsubAck();
     };
-  }, [sentAlert]);
+  }, [sentAlert, speak]);
 
   if (!isOpen) return null;
 
-  const handleSendAlert = async (choice: AlertChoice) => {
+  const handleSendAlert = async (choice: PredefinedAlertChoice) => {
     playChime('complete');
     const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
     setSentAlert({
+      alertId: choice.id,
       label: choice.label,
       emoji: choice.emoji,
       time: timeStr,
@@ -160,14 +157,15 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
     await sendCaregiverAlert({
       childName: childProfile.name,
-      emotion: choice.emotion,
+      emotion: choice.id,
+      alertId: choice.id,
       label: choice.label,
       emoji: choice.emoji,
       location: selectedLocation,
-      note: `Sent from BeeYou Easy Alert at ${selectedLocation}`,
+      note: `Location: ${selectedLocation}`,
     });
 
-    speak(`Your alert was sent to your caregiver. You are safe. Take a slow, gentle breath.`);
+    speak(`Your alert was sent to your ${isAdult ? 'emergency contact' : 'caregiver'}. You are safe. Take a slow, gentle breath.`);
   };
 
   const handleReset = () => {
@@ -177,22 +175,23 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in">
-      <div className="w-full max-w-xl rounded-3xl bg-white p-5 sm:p-7 shadow-2xl border-4 border-rose-300 text-slate-800 max-h-[92vh] flex flex-col">
+      <div className="w-full max-w-xl rounded-3xl bg-[#FAF8F5] p-5 sm:p-7 shadow-2xl border-2 border-amber-200/90 text-slate-800 max-h-[92vh] flex flex-col">
+        
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-black shadow-md shadow-rose-200 animate-pulse">
-              <ShieldAlert className="w-7 h-7" />
+            <div className="w-11 h-11 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-sm shadow-rose-300 animate-pulse">
+              <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <span>Caregiver Alert Button</span>
-                <span className="text-xs font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
-                  Quick SOS
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span>{isAdult ? 'Support Alert & Quick Check-in' : 'Caregiver Alert'}</span>
+                <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">
+                  Instant SOS
                 </span>
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Tap once to immediately notify your caregiver with your feeling & location
+              <p className="text-xs text-slate-600 font-medium">
+                Tap once to notify your {isAdult ? 'trusted contact' : 'caregiver'} with your status and location
               </p>
             </div>
           </div>
@@ -202,9 +201,9 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               handleReset();
               onClose();
             }}
-            className="p-2 rounded-2xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+            className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -212,109 +211,141 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
         <div className="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">
           {sentAlert ? (
             /* Sent State & Waiting Reassurance */
-            <div className="space-y-5 animate-in zoom-in-95">
+            <div className="space-y-4 animate-in zoom-in-95">
+              
               {/* Delivery Banner */}
-              <div className="p-5 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+              <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black shadow-md shrink-0">
-                    <CheckCircle2 className="w-7 h-7" />
+                  <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-xs font-black uppercase tracking-wider text-emerald-700 flex items-center gap-1 justify-center sm:justify-start">
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1 justify-center sm:justify-start">
                       <Clock className="w-3.5 h-3.5" />
-                      Delivered at {sentAlert.time}
+                      <span>Delivered at {sentAlert.time}</span>
                     </div>
-                    <div className="text-lg font-black text-slate-900 mt-0.5">
-                      Alert Sent: "{sentAlert.emoji} {sentAlert.label}"
+                    <div className="text-base font-bold text-slate-900 mt-0.5">
+                      Alert: "{sentAlert.emoji} {sentAlert.label}"
                     </div>
                     <div className="text-xs text-emerald-800 font-medium">
-                      Location tagged: <strong className="capitalize">{sentAlert.location}</strong>
+                      Location: <strong className="capitalize">{sentAlert.location}</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="px-3.5 py-1.5 rounded-full bg-emerald-200 text-emerald-900 text-xs font-black">
-                  Delivered ✅
+                <div className="px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-xs font-bold shrink-0">
+                  Delivered ✓
                 </div>
               </div>
 
-              {/* Caregiver Response Banner (if received) */}
+              {/* Caregiver Response Banner (Predefined Response) */}
               {caregiverResponse ? (
-                <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 text-rose-950 flex items-start gap-3.5 animate-in slide-in-from-top-2">
-                  <div className="w-11 h-11 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-xl shrink-0">
-                    ❤️
+                <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 text-slate-900 flex items-start gap-3.5 animate-in slide-in-from-top-2 shadow-xs">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
+                    {caregiverResponse.responseId === 'coming' ? '🚗' : caregiverResponse.responseId === 'im_here' ? '❤️' : '👍'}
                   </div>
                   <div className="flex-1">
-                    <span className="text-xs font-black text-rose-700 uppercase tracking-wider block">
-                      Caregiver Response:
+                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">
+                      Response from {caregiverResponse.by}:
                     </span>
-                    <p className="text-base font-black text-slate-900 mt-0.5">
-                      "{caregiverResponse}"
+                    <p className="text-base font-bold text-slate-900 mt-0.5">
+                      "{caregiverResponse.text}"
                     </p>
                     <button
-                      onClick={() => speak(`Message from caregiver: ${caregiverResponse}`)}
-                      className="mt-2 text-xs font-bold text-rose-700 hover:text-rose-900 flex items-center gap-1 cursor-pointer"
+                      type="button"
+                      onClick={() => speak(`Message from ${caregiverResponse.by}: ${caregiverResponse.text}`)}
+                      className="mt-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer"
                     >
-                      <Volume2 className="w-4 h-4" />
-                      <span>Hear Message Again</span>
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Hear Response Again</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                  <p className="text-xs text-slate-600 font-medium">
-                    Waiting for caregiver to respond... Your alert is flashing on their companion screen.
+                <div className="p-3.5 rounded-2xl bg-white border border-stone-200 text-center shadow-xs">
+                  <p className="text-xs text-slate-600 font-medium flex items-center justify-center gap-1.5">
+                    <BeeMascot size="xs" pose="listening" />
+                    <span>Waiting for response... Your alert is displayed on their companion screen.</span>
                   </p>
                 </div>
               )}
 
               {/* Calming Breathing Guidance while waiting */}
-              <div className="p-6 rounded-3xl bg-linear-to-b from-teal-50 to-emerald-50 border border-teal-200 text-center space-y-3">
-                <div className="flex items-center justify-center gap-2 text-xs font-black text-teal-800 uppercase tracking-wider">
+              <div className="p-5 rounded-3xl bg-teal-50/70 border border-teal-200 text-center space-y-2.5">
+                <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-teal-800 uppercase tracking-wider">
                   <Wind className="w-4 h-4 text-teal-600 animate-pulse" />
                   <span>Calm & Safe Breathing Pause</span>
                 </div>
 
                 {/* Animated breathing circle */}
-                <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+                <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-teal-200/50 animate-ping opacity-30"></div>
-                  <div className="w-24 h-24 rounded-full bg-teal-500 text-white flex flex-col items-center justify-center font-black shadow-lg shadow-teal-200 transition-all duration-1000">
-                    <span className="text-2xl">🌸</span>
-                    <span className="text-[10px] uppercase font-bold mt-1">Breathe</span>
+                  <div className="w-20 h-20 rounded-full bg-teal-500 text-white flex flex-col items-center justify-center font-bold shadow-md shadow-teal-200/50 transition-all duration-1000">
+                    <span className="text-xl">🌸</span>
+                    <span className="text-[9px] uppercase font-bold mt-0.5">Breathe</span>
                   </div>
                 </div>
 
-                <div className="text-base font-black text-teal-950">
+                <div className="text-sm font-bold text-teal-950">
                   {breathingStep}
                 </div>
 
                 <p className="text-xs text-teal-800 font-medium max-w-sm mx-auto">
-                  You are safe, {childProfile.name}. Your feelings are valid and help is notified.
+                  You are safe, {childProfile.name}. Take your time.
                 </p>
               </div>
 
+              {/* Native Calling & Texting Shortcuts */}
+              {activePhone && (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80">
+                  <div className="text-xs text-slate-700 font-medium">
+                    Need instant contact?
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => launchNativePhoneCall(activePhone)}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 hover:bg-stone-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Call Native Phone</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => launchNativeSms(activePhone, `BeeYou Alert: I need assistance right now.`)}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 hover:bg-stone-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Text SMS</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Action buttons */}
-              <div className="flex gap-2.5 pt-2">
+              <div className="flex gap-2.5 pt-1">
                 <button
+                  type="button"
                   onClick={handleReset}
-                  className="flex-1 py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs transition cursor-pointer"
+                  className="flex-1 py-2.5 px-4 rounded-2xl bg-white hover:bg-stone-100 border border-stone-300 text-slate-800 font-bold text-xs transition cursor-pointer"
                 >
-                  Send Another Emotion
+                  Send Another Status
                 </button>
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md transition cursor-pointer"
+                  className="flex-1 py-2.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs transition cursor-pointer"
                 >
                   Close & Continue
                 </button>
               </div>
             </div>
           ) : (
-            /* Selection State: Where are you? + Giant Buttons */
+            /* Selection State: Where are you? + Predefined Alert Cards */
             <>
               {/* Where are you right now? */}
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                <div className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <div className="bg-white p-3.5 rounded-2xl border border-stone-200/90 shadow-xs">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-slate-600" />
                   <span>Where are you right now?</span>
                 </div>
@@ -322,8 +353,8 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   {[
                     { id: 'school', label: 'School', icon: School, emoji: '🏫' },
                     { id: 'therapy', label: 'Therapy', icon: Activity, emoji: '🩺' },
-                    { id: 'bus', label: 'Bus / Van', icon: Bus, emoji: '🚌' },
-                    { id: 'other', label: 'Other', icon: MapPin, emoji: '📍' },
+                    { id: 'bus', label: 'Transit', icon: Bus, emoji: '🚌' },
+                    { id: 'home', label: 'Home', icon: MapPin, emoji: '🏡' },
                   ].map((loc) => (
                     <button
                       key={loc.id}
@@ -332,10 +363,10 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                         setSelectedLocation(loc.id as any);
                         playChime('tap');
                       }}
-                      className={`p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer border ${
+                      className={`p-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer border ${
                         selectedLocation === loc.id
-                          ? 'bg-rose-500 text-white border-rose-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : 'bg-stone-50 text-slate-700 border-stone-200 hover:bg-stone-100'
                       }`}
                     >
                       <span className="text-base">{loc.emoji}</span>
@@ -345,40 +376,67 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
               </div>
 
-              {/* Giant Alert Emotion Cards */}
+              {/* 5 Predefined Alert Cards */}
               <div>
-                <div className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2.5">
-                  Choose what you are feeling:
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  Tap to send instant update:
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {ALERT_CHOICES.map((choice) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {PREDEFINED_ALERTS.map((choice) => (
                     <button
                       key={choice.id}
+                      type="button"
                       onClick={() => handleSendAlert(choice)}
-                      className={`p-4 rounded-3xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-start gap-3.5`}
+                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-start gap-3`}
                     >
-                      <div className="text-3xl sm:text-4xl group-hover:scale-110 transition shrink-0">
+                      <div className="text-3xl group-hover:scale-110 transition shrink-0">
                         {choice.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`text-sm sm:text-base font-black ${choice.colorClass}`}>
+                        <div className={`text-sm font-bold ${choice.colorClass}`}>
                           {choice.label}
                         </div>
                         <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug">
                           {choice.sublabel}
                         </div>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-white/90 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-rose-600 shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-white/90 border border-stone-300 flex items-center justify-center text-slate-400 group-hover:text-amber-700 shrink-0">
                         <Send className="w-3.5 h-3.5" />
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
+
+              {/* Native Phone & SMS Buttons if contact is saved */}
+              {activePhone && (
+                <div className="pt-2 border-t border-stone-200 flex items-center justify-between">
+                  <span className="text-xs text-slate-600 font-medium">Direct Native Dial:</span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => launchNativePhoneCall(activePhone)}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 text-slate-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Call {activePhone}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => launchNativeSms(activePhone, `BeeYou Alert from ${childProfile.name}`)}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 text-slate-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Text SMS</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
+
       </div>
     </div>
   );

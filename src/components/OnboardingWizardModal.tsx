@@ -43,6 +43,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     themes,
     setTheme,
     setUserAgeGroup,
+    setUserRole,
     userAgeGroup: currentContextAge,
     enabledFeatures: contextFeatures,
     updateEnabledFeatures,
@@ -97,7 +98,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   };
 
   const handleFinish = () => {
-    // 1. Update Profile
+    // 1. Determine User Account Role
+    const calculatedRole = selectedAge === 'adult' 
+      ? (role === 'self' ? 'independent_adult' : 'caregiver')
+      : (selectedAge === 'teen' ? 'teen_dependent' : 'child_dependent');
+
+    // 2. Update Profile
     updateChildProfile({
       name: name.trim() || (selectedAge === 'adult' ? 'User' : 'Friend'),
       pronouns: pronouns.trim(),
@@ -107,11 +113,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       onboardingCompleted: true,
     });
 
-    // 2. Update Context Age Group & Features
+    // 3. Update Context Age Group, Role & Features
     if (setUserAgeGroup) setUserAgeGroup(selectedAge);
+    if (setUserRole) setUserRole(calculatedRole);
     if (updateEnabledFeatures) updateEnabledFeatures(features);
 
-    // 3. Update Settings
+    // 4. Update Settings
     updateSettings({
       onboardingCompleted: true,
       features: features,
@@ -119,6 +126,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     try {
       localStorage.setItem('beeyou_onboarding_completed', 'true');
       localStorage.setItem('beeyou_user_age_group', selectedAge);
+      localStorage.setItem('beeyou_user_role', calculatedRole);
       localStorage.setItem('beeyou_enabled_features', JSON.stringify(features));
     } catch (e) {}
 

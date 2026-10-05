@@ -596,6 +596,87 @@ export interface AppSettings {
   aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white' | 'neutral_monochrome';
 }
 
+export type UserAccountRole = 
+  | 'child_dependent'      // Scenario A: 10-year-old child (caregiver owned, paired device, simplified)
+  | 'teen_dependent'       // Scenario B: 15-year-old teen (caregiver linked with privacy/permissions)
+  | 'independent_adult'    // Scenario C: 27-year-old adult (self-owned account, optional emergency contact)
+  | 'caregiver';           // Caregiver dashboard view for the parent/supporter
+
+export interface CaregiverPermissions {
+  receiveAlerts: boolean;
+  receiveMood: boolean;
+  receiveRoutines: boolean;
+  canEditRoutines: boolean;
+  canEditAac: boolean;
+  allowLocationTag: boolean;
+}
+
+export interface EmergencySupportContact {
+  id: string;
+  name: string;
+  relationship: string;
+  phone: string;
+  email?: string;
+  notes?: string;
+  permissions: {
+    receiveHelpAlerts: boolean;
+    receiveOverwhelmedAlerts: boolean;
+    receiveRoutineUpdates: boolean;
+    receiveLocation: boolean;
+  };
+}
+
+export interface TemporaryPairingSession {
+  pairingCode: string; // e.g. "K7P4-92"
+  token: string;
+  createdAt: number;
+  expiresAt: number; // 10 minutes from creation
+  status: 'pending' | 'paired' | 'expired' | 'revoked';
+  initiatedBy: 'child_device' | 'caregiver';
+  childName?: string;
+  childAge?: number;
+  ageGroup?: UserAgeGroup;
+  caregiverName?: string;
+  caregiverPhone?: string;
+  caregiverEmail?: string;
+  permissions?: CaregiverPermissions;
+}
+
+export interface LinkedDeviceProfile {
+  id: string;
+  childName: string;
+  ageGroup: UserAgeGroup;
+  age?: number;
+  pairingCode: string;
+  deviceToken?: string;
+  linkedAt: string;
+  lastActive?: string;
+  status: 'connected' | 'offline' | 'unlinked';
+  permissions: CaregiverPermissions;
+}
+
+export interface CaregiverAccountData {
+  caregiverId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  linkedChildren: LinkedDeviceProfile[];
+  selectedChildId?: string;
+}
+
+export type PredefinedAlertId = 
+  | 'need_help'      // 🆘 I NEED HELP
+  | 'overwhelmed'    // 😣 I'M OVERWHELMED
+  | 'need_break'     // 🧘 I NEED A BREAK
+  | 'want_to_talk'   // 💬 I WANT TO TALK
+  | 'im_okay';       // ❤️ I'M OKAY
+
+export type PredefinedCaregiverResponseId =
+  | 'im_here'        // ❤️ I'm here
+  | 'coming'         // 🚗 I'm coming
+  | 'okay'           // 👍 Okay
+  | 'give_minutes';  // ⏳ Give me a few minutes
+
 export interface CaregiverMessage {
   id: string;
   senderName: string;
@@ -603,13 +684,15 @@ export interface CaregiverMessage {
   emoji?: string;
   timestamp: string;
   read: boolean;
+  responseId?: PredefinedCaregiverResponseId;
 }
 
 export interface CaregiverAlert {
   id: string;
   childName: string;
   pairingCode: string;
-  emotion: EmotionType | 'need_help' | 'need_break' | 'sensory_overload';
+  emotion: EmotionType | 'need_help' | 'need_break' | 'sensory_overload' | 'want_to_talk' | 'im_okay';
+  alertId?: PredefinedAlertId;
   label: string;
   emoji: string;
   location?: 'school' | 'therapy' | 'bus' | 'home' | 'other';
@@ -619,6 +702,7 @@ export interface CaregiverAlert {
   acknowledgedBy?: string;
   acknowledgedAt?: string;
   responseMessage?: string;
+  responseId?: PredefinedCaregiverResponseId;
 }
 
 export interface CaregiverChildStatus {
@@ -643,6 +727,10 @@ export interface CaregiverChildStatus {
   isOffline: boolean;
   quickAlert?: string | null;
   activeAlert?: CaregiverAlert | null;
+  emergencyContact?: EmergencySupportContact | null;
+  caregiverPhone?: string;
+  userRole?: UserAccountRole;
+  permissions?: CaregiverPermissions;
 }
 
 export interface OfflineStorageStats {

@@ -44,6 +44,10 @@ import {
   DashboardWidgetConfig,
   DashboardWidgetId,
   BeeYouBackupData,
+  UserAccountRole,
+  CaregiverPermissions,
+  EmergencySupportContact,
+  TemporaryPairingSession,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -248,9 +252,17 @@ interface AppContextType {
   showThemeModal: boolean;
   setShowThemeModal: (val: boolean) => void;
 
-  // Onboarding & Multi-Age Adaptability
+  // Onboarding & Multi-Age Adaptability & Role
   userAgeGroup: UserAgeGroup;
   setUserAgeGroup: (age: UserAgeGroup) => void;
+  userRole: UserAccountRole;
+  setUserRole: (role: UserAccountRole) => void;
+  emergencyContact: EmergencySupportContact | null;
+  setEmergencyContact: (contact: EmergencySupportContact | null) => void;
+  caregiverPermissions: CaregiverPermissions;
+  updateCaregiverPermissions: (updates: Partial<CaregiverPermissions>) => void;
+  linkedDeviceCode: string;
+  setLinkedDeviceCode: (code: string) => void;
   enabledFeatures: EnabledFeatures;
   updateEnabledFeatures: (features: Partial<EnabledFeatures>) => void;
   toggleFeature: (key: keyof EnabledFeatures) => void;
@@ -863,6 +875,76 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {}
     return 'kid';
   });
+
+  const [userRole, setUserRoleState] = useState<UserAccountRole>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_user_role');
+      if (saved === 'child_dependent' || saved === 'teen_dependent' || saved === 'independent_adult' || saved === 'caregiver') {
+        return saved;
+      }
+    } catch (e) {}
+    return 'child_dependent';
+  });
+
+  const [emergencyContact, setEmergencyContactState] = useState<EmergencySupportContact | null>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_emergency_support_contact');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
+  const [caregiverPermissions, setCaregiverPermissions] = useState<CaregiverPermissions>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_caregiver_permissions');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      receiveAlerts: true,
+      receiveMood: true,
+      receiveRoutines: true,
+      canEditRoutines: true,
+      canEditAac: true,
+      allowLocationTag: true,
+    };
+  });
+
+  const [linkedDeviceCode, setLinkedDeviceCodeState] = useState<string>(() => {
+    return getPairingCode();
+  });
+
+  const setUserRole = (role: UserAccountRole) => {
+    setUserRoleState(role);
+    try {
+      localStorage.setItem('beeyou_user_role', role);
+    } catch (e) {}
+  };
+
+  const setEmergencyContact = (contact: EmergencySupportContact | null) => {
+    setEmergencyContactState(contact);
+    try {
+      if (contact) {
+        localStorage.setItem('beeyou_emergency_support_contact', JSON.stringify(contact));
+      } else {
+        localStorage.removeItem('beeyou_emergency_support_contact');
+      }
+    } catch (e) {}
+  };
+
+  const updateCaregiverPermissions = (updates: Partial<CaregiverPermissions>) => {
+    setCaregiverPermissions((prev) => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('beeyou_caregiver_permissions', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const setLinkedDeviceCode = (code: string) => {
+    setLinkedDeviceCodeState(code);
+    setPairingCode(code);
+  };
 
   const [enabledFeatures, setEnabledFeatures] = useState<EnabledFeatures>(() => {
     try {
@@ -2668,6 +2750,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         userAgeGroup,
         setUserAgeGroup,
+        userRole,
+        setUserRole,
+        emergencyContact,
+        setEmergencyContact,
+        caregiverPermissions,
+        updateCaregiverPermissions,
+        linkedDeviceCode,
+        setLinkedDeviceCode,
         enabledFeatures,
         updateEnabledFeatures,
         toggleFeature,
