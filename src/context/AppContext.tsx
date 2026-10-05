@@ -48,6 +48,10 @@ import {
   CaregiverPermissions,
   EmergencySupportContact,
   TemporaryPairingSession,
+  HelpAlertPreset,
+  CaregiverResponsePreset,
+  CalmCopingStrategy,
+  BreathingPacerConfig,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -70,6 +74,10 @@ import {
   INITIAL_MOOD_JOURNAL_ENTRIES,
   INITIAL_CYCLE_SETTINGS,
   INITIAL_CYCLE_LOGS,
+  DEFAULT_HELP_ALERT_PRESETS,
+  DEFAULT_CAREGIVER_RESPONSES,
+  DEFAULT_CALM_STRATEGIES,
+  DEFAULT_BREATHING_PACER_CONFIG,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { AGE_DEFAULT_WIDGETS } from '../data/navigation';
@@ -391,6 +399,32 @@ interface AppContextType {
   resetDashboardWidgets: () => void;
   showDashboardCustomizer: boolean;
   setShowDashboardCustomizer: (val: boolean) => void;
+  // Editable Help Alerts & Caregiver Responses
+  helpAlertPresets: HelpAlertPreset[];
+  addHelpAlertPreset: (preset: Omit<HelpAlertPreset, 'id'>) => void;
+  updateHelpAlertPreset: (id: string, updates: Partial<HelpAlertPreset>) => void;
+  deleteHelpAlertPreset: (id: string) => void;
+  resetHelpAlertPresets: () => void;
+  caregiverResponses: CaregiverResponsePreset[];
+  addCaregiverResponse: (response: Omit<CaregiverResponsePreset, 'id'>) => void;
+  updateCaregiverResponse: (id: string, updates: Partial<CaregiverResponsePreset>) => void;
+  deleteCaregiverResponse: (id: string) => void;
+  resetCaregiverResponses: () => void;
+  showEditAlertsModal: boolean;
+  setShowEditAlertsModal: (val: boolean) => void;
+
+  // Editable Calm Down Tools & Breathing Pacer
+  calmStrategies: CalmCopingStrategy[];
+  addCalmStrategy: (strategy: Omit<CalmCopingStrategy, 'id'>) => void;
+  updateCalmStrategy: (id: string, updates: Partial<CalmCopingStrategy>) => void;
+  deleteCalmStrategy: (id: string) => void;
+  resetCalmStrategies: () => void;
+  breathingConfig: BreathingPacerConfig;
+  updateBreathingConfig: (config: Partial<BreathingPacerConfig>) => void;
+  resetBreathingConfig: () => void;
+  showEditCalmModal: boolean;
+  setShowEditCalmModal: (val: boolean) => void;
+
   // Backup & Restore
   exportProfileBackup: () => BeeYouBackupData;
   importProfileBackup: (importedJson: string | object) => { success: boolean; message: string };
@@ -2504,7 +2538,161 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording
-  // These live inside routine steps (microSteps and audioDataUrl fields) â€” no extra top-level state.
+  // These live inside routine steps (microSteps and audioDataUrl fields) — no extra top-level state.
+
+  // ── FEATURE: Editable Help Alerts & Caregiver Responses ─────────────────────
+  const [helpAlertPresets, setHelpAlertPresets] = useState<HelpAlertPreset[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_help_alert_presets');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_HELP_ALERT_PRESETS;
+  });
+
+  const [caregiverResponses, setCaregiverResponses] = useState<CaregiverResponsePreset[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_caregiver_responses');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_CAREGIVER_RESPONSES;
+  });
+
+  const [showEditAlertsModal, setShowEditAlertsModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_help_alert_presets', JSON.stringify(helpAlertPresets));
+    } catch (e) {}
+  }, [helpAlertPresets]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_caregiver_responses', JSON.stringify(caregiverResponses));
+    } catch (e) {}
+  }, [caregiverResponses]);
+
+  const addHelpAlertPreset = (preset: Omit<HelpAlertPreset, 'id'>) => {
+    const newPreset: HelpAlertPreset = {
+      ...preset,
+      id: `alert-custom-${Date.now()}`,
+      isCustom: true,
+    };
+    setHelpAlertPresets((prev) => [...prev, newPreset]);
+    if (settings.soundEffects) playChime('complete');
+  };
+
+  const updateHelpAlertPreset = (id: string, updates: Partial<HelpAlertPreset>) => {
+    setHelpAlertPresets((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
+    );
+  };
+
+  const deleteHelpAlertPreset = (id: string) => {
+    setHelpAlertPresets((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const resetHelpAlertPresets = () => {
+    setHelpAlertPresets(DEFAULT_HELP_ALERT_PRESETS);
+  };
+
+  const addCaregiverResponse = (resp: Omit<CaregiverResponsePreset, 'id'>) => {
+    const newResp: CaregiverResponsePreset = {
+      ...resp,
+      id: `resp-custom-${Date.now()}`,
+      isCustom: true,
+    };
+    setCaregiverResponses((prev) => [...prev, newResp]);
+    if (settings.soundEffects) playChime('complete');
+  };
+
+  const updateCaregiverResponse = (id: string, updates: Partial<CaregiverResponsePreset>) => {
+    setCaregiverResponses((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
+    );
+  };
+
+  const deleteCaregiverResponse = (id: string) => {
+    setCaregiverResponses((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const resetCaregiverResponses = () => {
+    setCaregiverResponses(DEFAULT_CAREGIVER_RESPONSES);
+  };
+
+  // ── FEATURE: Editable Calm Coping Strategies & Breathing Pacer ─────────────
+  const [calmStrategies, setCalmStrategies] = useState<CalmCopingStrategy[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_calm_strategies');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_CALM_STRATEGIES;
+  });
+
+  const [breathingConfig, setBreathingConfig] = useState<BreathingPacerConfig>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_breathing_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.inhaleSec) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_BREATHING_PACER_CONFIG;
+  });
+
+  const [showEditCalmModal, setShowEditCalmModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_calm_strategies', JSON.stringify(calmStrategies));
+    } catch (e) {}
+  }, [calmStrategies]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_breathing_config', JSON.stringify(breathingConfig));
+    } catch (e) {}
+  }, [breathingConfig]);
+
+  const addCalmStrategy = (strategy: Omit<CalmCopingStrategy, 'id'>) => {
+    const newStrat: CalmCopingStrategy = {
+      ...strategy,
+      id: `calm-custom-${Date.now()}`,
+      isCustom: true,
+    };
+    setCalmStrategies((prev) => [...prev, newStrat]);
+    if (settings.soundEffects) playChime('complete');
+  };
+
+  const updateCalmStrategy = (id: string, updates: Partial<CalmCopingStrategy>) => {
+    setCalmStrategies((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
+    );
+  };
+
+  const deleteCalmStrategy = (id: string) => {
+    setCalmStrategies((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const resetCalmStrategies = () => {
+    setCalmStrategies(DEFAULT_CALM_STRATEGIES);
+  };
+
+  const updateBreathingConfig = (config: Partial<BreathingPacerConfig>) => {
+    setBreathingConfig((prev) => ({ ...prev, ...config }));
+  };
+
+  const resetBreathingConfig = () => {
+    setBreathingConfig(DEFAULT_BREATHING_PACER_CONFIG);
+  };
 
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
@@ -2526,6 +2714,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setCycleLogs(INITIAL_CYCLE_LOGS);
     setUserAgeGroupState('kid');
     setEnabledFeatures(getDefaultFeaturesForAge('kid'));
+    setHelpAlertPresets(DEFAULT_HELP_ALERT_PRESETS);
+    setCaregiverResponses(DEFAULT_CAREGIVER_RESPONSES);
+    setCalmStrategies(DEFAULT_CALM_STRATEGIES);
+    setBreathingConfig(DEFAULT_BREATHING_PACER_CONFIG);
     setSentence([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('beeyou_daily_recollections');
@@ -2536,6 +2728,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.removeItem('beeyou_user_age_group');
     localStorage.removeItem('beeyou_enabled_features');
     localStorage.removeItem('beeyou_onboarding_completed');
+    localStorage.removeItem('beeyou_help_alert_presets');
+    localStorage.removeItem('beeyou_caregiver_responses');
+    localStorage.removeItem('beeyou_calm_strategies');
+    localStorage.removeItem('beeyou_breathing_config');
     if (settings.soundEffects) playChime('clear');
   };
 
@@ -2861,6 +3057,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         resetDashboardWidgets,
         showDashboardCustomizer,
         setShowDashboardCustomizer,
+
+        // Editable Help Alerts & Caregiver Responses
+        helpAlertPresets,
+        addHelpAlertPreset,
+        updateHelpAlertPreset,
+        deleteHelpAlertPreset,
+        resetHelpAlertPresets,
+        caregiverResponses,
+        addCaregiverResponse,
+        updateCaregiverResponse,
+        deleteCaregiverResponse,
+        resetCaregiverResponses,
+        showEditAlertsModal,
+        setShowEditAlertsModal,
+
+        // Editable Calm Coping Strategies & Breathing Pacer
+        calmStrategies,
+        addCalmStrategy,
+        updateCalmStrategy,
+        deleteCalmStrategy,
+        resetCalmStrategies,
+        breathingConfig,
+        updateBreathingConfig,
+        resetBreathingConfig,
+        showEditCalmModal,
+        setShowEditCalmModal,
 
         exportProfileBackup,
         importProfileBackup,

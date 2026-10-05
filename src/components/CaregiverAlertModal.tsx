@@ -92,7 +92,7 @@ const PREDEFINED_ALERTS: PredefinedAlertChoice[] = [
 ];
 
 export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen, onClose }) => {
-  const { childProfile, speak, emergencyContact, userAgeGroup, settings } = useApp();
+  const { childProfile, speak, emergencyContact, userAgeGroup, settings, helpAlertPresets, setShowEditAlertsModal } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<'school' | 'therapy' | 'bus' | 'home' | 'other'>('school');
   const [sentAlert, setSentAlert] = useState<{
     alertId: PredefinedAlertId;
@@ -393,29 +393,38 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
               </div>
 
-              {/* 5 Predefined Alert Cards */}
+              {/* Predefined Alert Cards */}
               <div>
-                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                  Tap to send instant update:
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Tap to send instant update:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditAlertsModal(true)}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200"
+                  >
+                    <span>⚙️ Customize Alerts</span>
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {PREDEFINED_ALERTS.map((choice) => (
+                  {(helpAlertPresets && helpAlertPresets.length > 0 ? helpAlertPresets : PREDEFINED_ALERTS).map((choice) => (
                     <button
                       key={choice.id}
                       type="button"
                       onClick={() => handleSendAlert(choice)}
-                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-start gap-3`}
+                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass || 'border-rose-400 bg-rose-50'} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-start gap-3`}
                     >
                       <div className="text-3xl group-hover:scale-110 transition shrink-0">
                         {choice.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-bold ${choice.colorClass}`}>
+                        <div className={`text-sm font-bold ${choice.colorClass || 'text-rose-900'}`}>
                           {choice.label}
                         </div>
                         <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug">
-                          {choice.sublabel}
+                          {choice.sublabel || choice.ttsAnnouncement}
                         </div>
                       </div>
                       <div className="w-7 h-7 rounded-full bg-white/90 border border-stone-300 flex items-center justify-center text-slate-400 group-hover:text-amber-700 shrink-0">

@@ -52,6 +52,8 @@ const AacKeyboardModal = lazy(() => import('./components/AacKeyboardModal').then
 const ToolsHubModal = lazy(() => import('./components/ToolsHubModal').then(m => ({ default: m.ToolsHubModal })));
 const AccessibilityPreferencesModal = lazy(() => import('./components/AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
 const DashboardCustomizerModal = lazy(() => import('./components/DashboardCustomizerModal').then(m => ({ default: m.DashboardCustomizerModal })));
+const EditAlertsModal = lazy(() => import('./components/EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
+const EditCalmModal = lazy(() => import('./components/EditCalmModal').then(m => ({ default: m.EditCalmModal })));
 
 const AppContent: React.FC = () => {
   const { 
@@ -246,6 +248,12 @@ const AppContent: React.FC = () => {
 
         {/* Editable Dashboard Customizer Modal */}
         <DashboardCustomizerModal />
+
+        {/* Editable Help Alerts & Caregiver Responses Customizer Modal */}
+        <EditAlertsModal />
+
+        {/* Editable Calm Tools & Breathing Pacer Customizer Modal */}
+        <EditCalmModal />
       </Suspense>
     </div>
   );

@@ -673,13 +673,54 @@ export type PredefinedAlertId =
   | 'overwhelmed'    // 😣 I'M OVERWHELMED
   | 'need_break'     // 🧘 I NEED A BREAK
   | 'want_to_talk'   // 💬 I WANT TO TALK
-  | 'im_okay';       // ❤️ I'M OKAY
+  | 'im_okay'        // ❤️ I'M OKAY
+  | string;          // Custom user-defined alert IDs
+
+export interface HelpAlertPreset {
+  id: string;
+  label: string;
+  sublabel: string;
+  emoji: string;
+  colorClass: string;
+  borderClass: string;
+  ttsAnnouncement: string;
+  isCustom?: boolean;
+  priority?: 'high' | 'medium' | 'low';
+}
 
 export type PredefinedCaregiverResponseId =
   | 'im_here'        // ❤️ I'm here
   | 'coming'         // 🚗 I'm coming
   | 'okay'           // 👍 Okay
-  | 'give_minutes';  // ⏳ Give me a few minutes
+  | 'give_minutes'   // ⏳ Give me a few minutes
+  | string;          // Custom user-defined response IDs
+
+export interface CaregiverResponsePreset {
+  id: string;
+  label: string;
+  text: string;
+  emoji: string;
+  isCustom?: boolean;
+}
+
+export interface CalmCopingStrategy {
+  id: string;
+  title: string;
+  instruction: string;
+  emoji: string;
+  category: 'breathing' | 'sensory' | 'movement' | 'comfort' | 'grounding';
+  durationMin?: number;
+  isCustom?: boolean;
+}
+
+export interface BreathingPacerConfig {
+  pattern: 'box_4_4_4_4' | 'relax_4_7_8' | 'calm_4_2_6' | 'gentle_3_3_3' | 'custom';
+  inhaleSec: number;
+  holdSec: number;
+  exhaleSec: number;
+  pauseSec?: number;
+  soundTheme: 'chime' | 'soft_bell' | 'ocean' | 'silent';
+}
 
 export interface CaregiverMessage {
   id: string;

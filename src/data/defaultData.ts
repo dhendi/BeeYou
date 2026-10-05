@@ -21,6 +21,10 @@ import {
   CopingStrategyUsed,
   CycleDailyLog,
   CycleSettings,
+  HelpAlertPreset,
+  CaregiverResponsePreset,
+  CalmCopingStrategy,
+  BreathingPacerConfig,
 } from '../types';
 
 export const EMOTIONS: EmotionOption[] = [
@@ -1094,6 +1098,126 @@ export const COPING_META: Record<CopingStrategyUsed, { label: string; emoji: str
   gaming_special_interest: { label: 'Special Interest / Gaming', emoji: '🎮' },
   nap_rest: { label: 'Rest / Nap', emoji: '💤' },
   hydration_snack: { label: 'Water & Nutritious Snack', emoji: '🍎' },
+};
+
+export const DEFAULT_HELP_ALERT_PRESETS: HelpAlertPreset[] = [
+  {
+    id: 'need_help',
+    label: 'I Need Help',
+    sublabel: 'I need adult assistance right now',
+    emoji: '🆘',
+    colorClass: 'text-rose-900',
+    borderClass: 'border-rose-400 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
+    ttsAnnouncement: 'I sent an alert asking for help right now.',
+    priority: 'high',
+  },
+  {
+    id: 'overwhelmed',
+    label: "I'm Overwhelmed",
+    sublabel: 'Sensory overload, too loud or too bright',
+    emoji: '😣',
+    colorClass: 'text-amber-900',
+    borderClass: 'border-amber-400 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
+    ttsAnnouncement: 'I sent an alert that I feel overwhelmed.',
+    priority: 'high',
+  },
+  {
+    id: 'need_break',
+    label: 'I Need a Break',
+    sublabel: 'Pause from activity, class, or therapy',
+    emoji: '🧘',
+    colorClass: 'text-teal-900',
+    borderClass: 'border-teal-400 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
+    ttsAnnouncement: 'I sent an alert that I need a calm break.',
+    priority: 'medium',
+  },
+  {
+    id: 'want_to_talk',
+    label: 'I Want to Talk',
+    sublabel: 'I would like to speak with you when possible',
+    emoji: '💬',
+    colorClass: 'text-blue-900',
+    borderClass: 'border-blue-400 hover:border-blue-500 bg-blue-50 hover:bg-blue-100',
+    ttsAnnouncement: 'I sent an alert that I want to talk.',
+    priority: 'medium',
+  },
+  {
+    id: 'im_okay',
+    label: "I'm Okay",
+    sublabel: 'Just checking in to let you know I am safe',
+    emoji: '❤️',
+    colorClass: 'text-emerald-900',
+    borderClass: 'border-emerald-400 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
+    ttsAnnouncement: 'I sent an alert letting my caregiver know I am okay.',
+    priority: 'low',
+  },
+];
+
+export const DEFAULT_CAREGIVER_RESPONSES: CaregiverResponsePreset[] = [
+  { id: 'im_here', label: "I'm here", text: "I'm here for you ❤️", emoji: '❤️' },
+  { id: 'coming', label: "I'm coming", text: "I'm on my way 🚗", emoji: '🚗' },
+  { id: 'okay', label: "Okay", text: "Okay, got your message 👍", emoji: '👍' },
+  { id: 'give_minutes', label: "Give me a few minutes", text: "Give me a few minutes ⏳", emoji: '⏳' },
+];
+
+export const DEFAULT_CALM_STRATEGIES: CalmCopingStrategy[] = [
+  {
+    id: 'cs-1',
+    title: 'Box Breathing Pacer',
+    instruction: 'Inhale 4s, hold 4s, exhale 4s, hold 4s',
+    emoji: '🫁',
+    category: 'breathing',
+    durationMin: 3,
+  },
+  {
+    id: 'cs-2',
+    title: '5-4-3-2-1 Grounding',
+    instruction: 'Notice 5 things to see, 4 to feel, 3 to hear, 2 to smell, 1 to taste',
+    emoji: '👀',
+    category: 'grounding',
+    durationMin: 4,
+  },
+  {
+    id: 'cs-3',
+    title: 'Weighted Comfort / Deep Pressure',
+    instruction: 'Use weighted dino toy or blanket across lap',
+    emoji: '🦕',
+    category: 'comfort',
+    durationMin: 5,
+  },
+  {
+    id: 'cs-4',
+    title: 'Noise-Cancelling Headphones',
+    instruction: 'Put on headphones to reduce loud environment sounds',
+    emoji: '🎧',
+    category: 'sensory',
+    durationMin: 5,
+  },
+  {
+    id: 'cs-5',
+    title: 'Drink Cool Water & Gentle Stretch',
+    instruction: 'Take slow sips of water and roll shoulders back',
+    emoji: '💧',
+    category: 'movement',
+    durationMin: 2,
+  },
+  {
+    id: 'cs-6',
+    title: 'Digital Fidget & Bubble Pop',
+    instruction: 'Interact with satisfying pop bubbles and tactile switches',
+    emoji: '🫧',
+    category: 'sensory',
+    durationMin: 3,
+  },
+];
+
+export const DEFAULT_BREATHING_PACER_CONFIG: BreathingPacerConfig = {
+  pattern: 'box_4_4_4_4',
+  inhaleSec: 4,
+  holdSec: 3,
+  exhaleSec: 4,
+  pauseSec: 1,
+  soundTheme: 'chime',
 };
 
 

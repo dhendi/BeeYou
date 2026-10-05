@@ -42,12 +42,15 @@ export const CopingToolkitModal: React.FC = () => {
     setShowFivePointModal,
     setShowPieTimerModal,
     setShowFidgetModal,
+    breathingConfig,
+    calmStrategies,
+    setShowEditCalmModal,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'breathing' | 'timer' | 'grounding' | 'sound'>('breathing');
+  const [activeTab, setActiveTab] = useState<'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound'>('breathing');
 
   // Breathing state
-  const [breathePhase, setBreathePhase] = useState<'Inhale...' | 'Hold...' | 'Exhale...'>('Inhale...');
+  const [breathePhase, setBreathePhase] = useState<'Inhale...' | 'Hold...' | 'Exhale...' | 'Rest...' | string>('Inhale...');
   const [breatheScale, setBreatheScale] = useState(1);
 
   // Timer state
@@ -63,6 +66,9 @@ export const CopingToolkitModal: React.FC = () => {
   // Grounding state
   const [groundingStep, setGroundingStep] = useState(0);
 
+  // Strategy category filter
+  const [strategyFilter, setStrategyFilter] = useState<string>('all');
+
   // Subscribe to live soundscape changes
   useEffect(() => {
     const unsub = subscribeToSoundscape((id) => {
@@ -74,6 +80,11 @@ export const CopingToolkitModal: React.FC = () => {
     return () => unsub();
   }, []);
 
+  const inhaleSec = breathingConfig?.inhaleSec || 4;
+  const holdSec = breathingConfig?.holdSec || 3;
+  const exhaleSec = breathingConfig?.exhaleSec || 4;
+  const pauseSec = breathingConfig?.pauseSec ?? 1;
+
   // Breathing loop
   useEffect(() => {
     if (!showCopingToolkit || activeTab !== 'breathing') return;
@@ -81,22 +92,28 @@ export const CopingToolkitModal: React.FC = () => {
     let isSubscribed = true;
     const cycle = async () => {
       while (isSubscribed) {
-        setBreathePhase('Inhale...');
+        setBreathePhase(`Inhale (${inhaleSec}s)`);
         setBreatheScale(1.4);
         playChime('breathe');
-        await new Promise((r) => setTimeout(r, 4000));
+        await new Promise((r) => setTimeout(r, inhaleSec * 1000));
         if (!isSubscribed) break;
 
-        setBreathePhase('Hold...');
-        await new Promise((r) => setTimeout(r, 3000));
-        if (!isSubscribed) break;
+        if (holdSec > 0) {
+          setBreathePhase(`Hold gently (${holdSec}s)`);
+          await new Promise((r) => setTimeout(r, holdSec * 1000));
+          if (!isSubscribed) break;
+        }
 
-        setBreathePhase('Exhale...');
+        setBreathePhase(`Exhale softly (${exhaleSec}s)`);
         setBreatheScale(1.0);
-        await new Promise((r) => setTimeout(r, 4000));
+        await new Promise((r) => setTimeout(r, exhaleSec * 1000));
         if (!isSubscribed) break;
 
-        await new Promise((r) => setTimeout(r, 1000));
+        if (pauseSec > 0) {
+          setBreathePhase(`Rest (${pauseSec}s)`);
+          await new Promise((r) => setTimeout(r, pauseSec * 1000));
+          if (!isSubscribed) break;
+        }
       }
     };
     cycle();
@@ -104,7 +121,7 @@ export const CopingToolkitModal: React.FC = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [showCopingToolkit, activeTab]);
+  }, [showCopingToolkit, activeTab, inhaleSec, holdSec, exhaleSec, pauseSec]);
 
   // Timer interval
   useEffect(() => {
@@ -189,6 +206,17 @@ export const CopingToolkitModal: React.FC = () => {
             <span>Deep Breathing</span>
           </button>
           <button
+            onClick={() => setActiveTab('strategies')}
+            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'strategies'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Heart className="w-4 h-4" />
+            <span>Calm Tools</span>
+          </button>
+          <button
             onClick={() => setActiveTab('timer')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
               activeTab === 'timer'
@@ -208,7 +236,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Eye className="w-4 h-4" />
-            <span>5-4-3-2-1 Grounding</span>
+            <span>5-4-3-2-1</span>
           </button>
           <button
             onClick={() => setActiveTab('sound')}
@@ -219,7 +247,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Volume2 className="w-4 h-4" />
-            <span>Sensory Sounds</span>
+            <span>Sounds</span>
           </button>
         </div>
 
@@ -280,14 +308,97 @@ export const CopingToolkitModal: React.FC = () => {
               >
                 <div className="w-32 h-32 rounded-full bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-teal-900 shadow-inner">
                   <Wind className="w-8 h-8 text-teal-600 mb-1" />
-                  <span className="font-black text-lg sm:text-xl tracking-tight">
+                  <span className="font-black text-sm sm:text-base tracking-tight leading-tight">
                     {breathePhase}
                   </span>
                 </div>
               </div>
-              <p className="text-slate-600 font-medium text-sm mt-8 max-w-xs">
+              <p className="text-slate-600 font-medium text-xs sm:text-sm mt-6 max-w-xs">
                 Follow the gentle bubble. Breathe in slowly through your nose, hold, and breathe out like blowing a dandelion.
               </p>
+              <div className="mt-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditCalmModal(true)}
+                  className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Customize Pace ({inhaleSec}s - {holdSec}s - {exhaleSec}s)</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CALM TOOLS & COPING STRATEGIES */}
+          {activeTab === 'strategies' && (
+            <div className="w-full flex flex-col gap-3.5 text-left animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-black text-slate-800">Calming Coping Strategies</h3>
+                  <p className="text-[11px] text-slate-500">Pick a comforting activity to regulate your nervous system</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditCalmModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-bold border border-teal-200 flex items-center gap-1 cursor-pointer"
+                >
+                  <Sliders className="w-3 h-3" />
+                  <span>Customize</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+                {calmStrategies.map((strat) => (
+                  <div
+                    key={strat.id}
+                    className="p-3.5 rounded-2xl bg-slate-50 hover:bg-teal-50/70 border border-slate-200 hover:border-teal-300 transition-all flex flex-col justify-between gap-2 shadow-xs group"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-2xl p-1.5 rounded-xl bg-white shadow-xs group-hover:scale-110 transition shrink-0">
+                        {strat.emoji}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-black text-slate-800 truncate">{strat.title}</p>
+                          {strat.durationMin && (
+                            <span className="text-[9px] font-bold text-teal-700 bg-teal-100 px-1.5 py-0.2 rounded-md">
+                              {strat.durationMin}m
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2 leading-tight">
+                          {strat.instruction}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-200/60">
+                      <button
+                        onClick={() => {
+                          speak(strat.instruction || strat.title);
+                          playChime('tap');
+                        }}
+                        className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[10px] font-bold hover:bg-slate-100 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Volume2 className="w-3 h-3 text-teal-600" />
+                        <span>Read</span>
+                      </button>
+                      {strat.durationMin && (
+                        <button
+                          onClick={() => {
+                            startBreakTimer(strat.durationMin || 3);
+                            setActiveTab('timer');
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <Timer className="w-3 h-3" />
+                          <span>Start {strat.durationMin}m Timer</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

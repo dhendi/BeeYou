@@ -137,9 +137,10 @@ export const ParentDashboard: React.FC = () => {
     setSubscriptionTier,
     setBillingCycle,
     triggerUpgrade,
-    getTrialDaysRemaining,
     exportProfileBackup,
     importProfileBackup,
+    setShowEditAlertsModal,
+    setShowEditCalmModal,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -4819,11 +4820,20 @@ export const ParentDashboard: React.FC = () => {
                   </span>
                 </label>
 
-                {/* Alert Notification Channels */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 mt-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                    Alert & Notification Channels
-                  </h4>
+                {/* Alert Notification Channels & Customizers */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 mt-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                      Alert & Help Customizer
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowEditAlertsModal(true)}
+                      className="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <span>⚙️ Edit Alert Buttons & Replies</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
                       <input
@@ -4865,6 +4875,25 @@ export const ParentDashboard: React.FC = () => {
                       <span>Read responses aloud (TTS)</span>
                     </label>
                   </div>
+                </div>
+
+                {/* Calm Tools Customizer */}
+                <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200 flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-xs font-black text-teal-950 uppercase tracking-wider">
+                      Calm Down Tools & Breathing Pacer
+                    </h4>
+                    <p className="text-[11px] text-teal-700 font-medium mt-0.5">
+                      Customize second-by-second breathing timings (Box 4-4-4-4, 4-7-8) and manage personal coping strategies.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditCalmModal(true)}
+                    className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
+                  >
+                    <span>🫁 Edit Calm Tools</span>
+                  </button>
                 </div>
               </div>
 
