@@ -131,6 +131,10 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   colorCodingEnabled: true,
   autoSpeakSentence: true,
   aacButtonColorMode: 'fitzgerald',
+  visualAlerts: true,
+  soundAlerts: true,
+  vibrationAlerts: true,
+  spokenAlerts: false,
 };
 
 export const INITIAL_AVATAR: AvatarConfig = {

@@ -25,8 +25,8 @@ import {
   getPairingCode
 } from '../services/caregiverSync';
 import { PredefinedAlertId, PredefinedCaregiverResponseId } from '../types';
-import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
+import { ContextualHelpButton } from './ContextualHelpButton';
 
 interface CaregiverAlertModalProps {
   isOpen: boolean;
@@ -92,7 +92,7 @@ const PREDEFINED_ALERTS: PredefinedAlertChoice[] = [
 ];
 
 export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen, onClose }) => {
-  const { childProfile, speak, emergencyContact, userAgeGroup } = useApp();
+  const { childProfile, speak, emergencyContact, userAgeGroup, settings } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<'school' | 'therapy' | 'bus' | 'home' | 'other'>('school');
   const [sentAlert, setSentAlert] = useState<{
     alertId: PredefinedAlertId;
@@ -125,26 +125,38 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     }, 4000);
 
     const unsubAck = onCaregiverAlertAck((ack) => {
-      playChime('star');
+      if (settings?.soundAlerts !== false) {
+        try { const { playChime } = require('../utils/audio'); playChime('star'); } catch (e) {}
+      }
+      if (settings?.vibrationAlerts !== false && typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
       const text = ack.responseMessage || 'Response received.';
       setCaregiverResponse({
         text,
         responseId: ack.responseId,
         by: ack.by,
       });
-      speak(`Message from ${ack.by}: ${text}`);
+      if (settings?.spokenAlerts !== false) {
+        speak(`Message from ${ack.by}: ${text}`);
+      }
     });
 
     return () => {
       clearInterval(interval);
       unsubAck();
     };
-  }, [sentAlert, speak]);
+  }, [sentAlert, speak, settings]);
 
   if (!isOpen) return null;
 
   const handleSendAlert = async (choice: PredefinedAlertChoice) => {
-    playChime('complete');
+    if (settings?.soundAlerts !== false) {
+      try { const { playChime } = require('../utils/audio'); playChime('complete'); } catch (e) {}
+    }
+    if (settings?.vibrationAlerts !== false && typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(150);
+    }
     const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
     setSentAlert({
@@ -165,7 +177,9 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       note: `Location: ${selectedLocation}`,
     });
 
-    speak(`Your alert was sent to your ${isAdult ? 'emergency contact' : 'caregiver'}. You are safe. Take a slow, gentle breath.`);
+    if (settings?.spokenAlerts !== false) {
+      speak(`Your alert was sent to your ${isAdult ? 'emergency contact' : 'caregiver'}. You are safe. Take a slow, gentle breath.`);
+    }
   };
 
   const handleReset = () => {
@@ -196,15 +210,18 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              handleReset();
-              onClose();
-            }}
-            className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ContextualHelpButton topic="alerts" label="How alerts work" variant="pill" />
+            <button
+              onClick={() => {
+                handleReset();
+                onClose();
+              }}
+              className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}

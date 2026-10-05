@@ -408,6 +408,76 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
+              {/* Notification & Alert Channel Settings */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="pb-1 border-b border-slate-200 dark:border-slate-700">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                    Help & Routine Alert Settings
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Customize how alerts and reminders reach you and your caregiver.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Visual Alerts */}
+                  <label className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Visual Alerts</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">On-screen banners</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.visualAlerts ?? true}
+                      onChange={(e) => updateSettings({ visualAlerts: e.target.checked })}
+                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    />
+                  </label>
+
+                  {/* Sound Alerts */}
+                  <label className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Sound Chimes</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Audible notification</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.soundAlerts ?? true}
+                      onChange={(e) => updateSettings({ soundAlerts: e.target.checked })}
+                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    />
+                  </label>
+
+                  {/* Vibration */}
+                  <label className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Vibration (Haptics)</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Device buzz pulse</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.vibrationAlerts ?? true}
+                      onChange={(e) => updateSettings({ vibrationAlerts: e.target.checked })}
+                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    />
+                  </label>
+
+                  {/* Spoken Alert */}
+                  <label className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Spoken Voice Alerts</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Read responses aloud</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.spokenAlerts ?? false}
+                      onChange={(e) => updateSettings({ spokenAlerts: e.target.checked })}
+                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    />
+                  </label>
+                </div>
+              </div>
+
               {/* Spoken Announcements / Narrator Toggle */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
                 <div>

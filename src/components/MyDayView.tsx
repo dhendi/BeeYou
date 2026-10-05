@@ -7,19 +7,24 @@ import {
   Sparkles, 
   ArrowRight, 
   RotateCcw, 
-  AlertCircle,
-  Volume2,
-  Info,
-  Timer,
-  Pill,
-  Mic,
-  Wand2,
-  Play
+  Volume2, 
+  Info, 
+  Timer, 
+  Mic, 
+  Wand2, 
+  Play,
+  Sun,
+  Moon,
+  ListFilter,
+  Eye,
+  Layers,
+  Sparkle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { VisualScheduleStep } from '../types';
+import { ContextualHelpButton } from './ContextualHelpButton';
 
 export const MyDayView: React.FC = () => {
   const {
@@ -33,18 +38,17 @@ export const MyDayView: React.FC = () => {
     announce,
     setChildView,
     earnedStickers,
-    dailyRecollections,
-    setShowRecollectionModal,
-    medications,
-    takeMedicationDose,
-    setShowMedicationModal,
-    enabledFeatures,
   } = useApp();
-
 
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
     routines[0]?.id || 'routine-morning'
   );
+
+  // View Mode: 'focus_mode' (One Step at a Time) vs 'list_mode' (Full Schedule)
+  const [scheduleViewMode, setScheduleViewMode] = useState<'focus_mode' | 'list_mode'>('focus_mode');
+  
+  // Category Filter: 'all' | 'morning' | 'evening' | 'other'
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'morning' | 'evening' | 'other'>('all');
 
   const timerSectionRef = React.useRef<HTMLDivElement | null>(null);
   const [playingAudioStepId, setPlayingAudioStepId] = useState<string | null>(null);
@@ -63,10 +67,22 @@ export const MyDayView: React.FC = () => {
     }
   };
 
-  const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || routines[0];
+  // Filtered routines based on category filter
+  const filteredRoutines = routines.filter((r) => {
+    if (categoryFilter === 'morning') return r.category === 'morning';
+    if (categoryFilter === 'evening') return r.category === 'bedtime' || r.category === 'after-school';
+    if (categoryFilter === 'other') return r.category !== 'morning' && r.category !== 'bedtime' && r.category !== 'after-school';
+    return true;
+  });
 
-  // Find next uncompleted step
-  const nextStep = currentRoutine?.steps.find((s) => !s.completed);
+  const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || filteredRoutines[0] || routines[0];
+
+  // Find next uncompleted step (Active Step)
+  const activeStep = currentRoutine?.steps.find((s) => !s.completed);
+  const activeStepIndex = currentRoutine?.steps.findIndex((s) => !s.completed) ?? -1;
+  const subsequentStep = activeStepIndex >= 0 && activeStepIndex + 1 < (currentRoutine?.steps.length || 0)
+    ? currentRoutine.steps[activeStepIndex + 1]
+    : undefined;
 
   const [activeTimerTask, setActiveTimerTask] = useState<{
     title: string;
@@ -75,30 +91,30 @@ export const MyDayView: React.FC = () => {
     stepId?: string;
     autoStart?: boolean;
   } | undefined>(() => {
-    if (nextStep) {
+    if (activeStep) {
       return {
-        title: nextStep.title,
-        emoji: nextStep.emoji,
-        durationSeconds: (nextStep.durationMin || 2) * 60,
-        stepId: nextStep.id,
+        title: activeStep.title,
+        emoji: activeStep.emoji,
+        durationSeconds: (activeStep.durationMin || 2) * 60,
+        stepId: activeStep.id,
         autoStart: false,
       };
     }
     return undefined;
   });
 
-  // When selected routine changes, sync timer to current activity
+  // When selected routine changes or step finishes, sync timer to current activity
   React.useEffect(() => {
-    if (nextStep) {
+    if (activeStep) {
       setActiveTimerTask({
-        title: nextStep.title,
-        emoji: nextStep.emoji,
-        durationSeconds: (nextStep.durationMin || 2) * 60,
-        stepId: nextStep.id,
+        title: activeStep.title,
+        emoji: activeStep.emoji,
+        durationSeconds: (activeStep.durationMin || 2) * 60,
+        stepId: activeStep.id,
         autoStart: false,
       });
     }
-  }, [selectedRoutineId, nextStep?.id]);
+  }, [selectedRoutineId, activeStep?.id]);
 
   if (!currentRoutine) {
     return (
@@ -143,20 +159,21 @@ export const MyDayView: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
+      
       {/* 1. PLANS CHANGED ALERT BANNER (If Active) */}
       {plansChanged.active && (
         <div
           onClick={() => setShowPlansChangedModal(true)}
-          className="bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98"
+          className="bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in"
         >
           <div className="flex items-center gap-3">
             <span className="text-3xl sm:text-4xl animate-bounce">🔄</span>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[11px] uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
                   Important Change
                 </span>
-                <span className="text-xs font-bold text-amber-900">Tap to see new plan</span>
+                <span className="text-xs font-bold text-amber-900">Tap to see new calm plan</span>
               </div>
               <h2 className="text-base sm:text-lg font-black text-amber-950 mt-0.5">
                 New Plan: {plansChanged.newPlanTitle}
@@ -167,9 +184,102 @@ export const MyDayView: React.FC = () => {
         </div>
       )}
 
-      {/* 2. ROUTINE SELECTOR TABS */}
+      {/* 2. TOP CONTROLS: CATEGORY FILTER & HELP */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+        
+        {/* Category Filter Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('all');
+              playChime('tap');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 ${
+              categoryFilter === 'all'
+                ? 'bg-slate-900 dark:bg-amber-400 text-white dark:text-amber-950 shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            All Schedules
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('morning');
+              playChime('tap');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+              categoryFilter === 'morning'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 hover:bg-amber-100'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5" />
+            <span>Morning ☀️</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('evening');
+              playChime('tap');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+              categoryFilter === 'evening'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-300 hover:bg-indigo-100'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span>Evening 🌙</span>
+          </button>
+        </div>
+
+        {/* View Mode Switcher & Contextual Help Button */}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => {
+                setScheduleViewMode('focus_mode');
+                playChime('tap');
+              }}
+              className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+                scheduleViewMode === 'focus_mode'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}
+              title="Focus on one activity at a time"
+            >
+              <span>🎯 One at a Time</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setScheduleViewMode('list_mode');
+                playChime('tap');
+              }}
+              className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+                scheduleViewMode === 'list_mode'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
+                  : 'text-slate-600 dark:text-slate-400'
+              }`}
+              title="View full schedule checklist"
+            >
+              <span>📋 Full List</span>
+            </button>
+          </div>
+
+          <ContextualHelpButton topic="schedules" label="How it works" variant="pill" />
+        </div>
+      </div>
+
+      {/* 3. ROUTINE SELECTOR TABS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-        {routines.map((routine) => {
+        {filteredRoutines.map((routine) => {
           const isSelected = routine.id === selectedRoutineId;
           const isAllDone =
             routine.steps.length > 0 && routine.steps.every((s) => s.completed);
@@ -183,8 +293,8 @@ export const MyDayView: React.FC = () => {
               }}
               className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm border-2 transition-all shrink-0 cursor-pointer ${
                 isSelected
-                  ? 'bg-sky-500 text-white border-sky-600 shadow-md ring-2 ring-sky-300'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                  ? 'bg-amber-500 text-white border-amber-600 shadow-md ring-2 ring-amber-300'
+                  : 'bg-white dark:bg-slate-850 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
               }`}
             >
               <span className="text-lg">{routine.emoji}</span>
@@ -195,15 +305,15 @@ export const MyDayView: React.FC = () => {
         })}
       </div>
 
-      {/* 3. FIRST -> THEN CARD (Core Predictability Principle) */}
+      {/* 4. FIRST -> THEN CARD (Core Predictability Principle) */}
       {currentRoutine.firstThen && (
         <section
           aria-label="First then board"
-          className="bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-3 border-indigo-200 rounded-3xl p-4 sm:p-5 shadow-sm"
+          className="bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-850 border-2 border-indigo-200 dark:border-indigo-800 rounded-3xl p-4 sm:p-5 shadow-xs"
         >
-          <div className="text-[11px] font-black uppercase tracking-wider text-indigo-800 mb-2 flex items-center justify-between">
+          <div className="text-[11px] font-black uppercase tracking-wider text-indigo-900 dark:text-indigo-300 mb-2 flex items-center justify-between">
             <span>First → Then</span>
-            <span className="text-slate-500 font-medium">Tap when done!</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Tap when done!</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
@@ -213,7 +323,7 @@ export const MyDayView: React.FC = () => {
               className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedFirst
                   ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-inner'
-                  : 'bg-white border-slate-300 text-slate-800 shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-xs'
               }`}
             >
               <div className="w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0">
@@ -241,7 +351,7 @@ export const MyDayView: React.FC = () => {
               className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedThen
                   ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-inner'
-                  : 'bg-white border-slate-300 text-slate-800 shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-xs'
               }`}
             >
               <div className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
@@ -266,7 +376,7 @@ export const MyDayView: React.FC = () => {
         </section>
       )}
 
-      {/* 4. VISUAL COUNTDOWN TIMER COMPONENT (Non-pressuring, calm, visual) */}
+      {/* 5. VISUAL TASK TIMER */}
       <div ref={timerSectionRef} className="scroll-mt-4">
         <VisualTaskTimer
           initialTask={activeTimerTask}
@@ -274,16 +384,16 @@ export const MyDayView: React.FC = () => {
         />
       </div>
 
-      {/* 5. ACTIVE ROUTINE HEADER & PROGRESS */}
-      <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-sm">
+      {/* 6. ROUTINE PROGRESS & REWARD BANNER */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <span className="text-3xl sm:text-4xl">{currentRoutine.emoji}</span>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-slate-800">
+              <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-white">
                 {currentRoutine.title}
               </h2>
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {currentRoutine.time && (
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -300,7 +410,7 @@ export const MyDayView: React.FC = () => {
 
           <button
             onClick={() => resetRoutine(currentRoutine.id)}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
             title="Reset routine"
           >
             <RotateCcw className="w-4 h-4" />
@@ -309,7 +419,7 @@ export const MyDayView: React.FC = () => {
         </div>
 
         {/* Visual Progress Bar */}
-        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
           <div
             className="bg-emerald-500 h-full transition-all duration-500 rounded-full"
             style={{ width: `${progressPercent}%` }}
@@ -317,9 +427,9 @@ export const MyDayView: React.FC = () => {
         </div>
 
         {/* Digital Sticker Reward Banner */}
-        <div className="mt-3.5 p-3 rounded-2xl border-2 flex items-center justify-between flex-wrap gap-2 transition-all bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 border-amber-300/80 shadow-xs">
+        <div className="mt-3.5 p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 transition-all bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border-amber-300/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white border border-amber-200 flex items-center justify-center text-2xl shadow-xs shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-amber-200 flex items-center justify-center text-2xl shadow-xs shrink-0">
               {routineStickerDef.emoji}
             </div>
             <div>
@@ -327,12 +437,12 @@ export const MyDayView: React.FC = () => {
                 <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
                   {isRoutineCompleted ? '🎉 Sticker Unlocked!' : '🎁 Complete Routine Reward'}
                 </span>
-                <span className="text-[11px] font-bold text-amber-700">
+                <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
                   +{routineStickerDef.starsAward} Stars
                 </span>
               </div>
-              <p className="font-black text-xs sm:text-sm text-slate-800 mt-0.5">
-                {routineStickerDef.stickerName}: <span className="text-slate-500 font-medium">{routineStickerDef.description}</span>
+              <p className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 mt-0.5">
+                {routineStickerDef.stickerName}: <span className="text-slate-500 dark:text-slate-400 font-medium">{routineStickerDef.description}</span>
               </p>
             </div>
           </div>
@@ -343,292 +453,294 @@ export const MyDayView: React.FC = () => {
               setChildView('rewards');
               playChime('tap');
             }}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 dark:bg-slate-900 text-amber-900 dark:text-amber-200 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
           >
             <span>Sticker Album ({earnedStickers.length})</span>
             <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
           </button>
         </div>
-
-        {/* WHAT AM I DOING? & WHAT'S NEXT? Indicator */}
-        {nextStep && (
-          <div className="mt-3 p-3 bg-sky-50 border border-sky-200 rounded-2xl flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-sky-800 uppercase tracking-wider">
-                Up Next:
-              </span>
-              <span className="text-xl">{nextStep.emoji}</span>
-              <span className="font-bold text-xs sm:text-sm text-sky-950">{nextStep.title}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => startTimerForStep(nextStep, true)}
-                className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-sm shadow-sky-200"
-                title="Start visual countdown timer for up next step"
-              >
-                <Timer className="w-3.5 h-3.5" />
-                <span>Start Timer ({nextStep.durationMin || 2}m)</span>
-              </button>
-              <button
-                onClick={() => speak(`Up next is: ${nextStep.title}`)}
-                className="p-1.5 rounded-lg bg-sky-200/80 text-sky-800 hover:bg-sky-300 transition-all cursor-pointer"
-                title="Hear up next"
-              >
-                <Volume2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* 6. STEP-BY-STEP MISSION CHECKLIST */}
-      <div className="space-y-2.5">
-        {currentRoutine.steps.map((step, idx) => (
-          <div
-            key={step.id}
-            onClick={() => toggleRoutineStep(currentRoutine.id, step.id)}
-            className={`flex items-start sm:items-center justify-between p-3.5 sm:p-4 rounded-3xl border-2 transition-all active:scale-98 cursor-pointer select-none ${
-              step.completed
-                ? 'bg-emerald-50/70 border-emerald-300 opacity-90'
-                : 'bg-white hover:bg-slate-50 border-slate-200 shadow-xs'
-            }`}
-          >
-            <div className="flex items-start sm:items-center gap-3 flex-1">
-              {/* Checkbox button */}
-              <button
-                className="mt-0.5 sm:mt-0 text-emerald-600 transition-transform hover:scale-110"
-                aria-label={step.completed ? 'Mark incomplete' : 'Mark complete'}
-              >
-                {step.completed ? (
-                  <CheckCircle2 className="w-7 h-7 fill-emerald-500 text-white" />
-                ) : (
-                  <Circle className="w-7 h-7 text-slate-300" />
-                )}
-              </button>
-
-              <span className="text-3xl shrink-0">{step.emoji}</span>
-
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                    {idx + 1}
+      {/* ════════════════════════════════════════════════════════════════
+          7A. FOCUS MODE: ONE STEP AT A TIME (Current Activity Experience)
+      ════════════════════════════════════════════════════════════════ */}
+      {scheduleViewMode === 'focus_mode' && (
+        <div className="space-y-4 animate-in fade-in">
+          {activeStep ? (
+            <div className="space-y-3">
+              {/* CURRENT STEP (NOW) HERO CARD */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-500/10 border-3 border-amber-400 dark:border-amber-500/80 bg-white dark:bg-slate-900 shadow-md space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-xs">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>NOW • Step {activeStepIndex + 1} of {totalStepsCount}</span>
                   </span>
-                  <h3
-                    className={`font-black text-sm sm:text-base leading-tight ${
-                      step.completed ? 'line-through text-slate-400' : 'text-slate-800'
-                    }`}
-                  >
-                    {step.title}
-                  </h3>
-                  {step.durationMin && (
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                      {step.durationMin}m
+                  {activeStep.durationMin && (
+                    <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 font-black text-xs">
+                      ⏱️ {activeStep.durationMin} minutes
                     </span>
                   )}
                 </div>
 
-                {step.instruction && (
-                  <p className="text-xs text-slate-500 font-medium mt-1 leading-snug">
-                    {step.instruction}
-                  </p>
-                )}
-
-                {step.sensoryNote && (
-                  <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md mt-1.5 w-fit">
-                    <Info className="w-3 h-3 text-amber-600 shrink-0" />
-                    <span>Sensory tip: {step.sensoryNote}</span>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left py-2">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-amber-100 dark:bg-amber-950/60 border-2 border-amber-300 flex items-center justify-center text-5xl sm:text-6xl shadow-sm shrink-0">
+                    {activeStep.emoji}
                   </div>
-                )}
 
-                {/* Magic Micro-Steps Checklist (Feature 4 & 10) */}
-                {step.microSteps && step.microSteps.length > 0 && (
-                  <div 
-                    className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-1.5"
-                    onClick={(e) => e.stopPropagation()}
+                  <div className="flex-1 space-y-1.5">
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {activeStep.title}
+                    </h3>
+                    {activeStep.instruction && (
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
+                        {activeStep.instruction}
+                      </p>
+                    )}
+                    {activeStep.sensoryNote && (
+                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-100 dark:bg-amber-950/60 px-3 py-1 rounded-xl mt-1">
+                        <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>Sensory tip: {activeStep.sensoryNote}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Primary Action Buttons: Start Timer & Complete Button */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => startTimerForStep(activeStep, true)}
+                    className="py-3.5 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 flex items-center gap-1">
-                        <Wand2 className="w-3 h-3 text-purple-600" />
-                        <span>Micro-Steps ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
+                    <Timer className="w-5 h-5" />
+                    <span>Start Timer ({activeStep.durationMin || 2}m)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleRoutineStep(currentRoutine.id, activeStep.id);
+                      playChime('star');
+                    }}
+                    className="py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>✓ Mark as Done!</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* UP NEXT PREVIEW CARD */}
+              {subsequentStep && (
+                <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl sm:text-3xl">{subsequentStep.emoji}</span>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                        NEXT
                       </span>
-                      <span className="text-[10px] font-bold text-purple-700">Tap to check off</span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {step.microSteps.map((ms) => {
-                        const isDone = completedMicroSteps[ms.id];
-                        return (
-                          <div
-                            key={ms.id}
-                            onClick={() => {
-                              setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
-                              playChime('tap');
-                            }}
-                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                              isDone
-                                ? 'bg-purple-100/90 border-purple-300 text-purple-900 line-through opacity-75'
-                                : 'bg-white hover:bg-purple-100/50 border-purple-200 text-purple-950 shadow-2xs'
-                            }`}
-                          >
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
-                              <span className="text-sm shrink-0">{ms.emoji}</span>
-                              <span className="truncate">{ms.title}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
-                              }}
-                              className="p-1 rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer"
-                              title="2-min micro-step timer"
-                            >
-                              <Timer className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        );
-                      })}
+                      <h4 className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">
+                        {subsequentStep.title}
+                      </h4>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
 
-            {/* Action buttons: Start Timer, Parent Voice & Hear step */}
-            <div className="flex items-center gap-1.5 ml-2 shrink-0">
-              {/* Parent Voice Recorded Clip (Feature 11) */}
-              {step.audioDataUrl && (
+                  <span className="text-xs font-bold text-slate-500 px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700">
+                    {subsequentStep.durationMin || 2}m
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-8 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 text-center space-y-3">
+              <span className="text-5xl block animate-bounce">🎉</span>
+              <h3 className="text-xl sm:text-2xl font-black text-emerald-950 dark:text-emerald-200">
+                All done with {currentRoutine.title}!
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-medium max-w-md mx-auto">
+                Great job following each step! You earned your routine reward stars.
+              </p>
+              <button
+                type="button"
+                onClick={() => resetRoutine(currentRoutine.id)}
+                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-xs cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Start Routine Again</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════
+          7B. LIST MODE: STEP-BY-STEP MISSION CHECKLIST
+      ════════════════════════════════════════════════════════════════ */}
+      {scheduleViewMode === 'list_mode' && (
+        <div className="space-y-2.5 animate-in fade-in">
+          {currentRoutine.steps.map((step, idx) => (
+            <div
+              key={step.id}
+              onClick={() => toggleRoutineStep(currentRoutine.id, step.id)}
+              className={`flex items-start sm:items-center justify-between p-3.5 sm:p-4 rounded-3xl border-2 transition-all active:scale-98 cursor-pointer select-none ${
+                step.completed
+                  ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 opacity-90'
+                  : 'bg-white dark:bg-slate-850 hover:bg-slate-50 border-slate-200 dark:border-slate-700 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-start sm:items-center gap-3 flex-1">
+                {/* Checkbox button */}
+                <button
+                  className="mt-0.5 sm:mt-0 text-emerald-600 transition-transform hover:scale-110"
+                  aria-label={step.completed ? 'Mark incomplete' : 'Mark complete'}
+                >
+                  {step.completed ? (
+                    <CheckCircle2 className="w-7 h-7 fill-emerald-500 text-white" />
+                  ) : (
+                    <Circle className="w-7 h-7 text-slate-300" />
+                  )}
+                </button>
+
+                <span className="text-3xl shrink-0">{step.emoji}</span>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <h3
+                      className={`font-black text-sm sm:text-base leading-tight ${
+                        step.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'
+                      }`}
+                    >
+                      {step.title}
+                    </h3>
+                    {step.durationMin && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {step.durationMin}m
+                      </span>
+                    )}
+                  </div>
+
+                  {step.instruction && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-snug">
+                      {step.instruction}
+                    </p>
+                  )}
+
+                  {step.sensoryNote && (
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md mt-1.5 w-fit">
+                      <Info className="w-3 h-3 text-amber-600 shrink-0" />
+                      <span>Sensory tip: {step.sensoryNote}</span>
+                    </div>
+                  )}
+
+                  {/* Micro-Steps Breakdown */}
+                  {step.microSteps && step.microSteps.length > 0 && (
+                    <div 
+                      className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 space-y-1.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1">
+                          <Wand2 className="w-3 h-3 text-purple-600" />
+                          <span>Micro-Steps ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-purple-700 dark:text-purple-400">Tap to check off</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {step.microSteps.map((ms) => {
+                          const isDone = completedMicroSteps[ms.id];
+                          return (
+                            <div
+                              key={ms.id}
+                              onClick={() => {
+                                setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
+                                playChime('tap');
+                              }}
+                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                isDone
+                                  ? 'bg-purple-100/90 dark:bg-purple-900/60 border-purple-300 text-purple-900 line-through opacity-75'
+                                  : 'bg-white dark:bg-slate-900 hover:bg-purple-100/50 border-purple-200 dark:border-purple-700 text-purple-950 dark:text-purple-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
+                                <span className="text-sm shrink-0">{ms.emoji}</span>
+                                <span className="truncate">{ms.title}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
+                                }}
+                                className="p-1 rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer"
+                                title="2-min micro-step timer"
+                              >
+                                <Timer className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                {step.audioDataUrl && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playParentVoice(step);
+                    }}
+                    className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
+                      playingAudioStepId === step.id
+                        ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
+                        : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
+                    }`}
+                    title="Listen to voice recording for this step"
+                  >
+                    <Mic className="w-4 h-4 text-rose-600" />
+                    <span className="hidden sm:inline">{playingAudioStepId === step.id ? 'Playing...' : "Voice"}</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    playParentVoice(step);
+                    startTimerForStep(step, true);
                   }}
-                  className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
-                    playingAudioStepId === step.id
-                      ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
-                      : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
-                  }`}
-                  title="Listen to parent's voice recording for this step"
+                  className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-800 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
+                  title={`Start countdown timer for ${step.title}`}
                 >
-                  <Mic className="w-4 h-4 text-rose-600" />
-                  <span className="hidden sm:inline">{playingAudioStepId === step.id ? 'Playing...' : "Parent Voice"}</span>
+                  <Timer className="w-4 h-4 text-sky-600" />
+                  <span className="hidden sm:inline">Start Timer</span>
+                  <span className="sm:hidden">Timer</span>
                 </button>
-              )}
 
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  startTimerForStep(step, true);
-                }}
-                className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-800 border-2 border-sky-200 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
-                title={`Start countdown timer for ${step.title}`}
-              >
-                <Timer className="w-4 h-4 text-sky-600" />
-                <span className="hidden sm:inline">Start Timer</span>
-                <span className="sm:hidden">Timer</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  speak(`${step.title}. ${step.instruction || ''}`);
-                }}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
-                title="Hear step instructions"
-              >
-                <Volume2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Medication & Health Routine Card */}
-      {enabledFeatures?.medicationReminders !== false && medications.length > 0 && (() => {
-        const totalDoses = medications.reduce((acc, m) => acc + (m.frequency === 'as_needed' ? 1 : m.times.length), 0);
-        const takenDoses = medications.reduce((acc, m) => acc + m.takenTimesToday.length, 0);
-
-        return (
-          <div className="bg-gradient-to-r from-teal-50 via-sky-50 to-indigo-50 border-2 border-teal-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl select-none">💊</span>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-black uppercase text-teal-800 bg-teal-200/90 px-2 py-0.5 rounded-full">
-                    Health & Medications
-                  </span>
-                  <span className="text-xs font-bold text-teal-900">
-                    {takenDoses >= totalDoses
-                      ? "All doses taken today! ✓"
-                      : `${takenDoses} of ${totalDoses} doses taken (+1 ⭐ per dose)`}
-                  </span>
-                </div>
-                <h4 className="text-sm sm:text-base font-black text-slate-800 mt-0.5">
-                  Medication Reminders & Supply
-                </h4>
-                <p className="text-xs text-slate-600">
-                  Track pills, chewables, and inhalers with automatic inventory countdown.
-                </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    speak(`${step.title}. ${step.instruction || ''}`);
+                  }}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  title="Hear step instructions"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowMedicationModal(true);
-                playChime('tap');
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
-            >
-              <Pill className="w-4 h-4" />
-              <span>Open Medication Tracker</span>
-            </button>
-          </div>
-        );
-      })()}
-
-      {/* End of Day Reflection Card */}
-      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl select-none">🌙</span>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200/90 px-2 py-0.5 rounded-full">
-                End-of-Day Chart
-              </span>
-              <span className="text-xs font-bold text-amber-900">
-                {dailyRecollections.some((r) => r.date === new Date().toISOString().split('T')[0])
-                  ? "Today's reflection recorded! ✓"
-                  : "How was today? (+3 ⭐)"}
-              </span>
-            </div>
-            <h4 className="text-sm sm:text-base font-black text-slate-800 mt-0.5">
-              Daily Mood & Recollection Check-In
-            </h4>
-            <p className="text-xs text-slate-600">
-              Answer quick questions with your family or therapist to review your day.
-            </p>
-          </div>
+          ))}
         </div>
+      )}
 
-        <button
-          type="button"
-          onClick={() => {
-            setShowRecollectionModal(true);
-            playChime('tap');
-          }}
-          className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
-        >
-          <Sparkles className="w-4 h-4 fill-amber-300 text-amber-600" />
-          <span>Open Reflection</span>
-        </button>
-      </div>
     </div>
   );
 };
-
-

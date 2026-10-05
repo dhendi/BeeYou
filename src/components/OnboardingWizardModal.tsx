@@ -3,32 +3,36 @@ import { useApp } from '../context/AppContext';
 import { 
   UserAgeGroup, 
   EnabledFeatures, 
-  getDefaultFeaturesForAge
+  getDefaultFeaturesForAge,
+  UserAccountRole
 } from '../types';
-import { playChime, speakText } from '../utils/audio';
+import { playChime } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
   ArrowRight, 
   ArrowLeft, 
   Heart, 
   User, 
-  X,
-  Sparkles
+  X, 
+  Sparkles, 
+  CheckCircle2, 
+  Calendar, 
+  ShieldAlert, 
+  Timer, 
+  Sliders, 
+  HelpCircle,
+  Play,
+  Sun,
+  BookOpen
 } from 'lucide-react';
 import { BeeMascot } from './BeeYouLogo';
+import { CaregiverHowItWorksModal } from './CaregiverHowItWorksModal';
 
 interface OnboardingWizardModalProps {
   isOpen: boolean;
   onClose: () => void;
   canDismiss?: boolean;
 }
-
-const COMMUNICATION_STYLES = [
-  { id: 'aac_tiles', label: 'AAC Picture Board & Speech Engine', emoji: '🗣️', desc: 'Symbol board with voice speech (Enables Communicate Tab)', needsAac: true },
-  { id: 'verbal_speech', label: 'Speaks Verbally / No AAC Board', emoji: '💬', desc: 'User speaks verbally — hides Communicate tab and AAC tiles', needsAac: false },
-  { id: 'visual_routines', label: 'Visual Schedules & Time Timers', emoji: '📅', desc: 'Focus on routines and visual timers (Hides Communicate Tab)', needsAac: false },
-  { id: 'calm_pacer', label: 'Sensory Breaks & Calming Tools', emoji: '🫁', desc: 'Sensory regulation & calming tools (Hides Communicate Tab)', needsAac: false },
-];
 
 export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   isOpen,
@@ -38,23 +42,25 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   const {
     childProfile,
     updateChildProfile,
-    settings,
     updateSettings,
-    themes,
     setTheme,
     setUserAgeGroup,
     setUserRole,
     userAgeGroup: currentContextAge,
     enabledFeatures: contextFeatures,
     updateEnabledFeatures,
-    childView,
     setChildView,
+    setIsParentMode,
+    setShowCaregiverModal,
   } = useApp();
 
+  // Mode: 'user' (Child/Teen/Adult) or 'caregiver'
+  const [onboardingMode, setOnboardingMode] = useState<'user' | 'caregiver'>('user');
   const [step, setStep] = useState<number>(1);
-  const totalSteps = 3;
+  const [showFirstActionPrompt, setShowFirstActionPrompt] = useState<boolean>(false);
+  const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
 
-  // Wizard local form state
+  // User Profile Form State
   const [selectedAge, setSelectedAge] = useState<UserAgeGroup>(childProfile.ageGroup || currentContextAge || 'kid');
   const [role, setRole] = useState<'self' | 'caregiver_managing'>(() => {
     if (childProfile.userRole) return childProfile.userRole;
@@ -62,15 +68,16 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   });
   const [name, setName] = useState<string>(childProfile.name || (selectedAge === 'adult' ? 'Alex' : 'Leo'));
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
-  const [commStyle, setCommStyle] = useState<string>('aac_tiles');
   
   // Features state
   const [features, setFeatures] = useState<EnabledFeatures>(() => {
     return contextFeatures || getDefaultFeaturesForAge(selectedAge);
   });
 
-  // When selected age changes, update recommended features and role
-  const handleAgeChange = (newAge: UserAgeGroup) => {
+  const totalUserSteps = 5;
+  const totalCaregiverSteps = 3;
+
+  const handleAgeSelect = (newAge: UserAgeGroup) => {
     setSelectedAge(newAge);
     if (newAge === 'kid' || newAge === 'teen') {
       setRole('caregiver_managing');
@@ -78,51 +85,38 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       setRole('self');
     }
     playChime('tap');
-    
-    // Suggest default features for this age
-    const newDefaults = getDefaultFeaturesForAge(newAge);
-    setFeatures(newDefaults);
+    setFeatures(getDefaultFeaturesForAge(newAge));
   };
 
-  const toggleFeatureKey = (key: keyof EnabledFeatures) => {
-    playChime('tap');
-    setFeatures(prev => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+  const handleFinishOnboarding = (actionAfter?: 'morning_routine' | 'home' | 'caregiver_setup') => {
+    // 1. Calculate user role
+    const calculatedRole: UserAccountRole = onboardingMode === 'caregiver'
+      ? 'caregiver'
+      : (selectedAge === 'adult'
+          ? (role === 'self' ? 'independent_adult' : 'caregiver')
+          : (selectedAge === 'teen' ? 'teen_dependent' : 'child_dependent'));
 
-  const handleApplyPreset = (presetAge: UserAgeGroup) => {
-    playChime('star');
-    setFeatures(getDefaultFeaturesForAge(presetAge));
-  };
-
-  const handleFinish = () => {
-    // 1. Determine User Account Role
-    const calculatedRole = selectedAge === 'adult' 
-      ? (role === 'self' ? 'independent_adult' : 'caregiver')
-      : (selectedAge === 'teen' ? 'teen_dependent' : 'child_dependent');
-
-    // 2. Update Profile
+    // 2. Save profile
     updateChildProfile({
-      name: name.trim() || (selectedAge === 'adult' ? 'User' : 'Friend'),
+      name: name.trim() || (selectedAge === 'adult' ? 'Alex' : 'Leo'),
       pronouns: pronouns.trim(),
       ageGroup: selectedAge,
       userRole: role,
-      interests: childProfile.interests || [],
+      interests: childProfile.interests || ['Visual schedules', 'Calm routines'],
       onboardingCompleted: true,
     });
 
-    // 3. Update Context Age Group, Role & Features
+    // 3. Update global context
     if (setUserAgeGroup) setUserAgeGroup(selectedAge);
     if (setUserRole) setUserRole(calculatedRole);
     if (updateEnabledFeatures) updateEnabledFeatures(features);
 
-    // 4. Update Settings
+    // 4. Update settings
     updateSettings({
       onboardingCompleted: true,
       features: features,
     });
+
     try {
       localStorage.setItem('beeyou_onboarding_completed', 'true');
       localStorage.setItem('beeyou_user_age_group', selectedAge);
@@ -130,656 +124,711 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       localStorage.setItem('beeyou_enabled_features', JSON.stringify(features));
     } catch (e) {}
 
-    // 4. Equip default theme
+    // 5. Default Theme
     const defaultThemeId = selectedAge === 'adult' ? 'theme-executive' : selectedAge === 'teen' ? 'theme-lofi' : 'theme-classic';
     setTheme(defaultThemeId);
 
-    // 5. If AAC was disabled, reset view to home
-    if (!features.aacCommunication && childView === 'aac' && setChildView) {
-      setChildView('home');
-    }
-
-    // 6. Celebration
-    confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
+    // 6. Celebration & Routing
+    confetti({ particleCount: 75, spread: 70, origin: { y: 0.5 } });
     playChime('complete');
 
     onClose();
+
+    if (actionAfter === 'morning_routine') {
+      if (setChildView) setChildView('my-day');
+    } else if (actionAfter === 'caregiver_setup') {
+      if (setShowCaregiverModal) setShowCaregiverModal(true);
+    } else {
+      if (setChildView) setChildView('home');
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#FAF8F5] rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2 border-amber-200/80 overflow-hidden text-slate-800">
-        
-        {/* WIZARD HEADER */}
-        <div className="bg-slate-900 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center shadow-inner">
-              <BeeMascot size="sm" pose={step === 1 ? 'waving' : step === 2 ? 'listening' : 'celebrating'} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  Welcome to BeeYou
-                </span>
-                <span className="text-xs font-semibold text-slate-400">
-                  Step {step} of {totalSteps}
-                </span>
+    <>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200"
+      >
+        <div className="bg-[#FAF8F5] dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2 border-amber-200/90 dark:border-slate-800 overflow-hidden text-slate-800 dark:text-slate-100">
+          
+          {/* TOP HEADER */}
+          <div className="bg-slate-900 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center shadow-inner">
+                <BeeMascot size="sm" pose={step === 1 ? 'waving' : step === 3 ? 'flying' : 'celebrating'} />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight leading-tight mt-1 text-white">
-                {step === 1 && 'Who is using BeeYou?'}
-                {step === 2 && 'Your Profile & Communication'}
-                {step === 3 && 'Choose Your Tools & Features'}
-              </h2>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    Welcome to BeeYou
+                  </span>
+                  <span className="text-xs font-semibold text-slate-400">
+                    Step {step} of {onboardingMode === 'caregiver' ? totalCaregiverSteps : totalUserSteps}
+                  </span>
+                </div>
+                <h2 id="onboarding-title" className="text-base sm:text-lg font-bold tracking-tight text-white mt-0.5">
+                  {onboardingMode === 'caregiver' ? 'Caregiver & Supporter Setup' : 'Your Friendly Visual Companion'}
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all"
+                title="Open How It Works Guide"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">How It Works</span>
+              </button>
+
+              {canDismiss && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+                  aria-label="Close onboarding"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
 
-          {canDismiss && (
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
-              title="Close wizard"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
-        </div>
+          {/* STEP PROGRESS BAR */}
+          <div className="w-full bg-amber-100/60 dark:bg-slate-800 h-1.5 flex shrink-0">
+            {Array.from({ length: onboardingMode === 'caregiver' ? totalCaregiverSteps : totalUserSteps }).map((_, i) => (
+              <div
+                key={i}
+                className={`flex-1 transition-all duration-300 ${
+                  i + 1 <= step ? 'bg-amber-500' : 'bg-transparent'
+                }`}
+              />
+            ))}
+          </div>
 
-        {/* STEP PROGRESS BAR */}
-        <div className="w-full bg-amber-100/60 h-1.5 flex shrink-0">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`flex-1 transition-all duration-300 ${
-                s <= step ? 'bg-amber-500' : 'bg-transparent'
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* WIZARD BODY (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-          
-          {/* STEP 1: AGE GROUP & ROLE */}
-          {step === 1 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div>
-                <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                  BeeYou adapts its visuals, wording, and tools to fit you comfortably. You can always customize any feature later:
-                </p>
-              </div>
-
-              {/* Age Group Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Kid */}
-                <button
-                  type="button"
-                  onClick={() => handleAgeChange('kid')}
-                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    selectedAge === 'kid'
-                      ? 'border-amber-400 bg-amber-50/90 shadow-md ring-2 ring-amber-300/60'
-                      : 'border-stone-200/90 hover:border-amber-300 bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl">🧒</span>
-                    {selectedAge === 'kid' && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="font-bold text-slate-900 text-base">Kids</h3>
-                    <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                      Ages 3–11
-                    </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
-                      Warm colors, cozy bee & animal companions, star rewards, and simple First/Then cards.
-                    </p>
-                  </div>
-                </button>
-
-                {/* Teen */}
-                <button
-                  type="button"
-                  onClick={() => handleAgeChange('teen')}
-                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    selectedAge === 'teen'
-                      ? 'border-indigo-400 bg-indigo-50/90 shadow-md ring-2 ring-indigo-300/60'
-                      : 'border-stone-200/90 hover:border-indigo-300 bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl">🎧</span>
-                    {selectedAge === 'teen' && (
-                      <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="font-bold text-slate-900 text-base">Teens</h3>
-                    <span className="text-[11px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                      Ages 12–17
-                    </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
-                      Calm and lo-fi styles, focused countdowns, independence habits, and zero baby talk.
-                    </p>
-                  </div>
-                </button>
-
-                {/* Adult */}
-                <button
-                  type="button"
-                  onClick={() => handleAgeChange('adult')}
-                  className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    selectedAge === 'adult'
-                      ? 'border-emerald-600 bg-emerald-50/90 shadow-md ring-2 ring-emerald-300/60'
-                      : 'border-stone-200/90 hover:border-emerald-300 bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl">💼</span>
-                    {selectedAge === 'adult' && (
-                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="font-bold text-slate-900 text-base">Adults</h3>
-                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                      Ages 18+
-                    </span>
-                    <p className="text-xs text-slate-600 mt-2 font-medium leading-normal">
-                      Executive function tools, dignified AAC boards, discreet calm styling, dark mode, and therapy logs.
-                    </p>
-                  </div>
-                </button>
-              </div>
-
-              {/* Who is configuring? */}
-              <div className="pt-3 border-t border-slate-100">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-2">
-                  Who is filling this out?
-                </label>
-                
-                {selectedAge === 'adult' ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRole('self');
-                        playChime('tap');
-                      }}
-                      className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
-                        role === 'self'
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-950 font-black'
-                          : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <User className="w-4 h-4 text-emerald-600" />
-                      <span>I am setting this up for myself</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRole('caregiver_managing');
-                        playChime('tap');
-                      }}
-                      className={`p-3 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm flex items-center gap-2.5 cursor-pointer ${
-                        role === 'caregiver_managing'
-                          ? 'border-rose-500 bg-rose-50 text-rose-950 font-black'
-                          : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <Heart className="w-4 h-4 text-rose-600" />
-                      <span>I am a caregiver or support assistant</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-3.5 rounded-2xl border-2 border-rose-200 bg-rose-50/80 text-rose-950 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                      <Heart className="w-5 h-5 fill-rose-500 text-rose-500" />
+          {/* ONBOARDING BODY CONTENT */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+            
+            {/* ══════════════════════════════════════════════════════
+                STANDARD USER ONBOARDING FLOW
+            ══════════════════════════════════════════════════════ */}
+            {onboardingMode === 'user' && (
+              <>
+                {/* SCREEN 1: WELCOME */}
+                {step === 1 && (
+                  <div className="space-y-6 text-center py-4 animate-in fade-in">
+                    <div className="w-24 h-24 mx-auto rounded-3xl bg-amber-100 dark:bg-amber-950/50 border-2 border-amber-300 flex items-center justify-center shadow-md">
+                      <BeeMascot size="lg" pose="waving" />
                     </div>
-                    <div>
-                      <span className="text-xs font-black block text-slate-900">Parent or Caregiver Setup</span>
-                      <p className="text-[11px] text-rose-800 font-medium leading-tight mt-0.5">
-                        {selectedAge === 'kid' ? 'Kids' : 'Teens'} profiles must be set up and managed by a parent, guardian, or therapist.
+
+                    <div className="space-y-2 max-w-lg mx-auto">
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        Welcome to BeeYou
+                      </h3>
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                        BeeYou helps you organize your day, follow routines, communicate how you feel, and ask for help when you need it.
                       </p>
+                      <div className="pt-2">
+                        <span className="inline-block px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 font-bold text-xs">
+                          🐝 "You can be yourself here."
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStep(2);
+                          playChime('tap');
+                        }}
+                        className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-base shadow-md hover:shadow-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <span>Get Started</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOnboardingMode('caregiver');
+                          setStep(1);
+                          playChime('tap');
+                        }}
+                        className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm cursor-pointer transition-all flex items-center justify-center gap-2"
+                      >
+                        <Heart className="w-4 h-4 text-rose-500" />
+                        <span>I am a caregiver / teacher</span>
+                      </button>
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
 
-          {/* STEP 2: PROFILE & COMMUNICATION */}
-          {step === 2 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 block mb-1">
-                    {selectedAge === 'adult' ? 'Your Name:' : "Child or User's Name:"}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={selectedAge === 'adult' ? 'Alex' : 'Leo'}
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-slate-300 font-bold text-base focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
-                  />
-                </div>
+                {/* SCREEN 2: WHO IS BEEYOU FOR? */}
+                {step === 2 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Who is BeeYou for?
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        BeeYou is designed for anyone who benefits from visual schedules, predictable routines, communication supports, and gentle timers.
+                      </p>
+                    </div>
 
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 block mb-1">
-                    Pronouns (optional):
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {['they/them', 'he/him', 'she/her', 'any pronouns'].map((p) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Kids */}
                       <button
-                        key={p}
                         type="button"
-                        onClick={() => {
-                          setPronouns(p);
-                          playChime('tap');
-                        }}
-                        className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer ${
-                          pronouns === p
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-900 font-black'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        onClick={() => handleAgeSelect('kid')}
+                        className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          selectedAge === 'kid' && role !== 'self'
+                            ? 'border-amber-400 bg-amber-50/90 dark:bg-amber-950/40 shadow-md ring-2 ring-amber-300'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-amber-300'
                         }`}
                       >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 block mb-1.5">
-                    What does the user need most?
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {COMMUNICATION_STYLES.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => {
-                          setCommStyle(c.id);
-                          setFeatures(prev => ({
-                            ...prev,
-                            aacCommunication: c.needsAac,
-                          }));
-                          playChime('tap');
-                        }}
-                        className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
-                          commStyle === c.id
-                            ? 'border-amber-500 bg-amber-50/80 ring-1 ring-amber-400'
-                            : 'border-slate-200 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{c.emoji}</span>
-                          <span className="text-xs font-black text-slate-800">{c.label}</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-3xl">🧒</span>
+                          {selectedAge === 'kid' && (
+                            <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-1 font-medium">{c.desc}</p>
+                        <div className="mt-3">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-base">Kids</h4>
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                            Ages 3–11
+                          </span>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                            Warm colors, cozy bee mascot, star celebrations, and First/Then cards.
+                          </p>
+                        </div>
                       </button>
-                    ))}
-                  </div>
 
-                  {/* Explicit AAC device inclusion / removal card */}
-                  <div className="mt-3 p-3.5 rounded-2xl border-2 bg-slate-50 border-slate-200 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-2xl">{features.aacCommunication ? '🗣️' : '🚫'}</span>
-                      <div>
-                        <span className="text-xs font-black text-slate-900 block">
-                          {features.aacCommunication ? 'AAC Communicate Tab: ENABLED' : 'AAC Communicate Tab: REMOVED'}
+                      {/* Teens */}
+                      <button
+                        type="button"
+                        onClick={() => handleAgeSelect('teen')}
+                        className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          selectedAge === 'teen'
+                            ? 'border-indigo-400 bg-indigo-50/90 dark:bg-indigo-950/40 shadow-md ring-2 ring-indigo-300'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-indigo-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-3xl">🎧</span>
+                          {selectedAge === 'teen' && (
+                            <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-base">Teens</h4>
+                          <span className="text-[10px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                            Ages 12–17
+                          </span>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                            Lo-fi calm visuals, focused countdowns, independent routines, zero baby talk.
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* Adults */}
+                      <button
+                        type="button"
+                        onClick={() => handleAgeSelect('adult')}
+                        className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          selectedAge === 'adult'
+                            ? 'border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/40 shadow-md ring-2 ring-emerald-300'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-emerald-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-3xl">💼</span>
+                          {selectedAge === 'adult' && (
+                            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-base">Adults</h4>
+                          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                            Ages 18+
+                          </span>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">
+                            Executive space, clean minimal theme, discreet calm mode, optional support contact.
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Who is configuring note */}
+                    <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between gap-3">
+                      <span>💡 You can always change age presets or customize individual features later.</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* SCREEN 3: START WITH YOUR DAY */}
+                {step === 3 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Start with your day
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        Follow one activity at a time instead of thinking about the whole day at once.
+                      </p>
+                    </div>
+
+                    {/* Visual Schedule Example */}
+                    <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 border-2 border-amber-300/80 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">☀️</span>
+                          <span className="font-black text-sm text-amber-950 dark:text-amber-200">
+                            Example: Morning Routine
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-bold text-amber-800 bg-amber-200/80 px-2.5 py-0.5 rounded-full">
+                          Step-by-Step
                         </span>
-                        <p className="text-[11px] text-slate-500 font-medium">
-                          {features.aacCommunication
-                            ? 'The "Communicate" tab will appear on the navigation bar.'
-                            : 'The "Communicate" tab is hidden from the navigation bar.'}
-                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        {[
+                          { title: 'Wake up & stretch', emoji: '☀️', time: '2m' },
+                          { title: 'Brush teeth', emoji: '🪥', time: '2m' },
+                          { title: 'Get dressed', emoji: '👕', time: '5m' },
+                          { title: 'Eat breakfast', emoji: '🥞', time: '15m' },
+                          { title: 'Pack bag & go', emoji: '🎒', time: '5m' },
+                        ].map((item, idx) => (
+                          <div key={idx} className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 font-black text-[10px] flex items-center justify-center">
+                                {idx + 1}
+                              </span>
+                              <span className="text-xl">{item.emoji}</span>
+                              <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+                                {item.title}
+                              </span>
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-500 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                              {item.time}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        toggleFeatureKey('aacCommunication');
-                        if (features.aacCommunication) {
-                          setCommStyle('verbal_speech');
-                        } else {
-                          setCommStyle('aac_tiles');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all ${
-                        features.aacCommunication
-                          ? 'bg-rose-100 hover:bg-rose-200 text-rose-800 font-black'
-                          : 'bg-amber-400 hover:bg-amber-500 text-amber-950 font-black shadow-2xs'
-                      }`}
-                    >
-                      {features.aacCommunication ? 'Remove AAC' : 'Enable AAC'}
-                    </button>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                      Each activity has large icons, clear timers, and shows what comes next so transitions stay calm.
+                    </p>
                   </div>
-                </div>
+                )}
+
+                {/* SCREEN 4: NEED HELP? (ALERTS) */}
+                {step === 4 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Need help? Simple Alerts
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        If you are connected to a caregiver or support person, you can send them a simple alert when you need help.
+                      </p>
+                    </div>
+
+                    {/* Visual Demo of Alert and Response */}
+                    <div className="p-4 sm:p-5 rounded-3xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 space-y-4">
+                      {/* Step 1: Child sends */}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                          1. You tap one button:
+                        </span>
+                        <div className="p-3 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-950 font-black text-sm flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">🆘</span>
+                            <span>I NEED HELP</span>
+                          </div>
+                          <span className="text-xs font-bold text-rose-700">1-Tap Alert</span>
+                        </div>
+                      </div>
+
+                      {/* Step 2: Caregiver receives */}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                          2. Caregiver receives:
+                        </span>
+                        <div className="p-3 rounded-2xl bg-slate-900 text-white font-medium text-xs sm:text-sm flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">🔔</span>
+                            <span>"{name || 'Alex'} needs help right now."</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-amber-300 bg-amber-900/60 px-2 py-0.5 rounded-full">
+                            Instant
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Step 3: Caregiver responds */}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                          3. Caregiver sends a reassuring response:
+                        </span>
+                        <div className="p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-950 font-black text-sm flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">❤️</span>
+                            <span>I'm here</span>
+                          </div>
+                          <span className="text-xs font-bold text-emerald-700">Read aloud automatically</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                      Zero complicated text messaging or phone apps. Clear, predictable reassurance when words are hard.
+                    </p>
+                  </div>
+                )}
+
+                {/* SCREEN 5: MAKE BEEYOU WORK FOR YOU */}
+                {step === 5 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Make BeeYou work for you
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        Personalize your name and preferences. You can adjust routines, timers, sounds, and features at any time.
+                      </p>
+                    </div>
+
+                    <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 space-y-4">
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                          {selectedAge === 'adult' ? 'Your Name:' : "Child or User's Name:"}
+                        </label>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder={selectedAge === 'adult' ? 'Alex' : 'Leo'}
+                          className="w-full px-4 py-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-base focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                          Pronouns (optional):
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {['they/them', 'he/him', 'she/her', 'any pronouns'].map((p) => (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => {
+                                setPronouns(p);
+                                playChime('tap');
+                              }}
+                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                                pronouns === p
+                                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-black'
+                                  : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-amber-950 dark:text-amber-200 text-xs font-medium">
+                      🎉 <strong>You're all set!</strong> Tap below to start your personalized BeeYou experience.
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ══════════════════════════════════════════════════════
+                CAREGIVER DEDICATED ONBOARDING FLOW
+            ══════════════════════════════════════════════════════ */}
+            {onboardingMode === 'caregiver' && (
+              <>
+                {/* CAREGIVER SCREEN 1 */}
+                {step === 1 && (
+                  <div className="space-y-6 text-center py-4 animate-in fade-in">
+                    <div className="w-20 h-20 mx-auto rounded-3xl bg-rose-100 dark:bg-rose-950/50 border-2 border-rose-300 flex items-center justify-center shadow-md">
+                      <Heart className="w-10 h-10 text-rose-600 fill-rose-500" />
+                    </div>
+
+                    <div className="space-y-2 max-w-lg mx-auto">
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        Welcome, Caregiver & Educator
+                      </h3>
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                        BeeYou helps the person you support follow routines, understand what is coming next, communicate how they feel, and ask for help.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto text-left space-y-1.5 font-medium">
+                      <div className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[10px]">
+                        What you can do:
+                      </div>
+                      <div>• Set up visual morning & evening routines</div>
+                      <div>• Connect an iPad or phone with a simple 6-character code</div>
+                      <div>• Receive 1-tap alerts and send instant reassuring responses</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CAREGIVER SCREEN 2 */}
+                {step === 2 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Your Caregiver Role
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        You can manage routines, customize visual activities, and choose which notifications you receive.
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                        <Calendar className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">Customize Routines</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                            Add, reorder, or edit steps with icons, timers, and sensory notes.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                        <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">Receive Instant Help Alerts</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                            Receive notifications when they need help and reply with 1 tap.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                        <Sliders className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">Feature Toggles & Privacy</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                            Turn off any features they do not need to keep the screen simple.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CAREGIVER SCREEN 3 */}
+                {step === 3 && (
+                  <div className="space-y-5 animate-in fade-in">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                        Let's Get Started!
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
+                        Choose your next step. You can link a device now or try a sample routine first:
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleFinishOnboarding('caregiver_setup')}
+                        className="p-4 rounded-3xl border-2 border-amber-400 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 text-left cursor-pointer transition-all active:scale-95 shadow-xs"
+                      >
+                        <span className="text-3xl">👤</span>
+                        <h4 className="font-black text-sm sm:text-base text-amber-950 dark:text-amber-200 mt-2">
+                          Add Someone I Support
+                        </h4>
+                        <p className="text-xs text-amber-900/80 dark:text-amber-300/80 mt-1 font-medium">
+                          Set up their profile or pair their iPad / phone with a pairing code.
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowGuideModal(true);
+                          playChime('tap');
+                        }}
+                        className="p-4 rounded-3xl border-2 border-indigo-300 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-left cursor-pointer transition-all active:scale-95 shadow-xs"
+                      >
+                        <span className="text-3xl">🎮</span>
+                        <h4 className="font-black text-sm sm:text-base text-indigo-950 dark:text-indigo-200 mt-2">
+                          Try Sample Routine Demo
+                        </h4>
+                        <p className="text-xs text-indigo-900/80 dark:text-indigo-300/80 mt-1 font-medium">
+                          Interact with a live morning routine and timer in our interactive sandbox.
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+          </div>
+
+          {/* FOOTER ACTIONS */}
+          <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(step - 1);
+                  playChime('tap');
+                }}
+                className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+            ) : (
+              <div>
+                {onboardingMode === 'caregiver' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOnboardingMode('user');
+                      setStep(1);
+                      playChime('tap');
+                    }}
+                    className="text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 cursor-pointer"
+                  >
+                    Switch to User Mode
+                  </button>
+                )}
               </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              {onboardingMode === 'user' && step < totalUserSteps && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(step + 1);
+                    playChime('tap');
+                  }}
+                  className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-xs cursor-pointer flex items-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+
+              {onboardingMode === 'user' && step === totalUserSteps && (
+                <button
+                  type="button"
+                  onClick={() => setShowFirstActionPrompt(true)}
+                  className="px-7 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all animate-pulse"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Start Using BeeYou 🎉</span>
+                </button>
+              )}
+
+              {onboardingMode === 'caregiver' && step < totalCaregiverSteps && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(step + 1);
+                    playChime('tap');
+                  }}
+                  className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-xs cursor-pointer flex items-center gap-1.5 active:scale-95 transition-all"
+                >
+                  <span>Next</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+
+              {onboardingMode === 'caregiver' && step === totalCaregiverSteps && (
+                <button
+                  type="button"
+                  onClick={() => handleFinishOnboarding('caregiver_setup')}
+                  className="px-6 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs sm:text-sm shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all"
+                >
+                  <span>Open Caregiver Portal</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
-          )}
-
-          {/* STEP 3: CURATED TOOLS & FEATURES */}
-          {step === 3 && (
-            <div className="space-y-4 animate-in fade-in">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                <div>
-                  <h3 className="text-sm font-black text-slate-900">
-                    Curated Features for {selectedAge.toUpperCase()}
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    You can toggle any feature on or off. Adults can have stickers; kids can have a minimal layout!
-                  </p>
-                </div>
-
-                {/* Preset shortcuts */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-slate-400">Presets:</span>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset('kid')}
-                    className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[10px] cursor-pointer"
-                  >
-                    Kids
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset('teen')}
-                    className="px-2 py-1 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-[10px] cursor-pointer"
-                  >
-                    Teens
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset('adult')}
-                    className="px-2 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[10px] cursor-pointer"
-                  >
-                    Adults
-                  </button>
-                </div>
-              </div>
-
-              {/* Feature Grid / Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* AAC Symbol Board */}
-                <div 
-                  onClick={() => toggleFeatureKey('aacCommunication')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.aacCommunication ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🗣️</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">AAC Symbol & Voice Board</h4>
-                      <p className="text-[11px] text-slate-500">Motor-planned picture tiles with speech</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.aacCommunication}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Visual Countdown Timer */}
-                <div 
-                  onClick={() => toggleFeatureKey('visualCountdownTimer')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.visualCountdownTimer ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">⏱️</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Visual Countdown Timer</h4>
-                      <p className="text-[11px] text-slate-500">Smooth visual time ring for tasks</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.visualCountdownTimer}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* First / Then Schedules */}
-                <div 
-                  onClick={() => toggleFeatureKey('firstThenSchedules')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.firstThenSchedules ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">📋</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">First / Then Schedules</h4>
-                      <p className="text-[11px] text-slate-500">Visual next-step breakdown</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.firstThenSchedules}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Stars & Digital Stickers */}
-                <div 
-                  onClick={() => toggleFeatureKey('starsAndRewards')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.starsAndRewards ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">⭐</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Stars & Digital Stickers</h4>
-                      <p className="text-[11px] text-slate-500">Routine reward coins & badges</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.starsAndRewards}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Playful Mascot Companion */}
-                <div 
-                  onClick={() => toggleFeatureKey('mascotCompanion')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.mascotCompanion ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🐝</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Bee Mascot Companion</h4>
-                      <p className="text-[11px] text-slate-500">Cozy encouragement & friendly cheers</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.mascotCompanion}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Daily Mood & Recollection Log */}
-                <div 
-                  onClick={() => toggleFeatureKey('dailyMoodRecollection')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.dailyMoodRecollection ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🌙</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Evening Mood & Therapy Log</h4>
-                      <p className="text-[11px] text-slate-500">Daily check-in & therapist export</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.dailyMoodRecollection}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Sensory Breathing Pacer */}
-                <div 
-                  onClick={() => toggleFeatureKey('sensoryBreathingPacer')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.sensoryBreathingPacer ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🫁</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Sensory Breathing & Coping</h4>
-                      <p className="text-[11px] text-slate-500">Visual breath circle & calm tools</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.sensoryBreathingPacer}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Emergency Caregiver Alert SOS */}
-                <div 
-                  onClick={() => toggleFeatureKey('emergencyAlertSOS')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.emergencyAlertSOS ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🚨</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Caregiver Alert SOS Button</h4>
-                      <p className="text-[11px] text-slate-500">One-tap help & school alerts</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.emergencyAlertSOS}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Social Stories */}
-                <div 
-                  onClick={() => toggleFeatureKey('socialStories')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.socialStories ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">📖</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Social Stories Preparation</h4>
-                      <p className="text-[11px] text-slate-500">Pre-event stories for parties & visits</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.socialStories}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-
-                {/* Discreet Minimal Mode */}
-                <div 
-                  onClick={() => toggleFeatureKey('discreetMode')}
-                  className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
-                    features.discreetMode ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-slate-50/60 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🕶️</span>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">Discreet Minimal Mode</h4>
-                      <p className="text-[11px] text-slate-500">Clean text layout, reduced animations</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={features.discreetMode}
-                    onChange={() => {}}
-                    className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
 
         </div>
-
-        {/* WIZARD FOOTER CONTROLS */}
-        <div className="bg-slate-50 border-t border-slate-200 p-4 sm:p-5 flex items-center justify-between shrink-0">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={() => {
-                setStep(s => s - 1);
-                playChime('tap');
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm border border-slate-300 flex items-center gap-1.5 cursor-pointer active:scale-95"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-          ) : (
-            <div />
-          )}
-
-          {step < totalSteps ? (
-            <button
-              type="button"
-              onClick={() => {
-                setStep(s => s + 1);
-                playChime('tap');
-              }}
-              className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
-            >
-              <span>Continue</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleFinish}
-              className="px-7 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm sm:text-base shadow-md shadow-amber-500/20 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
-            >
-              <Sparkles className="w-4 h-4 text-amber-100" />
-              <span>Enter BeeYou</span>
-            </button>
-          )}
-        </div>
-
       </div>
-    </div>
+
+      {/* POST-ONBOARDING FIRST ACTION MODAL */}
+      {showFirstActionPrompt && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 text-center border-2 border-amber-300 dark:border-amber-800 shadow-2xl space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 mx-auto flex items-center justify-center text-3xl">
+              ☀️
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Let's create your first routine!
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+                Starting with a morning routine makes everyday transitions smooth and predictable.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFirstActionPrompt(false);
+                  handleFinishOnboarding('morning_routine');
+                }}
+                className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                <Sun className="w-4 h-4" />
+                <span>Create Morning Routine</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFirstActionPrompt(false);
+                  handleFinishOnboarding('home');
+                }}
+                className="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer transition-all"
+              >
+                I'll do this later (Go to Home)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HOW IT WORKS / GUIDE MODAL */}
+      <CaregiverHowItWorksModal
+        isOpen={showGuideModal}
+        onClose={() => setShowGuideModal(false)}
+        initialTopic="what_is_beeyou"
+      />
+    </>
   );
 };

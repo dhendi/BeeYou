@@ -594,6 +594,10 @@ export interface AppSettings {
   features?: EnabledFeatures;
   onboardingCompleted?: boolean;
   aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white' | 'neutral_monochrome';
+  visualAlerts?: boolean;
+  soundAlerts?: boolean;
+  vibrationAlerts?: boolean;
+  spokenAlerts?: boolean;
 }
 
 export type UserAccountRole = 

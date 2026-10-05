@@ -26,6 +26,7 @@ import { playChime } from '../utils/audio';
 import { MOOD_META } from '../data/defaultData';
 import { DashboardWidgetId } from '../types';
 import { isWidgetAvailable } from '../data/navigation';
+import { ContextualHelpButton } from './ContextualHelpButton';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -660,8 +661,9 @@ export const ChildHomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Action bar: Customize Dashboard Button */}
-        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+        {/* Action bar: Customize Dashboard & How It Works Buttons */}
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto flex-wrap">
+          <ContextualHelpButton topic="all" label="How It Works 💡" variant="pill" />
           <button
             onClick={() => {
               setShowDashboardCustomizer(true);

@@ -37,8 +37,8 @@ import {
   onDevicePairingEvent
 } from '../services/caregiverSync';
 import { CaregiverMessage, TemporaryPairingSession, EmergencySupportContact } from '../types';
-import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
+import { ContextualHelpButton } from './ContextualHelpButton';
 
 interface ConnectCaregiverModalProps {
   isOpen: boolean;
@@ -286,12 +286,15 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ContextualHelpButton topic="device_connection" label="How pairing works" variant="pill" />
+            <button
+              onClick={onClose}
+              className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}

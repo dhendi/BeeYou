@@ -44,6 +44,7 @@ import {
 } from '../types';
 import { playChime } from '../utils/audio';
 import { BeeMascot, BeeYouLogo } from './BeeYouLogo';
+import { ContextualHelpButton } from './ContextualHelpButton';
 
 interface CaregiverLivePortalProps {
   initialCode?: string;
@@ -217,6 +218,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <ContextualHelpButton topic="all" label="How It Works" variant="pill" className="bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700" />
             <button
               onClick={() => setShowAddChildModal(true)}
               className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition flex items-center gap-1.5"
