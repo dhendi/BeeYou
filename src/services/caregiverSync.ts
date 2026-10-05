@@ -16,8 +16,22 @@ const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
 const ACTIVE_ALERT_KEY = 'beeyou_active_caregiver_alert';
 const EMERGENCY_CONTACT_KEY = 'beeyou_emergency_support_contact';
 const CAREGIVER_ACCOUNT_KEY = 'beeyou_caregiver_account_data';
+const DEVICE_ID_KEY = 'beeyou_device_id';
 
-// Setup broadcast channel for instant local cross-tab communication
+// Generate or retrieve unique Device ID for echo suppression
+export function getDeviceId(): string {
+  if (typeof window === 'undefined') return 'dev-server';
+  let devId = localStorage.getItem(DEVICE_ID_KEY);
+  if (!devId) {
+    devId = 'dev-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
+    try {
+      localStorage.setItem(DEVICE_ID_KEY, devId);
+    } catch {}
+  }
+  return devId;
+}
+
+// Setup local broadcast channel for same-device instant multi-tab communication
 let broadcastChannel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
   try {
@@ -103,234 +117,178 @@ export function getPairingCode(): string {
  */
 export function setPairingCode(newCode: string): void {
   if (typeof window !== 'undefined' && newCode) {
-    localStorage.setItem(PAIRING_KEY, newCode.trim().toUpperCase());
+    const safe = newCode.trim().toUpperCase();
+    localStorage.setItem(PAIRING_KEY, safe);
+    subscribeToCloudChannel(safe);
   }
 }
 
 // -------------------------------------------------------------
-// Two-Way Temporary Pairing API (Flow A & Flow B)
+// Real-time Cloud Pub/Sub Relay (ntfy.sh + SSE + BroadcastChannel)
 // -------------------------------------------------------------
 
-/**
- * Creates a single-use expirable pairing session (10 min expiry)
- */
-export async function createTemporaryPairingSession(params: {
-  initiatedBy: 'child_device' | 'caregiver';
-  childName?: string;
-  childAge?: number;
-  ageGroup?: UserAgeGroup;
-  caregiverName?: string;
-  caregiverPhone?: string;
-  caregiverEmail?: string;
-  permissions?: CaregiverPermissions;
-}): Promise<TemporaryPairingSession> {
-  const now = Date.now();
-  const fallbackCode = getPairingCode();
+function getTopicForCode(code: string): string {
+  const sanitized = (code || 'beeyou-demo').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').toLowerCase();
+  return `beeyou-sync-${sanitized || 'default'}`;
+}
 
-  // Try server API first
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
-    try {
-      const res = await fetch('/api/caregiver/pairing/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.session) {
-          setPairingCode(data.session.pairingCode);
-          return data.session;
-        }
-      }
-    } catch (e) {
-      console.warn('Network pairing session creation failed, using local session:', e);
-    }
+let activeEventSource: EventSource | null = null;
+let currentSubscribedCode: string | null = null;
+
+// Track last known pings
+let lastPeerPingTimestamp = 0;
+let lastPeerRole: 'child_device' | 'caregiver' | null = null;
+let lastPeerName: string = '';
+
+export interface ConnectionStatusInfo {
+  isConnected: boolean;
+  peerRole: 'child_device' | 'caregiver' | null;
+  peerName: string;
+  lastPingAgoSeconds: number;
+  statusText: string;
+  pairingCode: string;
+}
+
+export type ConnectionStatusListener = (status: ConnectionStatusInfo) => void;
+const connectionStatusListeners: Set<ConnectionStatusListener> = new Set();
+
+export function onConnectionStatusChange(listener: ConnectionStatusListener): () => void {
+  connectionStatusListeners.add(listener);
+  // Immediate trigger with current status
+  listener(getLiveConnectionStatus());
+  return () => connectionStatusListeners.delete(listener);
+}
+
+export function getLiveConnectionStatus(): ConnectionStatusInfo {
+  const code = getPairingCode();
+  const now = Date.now();
+  const diffSec = lastPeerPingTimestamp > 0 ? Math.floor((now - lastPeerPingTimestamp) / 1000) : 9999;
+  const isConnected = lastPeerPingTimestamp > 0 && diffSec <= 35;
+
+  let statusText = 'Not Connected';
+  if (isConnected) {
+    statusText = `Connected (${diffSec < 5 ? 'Live' : `${diffSec}s ago`})`;
+  } else if (lastPeerPingTimestamp > 0) {
+    statusText = `Last seen ${diffSec > 60 ? `${Math.floor(diffSec / 60)}m ago` : `${diffSec}s ago`}`;
   }
 
-  // Local fallback session
-  const session: TemporaryPairingSession = {
-    pairingCode: fallbackCode,
-    token: 'tok-local-' + now,
-    createdAt: now,
-    expiresAt: now + 10 * 60 * 1000,
-    status: 'pending',
-    initiatedBy: params.initiatedBy,
-    childName: params.childName,
-    childAge: params.childAge,
-    ageGroup: params.ageGroup || 'kid',
-    caregiverName: params.caregiverName,
-    caregiverPhone: params.caregiverPhone,
-    caregiverEmail: params.caregiverEmail,
-    permissions: params.permissions || {
-      receiveAlerts: true,
-      receiveMood: true,
-      receiveRoutines: true,
-      canEditRoutines: true,
-      canEditAac: true,
-      allowLocationTag: true,
-    },
+  return {
+    isConnected,
+    peerRole: lastPeerRole,
+    peerName: lastPeerName || (lastPeerRole === 'caregiver' ? 'Caregiver Device' : 'Child Tablet'),
+    lastPingAgoSeconds: diffSec,
+    statusText,
+    pairingCode: code,
+  };
+}
+
+function notifyConnectionStatus(): void {
+  const status = getLiveConnectionStatus();
+  connectionStatusListeners.forEach((fn) => fn(status));
+}
+
+// Check connection status periodically (every 4s)
+if (typeof window !== 'undefined') {
+  setInterval(() => {
+    notifyConnectionStatus();
+  }, 4000);
+}
+
+/**
+ * Publishes an event to the cloud relay and local BroadcastChannel
+ */
+export async function publishCloudEvent(code: string, eventData: Record<string, any>): Promise<void> {
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  const topic = getTopicForCode(safeCode);
+  const myDeviceId = getDeviceId();
+
+  const envelope = {
+    ...eventData,
+    senderDeviceId: myDeviceId,
+    pairingCode: safeCode,
+    sentAt: Date.now(),
   };
 
-  try {
-    localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(session));
-  } catch {}
-
-  return session;
-}
-
-/**
- * Checks the status of a temporary pairing session
- */
-export async function pollPairingSessionStatus(code: string): Promise<TemporaryPairingSession | null> {
-  const safeCode = code.trim().toUpperCase();
-
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
+  // 1. Local BroadcastChannel for zero-latency multi-tab
+  if (broadcastChannel) {
     try {
-      const res = await fetch(`/api/caregiver/pairing/status/${safeCode}`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.session;
-      }
+      broadcastChannel.postMessage(envelope);
     } catch (e) {}
   }
 
-  // Local check
-  try {
-    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.pairingCode === safeCode) {
-        if (Date.now() > parsed.expiresAt && parsed.status === 'pending') {
-          parsed.status = 'expired';
-        }
-        return parsed;
-      }
-    }
-  } catch {}
-
-  return null;
-}
-
-/**
- * Claims and connects a temporary pairing code
- */
-export async function claimPairingSession(params: {
-  pairingCode: string;
-  claimerRole: 'caregiver' | 'child_device';
-  childName?: string;
-  childAge?: number;
-  ageGroup?: UserAgeGroup;
-  caregiverName?: string;
-  caregiverPhone?: string;
-  caregiverEmail?: string;
-  permissions?: CaregiverPermissions;
-}): Promise<{ success: boolean; message: string; session?: TemporaryPairingSession }> {
-  const safeCode = params.pairingCode.trim().toUpperCase();
-
-  // Try server API
+  // 2. Cloud Relay (ntfy.sh) for cross-device (Phone <-> Tablet)
   if (typeof navigator !== 'undefined' && navigator.onLine) {
     try {
-      const res = await fetch('/api/caregiver/pairing/claim', {
+      await fetch(`https://ntfy.sh/${topic}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...params, pairingCode: safeCode }),
+        headers: {
+          'Title': 'BeeYou Sync',
+          'Priority': eventData.type === 'CAREGIVER_ALERT' ? '5' : '3',
+        },
+        body: JSON.stringify(envelope),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setPairingCode(safeCode);
-        if (broadcastChannel) {
-          broadcastChannel.postMessage({ type: 'DEVICE_PAIRED', pairingCode: safeCode, session: data.session });
-        }
-        return data;
-      } else {
-        return { success: false, message: data.error || 'Failed to claim pairing code' };
-      }
     } catch (e) {
-      console.warn('Claim pairing network failed, using local simulation:', e);
+      console.warn('Cloud publish failed, fallback active:', e);
     }
   }
-
-  // Local claiming simulation
-  setPairingCode(safeCode);
-  const claimedSession: TemporaryPairingSession = {
-    pairingCode: safeCode,
-    token: 'tok-claimed-' + Date.now(),
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 10 * 60 * 1000,
-    status: 'paired',
-    initiatedBy: params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver',
-    childName: params.childName || 'Emma',
-    childAge: params.childAge || 10,
-    ageGroup: params.ageGroup || 'kid',
-    caregiverName: params.caregiverName || 'Caregiver',
-    caregiverPhone: params.caregiverPhone,
-    permissions: params.permissions,
-  };
-
-  try {
-    localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(claimedSession));
-  } catch {}
-
-  if (broadcastChannel) {
-    broadcastChannel.postMessage({ type: 'DEVICE_PAIRED', pairingCode: safeCode, session: claimedSession });
-  }
-
-  return { success: true, message: 'Device connected successfully!', session: claimedSession };
 }
 
 /**
- * Unlinks a paired device
+ * Subscribes to the live cloud SSE stream for a pairing code
  */
-export async function unlinkDeviceSession(code: string): Promise<boolean> {
-  const safeCode = code.trim().toUpperCase();
-
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({ type: 'DEVICE_UNLINKED', pairingCode: safeCode });
-    } catch {}
+export function subscribeToCloudChannel(code: string): void {
+  if (typeof window === 'undefined' || !('EventSource' in window)) return;
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  if (currentSubscribedCode === safeCode && activeEventSource && activeEventSource.readyState !== EventSource.CLOSED) {
+    return;
   }
 
-  try {
-    localStorage.removeItem('beeyou_temporary_pairing_session');
-    localStorage.removeItem(LOCAL_SESSION_KEY);
-  } catch {}
-
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
+  if (activeEventSource) {
     try {
-      const res = await fetch('/api/caregiver/device/unlink', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pairingCode: safeCode }),
-      });
-      return res.ok;
+      activeEventSource.close();
     } catch {}
+    activeEventSource = null;
   }
 
-  return true;
+  currentSubscribedCode = safeCode;
+  const topic = getTopicForCode(safeCode);
+
+  try {
+    const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
+    activeEventSource = es;
+
+    es.onmessage = (event) => {
+      try {
+        const raw = JSON.parse(event.data);
+        // ntfy.sh wraps messages in an object with `message` field
+        let payload = raw;
+        if (raw.message && typeof raw.message === 'string') {
+          try {
+            payload = JSON.parse(raw.message);
+          } catch {
+            payload = raw;
+          }
+        }
+
+        handleIncomingSyncEnvelope(payload);
+      } catch (e) {
+        // Non-JSON or keepalive comment
+      }
+    };
+
+    es.onerror = () => {
+      // Automatic browser reconnect will handle retry
+    };
+  } catch (e) {
+    console.warn('Could not establish SSE stream:', e);
+  }
 }
 
-// -------------------------------------------------------------
-// Emergency / Support Contact Storage for Independent Adults
-// -------------------------------------------------------------
-
-export function getStoredEmergencyContact(): EmergencySupportContact | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(EMERGENCY_CONTACT_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return null;
-}
-
-export function saveStoredEmergencyContact(contact: EmergencySupportContact | null): void {
-  if (typeof window === 'undefined') return;
-  try {
-    if (contact) {
-      localStorage.setItem(EMERGENCY_CONTACT_KEY, JSON.stringify(contact));
-    } else {
-      localStorage.removeItem(EMERGENCY_CONTACT_KEY);
-    }
-  } catch {}
+// Initialize cloud subscription on startup
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    subscribeToCloudChannel(getPairingCode());
+  }, 1000);
 }
 
 // -------------------------------------------------------------
@@ -369,65 +327,343 @@ export function onDevicePairingEvent(listener: PairingListener): () => void {
   return () => pairingListeners.delete(listener);
 }
 
-// Listen for broadcast messages from other tabs/windows
-if (broadcastChannel) {
-  broadcastChannel.onmessage = (event) => {
-    if (event.data?.type === 'CAREGIVER_MESSAGE' && event.data.message) {
-      messageListeners.forEach((fn) => fn(event.data.message));
-      triggerWebNotification(`Message from ${event.data.message.senderName}`, {
-        body: event.data.message.text,
-      });
-    } else if (event.data?.type === 'CAREGIVER_ALERT' && event.data.alert) {
-      alertListeners.forEach((fn) => fn(event.data.alert));
-      triggerWebNotification(`BeeYou Alert: ${event.data.alert.childName}`, {
-        body: `${event.data.alert.emoji} ${event.data.alert.label}`,
-      });
-    } else if (event.data?.type === 'CAREGIVER_ALERT_ACK' && event.data.ack) {
-      alertAckListeners.forEach((fn) => fn(event.data.ack));
-      triggerWebNotification(`Response from ${event.data.ack.by}`, {
-        body: event.data.ack.responseMessage || 'Response received.',
-      });
-    } else if (event.data?.type === 'DEVICE_PAIRED' || event.data?.type === 'DEVICE_UNLINKED') {
-      pairingListeners.forEach((fn) => fn(event.data));
-    }
-  };
+export type ChildStatusListener = (status: CaregiverChildStatus) => void;
+const statusListeners: Set<ChildStatusListener> = new Set();
+
+export function onChildStatusUpdate(listener: ChildStatusListener): () => void {
+  statusListeners.add(listener);
+  return () => statusListeners.delete(listener);
 }
 
 /**
- * Sends child status update to caregiver (via backend API and BroadcastChannel)
+ * Dispatches incoming envelope from SSE or BroadcastChannel
+ */
+function handleIncomingSyncEnvelope(envelope: any): void {
+  if (!envelope || typeof envelope !== 'object') return;
+  
+  const myDevId = getDeviceId();
+  // Echo suppression: Ignore if sent by this exact same browser tab/device
+  if (envelope.senderDeviceId && envelope.senderDeviceId === myDevId) {
+    return;
+  }
+
+  const type = envelope.type;
+
+  // 1. Heartbeat & Ping Events
+  if (type === 'HEARTBEAT' || type === 'CHILD_HEARTBEAT' || type === 'CAREGIVER_HEARTBEAT') {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = envelope.role || (type === 'CHILD_HEARTBEAT' ? 'child_device' : 'caregiver');
+    lastPeerName = envelope.name || (lastPeerRole === 'caregiver' ? 'Caregiver Device' : 'Child Device');
+    notifyConnectionStatus();
+
+    if (envelope.childStatus) {
+      statusListeners.forEach((fn) => fn(envelope.childStatus));
+      try {
+        localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(envelope.childStatus));
+      } catch {}
+    }
+    return;
+  }
+
+  // 2. Child Status Update
+  if (type === 'CHILD_STATUS_UPDATE' && envelope.status) {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = 'child_device';
+    lastPeerName = envelope.status.childName || 'Child Device';
+    notifyConnectionStatus();
+
+    statusListeners.forEach((fn) => fn(envelope.status));
+    try {
+      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(envelope.status));
+    } catch {}
+    return;
+  }
+
+  // 3. Caregiver Message (Caregiver -> Child)
+  if (type === 'CAREGIVER_MESSAGE' && envelope.message) {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = 'caregiver';
+    notifyConnectionStatus();
+
+    messageListeners.forEach((fn) => fn(envelope.message));
+    triggerWebNotification(`Message from ${envelope.message.senderName || 'Caregiver'}`, {
+      body: envelope.message.text,
+    });
+    return;
+  }
+
+  // 4. Caregiver Alert (Child -> Caregiver)
+  if (type === 'CAREGIVER_ALERT' && envelope.alert) {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = 'child_device';
+    lastPeerName = envelope.alert.childName || 'Child Device';
+    notifyConnectionStatus();
+
+    alertListeners.forEach((fn) => fn(envelope.alert));
+    try {
+      localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(envelope.alert));
+    } catch {}
+    triggerWebNotification(`BeeYou Alert: ${envelope.alert.childName}`, {
+      body: `${envelope.alert.emoji || '🚨'} ${envelope.alert.label}: ${envelope.alert.note || 'Help requested'}`,
+      requireInteraction: true,
+    });
+    return;
+  }
+
+  // 5. Caregiver Alert ACK (Caregiver -> Child)
+  if (type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = 'caregiver';
+    notifyConnectionStatus();
+
+    alertAckListeners.forEach((fn) => fn(envelope.ack));
+    triggerWebNotification(`Caregiver Response: ${envelope.ack.by || 'Caregiver'}`, {
+      body: envelope.ack.responseMessage || "I'm here for you ❤️",
+    });
+    return;
+  }
+
+  // 6. Pairing & Unlink Events
+  if (type === 'DEVICE_PAIRED' || type === 'DEVICE_UNLINKED') {
+    pairingListeners.forEach((fn) => fn(envelope));
+    return;
+  }
+}
+
+// Local BroadcastChannel Listener
+if (broadcastChannel) {
+  broadcastChannel.onmessage = (event) => {
+    handleIncomingSyncEnvelope(event.data);
+  };
+}
+
+// -------------------------------------------------------------
+// Two-Way Temporary Pairing API
+// -------------------------------------------------------------
+
+/**
+ * Creates a single-use expirable pairing session (10 min expiry)
+ */
+export async function createTemporaryPairingSession(params: {
+  initiatedBy: 'child_device' | 'caregiver';
+  childName?: string;
+  childAge?: number;
+  ageGroup?: UserAgeGroup;
+  caregiverName?: string;
+  caregiverPhone?: string;
+  caregiverEmail?: string;
+  permissions?: CaregiverPermissions;
+}): Promise<TemporaryPairingSession> {
+  const now = Date.now();
+  const fallbackCode = getPairingCode();
+
+  const session: TemporaryPairingSession = {
+    pairingCode: fallbackCode,
+    token: 'tok-local-' + now,
+    createdAt: now,
+    expiresAt: now + 10 * 60 * 1000,
+    status: 'pending',
+    initiatedBy: params.initiatedBy,
+    childName: params.childName,
+    childAge: params.childAge,
+    ageGroup: params.ageGroup || 'kid',
+    caregiverName: params.caregiverName,
+    caregiverPhone: params.caregiverPhone,
+    caregiverEmail: params.caregiverEmail,
+    permissions: params.permissions || {
+      receiveAlerts: true,
+      receiveMood: true,
+      receiveRoutines: true,
+      canEditRoutines: true,
+      canEditAac: true,
+      allowLocationTag: true,
+    },
+  };
+
+  try {
+    localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(session));
+  } catch {}
+
+  // Publish pairing session creation event
+  await publishCloudEvent(fallbackCode, {
+    type: 'PAIRING_SESSION_CREATED',
+    session,
+  });
+
+  return session;
+}
+
+/**
+ * Checks the status of a temporary pairing session
+ */
+export async function pollPairingSessionStatus(code: string): Promise<TemporaryPairingSession | null> {
+  const safeCode = code.trim().toUpperCase();
+
+  try {
+    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.pairingCode === safeCode) {
+        if (Date.now() > parsed.expiresAt && parsed.status === 'pending') {
+          parsed.status = 'expired';
+        }
+        return parsed;
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+/**
+ * Claims and connects a temporary pairing code
+ */
+export async function claimPairingSession(params: {
+  pairingCode: string;
+  claimerRole: 'caregiver' | 'child_device';
+  childName?: string;
+  childAge?: number;
+  ageGroup?: UserAgeGroup;
+  caregiverName?: string;
+  caregiverPhone?: string;
+  caregiverEmail?: string;
+  permissions?: CaregiverPermissions;
+}): Promise<{ success: boolean; message: string; session?: TemporaryPairingSession }> {
+  const safeCode = params.pairingCode.trim().toUpperCase();
+  setPairingCode(safeCode);
+
+  const claimedSession: TemporaryPairingSession = {
+    pairingCode: safeCode,
+    token: 'tok-claimed-' + Date.now(),
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    status: 'paired',
+    initiatedBy: params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver',
+    childName: params.childName || 'Leo',
+    childAge: params.childAge || 10,
+    ageGroup: params.ageGroup || 'kid',
+    caregiverName: params.caregiverName || 'Caregiver',
+    caregiverPhone: params.caregiverPhone,
+    permissions: params.permissions,
+  };
+
+  try {
+    localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(claimedSession));
+  } catch {}
+
+  await publishCloudEvent(safeCode, {
+    type: 'DEVICE_PAIRED',
+    pairingCode: safeCode,
+    session: claimedSession,
+  });
+
+  // Also send an immediate heartbeat to confirm connection
+  await sendHeartbeat({
+    role: params.claimerRole,
+    name: params.claimerRole === 'caregiver' ? params.caregiverName || 'Caregiver' : params.childName || 'Child',
+    pairingCode: safeCode,
+  });
+
+  return { success: true, message: 'Device connected successfully!', session: claimedSession };
+}
+
+/**
+ * Unlinks a paired device
+ */
+export async function unlinkDeviceSession(code: string): Promise<boolean> {
+  const safeCode = code.trim().toUpperCase();
+
+  await publishCloudEvent(safeCode, {
+    type: 'DEVICE_UNLINKED',
+    pairingCode: safeCode,
+  });
+
+  try {
+    localStorage.removeItem('beeyou_temporary_pairing_session');
+    localStorage.removeItem(LOCAL_SESSION_KEY);
+    localStorage.removeItem(ACTIVE_ALERT_KEY);
+  } catch {}
+
+  lastPeerPingTimestamp = 0;
+  notifyConnectionStatus();
+
+  return true;
+}
+
+// -------------------------------------------------------------
+// Emergency / Support Contact Storage for Independent Adults
+// -------------------------------------------------------------
+
+export function getStoredEmergencyContact(): EmergencySupportContact | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(EMERGENCY_CONTACT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+export function saveStoredEmergencyContact(contact: EmergencySupportContact | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (contact) {
+      localStorage.setItem(EMERGENCY_CONTACT_KEY, JSON.stringify(contact));
+    } else {
+      localStorage.removeItem(EMERGENCY_CONTACT_KEY);
+    }
+  } catch {}
+}
+
+// -------------------------------------------------------------
+// Core Real-Time Methods
+// -------------------------------------------------------------
+
+/**
+ * Sends a periodic heartbeat ping to the other device
+ */
+export async function sendHeartbeat(params: {
+  role: 'child_device' | 'caregiver';
+  name?: string;
+  pairingCode?: string;
+  childStatus?: Partial<CaregiverChildStatus>;
+}): Promise<void> {
+  const code = params.pairingCode || getPairingCode();
+  await publishCloudEvent(code, {
+    type: params.role === 'child_device' ? 'CHILD_HEARTBEAT' : 'CAREGIVER_HEARTBEAT',
+    role: params.role,
+    name: params.name,
+    childStatus: params.childStatus,
+  });
+}
+
+/**
+ * Sends child status update to caregiver in real-time
  */
 export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildStatus>): Promise<void> {
   const code = getPairingCode();
-  const payload = {
+  const payload: CaregiverChildStatus = {
+    childName: status.childName || 'Child',
     pairingCode: code,
     lastActiveTime: new Date().toISOString(),
-    ...status,
+    currentActivity: status.currentActivity || 'Using BeeYou',
+    currentMood: status.currentMood || 'happy',
+    habitsCompletedToday: status.habitsCompletedToday ?? 0,
+    totalHabits: status.totalHabits ?? 0,
+    routineProgress: status.routineProgress || null,
+    stars: status.stars ?? 0,
+    isOffline: status.isOffline ?? false,
+    lastAacSentence: status.lastAacSentence,
+    caregiverPhone: status.caregiverPhone,
   };
 
-  // 1. Mirror locally for instantaneous cross-tab access
   try {
     localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(payload));
   } catch {}
 
-  // 2. Broadcast immediately
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({ type: 'CHILD_STATUS_UPDATE', status: payload });
-    } catch {}
-  }
-
-  // 3. Sync to server API if online
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
-    try {
-      await fetch('/api/caregiver/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } catch (e) {
-      // offline silent fallback
-    }
-  }
+  await publishCloudEvent(code, {
+    type: 'CHILD_STATUS_UPDATE',
+    status: payload,
+  });
 }
 
 /**
@@ -436,20 +672,6 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
 export async function fetchCaregiverSession(code: string): Promise<CaregiverChildStatus | null> {
   const safeCode = code.trim().toUpperCase();
 
-  // Try server first if online
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
-    try {
-      const res = await fetch(`/api/caregiver/session/${safeCode}`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.session;
-      }
-    } catch (e) {
-      console.warn('Could not fetch session from server:', e);
-    }
-  }
-
-  // Fallback to local storage mirror
   try {
     const raw = localStorage.getItem(LOCAL_SESSION_KEY);
     if (raw) {
@@ -460,13 +682,12 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
     }
   } catch {}
 
-  // Default fallback status
   return {
     childName: 'Alex',
     pairingCode: safeCode,
     lastActiveTime: new Date().toISOString(),
     currentActivity: 'Using BeeYou',
-    currentMood: 'calm',
+    currentMood: 'happy',
     habitsCompletedToday: 2,
     totalHabits: 4,
     routineProgress: null,
@@ -476,7 +697,7 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
 }
 
 /**
- * Caregiver sends a message or predefined response to the child
+ * Caregiver sends a message or remote alert to the child device
  */
 export async function sendCaregiverMessage(
   code: string,
@@ -484,8 +705,8 @@ export async function sendCaregiverMessage(
   senderName = 'Caregiver',
   emoji = '❤️',
   responseId?: PredefinedCaregiverResponseId
-): Promise<CaregiverMessage | null> {
-  const safeCode = code.trim().toUpperCase();
+): Promise<CaregiverMessage> {
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
   const newMsg: CaregiverMessage = {
     id: 'msg-' + Date.now(),
     senderName,
@@ -496,33 +717,10 @@ export async function sendCaregiverMessage(
     responseId,
   };
 
-  // Broadcast locally
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({ type: 'CAREGIVER_MESSAGE', message: newMsg });
-    } catch {}
-  }
-
-  // Save to server
-  try {
-    const res = await fetch('/api/caregiver/message', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pairingCode: safeCode,
-        senderName,
-        text,
-        emoji,
-        responseId,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return data.message;
-    }
-  } catch (e) {
-    console.warn('Failed to send caregiver message over network:', e);
-  }
+  await publishCloudEvent(safeCode, {
+    type: 'CAREGIVER_MESSAGE',
+    message: newMsg,
+  });
 
   return newMsg;
 }
@@ -531,18 +729,6 @@ export async function sendCaregiverMessage(
  * Child fetches new messages from caregiver
  */
 export async function pollCaregiverMessages(code: string): Promise<CaregiverMessage[]> {
-  const safeCode = code.trim().toUpperCase();
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    return [];
-  }
-
-  try {
-    const res = await fetch(`/api/caregiver/messages/${safeCode}`);
-    if (res.ok) {
-      const data = await res.json();
-      return data.messages || [];
-    }
-  } catch {}
   return [];
 }
 
@@ -567,37 +753,14 @@ export async function sendCaregiverAlert(alertData: {
     ...alertData,
   };
 
-  // 1. Mirror in localStorage
   try {
     localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
   } catch {}
 
-  // 2. Broadcast immediately over local channel
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({ type: 'CAREGIVER_ALERT', alert });
-    } catch {}
-  }
-
-  // 3. Post to backend server if online
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
-    try {
-      const res = await fetch('/api/caregiver/alert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pairingCode: code,
-          ...alertData,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data.alert;
-      }
-    } catch (e) {
-      console.warn('Network alert post failed, local broadcast active:', e);
-    }
-  }
+  await publishCloudEvent(code, {
+    type: 'CAREGIVER_ALERT',
+    alert,
+  });
 
   return alert;
 }
@@ -611,32 +774,14 @@ export async function acknowledgeCaregiverAlert(
   responseMessage?: string,
   responseId?: PredefinedCaregiverResponseId
 ): Promise<void> {
-  const safeCode = code.trim().toUpperCase();
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
-  // 1. Broadcast locally
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({
-        type: 'CAREGIVER_ALERT_ACK',
-        ack: { alertId: safeCode, responseMessage, responseId, by: acknowledgedBy },
-      });
-    } catch {}
-  }
+  await publishCloudEvent(safeCode, {
+    type: 'CAREGIVER_ALERT_ACK',
+    ack: { alertId: safeCode, responseMessage, responseId, by: acknowledgedBy },
+  });
 
-  // 2. Update server
-  try {
-    await fetch('/api/caregiver/alert/acknowledge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pairingCode: safeCode,
-        acknowledgedBy,
-        responseMessage,
-        responseId,
-      }),
-    });
-  } catch (e) {
-    console.warn('Network alert acknowledge failed:', e);
+  if (responseMessage) {
+    await sendCaregiverMessage(safeCode, responseMessage, acknowledgedBy, '❤️', responseId);
   }
 }
-

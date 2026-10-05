@@ -64,7 +64,9 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     caregiverPermissions,
     updateCaregiverPermissions,
     linkedDeviceCode,
-    setLinkedDeviceCode
+    setLinkedDeviceCode,
+    connectionStatus,
+    isCaregiverConnected,
   } = useApp();
 
   const isAdult = userAgeGroup === 'adult' || userRole === 'independent_adult';
@@ -371,12 +373,19 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
           {activeTab === 'pair_code' && (
             <div className="space-y-4 animate-in fade-in">
               <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs text-center space-y-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-3 py-1 rounded-full inline-block">
-                  Temporary Pairing Session
-                </span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full inline-flex items-center gap-1.5 ${
+                    connectionStatus.isConnected
+                      ? 'text-emerald-900 bg-emerald-100 border border-emerald-300'
+                      : 'text-amber-800 bg-amber-100'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${connectionStatus.isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    <span>{connectionStatus.isConnected ? `🟢 Connected with ${connectionStatus.peerName || 'Caregiver'}` : 'Temporary Pairing Session'}</span>
+                  </span>
+                </div>
 
                 <h3 className="text-base font-bold text-slate-900">
-                  Give this code to your caregiver:
+                  {connectionStatus.isConnected ? 'Connected Caregiver Device' : 'Give this code to your caregiver:'}
                 </h3>
 
                 {/* Big Code Pill */}

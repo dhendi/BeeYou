@@ -33,7 +33,12 @@ import {
   createTemporaryPairingSession,
   claimPairingSession,
   launchNativePhoneCall,
-  launchNativeSms
+  launchNativeSms,
+  subscribeToCloudChannel,
+  sendHeartbeat,
+  onConnectionStatusChange,
+  getLiveConnectionStatus,
+  ConnectionStatusInfo
 } from '../services/caregiverSync';
 import { 
   CaregiverChildStatus, 
@@ -108,10 +113,21 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
 
   useEffect(() => {
     loadStatus(code);
-    // Poll every 4 seconds for live status
+    subscribeToCloudChannel(code);
+
+    const sendPing = () => {
+      sendHeartbeat({
+        role: 'caregiver',
+        name: senderName || 'Caregiver',
+        pairingCode: code,
+      });
+    };
+
+    sendPing();
     const interval = setInterval(() => {
       loadStatus(code);
-    }, 4000);
+      sendPing();
+    }, 5000);
 
     // Instant notification on urgent alert broadcast
     const unsubAlert = onCaregiverAlert((alert) => {
@@ -123,7 +139,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
       clearInterval(interval);
       unsubAlert();
     };
-  }, [code]);
+  }, [code, senderName]);
 
   const handleSendPredefinedResponse = async (item: typeof PREDEFINED_RESPONSES[0]) => {
     playChime('star');

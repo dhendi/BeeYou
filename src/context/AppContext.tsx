@@ -100,7 +100,12 @@ import {
   pollCaregiverMessages, 
   onCaregiverMessage, 
   getPairingCode,
-  setPairingCode
+  setPairingCode,
+  onConnectionStatusChange,
+  getLiveConnectionStatus,
+  sendHeartbeat,
+  subscribeToCloudChannel,
+  ConnectionStatusInfo
 } from '../services/caregiverSync';
 import { resolveAacImageUrl } from '../services/symbolService';
 
@@ -149,6 +154,10 @@ interface AppContextType {
   dismissIncomingCaregiverMessage: () => void;
   activeContextTopic: string | null;
   setActiveContextTopic: (topic: string | null) => void;
+
+  // Real-time Caregiver Connection & Cross-Device Sync
+  connectionStatus: ConnectionStatusInfo;
+  isCaregiverConnected: boolean;
 
   // TTS & Offline Engine
   isSpeaking: boolean;
@@ -589,6 +598,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
   const [incomingCaregiverMessage, setIncomingCaregiverMessage] = useState<CaregiverMessage | null>(null);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatusInfo>(getLiveConnectionStatus());
+  const isCaregiverConnected = connectionStatus.isConnected && connectionStatus.peerRole === 'caregiver';
 
   const dismissIncomingCaregiverMessage = () => {
     setIncomingCaregiverMessage(null);
@@ -1130,7 +1141,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   }, [settings.language]);
 
-  // Listen for real-time messages from caregiver and poll periodically
+  // Listen for real-time messages and connection updates from caregiver
   useEffect(() => {
     const unsubCaregiver = onCaregiverMessage((msg) => {
       setIncomingCaregiverMessage(msg);
@@ -1138,21 +1149,37 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       speakText(`${msg.senderName} sent you a message: ${msg.text}`);
     });
 
-    const interval = setInterval(() => {
-      const code = getPairingCode();
-      pollCaregiverMessages(code).then((msgs) => {
-        const unread = msgs.find((m) => !m.read);
-        if (unread) {
-          setIncomingCaregiverMessage(unread);
+    const unsubConnection = onConnectionStatusChange((status) => {
+      setConnectionStatus(status);
+    });
+
+    // Send initial heartbeat and periodic keepalive (every 10s)
+    const code = getPairingCode();
+    subscribeToCloudChannel(code);
+
+    const sendPing = () => {
+      sendHeartbeat({
+        role: userRole === 'caregiver' ? 'caregiver' : 'child_device',
+        name: userRole === 'caregiver' ? 'Caregiver' : childProfile.name,
+        pairingCode: code,
+        childStatus: {
+          childName: childProfile.name,
+          currentMood,
+          currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : childView === 'skills' ? 'Life Skills' : childView === 'adventures' ? 'Life Adventures' : childView === 'feelings' ? 'Feelings Check-in' : 'BeeYou'}`,
+          stars: worldState.stars,
         }
       });
-    }, 8000);
+    };
+
+    sendPing();
+    const interval = setInterval(sendPing, 10000);
 
     return () => {
       unsubCaregiver();
+      unsubConnection();
       clearInterval(interval);
     };
-  }, []);
+  }, [userRole, childProfile.name, currentMood, childView, worldState.stars]);
 
   // Hydrate from localStorage on initial mount
   useEffect(() => {
@@ -3242,6 +3269,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         exportProfileBackup,
         importProfileBackup,
+
+        // Real-time Caregiver Connection
+        connectionStatus,
+        isCaregiverConnected,
 
         resetToDefaults,
       }}

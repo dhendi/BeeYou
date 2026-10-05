@@ -42,7 +42,13 @@ import {
   Upload,
   FileJson,
   HelpCircle,
-  ArrowRight
+  ArrowRight,
+  Send,
+  Bell,
+  Activity,
+  Smartphone,
+  Radio,
+  ShieldAlert
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
@@ -63,6 +69,9 @@ import {
   DEFAULT_ADULT_FEATURES,
   MedicationReminder,
   MedicationFrequency,
+  CaregiverAlert,
+  PredefinedCaregiverResponseId,
+  CaregiverChildStatus
 } from '../types';
 import { CaregiverLivePortal } from './CaregiverLivePortal';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -75,7 +84,14 @@ import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/symbolService';
 import { QRCodeView } from './QRCodeView';
 
-import { getPairingCode } from '../services/caregiverSync';
+import { 
+  getPairingCode, 
+  sendCaregiverMessage, 
+  acknowledgeCaregiverAlert, 
+  onCaregiverAlert,
+  onChildStatusUpdate,
+  fetchCaregiverSession
+} from '../services/caregiverSync';
 
 export const ParentDashboard: React.FC = () => {
   const {
@@ -83,6 +99,11 @@ export const ParentDashboard: React.FC = () => {
     userRole,
     childProfile,
     updateChildProfile,
+    worldState,
+    currentMood,
+    connectionStatus,
+    isCaregiverConnected,
+    setShowCaregiverModal,
     plansChanged,
     activatePlansChanged,
     dismissPlansChanged,
@@ -175,6 +196,7 @@ export const ParentDashboard: React.FC = () => {
   const cyclePhaseInfo = getCyclePhaseInfo();
 
   type TabType = 
+    | 'home'
     | 'subscription'
     | 'guide'
     | 'caregiver'
@@ -193,9 +215,59 @@ export const ParentDashboard: React.FC = () => {
     | 'themes'
     | 'settings';
 
-  const [activeTab, setActiveTab] = useState<TabType>('routines');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
+
+  // Caregiver Live Homepage & Remote Dispatcher State
+  const [customMsgText, setCustomMsgText] = useState('');
+  const [customMsgEmoji, setCustomMsgEmoji] = useState('❤️');
+  const [activeAlerts, setActiveAlerts] = useState<CaregiverAlert[]>(() => {
+    try {
+      const raw = localStorage.getItem('beeyou_active_caregiver_alert');
+      if (raw) return [JSON.parse(raw)];
+    } catch {}
+    return [];
+  });
+  const [liveChildStatus, setLiveChildStatus] = useState<CaregiverChildStatus | null>(null);
+
+  useEffect(() => {
+    fetchCaregiverSession(getPairingCode()).then(setLiveChildStatus);
+    const unsubAlert = onCaregiverAlert((alert) => {
+      setActiveAlerts((prev) => [alert, ...prev.filter((a) => a.id !== alert.id)]);
+      playChime('star');
+      showNotification(`🚨 Incoming Alert from ${alert.childName}: ${alert.label}`);
+    });
+    const unsubStatus = onChildStatusUpdate((status) => {
+      setLiveChildStatus(status);
+    });
+    return () => {
+      unsubAlert();
+      unsubStatus();
+    };
+  }, []);
+
+  const handleSendQuickNudge = async (title: string, text: string, emoji: string) => {
+    await sendCaregiverMessage(getPairingCode(), text, 'Caregiver', emoji);
+    showNotification(`Sent "${title}" alert to ${childProfile.name}'s device!`);
+    playChime('tap');
+  };
+
+  const handleSendCustomMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customMsgText.trim()) return;
+    await sendCaregiverMessage(getPairingCode(), customMsgText.trim(), 'Caregiver', customMsgEmoji);
+    showNotification(`Sent note to ${childProfile.name}'s device!`);
+    setCustomMsgText('');
+    playChime('tap');
+  };
+
+  const handleAcknowledgeAlert = async (alertId: string, responseMessage: string, responseId?: PredefinedCaregiverResponseId) => {
+    await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId);
+    setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    showNotification(`Sent response: "${responseMessage}" to child!`);
+    playChime('star');
+  };
 
   // Smoothly scroll back to top of page when changing tabs
   useEffect(() => {
@@ -749,6 +821,13 @@ export const ParentDashboard: React.FC = () => {
         <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           {[
             { 
+              id: 'home', 
+              label: 'Caregiver Live Hub', 
+              emoji: '🏠', 
+              icon: Sparkles, 
+              badge: connectionStatus.isConnected ? 'Live 🟢' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : 'Home') 
+            },
+            { 
               id: 'subscription', 
               label: 'Membership & Plan', 
               emoji: '👑', 
@@ -855,6 +934,279 @@ export const ParentDashboard: React.FC = () => {
                 <span>Browse Templates</span>
                 <span>→</span>
               </button>
+            </div>
+          )}
+
+          {/* TAB: CAREGIVER LIVE HUB HOMEPAGE */}
+          {activeTab === 'home' && (
+            <div className="space-y-6 animate-in fade-in pb-10">
+              {/* 1. HERO LIVE CONNECTION & CHILD SNAPSHOT CARD */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-indigo-500/15 border-2 border-amber-300/80 shadow-xs relative overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 flex items-center justify-center text-3xl shadow-inner shrink-0">
+                      🐝
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-lg sm:text-xl font-black text-slate-900">
+                          {childProfile.name}'s Caregiver Command Hub
+                        </h2>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-black flex items-center gap-1.5 ${
+                          connectionStatus.isConnected 
+                            ? 'bg-emerald-500 text-white shadow-xs' 
+                            : 'bg-amber-200 text-amber-950'
+                        }`}>
+                          <span className={`w-2 h-2 rounded-full ${connectionStatus.isConnected ? 'bg-white animate-pulse' : 'bg-amber-600'}`} />
+                          <span>{connectionStatus.isConnected ? `Connected: ${connectionStatus.peerName || 'Child Device'}` : 'Waiting for Device Connection'}</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 font-medium mt-1">
+                        Send instant nudges & alerts, receive real-time SOS notifications, and manage routines and speech support.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('caregiver');
+                        playChime('tap');
+                      }}
+                      className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+                    >
+                      <Smartphone className="w-4 h-4 text-amber-600" />
+                      <span>Pairing & QR</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('guide');
+                        playChime('tap');
+                      }}
+                      className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+                    >
+                      <HelpCircle className="w-4 h-4 text-amber-300" />
+                      <span>How It Works</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live Snapshot Pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-amber-200/60 text-xs">
+                  <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Current Mood</span>
+                    <span className="text-sm font-black text-slate-900 flex items-center gap-1 mt-0.5 capitalize">
+                      <span>{currentMood === 'happy' ? '😊' : currentMood === 'calm' ? '😌' : currentMood === 'overwhelmed' ? '😫' : currentMood === 'sad' ? '😢' : '✨'}</span>
+                      <span>{currentMood || 'Happy'}</span>
+                    </span>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Current View</span>
+                    <span className="text-sm font-black text-slate-900 mt-0.5 block truncate">
+                      {liveChildStatus?.currentActivity || 'BeeYou Active'}
+                    </span>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Habits Done</span>
+                    <span className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1">
+                      <span>⭐</span>
+                      <span>{habits.filter(h => h.completedToday).length} / {habits.length} Done</span>
+                    </span>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Pairing Code</span>
+                    <span className="text-sm font-black text-indigo-700 font-mono mt-0.5 block">
+                      {getPairingCode()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. REAL-TIME INCOMING ALERTS FEED (IF ANY ACTIVE) */}
+              {activeAlerts.length > 0 && (
+                <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-3 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-rose-900 font-black text-sm">
+                      <span className="flex h-3 w-3 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+                      </span>
+                      <ShieldAlert className="w-5 h-5 text-rose-600" />
+                      <span>Live Help Alert from {childProfile.name}</span>
+                    </div>
+                    <span className="text-xs font-bold text-rose-700">Action Required</span>
+                  </div>
+
+                  {activeAlerts.map((alert) => (
+                    <div key={alert.id} className="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl shrink-0 font-bold">
+                            {alert.emoji || '🚨'}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
+                            <p className="text-xs text-slate-500 font-medium">
+                              {alert.note || 'Child tapped help alert button'} {alert.location ? `• Location: ${alert.location}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-slate-400">
+                          {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+
+                      {/* Quick 1-tap Caregiver Responses */}
+                      <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
+                        <span className="text-xs font-bold text-slate-500">Quick Reply:</span>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
+                          className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
+                        >
+                          🚗 I'm On My Way
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
+                          className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
+                        >
+                          ❤️ I'm Here For You
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer active:scale-95"
+                        >
+                          ⏳ 5 Minutes
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 3. REMOTE ALERT & NUDGE DISPATCHER (CAREGIVER -> CHILD TABLET) */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                      <Send className="w-5 h-5 text-indigo-600" />
+                      <span>Send Instant Alert or Message to {childProfile.name}'s Tablet</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      Triggers an immediate spoken toast and visual alert card on the child's screen in real time.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 1-Tap Quick Nudges Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { title: '5-Min Warning', text: '5 minutes until we leave or change activity! ⏳', emoji: '⏳', bg: 'hover:bg-amber-50 border-amber-200' },
+                    { title: 'Meal / Snack Time', text: 'Time for food or snack! 🍽️', emoji: '🍽️', bg: 'hover:bg-emerald-50 border-emerald-200' },
+                    { title: 'Medicine Time', text: 'Time to take your scheduled medicine 💊', emoji: '💊', bg: 'hover:bg-rose-50 border-rose-200' },
+                    { title: "I'm On My Way", text: "Caregiver is on the way to pick you up 🚗", emoji: '🚗', bg: 'hover:bg-indigo-50 border-indigo-200' },
+                    { title: 'Calm Breathing', text: "Let's take 3 slow, deep breaths together 🫁", emoji: '🫁', bg: 'hover:bg-sky-50 border-sky-200' },
+                    { title: 'Proud of You', text: 'Super proud of you! You are doing awesome ⭐', emoji: '⭐', bg: 'hover:bg-purple-50 border-purple-200' },
+                    { title: 'Plans Changed', text: 'Quick reminder: Our plans changed a little today 🔄', emoji: '🔄', bg: 'hover:bg-amber-50 border-amber-200' },
+                    { title: 'Check In', text: 'How are you feeling right now? Tap your feelings! 😊', emoji: '💬', bg: 'hover:bg-blue-50 border-blue-200' },
+                  ].map((nudge, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSendQuickNudge(nudge.title, nudge.text, nudge.emoji)}
+                      className={`p-3 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-1 shadow-2xs ${nudge.bg}`}
+                    >
+                      <div className="text-2xl">{nudge.emoji}</div>
+                      <div>
+                        <div className="text-xs font-black text-slate-900">{nudge.title}</div>
+                        <div className="text-[10px] text-slate-500 truncate mt-0.5">{nudge.text}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Message Composer */}
+                <form onSubmit={handleSendCustomMessage} className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 shrink-0 border border-slate-200">
+                    {['❤️', '⭐', '🚗', '💊', '🍎', '👏'].map((em) => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => setCustomMsgEmoji(em)}
+                        className={`w-8 h-8 rounded-xl text-lg flex items-center justify-center transition cursor-pointer ${
+                          customMsgEmoji === em ? 'bg-white shadow-xs scale-110' : 'opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+
+                  <input
+                    type="text"
+                    value={customMsgText}
+                    onChange={(e) => setCustomMsgText(e.target.value)}
+                    placeholder={`Type custom message to display on ${childProfile.name}'s tablet...`}
+                    className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:outline-hidden text-xs sm:text-sm font-medium"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={!customMsgText.trim()}
+                    className="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-95 transition shrink-0"
+                  >
+                    <Send className="w-4 h-4 text-amber-300" />
+                    <span>Send to Tablet</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* 4. CAREGIVER HUB QUICK ACCESS GRID */}
+              <div className="space-y-3">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span>Caregiver Hub Features & Management</span>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
+                    Quick Access
+                  </span>
+                </h3>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {[
+                    { tab: 'routines', title: 'Routines & My Day', desc: 'Visual schedules & First-Then boards', emoji: '✨', color: 'from-sky-500/10 to-indigo-500/10 border-sky-200' },
+                    { tab: 'aac', title: 'AAC & Vocabulary', desc: 'Manage core words & speech cards', emoji: '🗣️', color: 'from-amber-500/10 to-orange-500/10 border-amber-200' },
+                    { tab: 'plans-changed', title: 'Plans Changed', desc: 'Trigger calm unexpected plan changes', emoji: '🔄', color: 'from-rose-500/10 to-amber-500/10 border-rose-200' },
+                    { tab: 'medications', title: 'Medication Tracker', desc: 'Dosages, logs & low refill stock', emoji: '💊', color: 'from-emerald-500/10 to-teal-500/10 border-emerald-200' },
+                    { tab: 'recollection', title: 'Daily Therapist Summary', desc: 'Export mood & daily progress reports', emoji: '📊', color: 'from-purple-500/10 to-indigo-500/10 border-purple-200' },
+                    { tab: 'themes', title: 'Themes & Studio', desc: 'Wallpapers, high contrast & fonts', emoji: '🎨', color: 'from-pink-500/10 to-rose-500/10 border-pink-200' },
+                    { tab: 'caregiver', title: 'Device Link & QR', desc: 'Scan QR code & manage pairing', emoji: '📱', color: 'from-indigo-500/10 to-sky-500/10 border-indigo-200' },
+                    { tab: 'subscription', title: 'BeeYou Premium', desc: 'Manage membership & 30-day trial', emoji: '👑', color: 'from-amber-500/10 to-yellow-500/10 border-amber-300' },
+                  ].map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(item.tab as any);
+                        playChime('tap');
+                      }}
+                      className={`p-4 rounded-3xl bg-gradient-to-br ${item.color} border-2 text-left hover:shadow-md transition active:scale-95 cursor-pointer flex flex-col justify-between gap-3`}
+                    >
+                      <span className="text-3xl">{item.emoji}</span>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">{item.title}</h4>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-snug">{item.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -2494,31 +2846,63 @@ export const ParentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Pairing Code Card */}
-              <div className="p-5 rounded-3xl bg-linear-to-r from-rose-50 via-purple-50 to-indigo-50 border border-rose-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <span className="text-xs font-black text-rose-700 uppercase tracking-wider block mb-1">
-                    Your Child's Remote Pairing Code
-                  </span>
-                  <div className="text-3xl font-black tracking-wider text-slate-900 font-mono">
+              {/* Pairing Code Card with Crisp Live QR Code */}
+              <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-50 via-purple-50 to-indigo-50 border-2 border-rose-200 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-rose-700 uppercase tracking-wider block">
+                      Child's Remote Pairing Code
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                      connectionStatus.isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {connectionStatus.isConnected ? '🟢 Live Connected' : '⚪ Ready to Pair'}
+                    </span>
+                  </div>
+
+                  <div className="text-3xl sm:text-4xl font-black tracking-widest text-slate-900 font-mono select-all">
                     {getPairingCode()}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Open this portal from any phone, laptop, or tablet using this code or the direct link.
+                  
+                  <p className="text-xs text-slate-600 font-medium">
+                    Scan this QR code with your phone camera or enter the 6-letter code to link instantly.
                   </p>
+
+                  <div className="flex items-center gap-2 pt-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = `${window.location.origin}/?caregiver=true&code=${getPairingCode()}`;
+                        navigator.clipboard?.writeText(url);
+                        showNotification('Caregiver portal link copied to clipboard!');
+                      }}
+                      className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
+                    >
+                      <Copy className="w-4 h-4" />
+                      <span>Copy Direct Portal URL</span>
+                    </button>
+
+                    <a
+                      href={`/?caregiver=true&code=${getPairingCode()}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Open Portal In New Tab</span>
+                    </a>
+                  </div>
                 </div>
 
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/?caregiver=true&code=${getPairingCode()}`;
-                    navigator.clipboard?.writeText(url);
-                    showNotification('Caregiver portal link copied to clipboard!');
-                  }}
-                  className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-                >
-                  <Copy className="w-4 h-4" />
-                  <span>Copy Direct Portal URL</span>
-                </button>
+                {/* Live High-Contrast Scannable QR Code */}
+                <div className="p-4 bg-white rounded-3xl border-2 border-rose-200 shadow-sm flex flex-col items-center gap-2 shrink-0">
+                  <QRCodeView 
+                    value={getPairingCode()} 
+                    size={180} 
+                    title={`Pair with ${childProfile.name}`}
+                    subtitle="Scan with phone camera"
+                  />
+                </div>
               </div>
 
               {/* Embedded Live Companion Portal View */}
