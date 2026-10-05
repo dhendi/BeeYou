@@ -246,12 +246,12 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[150] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] overflow-y-auto animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-label="Avatar Creator Studio"
     >
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full border-4 border-amber-300 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[94vh]">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full border-4 border-amber-300 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1.5rem)]">
         
         {/* HEADER BAR */}
         <div className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 px-4 sm:px-6 py-3.5 flex items-center justify-between border-b-2 border-amber-200 shrink-0">

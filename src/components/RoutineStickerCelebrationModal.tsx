@@ -28,8 +28,8 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-gradient-to-b from-amber-50 via-white to-sky-50 rounded-3xl border-4 border-amber-300 shadow-2xl p-6 text-center space-y-4 overflow-hidden">
+    <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-gradient-to-b from-amber-50 via-white to-sky-50 rounded-3xl border-4 border-amber-300 shadow-2xl p-6 text-center space-y-4 overflow-y-auto max-h-[calc(100dvh-1.5rem)]">
         {/* Decorative background glow */}
         <div className="absolute -top-12 -left-12 w-36 h-36 bg-amber-300/30 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-sky-300/30 rounded-full blur-2xl pointer-events-none" />

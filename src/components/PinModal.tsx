@@ -46,11 +46,11 @@ export const PinModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in duration-200"
       onClick={() => setShowPinModal(false)}
     >
       <div
-        className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-200 flex flex-col items-center text-center"
+        className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-200 flex flex-col items-center text-center max-h-[calc(100dvh-1.5rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">

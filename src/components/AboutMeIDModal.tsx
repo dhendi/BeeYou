@@ -201,8 +201,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[94vh] flex flex-col shadow-2xl border-4 border-amber-300 overflow-hidden text-slate-800">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 md:p-6 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl border-4 border-amber-300 overflow-hidden text-slate-800">
         
         {/* HEADER BADGE */}
         <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">

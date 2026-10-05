@@ -19,10 +19,10 @@ export const ThemeCustomizerModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-labelledby="theme-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <div 
-        className="bg-slate-50 w-full max-w-4xl max-h-[92dvh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-2 border-slate-200 animate-in zoom-in-95 duration-200"
+        className="bg-slate-50 w-full max-w-4xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-2 border-slate-200 animate-in zoom-in-95 duration-200"
       >
         {/* Modal Top Bar */}
         <div className="bg-white px-4 sm:px-6 py-3 border-b border-slate-200 flex items-center justify-between shrink-0">

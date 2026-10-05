@@ -244,11 +244,11 @@ export const ToolsHubModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in duration-200"
       onClick={() => setShowToolsHubModal(false)}
     >
       <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-2 border-slate-200"
+        className="bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl overflow-hidden border-2 border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

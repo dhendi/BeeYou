@@ -262,8 +262,8 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ is
   const activePhone = emergencyContact?.phone || inputCaregiverPhone;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in">
-      <div className="w-full max-w-xl rounded-3xl bg-[#FAF8F5] p-5 sm:p-7 shadow-2xl border-2 border-amber-200/90 text-slate-800 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in">
+      <div className="w-full max-w-xl rounded-3xl bg-[#FAF8F5] p-4 sm:p-6 shadow-2xl border-2 border-amber-200/90 text-slate-800 max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-stone-200/80">

@@ -140,9 +140,9 @@ export const MorningBriefModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-label="Morning Brief"
-      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in"
+      className="fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] overflow-y-auto animate-in fade-in"
     >
-      <div className="bg-white border-3 border-amber-300 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[92vh]">
+      <div className="bg-white border-3 border-amber-300 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)]">
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-6 text-amber-950 relative flex items-center justify-between">
           <div className="flex items-center gap-3.5">
