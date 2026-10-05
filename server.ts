@@ -84,6 +84,54 @@ interface CloudSyncEvent {
   [key: string]: any;
 }
 
+interface ServerFamilyAccount {
+  id: string;
+  email: string;
+  familyCode: string;
+  caregiverName: string;
+  caregiverRole: string;
+  childProfile: {
+    name: string;
+    ageGroup: string;
+    pin: string;
+    interests: string[];
+    pronouns: string;
+  };
+  subscriptionTier: 'free' | 'premium';
+  createdAt: string;
+  lastSyncedAt: string;
+}
+
+const familyAccounts = new Map<string, ServerFamilyAccount>();
+
+// Pre-seed Demo Account
+familyAccounts.set('demo@beeyou.app', {
+  id: 'fam-demo-2026',
+  email: 'demo@beeyou.app',
+  familyCode: 'BEE-DEMO',
+  caregiverName: 'Sarah (Mom)',
+  caregiverRole: 'Mom',
+  childProfile: {
+    name: 'Leo',
+    ageGroup: 'kid',
+    pin: '1234',
+    interests: ['Lego building', 'Visual schedules'],
+    pronouns: 'he/him',
+  },
+  subscriptionTier: 'premium',
+  createdAt: '2026-10-01T00:00:00.000Z',
+  lastSyncedAt: new Date().toISOString(),
+});
+
+function getDeterministicFamilyCode(email: string): string {
+  const clean = email.trim().toLowerCase();
+  if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
+    return 'BEE-DEMO';
+  }
+  const prefix = clean.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 5).toUpperCase();
+  return `BEE-${prefix || 'FAM'}`;
+}
+
 const eventHistoryByCode = new Map<string, CloudSyncEvent[]>();
 const sseClientsByCode = new Map<string, Set<express.Response>>();
 
@@ -424,6 +472,125 @@ app.get('/api/caregiver/poll/:code', (req, res) => {
     session,
     serverTime: Date.now(),
   });
+});
+
+// -------------------------------------------------------------
+// Shared Family Account Endpoints (Single Email Links Both Devices)
+// -------------------------------------------------------------
+
+// Register a new shared family account on the server
+app.post('/api/caregiver/family/register', (req, res) => {
+  const { email, caregiverName, caregiverRole, childName, childAgeGroup, pin } = req.body || {};
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+  }
+
+  const familyCode = getDeterministicFamilyCode(cleanEmail);
+  const account: ServerFamilyAccount = {
+    id: 'fam-' + Date.now(),
+    email: cleanEmail,
+    familyCode,
+    caregiverName: caregiverName?.trim() || 'Caregiver',
+    caregiverRole: caregiverRole?.trim() || 'Parent',
+    childProfile: {
+      name: childName?.trim() || 'Leo',
+      ageGroup: childAgeGroup || 'kid',
+      pin: pin || '1234',
+      interests: ['Visual Schedules', 'Calm Activities'],
+      pronouns: 'they/them',
+    },
+    subscriptionTier: 'premium',
+    createdAt: new Date().toISOString(),
+    lastSyncedAt: new Date().toISOString(),
+  };
+
+  familyAccounts.set(cleanEmail, account);
+
+  // Initialize caregiver session for this familyCode
+  if (!caregiverSessions.has(familyCode)) {
+    caregiverSessions.set(familyCode, {
+      pairingCode: familyCode,
+      childName: account.childProfile.name,
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 4,
+      routineProgress: null,
+      stars: 10,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    });
+  }
+
+  return res.json({ success: true, account, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
+});
+
+// Sign into shared family account on the server
+app.post('/api/caregiver/family/login', (req, res) => {
+  const { email } = req.body || {};
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+  }
+
+  let account = familyAccounts.get(cleanEmail);
+  if (!account) {
+    // Deterministically generate so sign in NEVER fails across devices
+    const familyCode = getDeterministicFamilyCode(cleanEmail);
+    account = {
+      id: 'fam-' + Date.now(),
+      email: cleanEmail,
+      familyCode,
+      caregiverName: 'Caregiver',
+      caregiverRole: 'Parent',
+      childProfile: {
+        name: 'Leo',
+        ageGroup: 'kid',
+        pin: '1234',
+        interests: ['Visual Schedules'],
+        pronouns: 'they/them',
+      },
+      subscriptionTier: 'premium',
+      createdAt: new Date().toISOString(),
+      lastSyncedAt: new Date().toISOString(),
+    };
+    familyAccounts.set(cleanEmail, account);
+  }
+
+  // Ensure caregiver session is initialized
+  if (!caregiverSessions.has(account.familyCode)) {
+    caregiverSessions.set(account.familyCode, {
+      pairingCode: account.familyCode,
+      childName: account.childProfile.name,
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 4,
+      routineProgress: null,
+      stars: 10,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    });
+  }
+
+  return res.json({ success: true, account, message: `Logged in as ${cleanEmail}!` });
+});
+
+// Fetch account details by email
+app.get('/api/caregiver/family/:email', (req, res) => {
+  const cleanEmail = (req.params.email || '').trim().toLowerCase();
+  const account = familyAccounts.get(cleanEmail);
+  if (!account) {
+    return res.status(404).json({ success: false, message: 'Family account not found' });
+  }
+  return res.json({ success: true, account });
 });
 
 // -------------------------------------------------------------

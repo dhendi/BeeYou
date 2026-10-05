@@ -52,12 +52,13 @@ export function getStoredFamilyAccount(): FamilyAccount | null {
   return null;
 }
 
-// Save family account to local storage and bind live sync code
 export function saveStoredFamilyAccount(account: FamilyAccount | null): void {
   if (typeof window === 'undefined') return;
   try {
     if (account) {
       localStorage.setItem(FAMILY_ACCOUNT_KEY, JSON.stringify(account));
+      localStorage.setItem('beeyou_pairing_code', account.familyCode);
+      localStorage.setItem('beeyou_device_linked_code', account.familyCode);
       setPairingCode(account.familyCode);
       subscribeToCloudChannel(account.familyCode);
     } else {
@@ -83,6 +84,15 @@ export function setActiveDeviceView(view: 'child' | 'caregiver'): void {
   } catch {}
 }
 
+export function getDeterministicFamilyCode(email: string): string {
+  const clean = email.trim().toLowerCase();
+  if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
+    return 'BEE-DEMO';
+  }
+  const prefix = clean.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 5).toUpperCase();
+  return `BEE-${prefix || 'FAM'}`;
+}
+
 /**
  * Perform login using Shared Email and Password (or Demo account)
  */
@@ -100,6 +110,13 @@ export async function loginWithSharedEmail(
   if (cleanEmail === 'demo@beeyou.app' || cleanEmail === 'demo' || cleanEmail === 'test@beeyou.app') {
     const demo = { ...DEMO_FAMILY_ACCOUNT, lastSyncedAt: new Date().toISOString() };
     saveStoredFamilyAccount(demo);
+    try {
+      await sendHeartbeat({
+        role: 'caregiver',
+        name: demo.caregiverName,
+        pairingCode: demo.familyCode,
+      });
+    } catch {}
     return {
       success: true,
       account: demo,
@@ -107,37 +124,61 @@ export async function loginWithSharedEmail(
     };
   }
 
-  // 2. Check existing stored account or generate unique family account
-  let account = getStoredFamilyAccount();
-  if (!account || account.email !== cleanEmail) {
-    // Generate deterministic clean 6-character family code from email
-    const hash = cleanEmail.replace(/[^a-z0-9]/g, '').slice(0, 4).toUpperCase();
-    const familyCode = `BEE-${hash || 'FAM'}`;
+  const deterministicCode = getDeterministicFamilyCode(cleanEmail);
+  let account: FamilyAccount = {
+    id: 'fam-' + Date.now(),
+    email: cleanEmail,
+    caregiverName: 'Caregiver',
+    caregiverRole: 'Parent / Caregiver',
+    familyCode: deterministicCode,
+    childProfile: {
+      name: 'Leo',
+      ageGroup: 'kid',
+      interests: ['Visual Schedules', 'Sensory Breaks'],
+      pronouns: 'they/them',
+      pin: '1234',
+    },
+    subscriptionTier: 'premium',
+    createdAt: new Date().toISOString(),
+    lastSyncedAt: new Date().toISOString(),
+  };
 
-    account = {
-      id: 'fam-' + Date.now(),
-      email: cleanEmail,
-      caregiverName: 'Caregiver',
-      caregiverRole: 'Parent / Caregiver',
-      familyCode,
-      childProfile: {
-        name: 'Leo',
-        ageGroup: 'kid',
-        interests: ['Visual Schedules', 'Sensory Breaks'],
-        pronouns: 'they/them',
-        pin: '1234',
-      },
-      subscriptionTier: 'premium',
-      createdAt: new Date().toISOString(),
-      lastSyncedAt: new Date().toISOString(),
-    };
+  // 2. Fetch or login on server
+  try {
+    const res = await fetch('/api/caregiver/family/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.account) {
+        account = {
+          ...account,
+          ...data.account,
+          familyCode: data.account.familyCode || deterministicCode,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Backend /api/caregiver/family/login unreachable, using local deterministic account', err);
   }
 
   saveStoredFamilyAccount(account);
+
+  // Send initial heartbeat
+  try {
+    await sendHeartbeat({
+      role: 'caregiver',
+      name: account.caregiverName,
+      pairingCode: account.familyCode,
+    });
+  } catch {}
+
   return {
     success: true,
     account,
-    message: `Logged in as ${cleanEmail}. Family sync code is ${account.familyCode}.`,
+    message: `Logged in as ${cleanEmail}. Family sync code is ${account.familyCode}. Both devices link automatically!`,
   };
 }
 
@@ -158,19 +199,16 @@ export async function registerSharedFamilyAccount(params: {
     return { success: false, message: 'Please enter a valid email address.' };
   }
 
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let rand2 = '';
-  for (let i = 0; i < 2; i++) rand2 += chars.charAt(Math.floor(Math.random() * chars.length));
-  const familyCode = `FAM-${rand2}${Math.floor(Math.random() * 89 + 10)}`;
+  const deterministicCode = getDeterministicFamilyCode(cleanEmail);
 
-  const newAccount: FamilyAccount = {
+  let newAccount: FamilyAccount = {
     id: 'fam-' + Date.now(),
     email: cleanEmail,
     caregiverName: params.caregiverName.trim() || 'Caregiver',
     caregiverRole: params.caregiverRole.trim() || 'Parent',
-    familyCode,
+    familyCode: deterministicCode,
     childProfile: {
-      name: params.childName.trim() || 'Child',
+      name: params.childName.trim() || 'Leo',
       ageGroup: params.childAgeGroup || 'kid',
       interests: ['Visual schedules', 'Calming activities'],
       pronouns: 'they/them',
@@ -181,12 +219,49 @@ export async function registerSharedFamilyAccount(params: {
     lastSyncedAt: new Date().toISOString(),
   };
 
+  // Call server API to register family account
+  try {
+    const res = await fetch('/api/caregiver/family/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: cleanEmail,
+        caregiverName: newAccount.caregiverName,
+        caregiverRole: newAccount.caregiverRole,
+        childName: newAccount.childProfile.name,
+        childAgeGroup: newAccount.childProfile.ageGroup,
+        pin: newAccount.childProfile.pin,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.account) {
+        newAccount = {
+          ...newAccount,
+          ...data.account,
+          familyCode: data.account.familyCode || deterministicCode,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Backend /api/caregiver/family/register unreachable, using deterministic account', err);
+  }
+
   saveStoredFamilyAccount(newAccount);
+
+  // Send initial heartbeat & sync status
+  try {
+    await sendHeartbeat({
+      role: 'caregiver',
+      name: newAccount.caregiverName,
+      pairingCode: newAccount.familyCode,
+    });
+  } catch {}
 
   return {
     success: true,
     account: newAccount,
-    message: `Account created for ${cleanEmail}! Both devices can now connect using this email.`,
+    message: `Account created for ${cleanEmail}! Family sync code: ${newAccount.familyCode}. Both devices link automatically!`,
   };
 }
 

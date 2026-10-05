@@ -89,9 +89,11 @@ import { QRCodeView } from './QRCodeView';
 import { CameraQRScannerModal } from './CameraQRScannerModal';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 import { FamilyAuthModal } from './FamilyAuthModal';
+import { getActiveDeviceView } from '../services/authService';
 
 import { 
   getPairingCode, 
+  subscribeToCloudChannel,
   sendCaregiverMessage, 
   acknowledgeCaregiverAlert, 
   onCaregiverAlert,
@@ -107,6 +109,7 @@ export const ParentDashboard: React.FC = () => {
     userRole,
     childProfile,
     updateChildProfile,
+    caregiverPermissions,
     worldState,
     currentMood,
     connectionStatus,
@@ -179,6 +182,8 @@ export const ParentDashboard: React.FC = () => {
     getTrialDaysRemaining,
   } = useApp();
 
+  const isCaregiverOnly = userRole === 'caregiver' || getActiveDeviceView() === 'caregiver' || childProfile.userRole === 'caregiver_managing';
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackupUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,9 +255,10 @@ export const ParentDashboard: React.FC = () => {
         if (session) {
           setLiveChildStatus(session);
           if (session.activeAlert && session.activeAlert.status === 'active') {
+            const current = session.activeAlert;
             setActiveAlerts((prev) => [
-              session.activeAlert,
-              ...prev.filter((a) => a.id !== session.activeAlert.id),
+              current,
+              ...prev.filter((a) => a.id !== current.id),
             ]);
           }
         }
@@ -830,7 +836,7 @@ export const ParentDashboard: React.FC = () => {
       {/* Top Caregiver Header */}
       <header className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
-          {userRole !== 'caregiver' ? (
+          {!isCaregiverOnly ? (
             <button
               onClick={() => {
                 setIsParentMode(false);

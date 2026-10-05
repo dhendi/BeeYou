@@ -4,12 +4,16 @@ import QRCode from 'qrcode';
 interface QRCodeViewProps {
   value: string;
   size?: number;
+  title?: string;
+  subtitle?: string;
   className?: string;
 }
 
 export const QRCodeView: React.FC<QRCodeViewProps> = ({
   value,
   size = 200,
+  title,
+  subtitle,
   className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -51,12 +55,14 @@ export const QRCodeView: React.FC<QRCodeViewProps> = ({
 
   return (
     <div className={`flex flex-col items-center gap-1.5 ${className}`}>
+      {title && <span className="text-xs font-black text-slate-800">{title}</span>}
       <img
         src={dataUrl}
         alt={`QR code for pairing ${value}`}
         style={{ width: size, height: size }}
         className="rounded-2xl border-2 border-amber-300 shadow-sm bg-white p-2 object-contain"
       />
+      {subtitle && <span className="text-[11px] text-slate-500 font-medium">{subtitle}</span>}
     </div>
   );
 };

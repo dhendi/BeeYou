@@ -20,7 +20,8 @@ import {
   Smartphone,
   Trash2,
   Settings,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react';
 import { 
   fetchCaregiverSession, 

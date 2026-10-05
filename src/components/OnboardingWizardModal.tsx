@@ -38,6 +38,11 @@ import {
 } from 'lucide-react';
 import { BeeMascot } from './BeeYouLogo';
 import { CaregiverHowItWorksModal } from './CaregiverHowItWorksModal';
+import {
+  registerSharedFamilyAccount,
+  setActiveDeviceView,
+  getDeterministicFamilyCode,
+} from '../services/authService';
 
 export type OnboardingPersona = 'kid' | 'teen' | 'adult' | 'caregiver';
 
@@ -58,6 +63,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     updateSettings,
     setTheme,
     setUserAgeGroup,
+    userRole,
     setUserRole,
     userAgeGroup: currentContextAge,
     enabledFeatures: contextFeatures,
@@ -65,11 +71,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     setChildView,
     setIsParentMode,
     setShowCaregiverModal,
+    setLinkedDeviceCode,
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
   const [selectedPersona, setSelectedPersona] = useState<OnboardingPersona>(() => {
-    if (childProfile.userRole === 'caregiver') return 'caregiver';
+    if (childProfile.userRole === 'caregiver_managing' || userRole === 'caregiver') return 'caregiver';
     if (childProfile.ageGroup) return childProfile.ageGroup;
     if (currentContextAge) return currentContextAge;
     return 'kid';
@@ -78,8 +85,13 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
 
   // User Profile Form State
-  const [name, setName] = useState<string>(childProfile.name || (selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'caregiver' ? 'Parent / Educator' : 'Leo'));
+  const [name, setName] = useState<string>(childProfile.name || (selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'caregiver' ? 'Sarah (Mom)' : 'Leo'));
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
+
+  // Caregiver Registration Form State
+  const [caregiverEmail, setCaregiverEmail] = useState<string>('demo@beeyou.app');
+  const [caregiverChildName, setCaregiverChildName] = useState<string>('Leo');
+  const [caregiverRoleTitle, setCaregiverRoleTitle] = useState<string>('Parent');
   
   // Features state
   const [features, setFeatures] = useState<EnabledFeatures>(() => {
@@ -112,15 +124,67 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     }));
   };
 
-  const handleFinishOnboarding = (actionAfter?: 'morning_routine' | 'home' | 'caregiver_setup') => {
-    // 1. Calculate user role & age group
+  const handleFinishOnboarding = async (actionAfter?: 'morning_routine' | 'home' | 'caregiver_setup') => {
+    // Caregiver Registration Flow
+    if (selectedPersona === 'caregiver' || actionAfter === 'caregiver_setup') {
+      const emailToUse = caregiverEmail.trim().toLowerCase() || 'demo@beeyou.app';
+      const cName = name.trim() || 'Sarah (Mom)';
+      const chName = caregiverChildName.trim() || 'Leo';
+      let familyCode = getDeterministicFamilyCode(emailToUse);
+
+      try {
+        const regRes = await registerSharedFamilyAccount({
+          email: emailToUse,
+          caregiverName: cName,
+          caregiverRole: caregiverRoleTitle || 'Parent',
+          childName: chName,
+          childAgeGroup: 'kid',
+          pin: '1234',
+        });
+        if (regRes.success && regRes.account) {
+          familyCode = regRes.account.familyCode;
+        }
+      } catch (err) {
+        console.warn('Caregiver registration API failed, using deterministic code', err);
+      }
+
+      setActiveDeviceView('caregiver');
+      try {
+        localStorage.setItem('beeyou_onboarding_completed', 'true');
+        localStorage.setItem('beeyou_user_role', 'caregiver');
+        localStorage.setItem('beeyou_active_device_view', 'caregiver');
+      } catch {}
+
+      updateChildProfile({
+        name: chName,
+        pronouns: 'they/them',
+        ageGroup: 'kid',
+        userRole: 'caregiver_managing',
+        interests: ['Visual schedules', 'Calm routines'],
+        onboardingCompleted: true,
+      });
+
+      if (setUserRole) setUserRole('caregiver');
+      if (setIsParentMode) setIsParentMode(true);
+      if (setLinkedDeviceCode) setLinkedDeviceCode(familyCode);
+      setTheme('theme-classic');
+
+      confetti({ particleCount: 80, spread: 75, origin: { y: 0.5 } });
+      playChime('complete');
+      onClose();
+
+      // Immediately pop up link to child's device
+      if (setShowCaregiverModal) {
+        setShowCaregiverModal(true);
+      }
+      return;
+    }
+
+    // 1. Calculate user role & age group for standard personas
     let calculatedRole: UserAccountRole = 'child_dependent';
     let calculatedAge: UserAgeGroup = 'kid';
 
-    if (selectedPersona === 'caregiver') {
-      calculatedRole = 'caregiver';
-      calculatedAge = 'kid';
-    } else if (selectedPersona === 'adult') {
+    if (selectedPersona === 'adult') {
       calculatedRole = 'independent_adult';
       calculatedAge = 'adult';
     } else if (selectedPersona === 'teen') {
@@ -133,10 +197,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
     // 2. Save profile
     updateChildProfile({
-      name: name.trim() || (selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'caregiver' ? 'Caregiver' : 'Leo'),
+      name: name.trim() || (selectedPersona === 'adult' ? 'Alex' : 'Leo'),
       pronouns: pronouns.trim(),
       ageGroup: calculatedAge,
-      userRole: calculatedRole === 'caregiver' ? 'caregiver_managing' : 'self',
+      userRole: 'self',
       interests: childProfile.interests || ['Visual schedules', 'Calm routines'],
       onboardingCompleted: true,
     });
@@ -164,8 +228,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       ? 'theme-executive' 
       : selectedPersona === 'teen' 
       ? 'theme-lofi' 
-      : selectedPersona === 'caregiver'
-      ? 'theme-classic'
       : 'theme-classic';
     setTheme(defaultThemeId);
 
@@ -175,10 +237,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
     onClose();
 
-    if (selectedPersona === 'caregiver' || actionAfter === 'caregiver_setup') {
-      if (setIsParentMode) setIsParentMode(true);
-      if (setShowCaregiverModal) setShowCaregiverModal(true);
-    } else if (actionAfter === 'morning_routine') {
+    if (actionAfter === 'morning_routine') {
       if (setChildView) setChildView('my-day');
     } else {
       if (setChildView) setChildView('home');
@@ -891,10 +950,124 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             )}
 
             {/* ══════════════════════════════════════════════════════
-                FINAL SCREEN: PERSONALIZE YOUR SPACE
-                (Step 4 for caregivers, Step 5 for others)
+                FINAL SCREEN: CAREGIVER REGISTRATION & LINK
+                (Step 4 for Caregivers)
             ══════════════════════════════════════════════════════ */}
-            {((isCaregiver && step === 4) || (!isCaregiver && step === 5)) && (
+            {isCaregiver && step === 4 && (
+              <div className="space-y-4 animate-in fade-in">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 text-[10px] font-black uppercase tracking-wider">
+                      Caregiver Account Setup
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                    Register Caregiver Space &amp; Link Child
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5 font-medium leading-relaxed">
+                    Only 1 shared family email is needed. Both your phone and your child's tablet will link automatically!
+                  </p>
+                </div>
+
+                {/* 1-Click Demo Pre-fill Banner */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCaregiverEmail('demo@beeyou.app');
+                    setName('Sarah (Mom)');
+                    setCaregiverChildName('Leo');
+                    playChime('tap');
+                  }}
+                  className="w-full p-3 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-amber-500/10 to-rose-500/10 border-2 border-indigo-300/80 hover:border-indigo-500 text-left flex items-center justify-between cursor-pointer transition-all group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">⚡</span>
+                    <div>
+                      <span className="text-xs font-black text-indigo-950 dark:text-indigo-200 block">
+                        Want to test right now? Use Demo Account
+                      </span>
+                      <span className="text-[11px] text-slate-600 dark:text-slate-400 block">
+                        Prefills demo@beeyou.app • Code: BEE-DEMO • Leo (Kid)
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-indigo-600 group-hover:underline">
+                    Use Demo ✨
+                  </span>
+                </button>
+
+                <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 space-y-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                        Caregiver Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Sarah (Mom)"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                        Shared Family Email *
+                      </label>
+                      <input
+                        type="email"
+                        value={caregiverEmail}
+                        onChange={(e) => setCaregiverEmail(e.target.value)}
+                        placeholder="e.g. smithfamily@gmail.com"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                        Child's Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={caregiverChildName}
+                        onChange={(e) => setCaregiverChildName(e.target.value)}
+                        placeholder="e.g. Leo"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                        Caregiver Role
+                      </label>
+                      <input
+                        type="text"
+                        value={caregiverRoleTitle}
+                        onChange={(e) => setCaregiverRoleTitle(e.target.value)}
+                        placeholder="e.g. Mom, Dad, Teacher"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 text-[11px] text-amber-900 dark:text-amber-200">
+                    💡 <strong>How connectivity works:</strong> When you complete setup, you will immediately get a popup to connect to your child's device via camera QR scan or sync code (<code>{getDeterministicFamilyCode(caregiverEmail || 'demo@beeyou.app')}</code>).
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════
+                FINAL SCREEN: PERSONALIZE YOUR SPACE
+                (Step 5 for kids, teens, adults)
+            ══════════════════════════════════════════════════════ */}
+            {!isCaregiver && step === 5 && (
               <div className="space-y-5 animate-in fade-in">
                 <div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
@@ -908,13 +1081,13 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 space-y-4">
                   <div>
                     <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
-                      {selectedPersona === 'adult' ? 'Your Name:' : selectedPersona === 'caregiver' ? 'Caregiver / Display Name:' : "Child or User's Name:"}
+                      {selectedPersona === 'adult' ? 'Your Name:' : "Child or User's Name:"}
                     </label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder={selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'caregiver' ? 'Parent / Educator' : 'Leo'}
+                      placeholder={selectedPersona === 'adult' ? 'Alex' : 'Leo'}
                       className="w-full px-4 py-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-base focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
                     />
                   </div>
@@ -947,7 +1120,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-700">
                     <span>Theme Preset:</span>
                     <span className="font-bold text-amber-700 dark:text-amber-300 capitalize">
-                      {selectedPersona === 'adult' ? 'Executive Minimal' : selectedPersona === 'teen' ? 'Lo-Fi Chill' : selectedPersona === 'caregiver' ? 'Caregiver Warm' : 'Classic Honey'}
+                      {selectedPersona === 'adult' ? 'Executive Minimal' : selectedPersona === 'teen' ? 'Lo-Fi Chill' : 'Classic Honey'}
                     </span>
                   </div>
                 </div>
@@ -997,10 +1170,14 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleFinishOnboarding('home')}
-                  className="px-7 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all animate-pulse"
+                  className={`px-7 py-3 rounded-2xl text-white font-black text-sm shadow-md cursor-pointer flex items-center gap-2 active:scale-95 transition-all ${
+                    isCaregiver 
+                      ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' 
+                      : 'bg-emerald-500 hover:bg-emerald-600 animate-pulse'
+                  }`}
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Start Using BeeYou 🎉</span>
+                  <span>{isCaregiver ? 'Register & Link Device 📱' : 'Start Using BeeYou 🎉'}</span>
                 </button>
               )}
             </div>

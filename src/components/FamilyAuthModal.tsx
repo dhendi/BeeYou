@@ -28,6 +28,7 @@ import {
   DEMO_FAMILY_ACCOUNT,
   getStoredFamilyAccount,
   logoutFamilyAccount,
+  setActiveDeviceView,
   FamilyAccount
 } from '../services/authService';
 import { BeeMascot } from './BeeYouLogo';
@@ -49,6 +50,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     setUserAgeGroup,
     setIsParentMode,
     setLinkedDeviceCode,
+    setShowCaregiverModal,
     speak,
   } = useApp();
 
@@ -82,6 +84,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }
 
       if (asRole === 'caregiver') {
+        setActiveDeviceView('caregiver');
+        try {
+          localStorage.setItem('beeyou_user_role', 'caregiver');
+          localStorage.setItem('beeyou_active_device_view', 'caregiver');
+        } catch {}
         setIsParentMode(true);
         if (setUserRole) setUserRole('caregiver');
         updateChildProfile({
@@ -89,11 +96,16 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           ageGroup: account.childProfile.ageGroup,
           userRole: 'caregiver_managing',
         });
-        setSuccessMessage(`Logged into Family Account as ${account.caregiverName}! Switched to Caregiver Hub.`);
+        setSuccessMessage(`Caregiver active! Linked with ${account.childProfile.name} (Code: ${account.familyCode}). Opening Caregiver Link...`);
         try {
-          speak(`Logged in as caregiver. Connected to ${account.childProfile.name}.`);
+          speak(`You are connected to ${account.childProfile.name}`);
         } catch {}
       } else {
+        setActiveDeviceView('child');
+        try {
+          localStorage.setItem('beeyou_user_role', 'child_dependent');
+          localStorage.setItem('beeyou_active_device_view', 'child');
+        } catch {}
         setIsParentMode(false);
         if (setUserRole) setUserRole('child_dependent');
         if (setUserAgeGroup) setUserAgeGroup(account.childProfile.ageGroup);
@@ -102,9 +114,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           ageGroup: account.childProfile.ageGroup,
           userRole: 'self',
         });
-        setSuccessMessage(`Logged into Family Account as ${account.childProfile.name}! Switched to Child Tablet.`);
+        setSuccessMessage(`Logged in as ${account.childProfile.name}! Connected to ${account.caregiverName}.`);
         try {
-          speak(`Welcome back ${account.childProfile.name}. Connected to ${account.caregiverName}.`);
+          speak(`${account.caregiverName} is connected to your device`);
         } catch {}
       }
 
@@ -118,6 +130,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
       setTimeout(() => {
         onClose();
+        if (asRole === 'caregiver' && setShowCaregiverModal) {
+          setShowCaregiverModal(true);
+        }
       }, 1200);
     } catch (err) {
       console.error('Failed to apply account context:', err);
@@ -631,11 +646,6 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
                 <button
                   type="submit"
-                  onClick={(e) => {
-                    if (regEmail.trim()) {
-                      handleRegisterSubmit(e);
-                    }
-                  }}
                   disabled={regLoading}
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >

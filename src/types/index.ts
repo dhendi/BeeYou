@@ -21,6 +21,7 @@ export interface EmotionOption {
 
 export type AACCategory = 
   | 'favorites'
+  | 'favorite_sentences'
   | 'core'
   | 'food'
   | 'drinks'
@@ -443,6 +444,12 @@ export interface EnabledFeatures {
   moodJournal: boolean;            // Reflective mood & trigger journal (teens to adults)
   cycleTracker: boolean;           // Cycle & hormonal tracking with sensory insights (teens to adults)
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
+  routines?: boolean;
+  aac?: boolean;
+  sensoryTools?: boolean;
+  emotions?: boolean;
+  caregiverMessaging?: boolean;
+  spoonBudget?: boolean;
 }
 
 export const DEFAULT_KID_FEATURES: EnabledFeatures = {

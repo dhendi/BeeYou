@@ -7,7 +7,11 @@ export type MascotPose =
   | 'gentle' 
   | 'listening' 
   | 'sleepy' 
-  | 'celebrating';
+  | 'celebrating'
+  | 'flying'
+  | 'thinking'
+  | 'reading'
+  | 'talking';
 
 interface BeeMascotProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | number;

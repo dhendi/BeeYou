@@ -41,6 +41,7 @@ import {
   extractPairingCodeFromScan
 } from '../services/caregiverSync';
 import { CaregiverMessage, TemporaryPairingSession, EmergencySupportContact } from '../types';
+import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { QRCodeView } from './QRCodeView';
@@ -619,6 +620,22 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                         <Camera className="w-4 h-4" />
                       </button>
                     </div>
+
+                    {linkedDeviceCode && (
+                      <div className="pt-1.5 flex items-center justify-between text-xs">
+                        <span className="text-slate-500 font-medium">Your Family Sync Code:</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInputCode(linkedDeviceCode);
+                            playChime('tap');
+                          }}
+                          className="font-mono font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                        >
+                          Use {linkedDeviceCode}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
