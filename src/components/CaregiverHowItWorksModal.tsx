@@ -21,17 +21,20 @@ import {
   Vibrate,
   Eye,
   Info,
-  MessageSquare
+  MessageSquare,
+  BookOpen
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
+import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
 
 export type HelpTopic = 
   | 'all'
   | 'what_is_beeyou'
+  | 'visual_walkthrough'
+  | 'quick_start'
   | 'who_is_it_for'
   | 'does_my_child_need'
-  | 'quick_start'
   | 'aac_guide'
   | 'schedules'
   | 'timers'
@@ -99,6 +102,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
     badge?: string;
   }> = [
     { id: 'what_is_beeyou', title: 'What is BeeYou?', icon: Sparkles },
+    { id: 'visual_walkthrough', title: 'Step-by-Step Feature Visuals & Screenshots', icon: BookOpen, badge: 'Visuals & Clicks' },
     { id: 'quick_start', title: '5-Step Quick Start Guide', icon: UserCheck, badge: 'Caregiver' },
     { id: 'who_is_it_for', title: 'Who is BeeYou for?', icon: Heart },
     { id: 'does_my_child_need', title: 'Does the person I support need BeeYou?', icon: HelpCircle },
@@ -234,6 +238,15 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
           {/* MAIN CONTENT AREA */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 bg-white dark:bg-slate-850">
             
+            {/* TOPIC: VISUAL FEATURE WALKTHROUGH & SCREENSHOTS */}
+            {activeTopic === 'visual_walkthrough' && (
+              <div className="space-y-4 animate-in fade-in">
+                <CaregiverFeatureWalkthrough onNavigateTab={() => {
+                  onClose();
+                }} />
+              </div>
+            )}
+
             {/* TOPIC 1: WHAT IS BEEYOU? */}
             {activeTopic === 'what_is_beeyou' && (
               <div className="space-y-4 animate-in fade-in">

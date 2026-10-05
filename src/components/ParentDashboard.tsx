@@ -45,6 +45,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
+import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { MOOD_META, TRIGGER_META, COPING_META } from '../data/defaultData';
 import { playChime, getAvailableVoices, rateVoiceNaturalness, isVoiceFluid, speakText, getBestSystemVoice, stopSpeaking as haltSpeaking } from '../utils/audio';
@@ -1460,52 +1461,10 @@ export const ParentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* CORE TOPICS BREAKDOWN */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Visual Schedules */}
-                <div className="p-5 rounded-3xl bg-white border-2 border-slate-200 space-y-2.5">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">☀️</span>
-                    <h4 className="font-black text-sm text-slate-900">How Visual Schedules Work</h4>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    BeeYou focuses on <strong>"One Step at a Time"</strong>. Users see what they are doing <strong>NOW</strong> and what comes <strong>NEXT</strong>. Each card has a large icon, optional timer, and tap-to-complete button.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('routines');
-                      playChime('tap');
-                    }}
-                    className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Open Routine Templates Library</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Help Alerts */}
-                <div className="p-5 rounded-3xl bg-white border-2 border-slate-200 space-y-2.5">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🆘</span>
-                    <h4 className="font-black text-sm text-slate-900">How Help Alerts Work</h4>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    When the user taps <em>"I Need Help"</em> or <em>"I'm Overwhelmed"</em>, you receive an instant alert on your connected dashboard. Reply with 1 tap (<em>"I'm here"</em>, <em>"I'm coming"</em>), and their device displays and speaks your reassuring message.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('caregiver');
-                      playChime('tap');
-                    }}
-                    className="text-xs font-bold text-rose-700 hover:text-rose-900 flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Open Live Caregiver Link</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+              {/* INTERACTIVE STEP-BY-STEP VISUAL FEATURE WALKTHROUGH */}
+              <CaregiverFeatureWalkthrough onNavigateTab={(tab) => {
+                setActiveTab(tab as TabType);
+              }} />
             </div>
           )}
 
