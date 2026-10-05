@@ -7,7 +7,35 @@ import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolServ
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
 import { AACGuideModal } from './AACGuideModal';
+import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
+
+const AAC_COACH_STEPS: CoachMarkStep[] = [
+  {
+    targetSelector: '[data-tour="aac-categories"]',
+    title: '1. Vocabulary Categories',
+    instruction: 'Tap category folders like Food 🍕, Drinks 🧃, Play 🎮, or Favorite Sentences 💬 to browse words.',
+    mascotHint: 'Click any folder above or tap Next! 👇',
+  },
+  {
+    targetSelector: '[data-tour="aac-sentence-strip"]',
+    title: '2. Sentence Builder Strip',
+    instruction: 'Words you tap appear here. Tap SPEAK to hear your entire sentence spoken aloud with high quality voice output!',
+    mascotHint: 'Tap SPEAK to talk with your voice! 🔊',
+  },
+  {
+    targetSelector: '[data-tour="aac-quickchat"]',
+    title: '3. Quick Chat Expressions',
+    instruction: 'Tap Quick Chat to instantly say common phrases (Yes, No, Help, Thank You) without clearing your sentence.',
+    mascotHint: 'Click for instant everyday phrases! 💬',
+  },
+  {
+    targetSelector: '[data-tour="aac-symbols"]',
+    title: '4. Clinical Symbols Studio',
+    instruction: 'Tap Symbols to search and add thousands of research-backed AAC symbols from the Mulberry Library.',
+    mascotHint: 'Add new words anytime! 🌟',
+  },
+];
 import { 
   Volume2, 
   Trash2, 
@@ -155,6 +183,7 @@ export const AACView: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [instantSpeakMode, setInstantSpeakMode] = useState(false);
   const [isSentenceBarCollapsed, setIsSentenceBarCollapsed] = useState(false);
+  const [isCoachMarksActive, setIsCoachMarksActive] = useState(false);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
@@ -657,6 +686,7 @@ export const AACView: React.FC = () => {
         {/* 2. SENTENCE BUILDER STRIP (Message Window) */}
         {!isSentenceBarCollapsed && (
           <section
+            data-tour="aac-sentence-strip"
             aria-label="Sentence builder"
             className="w-full bg-white/95 backdrop-blur-md rounded-2xl border-2 border-slate-300 shadow-xs p-2 animate-in fade-in duration-150"
           >
@@ -840,7 +870,7 @@ export const AACView: React.FC = () => {
         <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-0.5 scrollbar-thin">
           
           {/* Category Navigation Pills */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div data-tour="aac-categories" className="flex items-center gap-1 shrink-0">
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -871,6 +901,7 @@ export const AACView: React.FC = () => {
             
             {/* Quick-Chat Expressions Drawer Button (Instant Speech without clearing sentence) */}
             <button
+              data-tour="aac-quickchat"
               type="button"
               onClick={() => {
                 setShowQuickChatDrawer(true);
@@ -954,6 +985,7 @@ export const AACView: React.FC = () => {
             {/* Mulberry Symbols Picker */}
             <div className="flex items-center gap-1 shrink-0">
               <button
+                data-tour="aac-symbols"
                 type="button"
                 onClick={() => {
                   setShowSymbolPicker(true);
@@ -982,11 +1014,11 @@ export const AACView: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setShowAacGuideModal(true);
+                setIsCoachMarksActive(true);
                 playChime('tap');
               }}
               className="px-2.5 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-              title="Open AAC Guide & Instructions"
+              title="Open Interactive AAC Coach Marks Guide"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span>AAC Guide 💡</span>
@@ -1678,6 +1710,15 @@ export const AACView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Live Interactive AAC Coach Marks Walkthrough */}
+      <CoachMarksOverlay
+        isActive={isCoachMarksActive}
+        steps={AAC_COACH_STEPS}
+        tourName="BeeYou AAC Voice Guide"
+        onComplete={() => setIsCoachMarksActive(false)}
+        onSkip={() => setIsCoachMarksActive(false)}
+      />
 
       {/* AAC Guide / How-To Modal */}
       <AACGuideModal

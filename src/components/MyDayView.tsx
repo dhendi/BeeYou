@@ -26,6 +26,46 @@ import { getStickerForRoutine } from '../data/rewardsData';
 import { VisualScheduleStep } from '../types';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { InteractiveMyDayGuideModal } from './InteractiveMyDayGuideModal';
+import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
+
+const MY_DAY_COACH_STEPS: CoachMarkStep[] = [
+  {
+    targetSelector: '[data-tour="myday-routines"]',
+    title: '1. Select Your Routine',
+    instruction: 'Click on any routine tab (Morning ☀️, Evening 🌙, or custom routines) to view its schedule.',
+    mascotHint: 'Click a routine above or tap Next! 👇',
+  },
+  {
+    targetSelector: '[data-tour="myday-viewmode"]',
+    title: '2. Choose Your Focus View',
+    instruction: 'Click "One at a Time" to focus without distraction, or "Full List" to see your complete schedule checklist.',
+    mascotHint: 'Click to switch focus views! 👉',
+  },
+  {
+    targetSelector: '[data-tour="myday-activetask"]',
+    title: '3. Current Activity in Progress',
+    instruction: 'This card shows what you are doing right now, complete with step duration and calm instructions.',
+    mascotHint: 'This is the active task happening now! 🌟',
+  },
+  {
+    targetSelector: '[data-tour="myday-starttimer"]',
+    title: '4. Start Countdown Timer',
+    instruction: 'Click "Start Timer" to begin a visual countdown so you always know how much time is left.',
+    mascotHint: 'Click this blue timer button! ⏱️',
+  },
+  {
+    targetSelector: '[data-tour="myday-markdone"]',
+    title: '5. Mark Done & Collect Rewards',
+    instruction: 'When you complete your activity, click "Mark as Done!" to check it off and unlock sticker rewards!',
+    mascotHint: 'Click this green button to finish! ✨',
+  },
+  {
+    targetSelector: '[data-tour="myday-firstthen"]',
+    title: '6. First ➔ Then Board',
+    instruction: 'Need extra motivation? The First / Then board shows what fun reward comes right after your work.',
+    mascotHint: 'You finished the tour! Bee proud of yourself! 🐝',
+  },
+];
 
 export const MyDayView: React.FC = () => {
   const {
@@ -42,6 +82,8 @@ export const MyDayView: React.FC = () => {
     showMyDayGuideModal,
     setShowMyDayGuideModal,
   } = useApp();
+
+  const [isCoachMarksActive, setIsCoachMarksActive] = useState(false);
 
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
     routines[0]?.id || 'routine-morning'
@@ -191,7 +233,7 @@ export const MyDayView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs">
         
         {/* Category Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+        <div data-tour="myday-categoryfilter" className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <button
             type="button"
             onClick={() => {
@@ -242,7 +284,7 @@ export const MyDayView: React.FC = () => {
 
         {/* View Mode Switcher & Contextual Help Button */}
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div data-tour="myday-viewmode" className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={() => {
@@ -279,11 +321,11 @@ export const MyDayView: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setShowMyDayGuideModal(true);
+              setIsCoachMarksActive(true);
               playChime('tap');
             }}
             className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all border border-amber-300"
-            title="Interactive step-by-step walkthrough"
+            title="Interactive live tutorial on where to click"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Help Me</span>
@@ -294,7 +336,7 @@ export const MyDayView: React.FC = () => {
       </div>
 
       {/* 3. ROUTINE SELECTOR TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+      <div data-tour="myday-routines" className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
         {filteredRoutines.map((routine) => {
           const isSelected = routine.id === selectedRoutineId;
           const isAllDone =
@@ -324,6 +366,7 @@ export const MyDayView: React.FC = () => {
       {/* 4. FIRST -> THEN CARD (Core Predictability Principle) */}
       {currentRoutine.firstThen && (
         <section
+          data-tour="myday-firstthen"
           aria-label="First then board"
           className="bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-850 border-2 border-indigo-200 dark:border-indigo-800 rounded-3xl p-4 sm:p-5 shadow-xs"
         >
@@ -485,7 +528,10 @@ export const MyDayView: React.FC = () => {
           {activeStep ? (
             <div className="space-y-3">
               {/* CURRENT STEP (NOW) HERO CARD */}
-              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-500/10 border-3 border-amber-400 dark:border-amber-500/80 bg-white dark:bg-slate-900 shadow-md space-y-4">
+              <div
+                data-tour="myday-activetask"
+                className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-500/10 border-3 border-amber-400 dark:border-amber-500/80 bg-white dark:bg-slate-900 shadow-md space-y-4"
+              >
                 <div className="flex items-center justify-between">
                   <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-xs">
                     <Sparkles className="w-3.5 h-3.5" />
@@ -524,6 +570,7 @@ export const MyDayView: React.FC = () => {
                 {/* Primary Action Buttons: Start Timer & Complete Button */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <button
+                    data-tour="myday-starttimer"
                     type="button"
                     onClick={() => startTimerForStep(activeStep, true)}
                     className="py-3.5 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -533,6 +580,7 @@ export const MyDayView: React.FC = () => {
                   </button>
 
                   <button
+                    data-tour="myday-markdone"
                     type="button"
                     onClick={() => {
                       toggleRoutineStep(currentRoutine.id, activeStep.id);
@@ -757,7 +805,16 @@ export const MyDayView: React.FC = () => {
         </div>
       )}
 
-      {/* Interactive My Day Walkthrough & Help Modal */}
+      {/* Live Interactive Coach Marks Walkthrough */}
+      <CoachMarksOverlay
+        isActive={isCoachMarksActive}
+        steps={MY_DAY_COACH_STEPS}
+        tourName="My Day Visual Schedule Guide"
+        onComplete={() => setIsCoachMarksActive(false)}
+        onSkip={() => setIsCoachMarksActive(false)}
+      />
+
+      {/* Deep-Dive Help Modal */}
       <InteractiveMyDayGuideModal
         isOpen={showMyDayGuideModal}
         onClose={() => setShowMyDayGuideModal(false)}
