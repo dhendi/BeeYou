@@ -56,6 +56,7 @@ const AccessibilityPreferencesModal = lazy(() => import('./components/Accessibil
 const DashboardCustomizerModal = lazy(() => import('./components/DashboardCustomizerModal').then(m => ({ default: m.DashboardCustomizerModal })));
 const EditAlertsModal = lazy(() => import('./components/EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
 const EditCalmModal = lazy(() => import('./components/EditCalmModal').then(m => ({ default: m.EditCalmModal })));
+const FamilyAuthModal = lazy(() => import('./components/FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
 
 const AppContent: React.FC = () => {
   const { 
@@ -64,6 +65,8 @@ const AppContent: React.FC = () => {
     userRole,
     showCaregiverModal, 
     setShowCaregiverModal,
+    showFamilyAuthModal,
+    setShowFamilyAuthModal,
     showCaregiverAlertModal,
     setShowCaregiverAlertModal,
     activeTheme,
@@ -299,6 +302,12 @@ const AppContent: React.FC = () => {
           state={globalFeedbackState}
           onClose={() => setGlobalFeedbackState(null)}
           onOpenCamera={() => setShowCaregiverModal(true)}
+        />
+
+        {/* Shared Family Email & Demo Modal */}
+        <FamilyAuthModal
+          isOpen={showFamilyAuthModal}
+          onClose={() => setShowFamilyAuthModal(false)}
         />
       </Suspense>
     </div>

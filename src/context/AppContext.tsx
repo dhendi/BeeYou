@@ -146,6 +146,8 @@ interface AppContextType {
   setShowCaregiverModal: (val: boolean) => void;
   showCaregiverAlertModal: boolean;
   setShowCaregiverAlertModal: (val: boolean) => void;
+  showFamilyAuthModal: boolean;
+  setShowFamilyAuthModal: (val: boolean) => void;
   showAboutMeModal: boolean;
   setShowAboutMeModal: (val: boolean) => void;
   showAvatarCreator: boolean;
@@ -472,6 +474,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
   const [showCaregiverModal, setShowCaregiverModal] = useState<boolean>(false);
   const [showCaregiverAlertModal, setShowCaregiverAlertModal] = useState<boolean>(false);
+  const [showFamilyAuthModal, setShowFamilyAuthModal] = useState<boolean>(false);
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
   const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
 
@@ -3010,6 +3013,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setShowCaregiverModal,
         showCaregiverAlertModal,
         setShowCaregiverAlertModal,
+        showFamilyAuthModal,
+        setShowFamilyAuthModal,
         showAboutMeModal,
         setShowAboutMeModal,
         showAvatarCreator,

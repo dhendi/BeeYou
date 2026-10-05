@@ -21,7 +21,9 @@ import {
   AlertTriangle,
   RefreshCw,
   Plus,
-  Camera
+  Camera,
+  Mail,
+  Zap
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -44,6 +46,7 @@ import { ContextualHelpButton } from './ContextualHelpButton';
 import { QRCodeView } from './QRCodeView';
 import { CameraQRScannerModal } from './CameraQRScannerModal';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
+import { FamilyAuthModal } from './FamilyAuthModal';
 
 interface ConnectCaregiverModalProps {
   isOpen: boolean;
@@ -119,6 +122,8 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   // Connection feedback popup state
   const [feedbackState, setFeedbackState] = useState<ConnectionFeedbackState | null>(null);
+  // Family Account Modal state
+  const [showFamilyModal, setShowFamilyModal] = useState(false);
 
   // Initialize or generate session when modal opens
   useEffect(() => {
@@ -369,8 +374,39 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
           </div>
         </div>
 
+        {/* SHARED FAMILY EMAIL & DEMO ACCOUNT HERO BANNER */}
+        <div className="mt-3.5 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-500/10 to-purple-500/15 border-2 border-amber-300 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-xs font-black text-slate-900">
+                  Shared Family Email (Recommended)
+                </h3>
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase">
+                  Permanent Sync
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 font-medium">
+                Only 1 email needed to link phone &amp; tablet permanently with 0 code expiry.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowFamilyModal(true)}
+            className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs shadow-xs transition cursor-pointer flex items-center gap-1 shrink-0"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            <span>Sign In / Demo</span>
+          </button>
+        </div>
+
         {/* Tab Navigation */}
-        <div className="flex bg-stone-200/70 p-1 rounded-2xl mt-3.5 gap-1 text-xs font-bold shrink-0">
+        <div className="flex bg-stone-200/70 p-1 rounded-2xl mt-3 gap-1 text-xs font-bold shrink-0">
           {!isAdult && (
             <>
               <button
@@ -383,7 +419,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
-                <span>Pair This Device</span>
+                <span>Temporary Code / QR</span>
               </button>
               <button
                 type="button"
@@ -395,7 +431,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                 }`}
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>I Have a Code</span>
+                <span>Enter 6-Letter Code</span>
               </button>
             </>
           )}
@@ -847,6 +883,13 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
         onRetry={() => {
           if (inputCode) handleProcessCodeClaim(inputCode);
         }}
+      />
+
+      {/* Shared Family Email & Demo Auth Modal */}
+      <FamilyAuthModal
+        isOpen={showFamilyModal}
+        onClose={() => setShowFamilyModal(false)}
+        initialTab="demo"
       />
     </div>
   );

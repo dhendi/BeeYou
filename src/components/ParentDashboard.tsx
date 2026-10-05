@@ -49,7 +49,9 @@ import {
   Smartphone,
   Radio,
   ShieldAlert,
-  Camera
+  Camera,
+  Mail,
+  Zap
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
@@ -86,6 +88,7 @@ import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/symbolService';
 import { QRCodeView } from './QRCodeView';
 import { CameraQRScannerModal } from './CameraQRScannerModal';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
+import { FamilyAuthModal } from './FamilyAuthModal';
 
 import { 
   getPairingCode, 
@@ -109,6 +112,8 @@ export const ParentDashboard: React.FC = () => {
     connectionStatus,
     isCaregiverConnected,
     setShowCaregiverModal,
+    showFamilyAuthModal,
+    setShowFamilyAuthModal,
     plansChanged,
     activatePlansChanged,
     dismissPlansChanged,
@@ -1012,6 +1017,19 @@ export const ParentDashboard: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowFamilyAuthModal(true);
+                        playChime('tap');
+                      }}
+                      className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+                      title="Shared Family Email & 1-Click Demo Testing"
+                    >
+                      <Zap className="w-4 h-4 text-amber-300" />
+                      <span>Family Email &amp; Demo</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -5440,6 +5458,12 @@ export const ParentDashboard: React.FC = () => {
         state={feedbackState}
         onClose={() => setFeedbackState(null)}
         onOpenCamera={() => setShowCameraScanner(true)}
+      />
+
+      {/* Shared Family Email & 1-Click Demo Modal */}
+      <FamilyAuthModal
+        isOpen={showFamilyAuthModal}
+        onClose={() => setShowFamilyAuthModal(false)}
       />
     </div>
   );
