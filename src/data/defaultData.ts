@@ -1,6 +1,7 @@
 import {
   AACItem,
   QuickPhrase,
+  FavoriteSentence,
   Routine,
   LifeAdventure,
   LifeSkill,
@@ -262,6 +263,21 @@ export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [
   { id: 'qp-10', text: 'Not right now.', emoji: '⏳', isEmergency: false },
   { id: 'qp-11', text: "What's next?", emoji: '❓', isEmergency: false },
   { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false },
+];
+
+export const DEFAULT_FAVORITE_SENTENCES: FavoriteSentence[] = [
+  { id: 'fav-1', text: 'I want to play lego', speechText: 'I want to play lego', emoji: '🧱', usageCount: 14, isParentPinned: true, category: 'play' },
+  { id: 'fav-2', text: 'I want to take a bath', speechText: 'I want to take a bath', emoji: '🛁', usageCount: 11, isParentPinned: true, category: 'daily' },
+  { id: 'fav-3', text: 'I am hungry, can I have a snack?', speechText: 'I am hungry, can I have a snack please', emoji: '🥪', usageCount: 10, isParentPinned: true, category: 'requests' },
+  { id: 'fav-4', text: 'I am thirsty, I want water', speechText: 'I am thirsty, I want some water please', emoji: '💧', usageCount: 9, isParentPinned: true, category: 'requests' },
+  { id: 'fav-5', text: 'I need a sensory quiet break', speechText: 'I need a quiet break please', emoji: '🛋️', usageCount: 8, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-6', text: 'Can you help me please?', speechText: 'Can you please help me right now', emoji: '🆘', usageCount: 7, isParentPinned: true, category: 'requests' },
+  { id: 'fav-7', text: 'I want to go outside', speechText: 'I want to go outside and play', emoji: '🌳', usageCount: 6, isParentPinned: true, category: 'play' },
+  { id: 'fav-8', text: 'I love you', speechText: 'I love you', emoji: '💖', usageCount: 6, isParentPinned: true, category: 'social' },
+  { id: 'fav-9', text: 'I am tired, I want to rest', speechText: 'I am feeling tired and want to rest', emoji: '😴', usageCount: 5, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-10', text: 'I want to listen to music', speechText: 'I want to listen to calming music', emoji: '🎧', usageCount: 4, isParentPinned: true, category: 'play' },
+  { id: 'fav-11', text: 'I do not want this, stop please', speechText: 'I do not want this, please stop', emoji: '🛑', usageCount: 4, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-12', text: 'I am happy!', speechText: 'I am feeling happy and good', emoji: '😊', usageCount: 3, isParentPinned: false, category: 'feelings' },
 ];
 
 export const DEFAULT_ROUTINES: Routine[] = [

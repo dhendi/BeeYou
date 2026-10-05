@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import {
   AACItem,
   QuickPhrase,
+  FavoriteSentence,
   Routine,
   LifeAdventure,
   LifeSkill,
@@ -57,6 +58,7 @@ import { PRESET_THEMES } from '../data/themesData';
 import {
   DEFAULT_AAC_ITEMS,
   DEFAULT_QUICK_PHRASES,
+  DEFAULT_FAVORITE_SENTENCES,
   DEFAULT_ROUTINES,
   DEFAULT_ADVENTURES,
   DEFAULT_SKILLS,
@@ -159,6 +161,11 @@ interface AppContextType {
   aacItems: AACItem[];
   sentence: AACItem[];
   quickPhrases: QuickPhrase[];
+  favoriteSentences: FavoriteSentence[];
+  showAacGuideModal: boolean;
+  setShowAacGuideModal: (val: boolean) => void;
+  showMyDayGuideModal: boolean;
+  setShowMyDayGuideModal: (val: boolean) => void;
   speak: (text: string) => Promise<void>;
   announce: (text: string) => Promise<void>;
   addToSentence: (item: AACItem) => void;
@@ -166,6 +173,10 @@ interface AppContextType {
   clearSentence: () => void;
   removeLastFromSentence: () => void;
   saveSentenceAsQuickPhrase: () => void;
+  addFavoriteSentence: (fav: Omit<FavoriteSentence, 'id' | 'usageCount'> & { usageCount?: number }) => void;
+  deleteFavoriteSentence: (id: string) => void;
+  togglePinFavoriteSentence: (id: string) => void;
+  recordSentenceSpoken: (text: string, emoji?: string) => void;
   addAacItem: (item: Omit<AACItem, 'id' | 'motorIndex'> & { id?: string; isFavorite?: boolean }) => void;
   updateAacItem: (item: AACItem) => void;
   toggleAacFavorite: (id: string) => void;
@@ -600,6 +611,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [aacItems, setAacItems] = useState<AACItem[]>(DEFAULT_AAC_ITEMS);
   const [sentence, setSentence] = useState<AACItem[]>([]);
   const [quickPhrases, setQuickPhrases] = useState<QuickPhrase[]>(DEFAULT_QUICK_PHRASES);
+  const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_favorite_sentences');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return DEFAULT_FAVORITE_SENTENCES;
+  });
+  const [showAacGuideModal, setShowAacGuideModal] = useState<boolean>(false);
+  const [showMyDayGuideModal, setShowMyDayGuideModal] = useState<boolean>(false);
   const [routines, setRoutines] = useState<Routine[]>(DEFAULT_ROUTINES);
   const [plansChanged, setPlansChanged] = useState<PlansChangedState>(DEFAULT_PLANS_CHANGED);
   const [adventures, setAdventures] = useState<LifeAdventure[]>(DEFAULT_ADVENTURES);
@@ -1316,9 +1336,92 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  // Sync favoriteSentences to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_favorite_sentences', JSON.stringify(favoriteSentences));
+    } catch (e) {}
+  }, [favoriteSentences]);
+
+  const recordSentenceSpoken = (text: string, emoji?: string) => {
+    const cleanText = text.trim();
+    if (!cleanText) return;
+    setFavoriteSentences((prev) => {
+      const existingIdx = prev.findIndex((s) => s.text.toLowerCase() === cleanText.toLowerCase());
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          usageCount: (updated[existingIdx].usageCount || 0) + 1,
+          lastUsedAt: new Date().toISOString(),
+        };
+        return updated;
+      } else {
+        const newFav: FavoriteSentence = {
+          id: `fav-used-${Date.now()}`,
+          text: cleanText,
+          speechText: cleanText,
+          emoji: emoji || '💬',
+          usageCount: 1,
+          lastUsedAt: new Date().toISOString(),
+          isCustom: true,
+          category: 'favorites',
+        };
+        return [...prev, newFav];
+      }
+    });
+  };
+
+  const addFavoriteSentence = (fav: Omit<FavoriteSentence, 'id' | 'usageCount'> & { usageCount?: number }) => {
+    const cleanText = fav.text.trim();
+    if (!cleanText) return;
+    setFavoriteSentences((prev) => {
+      const existingIdx = prev.findIndex((s) => s.text.toLowerCase() === cleanText.toLowerCase());
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          usageCount: (updated[existingIdx].usageCount || 0) + 1,
+          isParentPinned: fav.isParentPinned !== undefined ? fav.isParentPinned : updated[existingIdx].isParentPinned,
+          emoji: fav.emoji || updated[existingIdx].emoji,
+          speechText: fav.speechText || updated[existingIdx].speechText,
+          lastUsedAt: new Date().toISOString(),
+        };
+        return updated;
+      } else {
+        const newFav: FavoriteSentence = {
+          id: `fav-custom-${Date.now()}`,
+          text: cleanText,
+          speechText: fav.speechText || cleanText,
+          emoji: fav.emoji || '💬',
+          usageCount: fav.usageCount || 1,
+          isParentPinned: fav.isParentPinned !== undefined ? fav.isParentPinned : true,
+          isCustom: true,
+          lastUsedAt: new Date().toISOString(),
+          category: fav.category || 'favorites',
+        };
+        return [newFav, ...prev];
+      }
+    });
+    if (settings.soundEffects) playChime('star');
+  };
+
+  const deleteFavoriteSentence = (id: string) => {
+    setFavoriteSentences((prev) => prev.filter((f) => f.id !== id));
+    if (settings.soundEffects) playChime('clear');
+  };
+
+  const togglePinFavoriteSentence = (id: string) => {
+    setFavoriteSentences((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, isParentPinned: !f.isParentPinned } : f))
+    );
+    if (settings.soundEffects) playChime('tap');
+  };
+
   const speakSentence = async () => {
     if (sentence.length === 0) return;
     const fullText = sentence.map((item) => item.speechText || item.label).join(' ');
+    recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
       childName: childProfile.name,
       lastAacSentence: fullText,
@@ -1340,6 +1443,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const saveSentenceAsQuickPhrase = () => {
     if (sentence.length === 0) return;
     const phraseText = sentence.map((item) => item.speechText || item.label).join(' ');
+    addFavoriteSentence({
+      text: phraseText,
+      speechText: phraseText,
+      emoji: sentence[0]?.emoji || '💬',
+      isParentPinned: true,
+    });
     const newQP: QuickPhrase = {
       id: `qp-custom-${Date.now()}`,
       text: phraseText,
@@ -2892,6 +3001,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         aacItems,
         sentence,
         quickPhrases,
+        favoriteSentences,
+        showAacGuideModal,
+        setShowAacGuideModal,
+        showMyDayGuideModal,
+        setShowMyDayGuideModal,
         speak,
         announce,
         addToSentence,
@@ -2899,6 +3013,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         clearSentence,
         removeLastFromSentence,
         saveSentenceAsQuickPhrase,
+        addFavoriteSentence,
+        deleteFavoriteSentence,
+        togglePinFavoriteSentence,
+        recordSentenceSpoken,
         addAacItem,
         updateAacItem,
         toggleAacFavorite,

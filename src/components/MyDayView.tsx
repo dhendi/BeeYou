@@ -25,6 +25,7 @@ import { VisualTaskTimer } from './VisualTaskTimer';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { VisualScheduleStep } from '../types';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import { InteractiveMyDayGuideModal } from './InteractiveMyDayGuideModal';
 
 export const MyDayView: React.FC = () => {
   const {
@@ -38,6 +39,8 @@ export const MyDayView: React.FC = () => {
     announce,
     setChildView,
     earnedStickers,
+    showMyDayGuideModal,
+    setShowMyDayGuideModal,
   } = useApp();
 
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
@@ -273,7 +276,20 @@ export const MyDayView: React.FC = () => {
             </button>
           </div>
 
-          <ContextualHelpButton topic="schedules" label="How it works" variant="pill" />
+          <button
+            type="button"
+            onClick={() => {
+              setShowMyDayGuideModal(true);
+              playChime('tap');
+            }}
+            className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all border border-amber-300"
+            title="Interactive step-by-step walkthrough"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Help Me</span>
+          </button>
+
+          <ContextualHelpButton topic="schedules" label="Guide" variant="pill" />
         </div>
       </div>
 
@@ -741,6 +757,11 @@ export const MyDayView: React.FC = () => {
         </div>
       )}
 
+      {/* Interactive My Day Walkthrough & Help Modal */}
+      <InteractiveMyDayGuideModal
+        isOpen={showMyDayGuideModal}
+        onClose={() => setShowMyDayGuideModal(false)}
+      />
     </div>
   );
 };

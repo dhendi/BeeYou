@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { AACCategory, AACItem } from '../types';
+import { AACCategory, AACItem, FavoriteSentence } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { AACTileArt } from './AACTileArt';
 import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
+import { AACGuideModal } from './AACGuideModal';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { 
   Volume2, 
@@ -120,6 +121,13 @@ export const AACView: React.FC = () => {
     clearSentence,
     removeLastFromSentence,
     saveSentenceAsQuickPhrase,
+    favoriteSentences,
+    addFavoriteSentence,
+    deleteFavoriteSentence,
+    togglePinFavoriteSentence,
+    recordSentenceSpoken,
+    showAacGuideModal,
+    setShowAacGuideModal,
     settings,
     plansChanged,
     adventures,
@@ -139,7 +147,7 @@ export const AACView: React.FC = () => {
     upgradeAllAacToClinicalSymbols,
   } = useApp();
 
-  const [activeCategory, setActiveCategory] = useState<AACCategory | 'all'>('core');
+  const [activeCategory, setActiveCategory] = useState<AACCategory | 'all' | 'favorite_sentences'>('core');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
   const [showWordEditor, setShowWordEditor] = useState(false);
@@ -147,6 +155,11 @@ export const AACView: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [instantSpeakMode, setInstantSpeakMode] = useState(false);
   const [isSentenceBarCollapsed, setIsSentenceBarCollapsed] = useState(false);
+
+  // Favorite Sentences Form state
+  const [newFavSentenceText, setNewFavSentenceText] = useState('');
+  const [newFavSentenceEmoji, setNewFavSentenceEmoji] = useState('💬');
+  const [showAddSentenceForm, setShowAddSentenceForm] = useState(false);
 
   // Proloquo2Go Features State
   const [showQuickChatDrawer, setShowQuickChatDrawer] = useState(false);
@@ -180,8 +193,9 @@ export const AACView: React.FC = () => {
   const isDentistDay = true;
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
-  const categories: { id: AACCategory | 'all'; label: string; emoji: string }[] = [
+  const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; emoji: string }[] = [
     { id: 'core', label: 'Core Board', emoji: '⭐' },
+    { id: 'favorite_sentences', label: 'Favorite Sentences', emoji: '💬' },
     { id: 'favorites', label: 'Favorites', emoji: '❤️' },
     { id: 'food', label: 'Food', emoji: '🍕' },
     { id: 'drinks', label: 'Drinks', emoji: '🧃' },
@@ -964,6 +978,20 @@ export const AACView: React.FC = () => {
               </button>
             </div>
 
+            {/* AAC Guide Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowAacGuideModal(true);
+                playChime('tap');
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              title="Open AAC Guide & Instructions"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>AAC Guide 💡</span>
+            </button>
+
           </div>
         </div>
 
@@ -1021,6 +1049,236 @@ export const AACView: React.FC = () => {
           </div>
         )}
 
+        {/* FAVORITE SENTENCES VIEW */}
+        {activeCategory === 'favorite_sentences' && !activeSceneData ? (
+          <div className="space-y-4 pb-12 animate-in fade-in">
+            {/* Header banner */}
+            <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-500/10 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-xs shrink-0">
+                  💬
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                    <span>Favorite Sentences & Frequent Phrases</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black uppercase">
+                      {favoriteSentences.length} Saved
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-600 font-medium">
+                    Tap any sentence to speak it aloud. Phrases used most frequently automatically rise to the top!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddSentenceForm(!showAddSentenceForm);
+                    playChime('tap');
+                  }}
+                  className="px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{showAddSentenceForm ? 'Close Form' : '+ Add Favorite Sentence'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Add Form */}
+            {showAddSentenceForm && (
+              <div className="p-4 rounded-3xl bg-white border-2 border-amber-300 space-y-3 shadow-md animate-in fade-in">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 className="font-black text-xs sm:text-sm text-slate-900 flex items-center gap-2">
+                    <span>✨ Add Custom Favorite Sentence</span>
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddSentenceForm(false)}
+                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
+                    <span className="text-[11px] font-bold text-slate-400 mr-1">Icon:</span>
+                    {['💬', '🧱', '🛁', '🥪', '💧', '🛋️', '🆘', '🌳', '💖', '😴', '🎧', '🛑', '🍦', '🚗', '🎨'].map((em) => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => {
+                          setNewFavSentenceEmoji(em);
+                          playChime('tap');
+                        }}
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center text-base cursor-pointer transition-all shrink-0 ${
+                          newFavSentenceEmoji === em ? 'bg-amber-400 scale-110 shadow-xs' : 'bg-slate-100 hover:bg-slate-200'
+                        }`}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="text"
+                      value={newFavSentenceText}
+                      onChange={(e) => setNewFavSentenceText(e.target.value)}
+                      placeholder="e.g. I want to play lego, I want to take a bath..."
+                      className="flex-1 px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-xs sm:text-sm font-bold focus:border-amber-500 focus:bg-white outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && newFavSentenceText.trim()) {
+                          addFavoriteSentence({
+                            text: newFavSentenceText.trim(),
+                            speechText: newFavSentenceText.trim(),
+                            emoji: newFavSentenceEmoji,
+                            isParentPinned: true,
+                          });
+                          setNewFavSentenceText('');
+                          setShowAddSentenceForm(false);
+                        }
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newFavSentenceText.trim()) return;
+                        addFavoriteSentence({
+                          text: newFavSentenceText.trim(),
+                          speechText: newFavSentenceText.trim(),
+                          emoji: newFavSentenceEmoji,
+                          isParentPinned: true,
+                        });
+                        setNewFavSentenceText('');
+                        setShowAddSentenceForm(false);
+                      }}
+                      disabled={!newFavSentenceText.trim()}
+                      className={`px-5 py-2.5 rounded-2xl font-black text-xs shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5 ${
+                        newFavSentenceText.trim()
+                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Save Sentence</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* List of Favorite Sentences */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[...favoriteSentences]
+                .sort((a, b) => {
+                  if (a.isParentPinned && !b.isParentPinned) return -1;
+                  if (!a.isParentPinned && b.isParentPinned) return 1;
+                  return (b.usageCount || 0) - (a.usageCount || 0);
+                })
+                .map((fav) => (
+                  <div
+                    key={fav.id}
+                    className={`p-3.5 sm:p-4 rounded-3xl border-2 transition-all flex items-center justify-between gap-3 shadow-xs hover:border-amber-400 group bg-white dark:bg-slate-850 ${
+                      fav.isParentPinned ? 'border-amber-300/90 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <div
+                      onClick={() => {
+                        speak(fav.speechText || fav.text);
+                        recordSentenceSpoken(fav.text, fav.emoji);
+                        playChime('speak');
+                        addToSentence({
+                          id: `fav-${Date.now()}`,
+                          label: fav.text,
+                          speechText: fav.speechText || fav.text,
+                          emoji: fav.emoji || '💬',
+                          category: 'favorites',
+                          colorType: 'social',
+                          motorIndex: 0,
+                        });
+                      }}
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                      title="Tap to speak sentence aloud"
+                    >
+                      <span className="text-3xl sm:text-4xl p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform">
+                        {fav.emoji || '💬'}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                            {fav.text}
+                          </h4>
+                          {fav.isParentPinned && (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-0.5">
+                              ⭐ Pinned
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 font-medium">
+                          <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300 font-bold">
+                            🔥 {fav.usageCount || 1}x spoken
+                          </span>
+                          <span>•</span>
+                          <span className="text-slate-400">Tap to speak</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          speak(fav.speechText || fav.text);
+                          recordSentenceSpoken(fav.text, fav.emoji);
+                          playChime('speak');
+                          addToSentence({
+                            id: `fav-${Date.now()}`,
+                            label: fav.text,
+                            speechText: fav.speechText || fav.text,
+                            emoji: fav.emoji || '💬',
+                            category: 'favorites',
+                            colorType: 'social',
+                            motorIndex: 0,
+                          });
+                        }}
+                        className="px-3.5 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+                        title="Speak Sentence Aloud"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                        <span>Speak</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => togglePinFavoriteSentence(fav.id)}
+                        className={`p-2 rounded-xl transition-all cursor-pointer ${
+                          fav.isParentPinned
+                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                        }`}
+                        title={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
+                      >
+                        <Heart className={`w-4 h-4 ${fav.isParentPinned ? 'fill-amber-400 text-amber-600' : ''}`} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteFavoriteSentence(fav.id)}
+                        className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
+                        title="Delete sentence"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
         <main
           className={`grid ${gridColsClass} gap-1.5 sm:gap-2 pb-10`}
           aria-label="Vocabulary grid"
@@ -1190,6 +1448,7 @@ export const AACView: React.FC = () => {
             );
           })}
         </main>
+        )}
       </div>
 
       {/* GRAMMAR INFLECTIONS POPUP (Proloquo2Go Style) */}
@@ -1419,6 +1678,12 @@ export const AACView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* AAC Guide / How-To Modal */}
+      <AACGuideModal
+        isOpen={showAacGuideModal}
+        onClose={() => setShowAacGuideModal(false)}
+      />
     </div>
   );
 };

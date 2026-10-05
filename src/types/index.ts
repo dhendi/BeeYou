@@ -59,6 +59,18 @@ export interface QuickPhrase {
   isCustom?: boolean;
 }
 
+export interface FavoriteSentence {
+  id: string;
+  text: string;
+  speechText?: string;
+  emoji: string;
+  usageCount: number;
+  lastUsedAt?: string;
+  isParentPinned?: boolean;
+  isCustom?: boolean;
+  category?: string;
+}
+
 export interface VisualScheduleStep {
   id: string;
   title: string;
