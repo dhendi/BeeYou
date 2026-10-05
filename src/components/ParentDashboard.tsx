@@ -1298,6 +1298,18 @@ export const ParentDashboard: React.FC = () => {
                           </div>
                         </div>
 
+                        {/* Delivery & Pipeline Status Badge */}
+                        <div className="flex items-center justify-between text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100">
+                          <div className="flex items-center gap-1.5 text-blue-700 font-bold">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                            </span>
+                            <span>Delivered to Hub • Pending Caregiver Response</span>
+                          </div>
+                          <span className="text-slate-400 font-medium">Auto-synced</span>
+                        </div>
+
                         {/* Quick 1-tap Caregiver Responses */}
                         {replyCooldown > 0 && (
                           <div className="w-full p-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">

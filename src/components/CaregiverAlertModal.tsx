@@ -14,7 +14,10 @@ import {
   Clock,
   Phone,
   MessageCircle,
-  Sparkles
+  Sparkles,
+  Loader2,
+  Check,
+  Smartphone
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -104,6 +107,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   } | null>(null);
   
   const [cooldown, setCooldown] = useState(0);
+  const [deliveryStage, setDeliveryStage] = useState<'idle' | 'sending' | 'delivered' | 'acknowledged'>('idle');
   const [caregiverResponse, setCaregiverResponse] = useState<{
     text: string;
     responseId?: PredefinedCaregiverResponseId;
@@ -139,6 +143,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
         responseId: ack.responseId,
         by: ack.by,
       });
+      setDeliveryStage('acknowledged');
       // Note: Spoken announcement is handled globally once by AppContext.tsx
     });
 
@@ -171,6 +176,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     }
     const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
+    setDeliveryStage('sending');
     setSentAlert({
       alertId: choice.id,
       label: choice.label,
@@ -190,6 +196,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       location: selectedLocation,
       note: '',
     });
+    setDeliveryStage('delivered');
 
     if (settings?.spokenAlerts !== false) {
       speak(`Your alert was sent to your ${isAdult ? 'emergency contact' : 'caregiver'}. You are safe. Take a slow, gentle breath.`);
@@ -199,6 +206,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   const handleReset = () => {
     setSentAlert(null);
     setCaregiverResponse(null);
+    setDeliveryStage('idle');
   };
 
   return (
@@ -244,6 +252,74 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
             /* Sent State & Waiting Reassurance */
             <div className="space-y-4 animate-in zoom-in-95">
               
+              {/* 3-Step Visual Delivery Status Indicator: Sending ➔ Delivered ➔ Acknowledged */}
+              <div className="p-4 rounded-3xl bg-white border-2 border-amber-200/90 shadow-xs space-y-3">
+                <div className="flex items-center justify-between text-xs font-black">
+                  <span className="text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📡 Live Delivery Pipeline:</span>
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 ${
+                    deliveryStage === 'sending' ? 'bg-amber-100 text-amber-900 animate-pulse' :
+                    deliveryStage === 'delivered' ? 'bg-blue-100 text-blue-900' :
+                    'bg-emerald-100 text-emerald-900'
+                  }`}>
+                    {deliveryStage === 'sending' && <><span>⏳</span><span>1. Sending to Cloud...</span></>}
+                    {deliveryStage === 'delivered' && <><span>📱</span><span>2. Delivered to Caregiver</span></>}
+                    {deliveryStage === 'acknowledged' && <><span>❤️</span><span>3. Acknowledged by Caregiver!</span></>}
+                  </span>
+                </div>
+
+                <div className="relative flex items-center justify-between px-3 py-1">
+                  {/* Progress Line */}
+                  <div className="absolute top-1/2 left-8 right-8 -translate-y-1/2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-500 transition-all duration-700 rounded-full"
+                      style={{
+                        width: deliveryStage === 'sending' ? '20%' : deliveryStage === 'delivered' ? '60%' : '100%'
+                      }}
+                    />
+                  </div>
+
+                  {/* Step 1: Sending */}
+                  <div className="flex flex-col items-center gap-1 relative z-10">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                      deliveryStage === 'sending'
+                        ? 'bg-amber-500 text-white ring-4 ring-amber-100 animate-pulse'
+                        : 'bg-emerald-600 text-white shadow-2xs'
+                    }`}>
+                      {deliveryStage === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700">Sending</span>
+                  </div>
+
+                  {/* Step 2: Delivered */}
+                  <div className="flex flex-col items-center gap-1 relative z-10">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                      deliveryStage === 'delivered'
+                        ? 'bg-blue-600 text-white ring-4 ring-blue-100 animate-pulse shadow-2xs'
+                        : deliveryStage === 'acknowledged'
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'bg-slate-200 text-slate-400'
+                    }`}>
+                      <Smartphone className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700">Delivered</span>
+                  </div>
+
+                  {/* Step 3: Acknowledged */}
+                  <div className="flex flex-col items-center gap-1 relative z-10">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                      deliveryStage === 'acknowledged'
+                        ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md scale-110'
+                        : 'bg-slate-200 text-slate-400'
+                    }`}>
+                      <Heart className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700">ACK (Reply)</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Delivery Banner */}
               <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
                 <div className="flex items-center gap-3">
