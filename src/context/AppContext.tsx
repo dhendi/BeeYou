@@ -1177,6 +1177,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Listen for real-time messages, alert acks and connection updates from caregiver
   useEffect(() => {
     const unsubCaregiver = onCaregiverMessage((msg) => {
+      if (msg.responseId) return; // Alert acknowledgment already announced via onCaregiverAlertAck
       setIncomingCaregiverMessage(msg);
       playChime('star');
       speakText(`${msg.senderName} sent you a message: ${msg.text}`);

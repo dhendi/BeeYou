@@ -2080,6 +2080,9 @@ function playAudioUrl(src: string, originalText: string): Promise<void> {
  * On-Device Web Speech API Engine with Priority for Non-Robotic Fluid Voices
  * Fully calibrated and hardened for Android Chrome, iOS Safari, and Desktop.
  */
+let lastSpokenTextNormalized = '';
+let lastSpokenTimestamp = 0;
+
 function speakWithBrowserSpeechSynthesis(
   formattedText: string,
   options?: {
@@ -2096,6 +2099,21 @@ function speakWithBrowserSpeechSynthesis(
       resolve();
       return;
     }
+
+    if (!formattedText || typeof formattedText !== 'string' || !formattedText.trim()) {
+      resolve();
+      return;
+    }
+
+    // Strict 5-second announcement deduplication: prevent double announcements
+    const normText = formattedText.trim().toLowerCase();
+    const now = Date.now();
+    if (normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < 5000) {
+      resolve();
+      return;
+    }
+    lastSpokenTextNormalized = normText;
+    lastSpokenTimestamp = now;
 
     try {
       // 1. Wake up / unpause SpeechSynthesis on Android

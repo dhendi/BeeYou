@@ -336,6 +336,8 @@ function getDeterministicFamilyCode(email: string): string {
 
 const eventHistoryByCode = new Map<string, CloudSyncEvent[]>();
 const sseClientsByCode = new Map<string, Set<express.Response>>();
+const lastAlertTimeByFamily = new Map<string, number>();
+const lastAckTimeByFamily = new Map<string, number>();
 
 function broadcastEvent(code: string, event: CloudSyncEvent): void {
   const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
@@ -728,6 +730,19 @@ app.post('/api/family/alert/:code', (req, res) => {
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
+  const now = Date.now();
+  const lastTime = lastAlertTimeByFamily.get(code) || 0;
+  if (now - lastTime < 5000 && current.activeAlert) {
+    return res.json({
+      success: true,
+      alert: current.activeAlert,
+      cooldown: true,
+      message: '5-second alert cooldown in effect',
+      state: current,
+    });
+  }
+  lastAlertTimeByFamily.set(code, now);
+
   const { id, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
 
   const alert = {
@@ -775,6 +790,18 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
+
+  const now = Date.now();
+  const lastTime = lastAckTimeByFamily.get(code) || 0;
+  if (now - lastTime < 5000) {
+    return res.json({
+      success: true,
+      cooldown: true,
+      message: '5-second response cooldown in effect',
+      state: current,
+    });
+  }
+  lastAckTimeByFamily.set(code, now);
 
   const { acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
 
@@ -1240,6 +1267,18 @@ app.post('/api/caregiver/alert', (req, res) => {
     return res.status(403).json({ error: 'Alerts are disabled by user permissions.' });
   }
 
+  const now = Date.now();
+  const lastTime = lastAlertTimeByFamily.get(code) || 0;
+  if (now - lastTime < 5000 && session.activeAlert) {
+    return res.json({
+      success: true,
+      alert: session.activeAlert,
+      cooldown: true,
+      message: '5-second alert cooldown in effect',
+    });
+  }
+  lastAlertTimeByFamily.set(code, now);
+
   const alert = {
     id: id || ('alert-' + Date.now()),
     childName: childName || session.childName || 'Child',
@@ -1284,6 +1323,18 @@ app.post('/api/caregiver/alert', (req, res) => {
 app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   const { pairingCode, acknowledgedBy, responseMessage, responseId } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
+
+  const now = Date.now();
+  const lastTime = lastAckTimeByFamily.get(code) || 0;
+  if (now - lastTime < 5000) {
+    return res.json({
+      success: true,
+      cooldown: true,
+      message: '5-second response cooldown in effect',
+    });
+  }
+  lastAckTimeByFamily.set(code, now);
+
   const session = caregiverSessions.get(code);
 
   // Sync persistent family state on disk

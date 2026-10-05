@@ -103,6 +103,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     location: string;
   } | null>(null);
   
+  const [cooldown, setCooldown] = useState(0);
   const [caregiverResponse, setCaregiverResponse] = useState<{
     text: string;
     responseId?: PredefinedCaregiverResponseId;
@@ -138,9 +139,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
         responseId: ack.responseId,
         by: ack.by,
       });
-      if (settings?.spokenAlerts !== false) {
-        speak(`Message from ${ack.by}: ${text}`);
-      }
+      // Note: Spoken announcement is handled globally once by AppContext.tsx
     });
 
     return () => {
@@ -152,6 +151,18 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   if (!isOpen) return null;
 
   const handleSendAlert = async (choice: PredefinedAlertChoice) => {
+    if (cooldown > 0) return;
+    setCooldown(5);
+    const cdTimer = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) {
+          clearInterval(cdTimer);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+
     if (settings?.soundAlerts !== false) {
       playChime('complete');
     }
@@ -411,13 +422,24 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </button>
                 </div>
 
+                {cooldown > 0 && (
+                  <div className="mb-2.5 p-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">
+                    <span>⏳ Please wait {cooldown}s before sending another alert...</span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {(helpAlertPresets && helpAlertPresets.length > 0 ? helpAlertPresets : PREDEFINED_ALERTS).map((choice) => (
                     <button
                       key={choice.id}
                       type="button"
+                      disabled={cooldown > 0}
                       onClick={() => handleSendAlert(choice)}
-                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass || 'border-rose-400 bg-rose-50'} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-start gap-3`}
+                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass || 'border-rose-400 bg-rose-50'} text-left transition-all ${
+                        cooldown > 0
+                          ? 'opacity-50 cursor-not-allowed pointer-events-none'
+                          : 'active:scale-95 cursor-pointer'
+                      } shadow-xs group flex items-start gap-3`}
                     >
                       <div className="text-3xl group-hover:scale-110 transition shrink-0">
                         {choice.emoji}

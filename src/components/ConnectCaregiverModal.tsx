@@ -192,8 +192,6 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     // Subscribe to live broadcast messages
     const unsubscribeMsg = onCaregiverMessage((newMsg) => {
       setMessages((prev) => [newMsg, ...prev]);
-      playChime('star');
-      speak(`${newMsg.senderName} says: ${newMsg.text}`);
     });
 
     return () => {

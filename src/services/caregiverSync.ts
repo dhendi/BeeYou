@@ -1057,9 +1057,9 @@ export async function acknowledgeCaregiverAlert(
 ): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
-  // 1. Send to server acknowledge endpoint
+  // Send to server acknowledge endpoint (server saves ack, updates state, and broadcasts single CAREGIVER_ALERT_ACK)
   try {
-    fetch('/api/caregiver/alert/acknowledge', {
+    await fetch('/api/caregiver/alert/acknowledge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1068,16 +1068,8 @@ export async function acknowledgeCaregiverAlert(
         responseMessage,
         responseId,
       }),
-    }).catch(() => {});
-  } catch {}
-
-  // 2. Publish to live event stream
-  await publishCloudEvent(safeCode, {
-    type: 'CAREGIVER_ALERT_ACK',
-    ack: { alertId: safeCode, responseMessage, responseId, by: acknowledgedBy },
-  });
-
-  if (responseMessage) {
-    await sendCaregiverMessage(safeCode, responseMessage, acknowledgedBy, '❤️', responseId);
+    });
+  } catch (err) {
+    console.warn('Acknowledge alert error:', err);
   }
 }
