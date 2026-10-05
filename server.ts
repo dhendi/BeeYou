@@ -7,14 +7,26 @@ import fs from 'fs';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const childPort = Number(process.env.PORT) || 3000;
+const caregiverPort = Number(process.env.CAREGIVER_PORT) || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
 app.use(express.json({ limit: '10mb' }));
 
+// Permissive CORS for cross-port communication between child (3000) and caregiver (3001)
+app.use((_req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (_req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
 });
 
 // -------------------------------------------------------------
@@ -1362,9 +1374,17 @@ async function startServer() {
     });
   }
 
-  app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
+  app.listen(childPort, () => {
+    console.log(`🧒 Child Tablet App listening on http://localhost:${childPort}`);
   });
+
+  if (childPort !== caregiverPort) {
+    app.listen(caregiverPort, () => {
+      console.log(`👑 Caregiver Controller Hub listening on http://localhost:${caregiverPort}`);
+    }).on('error', (err: any) => {
+      console.warn(`Could not bind caregiver port ${caregiverPort}:`, err.message);
+    });
+  }
 }
 
 if (!process.env.VERCEL) {

@@ -125,7 +125,27 @@ const AppContent: React.FC = () => {
     }
   }, [childView]);
 
-  const isCaregiverView = isParentMode || userRole === 'caregiver' || getActiveDeviceView() === 'caregiver';
+  const isCaregiverView = (() => {
+    if (typeof window !== 'undefined') {
+      // 1. Port 3001 is dedicated Caregiver Controller Hub
+      if (window.location.port === '3001') return true;
+
+      // 2. Explicit route /caregiver is dedicated Caregiver Controller
+      if (window.location.pathname.startsWith('/caregiver')) return true;
+
+      // 3. Explicit URL parameter ?role=caregiver or ?role=child
+      const params = new URLSearchParams(window.location.search);
+      const roleParam = params.get('role') || params.get('mode') || (params.get('caregiver') === 'true' ? 'caregiver' : null);
+      if (roleParam === 'caregiver') return true;
+      if (roleParam === 'child') return false;
+
+      // 4. Port 3000 is dedicated Child Tablet unless unlocked in this session
+      if (window.location.port === '3000') {
+        return isParentMode || sessionStorage.getItem('beeyou_active_device_view') === 'caregiver';
+      }
+    }
+    return isParentMode || userRole === 'caregiver' || getActiveDeviceView() === 'caregiver';
+  })();
 
   if (isCaregiverView) {
     return (

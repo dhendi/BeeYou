@@ -71,6 +71,27 @@ export function saveStoredFamilyAccount(account: FamilyAccount | null): void {
 export function getActiveDeviceView(): 'child' | 'caregiver' {
   if (typeof window === 'undefined') return 'child';
   try {
+    // 1. Port 3001 is dedicated Caregiver Controller
+    if (window.location.port === '3001') return 'caregiver';
+
+    // 2. URL Path /caregiver is dedicated Caregiver Controller
+    if (window.location.pathname.startsWith('/caregiver')) return 'caregiver';
+    if (window.location.pathname.startsWith('/child')) return 'child';
+
+    // 3. URL Query Parameter ?role=caregiver or ?role=child
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get('role') || params.get('mode') || (params.get('caregiver') === 'true' ? 'caregiver' : null);
+    if (roleParam === 'caregiver') return 'caregiver';
+    if (roleParam === 'child') return 'child';
+
+    // 4. Per-tab sessionStorage (isolated per tab so separate tabs never conflict)
+    const sess = sessionStorage.getItem(ACTIVE_DEVICE_VIEW_KEY);
+    if (sess === 'caregiver' || sess === 'child') return sess;
+
+    // 5. Port 3000 defaults to child
+    if (window.location.port === '3000') return 'child';
+
+    // 6. Fallback to localStorage
     const v = localStorage.getItem(ACTIVE_DEVICE_VIEW_KEY);
     if (v === 'caregiver' || v === 'child') return v;
   } catch {}
@@ -80,7 +101,14 @@ export function getActiveDeviceView(): 'child' | 'caregiver' {
 export function setActiveDeviceView(view: 'child' | 'caregiver'): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
+    sessionStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
+    if (window.location.port === '3001' && view === 'caregiver') {
+      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, 'caregiver');
+    } else if (window.location.port === '3000' && view === 'child') {
+      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, 'child');
+    } else if (window.location.port !== '3000' && window.location.port !== '3001') {
+      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
+    }
   } catch {}
 }
 

@@ -72,16 +72,21 @@ export const ChildHeader: React.FC = () => {
 
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <h1 
-              onClick={() => {
-                setShowAboutMeModal(true);
-                playChime('tap');
-              }}
-              className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none cursor-pointer hover:text-[#D97706] transition-colors"
-              title="About Me ID Card"
-            >
-              {childProfile.name}
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1 
+                onClick={() => {
+                  setShowAboutMeModal(true);
+                  playChime('tap');
+                }}
+                className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none cursor-pointer hover:text-[#D97706] transition-colors"
+                title="About Me ID Card"
+              >
+                {childProfile.name}
+              </h1>
+              <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Tablet (3000)
+              </span>
+            </div>
             <span className="text-[11px] font-semibold text-stone-500">
               {currentTime}
             </span>
@@ -201,6 +206,10 @@ export const ChildHeader: React.FC = () => {
             setIsParentMode(true);
             playChime('tap');
             if (typeof window !== 'undefined') {
+              if (window.location.port === '3000' || window.location.port === '') {
+                window.open(`http://${window.location.hostname || 'localhost'}:3001`, '_blank');
+                return;
+              }
               const url = new URL(window.location.href);
               url.searchParams.set('role', 'caregiver');
               url.searchParams.delete('child');
@@ -208,10 +217,10 @@ export const ChildHeader: React.FC = () => {
             }
           }}
           className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
-          title="Switch to Caregiver Hub & Controller 👑"
+          title="Open Caregiver Controller (Port 3001) in separate window/tab"
         >
-          <span className="hidden sm:inline">Caregiver Hub 👑</span>
-          <span className="sm:hidden">👑</span>
+          <span className="hidden sm:inline">Caregiver Hub (Port 3001) 👑</span>
+          <span className="sm:hidden">👑 3001</span>
         </button>
 
         {/* 5. Parent / Settings Lock */}

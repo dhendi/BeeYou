@@ -953,6 +953,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [userRole, setUserRoleState] = useState<UserAccountRole>(() => {
     try {
+      if (typeof window !== 'undefined') {
+        if (window.location.port === '3001') return 'caregiver';
+        if (window.location.pathname.startsWith('/caregiver')) return 'caregiver';
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role') || params.get('mode');
+        if (role === 'caregiver') return 'caregiver';
+        if (role === 'child') return 'child_dependent';
+
+        const sess = sessionStorage.getItem('beeyou_user_role');
+        if (sess === 'child_dependent' || sess === 'teen_dependent' || sess === 'independent_adult' || sess === 'caregiver') {
+          return sess as UserAccountRole;
+        }
+
+        if (window.location.port === '3000') return 'child_dependent';
+      }
       const saved = localStorage.getItem('beeyou_user_role');
       if (saved === 'child_dependent' || saved === 'teen_dependent' || saved === 'independent_adult' || saved === 'caregiver') {
         return saved;
@@ -991,7 +1006,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const setUserRole = (role: UserAccountRole) => {
     setUserRoleState(role);
     try {
-      localStorage.setItem('beeyou_user_role', role);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('beeyou_user_role', role);
+      }
+      if (typeof window !== 'undefined' && window.location.port === '3001' && role === 'caregiver') {
+        localStorage.setItem('beeyou_user_role', 'caregiver');
+      } else if (typeof window !== 'undefined' && window.location.port === '3000' && role !== 'caregiver') {
+        localStorage.setItem('beeyou_user_role', role);
+      } else {
+        localStorage.setItem('beeyou_user_role', role);
+      }
     } catch (e) {}
   };
 
