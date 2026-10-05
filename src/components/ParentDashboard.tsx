@@ -48,7 +48,8 @@ import {
   Activity,
   Smartphone,
   Radio,
-  ShieldAlert
+  ShieldAlert,
+  Camera
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
@@ -83,6 +84,8 @@ import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorag
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { INDUSTRY_AAC_PACKS, IndustryAacPack } from '../services/symbolService';
 import { QRCodeView } from './QRCodeView';
+import { CameraQRScannerModal } from './CameraQRScannerModal';
+import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 
 import { 
   getPairingCode, 
@@ -90,7 +93,9 @@ import {
   acknowledgeCaregiverAlert, 
   onCaregiverAlert,
   onChildStatusUpdate,
-  fetchCaregiverSession
+  fetchCaregiverSession,
+  claimPairingSession,
+  extractPairingCodeFromScan
 } from '../services/caregiverSync';
 
 export const ParentDashboard: React.FC = () => {
@@ -267,6 +272,45 @@ export const ParentDashboard: React.FC = () => {
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     showNotification(`Sent response: "${responseMessage}" to child!`);
     playChime('star');
+  };
+
+  // Camera QR Scanner Modal State
+  const [showCameraScanner, setShowCameraScanner] = useState(false);
+  // Connection Feedback State
+  const [feedbackState, setFeedbackState] = useState<ConnectionFeedbackState | null>(null);
+
+  const handleScanCaregiverQR = async (scanned: string) => {
+    const cleanCode = extractPairingCodeFromScan(scanned);
+    if (!cleanCode) return;
+
+    const res = await claimPairingSession({
+      pairingCode: cleanCode,
+      claimerRole: 'caregiver',
+      childName: childProfile.name || 'Leo',
+      caregiverName: 'Caregiver',
+      permissions: caregiverPermissions,
+    });
+
+    if (res.success) {
+      setFeedbackState({
+        isOpen: true,
+        type: 'success',
+        role: 'caregiver',
+        peerName: childProfile.name || 'Child',
+        pairingCode: cleanCode,
+      });
+      speakText(`You are connected to ${childProfile.name || 'your child'}`);
+      showNotification(`🎉 Successfully connected to ${childProfile.name}'s device!`);
+    } else {
+      setFeedbackState({
+        isOpen: true,
+        type: 'failure',
+        role: 'caregiver',
+        peerName: childProfile.name || 'Child',
+        errorMessage: res.message,
+        pairingCode: cleanCode,
+      });
+    }
   };
 
   // Smoothly scroll back to top of page when changing tabs
@@ -967,7 +1011,20 @@ export const ParentDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+                  <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCameraScanner(true);
+                        playChime('tap');
+                      }}
+                      className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+                      title="Open device camera to scan pairing QR code"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Scan Child QR</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -2869,6 +2926,19 @@ export const ParentDashboard: React.FC = () => {
                   </p>
 
                   <div className="flex items-center gap-2 pt-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCameraScanner(true);
+                        playChime('tap');
+                      }}
+                      className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
+                      title="Open device camera to scan pairing QR code"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Scan QR with Camera</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -5354,6 +5424,22 @@ export const ParentDashboard: React.FC = () => {
           upgradeAllAacToClinicalSymbols();
           showNotification('Upgraded all AAC buttons to official Mulberry Symbols!');
         }}
+      />
+
+      {/* In-App Live Camera QR Scanner */}
+      <CameraQRScannerModal
+        isOpen={showCameraScanner}
+        onClose={() => setShowCameraScanner(false)}
+        onScan={handleScanCaregiverQR}
+        title="Scan Child Device QR Code"
+        subtitle="Point camera at the QR code on the child's phone or tablet"
+      />
+
+      {/* Connection Feedback Modal (Success / Failure) */}
+      <ConnectionFeedbackModal
+        state={feedbackState}
+        onClose={() => setFeedbackState(null)}
+        onOpenCamera={() => setShowCameraScanner(true)}
       />
     </div>
   );

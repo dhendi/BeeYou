@@ -486,6 +486,21 @@ function handleIncomingSyncEnvelope(envelope: any): void {
   if (type === 'DEVICE_PAIRED' || type === 'DEVICE_UNLINKED') {
     if (type === 'DEVICE_PAIRED') {
       lastPeerPingTimestamp = Date.now();
+      const session = envelope.session;
+      if (session) {
+        if (session.caregiverName) {
+          lastPeerRole = 'caregiver';
+          lastPeerName = session.caregiverName;
+        } else if (session.childName) {
+          lastPeerRole = 'child_device';
+          lastPeerName = session.childName;
+        }
+      }
+      notifyConnectionStatus();
+    } else if (type === 'DEVICE_UNLINKED') {
+      lastPeerPingTimestamp = 0;
+      lastPeerRole = null;
+      lastPeerName = '';
       notifyConnectionStatus();
     }
     pairingListeners.forEach((fn) => fn(envelope));
@@ -579,6 +594,22 @@ export async function pollPairingSessionStatus(code: string): Promise<TemporaryP
 }
 
 /**
+ * Extracts and sanitizes pairing code from scanned QR string or URL
+ */
+export function extractPairingCodeFromScan(rawScan: string): string {
+  if (!rawScan) return '';
+  const trimmed = rawScan.trim();
+  try {
+    if (trimmed.includes('code=')) {
+      const url = new URL(trimmed.startsWith('http') ? trimmed : `https://beeyou.app/${trimmed.startsWith('?') ? '' : '?'}${trimmed}`);
+      const code = url.searchParams.get('code');
+      if (code) return code.trim().toUpperCase();
+    }
+  } catch {}
+  return trimmed.toUpperCase();
+}
+
+/**
  * Claims and connects a temporary pairing code
  */
 export async function claimPairingSession(params: {
@@ -592,9 +623,37 @@ export async function claimPairingSession(params: {
   caregiverEmail?: string;
   permissions?: CaregiverPermissions;
 }): Promise<{ success: boolean; message: string; session?: TemporaryPairingSession }> {
-  const safeCode = params.pairingCode.trim().toUpperCase();
+  if (!params.pairingCode || !params.pairingCode.trim()) {
+    return { 
+      success: false, 
+      message: 'Pairing code cannot be empty. Please enter or scan a valid code.' 
+    };
+  }
+
+  const cleanCode = extractPairingCodeFromScan(params.pairingCode);
+  const alphanumericOnly = cleanCode.replace(/[^A-Z0-9]/g, '');
+
+  if (alphanumericOnly.length < 3) {
+    return { 
+      success: false, 
+      message: `Invalid pairing code format ("${cleanCode}"). BeeYou pairing codes have 6 characters (e.g. K7P4-92).` 
+    };
+  }
+
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    return {
+      success: false,
+      message: 'Your device is currently offline. Please connect to Wi-Fi or cellular data and try again.'
+    };
+  }
+
+  const safeCode = cleanCode;
   setPairingCode(safeCode);
   subscribeToCloudChannel(safeCode);
+
+  lastPeerPingTimestamp = Date.now();
+  lastPeerRole = params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver';
+  lastPeerName = params.claimerRole === 'caregiver' ? (params.childName || 'Child') : (params.caregiverName || 'Caregiver');
 
   const claimedSession: TemporaryPairingSession = {
     pairingCode: safeCode,
@@ -614,6 +673,8 @@ export async function claimPairingSession(params: {
   try {
     localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(claimedSession));
   } catch {}
+
+  notifyConnectionStatus();
 
   await publishCloudEvent(safeCode, {
     type: 'DEVICE_PAIRED',

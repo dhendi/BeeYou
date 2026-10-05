@@ -20,7 +20,8 @@ import {
   Trash2,
   AlertTriangle,
   RefreshCw,
-  Plus
+  Plus,
+  Camera
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -34,12 +35,15 @@ import {
   unlinkDeviceSession,
   launchNativePhoneCall,
   launchNativeSms,
-  onDevicePairingEvent
+  onDevicePairingEvent,
+  extractPairingCodeFromScan
 } from '../services/caregiverSync';
 import { CaregiverMessage, TemporaryPairingSession, EmergencySupportContact } from '../types';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { QRCodeView } from './QRCodeView';
+import { CameraQRScannerModal } from './CameraQRScannerModal';
+import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 
 interface ConnectCaregiverModalProps {
   isOpen: boolean;
@@ -111,6 +115,11 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
   const [permRoutines, setPermRoutines] = useState(emergencyContact?.permissions?.receiveRoutineUpdates ?? false);
   const [permLocation, setPermLocation] = useState(emergencyContact?.permissions?.receiveLocation ?? true);
 
+  // Camera scanner modal state
+  const [showCameraScanner, setShowCameraScanner] = useState(false);
+  // Connection feedback popup state
+  const [feedbackState, setFeedbackState] = useState<ConnectionFeedbackState | null>(null);
+
   // Initialize or generate session when modal opens
   useEffect(() => {
     if (!isOpen) return;
@@ -149,8 +158,25 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     const unsubPairing = onDevicePairingEvent((evt) => {
       if (evt.type === 'DEVICE_PAIRED') {
         setIsConnected(true);
-        playChime('complete');
-        setSentSuccess('Device linked successfully to caregiver!');
+        const caregiverName = evt.session?.caregiverName || 'Caregiver';
+        const childName = evt.session?.childName || childProfile.name || 'Child';
+        const isCaregiverUser = userRole === 'caregiver';
+
+        setFeedbackState({
+          isOpen: true,
+          type: 'success',
+          role: isCaregiverUser ? 'caregiver' : 'child_device',
+          peerName: isCaregiverUser ? childName : caregiverName,
+          pairingCode: evt.pairingCode,
+        });
+
+        if (isCaregiverUser) {
+          speak(`You are connected to ${childName}`);
+        } else {
+          speak(`${caregiverName} is connected to your device`);
+        }
+
+        setSentSuccess(isCaregiverUser ? `Connected to ${childName}!` : `${caregiverName} is connected to your device!`);
       } else if (evt.type === 'DEVICE_UNLINKED') {
         setIsConnected(false);
         setSentSuccess('Device has been unlinked.');
@@ -194,22 +220,23 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleClaimCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputCode.trim()) return;
+  const handleProcessCodeClaim = async (codeToClaim: string) => {
+    const cleanCode = extractPairingCodeFromScan(codeToClaim);
+    if (!cleanCode) return;
 
     setClaimLoading(true);
     setClaimError(null);
 
-    const cleanCode = inputCode.trim().toUpperCase();
     const isCaregiverUser = userRole === 'caregiver';
+    const targetChildName = inputChildName.trim() || childProfile.name || 'Leo';
+    const targetCaregiverName = inputCaregiverName.trim() || 'Caregiver';
 
     const res = await claimPairingSession({
       pairingCode: cleanCode,
       claimerRole: isCaregiverUser ? 'caregiver' : 'child_device',
-      childName: inputChildName.trim() || childProfile.name,
+      childName: targetChildName,
       ageGroup: userAgeGroup,
-      caregiverName: inputCaregiverName.trim() || 'Caregiver',
+      caregiverName: targetCaregiverName,
       caregiverPhone: inputCaregiverPhone.trim() || undefined,
       permissions: caregiverPermissions,
     });
@@ -220,13 +247,41 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
       setPairingCode(cleanCode);
       setLinkedDeviceCode(cleanCode);
       setIsConnected(true);
-      playChime('complete');
-      setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${inputChildName || 'Child'}'s Tablet` : inputCaregiverName || 'Caregiver'}! 🎉`);
-      speak(`Connected successfully.`);
+      setFeedbackState({
+        isOpen: true,
+        type: 'success',
+        role: isCaregiverUser ? 'caregiver' : 'child_device',
+        peerName: isCaregiverUser ? targetChildName : targetCaregiverName,
+        pairingCode: cleanCode,
+      });
+      if (isCaregiverUser) {
+        speak(`You are connected to ${targetChildName}`);
+      } else {
+        speak(`${targetCaregiverName} is connected to your device`);
+      }
+      setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${targetChildName}'s Tablet` : targetCaregiverName}! 🎉`);
     } else {
-      setClaimError(res.message || 'Could not connect. Please check the code and try again.');
-      playChime('tap');
+      setClaimError(res.message);
+      setFeedbackState({
+        isOpen: true,
+        type: 'failure',
+        role: isCaregiverUser ? 'caregiver' : 'child_device',
+        peerName: isCaregiverUser ? targetChildName : targetCaregiverName,
+        errorMessage: res.message,
+        pairingCode: cleanCode,
+      });
     }
+  };
+
+  const handleClaimCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputCode.trim()) return;
+    await handleProcessCodeClaim(inputCode);
+  };
+
+  const handleCameraScanSuccess = (scanned: string) => {
+    setInputCode(scanned);
+    handleProcessCodeClaim(scanned);
   };
 
   const handleSaveSupportContact = (e: React.FormEvent) => {
@@ -481,70 +536,100 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
 
           {/* TAB 2: FLOW B (CAREGIVER GAVE A PAIRING CODE -> ENTER CODE) */}
           {activeTab === 'enter_code' && (
-            <form onSubmit={handleClaimCode} className="space-y-4 animate-in fade-in">
-              <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs space-y-3.5">
-                <h3 className="text-sm font-bold text-slate-900">
-                  Enter pairing code provided by caregiver:
-                </h3>
-
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                    Pairing Code:
-                  </label>
-                  <input
-                    type="text"
-                    value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                    placeholder="e.g. K7P4-92"
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 font-mono font-bold text-lg text-center tracking-widest focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none uppercase"
-                    required
-                  />
+            <div className="space-y-4 animate-in fade-in">
+              {/* Big Prominent Camera QR Scanner Button */}
+              <button
+                type="button"
+                onClick={() => setShowCameraScanner(true)}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2.5 border-2 border-amber-400"
+              >
+                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-white" />
                 </div>
+                <span>Open Camera to Scan QR Code</span>
+              </button>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                      Caregiver Name:
-                    </label>
-                    <input
-                      type="text"
-                      value={inputCaregiverName}
-                      onChange={(e) => setInputCaregiverName(e.target.value)}
-                      placeholder="e.g. Mom, Dad, Coach"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
-                      Caregiver Phone (Optional):
-                    </label>
-                    <input
-                      type="tel"
-                      value={inputCaregiverPhone}
-                      onChange={(e) => setInputCaregiverPhone(e.target.value)}
-                      placeholder="e.g. 555-0199"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
-                    />
-                  </div>
-                </div>
-
-                {claimError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
-                    <span>{claimError}</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={claimLoading || !inputCode.trim()}
-                  className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {claimLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                  <span>Connect Device</span>
-                </button>
+              <div className="flex items-center gap-3 text-xs text-slate-400 font-bold uppercase tracking-wider">
+                <div className="flex-1 h-px bg-stone-300" />
+                <span>or enter code manually</span>
+                <div className="flex-1 h-px bg-stone-300" />
               </div>
-            </form>
+
+              <form onSubmit={handleClaimCode} className="space-y-4">
+                <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs space-y-3.5">
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Enter pairing code provided by other device:
+                  </h3>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                      Pairing Code:
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        value={inputCode}
+                        onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                        placeholder="e.g. K7P4-92"
+                        className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 font-mono font-bold text-lg text-center tracking-widest focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none uppercase"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCameraScanner(true)}
+                        className="absolute right-2.5 p-2 rounded-xl bg-stone-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 transition cursor-pointer"
+                        title="Scan with Camera"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                        Caregiver Name:
+                      </label>
+                      <input
+                        type="text"
+                        value={inputCaregiverName}
+                        onChange={(e) => setInputCaregiverName(e.target.value)}
+                        placeholder="e.g. Mom, Dad, Coach"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                        Child's Name:
+                      </label>
+                      <input
+                        type="text"
+                        value={inputChildName}
+                        onChange={(e) => setInputChildName(e.target.value)}
+                        placeholder="e.g. Leo"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {claimError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                      <span>{claimError}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={claimLoading || !inputCode.trim()}
+                    className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {claimLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                    <span>Connect Device</span>
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
           {/* TAB 3: INDEPENDENT ADULT (OPTIONAL SUPPORT / EMERGENCY CONTACT) */}
@@ -744,6 +829,25 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
         </div>
 
       </div>
+
+      {/* In-App Live Camera QR Scanner */}
+      <CameraQRScannerModal
+        isOpen={showCameraScanner}
+        onClose={() => setShowCameraScanner(false)}
+        onScan={handleCameraScanSuccess}
+        title="Scan Pairing QR Code"
+        subtitle="Point camera at the QR code displayed on the other device"
+      />
+
+      {/* Connection Feedback Popup (Success / Failure) */}
+      <ConnectionFeedbackModal
+        state={feedbackState}
+        onClose={() => setFeedbackState(null)}
+        onOpenCamera={() => setShowCameraScanner(true)}
+        onRetry={() => {
+          if (inputCode) handleProcessCodeClaim(inputCode);
+        }}
+      />
     </div>
   );
 };

@@ -23,7 +23,8 @@ import { PinModal } from './components/PinModal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
-import { setPairingCode, subscribeToCloudChannel } from './services/caregiverSync';
+import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from './services/caregiverSync';
+import { ConnectionFeedbackModal, ConnectionFeedbackState } from './components/ConnectionFeedbackModal';
 
 // Lazy-loaded secondary components & heavy portals for bundle optimization
 const ParentDashboard = lazy(() => import('./components/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
@@ -74,6 +75,7 @@ const AppContent: React.FC = () => {
     settings,
   } = useApp();
   const [isCaregiverRoute, setIsCaregiverRoute] = useState(false);
+  const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -88,7 +90,25 @@ const AppContent: React.FC = () => {
         subscribeToCloudChannel(cleanCode);
       }
     }
-  }, []);
+
+    const unsubPair = onDevicePairingEvent((evt) => {
+      if (evt.type === 'DEVICE_PAIRED') {
+        const isCaregiverUser = userRole === 'caregiver';
+        const caregiverName = evt.session?.caregiverName || 'Caregiver';
+        const childName = evt.session?.childName || 'Child';
+
+        setGlobalFeedbackState({
+          isOpen: true,
+          type: 'success',
+          role: isCaregiverUser ? 'caregiver' : 'child_device',
+          peerName: isCaregiverUser ? childName : caregiverName,
+          pairingCode: evt.pairingCode,
+        });
+      }
+    });
+
+    return () => unsubPair();
+  }, [userRole]);
 
   // When tab changes, reset scroll smoothly to top so content never feels jumped or cut off
   useEffect(() => {
@@ -273,6 +293,13 @@ const AppContent: React.FC = () => {
 
         {/* Editable Calm Tools & Breathing Pacer Customizer Modal */}
         <EditCalmModal />
+
+        {/* Global Connection Feedback Modal */}
+        <ConnectionFeedbackModal
+          state={globalFeedbackState}
+          onClose={() => setGlobalFeedbackState(null)}
+          onOpenCamera={() => setShowCaregiverModal(true)}
+        />
       </Suspense>
     </div>
   );
