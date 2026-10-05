@@ -49,12 +49,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     setUserAgeGroup,
     setIsParentMode,
     setLinkedDeviceCode,
-    showNotification,
     speak,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register'>(initialTab);
   const [currentAccount, setCurrentAccount] = useState<FamilyAccount | null>(() => getStoredFamilyAccount());
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('demo@beeyou.app');
@@ -76,88 +76,132 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   if (!isOpen) return null;
 
   const applyAccountToContext = (account: FamilyAccount, asRole: 'child' | 'caregiver') => {
-    setLinkedDeviceCode(account.familyCode);
+    try {
+      if (setLinkedDeviceCode) {
+        setLinkedDeviceCode(account.familyCode);
+      }
 
-    if (asRole === 'caregiver') {
-      setIsParentMode(true);
-      if (setUserRole) setUserRole('caregiver');
-      updateChildProfile({
-        name: account.childProfile.name,
-        ageGroup: account.childProfile.ageGroup,
-        userRole: 'caregiver_managing',
-      });
-      showNotification(`Signed into Family Account as ${account.caregiverName} (Caregiver Hub)`);
-      speak(`Logged in as caregiver. Connected to ${account.childProfile.name}.`);
-    } else {
-      setIsParentMode(false);
-      if (setUserRole) setUserRole('child_dependent');
-      if (setUserAgeGroup) setUserAgeGroup(account.childProfile.ageGroup);
-      updateChildProfile({
-        name: account.childProfile.name,
-        ageGroup: account.childProfile.ageGroup,
-        userRole: 'self',
-      });
-      showNotification(`Signed into Family Account as ${account.childProfile.name} (Child Tablet)`);
-      speak(`Welcome back ${account.childProfile.name}. Connected to ${account.caregiverName}.`);
+      if (asRole === 'caregiver') {
+        setIsParentMode(true);
+        if (setUserRole) setUserRole('caregiver');
+        updateChildProfile({
+          name: account.childProfile.name,
+          ageGroup: account.childProfile.ageGroup,
+          userRole: 'caregiver_managing',
+        });
+        setSuccessMessage(`Logged into Family Account as ${account.caregiverName}! Switched to Caregiver Hub.`);
+        try {
+          speak(`Logged in as caregiver. Connected to ${account.childProfile.name}.`);
+        } catch {}
+      } else {
+        setIsParentMode(false);
+        if (setUserRole) setUserRole('child_dependent');
+        if (setUserAgeGroup) setUserAgeGroup(account.childProfile.ageGroup);
+        updateChildProfile({
+          name: account.childProfile.name,
+          ageGroup: account.childProfile.ageGroup,
+          userRole: 'self',
+        });
+        setSuccessMessage(`Logged into Family Account as ${account.childProfile.name}! Switched to Child Tablet.`);
+        try {
+          speak(`Welcome back ${account.childProfile.name}. Connected to ${account.caregiverName}.`);
+        } catch {}
+      }
+
+      try {
+        confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
+      } catch {}
+      try {
+        playChime('complete');
+      } catch {}
+      setCurrentAccount(account);
+
+      setTimeout(() => {
+        onClose();
+      }, 1200);
+    } catch (err) {
+      console.error('Failed to apply account context:', err);
+      onClose();
     }
-
-    confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
-    playChime('complete');
-    setCurrentAccount(account);
-    onClose();
   };
 
   const handleLaunchDemo = async (role: 'child' | 'caregiver') => {
-    setLoginLoading(true);
-    const { account } = await launchDemoMode(role);
-    setLoginLoading(false);
-    applyAccountToContext(account, role);
+    try {
+      setLoginLoading(true);
+      setLoginError(null);
+      const { account } = await launchDemoMode(role);
+      setLoginLoading(false);
+      applyAccountToContext(account, role);
+    } catch (err: any) {
+      setLoginLoading(false);
+      setLoginError(err?.message || 'Could not launch demo mode. Please try again.');
+    }
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginLoading(true);
-    setLoginError(null);
+    try {
+      setLoginLoading(true);
+      setLoginError(null);
 
-    const res = await loginWithSharedEmail(loginEmail, loginPassword);
-    setLoginLoading(false);
+      const res = await loginWithSharedEmail(loginEmail, loginPassword);
+      setLoginLoading(false);
 
-    if (res.success && res.account) {
-      applyAccountToContext(res.account, loginDeviceRole);
-    } else {
-      setLoginError(res.message);
-      playChime('tap');
+      if (res.success && res.account) {
+        applyAccountToContext(res.account, loginDeviceRole);
+      } else {
+        setLoginError(res.message || 'Login failed. Please verify email.');
+        try {
+          playChime('tap');
+        } catch {}
+      }
+    } catch (err: any) {
+      setLoginLoading(false);
+      setLoginError(err?.message || 'Login failed unexpectedly. Please try again.');
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRegLoading(true);
-    setRegError(null);
+    try {
+      setRegLoading(true);
+      setRegError(null);
 
-    const res = await registerSharedFamilyAccount({
-      email: regEmail,
-      caregiverName: regCaregiverName,
-      caregiverRole: regCaregiverRole,
-      childName: regChildName,
-      childAgeGroup: regChildAgeGroup,
-      pin: regPin,
-    });
-    setRegLoading(false);
+      const res = await registerSharedFamilyAccount({
+        email: regEmail,
+        caregiverName: regCaregiverName,
+        caregiverRole: regCaregiverRole,
+        childName: regChildName,
+        childAgeGroup: regChildAgeGroup,
+        pin: regPin,
+      });
+      setRegLoading(false);
 
-    if (res.success && res.account) {
-      applyAccountToContext(res.account, 'caregiver');
-    } else {
-      setRegError(res.message);
-      playChime('tap');
+      if (res.success && res.account) {
+        applyAccountToContext(res.account, 'caregiver');
+      } else {
+        setRegError(res.message || 'Registration failed. Please check fields.');
+        try {
+          playChime('tap');
+        } catch {}
+      }
+    } catch (err: any) {
+      setRegLoading(false);
+      setRegError(err?.message || 'Registration failed unexpectedly. Please try again.');
     }
   };
 
   const handleLogout = () => {
-    logoutFamilyAccount();
-    setCurrentAccount(null);
-    playChime('tap');
-    showNotification('Logged out of Shared Family Account.');
+    try {
+      logoutFamilyAccount();
+      setCurrentAccount(null);
+      setSuccessMessage('Logged out of Shared Family Account.');
+      try {
+        playChime('tap');
+      } catch {}
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   };
 
   return (
@@ -249,7 +293,16 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
         {/* MODAL BODY CONTENT */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
-          
+          {successMessage && (
+            <div className="p-4 rounded-2xl bg-emerald-500 text-white font-bold text-sm flex items-center gap-3 shadow-lg animate-in zoom-in-95">
+              <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-100" />
+              <div className="flex-1">
+                <p className="font-black text-white">{successMessage}</p>
+                <p className="text-xs text-emerald-100 mt-0.5">Connecting and loading your environment...</p>
+              </div>
+            </div>
+          )}
+
           {/* ══════════════════════════════════════════════════════
               TAB 1: 1-CLICK DEMO ACCOUNT (TESTING PLAYGROUND)
           ══════════════════════════════════════════════════════ */}
@@ -449,8 +502,27 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   </div>
                 )}
 
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginEmail('demo@beeyou.app');
+                      setLoginPassword('beeyou2026');
+                    }}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                  >
+                    ⚡ Fill Demo Credentials (demo@beeyou.app)
+                  </button>
+                </div>
+
                 <button
                   type="submit"
+                  onClick={(e) => {
+                    // Ensures click also submits even if inside non-standard form container
+                    if (loginEmail.trim()) {
+                      handleLoginSubmit(e);
+                    }
+                  }}
                   disabled={loginLoading}
                   className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
@@ -559,6 +631,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
                 <button
                   type="submit"
+                  onClick={(e) => {
+                    if (regEmail.trim()) {
+                      handleRegisterSubmit(e);
+                    }
+                  }}
                   disabled={regLoading}
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >

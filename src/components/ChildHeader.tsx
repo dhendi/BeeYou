@@ -142,10 +142,11 @@ export const ChildHeader: React.FC = () => {
             setShowFamilyAuthModal(true);
             playChime('tap');
           }}
-          className="hidden md:flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] cursor-pointer shadow-2xs active:scale-95 transition-all"
+          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] cursor-pointer shadow-2xs active:scale-95 transition-all"
           title="Sign in with Shared Family Email or Test with 1-Click Demo"
         >
-          <span>👨‍👩‍👧 Family Email</span>
+          <span className="hidden sm:inline">👨‍👩‍👧 Family Email</span>
+          <span className="sm:hidden text-xs">👨‍👩‍👧</span>
         </button>
 
         {/* 1. Accessibility Preferences */}
