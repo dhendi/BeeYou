@@ -256,69 +256,66 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                     <h3 className="text-base sm:text-lg font-black text-amber-950 dark:text-amber-200">
                       Welcome to BeeYou
                     </h3>
-                    <p className="text-xs sm:text-sm text-amber-900/90 dark:text-amber-300/90 font-medium mt-1 leading-relaxed">
-                      BeeYou helps you organize your day, follow routines, communicate how you feel, and ask for help when you need it.
+                    <p className="text-xs sm:text-sm text-amber-900/90 dark:text-amber-300/90 font-medium mt-0.5">
+                      BeeYou helps organize your day, follow routines, communicate, and ask for help.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider text-xs">
-                    The Four Core Pillars of BeeYou
+                  <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider">
+                    The 4 Core Pillars
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">☀️</span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">1. Visual Schedules</span>
+                        <span className="text-lg">☀️</span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">1. Visual Schedules</span>
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Follow one activity at a time without feeling overwhelmed by the entire day.
+                        Follow 1 activity at a time without whole-day overwhelm.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">⏱️</span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">2. Visual Timers</span>
+                        <span className="text-lg">⏱️</span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">2. Visual Timers</span>
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Gentle, visual countdowns make transitions predictable and calm.
+                        Gentle disk countdowns make transitions predictable and calm.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">💬</span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">3. AAC & Communication</span>
+                        <span className="text-lg">💬</span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">3. AAC Talker</span>
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Speak with symbols, words, and quick phrases whenever words are hard.
+                        Speak with symbols, words, and phrases 100% offline.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                    <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">🆘</span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">4. Predefined Help Alerts</span>
+                        <span className="text-lg">🆘</span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">4. 1-Tap Help Alerts</span>
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        1-tap alert sends a message to your caregiver, with immediate reassuring response.
+                        Instant message to caregiver with reassuring voice replies.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    Brand Message
-                  </h4>
-                  <p className="text-sm font-black text-amber-900 dark:text-amber-300">
-                    "You can be yourself here."
-                  </p>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                    BeeYou is warm, supportive, and non-judgmental. There is zero pressure or baby talk.
-                  </p>
+                <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-amber-900 dark:text-amber-300">
+                      "You can be yourself here."
+                    </span>
+                    <span className="text-xs text-slate-500">— Safe, warm, and pressure-free.</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -330,29 +327,29 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Get Started in 5 Simple Steps
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Caregivers and teachers can set up BeeYou in less than 2 minutes.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Caregivers and teachers can set up BeeYou in under 2 minutes.
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {[
-                    { step: '1', title: "Create the person's profile", desc: 'Enter their name and choose their age group (Kids, Teens, or Adults).', emoji: '👤' },
-                    { step: '2', title: "Connect their device (Optional)", desc: 'Use a short 6-character code (e.g. K7P4-92) or scan QR to pair an iPad or phone.', emoji: '🔗' },
-                    { step: '3', title: "Start with a Morning Routine", desc: 'Add 3-5 simple activities: Wake up, Brush teeth, Get dressed, Eat breakfast.', emoji: '☀️' },
-                    { step: '4', title: "Add timers where useful", desc: 'Attach a 2-minute timer to brushing teeth or getting shoes on.', emoji: '⏱️' },
-                    { step: '5', title: "Set up help & contact alerts", desc: 'Verify your phone number for 1-tap alerts and test the predefined responses.', emoji: '🆘' },
+                    { step: '1', title: "Create Profile", desc: 'Enter name and pick age group (Kids, Teens, Adults).', emoji: '👤' },
+                    { step: '2', title: "Pair Device (Optional)", desc: 'Scan QR or enter 6-character code (e.g. K7P4-92).', emoji: '🔗' },
+                    { step: '3', title: "Add Morning Routine", desc: 'Add 3–5 steps: Wake up, Brush teeth, Get dressed, Breakfast.', emoji: '☀️' },
+                    { step: '4', title: "Add Visual Timers", desc: 'Attach countdown timers to transition activities.', emoji: '⏱️' },
+                    { step: '5', title: "Test Help Alerts", desc: 'Verify notifications and test 1-tap reassuring replies.', emoji: '🆘' },
                   ].map((item) => (
-                    <div key={item.step} className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-3.5">
-                      <div className="w-8 h-8 rounded-xl bg-amber-400 text-amber-950 font-black text-sm flex items-center justify-center shrink-0">
+                    <div key={item.step} className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-xl bg-amber-400 text-amber-950 font-black text-xs flex items-center justify-center shrink-0">
                         {item.step}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
                           <span>{item.emoji}</span>
                           <span>{item.title}</span>
                         </h4>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium truncate sm:whitespace-normal">
                           {item.desc}
                         </p>
                       </div>
@@ -360,8 +357,8 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   ))}
                 </div>
 
-                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-emerald-950 dark:text-emerald-200 text-xs font-medium">
-                  💡 <strong>Tip:</strong> Once these 5 steps are complete, the user can start using BeeYou right away! You can explore extra features (IEP summaries, soundscapes, themes) whenever you wish.
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-emerald-950 dark:text-emerald-200 text-xs font-medium">
+                  💡 <strong>Ready to go:</strong> Once these 5 steps are set, the app is ready for daily use!
                 </div>
               </div>
             )}
@@ -373,46 +370,46 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Who is BeeYou For?
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    BeeYou is inclusive of anyone who benefits from visual routines, predictable steps, and accessible communication.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Inclusive of anyone who benefits from visual structure and accessible communication.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                    <span className="text-3xl">🧒</span>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-2">Children</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Cozy visuals, friendly bee mascot, star celebrations, and simple First/Then rewards.
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                    <span className="text-2xl">🧒</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">Children</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                      Cozy visuals, friendly bee mascot, and First/Then rewards.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
-                    <span className="text-3xl">🎧</span>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-2">Teens</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Calm and lo-fi styling, focused countdowns, independence habits, and zero baby talk.
+                  <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
+                    <span className="text-2xl">🎧</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">Teens</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                      Calm styling, focus countdowns, and independence habits.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                    <span className="text-3xl">💼</span>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-2">Adults</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Executive function tools, discreet calm modes, self-directed routines, and optional support contacts.
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                    <span className="text-2xl">💼</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">Adults</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                      Executive function tools, discreet calm modes, and self-directed routines.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1.5">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Key Supported Needs
+                    Key Supported Needs:
                   </h4>
-                  <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-4 font-medium">
-                    <li>People who benefit from visual schedules and clear step-by-step instructions.</li>
-                    <li>People who use AAC (Augmentative and Alternative Communication) or find speaking difficult when stressed.</li>
+                  <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4 font-medium">
+                    <li>People who benefit from visual schedules and step-by-step routines.</li>
+                    <li>People who use AAC or find speaking difficult when stressed or tired.</li>
                     <li>People with autism, ADHD, sensory sensitivities, or executive function differences.</li>
-                    <li>People who want an easy, safe way to alert a trusted person when overwhelmed.</li>
+                    <li>People who need an easy 1-tap way to alert a trusted person when overwhelmed.</li>
                   </ul>
                 </div>
               </div>
@@ -423,39 +420,33 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
               <div className="space-y-4 animate-in fade-in">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                    Does BeeYou seem right for the person I support?
+                    Does the person I support need BeeYou?
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Here are practical signs that visual routines and tools may be helpful:
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Helpful checklist to identify if visual routines and tools are a good fit:
                   </p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {[
                     'Benefits from visual schedules rather than spoken instructions alone',
-                    'Has difficulty knowing what happens next or asks "What are we doing next?" frequently',
-                    'Finds transitions between activities or locations stressful or abrupt',
-                    'Benefits from predictable, repeatable morning and bedtime routines',
-                    'Needs gentle visual reminders to complete multi-step tasks',
-                    'Has difficulty communicating verbally when overwhelmed or experiencing sensory overload',
-                    'Loves visual countdown timers to understand how long an activity takes',
-                    'Wants an easy, non-intimidating way to ask a trusted person for help',
+                    'Frequently asks "What are we doing next?"',
+                    'Finds transitions between activities or places abrupt or stressful',
+                    'Benefits from predictable morning and bedtime routines',
+                    'Needs visual step-by-step prompts to finish tasks',
+                    'Struggles to speak verbally when overwhelmed or overstimulated',
+                    'Benefits from visual countdown timers to see time elapse',
+                    'Wants an easy, non-intimidating way to ask for help',
                   ].map((sign, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-200">{sign}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-950 dark:text-amber-200">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider mb-1">
-                    <Info className="w-4 h-4 text-amber-600" />
-                    <span>Supportive Caregiver Note</span>
-                  </div>
-                  <p className="text-xs leading-relaxed font-medium">
-                    BeeYou is a daily support tool created to promote autonomy, calm, and predictable connection. It does not replace professional medical care, therapy, specialized education, or individualized support services.
-                  </p>
+                <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-950 dark:text-amber-200 text-xs font-medium">
+                  ℹ️ <strong>Note:</strong> BeeYou is a daily support tool for autonomy and calm. It does not replace medical or therapy services.
                 </div>
               </div>
             )}
@@ -467,64 +458,57 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     How Visual Schedules Work
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Visual schedules turn a long, confusing day into clear, bite-sized steps.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Turns daily routines into clear, bite-sized visual steps.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-sky-800 dark:text-sky-300 mb-2">
-                    Core Schedule Principle: "One Step at a Time"
+                <div className="p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-sky-800 dark:text-sky-300 mb-1">
+                    "One Step at a Time"
                   </h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                    Instead of worrying about the entire day at once, BeeYou highlights the <strong>NOW</strong> activity and shows what is <strong>NEXT</strong>.
+                  <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                    Highlights the <strong>NOW</strong> activity and clearly shows what comes <strong>NEXT</strong> to avoid overwhelm.
                   </p>
                 </div>
 
-                <div className="space-y-2.5">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    What each activity card includes:
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2.5">
-                      <span className="text-2xl">🪥</span>
-                      <div>
-                        <span className="font-bold text-xs block text-slate-900 dark:text-white">Large Visual Icon</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Instantly recognizable</span>
-                      </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                    <span className="text-xl">🪥</span>
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Visual Icon</span>
+                      <span className="text-[10px] text-slate-500">Fast recognition</span>
                     </div>
+                  </div>
 
-                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2.5">
-                      <span className="text-2xl">⏱️</span>
-                      <div>
-                        <span className="font-bold text-xs block text-slate-900 dark:text-white">Optional Timer</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Shows how long it takes</span>
-                      </div>
+                  <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                    <span className="text-xl">⏱️</span>
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Step Timer</span>
+                      <span className="text-[10px] text-slate-500">Shows remaining time</span>
                     </div>
+                  </div>
 
-                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2.5">
-                      <span className="text-2xl">✅</span>
-                      <div>
-                        <span className="font-bold text-xs block text-slate-900 dark:text-white">Tap to Complete</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Clear satisfying checkmark</span>
-                      </div>
+                  <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                    <span className="text-xl">✅</span>
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Tap Done</span>
+                      <span className="text-[10px] text-slate-500">Satisfying checkmark</span>
                     </div>
+                  </div>
 
-                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2.5">
-                      <span className="text-2xl">➡️</span>
-                      <div>
-                        <span className="font-bold text-xs block text-slate-900 dark:text-white">Clear Next Step</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Always know what is next</span>
-                      </div>
+                  <div className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                    <span className="text-xl">➡️</span>
+                    <div>
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">Next Activity</span>
+                      <span className="text-[10px] text-slate-500">Always predictable</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
-                  <span className="font-bold text-xs text-indigo-900 dark:text-indigo-300 block">First → Then Boards</span>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                    Connect an effort task with a motivating reward: (e.g. <em>First: Brush teeth 🪥 → Then: Tablet time 📱</em>).
-                  </p>
+                <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-xs">
+                  <span className="font-bold text-indigo-950 dark:text-indigo-200 block">First → Then Boards:</span>
+                  <span className="text-slate-600 dark:text-slate-400">Connect a task with a reward (e.g. <em>First: Brush teeth 🪥 → Then: Tablet time 📱</em>).</span>
                 </div>
               </div>
             )}
@@ -534,63 +518,57 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
               <div className="space-y-4 animate-in fade-in">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                    How AAC & Speech Communication Works
+                    How AAC & Speech Works
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    BeeYou provides an intuitive, motor-stable AAC board powered by high-clarity Mulberry symbols and instant offline speech.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Motor-stable symbol board with instant on-device speech that works 100% offline.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-4 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">🗣️</span>
-                      <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">1. Instant Symbol Speech</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl">🗣️</span>
+                      <h4 className="font-bold text-xs text-amber-950 dark:text-amber-200">1. Instant Symbol Speech</h4>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                      Tap any symbol tile to speak immediately or build full sentences on the top speech bar. Tiles stay fixed in consistent motor positions so communicators build reliable muscle memory.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
+                      Tap any tile to speak immediately. Fixed motor positions build reliable muscle memory.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">📝</span>
-                      <h4 className="font-black text-sm text-sky-950 dark:text-sky-200">2. Sentence Strip & Bar</h4>
+                  <div className="p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl">📝</span>
+                      <h4 className="font-bold text-xs text-sky-950 dark:text-sky-200">2. Sentence Strip</h4>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                      As symbols are selected, they line up in sequence in the sentence bar at the top of the AAC screen. Tap the <strong>Speak 🔊</strong> button to read out the complete sentence in natural speech.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
+                      Selected tiles line up in sequence. Tap <strong>Speak 🔊</strong> to read the complete sentence aloud.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">🎨</span>
-                      <h4 className="font-black text-sm text-emerald-950 dark:text-emerald-200">3. Custom Words & Photos</h4>
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl">🎨</span>
+                      <h4 className="font-bold text-xs text-emerald-950 dark:text-emerald-200">3. Custom Photos & Words</h4>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                      Caregivers can add custom words, record custom pronunciation text, and upload personal photos (e.g. family members, school places, favorite foods) using the in-app AAC Word Editor or Caregiver Hub.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
+                      Upload photos of family, pets, snacks, and school items in Caregiver Hub → AAC.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">⌨️</span>
-                      <h4 className="font-black text-sm text-purple-950 dark:text-purple-200">4. Quick Phrases & Keyboard</h4>
+                  <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl">⌨️</span>
+                      <h4 className="font-bold text-xs text-purple-950 dark:text-purple-200">4. Quick Phrases & Keyboard</h4>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                      Switch effortlessly between visual symbol grids, Quick Phrases (for instant emergency & frequent requests), and a large-button AAC Keyboard for emerging writers and literate communicators.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
+                      Instant emergency phrases and large-button keyboard for emerging writers.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📴</span>
-                    <h4 className="font-bold text-xs text-slate-900 dark:text-white">100% Offline & Private</h4>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    All text-to-speech runs natively on the device using device speech synthesis engines without transmitting audio or personal sentences to external servers. It is fully functional on planes, in cars, or with no Wi-Fi.
-                  </p>
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  📴 <strong>100% Offline & Private:</strong> All speech runs on-device. No internet or external servers required.
                 </div>
               </div>
             )}
@@ -602,31 +580,31 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     How Visual Timers Work
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Visual timers provide a gentle, non-pressuring sense of passing time.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Provides a gentle, non-pressuring visual countdown of passing time.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <span className="text-3xl">🥧</span>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-2">Pie Clock Visual</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      The colored pie slice shrinks clockwise as time elapses. Easy to understand without reading numbers.
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <span className="text-2xl">🥧</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">Pie Clock Visual</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
+                      Colored disk shrinks clockwise. Easy to understand without reading numbers.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <span className="text-3xl">🧘</span>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white mt-2">Sensory-Safe Chimes</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Never blares loud sirens. Uses soft star chimes or silent visual flash for sound-sensitive users.
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <span className="text-2xl">🧘</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">Sensory-Safe Chimes</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
+                      Soft star chimes or silent visual flash. Never uses harsh or loud alarms.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-medium text-amber-950 dark:text-amber-200">
-                  ⏱️ <strong>Quick Action:</strong> You can start a timer on any schedule step by tapping the <strong>Start Timer</strong> button on that activity card!
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-medium text-amber-950 dark:text-amber-200">
+                  ⏱️ <strong>Quick Action:</strong> Tap <strong>Start Timer</strong> directly on any routine step card!
                 </div>
               </div>
             )}
@@ -638,53 +616,49 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     How Help Alerts Work
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Simple, reliable communication between the user and their authorized support contact.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Safe 1-tap communication lifeline between dependent and caregiver.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border-2 border-rose-200 dark:border-rose-800 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">🆘</span>
-                    <h4 className="font-black text-sm text-rose-950 dark:text-rose-200">
-                      Step 1: User presses "I Need Help"
-                    </h4>
+                <div className="space-y-2">
+                  <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 flex items-start gap-2.5">
+                    <span className="text-xl shrink-0">🆘</span>
+                    <div>
+                      <h4 className="font-black text-xs text-rose-950 dark:text-rose-200">1. User Taps Alert</h4>
+                      <p className="text-xs text-rose-900 dark:text-rose-300 font-medium mt-0.5">
+                        Selects: <em>Need Help</em>, <em>Overwhelmed</em>, <em>Need a Break</em>, <em>Want to Talk</em>, or <em>I'm Okay</em>.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-rose-900 dark:text-rose-300 font-medium">
-                    The user selects one of 5 predefined alerts (<em>I Need Help</em>, <em>I'm Overwhelmed</em>, <em>I Need a Break</em>, <em>I Want to Talk</em>, <em>I'm Okay</em>).
-                  </p>
-                </div>
 
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-800 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">📱</span>
-                    <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">
-                      Step 2: Caregiver receives alert
-                    </h4>
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-start gap-2.5">
+                    <span className="text-xl shrink-0">📱</span>
+                    <div>
+                      <h4 className="font-black text-xs text-amber-950 dark:text-amber-200">2. Caregiver Notified</h4>
+                      <p className="text-xs text-amber-900 dark:text-amber-300 font-medium mt-0.5">
+                        Instant notification banner appears on caregiver device: <em>"Leo needs help."</em>
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-amber-900 dark:text-amber-300 font-medium">
-                    Caregiver sees the alert on their portal or device: <em>"Alex needs help."</em>
-                  </p>
-                </div>
 
-                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-200 dark:border-emerald-800 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">❤️</span>
-                    <h4 className="font-black text-sm text-emerald-950 dark:text-emerald-200">
-                      Step 3: Caregiver taps a predefined response
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    {['❤️ I\'m here', '🚗 I\'m coming', '👍 Okay', '⏳ Give me a few minutes'].map((resp) => (
-                      <span key={resp} className="px-2.5 py-1.5 bg-white dark:bg-slate-800 rounded-xl border border-emerald-300 text-xs font-bold text-emerald-900 dark:text-emerald-200 text-center">
-                        {resp}
-                      </span>
-                    ))}
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl shrink-0">❤️</span>
+                      <h4 className="font-black text-xs text-emerald-950 dark:text-emerald-200">3. 1-Tap Reassuring Response</h4>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {['❤️ I\'m here', '🚗 Coming', '👍 Okay', '⏳ In a few mins'].map((resp) => (
+                        <span key={resp} className="px-2 py-1 bg-white dark:bg-slate-800 rounded-lg border border-emerald-300 text-[11px] font-bold text-emerald-900 dark:text-emerald-200 text-center">
+                          {resp}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  🔒 <strong>Privacy & Simplicity:</strong> There is NO in-app open texting or chat. If phone or SMS is needed, native 📞 Call and 💬 SMS buttons open the phone's standard apps.
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                  🔒 <strong>Privacy:</strong> No in-app open chat. Native 📞 Call and 💬 SMS buttons open phone apps if needed.
                 </div>
               </div>
             )}
@@ -696,33 +670,33 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Connecting Devices (Two-Way Pairing)
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Connect an iPad, tablet, or phone in either direction in seconds.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Connect an iPad, tablet, or phone in seconds.
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                    <h4 className="font-bold text-xs uppercase tracking-wider text-amber-900 dark:text-amber-200 mb-1">
-                      Flow A: Child / Dependent Device First
+                <div className="space-y-2.5">
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-amber-900 dark:text-amber-200 mb-0.5">
+                      Flow A: Child Device First
                     </h4>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                      Tap <strong>Set up this device</strong> on the child's iPad. It generates a temporary 6-character code (e.g. <code>K7P4-92</code>) or QR code. The parent simply enters this code into their caregiver account.
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                      Tap <strong>Connect Caregiver</strong> on child's tablet for a 6-character code (e.g. <code>K7P4-92</code>) or QR. Enter code into Caregiver Hub.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
-                    <h4 className="font-bold text-xs uppercase tracking-wider text-indigo-900 dark:text-indigo-200 mb-1">
+                  <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-indigo-900 dark:text-indigo-200 mb-0.5">
                       Flow B: Caregiver First
                     </h4>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                      Parent sets up their caregiver dashboard, taps <strong>Add Someone I Support</strong>, and generates a pairing code. The child device enters the code or scans the QR code to link immediately.
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                      In Caregiver Hub, tap <strong>Add Someone I Support</strong>, generate code, and enter it on the child tablet.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  🛡️ <strong>Independent Adults:</strong> Adults do not need a caregiver to use BeeYou. Caregiver linking is 100% optional.
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                  🛡️ <strong>Independent Adults:</strong> Caregiver linking is 100% optional. Adults can use BeeYou independently.
                 </div>
               </div>
             )}
@@ -732,57 +706,57 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
               <div className="space-y-4 animate-in fade-in">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                    Configuring Notification & Alert Settings
+                    Notification & Sound Settings
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                    Customize alerts to respect individual sensory sensitivities.
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Customize alerts to match individual sensory preferences.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-3">
-                    <Eye className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
+                    <Eye className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Visual Alerts</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Clean banners and full-screen color-coded prompts.
+                        Clean banners and color cues.
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-3">
-                    <Volume2 className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
+                    <Volume2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Sound Effects</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Gentle chimes. Can be toggled completely off for silence.
+                        Gentle chimes or complete silence.
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-3">
-                    <Vibrate className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
+                    <Vibrate className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">Vibration Haptics</h4>
+                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">Vibration</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Tactile buzz feedback on supported mobile devices.
+                        Tactile buzz on mobile devices.
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-3">
-                    <Volume2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
+                    <Volume2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">Spoken Voice Alerts</h4>
+                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">Voice Alerts</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Speaks aloud caregiver responses and routine step updates.
+                        Speaks replies & step updates.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-xs text-emerald-900 dark:text-emerald-200 font-medium">
-                  ⚙️ <strong>Where to adjust:</strong> Go to <strong>Accessibility & Sensory Preferences</strong> or <strong>Parent Dashboard &gt; Settings</strong> at any time.
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-xs text-emerald-900 dark:text-emerald-200 font-medium">
+                  ⚙️ <strong>Where to change:</strong> Adjust anytime in <strong>Sensory Preferences</strong> or <strong>Parent Dashboard &gt; Settings</strong>.
                 </div>
               </div>
             )}
