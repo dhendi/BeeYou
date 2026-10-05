@@ -23,6 +23,7 @@ import { PinModal } from './components/PinModal';
 import { CaregiverMessageToast } from './components/CaregiverMessageToast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ThemeWallpaperArt } from './components/ThemeWallpaperArt';
+import { setPairingCode, subscribeToCloudChannel } from './services/caregiverSync';
 
 // Lazy-loaded secondary components & heavy portals for bundle optimization
 const ParentDashboard = lazy(() => import('./components/ParentDashboard').then(m => ({ default: m.ParentDashboard })));
@@ -78,7 +79,14 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      setIsCaregiverRoute(params.get('caregiver') === 'true');
+      const isCaregiver = params.get('caregiver') === 'true';
+      setIsCaregiverRoute(isCaregiver);
+      const codeParam = params.get('code');
+      if (codeParam) {
+        const cleanCode = codeParam.trim().toUpperCase();
+        setPairingCode(cleanCode);
+        subscribeToCloudChannel(cleanCode);
+      }
     }
   }, []);
 

@@ -201,9 +201,12 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setClaimLoading(true);
     setClaimError(null);
 
+    const cleanCode = inputCode.trim().toUpperCase();
+    const isCaregiverUser = userRole === 'caregiver';
+
     const res = await claimPairingSession({
-      pairingCode: inputCode.trim().toUpperCase(),
-      claimerRole: 'child_device',
+      pairingCode: cleanCode,
+      claimerRole: isCaregiverUser ? 'caregiver' : 'child_device',
       childName: inputChildName.trim() || childProfile.name,
       ageGroup: userAgeGroup,
       caregiverName: inputCaregiverName.trim() || 'Caregiver',
@@ -214,12 +217,12 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setClaimLoading(false);
 
     if (res.success) {
-      setPairingCode(inputCode.trim().toUpperCase());
-      setLinkedDeviceCode(inputCode.trim().toUpperCase());
+      setPairingCode(cleanCode);
+      setLinkedDeviceCode(cleanCode);
       setIsConnected(true);
       playChime('complete');
-      setSentSuccess(`Connected to ${inputCaregiverName || 'Caregiver'}! 🎉`);
-      speak(`Connected to caregiver.`);
+      setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${inputChildName || 'Child'}'s Tablet` : inputCaregiverName || 'Caregiver'}! 🎉`);
+      speak(`Connected successfully.`);
     } else {
       setClaimError(res.message || 'Could not connect. Please check the code and try again.');
       playChime('tap');

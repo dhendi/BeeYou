@@ -124,7 +124,7 @@ export function setPairingCode(newCode: string): void {
 }
 
 // -------------------------------------------------------------
-// Real-time Cloud Pub/Sub Relay (ntfy.sh + SSE + BroadcastChannel)
+// Real-time Cloud Pub/Sub Relay (ntfy.sh + SSE + Short Polling Backup)
 // -------------------------------------------------------------
 
 function getTopicForCode(code: string): string {
@@ -133,7 +133,23 @@ function getTopicForCode(code: string): string {
 }
 
 let activeEventSource: EventSource | null = null;
+let activePollingInterval: any = null;
 let currentSubscribedCode: string | null = null;
+
+// Track processed events to prevent duplicate callbacks between SSE and polling
+const seenEventIds = new Set<string>();
+
+function isEventAlreadyProcessed(envelope: any): boolean {
+  if (!envelope) return true;
+  const id = envelope.eventId || `${envelope.type}-${envelope.sentAt}-${envelope.senderDeviceId}`;
+  if (seenEventIds.has(id)) return true;
+  seenEventIds.add(id);
+  if (seenEventIds.size > 300) {
+    const first = seenEventIds.values().next().value;
+    if (first) seenEventIds.delete(first);
+  }
+  return false;
+}
 
 // Track last known pings
 let lastPeerPingTimestamp = 0;
@@ -163,11 +179,11 @@ export function getLiveConnectionStatus(): ConnectionStatusInfo {
   const code = getPairingCode();
   const now = Date.now();
   const diffSec = lastPeerPingTimestamp > 0 ? Math.floor((now - lastPeerPingTimestamp) / 1000) : 9999;
-  const isConnected = lastPeerPingTimestamp > 0 && diffSec <= 35;
+  const isConnected = lastPeerPingTimestamp > 0 && diffSec <= 25;
 
   let statusText = 'Not Connected';
   if (isConnected) {
-    statusText = `Connected (${diffSec < 5 ? 'Live' : `${diffSec}s ago`})`;
+    statusText = `Connected (${diffSec < 4 ? 'Live' : `${diffSec}s ago`})`;
   } else if (lastPeerPingTimestamp > 0) {
     statusText = `Last seen ${diffSec > 60 ? `${Math.floor(diffSec / 60)}m ago` : `${diffSec}s ago`}`;
   }
@@ -187,11 +203,11 @@ function notifyConnectionStatus(): void {
   connectionStatusListeners.forEach((fn) => fn(status));
 }
 
-// Check connection status periodically (every 4s)
+// Check connection status periodically (every 3s)
 if (typeof window !== 'undefined') {
   setInterval(() => {
     notifyConnectionStatus();
-  }, 4000);
+  }, 3000);
 }
 
 /**
@@ -201,15 +217,20 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
   const topic = getTopicForCode(safeCode);
   const myDeviceId = getDeviceId();
+  const eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
   const envelope = {
     ...eventData,
+    eventId,
     senderDeviceId: myDeviceId,
     pairingCode: safeCode,
     sentAt: Date.now(),
   };
 
-  // 1. Local BroadcastChannel for zero-latency multi-tab
+  // Mark as seen locally to prevent self-processing
+  seenEventIds.add(eventId);
+
+  // 1. Local BroadcastChannel for zero-latency multi-tab on same machine
   if (broadcastChannel) {
     try {
       broadcastChannel.postMessage(envelope);
@@ -234,10 +255,10 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
 }
 
 /**
- * Subscribes to the live cloud SSE stream for a pairing code
+ * Subscribes to the live cloud channel (SSE stream + active short-polling fallback)
  */
 export function subscribeToCloudChannel(code: string): void {
-  if (typeof window === 'undefined' || !('EventSource' in window)) return;
+  if (typeof window === 'undefined') return;
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
   if (currentSubscribedCode === safeCode && activeEventSource && activeEventSource.readyState !== EventSource.CLOSED) {
     return;
@@ -250,45 +271,78 @@ export function subscribeToCloudChannel(code: string): void {
     activeEventSource = null;
   }
 
+  if (activePollingInterval) {
+    clearInterval(activePollingInterval);
+    activePollingInterval = null;
+  }
+
   currentSubscribedCode = safeCode;
   const topic = getTopicForCode(safeCode);
 
-  try {
-    const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
-    activeEventSource = es;
+  // 1. Live SSE Stream (0ms instant delivery on desktop & modern browsers)
+  if ('EventSource' in window) {
+    try {
+      const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
+      activeEventSource = es;
 
-    es.onmessage = (event) => {
-      try {
-        const raw = JSON.parse(event.data);
-        // ntfy.sh wraps messages in an object with `message` field
-        let payload = raw;
-        if (raw.message && typeof raw.message === 'string') {
-          try {
-            payload = JSON.parse(raw.message);
-          } catch {
-            payload = raw;
+      es.onmessage = (event) => {
+        try {
+          const raw = JSON.parse(event.data);
+          let payload = raw;
+          if (raw.message && typeof raw.message === 'string') {
+            try {
+              payload = JSON.parse(raw.message);
+            } catch {
+              payload = raw;
+            }
           }
-        }
+          handleIncomingSyncEnvelope(payload);
+        } catch (e) {}
+      };
 
-        handleIncomingSyncEnvelope(payload);
-      } catch (e) {
-        // Non-JSON or keepalive comment
-      }
-    };
-
-    es.onerror = () => {
-      // Automatic browser reconnect will handle retry
-    };
-  } catch (e) {
-    console.warn('Could not establish SSE stream:', e);
+      es.onerror = () => {
+        // SSE reconnect will handle itself; short polling guarantees continuous delivery
+      };
+    } catch (e) {
+      console.warn('Could not establish SSE stream:', e);
+    }
   }
+
+  // 2. Short-Polling Backup (every 2.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
+  const pollCloud = async () => {
+    if (typeof navigator === 'undefined' || !navigator.onLine) return;
+    try {
+      const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=15s`);
+      if (res.ok) {
+        const text = await res.text();
+        const lines = text.split('\n').filter(Boolean);
+        for (const line of lines) {
+          try {
+            const raw = JSON.parse(line);
+            let payload = raw;
+            if (raw.message && typeof raw.message === 'string') {
+              try {
+                payload = JSON.parse(raw.message);
+              } catch {
+                payload = raw;
+              }
+            }
+            handleIncomingSyncEnvelope(payload);
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  };
+
+  pollCloud();
+  activePollingInterval = setInterval(pollCloud, 2500);
 }
 
 // Initialize cloud subscription on startup
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     subscribeToCloudChannel(getPairingCode());
-  }, 1000);
+  }, 500);
 }
 
 // -------------------------------------------------------------
@@ -347,13 +401,18 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     return;
   }
 
+  // Deduplication check
+  if (isEventAlreadyProcessed(envelope)) {
+    return;
+  }
+
   const type = envelope.type;
 
   // 1. Heartbeat & Ping Events
   if (type === 'HEARTBEAT' || type === 'CHILD_HEARTBEAT' || type === 'CAREGIVER_HEARTBEAT') {
     lastPeerPingTimestamp = Date.now();
     lastPeerRole = envelope.role || (type === 'CHILD_HEARTBEAT' ? 'child_device' : 'caregiver');
-    lastPeerName = envelope.name || (lastPeerRole === 'caregiver' ? 'Caregiver Device' : 'Child Device');
+    lastPeerName = envelope.name || (lastPeerRole === 'caregiver' ? 'Caregiver Device' : 'Child Tablet');
     notifyConnectionStatus();
 
     if (envelope.childStatus) {
@@ -369,7 +428,7 @@ function handleIncomingSyncEnvelope(envelope: any): void {
   if (type === 'CHILD_STATUS_UPDATE' && envelope.status) {
     lastPeerPingTimestamp = Date.now();
     lastPeerRole = 'child_device';
-    lastPeerName = envelope.status.childName || 'Child Device';
+    lastPeerName = envelope.status.childName || 'Child Tablet';
     notifyConnectionStatus();
 
     statusListeners.forEach((fn) => fn(envelope.status));
@@ -396,7 +455,7 @@ function handleIncomingSyncEnvelope(envelope: any): void {
   if (type === 'CAREGIVER_ALERT' && envelope.alert) {
     lastPeerPingTimestamp = Date.now();
     lastPeerRole = 'child_device';
-    lastPeerName = envelope.alert.childName || 'Child Device';
+    lastPeerName = envelope.alert.childName || 'Child Tablet';
     notifyConnectionStatus();
 
     alertListeners.forEach((fn) => fn(envelope.alert));
@@ -425,6 +484,10 @@ function handleIncomingSyncEnvelope(envelope: any): void {
 
   // 6. Pairing & Unlink Events
   if (type === 'DEVICE_PAIRED' || type === 'DEVICE_UNLINKED') {
+    if (type === 'DEVICE_PAIRED') {
+      lastPeerPingTimestamp = Date.now();
+      notifyConnectionStatus();
+    }
     pairingListeners.forEach((fn) => fn(envelope));
     return;
   }
@@ -531,6 +594,7 @@ export async function claimPairingSession(params: {
 }): Promise<{ success: boolean; message: string; session?: TemporaryPairingSession }> {
   const safeCode = params.pairingCode.trim().toUpperCase();
   setPairingCode(safeCode);
+  subscribeToCloudChannel(safeCode);
 
   const claimedSession: TemporaryPairingSession = {
     pairingCode: safeCode,
@@ -557,7 +621,7 @@ export async function claimPairingSession(params: {
     session: claimedSession,
   });
 
-  // Also send an immediate heartbeat to confirm connection
+  // Send an immediate heartbeat to confirm connection
   await sendHeartbeat({
     role: params.claimerRole,
     name: params.claimerRole === 'caregiver' ? params.caregiverName || 'Caregiver' : params.childName || 'Child',

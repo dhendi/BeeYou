@@ -24,6 +24,7 @@ import {
   launchNativeSms,
   getPairingCode
 } from '../services/caregiverSync';
+import { playChime } from '../utils/audio';
 import { PredefinedAlertId, PredefinedCaregiverResponseId } from '../types';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -126,7 +127,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
     const unsubAck = onCaregiverAlertAck((ack) => {
       if (settings?.soundAlerts !== false) {
-        try { const { playChime } = require('../utils/audio'); playChime('star'); } catch (e) {}
+        playChime('star');
       }
       if (settings?.vibrationAlerts !== false && typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([100, 50, 100]);
@@ -152,7 +153,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
   const handleSendAlert = async (choice: PredefinedAlertChoice) => {
     if (settings?.soundAlerts !== false) {
-      try { const { playChime } = require('../utils/audio'); playChime('complete'); } catch (e) {}
+      playChime('complete');
     }
     if (settings?.vibrationAlerts !== false && typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(150);
