@@ -18,6 +18,51 @@ const EMERGENCY_CONTACT_KEY = 'beeyou_emergency_support_contact';
 const CAREGIVER_ACCOUNT_KEY = 'beeyou_caregiver_account_data';
 const DEVICE_ID_KEY = 'beeyou_device_id';
 
+const ALERT_HISTORY_KEY = 'beeyou_alert_history';
+
+let sessionTabId = '';
+export function getTabId(): string {
+  if (typeof window === 'undefined') return 'tab-server';
+  if (!sessionTabId) {
+    try {
+      let tid = sessionStorage.getItem('beeyou_tab_id');
+      if (!tid) {
+        tid = 'tab-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+        sessionStorage.setItem('beeyou_tab_id', tid);
+      }
+      sessionTabId = tid;
+    } catch {
+      sessionTabId = 'tab-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+    }
+  }
+  return sessionTabId;
+}
+
+export function getAlertHistory(): CaregiverAlert[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(ALERT_HISTORY_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+export function saveAlertToHistory(alert: CaregiverAlert): void {
+  if (typeof window === 'undefined' || !alert) return;
+  try {
+    const history = getAlertHistory();
+    const updated = [alert, ...history.filter((a) => a.id !== alert.id)].slice(0, 50);
+    localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export function clearAlertHistory(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(ALERT_HISTORY_KEY);
+  } catch {}
+}
+
 // Generate or retrieve unique Device ID for echo suppression
 export function getDeviceId(): string {
   if (typeof window === 'undefined') return 'dev-server';
@@ -99,6 +144,17 @@ export function launchNativeSms(phoneNumber: string, prefillMessage?: string): v
  */
 export function getPairingCode(): string {
   if (typeof window === 'undefined') return 'BEE-101';
+  try {
+    const rawFam = localStorage.getItem('beeyou_family_account');
+    if (rawFam) {
+      const fam = JSON.parse(rawFam);
+      if (fam?.familyCode) {
+        const safeFam = fam.familyCode.toUpperCase();
+        localStorage.setItem(PAIRING_KEY, safeFam);
+        return safeFam;
+      }
+    }
+  } catch {}
   let code = localStorage.getItem(PAIRING_KEY);
   if (!code) {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -119,6 +175,9 @@ export function setPairingCode(newCode: string): void {
   if (typeof window !== 'undefined' && newCode) {
     const safe = newCode.trim().toUpperCase();
     localStorage.setItem(PAIRING_KEY, safe);
+    try {
+      localStorage.setItem('beeyou_device_linked_code', safe);
+    } catch {}
     subscribeToCloudChannel(safe);
   }
 }
@@ -141,7 +200,8 @@ const seenEventIds = new Set<string>();
 
 function isEventAlreadyProcessed(envelope: any): boolean {
   if (!envelope) return true;
-  const id = envelope.eventId || `${envelope.type}-${envelope.sentAt}-${envelope.senderDeviceId}`;
+  const id = envelope.eventId || (envelope.alert?.id ? `alert-${envelope.alert.id}` : null);
+  if (!id) return false;
   if (seenEventIds.has(id)) return true;
   seenEventIds.add(id);
   if (seenEventIds.size > 300) {
@@ -216,17 +276,19 @@ if (typeof window !== 'undefined') {
 export async function publishCloudEvent(code: string, eventData: Record<string, any>): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
   const myDeviceId = getDeviceId();
+  const myTabId = getTabId();
   const eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
   const envelope = {
     ...eventData,
     eventId,
     senderDeviceId: myDeviceId,
+    senderTabId: myTabId,
     pairingCode: safeCode,
     sentAt: Date.now(),
   };
 
-  // Mark as seen locally to prevent self-processing
+  // Mark as seen locally in this tab to prevent self-processing
   seenEventIds.add(eventId);
 
   // 1. Local BroadcastChannel for zero-latency multi-tab on same machine
@@ -402,9 +464,9 @@ export function onChildStatusUpdate(listener: ChildStatusListener): () => void {
 function handleIncomingSyncEnvelope(envelope: any): void {
   if (!envelope || typeof envelope !== 'object') return;
   
-  const myDevId = getDeviceId();
-  // Echo suppression: Ignore if sent by this exact same browser tab/device
-  if (envelope.senderDeviceId && envelope.senderDeviceId === myDevId) {
+  const myTabId = getTabId();
+  // Tab-level echo suppression: Ignore if sent by this exact same browser tab
+  if (envelope.senderTabId && envelope.senderTabId === myTabId) {
     return;
   }
 
@@ -465,6 +527,7 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     lastPeerName = envelope.alert.childName || 'Child Tablet';
     notifyConnectionStatus();
 
+    saveAlertToHistory(envelope.alert);
     alertListeners.forEach((fn) => fn(envelope.alert));
     try {
       localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(envelope.alert));
@@ -483,6 +546,15 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     notifyConnectionStatus();
 
     alertAckListeners.forEach((fn) => fn(envelope.ack));
+    try {
+      const activeRaw = localStorage.getItem(ACTIVE_ALERT_KEY);
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        if (active.id === envelope.ack.alertId || envelope.ack.alertId === active.pairingCode) {
+          localStorage.removeItem(ACTIVE_ALERT_KEY);
+        }
+      }
+    } catch {}
     triggerWebNotification(`Caregiver Response: ${envelope.ack.by || 'Caregiver'}`, {
       body: envelope.ack.responseMessage || "I'm here for you ❤️",
     });
@@ -929,19 +1001,26 @@ export async function sendCaregiverAlert(alertData: {
 
   try {
     localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+    saveAlertToHistory(alert);
   } catch {}
 
   // 1. Send to server alert endpoint
   try {
-    fetch('/api/caregiver/alert', {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    await fetch('/api/caregiver/alert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pairingCode: code,
         ...alertData,
       }),
-    }).catch(() => {});
-  } catch {}
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+  } catch (err) {
+    console.warn('Server alert sync error:', err);
+  }
 
   // 2. Publish to live event stream
   await publishCloudEvent(code, {
@@ -950,6 +1029,21 @@ export async function sendCaregiverAlert(alertData: {
   });
 
   return alert;
+}
+
+/**
+ * Fires a test alert to verify real-time caregiver delivery, sound, and visual indicators
+ */
+export async function sendTestCaregiverAlert(childName = 'Leo'): Promise<CaregiverAlert> {
+  return await sendCaregiverAlert({
+    childName,
+    emotion: 'need_help',
+    alertId: 'need_help',
+    label: 'Test Emergency Alert',
+    emoji: '🚨',
+    location: 'home',
+    note: 'Real-time test alert to verify instant notification, sound, and response controls.',
+  });
 }
 
 /**

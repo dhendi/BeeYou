@@ -100,7 +100,11 @@ import {
   onChildStatusUpdate,
   fetchCaregiverSession,
   claimPairingSession,
-  extractPairingCodeFromScan
+  extractPairingCodeFromScan,
+  getAlertHistory,
+  saveAlertToHistory,
+  clearAlertHistory,
+  sendTestCaregiverAlert
 } from '../services/caregiverSync';
 
 export const ParentDashboard: React.FC = () => {
@@ -212,6 +216,7 @@ export const ParentDashboard: React.FC = () => {
 
   type TabType = 
     | 'home'
+    | 'alerts'
     | 'subscription'
     | 'guide'
     | 'caregiver'
@@ -244,6 +249,7 @@ export const ParentDashboard: React.FC = () => {
     } catch {}
     return [];
   });
+  const [alertHistoryList, setAlertHistoryList] = useState<CaregiverAlert[]>(() => getAlertHistory());
   const [liveChildStatus, setLiveChildStatus] = useState<CaregiverChildStatus | null>(null);
 
   useEffect(() => {
@@ -260,6 +266,7 @@ export const ParentDashboard: React.FC = () => {
               current,
               ...prev.filter((a) => a.id !== current.id),
             ]);
+            setAlertHistoryList(getAlertHistory());
           }
         }
       });
@@ -270,6 +277,7 @@ export const ParentDashboard: React.FC = () => {
 
     const unsubAlert = onCaregiverAlert((alert) => {
       setActiveAlerts((prev) => [alert, ...prev.filter((a) => a.id !== alert.id)]);
+      setAlertHistoryList(getAlertHistory());
       playChime('star');
       showNotification(`🚨 Incoming Alert from ${alert.childName}: ${alert.label}`);
     });
@@ -301,8 +309,37 @@ export const ParentDashboard: React.FC = () => {
   const handleAcknowledgeAlert = async (alertId: string, responseMessage: string, responseId?: PredefinedCaregiverResponseId) => {
     await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    try {
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+    } catch {}
+    setAlertHistoryList(getAlertHistory());
     showNotification(`Sent response: "${responseMessage}" to child!`);
     playChime('star');
+  };
+
+  const handleTriggerTestAlert = async () => {
+    const testAlert = await sendTestCaregiverAlert(childProfile.name || 'Leo');
+    setActiveAlerts((prev) => [testAlert, ...prev.filter((a) => a.id !== testAlert.id)]);
+    setAlertHistoryList(getAlertHistory());
+    playChime('complete');
+    showNotification(`🚨 Test alert triggered successfully for ${childProfile.name}!`);
+  };
+
+  const handleClearAlertHistory = () => {
+    clearAlertHistory();
+    setAlertHistoryList([]);
+    showNotification('Alert history cleared.');
+    playChime('tap');
+  };
+
+  const handleResolveAlert = (alertId: string) => {
+    setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    try {
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+    } catch {}
+    setAlertHistoryList(getAlertHistory());
+    showNotification('Alert marked as resolved and safely archived.');
+    playChime('tap');
   };
 
   // Camera QR Scanner Modal State
@@ -903,6 +940,13 @@ export const ParentDashboard: React.FC = () => {
               badge: connectionStatus.isConnected ? 'Live 🟢' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : 'Home') 
             },
             { 
+              id: 'alerts', 
+              label: 'Live Alerts & SOS Inbox', 
+              emoji: '🚨', 
+              icon: ShieldAlert, 
+              badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : 'Safe 🟢' 
+            },
+            { 
               id: 'subscription', 
               label: 'Membership & Plan', 
               emoji: '👑', 
@@ -1129,69 +1173,129 @@ export const ParentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* 2. REAL-TIME INCOMING ALERTS FEED (IF ANY ACTIVE) */}
-              {activeAlerts.length > 0 && (
-                <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-3 animate-in fade-in">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-rose-900 font-black text-sm">
-                      <span className="flex h-3 w-3 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+              {/* 2. REAL-TIME SAFETY & ALERT CENTER */}
+              <div className="space-y-3">
+                {activeAlerts.length > 0 ? (
+                  <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-3 animate-in fade-in ring-2 ring-rose-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-rose-900 font-black text-sm">
+                        <span className="flex h-3 w-3 relative">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+                        </span>
+                        <ShieldAlert className="w-5 h-5 text-rose-600" />
+                        <span>🚨 Live Emergency Alert from {childProfile.name}</span>
+                      </div>
+                      <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full">
+                        Action Required
                       </span>
-                      <ShieldAlert className="w-5 h-5 text-rose-600" />
-                      <span>Live Help Alert from {childProfile.name}</span>
                     </div>
-                    <span className="text-xs font-bold text-rose-700">Action Required</span>
-                  </div>
 
-                  {activeAlerts.map((alert) => (
-                    <div key={alert.id} className="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl shrink-0 font-bold">
-                            {alert.emoji || '🚨'}
+                    {activeAlerts.map((alert) => (
+                      <div key={alert.id} className="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl shrink-0 font-bold">
+                              {alert.emoji || '🚨'}
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
+                              <p className="text-xs text-slate-500 font-medium">
+                                {alert.note || 'Help requested'} {alert.location ? `• Location: ${alert.location}` : ''}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
-                            <p className="text-xs text-slate-500 font-medium">
-                              {alert.note || 'Child tapped help alert button'} {alert.location ? `• Location: ${alert.location}` : ''}
-                            </p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono font-bold text-slate-400">
+                              {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleResolveAlert(alert.id)}
+                              className="text-[11px] font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 px-2 py-1 rounded-lg transition"
+                              title="Dismiss / Mark Resolved"
+                            >
+                              Resolve ✓
+                            </button>
                           </div>
                         </div>
-                        <span className="text-[11px] font-mono font-bold text-slate-400">
-                          {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
 
-                      {/* Quick 1-tap Caregiver Responses */}
-                      <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
-                        <span className="text-xs font-bold text-slate-500">Quick Reply:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
-                          className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
-                        >
-                          🚗 I'm On My Way
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
-                        >
-                          ❤️ I'm Here For You
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer active:scale-95"
-                        >
-                          ⏳ 5 Minutes
-                        </button>
+                        {/* Quick 1-tap Caregiver Responses */}
+                        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
+                          <span className="text-xs font-bold text-slate-500">Quick Reply:</span>
+                          <button
+                            type="button"
+                            onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
+                            className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
+                          >
+                            🚗 I'm On My Way
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
+                            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs"
+                          >
+                            ❤️ I'm Here For You
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer active:scale-95"
+                          >
+                            ⏳ 5 Minutes
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 sm:p-5 rounded-3xl bg-emerald-50/70 border-2 border-emerald-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
+                        <ShieldCheck className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-black text-emerald-950">
+                            Real-Time Safety &amp; Alert Center: All Clear
+                          </h4>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[10px] font-black uppercase tracking-wider">
+                            Active Listening
+                          </span>
+                        </div>
+                        <p className="text-xs text-emerald-800/80 font-medium mt-0.5">
+                          {connectionStatus.isConnected
+                            ? `Connected to ${childProfile.name}'s device (${getPairingCode()}). Any urgent SOS or sensory alert will appear and sound here instantly.`
+                            : `Listening on code ${getPairingCode()}. Ready to receive instant help calls from ${childProfile.name}.`}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={handleTriggerTestAlert}
+                        className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition"
+                        title="Simulate receiving an alert immediately"
+                      >
+                        <ShieldAlert className="w-4 h-4 text-amber-300" />
+                        <span>Send Test Alert 🚨</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('alerts');
+                          playChime('tap');
+                        }}
+                        className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-100/50 text-emerald-900 border border-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition"
+                      >
+                        <Bell className="w-4 h-4 text-emerald-600" />
+                        <span>Alert Inbox &amp; Log</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* 3. REMOTE ALERT & NUDGE DISPATCHER (CAREGIVER -> CHILD TABLET) */}
               <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-200 shadow-xs space-y-4">
@@ -1281,6 +1385,7 @@ export const ParentDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {[
+                    { tab: 'alerts', title: 'Live Alerts & SOS Inbox', desc: 'Real-time emergency signals & response log', emoji: '🚨', color: 'from-rose-500/10 to-red-500/10 border-rose-300' },
                     { tab: 'routines', title: 'Routines & My Day', desc: 'Visual schedules & First-Then boards', emoji: '✨', color: 'from-sky-500/10 to-indigo-500/10 border-sky-200' },
                     { tab: 'aac', title: 'AAC & Vocabulary', desc: 'Manage core words & speech cards', emoji: '🗣️', color: 'from-amber-500/10 to-orange-500/10 border-amber-200' },
                     { tab: 'plans-changed', title: 'Plans Changed', desc: 'Trigger calm unexpected plan changes', emoji: '🔄', color: 'from-rose-500/10 to-amber-500/10 border-rose-200' },
@@ -1288,7 +1393,6 @@ export const ParentDashboard: React.FC = () => {
                     { tab: 'recollection', title: 'Daily Therapist Summary', desc: 'Export mood & daily progress reports', emoji: '📊', color: 'from-purple-500/10 to-indigo-500/10 border-purple-200' },
                     { tab: 'themes', title: 'Themes & Studio', desc: 'Wallpapers, high contrast & fonts', emoji: '🎨', color: 'from-pink-500/10 to-rose-500/10 border-pink-200' },
                     { tab: 'caregiver', title: 'Device Link & QR', desc: 'Scan QR code & manage pairing', emoji: '📱', color: 'from-indigo-500/10 to-sky-500/10 border-indigo-200' },
-                    { tab: 'subscription', title: 'BeeYou Premium', desc: 'Manage membership & 30-day trial', emoji: '👑', color: 'from-amber-500/10 to-yellow-500/10 border-amber-300' },
                   ].map((item, idx) => (
                     <button
                       key={idx}
@@ -1306,6 +1410,278 @@ export const ParentDashboard: React.FC = () => {
                       </div>
                     </button>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: LIVE ALERTS & SOS INBOX */}
+          {activeTab === 'alerts' && (
+            <div className="space-y-6 animate-in fade-in pb-10">
+              {/* Header */}
+              <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      <ShieldAlert className="w-6 h-6 text-rose-600" />
+                      <span>Live Alerts &amp; SOS Inbox</span>
+                    </h2>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+                      activeAlerts.length > 0 
+                        ? 'bg-rose-500 text-white animate-pulse' 
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {activeAlerts.length > 0 ? `${activeAlerts.length} Active Alert` : '🟢 Safe & Clear'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Receive urgent sensory overload notices, help requests, and instant check-ins from {childProfile.name} in real time.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleTriggerTestAlert}
+                    className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-amber-300" />
+                    <span>Send Test Alert 🚨</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('home');
+                      playChime('tap');
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Home</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Real-Time Connectivity Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg font-bold shrink-0">
+                    📡
+                  </div>
+                  <div>
+                    <span className="font-black text-slate-900 block">
+                      Connection Channel: <span className="font-mono text-indigo-700">{getPairingCode()}</span>
+                    </span>
+                    <span className="text-slate-600 font-medium">
+                      Status: {connectionStatus.isConnected ? `Connected Live (${connectionStatus.peerName || 'Child Device'})` : 'Listening on cloud channel (ready for child alerts)'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-black ${connectionStatus.isConnected ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-900'}`}>
+                    {connectionStatus.isConnected ? '● Connected' : 'Waiting on Child Ping'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 1. Active Alerts Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                    <span>Active Urgent Alerts</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                      activeAlerts.length > 0 ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {activeAlerts.length}
+                    </span>
+                  </h3>
+                </div>
+
+                {activeAlerts.length === 0 ? (
+                  <div className="p-6 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
+                      ✓
+                    </div>
+                    <h4 className="text-sm font-black text-slate-800">No active alerts right now</h4>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      When {childProfile.name} taps the Help or Sensory Overload button on their tablet, it will instantly sound a chime and show up here with 1-tap reply options.
+                    </p>
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={handleTriggerTestAlert}
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
+                      >
+                        <span>Test Alert Simulation 🚨</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activeAlerts.map((alert) => (
+                      <div key={alert.id} className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-3xl shrink-0">
+                              {alert.emoji || '🚨'}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-base font-black text-slate-900">{alert.label}</h4>
+                                <span className="px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 text-[10px] font-black uppercase">
+                                  Urgent
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 font-medium mt-0.5">
+                                Sent by: <strong>{alert.childName}</strong> • {alert.location ? `Location: ${alert.location}` : 'Location unknown'} {alert.note ? `• "${alert.note}"` : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs font-mono font-bold text-slate-400">
+                              {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleResolveAlert(alert.id)}
+                              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black cursor-pointer shadow-2xs"
+                            >
+                              Resolve ✓
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Quick responses */}
+                        <div className="pt-3 border-t border-rose-200/80 space-y-2">
+                          <span className="text-xs font-black text-rose-950 block">
+                            Send Immediate Reassurance to {alert.childName}'s Screen:
+                          </span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
+                              className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
+                            >
+                              <span>🚗 I'm On My Way</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
+                              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
+                            >
+                              <span>❤️ I'm Here For You</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
+                              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
+                            >
+                              <span>⏳ 5 Minutes</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcknowledgeAlert(alert.id, "You are safe. Sit down and take a slow sip of water 💧", 'safe')}
+                              className="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
+                            >
+                              <span>💧 You Are Safe</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Alert History Log Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                      <span>Alert History &amp; Audit Log</span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
+                        {alertHistoryList.length} Total
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      All received alerts are permanently archived here for clinical and caregiver review.
+                    </p>
+                  </div>
+
+                  {alertHistoryList.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearAlertHistory}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer transition"
+                    >
+                      Clear History
+                    </button>
+                  )}
+                </div>
+
+                {alertHistoryList.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center text-xs text-slate-400">
+                    No alert history recorded yet.
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-3xl border-2 border-slate-200 divide-y divide-slate-100 overflow-hidden shadow-xs">
+                    {alertHistoryList.map((item, idx) => (
+                      <div key={item.id || idx} className="p-4 flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{item.emoji || '🚨'}</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-900">{item.label}</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600">
+                                {item.location || 'Device'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-0.5">
+                              {item.childName} • {item.note || 'Help alert'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-mono text-slate-400 text-[11px] block">
+                            {new Date(item.timestamp).toLocaleString([], {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-600">Archived ✓</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Emergency Support Guide & Direct Dial */}
+              <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
+                <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <span>How Real-Time Alerts Work in BeeYou</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
+                    <span className="font-black text-slate-900 block">1. Instant Child Trigger</span>
+                    <p className="text-slate-500">
+                      When child taps "Help", "Need Break", or "Sensory Overload", the alert is pushed via Server-Sent Events with fallback polling.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
+                    <span className="font-black text-slate-900 block">2. Caregiver Sound &amp; Push</span>
+                    <p className="text-slate-500">
+                      Caregiver device plays an audible alert tone, triggers browser notifications, and shows the glowing red response bar.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
+                    <span className="font-black text-slate-900 block">3. Two-Way Spoken Reply</span>
+                    <p className="text-slate-500">
+                      Tapping a quick response immediately speaks the caregiver's message aloud on the child's tablet so they know help is on the way.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
