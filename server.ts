@@ -74,6 +74,47 @@ interface CaregiverSessionData {
 const caregiverSessions = new Map<string, CaregiverSessionData>();
 const pairingSessions = new Map<string, TemporaryPairingSessionData>();
 
+// In-Memory Cloud Sync Event Bus (Multi-device pub/sub & SSE)
+interface CloudSyncEvent {
+  eventId: string;
+  pairingCode: string;
+  type: string;
+  sentAt: number;
+  senderDeviceId?: string;
+  [key: string]: any;
+}
+
+const eventHistoryByCode = new Map<string, CloudSyncEvent[]>();
+const sseClientsByCode = new Map<string, Set<express.Response>>();
+
+function broadcastEvent(code: string, event: CloudSyncEvent): void {
+  const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
+  event.pairingCode = cleanCode;
+  if (!event.sentAt) event.sentAt = Date.now();
+  if (!event.eventId) {
+    event.eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  }
+
+  // Store in rolling event history (last 60 events)
+  const history = eventHistoryByCode.get(cleanCode) || [];
+  history.push(event);
+  if (history.length > 60) history.shift();
+  eventHistoryByCode.set(cleanCode, history);
+
+  // Broadcast to all active SSE subscribers for this family/code
+  const clients = sseClientsByCode.get(cleanCode);
+  if (clients && clients.size > 0) {
+    const dataString = `data: ${JSON.stringify(event)}\n\n`;
+    clients.forEach((res) => {
+      try {
+        res.write(dataString);
+      } catch {
+        clients.delete(res);
+      }
+    });
+  }
+}
+
 // Helper to generate a clean, readable temporary pairing code (e.g., K7P4-92)
 function generatePairingCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -207,6 +248,15 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
   caregiverSessions.set(code, permanentSession);
 
+  // Broadcast DEVICE_PAIRED event across all connected devices
+  broadcastEvent(code, {
+    eventId: `ev-pair-${Date.now()}`,
+    type: 'DEVICE_PAIRED',
+    pairingCode: code,
+    session: permanentSession,
+    sentAt: Date.now(),
+  });
+
   return res.json({ 
     success: true, 
     session,
@@ -232,7 +282,148 @@ app.post('/api/caregiver/device/unlink', (req, res) => {
     pairing.status = 'revoked';
   }
 
+  // Broadcast DEVICE_UNLINKED event
+  broadcastEvent(code, {
+    eventId: `ev-unlink-${Date.now()}`,
+    type: 'DEVICE_UNLINKED',
+    pairingCode: code,
+    sentAt: Date.now(),
+  });
+
   return res.json({ success: true, message: 'Device unlinked successfully.' });
+});
+
+// -------------------------------------------------------------
+// Real-time Event Hub: Publish Event, Live SSE Stream & Polling
+// -------------------------------------------------------------
+
+// Universal Event Publisher (Child <-> Caregiver bidirectional relay)
+app.post('/api/caregiver/event', (req, res) => {
+  const envelope = req.body || {};
+  const pairingCode = (envelope.pairingCode || envelope.code || 'BEE-DEMO').trim().toUpperCase();
+
+  if (!envelope.eventId) {
+    envelope.eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  }
+  if (!envelope.sentAt) {
+    envelope.sentAt = Date.now();
+  }
+  envelope.pairingCode = pairingCode;
+
+  // Auto-sync session state in server memory
+  let session = caregiverSessions.get(pairingCode);
+  if (!session) {
+    session = {
+      pairingCode,
+      childName: envelope.childName || envelope.status?.childName || 'Child',
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 4,
+      routineProgress: null,
+      stars: 10,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    };
+    caregiverSessions.set(pairingCode, session);
+  }
+
+  if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
+    session.activeAlert = envelope.alert;
+    session.quickAlert = `ALERT: ${envelope.alert.label}`;
+    session.lastActiveTime = new Date().toISOString();
+  } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
+    if (session.activeAlert) {
+      session.activeAlert.status = 'acknowledged';
+      session.activeAlert.acknowledgedBy = envelope.ack.by;
+    }
+  } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
+    session.messages.push(envelope.message);
+    if (session.messages.length > 30) session.messages = session.messages.slice(-30);
+  } else if (envelope.type === 'CHILD_STATUS_UPDATE' && envelope.status) {
+    Object.assign(session, envelope.status);
+    session.lastActiveTime = new Date().toISOString();
+  } else if (envelope.type === 'CHILD_HEARTBEAT' || envelope.type === 'HEARTBEAT') {
+    session.lastActiveTime = new Date().toISOString();
+    if (envelope.childStatus) {
+      Object.assign(session, envelope.childStatus);
+    }
+  }
+
+  broadcastEvent(pairingCode, envelope);
+  return res.json({ success: true, eventId: envelope.eventId });
+});
+
+// Live Server-Sent Events (SSE) Stream for real-time 0ms delivery
+app.get('/api/caregiver/events/:code', (req, res) => {
+  const code = (req.params.code || '').trim().toUpperCase();
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+  });
+
+  let clients = sseClientsByCode.get(code);
+  if (!clients) {
+    clients = new Set();
+    sseClientsByCode.set(code, clients);
+  }
+  clients.add(res);
+
+  // Send initial connection ACK
+  res.write(`data: ${JSON.stringify({ type: 'CONNECTED', pairingCode: code, timestamp: Date.now() })}\n\n`);
+
+  // Send current active session state immediately
+  const session = caregiverSessions.get(code);
+  if (session) {
+    res.write(`data: ${JSON.stringify({ type: 'CHILD_STATUS_UPDATE', status: session, sentAt: Date.now() })}\n\n`);
+    if (session.activeAlert && session.activeAlert.status === 'active') {
+      res.write(`data: ${JSON.stringify({ type: 'CAREGIVER_ALERT', alert: session.activeAlert, sentAt: Date.now() })}\n\n`);
+    }
+  }
+
+  // Send recent events from last 45 seconds to catch up
+  const history = eventHistoryByCode.get(code) || [];
+  const now = Date.now();
+  for (const ev of history) {
+    if (now - ev.sentAt < 45000) {
+      res.write(`data: ${JSON.stringify(ev)}\n\n`);
+    }
+  }
+
+  const keepAliveInterval = setInterval(() => {
+    try {
+      res.write(': keepalive\n\n');
+    } catch {
+      clearInterval(keepAliveInterval);
+      clients?.delete(res);
+    }
+  }, 12000);
+
+  req.on('close', () => {
+    clearInterval(keepAliveInterval);
+    clients?.delete(res);
+  });
+});
+
+// Short-polling endpoint for background reliability & environments where SSE drops
+app.get('/api/caregiver/poll/:code', (req, res) => {
+  const code = (req.params.code || '').trim().toUpperCase();
+  const since = Number(req.query.since) || 0;
+  const history = eventHistoryByCode.get(code) || [];
+  const newEvents = history.filter((e) => e.sentAt > since);
+  const session = caregiverSessions.get(code) || null;
+
+  return res.json({
+    success: true,
+    events: newEvents,
+    session,
+    serverTime: Date.now(),
+  });
 });
 
 // -------------------------------------------------------------
@@ -326,6 +517,15 @@ app.post('/api/caregiver/sync', (req, res) => {
   };
 
   caregiverSessions.set(code, updated);
+
+  broadcastEvent(code, {
+    eventId: `ev-sync-${Date.now()}`,
+    type: 'CHILD_STATUS_UPDATE',
+    pairingCode: code,
+    status: updated,
+    sentAt: Date.now(),
+  });
+
   return res.json({ success: true, session: updated });
 });
 
@@ -375,6 +575,14 @@ app.post('/api/caregiver/message', (req, res) => {
   if (session.messages.length > 30) {
     session.messages = session.messages.slice(-30);
   }
+
+  broadcastEvent(code, {
+    eventId: `ev-msg-${Date.now()}`,
+    type: 'CAREGIVER_MESSAGE',
+    pairingCode: code,
+    message: newMessage,
+    sentAt: Date.now(),
+  });
 
   return res.json({ success: true, message: newMessage });
 });
@@ -447,6 +655,14 @@ app.post('/api/caregiver/alert', (req, res) => {
   session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
 
+  broadcastEvent(code, {
+    eventId: `ev-alert-${Date.now()}`,
+    type: 'CAREGIVER_ALERT',
+    pairingCode: code,
+    alert,
+    sentAt: Date.now(),
+  });
+
   return res.json({ success: true, alert });
 });
 
@@ -466,6 +682,14 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   session.activeAlert.responseMessage = responseMessage;
   session.activeAlert.responseId = responseId;
 
+  broadcastEvent(code, {
+    eventId: `ev-ack-${Date.now()}`,
+    type: 'CAREGIVER_ALERT_ACK',
+    pairingCode: code,
+    ack: { alertId: code, responseMessage, responseId, by: acknowledgedBy || 'Caregiver' },
+    sentAt: Date.now(),
+  });
+
   // Push response message to child's message stream
   if (responseMessage) {
     const newMessage: CaregiverMessageItem = {
@@ -478,6 +702,14 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
       responseId,
     };
     session.messages.push(newMessage);
+
+    broadcastEvent(code, {
+      eventId: `ev-msg-${Date.now()}`,
+      type: 'CAREGIVER_MESSAGE',
+      pairingCode: code,
+      message: newMessage,
+      sentAt: Date.now(),
+    });
   }
 
   return res.json({ success: true, alert: session.activeAlert });

@@ -99,6 +99,7 @@ import {
   syncChildStatusToCaregiver, 
   pollCaregiverMessages, 
   onCaregiverMessage, 
+  onCaregiverAlertAck,
   getPairingCode,
   setPairingCode,
   onConnectionStatusChange,
@@ -1144,7 +1145,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   }, [settings.language]);
 
-  // Listen for real-time messages and connection updates from caregiver
+  // Listen for real-time messages, alert acks and connection updates from caregiver
   useEffect(() => {
     const unsubCaregiver = onCaregiverMessage((msg) => {
       setIncomingCaregiverMessage(msg);
@@ -1152,11 +1153,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       speakText(`${msg.senderName} sent you a message: ${msg.text}`);
     });
 
+    const unsubAck = onCaregiverAlertAck((ack) => {
+      if (ack.responseMessage) {
+        setIncomingCaregiverMessage({
+          id: 'ack-' + Date.now(),
+          senderName: ack.by || 'Caregiver',
+          text: ack.responseMessage,
+          timestamp: new Date().toISOString(),
+          read: false,
+        });
+        playChime('star');
+        speakText(`${ack.by || 'Caregiver'} says: ${ack.responseMessage}`);
+      }
+    });
+
     const unsubConnection = onConnectionStatusChange((status) => {
       setConnectionStatus(status);
     });
 
-    // Send initial heartbeat and periodic keepalive (every 10s)
+    // Send initial heartbeat and periodic keepalive (every 5s)
     const code = getPairingCode();
     subscribeToCloudChannel(code);
 
@@ -1175,10 +1190,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     sendPing();
-    const interval = setInterval(sendPing, 10000);
+    const interval = setInterval(sendPing, 5000);
 
     return () => {
       unsubCaregiver();
+      unsubAck();
       unsubConnection();
       clearInterval(interval);
     };

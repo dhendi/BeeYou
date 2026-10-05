@@ -242,7 +242,26 @@ export const ParentDashboard: React.FC = () => {
   const [liveChildStatus, setLiveChildStatus] = useState<CaregiverChildStatus | null>(null);
 
   useEffect(() => {
-    fetchCaregiverSession(getPairingCode()).then(setLiveChildStatus);
+    const code = getPairingCode();
+    subscribeToCloudChannel(code);
+
+    const refreshSession = () => {
+      fetchCaregiverSession(code).then((session) => {
+        if (session) {
+          setLiveChildStatus(session);
+          if (session.activeAlert && session.activeAlert.status === 'active') {
+            setActiveAlerts((prev) => [
+              session.activeAlert,
+              ...prev.filter((a) => a.id !== session.activeAlert.id),
+            ]);
+          }
+        }
+      });
+    };
+
+    refreshSession();
+    const pollInterval = setInterval(refreshSession, 2000);
+
     const unsubAlert = onCaregiverAlert((alert) => {
       setActiveAlerts((prev) => [alert, ...prev.filter((a) => a.id !== alert.id)]);
       playChime('star');
@@ -254,6 +273,7 @@ export const ParentDashboard: React.FC = () => {
     return () => {
       unsubAlert();
       unsubStatus();
+      clearInterval(pollInterval);
     };
   }, []);
 

@@ -211,11 +211,10 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Publishes an event to the cloud relay and local BroadcastChannel
+ * Publishes an event to the server relay and local BroadcastChannel
  */
 export async function publishCloudEvent(code: string, eventData: Record<string, any>): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
-  const topic = getTopicForCode(safeCode);
   const myDeviceId = getDeviceId();
   const eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
@@ -237,38 +236,27 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     } catch (e) {}
   }
 
-  // 2. Cloud Relay (ntfy.sh) for cross-device (Phone <-> Tablet) with strict 3.5s timeout
-  if (typeof navigator !== 'undefined' && navigator.onLine) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+  // 2. Direct Server Event Relay (/api/caregiver/event)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-      // Attempt local backend endpoint if running on full-stack server
-      fetch('/api/caregiver/event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(envelope),
-        signal: controller.signal,
-      }).catch(() => {});
-
-      await fetch(`https://ntfy.sh/${topic}`, {
-        method: 'POST',
-        headers: {
-          'Title': 'BeeYou Sync',
-          'Priority': eventData.type === 'CAREGIVER_ALERT' ? '5' : '3',
-        },
-        body: JSON.stringify(envelope),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-    } catch (e) {
-      console.warn('Cloud publish fallback:', e);
-    }
+    await fetch('/api/caregiver/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(envelope),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+  } catch (e) {
+    console.warn('Direct server event publish error:', e);
   }
 }
 
+let lastPollTimestamp = 0;
+
 /**
- * Subscribes to the live cloud channel (SSE stream + active short-polling fallback)
+ * Subscribes to the live cloud channel (Server SSE stream + active short-polling fallback)
  */
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
@@ -290,79 +278,78 @@ export function subscribeToCloudChannel(code: string): void {
   }
 
   currentSubscribedCode = safeCode;
-  const topic = getTopicForCode(safeCode);
+  lastPollTimestamp = Date.now() - 45000;
 
-  // 1. Live SSE Stream (0ms instant delivery on desktop & modern browsers)
+  // 1. Live SSE Stream from App Server (/api/caregiver/events/:code)
   if ('EventSource' in window) {
     try {
-      const es = new EventSource(`https://ntfy.sh/${topic}/sse`);
+      const sseUrl = `/api/caregiver/events/${encodeURIComponent(safeCode)}`;
+      const es = new EventSource(sseUrl);
       activeEventSource = es;
 
       es.onmessage = (event) => {
         try {
-          const raw = JSON.parse(event.data);
-          let payload = raw;
-          if (raw.message && typeof raw.message === 'string') {
-            try {
-              payload = JSON.parse(raw.message);
-            } catch {
-              payload = raw;
-            }
-          }
+          const payload = JSON.parse(event.data);
           handleIncomingSyncEnvelope(payload);
         } catch (e) {}
       };
 
       es.onerror = () => {
-        // SSE reconnect will handle itself; short polling guarantees continuous delivery
+        // SSE auto-reconnects; short polling guarantees continuous delivery
       };
     } catch (e) {
-      console.warn('Could not establish SSE stream:', e);
+      console.warn('Could not establish SSE stream with server:', e);
     }
   }
 
-  // 2. Short-Polling Backup (every 2.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
-  const pollCloud = async () => {
-    if (typeof navigator === 'undefined' || !navigator.onLine) return;
+  // 2. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
+  const pollServer = async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=15s`, {
+      const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(safeCode)}?since=${lastPollTimestamp}`, {
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
 
       if (res.ok) {
-        const text = await res.text();
-        const lines = text.split('\n').filter(Boolean);
-        for (const line of lines) {
-          try {
-            const raw = JSON.parse(line);
-            let payload = raw;
-            if (raw.message && typeof raw.message === 'string') {
-              try {
-                payload = JSON.parse(raw.message);
-              } catch {
-                payload = raw;
-              }
-            }
-            handleIncomingSyncEnvelope(payload);
-          } catch (e) {}
+        const data = await res.json();
+        if (data.serverTime) {
+          lastPollTimestamp = data.serverTime;
+        } else {
+          lastPollTimestamp = Date.now();
+        }
+
+        if (Array.isArray(data.events)) {
+          for (const ev of data.events) {
+            handleIncomingSyncEnvelope(ev);
+          }
+        }
+
+        // If session returned from poll has active alert, ensure alert delivery
+        if (data.session) {
+          if (data.session.activeAlert && data.session.activeAlert.status === 'active') {
+            handleIncomingSyncEnvelope({
+              type: 'CAREGIVER_ALERT',
+              alert: data.session.activeAlert,
+              pairingCode: safeCode,
+            });
+          }
         }
       }
     } catch (e) {}
   };
 
-  pollCloud();
-  activePollingInterval = setInterval(pollCloud, 2500);
+  pollServer();
+  activePollingInterval = setInterval(pollServer, 1500);
 }
 
 // Initialize cloud subscription on startup
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     subscribeToCloudChannel(getPairingCode());
-  }, 500);
+  }, 300);
 }
 
 // -------------------------------------------------------------
@@ -805,6 +792,16 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
     localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(payload));
   } catch {}
 
+  // 1. Send to server sync endpoint
+  try {
+    fetch('/api/caregiver/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch {}
+
+  // 2. Publish to live event stream
   await publishCloudEvent(code, {
     type: 'CHILD_STATUS_UPDATE',
     status: payload,
@@ -815,8 +812,25 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
  * Caregiver fetches the live child status
  */
 export async function fetchCaregiverSession(code: string): Promise<CaregiverChildStatus | null> {
-  const safeCode = code.trim().toUpperCase();
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
+  // 1. Fetch live from server
+  try {
+    const res = await fetch(`/api/caregiver/session/${encodeURIComponent(safeCode)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.session) {
+        try {
+          localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(data.session));
+        } catch {}
+        return data.session;
+      }
+    }
+  } catch (err) {
+    // Network or server error, fallback below
+  }
+
+  // 2. Fallback to localStorage
   try {
     const raw = localStorage.getItem(LOCAL_SESSION_KEY);
     if (raw) {
@@ -827,18 +841,7 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
     }
   } catch {}
 
-  return {
-    childName: 'Alex',
-    pairingCode: safeCode,
-    lastActiveTime: new Date().toISOString(),
-    currentActivity: 'Using BeeYou',
-    currentMood: 'happy',
-    habitsCompletedToday: 2,
-    totalHabits: 4,
-    routineProgress: null,
-    stars: 12,
-    isOffline: false,
-  };
+  return null;
 }
 
 /**
@@ -862,6 +865,22 @@ export async function sendCaregiverMessage(
     responseId,
   };
 
+  // 1. Send to server message endpoint
+  try {
+    fetch('/api/caregiver/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: safeCode,
+        senderName,
+        text,
+        emoji,
+        responseId,
+      }),
+    }).catch(() => {});
+  } catch {}
+
+  // 2. Publish to live event stream
   await publishCloudEvent(safeCode, {
     type: 'CAREGIVER_MESSAGE',
     message: newMsg,
@@ -874,6 +893,16 @@ export async function sendCaregiverMessage(
  * Child fetches new messages from caregiver
  */
 export async function pollCaregiverMessages(code: string): Promise<CaregiverMessage[]> {
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  try {
+    const res = await fetch(`/api/caregiver/messages/${encodeURIComponent(safeCode)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.messages)) {
+        return data.messages;
+      }
+    }
+  } catch {}
   return [];
 }
 
@@ -902,6 +931,19 @@ export async function sendCaregiverAlert(alertData: {
     localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
   } catch {}
 
+  // 1. Send to server alert endpoint
+  try {
+    fetch('/api/caregiver/alert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: code,
+        ...alertData,
+      }),
+    }).catch(() => {});
+  } catch {}
+
+  // 2. Publish to live event stream
   await publishCloudEvent(code, {
     type: 'CAREGIVER_ALERT',
     alert,
@@ -921,6 +963,21 @@ export async function acknowledgeCaregiverAlert(
 ): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
+  // 1. Send to server acknowledge endpoint
+  try {
+    fetch('/api/caregiver/alert/acknowledge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: safeCode,
+        acknowledgedBy,
+        responseMessage,
+        responseId,
+      }),
+    }).catch(() => {});
+  } catch {}
+
+  // 2. Publish to live event stream
   await publishCloudEvent(safeCode, {
     type: 'CAREGIVER_ALERT_ACK',
     ack: { alertId: safeCode, responseMessage, responseId, by: acknowledgedBy },
