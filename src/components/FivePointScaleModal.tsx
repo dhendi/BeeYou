@@ -3,6 +3,27 @@ import { useApp } from '../context/AppContext';
 import { X, Flame, CheckCircle2, ChevronRight } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
+const getCleanLevelEmoji = (level: number, rawEmoji?: string) => {
+  if (rawEmoji && !rawEmoji.includes('ð') && !rawEmoji.includes('dY') && rawEmoji.length <= 4) {
+    return rawEmoji;
+  }
+  switch (level) {
+    case 1: return '😊';
+    case 2: return '🙂';
+    case 3: return '😐';
+    case 4: return '😟';
+    case 5: return '🌋';
+    default: return '😊';
+  }
+};
+
+const getCleanActionEmoji = (rawEmoji?: string, defaultFallback: string = '⭐') => {
+  if (rawEmoji && !rawEmoji.includes('ð') && !rawEmoji.includes('dY') && rawEmoji.length <= 4) {
+    return rawEmoji;
+  }
+  return defaultFallback;
+};
+
 export const FivePointScaleModal: React.FC = () => {
   const {
     showFivePointModal,
@@ -43,82 +64,93 @@ export const FivePointScaleModal: React.FC = () => {
   const selectedCfg = selectedLevel ? fivePointSettings.levels.find((l) => l.level === selectedLevel) : null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white border-b border-slate-100 z-10">
+      <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 z-10">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Incredible 5-Point Scale</p>
-          <h2 className="text-xl font-black text-slate-800">How do I feel right now?</h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Incredible 5-Point Scale</p>
+          <h2 className="text-xl font-black text-slate-800 dark:text-white">How do I feel right now?</h2>
         </div>
         <button
           onClick={() => setShowFivePointModal(false)}
-          className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-all"
+          className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-all"
         >
-          <X className="w-4 h-4 text-slate-600" />
+          <X className="w-4 h-4 text-slate-600 dark:text-slate-300" />
         </button>
       </div>
 
       <div className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-3">
         {/* Thermometer bar */}
         <div className="flex justify-between gap-1.5 mb-2">
-          {fivePointSettings.levels.map((l) => (
-            <button
-              key={l.level}
-              onClick={() => handleSelect(l.level)}
-              className={`flex-1 h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-3 font-black text-lg ${l.color} ${
-                selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-80 hover:opacity-100'
-              }`}
-            >
-              <span>{l.emoji}</span>
-              <span className={`text-[10px] font-black ${l.textColor}`}>{l.level}</span>
-            </button>
-          ))}
+          {fivePointSettings.levels.map((l) => {
+            const emoji = getCleanLevelEmoji(l.level, l.emoji);
+            return (
+              <button
+                key={l.level}
+                onClick={() => handleSelect(l.level)}
+                className={`flex-1 h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-3 font-black text-lg ${l.color} ${
+                  selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-85 hover:opacity-100'
+                }`}
+              >
+                <span className="text-xl leading-none">{emoji}</span>
+                <span className={`text-[10px] font-black ${l.textColor} mt-0.5`}>{l.level}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Level cards (full) */}
-        {fivePointSettings.levels.map((l) => (
-          <button
-            key={l.level}
-            onClick={() => handleSelect(l.level)}
-            className={`w-full text-left rounded-3xl p-4 border-2 transition-all cursor-pointer ${
-              selectedLevel === l.level
-                ? `${l.color} border-transparent shadow-md`
-                : 'bg-slate-50 border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <span className="text-3xl shrink-0">{l.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${l.color} ${l.textColor}`}>
-                    Level {l.level}
-                  </span>
-                  <span className="font-black text-sm text-slate-800">{l.label}</span>
+        {fivePointSettings.levels.map((l) => {
+          const emoji = getCleanLevelEmoji(l.level, l.emoji);
+          return (
+            <button
+              key={l.level}
+              onClick={() => handleSelect(l.level)}
+              className={`w-full text-left rounded-3xl p-4 border-2 transition-all cursor-pointer ${
+                selectedLevel === l.level
+                  ? `${l.color} border-transparent shadow-md`
+                  : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <div className="flex items-start gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center text-3xl shadow-xs shrink-0">
+                  {emoji}
                 </div>
-                <p className="text-xs text-slate-600 font-medium mt-1 leading-snug">{l.bodyFeelings}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${l.color} ${l.textColor}`}>
+                      Level {l.level}
+                    </span>
+                    <span className="font-black text-sm text-slate-800 dark:text-white">{l.label}</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-snug">{l.bodyFeelings}</p>
+                </div>
+                {selectedLevel === l.level && <CheckCircle2 className="w-5 h-5 text-white shrink-0 mt-0.5" />}
               </div>
-              {selectedLevel === l.level && <CheckCircle2 className="w-5 h-5 text-white shrink-0 mt-0.5" />}
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
 
         {/* Coping actions for selected level */}
         {selectedCfg && (
-          <div className="rounded-3xl bg-slate-900 p-5 space-y-3">
+          <div className="rounded-3xl bg-slate-900 p-5 space-y-3 animate-in fade-in">
             <p className="text-xs font-black uppercase tracking-widest text-slate-400">
               Helpful right now at Level {selectedCfg.level}:
             </p>
-            {selectedCfg.actions.map((action, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleAction(action, selectedCfg.level)}
-                className="w-full text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98"
-              >
-                <span className="text-2xl">{action.emoji}</span>
-                <span className="font-bold text-white text-sm flex-1">{action.label}</span>
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-              </button>
-            ))}
+            {selectedCfg.actions.map((action, idx) => {
+              const actEmoji = getCleanActionEmoji(action.emoji, idx === 0 ? '⭐' : '💡');
+              return (
+                <button
+                  key={idx}
+                  onClick={() => handleAction(action, selectedCfg.level)}
+                  className="w-full text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98"
+                >
+                  <span className="text-2xl">{actEmoji}</span>
+                  <span className="font-bold text-white text-sm flex-1">{action.label}</span>
+                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

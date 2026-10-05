@@ -97,7 +97,8 @@ import {
   syncChildStatusToCaregiver, 
   pollCaregiverMessages, 
   onCaregiverMessage, 
-  getPairingCode 
+  getPairingCode,
+  setPairingCode
 } from '../services/caregiverSync';
 import { resolveAacImageUrl } from '../services/symbolService';
 
@@ -626,7 +627,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         routineId: 'routine-morning',
         routineTitle: 'Morning Routine',
         stickerName: 'Morning Superstar',
-        emoji: 'ðŸŒ…',
+        emoji: '🌅',
         description: 'Woke up, stretched, brushed teeth, and got ready to shine!',
         earnedAt: 'Today',
         starsAwarded: 3,
@@ -1342,7 +1343,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const newQP: QuickPhrase = {
       id: `qp-custom-${Date.now()}`,
       text: phraseText,
-      emoji: sentence[0]?.emoji || 'ðŸ’¬',
+      emoji: sentence[0]?.emoji || '💬',
       isCustom: true,
     };
     setQuickPhrases((prev) => [newQP, ...prev]);
@@ -1379,7 +1380,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         id: item.id || `aac-${Date.now()}`,
         label: item.label,
         speechText: item.speechText || item.label,
-        emoji: item.emoji || 'âœ¨',
+        emoji: item.emoji || '✨',
         photoUrl: item.photoUrl,
         symbolId: item.symbolId,
         symbolSource: item.symbolSource || 'mulberry',
@@ -1420,7 +1421,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             id: `aac-pack-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             label: item.label,
             speechText: item.speechText || item.label,
-            emoji: item.emoji || 'âœ¨',
+            emoji: item.emoji || '✨',
             photoUrl: item.photoUrl,
             category: item.category,
             colorType: item.colorType,
@@ -2207,36 +2208,60 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // FEATURE 2: Incredible 5-Point Scale
   const DEFAULT_FIVE_POINT_LEVELS: FivePointLevelConfig[] = [
     {
-      level: 1, label: 'Calm & Happy', emoji: 'ðŸ˜Š', color: 'bg-green-400', textColor: 'text-green-900',
+      level: 1, label: 'Calm & Happy', emoji: '😊', color: 'bg-green-400', textColor: 'text-green-900',
       bodyFeelings: 'Body feels relaxed. Breathing is slow and easy. Muscles are loose.',
-      actions: [{ label: 'Keep going!', emoji: 'â­' }, { label: 'Share something nice', emoji: 'ðŸ’¬' }],
+      actions: [{ label: 'Keep going!', emoji: '⭐' }, { label: 'Share something nice', emoji: '💬' }],
     },
     {
-      level: 2, label: 'Okay / A Little Wiggly', emoji: 'ðŸ™‚', color: 'bg-lime-400', textColor: 'text-lime-900',
+      level: 2, label: 'Okay / A Little Wiggly', emoji: '🙂', color: 'bg-lime-400', textColor: 'text-lime-900',
       bodyFeelings: 'A tiny bit excited or distracted. Body is mostly comfortable.',
-      actions: [{ label: 'Take 2 deep breaths', emoji: 'ðŸŒ¬ï¸' }, { label: 'Wiggle your fingers', emoji: 'ðŸ–ï¸' }],
+      actions: [{ label: 'Take 2 deep breaths', emoji: '🌬️' }, { label: 'Wiggle your fingers', emoji: '🖐️' }],
     },
     {
-      level: 3, label: 'Medium / Uneasy', emoji: 'ðŸ˜', color: 'bg-yellow-400', textColor: 'text-yellow-900',
+      level: 3, label: 'Medium / Uneasy', emoji: '😐', color: 'bg-yellow-400', textColor: 'text-yellow-900',
       bodyFeelings: 'Heart might beat faster. Feeling tense, anxious, or frustrated.',
-      actions: [{ label: 'Try box breathing', emoji: 'ðŸ“¦' }, { label: 'Squeeze a fidget', emoji: 'ðŸ«™' }],
+      actions: [{ label: 'Try box breathing', emoji: '📦' }, { label: 'Squeeze a fidget', emoji: '🧸' }],
     },
     {
-      level: 4, label: 'Very Upset', emoji: 'ðŸ˜Ÿ', color: 'bg-orange-400', textColor: 'text-orange-900',
+      level: 4, label: 'Very Upset', emoji: '😟', color: 'bg-orange-400', textColor: 'text-orange-900',
       bodyFeelings: 'Lots of tension. Might want to yell or run away. Hard to think clearly.',
-      actions: [{ label: 'Go to quiet space', emoji: 'ðŸ¤«' }, { label: 'Use Coping Toolkit', emoji: 'ðŸŽ§' }],
+      actions: [{ label: 'Go to quiet space', emoji: '🤫' }, { label: 'Use Coping Toolkit', emoji: '🎧' }],
     },
     {
-      level: 5, label: 'Completely Overwhelmed', emoji: 'ðŸŒŠ', color: 'bg-red-500', textColor: 'text-red-100',
+      level: 5, label: 'Completely Overwhelmed', emoji: '🌋', color: 'bg-red-500', textColor: 'text-red-100',
       bodyFeelings: 'Out of control. Very hard to listen or stop. Body may feel like it\'s going to explode.',
-      actions: [{ label: 'Press Emergency Button', emoji: 'ðŸš¨' }, { label: 'Ask for help now', emoji: 'ðŸ†˜' }],
+      actions: [{ label: 'Press Emergency Button', emoji: '🚨' }, { label: 'Ask for help now', emoji: '🆘' }],
     },
   ];
 
   const [fivePointSettings, setFivePointSettings] = useState<FivePointScaleSettings>(() => {
     try {
       const saved = localStorage.getItem('beeyou_five_point');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.levels)) {
+          // Sanitize corrupted emojis if present from older browser storage
+          parsed.levels = parsed.levels.map((l: FivePointLevelConfig, idx: number) => {
+            const def = DEFAULT_FIVE_POINT_LEVELS[idx] || DEFAULT_FIVE_POINT_LEVELS[0];
+            const isCorrupted = !l.emoji || l.emoji.includes('\u00f0') || l.emoji.includes('dY') || l.emoji.includes('');
+            const cleanEmoji = isCorrupted ? def.emoji : l.emoji;
+            const cleanActions = (l.actions || def.actions).map((act, aIdx) => {
+              const defAct = def.actions[aIdx] || { label: act.label, emoji: '⭐' };
+              const actCorrupted = !act.emoji || act.emoji.includes('\u00f0') || act.emoji.includes('dY') || act.emoji.includes('');
+              return {
+                label: act.label || defAct.label,
+                emoji: actCorrupted ? defAct.emoji : act.emoji,
+              };
+            });
+            return {
+              ...l,
+              emoji: cleanEmoji,
+              actions: cleanActions,
+            };
+          });
+          return parsed;
+        }
+      }
     } catch (e) {}
     return { levels: DEFAULT_FIVE_POINT_LEVELS, showOnChildHome: true };
   });
@@ -2259,18 +2284,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // FEATURE 3: Decision Wheel
   const DEFAULT_WHEEL_OPTIONS: DecisionWheelOption[] = [
-    { id: 'opt-1', label: 'Watch a Movie', emoji: 'ðŸŽ¬', color: '#818cf8' },
-    { id: 'opt-2', label: 'Play Outside', emoji: 'âš½', color: '#34d399' },
-    { id: 'opt-3', label: 'Draw or Paint', emoji: 'ðŸŽ¨', color: '#fb923c' },
-    { id: 'opt-4', label: 'Read a Book', emoji: 'ðŸ“š', color: '#60a5fa' },
-    { id: 'opt-5', label: 'Build with Legos', emoji: 'ðŸ§±', color: '#f87171' },
-    { id: 'opt-6', label: 'Listen to Music', emoji: 'ðŸŽµ', color: '#a78bfa' },
+    { id: 'opt-1', label: 'Watch a Movie', emoji: '🎬', color: '#818cf8' },
+    { id: 'opt-2', label: 'Play Outside', emoji: '⚽', color: '#34d399' },
+    { id: 'opt-3', label: 'Draw or Paint', emoji: '🎨', color: '#fb923c' },
+    { id: 'opt-4', label: 'Read a Book', emoji: '📚', color: '#60a5fa' },
+    { id: 'opt-5', label: 'Build with Legos', emoji: '🧱', color: '#f87171' },
+    { id: 'opt-6', label: 'Listen to Music', emoji: '🎵', color: '#a78bfa' },
   ];
 
   const [decisionWheelConfig, setDecisionWheelConfig] = useState<DecisionWheelConfig>(() => {
     try {
       const saved = localStorage.getItem('beeyou_decision_wheel');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.options)) {
+          parsed.options = parsed.options.map((opt: DecisionWheelOption, idx: number) => {
+            const def = DEFAULT_WHEEL_OPTIONS[idx] || DEFAULT_WHEEL_OPTIONS[0];
+            const isCorrupted = !opt.emoji || opt.emoji.includes('\u00f0') || opt.emoji.includes('dY') || opt.emoji.includes('');
+            return {
+              ...opt,
+              emoji: isCorrupted ? def.emoji : opt.emoji,
+            };
+          });
+          return parsed;
+        }
+      }
     } catch (e) {}
     return { options: DEFAULT_WHEEL_OPTIONS };
   });
@@ -2336,7 +2374,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return spoonEntries.find((e) => e.date === todayStr) || null;
   };
 
-  // FEATURE 6: Visual Pie Clock (no persistent state â€” purely local in modal)
+  // FEATURE 6: Visual Pie Clock (no persistent state)
   const [showPieTimerModal, setShowPieTimerModal] = useState<boolean>(false);
 
   // FEATURE 7: Digital Fidget Toys (no persistent state)
@@ -2352,12 +2390,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Accessibility & Sensory Preferences Hub
   const [showAccessibilityModal, setShowAccessibilityModal] = useState<boolean>(false);
 
-  // â”€â”€ Customizable Dashboard Widgets (Clean & Minimalist by Default) â”€â”€
+  // Customizable Dashboard Widgets (Clean & Minimalist by Default)
   const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
     {
       id: 'routine_schedule',
       title: 'Visual Schedule & Routine',
-      emoji: 'ðŸ“…',
+      emoji: '📅',
       description: 'Step-by-step routine progress, timers, and sticker unlocks',
       category: 'core',
       enabled: true,
@@ -2365,7 +2403,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'quick_aac',
       title: 'Quick Communication Phrases',
-      emoji: 'ðŸ’¬',
+      emoji: '💬',
       description: 'Instant speech tiles for fast, motor-friendly expression',
       category: 'core',
       enabled: true,
@@ -2373,7 +2411,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'mascot_companion',
       title: 'Themed Companion & Motivation',
-      emoji: 'ðŸ¦',
+      emoji: '🐝',
       description: 'Daily greeting, mascot companion, and star motivation',
       category: 'core',
       enabled: false,
@@ -2381,7 +2419,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'five_point_scale',
       title: 'Incredible 5-Point Scale',
-      emoji: 'ðŸŒ¡ï¸',
+      emoji: '🌡️',
       description: 'Visual regulation thermometer with coping actions',
       category: 'sensory',
       enabled: false,
@@ -2389,7 +2427,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'spoon_budget',
       title: 'Spoon Theory Energy Budget',
-      emoji: 'ðŸ¥„',
+      emoji: '🥄',
       description: 'Morning energy check-in and stamina cost tracker',
       category: 'wellness',
       enabled: false,
@@ -2397,7 +2435,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'pie_timer',
       title: 'Visual Pie Clock',
-      emoji: 'â°',
+      emoji: '⏱️',
       description: 'Time Timer visual countdown disk with color warnings',
       category: 'sensory',
       enabled: false,
@@ -2405,7 +2443,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'decision_wheel',
       title: 'Decision Wheel Spinner',
-      emoji: 'ðŸŽ¡',
+      emoji: '🎡',
       description: 'Break choice paralysis with an animated spin wheel',
       category: 'sensory',
       enabled: false,
@@ -2413,7 +2451,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'fidget_toys',
       title: 'Digital Fidget Corner',
-      emoji: 'ðŸ«§',
+      emoji: '🧸',
       description: 'Bubble pop with haptics, sand ripples, and marble roll',
       category: 'sensory',
       enabled: false,
@@ -2421,7 +2459,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'medication_tracker',
       title: 'Medication Reminders',
-      emoji: 'ðŸ’Š',
+      emoji: '💊',
       description: 'Upcoming scheduled doses, supply tracking, and logged doses',
       category: 'wellness',
       enabled: false,
@@ -2429,7 +2467,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'mood_journal',
       title: 'Mood Reflection Journal',
-      emoji: 'ðŸ“–',
+      emoji: '📖',
       description: 'Deep feelings, sensory overload triggers, and body logs',
       category: 'wellness',
       enabled: false,
@@ -2437,7 +2475,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'cycle_tracker',
       title: 'Cycle & Sensory Rhythm',
-      emoji: 'ðŸŒ¸',
+      emoji: '🌸',
       description: 'Hormonal wellness, sensory sensitivity, and period predictor',
       category: 'wellness',
       enabled: false,
@@ -2445,7 +2483,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'communication_passport',
       title: 'Communication Support Passport',
-      emoji: 'ðŸªª',
+      emoji: '📋',
       description: '1-page printable summary for teachers, doctors & dentists',
       category: 'support',
       enabled: false,
@@ -2453,7 +2491,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'adventure_spotlight',
       title: "Today's Adventure Spotlight",
-      emoji: 'ðŸš€',
+      emoji: '🚀',
       description: 'Social story and life skills preparation walkthrough',
       category: 'core',
       enabled: false,
@@ -2461,7 +2499,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'evening_reflection',
       title: 'Evening Mood Recollection',
-      emoji: 'ðŸŒ™',
+      emoji: '🌙',
       description: 'End-of-day recollection chart and mood tracker',
       category: 'wellness',
       enabled: false,

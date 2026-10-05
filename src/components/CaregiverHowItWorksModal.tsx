@@ -20,7 +20,8 @@ import {
   VolumeX,
   Vibrate,
   Eye,
-  Info
+  Info,
+  MessageSquare
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
@@ -31,6 +32,7 @@ export type HelpTopic =
   | 'who_is_it_for'
   | 'does_my_child_need'
   | 'quick_start'
+  | 'aac_guide'
   | 'schedules'
   | 'timers'
   | 'alerts'
@@ -100,6 +102,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
     { id: 'quick_start', title: '5-Step Quick Start Guide', icon: UserCheck, badge: 'Caregiver' },
     { id: 'who_is_it_for', title: 'Who is BeeYou for?', icon: Heart },
     { id: 'does_my_child_need', title: 'Does the person I support need BeeYou?', icon: HelpCircle },
+    { id: 'aac_guide', title: 'How to use AAC & Communication', icon: MessageSquare, badge: 'AAC' },
     { id: 'schedules', title: 'How do Schedules work?', icon: Calendar },
     { id: 'timers', title: 'How do Timers work?', icon: Timer },
     { id: 'alerts', title: 'How do Help Alerts work?', icon: ShieldAlert },
@@ -508,6 +511,72 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   <span className="font-bold text-xs text-indigo-900 dark:text-indigo-300 block">First → Then Boards</span>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                     Connect an effort task with a motivating reward: (e.g. <em>First: Brush teeth 🪥 → Then: Tablet time 📱</em>).
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* TOPIC: HOW TO USE AAC & SPEECH COMMUNICATION */}
+            {activeTopic === 'aac_guide' && (
+              <div className="space-y-4 animate-in fade-in">
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    How AAC & Speech Communication Works
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                    BeeYou provides an intuitive, motor-stable AAC board powered by high-clarity Mulberry symbols and instant offline speech.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-4 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🗣️</span>
+                      <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">1. Instant Symbol Speech</h4>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                      Tap any symbol tile to speak immediately or build full sentences on the top speech bar. Tiles stay fixed in consistent motor positions so communicators build reliable muscle memory.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-3xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">📝</span>
+                      <h4 className="font-black text-sm text-sky-950 dark:text-sky-200">2. Sentence Strip & Bar</h4>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                      As symbols are selected, they line up in sequence in the sentence bar at the top of the AAC screen. Tap the <strong>Speak 🔊</strong> button to read out the complete sentence in natural speech.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🎨</span>
+                      <h4 className="font-black text-sm text-emerald-950 dark:text-emerald-200">3. Custom Words & Photos</h4>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                      Caregivers can add custom words, record custom pronunciation text, and upload personal photos (e.g. family members, school places, favorite foods) using the in-app AAC Word Editor or Caregiver Hub.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-3xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">⌨️</span>
+                      <h4 className="font-black text-sm text-purple-950 dark:text-purple-200">4. Quick Phrases & Keyboard</h4>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                      Switch effortlessly between visual symbol grids, Quick Phrases (for instant emergency & frequent requests), and a large-button AAC Keyboard for emerging writers and literate communicators.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📴</span>
+                    <h4 className="font-bold text-xs text-slate-900 dark:text-white">100% Offline & Private</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    All text-to-speech runs natively on the device using device speech synthesis engines without transmitting audio or personal sentences to external servers. It is fully functional on planes, in cars, or with no Wi-Fi.
                   </p>
                 </div>
               </div>

@@ -41,7 +41,8 @@ import {
   Search,
   Upload,
   FileJson,
-  HelpCircle
+  HelpCircle,
+  ArrowRight
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -141,6 +142,7 @@ export const ParentDashboard: React.FC = () => {
     importProfileBackup,
     setShowEditAlertsModal,
     setShowEditCalmModal,
+    getTrialDaysRemaining,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
