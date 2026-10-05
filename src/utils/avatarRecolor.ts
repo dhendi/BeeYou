@@ -37,7 +37,7 @@ export function isDefaultPalette(skinHex?: string, _hairHex?: string): boolean {
   return skinHex.toLowerCase() === '#fed7aa';
 }
 
-/** Baseline luminance of default peach skin across Lumina sprites */
+/** Baseline luminance of default peach skin across BeeYou sprites */
 const BASE_SKIN_LUM = 206.6; // 0.299 * 253 + 0.587 * 194 + 0.114 * 150
 
 /**

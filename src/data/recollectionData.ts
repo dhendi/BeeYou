@@ -393,7 +393,7 @@ export function generateTherapistSummaryText(
 
   const lines: string[] = [
     `==================================================`,
-    `📋 LUMINA DAILY MOOD & BEHAVIOR SUMMARY FOR THERAPY`,
+    `📋 BEEYOU DAILY MOOD & BEHAVIOR SUMMARY FOR THERAPY`,
     `Child: ${childName} | Date Generated: ${new Date().toLocaleDateString()}`,
     `Days Logged: ${totalDays} | Positive Days: ${positiveRatio}% (${greatOrGoodCount}/${totalDays})`,
     `Difficult Days: ${difficultCount}/${totalDays}`,
@@ -437,6 +437,6 @@ export function generateTherapistSummaryText(
   });
 
   lines.push(`\n==================================================`);
-  lines.push(`Report generated via Lumina Neurodivergent Companion App.`);
+  lines.push(`Report generated via BeeYou Neurodivergent Companion App.`);
   return lines.join('\n');
 }

@@ -156,7 +156,7 @@ export const AACView: React.FC = () => {
 
   const [maskedItemIds, setMaskedItemIds] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_aac_masked_ids');
+      const saved = localStorage.getItem('beeyou_aac_masked_ids');
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
@@ -169,7 +169,7 @@ export const AACView: React.FC = () => {
     setMaskedItemIds((prev) => {
       const updated = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       try {
-        localStorage.setItem('lumina_aac_masked_ids', JSON.stringify(updated));
+        localStorage.setItem('beeyou_aac_masked_ids', JSON.stringify(updated));
       } catch (e) {}
       return updated;
     });

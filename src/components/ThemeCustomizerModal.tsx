@@ -32,7 +32,7 @@ export const ThemeCustomizerModal: React.FC = () => {
             </span>
             <div>
               <h2 id="theme-modal-title" className="font-black text-slate-800 text-base sm:text-lg leading-tight">
-                Lumina Themes & Customizer
+                BeeYou Themes & Customizer
               </h2>
               <p className="text-xs text-slate-500 font-medium">
                 Pick ready-made themes or build your own special world
@@ -48,7 +48,7 @@ export const ThemeCustomizerModal: React.FC = () => {
                   setTheme('theme-classic');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95"
-                title="Reset to default Lumina theme"
+                title="Reset to default BeeYou theme"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
                 <span className="hidden sm:inline">Reset to Default</span>

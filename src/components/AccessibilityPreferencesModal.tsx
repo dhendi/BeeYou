@@ -458,7 +458,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   </h4>
                   <button
                     type="button"
-                    onClick={() => speak('Hello! This is your Lumina communication voice.')}
+                    onClick={() => speak('Hello! This is your BeeYou communication voice.')}
                     className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
                   >
                     Test Voice 🔊
@@ -481,7 +481,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="pb-1">
                 <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                  Choose what Lumina helps you with
+                  Choose what BeeYou helps you with
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
                   Switch off anything you don't need. It will disappear from your home screen, menus and shortcuts.

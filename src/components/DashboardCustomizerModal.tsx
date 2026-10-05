@@ -164,7 +164,7 @@ export const DashboardCustomizerModal: React.FC = () => {
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-2.5">
           {hiddenByFeatures > 0 && (
             <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3 font-medium">
-              {hiddenByFeatures} widget{hiddenByFeatures === 1 ? ' is' : 's are'} hidden because that part of Lumina is turned off.
+              {hiddenByFeatures} widget{hiddenByFeatures === 1 ? ' is' : 's are'} hidden because that part of BeeYou is turned off.
               You can turn it back on in More &gt; Accessibility &amp; features.
             </p>
           )}

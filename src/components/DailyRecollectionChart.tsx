@@ -66,7 +66,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
 
   const handleCopyReport = () => {
     if (!isPremium) {
-      triggerUpgrade('Therapist Clinical Summaries & IEP reports are a Lumina Premium feature! Start your 30-day free trial.');
+      triggerUpgrade('Therapist Clinical Summaries & IEP reports are a BeeYou Premium feature! Start your 30-day free trial.');
       return;
     }
     const text = generateTherapistSummaryText(filteredEntries, childProfile.name);
@@ -199,7 +199,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
 
           {!isPremium ? (
             <button
-              onClick={() => triggerUpgrade('Therapist Clinical Summaries & IEP reports are a Lumina Premium feature! Start your 30-day free trial.')}
+              onClick={() => triggerUpgrade('Therapist Clinical Summaries & IEP reports are a BeeYou Premium feature! Start your 30-day free trial.')}
               className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
             >
               <Crown className="w-4 h-4 text-amber-200" />
@@ -241,7 +241,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
             <button
               onClick={() => {
                 if (!isPremium) {
-                  triggerUpgrade('14-day & 30-day Journal History is a Lumina Premium feature! Start your 30-day free trial.');
+                  triggerUpgrade('14-day & 30-day Journal History is a BeeYou Premium feature! Start your 30-day free trial.');
                   return;
                 }
                 setDateFilter('14');
@@ -256,7 +256,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
             <button
               onClick={() => {
                 if (!isPremium) {
-                  triggerUpgrade('Unlimited Journal & Mood History is a Lumina Premium feature! Start your 30-day free trial.');
+                  triggerUpgrade('Unlimited Journal & Mood History is a BeeYou Premium feature! Start your 30-day free trial.');
                   return;
                 }
                 setDateFilter('all');

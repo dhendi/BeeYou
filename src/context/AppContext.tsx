@@ -43,7 +43,7 @@ import {
   SpoonBudgetEntry,
   DashboardWidgetConfig,
   DashboardWidgetId,
-  LuminaBackupData,
+  BeeYouBackupData,
 } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import {
@@ -310,7 +310,7 @@ interface AppContextType {
   triggerUpgrade: (reason?: string) => void;
   getTrialDaysRemaining: () => number;
 
-  // ── 11 New Competitive Features ───────────────────────────────────────────
+  // â”€â”€ 11 New Competitive Features â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // Emergency Sensory Red Button
   emergencyMode: EmergencySensorySettings;
@@ -355,7 +355,7 @@ interface AppContextType {
   showFidgetModal: boolean;
   setShowFidgetModal: (val: boolean) => void;
 
-  // AAC Context Scene Switcher (inline in AACView — no modal state needed)
+  // AAC Context Scene Switcher (inline in AACView â€” no modal state needed)
   aacActiveScene: string | null;
   setAacActiveScene: (scene: string | null) => void;
 
@@ -380,7 +380,7 @@ interface AppContextType {
   showDashboardCustomizer: boolean;
   setShowDashboardCustomizer: (val: boolean) => void;
   // Backup & Restore
-  exportProfileBackup: () => LuminaBackupData;
+  exportProfileBackup: () => BeeYouBackupData;
   importProfileBackup: (importedJson: string | object) => { success: boolean; message: string };
 
   // Utilities
@@ -389,7 +389,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'lumina_app_state_v1';
+const STORAGE_KEY = 'beeyou_app_state_v1';
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Navigation
@@ -411,7 +411,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Subscription state ($12.99/month, 30-day free trial, Day 1 Basic tier available)
   const [subscription, setSubscription] = useState<SubscriptionInfo>(() => {
     try {
-      const saved = localStorage.getItem('lumina_subscription');
+      const saved = localStorage.getItem('beeyou_subscription');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && (parsed.tier === 'basic' || parsed.tier === 'premium')) {
@@ -429,7 +429,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     } catch (e) {
-      console.error('Failed to parse lumina_subscription:', e);
+      console.error('Failed to parse beeyou_subscription:', e);
     }
     return {
       tier: 'basic',
@@ -443,11 +443,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [showPaywallModal, setShowPaywallModal] = useState<boolean>(false);
-  const [paywallTriggerReason, setPaywallTriggerReason] = useState<string>('Unlock all Lumina Premium features');
+  const [paywallTriggerReason, setPaywallTriggerReason] = useState<string>('Unlock all BeeYou Premium features');
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_subscription', JSON.stringify(subscription));
+      localStorage.setItem('beeyou_subscription', JSON.stringify(subscription));
     } catch (e) {}
   }, [subscription]);
 
@@ -524,7 +524,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const setShowAvatarCreator = (val: boolean) => {
     if (val && !isPremium) {
-      triggerUpgrade('Avatar Customizer Studio is a Lumina Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
       return;
     }
     _setShowAvatarCreator(val);
@@ -540,7 +540,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     try {
       const todayStr = new Date().toDateString();
-      const lastBriefDate = localStorage.getItem('lumina_last_brief_date');
+      const lastBriefDate = localStorage.getItem('beeyou_last_brief_date');
       if (lastBriefDate !== todayStr) {
         setShowMorningBrief(true);
       }
@@ -569,7 +569,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Digital Routine Stickers earned through My Day completions
   const [earnedStickers, setEarnedStickers] = useState<EarnedRoutineSticker[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_earned_routine_stickers');
+      const saved = localStorage.getItem('beeyou_earned_routine_stickers');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       // Fallback
@@ -580,7 +580,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         routineId: 'routine-morning',
         routineTitle: 'Morning Routine',
         stickerName: 'Morning Superstar',
-        emoji: '🌅',
+        emoji: 'ðŸŒ…',
         description: 'Woke up, stretched, brushed teeth, and got ready to shine!',
         earnedAt: 'Today',
         starsAwarded: 3,
@@ -592,19 +592,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_earned_routine_stickers', JSON.stringify(earnedStickers));
+      localStorage.setItem('beeyou_earned_routine_stickers', JSON.stringify(earnedStickers));
     } catch (e) {}
   }, [earnedStickers]);
 
   // Daily Mood & Recollection (End-of-Day Journal & Therapist Summary)
   const [dailyRecollections, setDailyRecollections] = useState<DailyRecollectionEntry[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_daily_recollections');
+      const saved = localStorage.getItem('beeyou_daily_recollections');
       if (saved) {
         return JSON.parse(saved);
       }
     } catch (e) {
-      console.error('Failed to parse lumina_daily_recollections:', e);
+      console.error('Failed to parse beeyou_daily_recollections:', e);
     }
     return INITIAL_DAILY_RECOLLECTIONS;
   });
@@ -613,14 +613,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_daily_recollections', JSON.stringify(dailyRecollections));
+      localStorage.setItem('beeyou_daily_recollections', JSON.stringify(dailyRecollections));
     } catch (e) {}
   }, [dailyRecollections]);
 
   // Medication Reminders & Supply Tracking state
   const [medications, setMedications] = useState<MedicationReminder[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_medications');
+      const saved = localStorage.getItem('beeyou_medications');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -634,20 +634,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     } catch (e) {
-      console.error('Failed to parse lumina_medications:', e);
+      console.error('Failed to parse beeyou_medications:', e);
     }
     return INITIAL_MEDICATIONS;
   });
 
   const [medicationLogs, setMedicationLogs] = useState<MedicationDoseLog[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_medication_logs');
+      const saved = localStorage.getItem('beeyou_medication_logs');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
-      console.error('Failed to parse lumina_medication_logs:', e);
+      console.error('Failed to parse beeyou_medication_logs:', e);
     }
     return INITIAL_MEDICATION_LOGS;
   });
@@ -656,23 +656,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_medications', JSON.stringify(medications));
+      localStorage.setItem('beeyou_medications', JSON.stringify(medications));
     } catch (e) {}
   }, [medications]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_medication_logs', JSON.stringify(medicationLogs));
+      localStorage.setItem('beeyou_medication_logs', JSON.stringify(medicationLogs));
     } catch (e) {}
   }, [medicationLogs]);
 
   // Mood Journal State (Teens to Adults)
   const [moodJournalEntries, setMoodJournalEntries] = useState<MoodJournalEntry[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_mood_journal_entries');
+      const saved = localStorage.getItem('beeyou_mood_journal_entries');
       if (saved) return JSON.parse(saved);
     } catch (e) {
-      console.error('Failed to parse lumina_mood_journal_entries:', e);
+      console.error('Failed to parse beeyou_mood_journal_entries:', e);
     }
     return INITIAL_MOOD_JOURNAL_ENTRIES;
   });
@@ -681,27 +681,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_mood_journal_entries', JSON.stringify(moodJournalEntries));
+      localStorage.setItem('beeyou_mood_journal_entries', JSON.stringify(moodJournalEntries));
     } catch (e) {}
   }, [moodJournalEntries]);
 
   // Cycle Tracker State (Teens to Adults)
   const [cycleSettings, setCycleSettings] = useState<CycleSettings>(() => {
     try {
-      const saved = localStorage.getItem('lumina_cycle_settings');
+      const saved = localStorage.getItem('beeyou_cycle_settings');
       if (saved) return JSON.parse(saved);
     } catch (e) {
-      console.error('Failed to parse lumina_cycle_settings:', e);
+      console.error('Failed to parse beeyou_cycle_settings:', e);
     }
     return INITIAL_CYCLE_SETTINGS;
   });
 
   const [cycleLogs, setCycleLogs] = useState<CycleDailyLog[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_cycle_logs');
+      const saved = localStorage.getItem('beeyou_cycle_logs');
       if (saved) return JSON.parse(saved);
     } catch (e) {
-      console.error('Failed to parse lumina_cycle_logs:', e);
+      console.error('Failed to parse beeyou_cycle_logs:', e);
     }
     return INITIAL_CYCLE_LOGS;
   });
@@ -710,20 +710,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_cycle_settings', JSON.stringify(cycleSettings));
+      localStorage.setItem('beeyou_cycle_settings', JSON.stringify(cycleSettings));
     } catch (e) {}
   }, [cycleSettings]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_cycle_logs', JSON.stringify(cycleLogs));
+      localStorage.setItem('beeyou_cycle_logs', JSON.stringify(cycleLogs));
     } catch (e) {}
   }, [cycleLogs]);
 
   // Themes & Customization state
   const [themes, setThemes] = useState<AppTheme[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_themes');
+      const saved = localStorage.getItem('beeyou_themes');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -736,14 +736,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       }
     } catch (e) {
-      console.error('Failed to parse lumina_themes:', e);
+      console.error('Failed to parse beeyou_themes:', e);
     }
     return PRESET_THEMES;
   });
 
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
     try {
-      const saved = localStorage.getItem('lumina_active_theme_id');
+      const saved = localStorage.getItem('beeyou_active_theme_id');
       if (saved) return saved;
     } catch (e) {}
     return 'theme-classic'; // Clean neutral classic theme default for Day 1 Basic
@@ -753,17 +753,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_themes', JSON.stringify(themes));
+      localStorage.setItem('beeyou_themes', JSON.stringify(themes));
     } catch (e) {}
   }, [themes]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_active_theme_id', activeThemeId);
+      localStorage.setItem('beeyou_active_theme_id', activeThemeId);
     } catch (e) {}
   }, [activeThemeId]);
 
-  // Themes are only for Lumina Premium: Basic tier falls back to theme-classic
+  // Themes are only for BeeYou Premium: Basic tier falls back to theme-classic
   useEffect(() => {
     if (!isPremium && activeThemeId !== 'theme-classic') {
       setActiveThemeId('theme-classic');
@@ -776,7 +776,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const setTheme = (id: string) => {
     if (!isPremium && id !== 'theme-classic') {
-      triggerUpgrade('Themes are a Lumina Premium feature! Start your 30-day free trial to unlock all themes.');
+      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 30-day free trial to unlock all themes.');
       return;
     }
     const target = themes.find((t) => t.id === id);
@@ -787,7 +787,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const buyTheme = (themeId: string): boolean => {
     if (!isPremium) {
-      triggerUpgrade('Themes are a Lumina Premium feature! Start your 30-day free trial to unlock all themes.');
+      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 30-day free trial to unlock all themes.');
       return false;
     }
     const target = themes.find((t) => t.id === themeId);
@@ -822,7 +822,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
     if (!isPremium) {
-      triggerUpgrade('Custom Theme Studio is a Lumina Premium feature! Start your 30-day free trial.');
+      triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 30-day free trial.');
       throw new Error('Premium required for custom themes');
     }
     const newTheme: AppTheme = {
@@ -858,7 +858,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Onboarding & Multi-Age Adaptability
   const [userAgeGroup, setUserAgeGroupState] = useState<UserAgeGroup>(() => {
     try {
-      const saved = localStorage.getItem('lumina_user_age_group');
+      const saved = localStorage.getItem('beeyou_user_age_group');
       if (saved === 'kid' || saved === 'teen' || saved === 'adult') return saved;
     } catch (e) {}
     return 'kid';
@@ -866,7 +866,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [enabledFeatures, setEnabledFeatures] = useState<EnabledFeatures>(() => {
     try {
-      const saved = localStorage.getItem('lumina_enabled_features');
+      const saved = localStorage.getItem('beeyou_enabled_features');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return getDefaultFeaturesForAge('kid');
@@ -874,7 +874,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [showOnboardingModal, setShowOnboardingModal] = useState<boolean>(() => {
     try {
-      const completed = localStorage.getItem('lumina_onboarding_completed');
+      const completed = localStorage.getItem('beeyou_onboarding_completed');
       if (completed === 'true') return false;
     } catch (e) {}
     return true; // First time launch
@@ -883,9 +883,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const setUserAgeGroup = (age: UserAgeGroup) => {
     setUserAgeGroupState(age);
     try {
-      localStorage.setItem('lumina_user_age_group', age);
+      localStorage.setItem('beeyou_user_age_group', age);
       // Re-apply age defaults to Home only if the user hasn't customised their dashboard.
-      if (localStorage.getItem('lumina_dashboard_customized') !== 'true') {
+      if (localStorage.getItem('beeyou_dashboard_customized') !== 'true') {
         setDashboardWidgetsState(getDefaultDashboardWidgets(age));
       }
     } catch (e) {}
@@ -895,7 +895,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setEnabledFeatures((prev) => {
       const next = { ...prev, ...updates };
       try {
-        localStorage.setItem('lumina_enabled_features', JSON.stringify(next));
+        localStorage.setItem('beeyou_enabled_features', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
@@ -905,7 +905,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setEnabledFeatures((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       try {
-        localStorage.setItem('lumina_enabled_features', JSON.stringify(next));
+        localStorage.setItem('beeyou_enabled_features', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
@@ -1075,7 +1075,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (parsed.skills) setSkills(parsed.skills);
         if (parsed.habits) {
           const todayStr = new Date().toDateString();
-          const lastHabitsDate = localStorage.getItem('lumina_last_habits_date');
+          const lastHabitsDate = localStorage.getItem('beeyou_last_habits_date');
           if (lastHabitsDate && lastHabitsDate !== todayStr) {
             // Reset daily completion for new day, keeping streak
             setHabits(
@@ -1141,7 +1141,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentMood,
         habitsCompletedToday: habits.filter((h) => h.completedToday).length,
         totalHabits: habits.length,
-        currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : childView === 'skills' ? 'Life Skills' : childView === 'adventures' ? 'Life Adventures' : childView === 'feelings' ? 'Feelings Check-in' : 'Lumina'}`,
+        currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : childView === 'skills' ? 'Life Skills' : childView === 'adventures' ? 'Life Adventures' : childView === 'feelings' ? 'Feelings Check-in' : 'BeeYou'}`,
         stars: worldState.stars,
         isOffline,
       });
@@ -1226,7 +1226,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const newQP: QuickPhrase = {
       id: `qp-custom-${Date.now()}`,
       text: phraseText,
-      emoji: sentence[0]?.emoji || '💬',
+      emoji: sentence[0]?.emoji || 'ðŸ’¬',
       isCustom: true,
     };
     setQuickPhrases((prev) => [newQP, ...prev]);
@@ -1263,7 +1263,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         id: item.id || `aac-${Date.now()}`,
         label: item.label,
         speechText: item.speechText || item.label,
-        emoji: item.emoji || '✨',
+        emoji: item.emoji || 'âœ¨',
         photoUrl: item.photoUrl,
         symbolId: item.symbolId,
         symbolSource: item.symbolSource || 'mulberry',
@@ -1304,7 +1304,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             id: `aac-pack-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             label: item.label,
             speechText: item.speechText || item.label,
-            emoji: item.emoji || '✨',
+            emoji: item.emoji || 'âœ¨',
             photoUrl: item.photoUrl,
             category: item.category,
             colorType: item.colorType,
@@ -1437,7 +1437,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addRoutine = (routine: Omit<Routine, 'id'>) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Lumina Basic includes 1 routine. Upgrade to Lumina Premium for unlimited routines, routine templates, and First-Then boards!');
+      triggerUpgrade('BeeYou Basic includes 1 routine. Upgrade to BeeYou Premium for unlimited routines, routine templates, and First-Then boards!');
       return;
     }
     const newR: Routine = {
@@ -1694,7 +1694,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // World & Avatar
   const updateAvatar = (partial: Partial<AvatarConfig>) => {
     if (!isPremium) {
-      triggerUpgrade('Avatar Customizer Studio is a Lumina Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
       return;
     }
     setAvatar((prev) => ({ ...prev, ...partial }));
@@ -1813,7 +1813,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Medication Actions
   const addMedication = (med: Omit<MedicationReminder, 'id' | 'takenTimesToday'>) => {
     if (!isPremium && medications.length >= 1) {
-      triggerUpgrade('Lumina Basic includes 1 medication reminder. Upgrade to Lumina Premium for unlimited medications, pill inventory tracking, and refill alerts!');
+      triggerUpgrade('BeeYou Basic includes 1 medication reminder. Upgrade to BeeYou Premium for unlimited medications, pill inventory tracking, and refill alerts!');
       return;
     }
     const newMed: MedicationReminder = {
@@ -2050,14 +2050,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
   };
 
-  // ─────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // 11 NEW FEATURES: State & Handlers
-  // ─────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // FEATURE 1: Emergency Sensory Mode
   const [emergencyMode, setEmergencyModeState] = useState<EmergencySensorySettings>(() => {
     try {
-      const saved = localStorage.getItem('lumina_emergency_mode');
+      const saved = localStorage.getItem('beeyou_emergency_mode');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return {
@@ -2070,7 +2070,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
   useEffect(() => {
-    try { localStorage.setItem('lumina_emergency_mode', JSON.stringify(emergencyMode)); } catch (e) {}
+    try { localStorage.setItem('beeyou_emergency_mode', JSON.stringify(emergencyMode)); } catch (e) {}
   }, [emergencyMode]);
 
   const setEmergencyMode = (val: Partial<EmergencySensorySettings>) => {
@@ -2091,35 +2091,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // FEATURE 2: Incredible 5-Point Scale
   const DEFAULT_FIVE_POINT_LEVELS: FivePointLevelConfig[] = [
     {
-      level: 1, label: 'Calm & Happy', emoji: '😊', color: 'bg-green-400', textColor: 'text-green-900',
+      level: 1, label: 'Calm & Happy', emoji: 'ðŸ˜Š', color: 'bg-green-400', textColor: 'text-green-900',
       bodyFeelings: 'Body feels relaxed. Breathing is slow and easy. Muscles are loose.',
-      actions: [{ label: 'Keep going!', emoji: '⭐' }, { label: 'Share something nice', emoji: '💬' }],
+      actions: [{ label: 'Keep going!', emoji: 'â­' }, { label: 'Share something nice', emoji: 'ðŸ’¬' }],
     },
     {
-      level: 2, label: 'Okay / A Little Wiggly', emoji: '🙂', color: 'bg-lime-400', textColor: 'text-lime-900',
+      level: 2, label: 'Okay / A Little Wiggly', emoji: 'ðŸ™‚', color: 'bg-lime-400', textColor: 'text-lime-900',
       bodyFeelings: 'A tiny bit excited or distracted. Body is mostly comfortable.',
-      actions: [{ label: 'Take 2 deep breaths', emoji: '🌬️' }, { label: 'Wiggle your fingers', emoji: '🖐️' }],
+      actions: [{ label: 'Take 2 deep breaths', emoji: 'ðŸŒ¬ï¸' }, { label: 'Wiggle your fingers', emoji: 'ðŸ–ï¸' }],
     },
     {
-      level: 3, label: 'Medium / Uneasy', emoji: '😐', color: 'bg-yellow-400', textColor: 'text-yellow-900',
+      level: 3, label: 'Medium / Uneasy', emoji: 'ðŸ˜', color: 'bg-yellow-400', textColor: 'text-yellow-900',
       bodyFeelings: 'Heart might beat faster. Feeling tense, anxious, or frustrated.',
-      actions: [{ label: 'Try box breathing', emoji: '📦' }, { label: 'Squeeze a fidget', emoji: '🫙' }],
+      actions: [{ label: 'Try box breathing', emoji: 'ðŸ“¦' }, { label: 'Squeeze a fidget', emoji: 'ðŸ«™' }],
     },
     {
-      level: 4, label: 'Very Upset', emoji: '😟', color: 'bg-orange-400', textColor: 'text-orange-900',
+      level: 4, label: 'Very Upset', emoji: 'ðŸ˜Ÿ', color: 'bg-orange-400', textColor: 'text-orange-900',
       bodyFeelings: 'Lots of tension. Might want to yell or run away. Hard to think clearly.',
-      actions: [{ label: 'Go to quiet space', emoji: '🤫' }, { label: 'Use Coping Toolkit', emoji: '🎧' }],
+      actions: [{ label: 'Go to quiet space', emoji: 'ðŸ¤«' }, { label: 'Use Coping Toolkit', emoji: 'ðŸŽ§' }],
     },
     {
-      level: 5, label: 'Completely Overwhelmed', emoji: '🌊', color: 'bg-red-500', textColor: 'text-red-100',
+      level: 5, label: 'Completely Overwhelmed', emoji: 'ðŸŒŠ', color: 'bg-red-500', textColor: 'text-red-100',
       bodyFeelings: 'Out of control. Very hard to listen or stop. Body may feel like it\'s going to explode.',
-      actions: [{ label: 'Press Emergency Button', emoji: '🚨' }, { label: 'Ask for help now', emoji: '🆘' }],
+      actions: [{ label: 'Press Emergency Button', emoji: 'ðŸš¨' }, { label: 'Ask for help now', emoji: 'ðŸ†˜' }],
     },
   ];
 
   const [fivePointSettings, setFivePointSettings] = useState<FivePointScaleSettings>(() => {
     try {
-      const saved = localStorage.getItem('lumina_five_point');
+      const saved = localStorage.getItem('beeyou_five_point');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return { levels: DEFAULT_FIVE_POINT_LEVELS, showOnChildHome: true };
@@ -2127,7 +2127,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showFivePointModal, setShowFivePointModal] = useState<boolean>(false);
 
   useEffect(() => {
-    try { localStorage.setItem('lumina_five_point', JSON.stringify(fivePointSettings)); } catch (e) {}
+    try { localStorage.setItem('beeyou_five_point', JSON.stringify(fivePointSettings)); } catch (e) {}
   }, [fivePointSettings]);
 
   const updateFivePointSettings = (updates: Partial<FivePointScaleSettings>) => {
@@ -2143,17 +2143,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // FEATURE 3: Decision Wheel
   const DEFAULT_WHEEL_OPTIONS: DecisionWheelOption[] = [
-    { id: 'opt-1', label: 'Watch a Movie', emoji: '🎬', color: '#818cf8' },
-    { id: 'opt-2', label: 'Play Outside', emoji: '⚽', color: '#34d399' },
-    { id: 'opt-3', label: 'Draw or Paint', emoji: '🎨', color: '#fb923c' },
-    { id: 'opt-4', label: 'Read a Book', emoji: '📚', color: '#60a5fa' },
-    { id: 'opt-5', label: 'Build with Legos', emoji: '🧱', color: '#f87171' },
-    { id: 'opt-6', label: 'Listen to Music', emoji: '🎵', color: '#a78bfa' },
+    { id: 'opt-1', label: 'Watch a Movie', emoji: 'ðŸŽ¬', color: '#818cf8' },
+    { id: 'opt-2', label: 'Play Outside', emoji: 'âš½', color: '#34d399' },
+    { id: 'opt-3', label: 'Draw or Paint', emoji: 'ðŸŽ¨', color: '#fb923c' },
+    { id: 'opt-4', label: 'Read a Book', emoji: 'ðŸ“š', color: '#60a5fa' },
+    { id: 'opt-5', label: 'Build with Legos', emoji: 'ðŸ§±', color: '#f87171' },
+    { id: 'opt-6', label: 'Listen to Music', emoji: 'ðŸŽµ', color: '#a78bfa' },
   ];
 
   const [decisionWheelConfig, setDecisionWheelConfig] = useState<DecisionWheelConfig>(() => {
     try {
-      const saved = localStorage.getItem('lumina_decision_wheel');
+      const saved = localStorage.getItem('beeyou_decision_wheel');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return { options: DEFAULT_WHEEL_OPTIONS };
@@ -2161,7 +2161,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showDecisionWheelModal, setShowDecisionWheelModal] = useState<boolean>(false);
 
   useEffect(() => {
-    try { localStorage.setItem('lumina_decision_wheel', JSON.stringify(decisionWheelConfig)); } catch (e) {}
+    try { localStorage.setItem('beeyou_decision_wheel', JSON.stringify(decisionWheelConfig)); } catch (e) {}
   }, [decisionWheelConfig]);
 
   const updateDecisionWheelConfig = (config: Partial<DecisionWheelConfig>) => {
@@ -2171,7 +2171,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // FEATURE 4: Communication Passport
   const [communicationPassport, setCommunicationPassport] = useState<CommunicationPassport>(() => {
     try {
-      const saved = localStorage.getItem('lumina_passport');
+      const saved = localStorage.getItem('beeyou_passport');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return {
@@ -2186,7 +2186,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showPassportModal, setShowPassportModal] = useState<boolean>(false);
 
   useEffect(() => {
-    try { localStorage.setItem('lumina_passport', JSON.stringify(communicationPassport)); } catch (e) {}
+    try { localStorage.setItem('beeyou_passport', JSON.stringify(communicationPassport)); } catch (e) {}
   }, [communicationPassport]);
 
   const updateCommunicationPassport = (updates: Partial<CommunicationPassport>) => {
@@ -2196,7 +2196,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // FEATURE 5: Spoon Theory Budget
   const [spoonEntries, setSpoonEntries] = useState<SpoonBudgetEntry[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_spoon_entries');
+      const saved = localStorage.getItem('beeyou_spoon_entries');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return [];
@@ -2204,7 +2204,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [showSpoonModal, setShowSpoonModal] = useState<boolean>(false);
 
   useEffect(() => {
-    try { localStorage.setItem('lumina_spoon_entries', JSON.stringify(spoonEntries)); } catch (e) {}
+    try { localStorage.setItem('beeyou_spoon_entries', JSON.stringify(spoonEntries)); } catch (e) {}
   }, [spoonEntries]);
 
   const addSpoonEntry = (entry: Omit<SpoonBudgetEntry, 'id'>) => {
@@ -2220,7 +2220,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return spoonEntries.find((e) => e.date === todayStr) || null;
   };
 
-  // FEATURE 6: Visual Pie Clock (no persistent state — purely local in modal)
+  // FEATURE 6: Visual Pie Clock (no persistent state â€” purely local in modal)
   const [showPieTimerModal, setShowPieTimerModal] = useState<boolean>(false);
 
   // FEATURE 7: Digital Fidget Toys (no persistent state)
@@ -2236,12 +2236,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Accessibility & Sensory Preferences Hub
   const [showAccessibilityModal, setShowAccessibilityModal] = useState<boolean>(false);
 
-  // ── Customizable Dashboard Widgets (Clean & Minimalist by Default) ──
+  // â”€â”€ Customizable Dashboard Widgets (Clean & Minimalist by Default) â”€â”€
   const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
     {
       id: 'routine_schedule',
       title: 'Visual Schedule & Routine',
-      emoji: '📅',
+      emoji: 'ðŸ“…',
       description: 'Step-by-step routine progress, timers, and sticker unlocks',
       category: 'core',
       enabled: true,
@@ -2249,7 +2249,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'quick_aac',
       title: 'Quick Communication Phrases',
-      emoji: '💬',
+      emoji: 'ðŸ’¬',
       description: 'Instant speech tiles for fast, motor-friendly expression',
       category: 'core',
       enabled: true,
@@ -2257,7 +2257,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'mascot_companion',
       title: 'Themed Companion & Motivation',
-      emoji: '🦁',
+      emoji: 'ðŸ¦',
       description: 'Daily greeting, mascot companion, and star motivation',
       category: 'core',
       enabled: false,
@@ -2265,7 +2265,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'five_point_scale',
       title: 'Incredible 5-Point Scale',
-      emoji: '🌡️',
+      emoji: 'ðŸŒ¡ï¸',
       description: 'Visual regulation thermometer with coping actions',
       category: 'sensory',
       enabled: false,
@@ -2273,7 +2273,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'spoon_budget',
       title: 'Spoon Theory Energy Budget',
-      emoji: '🥄',
+      emoji: 'ðŸ¥„',
       description: 'Morning energy check-in and stamina cost tracker',
       category: 'wellness',
       enabled: false,
@@ -2281,7 +2281,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'pie_timer',
       title: 'Visual Pie Clock',
-      emoji: '⏰',
+      emoji: 'â°',
       description: 'Time Timer visual countdown disk with color warnings',
       category: 'sensory',
       enabled: false,
@@ -2289,7 +2289,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'decision_wheel',
       title: 'Decision Wheel Spinner',
-      emoji: '🎡',
+      emoji: 'ðŸŽ¡',
       description: 'Break choice paralysis with an animated spin wheel',
       category: 'sensory',
       enabled: false,
@@ -2297,7 +2297,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'fidget_toys',
       title: 'Digital Fidget Corner',
-      emoji: '🫧',
+      emoji: 'ðŸ«§',
       description: 'Bubble pop with haptics, sand ripples, and marble roll',
       category: 'sensory',
       enabled: false,
@@ -2305,7 +2305,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'medication_tracker',
       title: 'Medication Reminders',
-      emoji: '💊',
+      emoji: 'ðŸ’Š',
       description: 'Upcoming scheduled doses, supply tracking, and logged doses',
       category: 'wellness',
       enabled: false,
@@ -2313,7 +2313,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'mood_journal',
       title: 'Mood Reflection Journal',
-      emoji: '📖',
+      emoji: 'ðŸ“–',
       description: 'Deep feelings, sensory overload triggers, and body logs',
       category: 'wellness',
       enabled: false,
@@ -2321,7 +2321,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'cycle_tracker',
       title: 'Cycle & Sensory Rhythm',
-      emoji: '🌸',
+      emoji: 'ðŸŒ¸',
       description: 'Hormonal wellness, sensory sensitivity, and period predictor',
       category: 'wellness',
       enabled: false,
@@ -2329,7 +2329,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'communication_passport',
       title: 'Communication Support Passport',
-      emoji: '🪪',
+      emoji: 'ðŸªª',
       description: '1-page printable summary for teachers, doctors & dentists',
       category: 'support',
       enabled: false,
@@ -2337,7 +2337,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'adventure_spotlight',
       title: "Today's Adventure Spotlight",
-      emoji: '🚀',
+      emoji: 'ðŸš€',
       description: 'Social story and life skills preparation walkthrough',
       category: 'core',
       enabled: false,
@@ -2345,7 +2345,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     {
       id: 'evening_reflection',
       title: 'Evening Mood Recollection',
-      emoji: '🌙',
+      emoji: 'ðŸŒ™',
       description: 'End-of-day recollection chart and mood tracker',
       category: 'wellness',
       enabled: false,
@@ -2366,7 +2366,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [dashboardWidgets, setDashboardWidgetsState] = useState<DashboardWidgetConfig[]>(() => {
     try {
-      const saved = localStorage.getItem('lumina_dashboard_widgets_v3');
+      const saved = localStorage.getItem('beeyou_dashboard_widgets_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -2383,14 +2383,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     try {
-      localStorage.setItem('lumina_dashboard_widgets_v3', JSON.stringify(dashboardWidgets));
+      localStorage.setItem('beeyou_dashboard_widgets_v3', JSON.stringify(dashboardWidgets));
     } catch (e) {}
   }, [dashboardWidgets]);
 
   const markDashboardCustomized = (value: boolean) => {
     try {
-      if (value) localStorage.setItem('lumina_dashboard_customized', 'true');
-      else localStorage.removeItem('lumina_dashboard_customized');
+      if (value) localStorage.setItem('beeyou_dashboard_customized', 'true');
+      else localStorage.removeItem('beeyou_dashboard_customized');
     } catch (e) {}
   };
 
@@ -2422,7 +2422,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // FEATURES 10 & 11: Magic Task Breakdown & Voice Recording
-  // These live inside routine steps (microSteps and audioDataUrl fields) — no extra top-level state.
+  // These live inside routine steps (microSteps and audioDataUrl fields) â€” no extra top-level state.
 
   const resetToDefaults = () => {
     setAacItems(DEFAULT_AAC_ITEMS);
@@ -2446,22 +2446,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setEnabledFeatures(getDefaultFeaturesForAge('kid'));
     setSentence([]);
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('lumina_daily_recollections');
-    localStorage.removeItem('lumina_medications');
-    localStorage.removeItem('lumina_mood_journal_entries');
-    localStorage.removeItem('lumina_cycle_settings');
-    localStorage.removeItem('lumina_cycle_logs');
-    localStorage.removeItem('lumina_user_age_group');
-    localStorage.removeItem('lumina_enabled_features');
-    localStorage.removeItem('lumina_onboarding_completed');
+    localStorage.removeItem('beeyou_daily_recollections');
+    localStorage.removeItem('beeyou_medications');
+    localStorage.removeItem('beeyou_mood_journal_entries');
+    localStorage.removeItem('beeyou_cycle_settings');
+    localStorage.removeItem('beeyou_cycle_logs');
+    localStorage.removeItem('beeyou_user_age_group');
+    localStorage.removeItem('beeyou_enabled_features');
+    localStorage.removeItem('beeyou_onboarding_completed');
     if (settings.soundEffects) playChime('clear');
   };
 
-  const exportProfileBackup = (): LuminaBackupData => {
-    const backup: LuminaBackupData = {
+  const exportProfileBackup = (): BeeYouBackupData => {
+    const backup: BeeYouBackupData = {
       version: 1,
       exportedAt: new Date().toISOString(),
-      app: 'Lumina',
+      app: 'BeeYou',
       childProfile,
       avatar,
       settings,
@@ -2485,9 +2485,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(backup, null, 2))}`;
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', jsonString);
-      const safeName = (childProfile.name || 'lumina').toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const safeName = (childProfile.name || 'beeyou').toLowerCase().replace(/[^a-z0-9]/g, '-');
       const dateStr = new Date().toISOString().split('T')[0];
-      downloadAnchor.setAttribute('download', `lumina-backup-${safeName}-${dateStr}.json`);
+      downloadAnchor.setAttribute('download', `beeyou-backup-${safeName}-${dateStr}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();

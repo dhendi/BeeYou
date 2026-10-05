@@ -1,5 +1,5 @@
 /**
- * Live Weather Service for Lumina
+ * Live Weather Service for BeeYou
  * Integrates directly with real-time weather feeds (Open-Meteo & Geolocation)
  * Generates tailored neurodivergent sensory comfort recommendations.
  * Non-editable, automatically synced.
@@ -112,7 +112,7 @@ export const DEFAULT_WEATHER_DATA: LiveWeatherData = {
   windMph: 5,
 };
 
-const WEATHER_CACHE_KEY = 'lumina_live_weather_cache';
+const WEATHER_CACHE_KEY = 'beeyou_live_weather_cache';
 
 export async function fetchLiveWeather(): Promise<LiveWeatherData> {
   // First, check if cached weather is less than 30 minutes old

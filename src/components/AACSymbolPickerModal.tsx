@@ -318,7 +318,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   playChime('complete');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                title="Apply official Mulberry Symbols to all AAC buttons in Lumina"
+                title="Apply official Mulberry Symbols to all AAC buttons in BeeYou"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{upgradedAll ? 'Symbols Upgraded ✓' : 'Upgrade All to Mulberry'}</span>
@@ -751,7 +751,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   <span>Mulberry Symbols & AAC Standards</span>
                 </h3>
                 <p>
-                  Lumina uses the open-access <strong>Mulberry Symbols</strong> set, created specifically for augmentative and alternative communication (AAC).
+                  BeeYou uses the open-access <strong>Mulberry Symbols</strong> set, created specifically for augmentative and alternative communication (AAC).
                 </p>
               </div>
 
@@ -793,7 +793,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-black text-slate-900 text-sm">1. Mulberry Symbols (In Lumina)</h4>
+                    <h4 className="font-black text-slate-900 text-sm">1. Mulberry Symbols (In BeeYou)</h4>
                     <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Open Standard</span>
                   </div>
                   <p className="text-[11px] text-slate-600">
@@ -807,7 +807,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     <span className="text-[10px] font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">Color Standard</span>
                   </div>
                   <p className="text-[11px] text-slate-600">
-                    The color standard supported in Lumina: Yellow (Pronouns/People), Green (Verbs), Orange (Nouns), Blue (Adjectives), Purple (Social), Red (Emergency/Stop).
+                    The color standard supported in BeeYou: Yellow (Pronouns/People), Green (Verbs), Orange (Nouns), Blue (Adjectives), Purple (Social), Red (Emergency/Stop).
                   </p>
                 </div>
               </div>

@@ -21,7 +21,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
       return (
         <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
           <CheckCircle className="w-4 h-4 text-emerald-600" />
-          <span>Lumina App Installed</span>
+          <span>BeeYou App Installed</span>
         </div>
       );
     }
@@ -42,7 +42,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
       return (
         <button
           onClick={handleInstallClick}
-          title="Install Lumina for Offline Access"
+          title="Install BeeYou for Offline Access"
           className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer ${className}`}
         >
           <Download className="w-3.5 h-3.5" />
@@ -58,7 +58,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
           className={`flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-black text-sm shadow-md transition cursor-pointer ${className}`}
         >
           <Download className="w-5 h-5" />
-          <span>Install Lumina to Home Screen</span>
+          <span>Install BeeYou to Home Screen</span>
         </button>
       );
     }
@@ -66,7 +66,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
     return (
       <button
         onClick={handleInstallClick}
-        title="Install Lumina for full offline reliability"
+        title="Install BeeYou for full offline reliability"
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-bold transition active:scale-95 cursor-pointer ${className}`}
       >
         <Download className="w-4 h-4" />
@@ -119,7 +119,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <p className="leading-snug">Tap <strong>"Add"</strong> in the top-right corner. Lumina is now ready offline!</p>
+                  <p className="leading-snug">Tap <strong>"Add"</strong> in the top-right corner. BeeYou is now ready offline!</p>
                 </div>
               </div>
 

@@ -73,7 +73,7 @@ export const SubscriptionModal: React.FC = () => {
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-black uppercase tracking-wider mb-2">
             <Crown className="w-4 h-4 text-amber-200" />
-            <span>Lumina Premium</span>
+            <span>BeeYou Premium</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -182,7 +182,7 @@ export const SubscriptionModal: React.FC = () => {
             <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-black text-slate-800 text-base">Lumina Basic</h3>
+                  <h3 className="font-black text-slate-800 text-base">BeeYou Basic</h3>
                   <span className="px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[11px] font-black uppercase">
                     Free Forever
                   </span>
@@ -244,7 +244,7 @@ export const SubscriptionModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-black text-purple-950 text-base flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-500" />
-                    <span>Lumina Premium</span>
+                    <span>BeeYou Premium</span>
                   </h3>
                   <span className="text-xs font-black text-purple-700">
                     {selectedCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}

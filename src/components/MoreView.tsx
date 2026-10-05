@@ -187,7 +187,7 @@ export const MoreView: React.FC = () => {
         {
           id: 'themes',
           title: 'Themes & avatar',
-          desc: 'Change how Lumina looks',
+          desc: 'Change how BeeYou looks',
           emoji: '🎨',
           show: true,
           onOpen: () => setShowThemeModal(true),
@@ -203,7 +203,7 @@ export const MoreView: React.FC = () => {
         {
           id: 'access',
           title: 'Accessibility & features',
-          desc: 'Choose what Lumina helps you with',
+          desc: 'Choose what BeeYou helps you with',
           emoji: '♿',
           show: true,
           onOpen: () => setShowAccessibilityModal(true),
@@ -221,7 +221,7 @@ export const MoreView: React.FC = () => {
       <header>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900">More</h1>
         <p className="text-sm text-slate-600 font-medium">
-          Everything else in Lumina. Turn sections on or off in Accessibility &amp; features.
+          Everything else in BeeYou. Turn sections on or off in Accessibility &amp; features.
         </p>
       </header>
 

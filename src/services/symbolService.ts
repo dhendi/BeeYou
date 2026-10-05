@@ -538,7 +538,7 @@ export const INDUSTRY_AAC_PACKS: IndustryAacPack[] = [
     title: 'Essential Clinical Core 12',
     subtitle: 'High-frequency core words used in 80% of daily communication',
     description: 'Based on high-frequency AAC research. Built using open Mulberry Symbols under CC BY-SA.',
-    usedBy: 'TouchChat, LAMP, Proloquo2Go, Lumina',
+    usedBy: 'TouchChat, LAMP, Proloquo2Go, BeeYou',
     icon: '⭐',
     badge: 'Clinical Standard',
     items: [

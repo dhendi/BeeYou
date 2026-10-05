@@ -403,7 +403,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 Current Activity
               </div>
               <div className="text-base font-black text-slate-800 mt-1">
-                {status?.currentActivity || 'Active in Lumina'}
+                {status?.currentActivity || 'Active in BeeYou'}
               </div>
               <p className="text-[11px] text-slate-400 mt-2">
                 Engaging with interactive tools

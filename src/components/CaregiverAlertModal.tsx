@@ -164,7 +164,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       label: choice.label,
       emoji: choice.emoji,
       location: selectedLocation,
-      note: `Sent from Lumina Easy Alert at ${selectedLocation}`,
+      note: `Sent from BeeYou Easy Alert at ${selectedLocation}`,
     });
 
     speak(`Your alert was sent to your caregiver. You are safe. Take a slow, gentle breath.`);

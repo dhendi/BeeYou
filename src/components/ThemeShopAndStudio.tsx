@@ -295,7 +295,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-white/90 mt-1 max-w-xl font-medium">
-              Transform Lumina to match your child's passions! Choose ready-made themes like 🦖 <strong>Dinosaurs</strong> or 🐸 <strong>Frogs</strong>, or create your own custom theme with favorite colors, mascots, and customized AAC buttons!
+              Transform BeeYou to match your child's passions! Choose ready-made themes like 🦖 <strong>Dinosaurs</strong> or 🐸 <strong>Frogs</strong>, or create your own custom theme with favorite colors, mascots, and customized AAC buttons!
             </p>
           </div>
 
@@ -312,7 +312,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   ? 'bg-white/20 text-white border border-white/40 ring-1 ring-white/30 cursor-default'
                   : 'bg-white text-slate-800 hover:bg-amber-50 hover:text-amber-900 border border-white/80'
               }`}
-              title="Reset Lumina to default Rainbow Meadow theme"
+              title="Reset BeeYou to default Rainbow Meadow theme"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${activeThemeId === 'theme-classic' ? 'text-amber-200' : 'text-amber-600'}`} />
               <span>Default Theme</span>
@@ -355,7 +355,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             type="button"
             onClick={() => {
               if (!isPremium) {
-                triggerUpgrade('Custom Theme Studio is a Lumina Premium feature! Start your 30-day free trial.');
+                triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 30-day free trial.');
                 return;
               }
               setActiveTab('studio');
@@ -427,7 +427,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     setTheme('theme-classic');
                   }}
                   className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
-                  title="Switch back to classic Lumina default theme"
+                  title="Switch back to classic BeeYou default theme"
                 >
                   <RotateCcw className="w-4 h-4 text-amber-700" />
                   <span>Reset to Default Theme</span>
@@ -478,7 +478,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   setTheme('theme-classic');
                 }}
                 className="px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 transition-all cursor-pointer active:scale-95 shadow-2xs"
-                title="Switch directly to default Lumina theme"
+                title="Switch directly to default BeeYou theme"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
                 <span>Default Theme (Classic)</span>
@@ -492,7 +492,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               <div className="flex items-center gap-2.5">
                 <Crown className="w-6 h-6 text-amber-600 shrink-0" />
                 <div className="text-left">
-                  <p className="font-black text-amber-950 text-sm">Themes are a Lumina Premium feature</p>
+                  <p className="font-black text-amber-950 text-sm">Themes are a BeeYou Premium feature</p>
                   <p className="text-amber-800 text-[11px] mt-0.5">
                     Basic tier uses the clean classic neutral theme. Start your 30-day free trial ($0 today) to unlock all 14+ themes and the custom studio!
                   </p>

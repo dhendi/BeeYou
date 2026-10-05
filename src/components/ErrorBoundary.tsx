@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Lumina Uncaught Error:', error, errorInfo);
+    console.error('BeeYou Uncaught Error:', error, errorInfo);
   }
 
   private handleResetApp = () => {
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Lumina is Refreshing
+                BeeYou is Refreshing
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
                 A new version was deployed. Tap below to refresh your view and load the latest updates.

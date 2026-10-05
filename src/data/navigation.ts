@@ -1,7 +1,7 @@
 import { DashboardWidgetId, EnabledFeatures } from '../types';
 
 /**
- * Shared information-architecture helpers for Lumina.
+ * Shared information-architecture helpers for BeeYou.
  * Keeps the bottom nav, the "More" screen, the dashboard and the feature
  * toggles consistent without adding another toggle system: everything here
  * is derived from the existing `enabledFeatures` and `userAgeGroup` state.
@@ -49,7 +49,7 @@ export const AGE_DEFAULT_WIDGETS: Record<'kid' | 'teen' | 'adult', DashboardWidg
 /** The "Minimal" preset: just the day plan and quick communication. */
 export const MINIMAL_WIDGETS: DashboardWidgetId[] = ['routine_schedule', 'quick_aac'];
 
-/** Plain-language groups for the "Choose what Lumina helps you with" screen. */
+/** Plain-language groups for the "Choose what BeeYou helps you with" screen. */
 export interface FeatureGroup {
   id: string;
   title: string;

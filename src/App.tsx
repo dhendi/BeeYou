@@ -1,5 +1,5 @@
 /**
- * Lumina: Everyday Companion & Communication App
+ * BeeYou: Everyday Companion & Communication App
  * Designed for children and caregivers.
  */
 
@@ -211,7 +211,7 @@ const AppContent: React.FC = () => {
         {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
         <CycleTrackerModal />
 
-        {/* Lumina Premium Subscription & Paywall Modal */}
+        {/* BeeYou Premium Subscription & Paywall Modal */}
         <SubscriptionModal />
 
         {/* Emergency Sensory Red Button Modal */}

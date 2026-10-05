@@ -1,14 +1,14 @@
 import { CaregiverChildStatus, CaregiverMessage, CaregiverAlert, EmotionType } from '../types';
 
-const PAIRING_KEY = 'lumina_caregiver_pairing_code';
-const LOCAL_SESSION_KEY = 'lumina_caregiver_local_session';
-const ACTIVE_ALERT_KEY = 'lumina_active_caregiver_alert';
+const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
+const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
+const ACTIVE_ALERT_KEY = 'beeyou_active_caregiver_alert';
 
 // Setup broadcast channel for instant local cross-tab communication
 let broadcastChannel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
   try {
-    broadcastChannel = new BroadcastChannel('lumina_caregiver_channel');
+    broadcastChannel = new BroadcastChannel('beeyou_caregiver_channel');
   } catch (e) {
     console.warn('BroadcastChannel not available:', e);
   }
@@ -146,7 +146,7 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
     childName: 'Alex',
     pairingCode: safeCode,
     lastActiveTime: new Date().toISOString(),
-    currentActivity: 'Using Lumina',
+    currentActivity: 'Using BeeYou',
     currentMood: 'calm',
     habitsCompletedToday: 2,
     totalHabits: 4,

@@ -14,8 +14,8 @@ export default defineConfig(() => {
         includeAssets: ['apple-touch-icon.png', 'icon.svg'],
         manifest: {
           id: '/',
-          name: 'Lumina: Everyday Companion',
-          short_name: 'Lumina',
+          name: 'BeeYou: Everyday Companion',
+          short_name: 'BeeYou',
           description: 'All-in-one visual companion supporting AAC speech, schedules, routines, and social stories completely offline.',
           theme_color: '#4F46E5',
           background_color: '#F8FAFC',

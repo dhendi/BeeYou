@@ -51,7 +51,7 @@ export const MorningBriefModal: React.FC = () => {
     setIsRefreshingWeather(true);
     try {
       if (force) {
-        localStorage.removeItem('lumina_live_weather_cache');
+        localStorage.removeItem('beeyou_live_weather_cache');
       }
       const data = await fetchLiveWeather();
       setWeatherData(data);
@@ -125,7 +125,7 @@ export const MorningBriefModal: React.FC = () => {
 
     // Save date in localStorage so it only opens once a day automatically
     try {
-      localStorage.setItem('lumina_last_brief_date', new Date().toDateString());
+      localStorage.setItem('beeyou_last_brief_date', new Date().toDateString());
     } catch (e) {
       // ignore
     }

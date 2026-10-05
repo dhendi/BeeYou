@@ -1,5 +1,5 @@
 /**
- * Lumina Sound Synthesizer & Enhanced Web Speech API Voice Engine
+ * BeeYou Sound Synthesizer & Enhanced Web Speech API Voice Engine
  * Queries window.speechSynthesis.getVoices() to identify, rank, and prioritize
  * high-quality, fluid, natural system voices over mechanical/robotic voices.
  * 100% offline-ready.
@@ -333,7 +333,7 @@ export function playEntitySound(itemType: string) {
 }
 
 // -------------------------------------------------------------
-// LUMINA PROCEDURAL SENSORY ROOM SOUNDSCAPES (WEB AUDIO API)
+// BEEYOU PROCEDURAL SENSORY ROOM SOUNDSCAPES (WEB AUDIO API)
 // 100% Offline-ready, synthesized in real-time, infinite loop
 // -------------------------------------------------------------
 
@@ -618,7 +618,7 @@ export function stopSoundscape(): void {
   }
 }
 
-const SOUNDSCAPE_VOLUME_STORAGE_KEY = 'lumina_soundscape_volumes';
+const SOUNDSCAPE_VOLUME_STORAGE_KEY = 'beeyou_soundscape_volumes';
 
 export function getSavedSoundscapeVolume(id?: SoundscapeId | null): number {
   if (typeof window === 'undefined') return 0.40;
@@ -712,13 +712,13 @@ export function playSoundscape(id: SoundscapeId, volume?: number): void {
               }, 40);
             })
             .catch((err) => {
-              console.warn(`[Lumina Audio] Audio file playback blocked or failed for ${id}, using procedural fallback:`, err);
+              console.warn(`[BeeYou Audio] Audio file playback blocked or failed for ${id}, using procedural fallback:`, err);
               playProceduralSoundscape(id, volume);
             });
         }
         return;
       } catch (err) {
-        console.warn(`[Lumina Audio] Could not instantiate audio file for ${id}:`, err);
+        console.warn(`[BeeYou Audio] Could not instantiate audio file for ${id}:`, err);
       }
     }
 
@@ -1619,7 +1619,7 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       activeSoundscapeNodes.push(masterGain);
     }
   } catch (e) {
-    console.error('Lumina Soundscape playback error:', e);
+    console.error('BeeYou Soundscape playback error:', e);
   }
 }
 
@@ -1973,7 +1973,7 @@ function formatForNaturalSpeech(text: string): string {
 // Active utterance retain set to prevent Android Chrome V8 Garbage Collector from cutting speech
 const activeUtterancesSet = new Set<SpeechSynthesisUtterance>();
 if (typeof window !== 'undefined') {
-  (window as any).__luminaUtterances = activeUtterancesSet;
+  (window as any).__beeyouUtterances = activeUtterancesSet;
 }
 
 /**

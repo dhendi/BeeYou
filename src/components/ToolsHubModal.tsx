@@ -259,7 +259,7 @@ export const ToolsHubModal: React.FC = () => {
             </span>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
-                Lumina Tools Hub
+                BeeYou Tools Hub
               </h2>
               <p className="text-xs text-slate-500 font-medium">
                 Sensory regulation, executive function & wellness tools

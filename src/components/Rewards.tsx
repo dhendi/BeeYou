@@ -720,7 +720,7 @@ export const Rewards: React.FC = () => {
               <span>My Customized Profile</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Here is your official Lumina ID card with your active stickers, avatar, and special comfort items.
+              Here is your official BeeYou ID card with your active stickers, avatar, and special comfort items.
             </p>
           </div>
 

@@ -447,7 +447,7 @@ export const CopingToolkitModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-amber-600 shrink-0" />
                     <span className="text-amber-900 font-medium">
-                      2 basic sounds included free. 15 specialized sensory soundscapes unlock with <strong>Lumina Premium</strong>.
+                      2 basic sounds included free. 15 specialized sensory soundscapes unlock with <strong>BeeYou Premium</strong>.
                     </span>
                   </div>
                   <button

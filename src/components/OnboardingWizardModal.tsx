@@ -115,9 +115,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       features: features,
     });
     try {
-      localStorage.setItem('lumina_onboarding_completed', 'true');
-      localStorage.setItem('lumina_user_age_group', selectedAge);
-      localStorage.setItem('lumina_enabled_features', JSON.stringify(features));
+      localStorage.setItem('beeyou_onboarding_completed', 'true');
+      localStorage.setItem('beeyou_user_age_group', selectedAge);
+      localStorage.setItem('beeyou_enabled_features', JSON.stringify(features));
     } catch (e) {}
 
     // 4. Equip default theme
@@ -151,14 +151,14 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/30 text-white">
-                  Welcome to Lumina
+                  Welcome to BeeYou
                 </span>
                 <span className="text-xs font-semibold text-white/90">
                   Step {step} of {totalSteps}
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
-                {step === 1 && 'Who is using Lumina?'}
+                {step === 1 && 'Who is using BeeYou?'}
                 {step === 2 && 'Your Profile & Communication'}
                 {step === 3 && 'Choose Your Tools & Features'}
               </h2>
@@ -196,7 +196,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             <div className="space-y-5 animate-in fade-in">
               <div>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium">
-                  Lumina adapts its visuals, wording, and tools to fit you perfectly. Choose an experience to start with (you can always customize any feature later):
+                  BeeYou adapts its visuals, wording, and tools to fit you perfectly. Choose an experience to start with (you can always customize any feature later):
                 </p>
               </div>
 
@@ -763,7 +763,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
               onClick={handleFinish}
               className="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-200 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
             >
-              <span>🚀 Launch Lumina</span>
+              <span>🚀 Launch BeeYou</span>
             </button>
           )}
         </div>

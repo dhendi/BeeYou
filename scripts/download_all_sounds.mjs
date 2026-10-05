@@ -44,7 +44,7 @@ async function downloadFile(item) {
   }
   console.log(`Downloading ${item.filename} from ${item.url}...`);
   try {
-    const res = await fetch(item.url, { headers: { 'User-Agent': 'LuminaAAC-Downloader/1.0' } });
+    const res = await fetch(item.url, { headers: { 'User-Agent': 'BeeYou-Downloader/1.0' } });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status} ${res.statusText}`);
     }

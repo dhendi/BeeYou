@@ -1,8 +1,8 @@
 import { AACItem, Routine, SocialStory, LifeSkill, DailyHabit, OfflineStorageStats } from '../types';
 
-const DB_NAME = 'lumina_offline_indexed_db';
+const DB_NAME = 'beeyou_offline_indexed_db';
 const DB_VERSION = 1;
-const LOCAL_INDEX_KEY = 'lumina_offline_local_index_v1';
+const LOCAL_INDEX_KEY = 'beeyou_offline_local_index_v1';
 
 let dbInstance: IDBDatabase | null = null;
 

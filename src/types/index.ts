@@ -852,10 +852,10 @@ export interface DashboardWidgetConfig {
 }
 
 // ── FEATURE: Full Backup & Restore ──────────────────────────────────────────
-export interface LuminaBackupData {
+export interface BeeYouBackupData {
   version: number;
   exportedAt: string;
-  app: 'Lumina';
+  app: 'BeeYou' | 'Lumina'; // 'Lumina' = backups made before the rebrand
   childProfile: ChildProfile;
   avatar: AvatarConfig;
   settings: AppSettings;

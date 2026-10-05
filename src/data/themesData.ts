@@ -317,7 +317,7 @@ export const PRESET_THEMES: AppTheme[] = [
     soundTheme: 'classic',
   },
 
-  // 6. RAINBOW MEADOW (Classic Lumina)
+  // 6. RAINBOW MEADOW (Classic BeeYou)
   {
     id: 'theme-classic',
     name: 'Rainbow Meadow',

@@ -336,7 +336,7 @@ export const MyWorldView: React.FC = () => {
           <div className="bg-amber-50 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 flex items-center justify-between">
             <div>
               <h3 className="text-base sm:text-lg font-black text-amber-950">
-                Lumina Reward Catalog
+                BeeYou Reward Catalog
               </h3>
               <p className="text-xs text-amber-800 font-medium">
                 Spend stars you earned from finishing daily routines and skills!

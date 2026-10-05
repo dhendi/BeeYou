@@ -444,7 +444,7 @@ export const ParentDashboard: React.FC = () => {
     if (!newRoutineTitle.trim()) return;
 
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
 
@@ -480,7 +480,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleQuickImportTemplate = (template: RoutineTemplate) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     addRoutine({
@@ -512,7 +512,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleCustomizeTemplate = (template: RoutineTemplate) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     setCustomizingRoutine({
@@ -549,7 +549,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleDuplicateRoutine = (routine: Routine) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     addRoutine({
@@ -572,7 +572,7 @@ export const ParentDashboard: React.FC = () => {
       showNotification(`Routine "${routineData.title}" updated successfully!`);
     } else {
       if (!isPremium && routines.length >= 1) {
-        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
         return;
       }
       addRoutine(routineData);
@@ -602,7 +602,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleOpenAddMed = () => {
     if (!isPremium && medications.length >= 1) {
-      triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts!');
+      triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts!');
       return;
     }
     setEditingMedId(null);
@@ -693,7 +693,7 @@ export const ParentDashboard: React.FC = () => {
             <h1 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
               <span>Parent & Caregiver Hub</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">
-                Lumina Support
+                BeeYou Support
               </span>
             </h1>
             <p className="text-xs text-slate-400">Child: {childProfile.name} • Private & Secure</p>
@@ -844,7 +844,7 @@ export const ParentDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-2xl">👑</span>
                     <h2 className="text-xl font-black text-slate-900">
-                      Lumina Membership & Plans
+                      BeeYou Membership & Plans
                     </h2>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-xs">
                       {subscription.billingCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
@@ -868,7 +868,7 @@ export const ParentDashboard: React.FC = () => {
                       ? 'bg-amber-400 text-amber-950 shadow-xs' 
                       : 'bg-slate-300 text-slate-800'
                   }`}>
-                    {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : `Premium (${subscription.billingCycle})`) : 'Lumina Basic (Free)'}
+                    {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : `Premium (${subscription.billingCycle})`) : 'BeeYou Basic (Free)'}
                   </span>
                 </div>
               </div>
@@ -925,8 +925,8 @@ export const ParentDashboard: React.FC = () => {
                           : 'bg-slate-800 text-white'
                       }`}>
                         {isPremium 
-                          ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : `👑 Lumina Premium Member (${subscription.billingCycle})`)
-                          : '🌱 Lumina Basic (Free Plan)'
+                          ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : `👑 BeeYou Premium Member (${subscription.billingCycle})`)
+                          : '🌱 BeeYou Basic (Free Plan)'
                         }
                       </span>
                       {isPremium && subscription.status === 'trial' && (
@@ -938,7 +938,7 @@ export const ParentDashboard: React.FC = () => {
 
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                       {isPremium 
-                        ? (subscription.status === 'trial' ? 'Full Lumina Premium Trial is Active' : 'Lumina Premium Membership')
+                        ? (subscription.status === 'trial' ? 'Full BeeYou Premium Trial is Active' : 'BeeYou Premium Membership')
                         : 'You Are Currently on the Basic Plan'
                       }
                     </h3>
@@ -946,7 +946,7 @@ export const ParentDashboard: React.FC = () => {
                     <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                       {isPremium
                         ? 'Your family has full, unrestricted access to all 17 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
-                        : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to Lumina Premium for ${subscription.billingCycle === 'yearly' ? '$129.99/year (Free 2 months • $10.83/mo)' : '$12.99/month'} ($0 today with a 30-day free trial) to unlock the full clinical suite.`
+                        : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$129.99/year (Free 2 months • $10.83/mo)' : '$12.99/month'} ($0 today with a 30-day free trial) to unlock the full clinical suite.`
                       }
                     </p>
 
@@ -986,7 +986,7 @@ export const ParentDashboard: React.FC = () => {
                         onClick={() => {
                           cancelSubscription();
                           playChime('tap');
-                          setSuccessMessage('Subscription reverted to Lumina Basic.');
+                          setSuccessMessage('Subscription reverted to BeeYou Basic.');
                           setTimeout(() => setSuccessMessage(null), 4000);
                         }}
                         className="w-full md:w-auto px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -1033,7 +1033,7 @@ export const ParentDashboard: React.FC = () => {
                         </th>
                         <th className="p-4 text-xs font-black text-slate-600 uppercase tracking-wider w-1/3">
                           <div className="flex items-center gap-1.5">
-                            <span>Lumina Basic</span>
+                            <span>BeeYou Basic</span>
                             <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-black">
                               Free
                             </span>
@@ -1042,7 +1042,7 @@ export const ParentDashboard: React.FC = () => {
                         <th className="p-4 text-xs font-black text-amber-900 uppercase tracking-wider w-1/3 bg-amber-50/50">
                           <div className="flex items-center gap-1.5">
                             <Crown className="w-4 h-4 text-amber-600" />
-                            <span>Lumina Premium</span>
+                            <span>BeeYou Premium</span>
                             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black shadow-xs">
                               $12.99 / mo
                             </span>
@@ -1226,7 +1226,7 @@ export const ParentDashboard: React.FC = () => {
                     onClick={() => {
                       setSubscriptionTier('basic');
                       playChime('tap');
-                      setSuccessMessage('Switched to Lumina Basic (Free Plan).');
+                      setSuccessMessage('Switched to BeeYou Basic (Free Plan).');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
                     className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
@@ -1277,7 +1277,7 @@ export const ParentDashboard: React.FC = () => {
                       setBillingCycle('monthly');
                       setSubscriptionTier('premium');
                       playChime('star');
-                      setSuccessMessage('Activated Lumina Premium ($12.99 / mo)!');
+                      setSuccessMessage('Activated BeeYou Premium ($12.99 / mo)!');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
                     className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
@@ -1294,7 +1294,7 @@ export const ParentDashboard: React.FC = () => {
                       setBillingCycle('yearly');
                       setSubscriptionTier('premium');
                       playChime('star');
-                      setSuccessMessage('Activated Lumina Premium Yearly ($129.99 / yr - 2 Mo Free)!');
+                      setSuccessMessage('Activated BeeYou Premium Yearly ($129.99 / yr - 2 Mo Free)!');
                       setTimeout(() => setSuccessMessage(null), 3000);
                     }}
                     className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer transition-all ${
@@ -1394,12 +1394,12 @@ export const ParentDashboard: React.FC = () => {
                         <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
                       </div>
                       <p className="text-xs text-amber-900 font-medium mt-0.5">
-                        You are using your 1 included medication reminder. Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.
+                        You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to Lumina Premium for unlimited medications, stock tracking, and refill alerts!')}
+                    onClick={() => triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to BeeYou Premium for unlimited medications, stock tracking, and refill alerts!')}
                     className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
                   >
                     <Crown className="w-3.5 h-3.5 text-amber-200" />
@@ -2482,7 +2482,7 @@ export const ParentDashboard: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-black text-indigo-950 flex items-center gap-2">
                     <Download className="w-4 h-4 text-indigo-600" />
-                    <span>Install Lumina as Standalone Progressive Web App</span>
+                    <span>Install BeeYou as Standalone Progressive Web App</span>
                   </h3>
                   <p className="text-xs text-indigo-800 mt-0.5">
                     Installs directly to tablet or phone home screen with native app launch and zero browser distractions.
@@ -2836,7 +2836,7 @@ export const ParentDashboard: React.FC = () => {
                   <button
                     onClick={() => {
                       if (!isPremium && routines.length >= 1) {
-                        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+                        triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
                         return;
                       }
                       setRoutinesSubView('create');
@@ -2871,12 +2871,12 @@ export const ParentDashboard: React.FC = () => {
                         <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
                       </div>
                       <p className="text-xs text-amber-900 font-medium mt-0.5">
-                        The Basic plan includes 1 active visual routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.
+                        The Basic plan includes 1 active visual routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to Lumina Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!')}
+                    onClick={() => triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!')}
                     className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
                   >
                     <Crown className="w-3.5 h-3.5 text-amber-200" />

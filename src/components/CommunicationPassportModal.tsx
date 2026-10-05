@@ -218,7 +218,7 @@ export const CommunicationPassportModal: React.FC = () => {
 
           {/* Footer */}
           <div className="text-center text-xs text-slate-400 py-2">
-            Created with Lumina — Neurodivergent Support App
+            Created with BeeYou — Neurodivergent Support App
           </div>
         </div>
       </div>
