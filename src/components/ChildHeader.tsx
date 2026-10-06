@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  Coffee, 
   Lock, 
   Sparkles, 
   AlertCircle,
-  ShieldAlert,
   Crown,
   Wifi,
   WifiOff
@@ -20,8 +18,6 @@ export const ChildHeader: React.FC = () => {
     worldState,
     setShowPinModal,
     setIsParentMode,
-    setShowCopingToolkit,
-    setShowCaregiverAlertModal,
     setShowCaregiverModal,
     connectionStatus,
     isCaregiverConnected,
@@ -34,63 +30,34 @@ export const ChildHeader: React.FC = () => {
     setShowAboutMeModal,
   } = useApp();
 
-  const [currentTime, setCurrentTime] = useState<string>('');
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleNeedBreak = () => {
-    playChime('tap');
-    setShowCopingToolkit(true);
-  };
-
   return (
-    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
-      {/* Left: Monogram Badge + Name + Time + Clean Star Count */}
-      <div className="flex items-center gap-2.5 sm:gap-3">
+    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 py-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
+      {/* Left: Monogram Badge + Name + Stars */}
+      <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
         <button 
           type="button"
           onClick={() => {
             setShowAboutMeModal(true);
             playChime('tap');
           }}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-100 hover:bg-amber-200/80 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border-2 border-amber-300/80 shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border border-amber-300 shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
           title="About Me ID Card"
           aria-label="About Me ID Card"
         >
           {childProfile.name ? childProfile.name.charAt(0).toUpperCase() : 'B'}
         </button>
 
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <h1 
-                onClick={() => {
-                  setShowAboutMeModal(true);
-                  playChime('tap');
-                }}
-                className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none cursor-pointer hover:text-[#D97706] transition-colors"
-                title="About Me ID Card"
-              >
-                {childProfile.name}
-              </h1>
-              <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Child Tablet
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold text-stone-500">
-              {currentTime}
-            </span>
-          </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 
+            onClick={() => {
+              setShowAboutMeModal(true);
+              playChime('tap');
+            }}
+            className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none truncate cursor-pointer hover:text-[#D97706] transition-colors"
+            title="About Me ID Card"
+          >
+            {childProfile.name}
+          </h1>
 
           {enabledFeatures?.starsAndRewards !== false && (
             <button
@@ -99,87 +66,61 @@ export const ChildHeader: React.FC = () => {
                 setChildView('rewards');
                 playChime('star');
               }}
-              className="flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 mt-0.5 cursor-pointer transition-colors w-fit"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-[11px] font-black text-amber-800 border border-amber-200/80 cursor-pointer transition-colors shrink-0"
               title="View earned rewards"
             >
-              <Sparkles className="w-3 h-3 text-amber-500 fill-amber-400" />
-              <span>{worldState.stars} Stars</span>
+              <Sparkles className="w-2.5 h-2.5 text-amber-500 fill-amber-400" />
+              <span>{worldState.stars}</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Center: Plans Changed Indicator (if active) */}
+      {/* Center: Plans Changed Alert Indicator (if active) */}
       {plansChanged.active && (
         <button
           onClick={() => setShowPlansChangedModal(true)}
-          className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95"
         >
-          <AlertCircle className="w-4 h-4" />
-          <span>Plans Changed: {plansChanged.newPlanTitle}</span>
+          <AlertCircle className="w-3.5 h-3.5" />
+          <span className="truncate max-w-[150px]">Plans Changed</span>
         </button>
       )}
 
-      {/* Right: Consolidated, Clean Action Bar */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Caregiver Live Connection Status Indicator Pill */}
+      {/* Right: Streamlined Compact Actions */}
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        {/* Compact Live Connection Indicator Pill */}
         <button
           type="button"
           onClick={() => {
             setShowCaregiverModal(true);
             playChime('tap');
           }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-2xl text-[11px] sm:text-xs font-black border transition-all cursor-pointer shadow-xs active:scale-95 ${
+          className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] sm:text-xs font-black border transition-all cursor-pointer shadow-2xs active:scale-95 ${
             isCaregiverConnected
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400 shadow-md shadow-emerald-200 ring-2 ring-emerald-300/70'
+              ? 'bg-emerald-500 text-white border-emerald-400 shadow-xs'
               : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
           }`}
-          title={isCaregiverConnected ? `Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : 'Tap to link with Caregiver Phone/Tablet'}
+          title={isCaregiverConnected ? `Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : 'Tap to link with Caregiver'}
         >
           {isCaregiverConnected ? (
             <>
-              <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
-              <Wifi className="w-3.5 h-3.5 text-white shrink-0" />
-              <span>Connected (Live)</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+              <Wifi className="w-3 h-3 text-white shrink-0" />
+              <span className="hidden sm:inline">Live</span>
             </>
           ) : (
             <>
-              <WifiOff className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-              <span>Link Caregiver</span>
+              <WifiOff className="w-3 h-3 text-stone-400 shrink-0" />
+              <span className="hidden sm:inline">Link</span>
             </>
           )}
         </button>
 
-        {/* 1. Break / Calming */}
-        <button
-          onClick={handleNeedBreak}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-[#E8F0EB] hover:bg-[#DCEAE1] text-[#2F5233] border border-[#82A792]/40 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-2xs"
-          title="Need a Break"
-        >
-          <Coffee className="w-3.5 h-3.5 text-[#5B8266]" />
-          <span className="hidden sm:inline">Break</span>
-        </button>
-
-        {/* 2. Emergency SOS Alert */}
-        {enabledFeatures?.emergencyAlertSOS !== false && (
-          <button
-            onClick={() => {
-              setShowCaregiverAlertModal(true);
-              playChime('tap');
-            }}
-            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs active:scale-95 transition-all shadow-xs cursor-pointer"
-            title="Send Alert to Caregiver"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-white" />
-            <span className="hidden sm:inline">Alert</span>
-            <span className="sm:hidden">SOS</span>
-          </button>
-        )}
-
-        {/* PWA Install Button */}
+        {/* Compact PWA Install Button */}
         <PWAInstallButton variant="compact" />
 
-        {/* 3. Switch to Caregiver Hub */}
+        {/* Switch to Caregiver Hub */}
         <button
           type="button"
           onClick={() => {
@@ -194,21 +135,20 @@ export const ChildHeader: React.FC = () => {
               window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
-          title="Open Caregiver Controller & Dashboard"
+          className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] sm:text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
+          title="Open Caregiver Hub"
         >
-          <Crown className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Caregiver Hub</span>
-          <span className="sm:hidden">Hub</span>
+          <Crown className="w-3 h-3" />
+          <span>Hub</span>
         </button>
 
-        {/* 4. Parent / Settings Lock */}
+        {/* PIN / Lock */}
         <button
           onClick={() => setShowPinModal(true)}
-          className="p-2 sm:px-2.5 sm:py-2 rounded-2xl bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 font-bold text-xs active:scale-95 transition-all flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"
+          className="p-1.5 sm:p-2 rounded-xl bg-[#FAF8F5] hover:bg-stone-100 text-stone-600 font-bold text-xs active:scale-95 transition-all flex items-center border border-stone-200 cursor-pointer shadow-2xs"
           title={userAgeGroup === 'adult' ? 'Settings (Protected by PIN)' : 'Caregiver PIN Lock'}
         >
-          <Lock className="w-3.5 h-3.5 text-stone-500" />
+          <Lock className="w-3 h-3 text-stone-500" />
         </button>
       </div>
     </header>

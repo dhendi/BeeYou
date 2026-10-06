@@ -5,7 +5,6 @@
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { AppProvider, useApp } from '../context/AppContext';
-import { RoleSwitcherBar } from './RoleSwitcherBar';
 import { setPairingCode, subscribeToCloudChannel } from '../services/caregiverSync';
 import { setActiveDeviceView } from '../services/authService';
 
@@ -67,7 +66,6 @@ const CaregiverAppContent: React.FC = () => {
           isOpen={showFamilyAuthModal}
           onClose={() => setShowFamilyAuthModal(false)}
         />
-        <RoleSwitcherBar />
       </Suspense>
     </div>
   );

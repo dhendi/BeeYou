@@ -81,10 +81,11 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
       <>
         <button
           onClick={() => setShowIOSGuide(true)}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 text-xs font-bold transition active:scale-95 cursor-pointer ${className}`}
+          title="Install BeeYou on iOS"
+          className={`flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 text-[10px] sm:text-xs font-bold transition active:scale-95 cursor-pointer shadow-2xs shrink-0 ${className}`}
         >
-          <Smartphone className="w-4 h-4 text-indigo-600" />
-          <span>Install on iOS</span>
+          <Smartphone className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+          <span className="hidden sm:inline">Install</span>
         </button>
 
         {showIOSGuide && (

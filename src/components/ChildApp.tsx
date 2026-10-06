@@ -24,7 +24,6 @@ import { CaregiverMessageToast } from './CaregiverMessageToast';
 import { OfflineIndicator } from './OfflineIndicator';
 import { ThemeWallpaperArt } from './ThemeWallpaperArt';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
-import { RoleSwitcherBar } from './RoleSwitcherBar';
 import { setActiveDeviceView } from '../services/authService';
 import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '../services/caregiverSync';
 
@@ -310,9 +309,6 @@ const ChildAppContent: React.FC = () => {
           isOpen={showFamilyAuthModal}
           onClose={() => setShowFamilyAuthModal(false)}
         />
-
-        {/* Role Switcher & Testing Hub */}
-        <RoleSwitcherBar />
       </Suspense>
     </div>
   );

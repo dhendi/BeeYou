@@ -288,8 +288,8 @@ export const ParentDashboard: React.FC = () => {
       className={`h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} flex flex-col text-slate-800 transition-colors duration-300`}
     >
       {/* Top Caregiver Header */}
-      <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md text-slate-900 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs border-b border-stone-200/70 transition-colors duration-300`}>
-        <div className="flex items-center gap-3">
+      <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md text-slate-900 px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs border-b border-stone-200/70 transition-colors duration-300`}>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => {
@@ -302,57 +302,53 @@ export const ParentDashboard: React.FC = () => {
                 window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-stone-200 shadow-2xs"
+            className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-stone-200 shadow-2xs shrink-0"
             title="Return to Child View"
           >
-            <ArrowLeft className="w-4 h-4 text-slate-600" />
-            <span>Return to Child View</span>
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
+            <span className="hidden sm:inline">Return to Child</span>
+            <span className="sm:hidden">Child</span>
           </button>
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} text-xs font-black shadow-2xs`}>
-            <Crown className="w-3.5 h-3.5" />
-            <span>Caregiver Controller</span>
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
-              <span>Parent &amp; Caregiver Hub</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-900'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}>
-                BeeYou Support
-              </span>
+
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 truncate">
+              Caregiver Hub
             </h1>
-            <p className="text-xs text-slate-500 font-medium">Child: {childProfile.name} • Private &amp; Secure</p>
+            <span className="text-xs text-slate-500 font-medium truncate hidden sm:inline">
+              • {childProfile.name}
+            </span>
           </div>
         </div>
 
-        {/* Quick Plans Changed Toggle */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              activatePlansChanged({ active: !plansChanged.active });
-            }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
-              plansChanged.active
-                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white animate-pulse ring-2 ring-amber-300`
-                : 'bg-white/90 hover:bg-white text-slate-700 border border-stone-200 shadow-2xs'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4" />
-            <span>Plans Changed: {plansChanged.active ? 'ACTIVE' : 'Off'}</span>
-          </button>
+        {/* Right: Plans Changed Status */}
+        <div className="flex items-center gap-2 shrink-0">
+          {plansChanged.active && (
+            <button
+              onClick={() => {
+                activatePlansChanged({ active: false });
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1 bg-amber-500 text-white animate-pulse shadow-xs cursor-pointer"
+              title="Plans Changed is active for child. Tap to turn off."
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span className="text-[11px]">Plans Changed Active</span>
+            </button>
+          )}
         </div>
       </header>
 
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="bg-emerald-600 text-white px-4 py-2.5 text-center text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 animate-in fade-in">
+        <div className="bg-emerald-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 animate-in fade-in">
           <Check className="w-4 h-4" />
           <span>{successMessage}</span>
         </div>
       )}
 
       {/* Main Layout: Sidebar Tabs + Content Area */}
-      <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-3 sm:p-6 gap-5">
+      <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-2.5 sm:p-6 gap-4 sm:gap-5">
         {/* Navigation Sidebar */}
-        <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-3 border-2 border-stone-200/80 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+        <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-2.5 sm:p-3 border-2 border-stone-200/80 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           {[
             {
               id: 'home',
@@ -447,38 +443,7 @@ export const ParentDashboard: React.FC = () => {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-7 border-2 border-stone-200/80 shadow-xs">
-          {/* Quick Access to Routine Templates Library if on another tab */}
-          {activeTab !== 'routines' && activeTab !== 'subscription' && (
-            <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-2 border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center font-black shrink-0 shadow-xs text-xl">
-                  ✨
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
-                    <span>Pre-Built Routine Templates Library</span>
-                    <span className="px-2 py-0.5 rounded-full bg-sky-200 text-sky-900 text-[10px] font-black uppercase tracking-wide">
-                      Morning • School Day • Bedtime
-                    </span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600 font-medium">
-                    Quickly import clinically designed, sensory-friendly routines and customize First/Then rewards for {childProfile.name}.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab('routines');
-                  playChime('tap');
-                }}
-                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
-              >
-                <span>Browse Templates</span>
-                <span>→</span>
-              </button>
-            </div>
-          )}
+        <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 border-2 border-stone-200/80 shadow-xs">
 
           {/* TAB: CAREGIVER LIVE HUB HOMEPAGE */}
           {activeTab === 'home' && (
