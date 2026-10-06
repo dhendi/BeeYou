@@ -6,9 +6,7 @@ import {
   Sparkles, 
   AlertCircle,
   ShieldAlert,
-  SlidersHorizontal,
   Crown,
-  Users,
   Wifi,
   WifiOff
 } from 'lucide-react';
@@ -34,8 +32,6 @@ export const ChildHeader: React.FC = () => {
     enabledFeatures,
     userAgeGroup,
     setShowAboutMeModal,
-    setShowAccessibilityModal,
-    setShowFamilyAuthModal,
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -154,35 +150,7 @@ export const ChildHeader: React.FC = () => {
           )}
         </button>
 
-        {/* Shared Family Email / Demo Quick Access */}
-        <button
-          type="button"
-          onClick={() => {
-            setShowFamilyAuthModal(true);
-            playChime('tap');
-          }}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] cursor-pointer shadow-2xs active:scale-95 transition-all"
-          title="Sign in with Shared Family Email or Test with 1-Click Demo"
-        >
-          <Users className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-          <span className="hidden sm:inline">Family Email</span>
-          <span className="sm:hidden text-xs">Family</span>
-        </button>
-
-        {/* 1. Accessibility Preferences */}
-        <button
-          onClick={() => {
-            setShowAccessibilityModal(true);
-            playChime('tap');
-          }}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-[#FAF8F5] hover:bg-amber-50 text-[#1E293B] font-bold text-xs active:scale-95 transition-all cursor-pointer border border-amber-200/80 shadow-2xs"
-          title="Accessibility Preferences (Colors, Sounds, Features)"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700" />
-          <span className="hidden sm:inline">Accessibility</span>
-        </button>
-
-        {/* 2. Break / Calming */}
+        {/* 1. Break / Calming */}
         <button
           onClick={handleNeedBreak}
           className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-[#E8F0EB] hover:bg-[#DCEAE1] text-[#2F5233] border border-[#82A792]/40 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-2xs"
@@ -192,7 +160,7 @@ export const ChildHeader: React.FC = () => {
           <span className="hidden sm:inline">Break</span>
         </button>
 
-        {/* 3. Emergency SOS Alert */}
+        {/* 2. Emergency SOS Alert */}
         {enabledFeatures?.emergencyAlertSOS !== false && (
           <button
             onClick={() => {
@@ -211,7 +179,7 @@ export const ChildHeader: React.FC = () => {
         {/* PWA Install Button */}
         <PWAInstallButton variant="compact" />
 
-        {/* 4. Switch to Caregiver Hub */}
+        {/* 3. Switch to Caregiver Hub */}
         <button
           type="button"
           onClick={() => {
@@ -226,7 +194,7 @@ export const ChildHeader: React.FC = () => {
               window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
           }}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
+          className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
           title="Open Caregiver Controller & Dashboard"
         >
           <Crown className="w-3.5 h-3.5" />
@@ -234,7 +202,7 @@ export const ChildHeader: React.FC = () => {
           <span className="sm:hidden">Hub</span>
         </button>
 
-        {/* 5. Parent / Settings Lock */}
+        {/* 4. Parent / Settings Lock */}
         <button
           onClick={() => setShowPinModal(true)}
           className="p-2 sm:px-2.5 sm:py-2 rounded-2xl bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 font-bold text-xs active:scale-95 transition-all flex items-center gap-1 border border-stone-200 cursor-pointer shadow-2xs"

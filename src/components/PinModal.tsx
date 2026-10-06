@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Lock, KeyRound, Check } from 'lucide-react';
+import { X, Lock, KeyRound, Check, Users } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 export const PinModal: React.FC = () => {
@@ -125,6 +125,22 @@ export const PinModal: React.FC = () => {
             className="text-indigo-600 hover:text-indigo-800 font-bold underline cursor-pointer"
           >
             Direct Access
+          </button>
+        </div>
+
+        {/* Family Account / Login section */}
+        <div className="w-full mt-3 pt-3 border-t border-slate-100">
+          <button
+            type="button"
+            onClick={() => {
+              setShowPinModal(false);
+              setShowFamilyAuthModal(true);
+              playChime('tap');
+            }}
+            className="w-full py-2.5 px-3 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
+          >
+            <Users className="w-4 h-4 text-amber-700" />
+            <span>Family Account Login &amp; Sync</span>
           </button>
         </div>
       </div>
