@@ -22,10 +22,14 @@ function getActiveRole(): 'caregiver' | 'child' {
   if (roleParam === 'caregiver') return 'caregiver';
   if (roleParam === 'child') return 'child';
 
-  // 4. Session storage check (if user switched role in this tab session)
-  const sessionView = sessionStorage.getItem('beeyou_active_device_view');
+  // 4. Storage checks (if user logged in or switched role)
+  const sessionView = sessionStorage.getItem('beeyou_active_device_view') || sessionStorage.getItem('beeyou_user_role');
   if (sessionView === 'caregiver') return 'caregiver';
-  if (sessionView === 'child') return 'child';
+  if (sessionView === 'child' || sessionView === 'child_dependent') return 'child';
+
+  const localView = localStorage.getItem('beeyou_active_device_view') || localStorage.getItem('beeyou_user_role');
+  if (localView === 'caregiver') return 'caregiver';
+  if (localView === 'child' || localView === 'child_dependent') return 'child';
 
   return 'child';
 }

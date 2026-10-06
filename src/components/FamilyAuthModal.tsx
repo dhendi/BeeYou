@@ -155,23 +155,27 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           const safeCode = account.familyCode || 'BEE-DEMO';
           if (asRole === 'caregiver') {
             sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+            sessionStorage.setItem('beeyou_user_role', 'caregiver');
             localStorage.setItem('beeyou_user_role', 'caregiver');
+            localStorage.setItem('beeyou_active_device_view', 'caregiver');
             if (window.location.port === '3000') {
               window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
             } else {
-              window.location.href = `${window.location.pathname}?role=caregiver&code=${encodeURIComponent(safeCode)}`;
+              window.location.href = `${window.location.origin}/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
             }
           } else {
             sessionStorage.setItem('beeyou_active_device_view', 'child');
+            sessionStorage.setItem('beeyou_user_role', 'child_dependent');
             localStorage.setItem('beeyou_user_role', 'child_dependent');
+            localStorage.setItem('beeyou_active_device_view', 'child');
             if (window.location.port === '3001') {
               window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(safeCode)}`;
             } else {
-              window.location.href = `${window.location.pathname}?role=child&code=${encodeURIComponent(safeCode)}`;
+              window.location.href = `${window.location.origin}/?role=child&code=${encodeURIComponent(safeCode)}`;
             }
           }
         }
-      }, 1000);
+      }, 300);
     } catch (err) {
       console.error('Failed to apply account context:', err);
       onClose();

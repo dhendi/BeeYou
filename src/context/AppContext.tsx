@@ -625,18 +625,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setIncomingCaregiverMessage(null);
   };
 
-  // Daily First Login Check for Morning Brief
-  useEffect(() => {
-    try {
-      const todayStr = new Date().toDateString();
-      const lastBriefDate = localStorage.getItem('beeyou_last_brief_date');
-      if (lastBriefDate !== todayStr) {
-        setShowMorningBrief(true);
-      }
-    } catch (e) {
-      // Fallback
-    }
-  }, []);
+  // Morning Brief is available on-demand from the child home dashboard
 
   // Core Data States
   const [aacItems, setAacItems] = useState<AACItem[]>(DEFAULT_AAC_ITEMS);

@@ -33,6 +33,8 @@ export const MorningBriefModal: React.FC = () => {
   const {
     showMorningBrief,
     setShowMorningBrief,
+    userRole,
+    isParentMode,
     childProfile,
     routines,
     adventures,
@@ -133,7 +135,7 @@ export const MorningBriefModal: React.FC = () => {
     setShowMorningBrief(false);
   };
 
-  if (!showMorningBrief) return null;
+  if (!showMorningBrief || userRole === 'caregiver' || isParentMode) return null;
 
   return (
     <div
