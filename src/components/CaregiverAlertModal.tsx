@@ -17,11 +17,13 @@ import {
   Sparkles,
   Loader2,
   Check,
-  Smartphone
+  Smartphone,
+  MessageSquare
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
   sendCaregiverAlert, 
+  sendCaregiverMessage,
   onCaregiverAlertAck,
   launchNativePhoneCall,
   launchNativeSms,
@@ -47,66 +49,93 @@ interface PredefinedAlertChoice {
   ttsAnnouncement: string;
 }
 
-const PREDEFINED_ALERTS: PredefinedAlertChoice[] = [
+const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
   {
     id: 'need_help',
     label: 'I Need Help',
     sublabel: 'I need adult assistance right now',
     emoji: '🆘',
     colorClass: 'text-rose-900',
-    borderClass: 'border-rose-400 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
+    borderClass: 'border-rose-300 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
     ttsAnnouncement: 'I sent an alert asking for help right now.',
   },
   {
     id: 'overwhelmed',
     label: "I'm Overwhelmed",
-    sublabel: 'Sensory overload, too loud or too bright',
+    sublabel: 'Sensory overload, too loud or bright',
     emoji: '😣',
     colorClass: 'text-amber-900',
-    borderClass: 'border-amber-400 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
+    borderClass: 'border-amber-300 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
     ttsAnnouncement: 'I sent an alert that I feel overwhelmed.',
   },
   {
     id: 'need_break',
     label: 'I Need a Break',
-    sublabel: 'Pause from activity, class, or therapy',
+    sublabel: 'Pause from activity or noise',
     emoji: '🧘',
     colorClass: 'text-teal-900',
-    borderClass: 'border-teal-400 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
+    borderClass: 'border-teal-300 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
     ttsAnnouncement: 'I sent an alert that I need a calm break.',
   },
   {
+    id: 'im_okay',
+    label: 'Send Love / Hug',
+    sublabel: 'Thinking of you and safe',
+    emoji: '❤️',
+    colorClass: 'text-emerald-900',
+    borderClass: 'border-emerald-300 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
+    ttsAnnouncement: 'I sent a loving check-in to my caregiver.',
+  },
+  {
     id: 'want_to_talk',
-    label: 'I Want to Talk',
-    sublabel: 'I would like to speak with you when possible',
-    emoji: '💬',
-    colorClass: 'text-blue-900',
-    borderClass: 'border-blue-400 hover:border-blue-500 bg-blue-50 hover:bg-blue-100',
-    ttsAnnouncement: 'I sent an alert that I want to talk.',
+    label: 'Ready for Pickup / Home',
+    sublabel: 'Ready to be picked up or go home',
+    emoji: '🚗',
+    colorClass: 'text-indigo-900',
+    borderClass: 'border-indigo-300 hover:border-indigo-500 bg-indigo-50 hover:bg-indigo-100',
+    ttsAnnouncement: 'I sent an alert that I am ready to go home.',
+  },
+  {
+    id: 'need_break',
+    label: 'Hungry / Thirsty',
+    sublabel: 'Need snack, meal or water',
+    emoji: '🥪',
+    colorClass: 'text-orange-900',
+    borderClass: 'border-orange-300 hover:border-orange-500 bg-orange-50 hover:bg-orange-100',
+    ttsAnnouncement: 'I sent an alert that I need food or water.',
+  },
+  {
+    id: 'need_help',
+    label: 'Need Restroom',
+    sublabel: 'Need to use the bathroom',
+    emoji: '🚽',
+    colorClass: 'text-sky-900',
+    borderClass: 'border-sky-300 hover:border-sky-500 bg-sky-50 hover:bg-sky-100',
+    ttsAnnouncement: 'I sent an alert that I need the restroom.',
   },
   {
     id: 'im_okay',
-    label: "I'm Okay",
-    sublabel: 'Just checking in to let you know I am safe',
-    emoji: '❤️',
-    colorClass: 'text-emerald-900',
-    borderClass: 'border-emerald-400 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
-    ttsAnnouncement: 'I sent an alert letting my caregiver know I am okay.',
+    label: 'Finished My Task! ⭐',
+    sublabel: 'Done with my routine or schedule',
+    emoji: '✅',
+    colorClass: 'text-purple-900',
+    borderClass: 'border-purple-300 hover:border-purple-500 bg-purple-50 hover:bg-purple-100',
+    ttsAnnouncement: 'I sent an alert that I completed my task.',
   },
 ];
 
 export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen, onClose }) => {
-  const { childProfile, speak, emergencyContact, userAgeGroup, settings, helpAlertPresets, setShowEditAlertsModal } = useApp();
+  const { childProfile, speak, emergencyContact, userAgeGroup, settings } = useApp();
   const [selectedLocation, setSelectedLocation] = useState<'school' | 'therapy' | 'bus' | 'home' | 'other'>('school');
+  const [customText, setCustomText] = useState('');
   const [sentAlert, setSentAlert] = useState<{
-    alertId: PredefinedAlertId;
+    alertId: string;
     label: string;
     emoji: string;
     time: string;
     location: string;
   } | null>(null);
   
-  const [cooldown, setCooldown] = useState(0);
   const [deliveryStage, setDeliveryStage] = useState<'idle' | 'sending' | 'delivered' | 'acknowledged'>('idle');
   const [caregiverResponse, setCaregiverResponse] = useState<{
     text: string;
@@ -144,7 +173,6 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
         by: ack.by,
       });
       setDeliveryStage('acknowledged');
-      // Note: Spoken announcement is handled globally once by AppContext.tsx
     });
 
     return () => {
@@ -156,18 +184,6 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   if (!isOpen) return null;
 
   const handleSendAlert = async (choice: PredefinedAlertChoice) => {
-    if (cooldown > 0) return;
-    setCooldown(5);
-    const cdTimer = setInterval(() => {
-      setCooldown((c) => {
-        if (c <= 1) {
-          clearInterval(cdTimer);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-
     if (settings?.soundAlerts !== false) {
       playChime('complete');
     }
@@ -188,7 +204,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     const alertUid = 'alert-' + Date.now();
     await sendCaregiverAlert({
       id: alertUid,
-      childName: childProfile.name,
+      childName: childProfile.name || 'Leo',
       emotion: choice.id as any,
       alertId: choice.id,
       label: choice.label,
@@ -199,7 +215,33 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     setDeliveryStage('delivered');
 
     if (settings?.spokenAlerts !== false) {
-      speak(`Your alert was sent to your ${isAdult ? 'emergency contact' : 'caregiver'}. You are safe. Take a slow, gentle breath.`);
+      speak(`Alert sent to your caregiver. You are safe. Take a slow breath.`);
+    }
+  };
+
+  const handleSendCustomMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customText.trim()) return;
+
+    playChime('complete');
+    const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    const code = getPairingCode();
+
+    setDeliveryStage('sending');
+    setSentAlert({
+      alertId: 'custom-note',
+      label: customText.trim(),
+      emoji: '💬',
+      time: timeStr,
+      location: selectedLocation,
+    });
+
+    await sendCaregiverMessage(code, customText.trim(), childProfile.name || 'Child', '💬');
+    setDeliveryStage('delivered');
+    setCustomText('');
+
+    if (settings?.spokenAlerts !== false) {
+      speak(`Note sent to caregiver.`);
     }
   };
 
@@ -210,53 +252,50 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/65 backdrop-blur-xs p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in">
-      <div className="w-full max-w-xl rounded-3xl bg-[#FAF8F5] p-4 sm:p-6 shadow-2xl border-2 border-amber-200/90 text-slate-800 max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in">
+      <div className="w-full max-w-2xl rounded-3xl bg-[#FAF8F5] p-4 sm:p-6 shadow-2xl border-2 border-amber-300 text-slate-800 max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200">
+        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-sm shadow-rose-300 animate-pulse">
-              <ShieldAlert className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-md shadow-rose-300 animate-pulse text-2xl">
+              🚨
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-                <span>{isAdult ? 'Support Alert & Quick Check-in' : 'Caregiver Alert'}</span>
-                <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full">
-                  Instant SOS
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                <span>{isAdult ? 'Support Alert & Quick Check-in' : 'Alert / Message Caregiver'}</span>
+                <span className="text-[10px] font-black text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  Live Sync 🟢
                 </span>
               </h2>
               <p className="text-xs text-slate-600 font-medium">
-                Tap once to notify your {isAdult ? 'trusted contact' : 'caregiver'} with your status and location
+                Tap once to notify your {isAdult ? 'trusted contact' : 'caregiver'} instantly
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <ContextualHelpButton topic="alerts" label="How alerts work" variant="pill" />
-            <button
-              onClick={() => {
-                handleReset();
-                onClose();
-              }}
-              className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              handleReset();
+              onClose();
+            }}
+            className="p-2.5 rounded-2xl hover:bg-stone-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Content */}
+        {/* Modal Body */}
         <div className="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">
           {sentAlert ? (
             /* Sent State & Waiting Reassurance */
             <div className="space-y-4 animate-in zoom-in-95">
               
-              {/* 3-Step Visual Delivery Status Indicator: Sending ➔ Delivered ➔ Acknowledged */}
-              <div className="p-4 rounded-3xl bg-white border-2 border-amber-200/90 shadow-xs space-y-3">
+              {/* Delivery Progress Bar */}
+              <div className="p-4 rounded-3xl bg-white border-2 border-amber-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between text-xs font-black">
-                  <span className="text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>📡 Live Delivery Pipeline:</span>
+                  <span className="text-slate-500 uppercase tracking-wider">
+                    📡 Live Delivery Status:
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 ${
                     deliveryStage === 'sending' ? 'bg-amber-100 text-amber-900 animate-pulse' :
@@ -269,99 +308,88 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </span>
                 </div>
 
-                <div className="relative flex items-center justify-between px-3 py-1">
-                  {/* Progress Line */}
+                <div className="relative flex items-center justify-between px-4 py-1">
                   <div className="absolute top-1/2 left-8 right-8 -translate-y-1/2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-500 transition-all duration-700 rounded-full"
                       style={{
-                        width: deliveryStage === 'sending' ? '20%' : deliveryStage === 'delivered' ? '60%' : '100%'
+                        width: deliveryStage === 'sending' ? '25%' : deliveryStage === 'delivered' ? '65%' : '100%'
                       }}
                     />
                   </div>
 
-                  {/* Step 1: Sending */}
                   <div className="flex flex-col items-center gap-1 relative z-10">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                      deliveryStage === 'sending'
-                        ? 'bg-amber-500 text-white ring-4 ring-amber-100 animate-pulse'
-                        : 'bg-emerald-600 text-white shadow-2xs'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      deliveryStage === 'sending' ? 'bg-amber-500 text-white animate-pulse' : 'bg-emerald-600 text-white'
                     }`}>
                       {deliveryStage === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     </div>
                     <span className="text-[10px] font-bold text-slate-700">Sending</span>
                   </div>
 
-                  {/* Step 2: Delivered */}
                   <div className="flex flex-col items-center gap-1 relative z-10">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                      deliveryStage === 'delivered'
-                        ? 'bg-blue-600 text-white ring-4 ring-blue-100 animate-pulse shadow-2xs'
-                        : deliveryStage === 'acknowledged'
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'bg-slate-200 text-slate-400'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      deliveryStage === 'delivered' ? 'bg-blue-600 text-white ring-4 ring-blue-100 animate-pulse' :
+                      deliveryStage === 'acknowledged' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400'
                     }`}>
                       <Smartphone className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-[10px] font-bold text-slate-700">Delivered</span>
                   </div>
 
-                  {/* Step 3: Acknowledged */}
                   <div className="flex flex-col items-center gap-1 relative z-10">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                      deliveryStage === 'acknowledged'
-                        ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md scale-110'
-                        : 'bg-slate-200 text-slate-400'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      deliveryStage === 'acknowledged' ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md scale-110' : 'bg-slate-200 text-slate-400'
                     }`}>
                       <Heart className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-[10px] font-bold text-slate-700">ACK (Reply)</span>
+                    <span className="text-[10px] font-bold text-slate-700">Replied ❤️</span>
                   </div>
                 </div>
               </div>
 
               {/* Delivery Banner */}
-              <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
+              <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-                    <CheckCircle2 className="w-6 h-6" />
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0 text-2xl">
+                    {sentAlert.emoji}
                   </div>
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1 justify-center sm:justify-start">
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
-                      <span>Delivered at {sentAlert.time}</span>
+                      <span>Sent at {sentAlert.time}</span>
                     </div>
-                    <div className="text-base font-bold text-slate-900 mt-0.5">
-                      Alert: "{sentAlert.emoji} {sentAlert.label}"
+                    <div className="text-base font-black text-slate-900 mt-0.5">
+                      "{sentAlert.label}"
                     </div>
                     <div className="text-xs text-emerald-800 font-medium">
-                      Location: <strong className="capitalize">{sentAlert.location}</strong>
+                      Location Tag: <strong className="capitalize">{sentAlert.location}</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-xs font-bold shrink-0">
+                <div className="px-3 py-1.5 rounded-full bg-emerald-200 text-emerald-900 text-xs font-black shrink-0">
                   Delivered ✓
                 </div>
               </div>
 
-              {/* Caregiver Response Banner (Predefined Response) */}
+              {/* Caregiver Response Banner */}
               {caregiverResponse ? (
-                <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 text-slate-900 flex items-start gap-3.5 animate-in slide-in-from-top-2 shadow-xs">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shrink-0 shadow-xs">
+                <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-rose-50 border-2 border-amber-300 text-slate-900 flex items-start gap-3.5 animate-in slide-in-from-top-2 shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-xs">
                     {caregiverResponse.responseId === 'coming' ? '🚗' : caregiverResponse.responseId === 'im_here' ? '❤️' : '👍'}
                   </div>
                   <div className="flex-1">
-                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">
-                      Response from {caregiverResponse.by}:
+                    <span className="text-xs font-black text-amber-800 uppercase tracking-wider block">
+                      Caregiver Response from {caregiverResponse.by}:
                     </span>
-                    <p className="text-base font-bold text-slate-900 mt-0.5">
+                    <p className="text-lg font-black text-slate-900 mt-0.5">
                       "{caregiverResponse.text}"
                     </p>
                     <button
                       type="button"
                       onClick={() => speak(`Message from ${caregiverResponse.by}: ${caregiverResponse.text}`)}
-                      className="mt-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer"
+                      className="mt-2 text-xs font-black text-amber-800 hover:text-amber-950 flex items-center gap-1.5 cursor-pointer bg-white/80 px-3 py-1.5 rounded-xl border border-amber-200 shadow-2xs"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                       <span>Hear Response Again</span>
@@ -369,99 +397,71 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </div>
                 </div>
               ) : (
-                <div className="p-3.5 rounded-2xl bg-white border border-stone-200 text-center shadow-xs">
-                  <p className="text-xs text-slate-600 font-medium flex items-center justify-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-white border border-stone-200 text-center shadow-xs">
+                  <p className="text-xs sm:text-sm text-slate-600 font-bold flex items-center justify-center gap-2">
                     <BeeMascot size="xs" pose="listening" />
-                    <span>Waiting for response... Your alert is displayed on their companion screen.</span>
+                    <span>Waiting for response... Your caregiver received this on their phone/hub.</span>
                   </p>
                 </div>
               )}
 
-              {/* Calming Breathing Guidance while waiting */}
-              <div className="p-5 rounded-3xl bg-teal-50/70 border border-teal-200 text-center space-y-2.5">
-                <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-teal-800 uppercase tracking-wider">
+              {/* Calming Breathing Pause */}
+              <div className="p-5 rounded-3xl bg-teal-50/80 border border-teal-200 text-center space-y-2.5">
+                <div className="flex items-center justify-center gap-1.5 text-xs font-black text-teal-800 uppercase tracking-wider">
                   <Wind className="w-4 h-4 text-teal-600 animate-pulse" />
-                  <span>Calm & Safe Breathing Pause</span>
+                  <span>Calm &amp; Safe Breathing Pause</span>
                 </div>
 
-                {/* Animated breathing circle */}
-                <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-teal-200/50 animate-ping opacity-30"></div>
-                  <div className="w-20 h-20 rounded-full bg-teal-500 text-white flex flex-col items-center justify-center font-bold shadow-md shadow-teal-200/50 transition-all duration-1000">
-                    <span className="text-xl">🌸</span>
-                    <span className="text-[9px] uppercase font-bold mt-0.5">Breathe</span>
+                  <div className="w-16 h-16 rounded-full bg-teal-500 text-white flex flex-col items-center justify-center font-black shadow-md shadow-teal-200/50">
+                    <span className="text-lg">🌸</span>
+                    <span className="text-[8px] uppercase font-black">Breathe</span>
                   </div>
                 </div>
 
-                <div className="text-sm font-bold text-teal-950">
+                <div className="text-sm font-black text-teal-950">
                   {breathingStep}
                 </div>
 
-                <p className="text-xs text-teal-800 font-medium max-w-sm mx-auto">
+                <p className="text-xs text-teal-800 font-medium">
                   You are safe, {childProfile.name}. Take your time.
                 </p>
               </div>
-
-              {/* Native Calling & Texting Shortcuts */}
-              {activePhone && (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80">
-                  <div className="text-xs text-slate-700 font-medium">
-                    Need instant contact?
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => launchNativePhoneCall(activePhone)}
-                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 hover:bg-stone-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
-                    >
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Call Native Phone</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => launchNativeSms(activePhone, `BeeYou Alert: I need assistance right now.`)}
-                      className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 hover:bg-stone-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Text SMS</span>
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {/* Action buttons */}
               <div className="flex gap-2.5 pt-1">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 py-2.5 px-4 rounded-2xl bg-white hover:bg-stone-100 border border-stone-300 text-slate-800 font-bold text-xs transition cursor-pointer"
+                  className="flex-1 py-3 px-4 rounded-2xl bg-white hover:bg-stone-100 border border-stone-300 text-slate-800 font-black text-xs sm:text-sm transition cursor-pointer"
                 >
-                  Send Another Status
+                  Send Another Message
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-2.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                  className="flex-1 py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm shadow-md transition cursor-pointer"
                 >
-                  Close & Continue
+                  Close &amp; Continue
                 </button>
               </div>
             </div>
           ) : (
-            /* Selection State: Where are you? + Predefined Alert Cards */
-            <>
-              {/* Where are you right now? */}
-              <div className="bg-white p-3.5 rounded-2xl border border-stone-200/90 shadow-xs">
-                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            /* Selection State: 1-Tap Quick Alerts & Messages */
+            <div className="space-y-4">
+              {/* Location Tag */}
+              <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-2xs">
+                <div className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-slate-600" />
-                  <span>Where are you right now?</span>
+                  <span>Your Current Location:</span>
                 </div>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-2">
                   {[
-                    { id: 'school', label: 'School', icon: School, emoji: '🏫' },
-                    { id: 'therapy', label: 'Therapy', icon: Activity, emoji: '🩺' },
-                    { id: 'bus', label: 'Transit', icon: Bus, emoji: '🚌' },
-                    { id: 'home', label: 'Home', icon: MapPin, emoji: '🏡' },
+                    { id: 'school', label: 'School', emoji: '🏫' },
+                    { id: 'therapy', label: 'Therapy', emoji: '🩺' },
+                    { id: 'bus', label: 'Transit', emoji: '🚌' },
+                    { id: 'home', label: 'Home', emoji: '🏡' },
                   ].map((loc) => (
                     <button
                       key={loc.id}
@@ -470,65 +470,45 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                         setSelectedLocation(loc.id as any);
                         playChime('tap');
                       }}
-                      className={`p-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer border ${
+                      className={`p-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border ${
                         selectedLocation === loc.id
                           ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
                           : 'bg-stone-50 text-slate-700 border-stone-200 hover:bg-stone-100'
                       }`}
                     >
-                      <span className="text-base">{loc.emoji}</span>
+                      <span className="text-sm">{loc.emoji}</span>
                       <span>{loc.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Predefined Alert Cards */}
+              {/* 1-Tap Quick Action Cards */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    Tap to send instant update:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowEditAlertsModal(true)}
-                    className="text-[11px] font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200"
-                  >
-                    <span>⚙️ Customize Alerts</span>
-                  </button>
-                </div>
-
-                {cooldown > 0 && (
-                  <div className="mb-2.5 p-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">
-                    <span>⏳ Please wait {cooldown}s before sending another alert...</span>
-                  </div>
-                )}
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
+                  Tap 1-Tap Instant Alert / Note:
+                </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {(helpAlertPresets && helpAlertPresets.length > 0 ? helpAlertPresets : PREDEFINED_ALERTS).map((choice) => (
+                  {DEFAULT_QUICK_ALERTS.map((choice, idx) => (
                     <button
-                      key={choice.id}
+                      key={idx}
                       type="button"
-                      disabled={cooldown > 0}
                       onClick={() => handleSendAlert(choice)}
-                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass || 'border-rose-400 bg-rose-50'} text-left transition-all ${
-                        cooldown > 0
-                          ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                          : 'active:scale-95 cursor-pointer'
-                      } shadow-xs group flex items-start gap-3`}
+                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-center gap-3.5`}
                     >
                       <div className="text-3xl group-hover:scale-110 transition shrink-0">
                         {choice.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-bold ${choice.colorClass || 'text-rose-900'}`}>
+                        <div className={`text-sm font-black ${choice.colorClass}`}>
                           {choice.label}
                         </div>
-                        <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug">
-                          {choice.sublabel || choice.ttsAnnouncement}
+                        <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug truncate">
+                          {choice.sublabel}
                         </div>
                       </div>
-                      <div className="w-7 h-7 rounded-full bg-white/90 border border-stone-300 flex items-center justify-center text-slate-400 group-hover:text-amber-700 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/90 border border-stone-200 flex items-center justify-center text-slate-400 group-hover:text-amber-600 shrink-0 shadow-2xs">
                         <Send className="w-3.5 h-3.5" />
                       </div>
                     </button>
@@ -536,10 +516,31 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
               </div>
 
-              {/* Native Phone & SMS Buttons if contact is saved */}
+              {/* Custom Text / Message Composer */}
+              <div className="pt-2 border-t border-stone-200">
+                <form onSubmit={handleSendCustomMessage} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    placeholder="Or type a custom note to caregiver..."
+                    className="flex-1 px-4 py-2.5 rounded-2xl bg-white border border-stone-300 text-sm font-medium placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 shadow-inner"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!customText.trim()}
+                    className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs transition"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Send</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Native Calling & Texting Shortcuts */}
               {activePhone && (
                 <div className="pt-2 border-t border-stone-200 flex items-center justify-between">
-                  <span className="text-xs text-slate-600 font-medium">Direct Native Dial:</span>
+                  <span className="text-xs text-slate-600 font-medium">Emergency Call:</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -560,7 +561,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 

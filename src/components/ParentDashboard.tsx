@@ -333,11 +333,6 @@ export const ParentDashboard: React.FC = () => {
   }, []);
 
   const handleSendQuickNudge = async (title: string, text: string, emoji: string) => {
-    if (replyCooldown > 0) {
-      showNotification(`Please wait ${replyCooldown}s before dispatching another message.`);
-      return;
-    }
-    startReplyCooldown();
     await sendCaregiverMessage(getPairingCode(), text, 'Caregiver', emoji);
     showNotification(`Sent "${title}" alert to ${childProfile.name}'s device!`);
     playChime('tap');
@@ -346,11 +341,6 @@ export const ParentDashboard: React.FC = () => {
   const handleSendCustomMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customMsgText.trim()) return;
-    if (replyCooldown > 0) {
-      showNotification(`Please wait ${replyCooldown}s before dispatching another message.`);
-      return;
-    }
-    startReplyCooldown();
     await sendCaregiverMessage(getPairingCode(), customMsgText.trim(), 'Caregiver', customMsgEmoji);
     showNotification(`Sent note to ${childProfile.name}'s device!`);
     setCustomMsgText('');
@@ -358,11 +348,6 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleAcknowledgeAlert = async (alertId: string, responseMessage: string, responseId?: PredefinedCaregiverResponseId) => {
-    if (replyCooldown > 0) {
-      showNotification(`Please wait ${replyCooldown}s before sending another reply.`);
-      return;
-    }
-    startReplyCooldown();
     await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     try {
@@ -1321,47 +1306,26 @@ export const ParentDashboard: React.FC = () => {
                           <span className="text-slate-400 font-medium">Auto-synced</span>
                         </div>
 
-                        {/* Quick 1-tap Caregiver Responses */}
-                        {replyCooldown > 0 && (
-                          <div className="w-full p-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">
-                            <span>⏳ Please wait {replyCooldown}s before sending another reply...</span>
-                          </div>
-                        )}
                         <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
                           <span className="text-xs font-bold text-slate-500">Quick Reply:</span>
                           <button
                             type="button"
-                            disabled={replyCooldown > 0}
                             onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
-                            className={`px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-2xs ${
-                              replyCooldown > 0
-                                ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                                : 'cursor-pointer active:scale-95'
-                            }`}
+                            className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-2xs cursor-pointer active:scale-95"
                           >
                             🚗 I'm On My Way
                           </button>
                           <button
                             type="button"
-                            disabled={replyCooldown > 0}
                             onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
-                            className={`px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-2xs ${
-                              replyCooldown > 0
-                                ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                                : 'cursor-pointer active:scale-95'
-                            }`}
+                            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-2xs cursor-pointer active:scale-95"
                           >
                             ❤️ I'm Here For You
                           </button>
                           <button
                             type="button"
-                            disabled={replyCooldown > 0}
                             onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
-                            className={`px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs ${
-                              replyCooldown > 0
-                                ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                                : 'cursor-pointer active:scale-95'
-                            }`}
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer active:scale-95"
                           >
                             ⏳ 5 Minutes
                           </button>
@@ -1433,11 +1397,6 @@ export const ParentDashboard: React.FC = () => {
                 </div>
 
                 {/* 1-Tap Quick Nudges Grid */}
-                {replyCooldown > 0 && (
-                  <div className="p-2 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">
-                    <span>⏳ Please wait {replyCooldown}s before dispatching another message...</span>
-                  </div>
-                )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
                     { title: '5-Min Warning', text: '5 minutes until we leave or change activity! ⏳', emoji: '⏳', bg: 'hover:bg-amber-50 border-amber-200' },
@@ -1452,13 +1411,8 @@ export const ParentDashboard: React.FC = () => {
                     <button
                       key={idx}
                       type="button"
-                      disabled={replyCooldown > 0}
                       onClick={() => handleSendQuickNudge(nudge.title, nudge.text, nudge.emoji)}
-                      className={`p-3 rounded-2xl border text-left transition ${
-                        replyCooldown > 0
-                          ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                          : 'active:scale-95 cursor-pointer'
-                      } flex flex-col justify-between gap-1 shadow-2xs ${nudge.bg}`}
+                      className={`p-3 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-1 shadow-2xs ${nudge.bg}`}
                     >
                       <div className="text-2xl">{nudge.emoji}</div>
                       <div>
@@ -1472,17 +1426,12 @@ export const ParentDashboard: React.FC = () => {
                 {/* Custom Message Composer */}
                 <form onSubmit={handleSendCustomMessage} className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                   <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 shrink-0 border border-slate-200">
-                    {['❤️', '⭐', '🚗', '💊', '🍎', '👏'].map((em) => (
+                    {['❤️', '⭐', '🚗', '💊', '🥪', '👏'].map((em) => (
                       <button
                         key={em}
                         type="button"
-                        disabled={replyCooldown > 0}
                         onClick={() => setCustomMsgEmoji(em)}
-                        className={`w-8 h-8 rounded-xl text-lg flex items-center justify-center transition ${
-                          replyCooldown > 0
-                            ? 'opacity-40 cursor-not-allowed'
-                            : 'cursor-pointer'
-                        } ${
+                        className={`w-8 h-8 rounded-xl text-lg flex items-center justify-center transition cursor-pointer ${
                           customMsgEmoji === em ? 'bg-white shadow-xs scale-110' : 'opacity-60 hover:opacity-100'
                         }`}
                       >
@@ -1493,16 +1442,15 @@ export const ParentDashboard: React.FC = () => {
 
                   <input
                     type="text"
-                    disabled={replyCooldown > 0}
                     value={customMsgText}
                     onChange={(e) => setCustomMsgText(e.target.value)}
-                    placeholder={replyCooldown > 0 ? `Cooldown active (${replyCooldown}s)...` : `Type custom message to display on ${childProfile.name}'s tablet...`}
-                    className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:outline-hidden text-xs sm:text-sm font-medium disabled:opacity-60"
+                    placeholder={`Type custom message to display on ${childProfile.name}'s tablet...`}
+                    className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-amber-400 focus:outline-hidden text-xs sm:text-sm font-medium"
                   />
 
                   <button
                     type="submit"
-                    disabled={!customMsgText.trim() || replyCooldown > 0}
+                    disabled={!customMsgText.trim()}
                     className="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-95 transition shrink-0"
                   >
                     <Send className="w-4 h-4 text-amber-300" />

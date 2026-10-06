@@ -265,7 +265,7 @@ export function onFirebaseAlert(listener: AlertCallback): () => void {
 
 export function onFirebaseAck(listener: AckCallback): () => void {
   ackListeners.add(listener);
-  return () => alertListeners.delete(listener);
+  return () => ackListeners.delete(listener);
 }
 
 export function onFirebaseMessage(listener: MessageCallback): () => void {
