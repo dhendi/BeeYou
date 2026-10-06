@@ -194,6 +194,7 @@ function getTopicForCode(code: string): string {
 }
 
 let activeEventSource: EventSource | null = null;
+let activeNtfyEventSource: EventSource | null = null;
 let activePollingInterval: any = null;
 let currentSubscribedCode: string | null = null;
 
@@ -305,22 +306,30 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-    await fetch('/api/caregiver/event', {
+    fetch('/api/caregiver/event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(envelope),
       signal: controller.signal,
-    });
+    }).catch(() => {});
     clearTimeout(timeoutId);
-  } catch (e) {
-    console.warn('Direct server event publish error:', e);
-  }
+  } catch (e) {}
+
+  // 3. Global Public Web Pub/Sub Relay (ntfy.sh) - works on any live website across separate physical devices worldwide
+  try {
+    const topic = getTopicForCode(safeCode);
+    fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+      method: 'POST',
+      body: JSON.stringify(envelope),
+      headers: { 'Title': 'BeeYou Sync', 'Priority': envelope.type === 'CAREGIVER_ALERT' ? 'urgent' : 'default' },
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 let lastPollTimestamp = 0;
 
 /**
- * Subscribes to the live cloud channel (Server SSE stream + active short-polling fallback)
+ * Subscribes to the live cloud channel (Server SSE stream + Global ntfy.sh stream + Short-polling backup)
  */
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
@@ -334,6 +343,13 @@ export function subscribeToCloudChannel(code: string): void {
       activeEventSource.close();
     } catch {}
     activeEventSource = null;
+  }
+
+  if (activeNtfyEventSource) {
+    try {
+      activeNtfyEventSource.close();
+    } catch {}
+    activeNtfyEventSource = null;
   }
 
   if (activePollingInterval) {
@@ -364,6 +380,23 @@ export function subscribeToCloudChannel(code: string): void {
     } catch (e) {
       console.warn('Could not establish SSE stream with server:', e);
     }
+
+    // 2. Global Public Web EventSource (ntfy.sh SSE stream for live internet multi-device testing)
+    try {
+      const topic = getTopicForCode(safeCode);
+      const ntfyEs = new EventSource(`https://ntfy.sh/${encodeURIComponent(topic)}/sse`);
+      activeNtfyEventSource = ntfyEs;
+
+      ntfyEs.onmessage = (event) => {
+        try {
+          const ntfyPayload = JSON.parse(event.data);
+          if (ntfyPayload.event === 'message' && ntfyPayload.message) {
+            const envelope = JSON.parse(ntfyPayload.message);
+            handleIncomingSyncEnvelope(envelope);
+          }
+        } catch (e) {}
+      };
+    } catch (e) {}
   }
 
   // 2. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
