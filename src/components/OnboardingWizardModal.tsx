@@ -153,6 +153,16 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         localStorage.setItem('beeyou_onboarding_completed', 'true');
         localStorage.setItem('beeyou_user_role', 'caregiver');
         localStorage.setItem('beeyou_active_device_view', 'caregiver');
+        sessionStorage.setItem('beeyou_user_role', 'caregiver');
+        sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+        if (typeof window !== 'undefined') {
+          if (window.location.port === '3000') {
+            window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(familyCode)}`;
+            return;
+          }
+          window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(familyCode)}`);
+          window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
+        }
       } catch {}
 
       updateChildProfile({
@@ -172,11 +182,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       confetti({ particleCount: 80, spread: 75, origin: { y: 0.5 } });
       playChime('complete');
       onClose();
-
-      // Immediately pop up link to child's device
-      if (setShowCaregiverModal) {
-        setShowCaregiverModal(true);
-      }
       return;
     }
 
