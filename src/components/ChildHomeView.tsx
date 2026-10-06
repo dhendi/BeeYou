@@ -196,6 +196,10 @@ export const ChildHomeView: React.FC = () => {
     });
   };
 
+  const isWidgetEnabled = (id: string) => {
+    return dashboardWidgets?.some((w) => w.id === id && w.enabled) ?? false;
+  };
+
   const enabledWidgets = dashboardWidgets.filter(
     (w) => w.enabled && isWidgetAvailable(w.id, enabledFeatures)
   );
