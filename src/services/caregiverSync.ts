@@ -10,6 +10,18 @@ import {
   PredefinedCaregiverResponseId,
   UserAgeGroup
 } from '../types';
+import {
+  initFirebaseLiveChannel,
+  sendFirebaseHeartbeat,
+  sendFirebaseAlert,
+  acknowledgeFirebaseAlert,
+  sendFirebaseMessage,
+  onFirebasePresence,
+  onFirebaseAlert,
+  onFirebaseAck,
+  onFirebaseMessage,
+  onFirebaseStatus
+} from './firebaseSync';
 
 const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
 const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
@@ -277,7 +289,7 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Publishes an event to WebRTC DataChannel, server relay, and local BroadcastChannel
+ * Publishes an event to Firebase Realtime Database, WebRTC DataChannel, and local BroadcastChannel
  */
 export async function publishCloudEvent(code: string, eventData: Record<string, any>): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
@@ -297,21 +309,45 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
   // Mark as seen locally in this tab to prevent self-processing
   seenEventIds.add(eventId);
 
-  // 1. Local BroadcastChannel for zero-latency multi-tab on same machine
+  // 1. Firebase Realtime Cloud Sync (Primary <50ms Cloud WebSocket Engine)
+  try {
+    if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
+      sendFirebaseAlert(envelope.alert);
+    } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
+      acknowledgeFirebaseAlert({
+        code: safeCode,
+        alertId: envelope.ack.alertId,
+        acknowledgedBy: envelope.ack.by,
+        responseMessage: envelope.ack.responseMessage,
+        responseId: envelope.ack.responseId,
+      });
+    } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
+      sendFirebaseMessage(safeCode, envelope.message);
+    } else if (envelope.type === 'CHILD_HEARTBEAT' || envelope.type === 'CAREGIVER_HEARTBEAT') {
+      sendFirebaseHeartbeat({
+        code: safeCode,
+        role: envelope.role || (envelope.type === 'CHILD_HEARTBEAT' ? 'child_device' : 'caregiver'),
+        name: envelope.name || 'User',
+        childStatus: envelope.childStatus,
+      });
+    }
+  } catch (e) {}
+
+  // 2. Local BroadcastChannel for zero-latency multi-tab on same machine
   if (broadcastChannel) {
     try {
       broadcastChannel.postMessage(envelope);
     } catch (e) {}
   }
 
-  // 2. Direct WebRTC DataChannel (0ms live peer delivery across devices)
+  // 3. Direct WebRTC DataChannel (0ms live peer delivery across devices)
   if (activePeerConn && activePeerConn.open) {
     try {
       activePeerConn.send(envelope);
     } catch (e) {}
   }
 
-  // 3. Direct Server Event Relay (/api/caregiver/event)
+  // 4. Direct Server Event Relay (/api/caregiver/event)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -341,11 +377,61 @@ function isCurrentDeviceCaregiver(): boolean {
 }
 
 /**
- * Subscribes to the live cloud channel (Direct WebRTC PeerJS + Server SSE stream + Short-polling backup)
+ * Subscribes to the live cloud channel (Firebase Realtime DB + WebRTC PeerJS + Server SSE stream + Short-polling backup)
  */
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+
+  // 1. Primary: Firebase Realtime Database WebSocket listeners
+  try {
+    const isCaregiver = isCurrentDeviceCaregiver();
+    initFirebaseLiveChannel(safeCode, isCaregiver);
+
+    onFirebasePresence((p) => {
+      if (p.isConnected) {
+        lastPeerPingTimestamp = Math.max(lastPeerPingTimestamp, Date.now() - (p.lastPingAgo * 1000));
+        lastPeerRole = p.peerRole;
+        lastPeerName = p.peerName;
+        notifyConnectionStatus();
+      }
+    });
+
+    onFirebaseAlert((alert) => {
+      handleIncomingSyncEnvelope({
+        type: 'CAREGIVER_ALERT',
+        alert,
+        pairingCode: safeCode,
+      });
+    });
+
+    onFirebaseAck((ack) => {
+      handleIncomingSyncEnvelope({
+        type: 'CAREGIVER_ALERT_ACK',
+        ack,
+        pairingCode: safeCode,
+      });
+    });
+
+    onFirebaseMessage((msg) => {
+      handleIncomingSyncEnvelope({
+        type: 'CAREGIVER_MESSAGE',
+        message: msg,
+        pairingCode: safeCode,
+      });
+    });
+
+    onFirebaseStatus((status) => {
+      handleIncomingSyncEnvelope({
+        type: 'CHILD_STATUS_UPDATE',
+        status,
+        pairingCode: safeCode,
+      });
+    });
+  } catch (e) {
+    console.warn('Firebase cloud channel setup error:', e);
+  }
+
   if (currentSubscribedCode === safeCode && activePeer && !activePeer.destroyed) {
     return;
   }
