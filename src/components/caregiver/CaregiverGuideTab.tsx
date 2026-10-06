@@ -1,13 +1,12 @@
 import React from 'react';
-import { ContextualHelpButton } from '../ContextualHelpButton';
-import { CaregiverFeatureWalkthrough } from '../CaregiverFeatureWalkthrough';
-import { CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface CaregiverGuideTabProps {
   onNavigateTab: (tab: any) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigateTab }) => {
+export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigateTab, onStartTour }) => {
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* Header */}
@@ -30,7 +29,20 @@ export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigate
         </div>
 
         <div className="flex items-center gap-2">
-          <ContextualHelpButton topic="all" label="Open Interactive Guide" variant="pill" />
+          <button
+            type="button"
+            onClick={() => {
+              if (onStartTour) {
+                onStartTour();
+              } else {
+                onNavigateTab('home');
+              }
+            }}
+            className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Launch In-Place Feature Tour</span>
+          </button>
         </div>
       </div>
 

@@ -38,6 +38,7 @@ interface CaregiverLiveHubTabProps {
   setShowCameraScanner: (show: boolean) => void;
   setActiveTab: (tab: any) => void;
   showNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
 export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
@@ -48,7 +49,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   setShowFamilyAuthModal,
   setShowCameraScanner,
   setActiveTab,
-  showNotification
+  showNotification,
+  onStartTour,
 }) => {
   const { childProfile, connectionStatus, currentMood, habits, activeTheme } = useApp();
   const [customMsgText, setCustomMsgText] = useState('');
@@ -94,7 +96,10 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* 1. HERO LIVE CONNECTION & CHILD SNAPSHOT CARD */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-indigo-500/15 border-2 border-amber-300/80 shadow-xs relative overflow-hidden">
+      <div
+        data-tour="caregiver-live-card"
+        className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-indigo-500/15 border-2 border-amber-300/80 shadow-xs relative overflow-hidden"
+      >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 flex items-center justify-center text-3xl shadow-inner shrink-0">
@@ -120,7 +125,10 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap">
+          <div
+            data-tour="caregiver-quick-actions"
+            className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap"
+          >
             <button
               type="button"
               onClick={() => {
@@ -162,13 +170,18 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             <button
               type="button"
               onClick={() => {
-                setActiveTab('guide');
+                if (onStartTour) {
+                  onStartTour();
+                } else {
+                  setActiveTab('guide');
+                }
                 playChime('tap');
               }}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+              title="Launch Interactive Coachmark Feature Tour"
             >
-              <HelpCircle className="w-4 h-4 text-amber-300" />
-              <span>How It Works</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Feature Tour</span>
             </button>
           </div>
         </div>
@@ -208,7 +221,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
       </div>
 
       {/* 2. REAL-TIME SAFETY & ALERT CENTER */}
-      <div className="space-y-3">
+      <div data-tour="caregiver-alert-center" className="space-y-3">
         {activeAlerts.length > 0 ? (
           <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-3 animate-in fade-in ring-2 ring-rose-200">
             <div className="flex items-center justify-between">
@@ -365,7 +378,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
       </div>
 
       {/* 3. REMOTE ALERT & NUDGE DISPATCHER (CAREGIVER -> CHILD TABLET) */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-200 shadow-xs space-y-4">
+      <div data-tour="caregiver-nudges-grid" className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
