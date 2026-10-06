@@ -921,6 +921,11 @@ export const ParentDashboard: React.FC = () => {
               setActiveDeviceView('child');
               setIsParentMode(false);
               playChime('tap');
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('beeyou_active_device_view', 'child');
+                window.history.replaceState(null, '', window.location.pathname.replace(/^\/caregiver/, '') || '/');
+                window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
+              }
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-slate-700 shadow-2xs"
             title="Return to Child View"

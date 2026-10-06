@@ -23,6 +23,10 @@ export const PinModal: React.FC = () => {
           setIsParentMode(true);
           setShowPinModal(false);
           setPinInput('');
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+            window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
+          }
         } else {
           setError(true);
           playChime('clear');
@@ -42,6 +46,10 @@ export const PinModal: React.FC = () => {
     setShowPinModal(false);
     setPinInput('');
     playChime('star');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+      window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
+    }
   };
 
   return (

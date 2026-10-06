@@ -57,6 +57,8 @@ const DashboardCustomizerModal = lazy(() => import('./DashboardCustomizerModal')
 const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
 const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
 const FamilyAuthModal = lazy(() => import('./FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
+const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
+const CaregiverHowItWorksModal = lazy(() => import('./CaregiverHowItWorksModal').then(m => ({ default: m.CaregiverHowItWorksModal })));
 
 const ChildAppContent: React.FC = () => {
   const { 
@@ -74,6 +76,7 @@ const ChildAppContent: React.FC = () => {
     showAboutMeModal,
     setShowAboutMeModal,
     settings,
+    isParentMode,
   } = useApp();
 
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
@@ -119,6 +122,39 @@ const ChildAppContent: React.FC = () => {
       mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [childView]);
+
+  if (isParentMode) {
+    return (
+      <div className="min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+        <Suspense fallback={
+          <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-amber-400 font-bold text-lg">
+            Loading Caregiver Hub...
+          </div>
+        }>
+          <ParentDashboard />
+          <SubscriptionModal />
+          <ConnectCaregiverModal 
+            isOpen={showCaregiverModal} 
+            onClose={() => setShowCaregiverModal(false)} 
+            initialTab="enter_code"
+          />
+          <OnboardingWizardModal
+            isOpen={showOnboardingModal}
+            onClose={() => setShowOnboardingModal(false)}
+            canDismiss={true}
+          />
+          <FamilyAuthModal
+            isOpen={showFamilyAuthModal}
+            onClose={() => setShowFamilyAuthModal(false)}
+          />
+          <ThemeCustomizerModal />
+          <CaregiverHowItWorksModal />
+          <CaregiverMessageToast />
+          <OfflineIndicator />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}>
