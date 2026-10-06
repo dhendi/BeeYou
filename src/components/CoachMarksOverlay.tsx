@@ -46,15 +46,12 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
 
   const currentStep = steps[currentStepIndex];
 
-  // Update target rect calculation
+  // Update target rect calculation without triggering scrolling
   const updateTargetRect = useCallback(() => {
     if (!isActive || !currentStep) return;
 
     const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
     if (el) {
-      // Scroll into view if needed
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-
       const rect = el.getBoundingClientRect();
       const padding = 8;
       const targetBox: Rect = {
@@ -110,6 +107,33 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
     }
   }, [isActive, currentStep]);
 
+  const rafRef = useRef<number | null>(null);
+
+  // Smoothly scroll target into view ONLY once when step changes
+  useEffect(() => {
+    if (!isActive || !currentStep) return;
+
+    setHasClickedTarget(false);
+
+    const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      } catch {
+        // Fallback for older browsers
+        el.scrollIntoView();
+      }
+    }
+
+    // Initial position measurement after DOM settles
+    const timeoutId = setTimeout(() => {
+      updateTargetRect();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [isActive, currentStepIndex, currentStep, updateTargetRect]);
+
+  // Throttled scroll and resize listeners using requestAnimationFrame
   useEffect(() => {
     if (!isActive) {
       setCurrentStepIndex(0);
@@ -117,25 +141,26 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
       return;
     }
 
-    setHasClickedTarget(false);
-    updateTargetRect();
-
-    // Listen to resize and scroll
-    const handleScrollOrResize = () => {
-      updateTargetRect();
+    const handleThrottledUpdate = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        updateTargetRect();
+        rafRef.current = null;
+      });
     };
 
-    window.addEventListener('resize', handleScrollOrResize);
-    window.addEventListener('scroll', handleScrollOrResize, true);
-
-    const timer = setTimeout(updateTargetRect, 250);
+    window.addEventListener('resize', handleThrottledUpdate, { passive: true });
+    window.addEventListener('scroll', handleThrottledUpdate, { passive: true, capture: true });
 
     return () => {
-      window.removeEventListener('resize', handleScrollOrResize);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      clearTimeout(timer);
+      window.removeEventListener('resize', handleThrottledUpdate);
+      window.removeEventListener('scroll', handleThrottledUpdate, { capture: true });
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
-  }, [isActive, currentStepIndex, updateTargetRect]);
+  }, [isActive, updateTargetRect]);
 
   const handleNext = () => {
     playChime('tap');

@@ -21,10 +21,63 @@ import {
   CheckCircle2,
   User,
   Palette,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Sparkles
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
+import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
+
+const CAREGIVER_COACH_STEPS: CoachMarkStep[] = [
+  {
+    targetSelector: '[data-tour="caregiver-tab-home"]',
+    title: '1. Caregiver Live Hub',
+    instruction: 'Your central control room. Monitor real-time child device connection, check live emotions, and send 1-tap reassuring responses.',
+    mascotHint: 'Click to open the live overview! 📡',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-alerts"]',
+    title: '2. Live Alerts & SOS Inbox',
+    instruction: 'When your child triggers "SOS Help" or "I Need a Break", instant priority notifications appear here with quick response replies.',
+    mascotHint: 'Always keeps your child safe! 🛡️',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-routines"]',
+    title: '3. Routine Templates Library',
+    instruction: 'Create morning, bedtime, school, and First/Then schedules with step timers and reward stickers to build daily independence.',
+    mascotHint: 'Make daily routines easy and visual! 📅',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-medications"]',
+    title: '4. Medication & Supply Reminders',
+    instruction: 'Set daily pill dosages and schedule alerts. Automatic notifications warn you before refills run low.',
+    mascotHint: 'Keeps prescriptions on schedule! 💊',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-plans-changed"]',
+    title: '5. Plans Changed Alert',
+    instruction: 'When plans change suddenly, send a gentle, calm visual broadcast to your child to eliminate transition anxiety.',
+    mascotHint: 'Calms sudden unexpected schedule changes! ⚠️',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-aac"]',
+    title: '6. AAC Symbol Studio',
+    instruction: 'Personalize communication boards using 3,400+ clinical Mulberry symbols, family photos, custom voices, and categories.',
+    mascotHint: 'Give your child their unique voice! 💬',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-recollection"]',
+    title: '7. Mood & Therapy Reports',
+    instruction: 'Review daily mood trends, sensory patterns, and export easy summary charts for therapists and pediatricians.',
+    mascotHint: 'Great for doctor & therapy visits! 📊',
+  },
+  {
+    targetSelector: '[data-tour="caregiver-tab-settings"]',
+    title: '8. PIN Security & Preferences',
+    instruction: 'Protect caregiver controls with your custom 4-digit PIN lock and configure notification preferences.',
+    mascotHint: 'Keeps caregiver settings safe & secure! 🔒',
+  },
+];
 import {
   getPairingCode,
   subscribeToCloudChannel,
@@ -112,6 +165,7 @@ export const ParentDashboard: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showCaregiverTour, setShowCaregiverTour] = useState(false);
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
 
   // Live remote alerts & status
@@ -320,8 +374,22 @@ export const ParentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Plans Changed Status */}
+        {/* Right: Feature Guide & Plans Changed Status */}
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              playChime('tap');
+              setShowCaregiverTour(true);
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100 text-xs font-black transition-all active:scale-95 cursor-pointer border border-amber-300/80 shadow-2xs"
+            title="Interactive Caregiver Tour Guide"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="hidden sm:inline">Feature Guide</span>
+            <span className="sm:hidden">Guide</span>
+          </button>
+
           {plansChanged.active && (
             <button
               onClick={() => {
@@ -410,6 +478,7 @@ export const ParentDashboard: React.FC = () => {
             return (
               <button
                 key={tab.id}
+                data-tour={`caregiver-tab-${tab.id}`}
                 onClick={() => {
                   setActiveTab(tab.id as any);
                   playChime('tap');
@@ -586,6 +655,15 @@ export const ParentDashboard: React.FC = () => {
       <FamilyAuthModal
         isOpen={showFamilyAuthModal}
         onClose={() => setShowFamilyAuthModal(false)}
+      />
+
+      {/* Interactive Caregiver CoachMarks Feature Tour */}
+      <CoachMarksOverlay
+        isActive={showCaregiverTour}
+        steps={CAREGIVER_COACH_STEPS}
+        onComplete={() => setShowCaregiverTour(false)}
+        onSkip={() => setShowCaregiverTour(false)}
+        tourName="Caregiver Features Tour"
       />
     </div>
   );
