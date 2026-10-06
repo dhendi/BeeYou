@@ -22,7 +22,8 @@ import {
   User,
   Palette,
   Settings as SettingsIcon,
-  Sparkles
+  Sparkles,
+  ChevronDown
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
@@ -318,7 +319,157 @@ export const ParentDashboard: React.FC = () => {
     }
   }, [activeTab]);
 
-  const cyclePhaseInfo = getCyclePhaseInfo();
+  const navGroups: {
+    id: string;
+    title: string;
+    emoji: string;
+    items: Array<{
+      id: TabType;
+      label: string;
+      icon: React.ComponentType<{ className?: string }>;
+      badge?: string;
+    }>;
+  }[] = [
+    {
+      id: 'live',
+      title: 'Live & Safety',
+      emoji: '📡',
+      items: [
+        {
+          id: 'home',
+          label: 'Caregiver Live Hub',
+          icon: LayoutDashboard,
+          badge: connectionStatus.isConnected ? 'Live' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : undefined),
+        },
+        {
+          id: 'alerts',
+          label: 'Live Alerts & SOS Inbox',
+          icon: ShieldAlert,
+          badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : undefined,
+        },
+        {
+          id: 'caregiver',
+          label: 'Live Caregiver Link',
+          icon: Heart,
+          badge: connectionStatus.isConnected ? 'Paired' : 'Pair',
+        },
+        {
+          id: 'plans-changed',
+          label: 'Plans Changed Mode',
+          icon: AlertTriangle,
+          badge: plansChanged.active ? 'Active' : undefined,
+        },
+      ],
+    },
+    {
+      id: 'routines',
+      title: 'Routines & Health',
+      emoji: '📅',
+      items: [
+        {
+          id: 'routines',
+          label: 'Routine Library',
+          icon: Calendar,
+          badge: 'Library',
+        },
+        {
+          id: 'medications',
+          label: 'Medication Reminders',
+          icon: Pill,
+          badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? 'Low Stock' : undefined,
+        },
+        {
+          id: 'recollection',
+          label: 'Daily Mood Summary',
+          icon: BarChart3,
+          badge: 'Therapy',
+        },
+        {
+          id: 'mood-journal',
+          label: 'Mood & Reflection Journal',
+          icon: BookOpen,
+          badge: `${moodJournalEntries.length} Entries`,
+        },
+        {
+          id: 'cycle-tracker',
+          label: 'Cycle & Hormonal Rhythm',
+          icon: HeartPulse,
+          badge: `Day ${cyclePhaseInfo.currentCycleDay}`,
+        },
+      ],
+    },
+    {
+      id: 'skills',
+      title: 'Speech & Skills',
+      emoji: '🗣️',
+      items: [
+        {
+          id: 'aac',
+          label: 'AAC & Vocabulary Studio',
+          icon: MessageSquare,
+        },
+        {
+          id: 'voice',
+          label: 'Custom Voice Testing Tool',
+          icon: Volume2,
+        },
+        {
+          id: 'adventures',
+          label: 'Life Adventures & Roleplay',
+          icon: Compass,
+        },
+        {
+          id: 'skills',
+          label: 'Life Skills & Tasks',
+          icon: CheckCircle2,
+        },
+      ],
+    },
+    {
+      id: 'system',
+      title: 'Setup & System',
+      emoji: '⚙️',
+      items: [
+        {
+          id: 'profile',
+          label: 'Child Profile & Persona',
+          icon: User,
+        },
+        {
+          id: 'themes',
+          label: 'Themes & Studio',
+          icon: Palette,
+          badge: 'Studio',
+        },
+        {
+          id: 'offline',
+          label: 'Offline & Storage Sync',
+          icon: Database,
+        },
+        {
+          id: 'settings',
+          label: 'Settings & Parent PIN',
+          icon: SettingsIcon,
+        },
+        {
+          id: 'subscription',
+          label: 'Membership & Plan',
+          icon: Crown,
+          badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '30d Free',
+        },
+        {
+          id: 'guide',
+          label: 'Feature Tour (Guide)',
+          icon: Sparkles,
+          badge: 'Tour',
+        },
+      ],
+    },
+  ];
+
+  const currentNavGroup = navGroups.find((g) => g.items.some((item) => item.id === activeTab)) || navGroups[0];
+  const currentNavItem = navGroups.flatMap((g) => g.items).find((item) => item.id === activeTab) || navGroups[0].items[0];
+  const CurrentIcon = currentNavItem.icon;
 
   return (
     <div
@@ -394,106 +545,135 @@ export const ParentDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Main Layout: Sidebar Tabs + Content Area */}
-      <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-2.5 sm:p-6 gap-4 sm:gap-5">
-        {/* Navigation Sidebar */}
-        <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-2.5 sm:p-3 border-2 border-stone-200/80 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
-          {[
-            {
-              id: 'home',
-              label: 'Caregiver Live Hub',
-              icon: LayoutDashboard,
-              badge: connectionStatus.isConnected ? 'Live' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : undefined),
-            },
-            {
-              id: 'alerts',
-              label: 'Live Alerts & SOS Inbox',
-              icon: ShieldAlert,
-              badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : undefined,
-            },
-            {
-              id: 'subscription',
-              label: 'Membership & Plan',
-              icon: Crown,
-              badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '30d Free',
-            },
-            {
-              id: 'guide',
-              label: 'Feature Tour (Guide)',
-              icon: Sparkles,
-              badge: 'Tour',
-            },
-            { id: 'routines', label: 'Routine Templates Library', icon: Calendar, badge: 'Library' },
-            {
-              id: 'medications',
-              label: 'Medication Reminders',
-              icon: Pill,
-              badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? 'Low Stock' : undefined,
-            },
-            { id: 'recollection', label: 'Daily Mood & Therapist Summary', icon: BarChart3, badge: 'Therapy' },
-            {
-              id: 'mood-journal',
-              label: 'Mood & Reflection Journal',
-              icon: BookOpen,
-              badge: `${moodJournalEntries.length} Entries`,
-            },
-            {
-              id: 'cycle-tracker',
-              label: 'Cycle & Hormonal Rhythm',
-              icon: HeartPulse,
-              badge: `Day ${cyclePhaseInfo.currentCycleDay}`,
-            },
-            { id: 'caregiver', label: 'Live Caregiver Link', icon: Heart, badge: 'Live' },
-            { id: 'plans-changed', label: 'Plans Changed', icon: AlertTriangle, badge: plansChanged.active ? 'Active' : undefined },
-            { id: 'aac', label: 'AAC & Vocabulary', icon: MessageSquare },
-            { id: 'voice', label: 'Voice Testing Tool', icon: Volume2 },
-            { id: 'offline', label: 'Offline & PWA Storage', icon: Database },
-            { id: 'adventures', label: 'Life Adventures', icon: Compass },
-            { id: 'skills', label: 'Life Skills', icon: CheckCircle2 },
-            { id: 'profile', label: 'Child Profile', icon: User },
-            { id: 'themes', label: 'Themes & Studio', icon: Palette, badge: 'Studio' },
-            { id: 'settings', label: 'Settings & PIN', icon: SettingsIcon },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                data-tour={`caregiver-tab-${tab.id}`}
-                onClick={() => {
-                  if (tab.id === 'guide') {
-                    handleStartTour();
-                    return;
-                  }
-                  setActiveTab(tab.id as any);
-                  playChime('tap');
-                }}
-                className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap md:whitespace-normal ${
-                  isActive
-                    ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-md ring-2 ring-amber-300/60`
-                    : `hover:${activeTheme?.palette?.primaryLight || 'hover:bg-amber-50'} text-slate-700`
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                    isActive ? 'bg-white/20 text-white' : `${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`
-                  }`}>
-                    <Icon className="w-4 h-4 stroke-[2.4]" />
-                  </div>
-                  <span>{tab.label}</span>
-                </div>
-                {tab.badge && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    tab.id === 'routines'
-                      ? 'bg-sky-100 text-sky-950 border border-sky-200'
-                      : `${activeTheme?.palette?.badgeBg || 'bg-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
-                  }`}>
-                    {tab.badge}
+      {/* Main Layout: Sidebar Tabs / Mobile Dropdown + Content Area */}
+      <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-2.5 sm:p-6 gap-3 sm:gap-5">
+        {/* Mobile Navigation: 4 Domain Quick Tabs + Categorized Select Dropdown */}
+        <div className="md:hidden flex flex-col gap-2 w-full bg-white/95 backdrop-blur-md rounded-2xl p-2.5 border-2 border-stone-200/80 shadow-xs">
+          {/* 4 Domain Filter Pills */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {navGroups.map((group) => {
+              const isGroupActive = currentNavGroup.id === group.id;
+              return (
+                <button
+                  key={group.id}
+                  type="button"
+                  onClick={() => {
+                    if (!group.items.some((item) => item.id === activeTab)) {
+                      setActiveTab(group.items[0].id);
+                      playChime('tap');
+                    }
+                  }}
+                  className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    isGroupActive
+                      ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
+                      : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                  }`}
+                >
+                  <span className="text-base leading-tight">{group.emoji}</span>
+                  <span className="text-[10px] leading-tight truncate max-w-full font-bold mt-0.5">
+                    {group.id === 'live' ? 'Live' : group.id === 'routines' ? 'Routines' : group.id === 'skills' ? 'Skills' : 'Setup'}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Categorized Dropdown Selector */}
+          <div className="relative flex items-center">
+            <div className={`absolute left-3 pointer-events-none w-6 h-6 rounded-lg flex items-center justify-center ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`}>
+              <CurrentIcon className="w-3.5 h-3.5 stroke-[2.4]" />
+            </div>
+            <select
+              aria-label="Select Caregiver Section"
+              value={activeTab}
+              onChange={(e) => {
+                const newTab = e.target.value as TabType;
+                if (newTab === 'guide') {
+                  handleStartTour();
+                } else {
+                  setActiveTab(newTab);
+                  playChime('tap');
+                }
+              }}
+              className="w-full pl-11 pr-9 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
+            >
+              {navGroups.map((group) => (
+                <optgroup key={group.id} label={`${group.emoji} ${group.title}`}>
+                  {group.items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label} {item.badge ? `(${item.badge})` : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <div className="absolute right-3 pointer-events-none text-slate-400">
+              <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Categorized Sidebar */}
+        <aside className="hidden md:flex md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-3 border-2 border-stone-200/80 shadow-xs flex-col gap-4 shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+          {navGroups.map((group) => (
+            <div key={group.id} className="flex flex-col gap-1">
+              <div className="px-2 py-1 flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
+                <span>{group.emoji}</span>
+                <span>{group.title}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      data-tour={`caregiver-tab-${item.id}`}
+                      onClick={() => {
+                        if (item.id === 'guide') {
+                          handleStartTour();
+                          return;
+                        }
+                        setActiveTab(item.id);
+                        playChime('tap');
+                      }}
+                      className={`flex items-center justify-between p-2 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        isActive
+                          ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs font-black`
+                          : `hover:${activeTheme?.palette?.primaryLight || 'hover:bg-amber-50'} text-slate-700`
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            isActive
+                              ? 'bg-white/20 text-white'
+                              : `${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5 stroke-[2.4]" />
+                        </div>
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={`px-1.5 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
+                            item.id === 'routines'
+                              ? 'bg-sky-100 text-sky-950 border border-sky-200'
+                              : isActive
+                              ? 'bg-white/25 text-white'
+                              : `${activeTheme?.palette?.badgeBg || 'bg-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </aside>
 
         {/* Content Area */}
