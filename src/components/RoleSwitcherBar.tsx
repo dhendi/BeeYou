@@ -114,7 +114,7 @@ export const RoleSwitcherBar: React.FC = () => {
   };
 
   const handleApplyDemoSetup = () => {
-    const demoCode = 'DEMO-BEE-123';
+    const demoCode = 'BEE-DEMO';
     setPairingCode(demoCode);
     subscribeToCloudChannel(demoCode);
     updateChildProfile({

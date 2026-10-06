@@ -273,8 +273,8 @@ export const ParentDashboard: React.FC = () => {
     const seen = new Set<string>();
     const result: CaregiverAlert[] = [];
     for (const a of alerts) {
-      if (!a || a.status !== 'active') continue;
-      const timeKey = Math.floor(new Date(a.timestamp).getTime() / 6000);
+      if (!a || (a.status && a.status !== 'active')) continue;
+      const timeKey = Math.floor(new Date(a.timestamp || Date.now()).getTime() / 6000);
       const contentKey = `${a.label || a.emotion || ''}-${timeKey}`;
       if (!seen.has(a.id) && !seen.has(contentKey)) {
         seen.add(a.id);
@@ -293,8 +293,12 @@ export const ParentDashboard: React.FC = () => {
       fetchCaregiverSession(code).then((session) => {
         if (session) {
           setLiveChildStatus(session);
-          if (session.activeAlert && session.activeAlert.status === 'active') {
-            const current = session.activeAlert;
+          if (session.activeAlert && (session.activeAlert.status === 'active' || !session.activeAlert.status)) {
+            const current: CaregiverAlert = {
+              ...session.activeAlert,
+              status: session.activeAlert.status || 'active',
+              timestamp: session.activeAlert.timestamp || new Date().toISOString(),
+            };
             setActiveAlerts((prev) => deduplicateAlerts([current, ...prev]));
             setAlertHistoryList(getAlertHistory());
           }
@@ -303,13 +307,20 @@ export const ParentDashboard: React.FC = () => {
     };
 
     refreshSession();
-    const pollInterval = setInterval(refreshSession, 2000);
+    const pollInterval = setInterval(refreshSession, 1500);
 
     const unsubAlert = onCaregiverAlert((alert) => {
-      setActiveAlerts((prev) => deduplicateAlerts([alert, ...prev]));
-      setAlertHistoryList(getAlertHistory());
-      playChime('star');
-      showNotification(`🚨 Incoming Alert from ${alert.childName}: ${alert.label}`);
+      if (alert) {
+        const fullAlert: CaregiverAlert = {
+          ...alert,
+          status: alert.status || 'active',
+          timestamp: alert.timestamp || new Date().toISOString(),
+        };
+        setActiveAlerts((prev) => deduplicateAlerts([fullAlert, ...prev]));
+        setAlertHistoryList(getAlertHistory());
+        playChime('star');
+        showNotification(`🚨 Incoming Alert from ${alert.childName || 'Leo'}: ${alert.label}`);
+      }
     });
     const unsubStatus = onChildStatusUpdate((status) => {
       setLiveChildStatus(status);

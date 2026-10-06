@@ -99,6 +99,7 @@ import {
   syncChildStatusToCaregiver, 
   pollCaregiverMessages, 
   onCaregiverMessage, 
+  onCaregiverAlert,
   onCaregiverAlertAck,
   getPairingCode,
   setPairingCode,
@@ -1183,6 +1184,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       speakText(`${msg.senderName} sent you a message: ${msg.text}`);
     });
 
+    const unsubAlert = onCaregiverAlert((alert) => {
+      if (userRole === 'caregiver' || isParentMode) {
+        playChime('star');
+        speakText(`Incoming Alert from ${alert.childName}: ${alert.label}`);
+        setIncomingCaregiverMessage({
+          id: 'alert-' + alert.id,
+          senderName: alert.childName || 'Child',
+          text: `🚨 ALERT: ${alert.label} (${alert.location || 'Location shared'})`,
+          emoji: alert.emoji || '🚨',
+          timestamp: alert.timestamp || new Date().toISOString(),
+          read: false,
+        });
+      }
+    });
+
     const unsubAck = onCaregiverAlertAck((ack) => {
       if (ack.responseMessage) {
         setIncomingCaregiverMessage({
@@ -1224,6 +1240,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     return () => {
       unsubCaregiver();
+      unsubAlert();
       unsubAck();
       unsubConnection();
       clearInterval(interval);

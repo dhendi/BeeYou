@@ -616,6 +616,7 @@ app.get('/api/caregiver/events/:code', (req, res) => {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache, no-transform',
     'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
     'Access-Control-Allow-Origin': '*',
   });
 
@@ -652,7 +653,7 @@ app.get('/api/caregiver/events/:code', (req, res) => {
       clearInterval(keepAliveInterval);
       clients?.delete(res);
     }
-  }, 12000);
+  }, 10000);
 
   req.on('close', () => {
     clearInterval(keepAliveInterval);
@@ -667,11 +668,19 @@ app.get('/api/caregiver/poll/:code', (req, res) => {
   const history = eventHistoryByCode.get(code) || [];
   const newEvents = history.filter((e) => e.sentAt > since);
   const familyState = getOrCreateFamilyState(code);
+  const session = caregiverSessions.get(code);
+
+  const mergedSession = {
+    ...(session || {}),
+    ...(familyState.childState || {}),
+    activeAlert: familyState.activeAlert || session?.activeAlert || null,
+    childName: familyState.childProfile?.name || session?.childName || 'Leo',
+  };
 
   return res.json({
     success: true,
     events: newEvents,
-    session: familyState.childState,
+    session: mergedSession,
     state: familyState,
     serverTime: Date.now(),
   });
@@ -1068,34 +1077,46 @@ app.get('/api/caregiver/session/:code', (req, res) => {
     return res.status(400).json({ error: 'Pairing code is required' });
   }
 
-  const session = caregiverSessions.get(code);
+  const familyState = getOrCreateFamilyState(code);
+  let session = caregiverSessions.get(code);
+
   if (!session) {
     // Check if pairing session exists
     const pairing = pairingSessions.get(code);
-    const fallback: CaregiverSessionData = {
+    session = {
       pairingCode: code,
-      childName: pairing?.childName || 'Alex',
+      childName: pairing?.childName || familyState.childProfile?.name || 'Leo',
       lastActiveTime: new Date().toISOString(),
-      currentActivity: 'Exploring BeeYou Home',
-      currentMood: 'calm',
-      habitsCompletedToday: 2,
-      totalHabits: 4,
+      currentActivity: familyState.childState?.currentActivity || 'Active in BeeYou',
+      currentMood: (familyState.childState?.currentMood as any) || 'calm',
+      habitsCompletedToday: familyState.childState?.habitsCompletedToday || 2,
+      totalHabits: familyState.childState?.totalHabits || 4,
       routineProgress: null,
-      stars: 15,
+      stars: familyState.childState?.stars || 15,
       isOffline: false,
-      messages: [],
+      messages: familyState.messages || [],
       caregiverPhone: pairing?.caregiverPhone,
       permissions: pairing?.permissions,
+      activeAlert: familyState.activeAlert || null,
       unlinked: false,
     };
-    return res.json({ session: fallback });
+    caregiverSessions.set(code, session);
+  } else {
+    session.activeAlert = familyState.activeAlert || session.activeAlert || null;
+    if (familyState.childProfile?.name) session.childName = familyState.childProfile.name;
+    if (familyState.childState) {
+      session.currentActivity = familyState.childState.currentActivity || session.currentActivity;
+      session.currentMood = familyState.childState.currentMood || session.currentMood;
+      session.habitsCompletedToday = familyState.childState.habitsCompletedToday ?? session.habitsCompletedToday;
+      session.stars = familyState.childState.stars ?? session.stars;
+    }
   }
 
   if (session.unlinked) {
     return res.status(403).json({ error: 'This device has been unlinked.', session: { ...session, unlinked: true } });
   }
 
-  return res.json({ session });
+  return res.json({ session, state: familyState });
 });
 
 // Child updates their active state (activity, mood, AAC, habits, routine)

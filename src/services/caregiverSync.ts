@@ -140,11 +140,18 @@ export function launchNativeSms(phoneNumber: string, prefillMessage?: string): v
 }
 
 /**
- * Gets the current active pairing code (e.g., K7P4-92 or LUMI-101)
+ * Gets the current active pairing code (defaults to BEE-DEMO for instant 2-device pairing)
  */
 export function getPairingCode(): string {
-  if (typeof window === 'undefined') return 'BEE-101';
+  if (typeof window === 'undefined') return 'BEE-DEMO';
   try {
+    const params = new URLSearchParams(window.location.search);
+    const urlCode = params.get('code');
+    if (urlCode && urlCode.trim()) {
+      const safeUrlCode = urlCode.trim().toUpperCase();
+      localStorage.setItem(PAIRING_KEY, safeUrlCode);
+      return safeUrlCode;
+    }
     const rawFam = localStorage.getItem('beeyou_family_account');
     if (rawFam) {
       const fam = JSON.parse(rawFam);
@@ -157,15 +164,10 @@ export function getPairingCode(): string {
   } catch {}
   let code = localStorage.getItem(PAIRING_KEY);
   if (!code) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let p1 = '';
-    for (let i = 0; i < 4; i++) p1 += chars.charAt(Math.floor(Math.random() * chars.length));
-    let p2 = '';
-    for (let i = 0; i < 2; i++) p2 += chars.charAt(Math.floor(Math.random() * chars.length));
-    code = `${p1}-${p2}`;
+    code = 'BEE-DEMO';
     localStorage.setItem(PAIRING_KEY, code);
   }
-  return code;
+  return code.toUpperCase();
 }
 
 /**
@@ -389,12 +391,24 @@ export function subscribeToCloudChannel(code: string): void {
           }
         }
 
-        // If session returned from poll has active alert, ensure alert delivery
-        if (data.session) {
-          if (data.session.activeAlert && data.session.activeAlert.status === 'active') {
+        // Check active alert from polled state
+        const activeAlert = data.state?.activeAlert || data.session?.activeAlert;
+        if (activeAlert) {
+          if (activeAlert.status === 'active') {
             handleIncomingSyncEnvelope({
               type: 'CAREGIVER_ALERT',
-              alert: data.session.activeAlert,
+              alert: activeAlert,
+              pairingCode: safeCode,
+            });
+          } else if (activeAlert.status === 'acknowledged') {
+            handleIncomingSyncEnvelope({
+              type: 'CAREGIVER_ALERT_ACK',
+              ack: {
+                alertId: activeAlert.id || safeCode,
+                responseMessage: activeAlert.responseMessage,
+                responseId: activeAlert.responseId,
+                by: activeAlert.acknowledgedBy || 'Caregiver',
+              },
               pairingCode: safeCode,
             });
           }
@@ -1025,8 +1039,16 @@ export async function sendCaregiverAlert(alertData: {
     console.warn('Server alert sync error:', err);
   }
 
-  // NOTE: /api/caregiver/alert already persists and broadcasts CAREGIVER_ALERT.
-  // We do not call publishCloudEvent here to prevent duplicate alert reception.
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage({
+        type: 'CAREGIVER_ALERT',
+        alert,
+        pairingCode: code,
+        sentAt: Date.now(),
+      });
+    } catch {}
+  }
 
   return alert;
 }
@@ -1056,6 +1078,22 @@ export async function acknowledgeCaregiverAlert(
   responseId?: PredefinedCaregiverResponseId
 ): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage({
+        type: 'CAREGIVER_ALERT_ACK',
+        pairingCode: safeCode,
+        ack: {
+          alertId: safeCode,
+          responseMessage,
+          responseId,
+          by: acknowledgedBy || 'Caregiver',
+        },
+        sentAt: Date.now(),
+      });
+    } catch {}
+  }
 
   // Send to server acknowledge endpoint (server saves ack, updates state, and broadcasts single CAREGIVER_ALERT_ACK)
   try {
