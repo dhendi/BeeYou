@@ -151,10 +151,27 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
       setTimeout(() => {
         onClose();
-        if (asRole === 'caregiver' && setShowCaregiverModal) {
-          setShowCaregiverModal(true);
+        if (typeof window !== 'undefined') {
+          const safeCode = account.familyCode || 'BEE-DEMO';
+          if (asRole === 'caregiver') {
+            sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+            localStorage.setItem('beeyou_user_role', 'caregiver');
+            if (window.location.port === '3000') {
+              window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
+            } else {
+              window.location.href = `${window.location.pathname}?role=caregiver&code=${encodeURIComponent(safeCode)}`;
+            }
+          } else {
+            sessionStorage.setItem('beeyou_active_device_view', 'child');
+            localStorage.setItem('beeyou_user_role', 'child_dependent');
+            if (window.location.port === '3001') {
+              window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(safeCode)}`;
+            } else {
+              window.location.href = `${window.location.pathname}?role=child&code=${encodeURIComponent(safeCode)}`;
+            }
+          }
         }
-      }, 1200);
+      }, 1000);
     } catch (err) {
       console.error('Failed to apply account context:', err);
       onClose();
