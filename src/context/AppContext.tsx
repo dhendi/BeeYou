@@ -467,13 +467,23 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'beeyou_app_state_v1';
 
-export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiver' | 'child' }> = ({ children, initialRole }) => {
   // Navigation
   const [childView, setChildView] = useState<ChildViewType>('home');
   const [activeAdventureId, setActiveAdventureId] = useState<string | null>(null);
   const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
-  const [isParentMode, setIsParentMode] = useState<boolean>(false);
+  const [isParentMode, setIsParentMode] = useState<boolean>(() => {
+    if (initialRole === 'caregiver') return true;
+    if (initialRole === 'child') return false;
+    if (typeof window !== 'undefined') {
+      if (window.location.port === '3001' || window.location.pathname.startsWith('/caregiver')) return true;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('role') === 'caregiver' || params.get('mode') === 'caregiver') return true;
+      if (params.get('role') === 'child') return false;
+    }
+    return false;
+  });
   const [showPinModal, setShowPinModal] = useState<boolean>(false);
   const [showQuickPhrasesDrawer, setShowQuickPhrasesDrawer] = useState<boolean>(false);
   const [showCopingToolkit, setShowCopingToolkit] = useState<boolean>(false);
@@ -953,10 +963,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [userRole, setUserRoleState] = useState<UserAccountRole>(() => {
+    if (initialRole === 'caregiver') return 'caregiver';
+    if (initialRole === 'child') return 'child_dependent';
     try {
       if (typeof window !== 'undefined') {
-        if (window.location.port === '3001') return 'caregiver';
-        if (window.location.pathname.startsWith('/caregiver')) return 'caregiver';
+        if (window.location.port === '3001' || window.location.pathname.startsWith('/caregiver')) return 'caregiver';
         const params = new URLSearchParams(window.location.search);
         const role = params.get('role') || params.get('mode');
         if (role === 'caregiver') return 'caregiver';
