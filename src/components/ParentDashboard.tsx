@@ -117,6 +117,7 @@ import { setActiveDeviceView } from '../services/authService';
 
 export const ParentDashboard: React.FC = () => {
   const {
+    activeTheme,
     setIsParentMode,
     userRole,
     childProfile,
@@ -916,10 +917,10 @@ export const ParentDashboard: React.FC = () => {
   return (
     <div 
       ref={dashboardScrollRef}
-      className="h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain bg-slate-100 flex flex-col text-slate-800"
+      className={`h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} flex flex-col text-slate-800 transition-colors duration-300`}
     >
       {/* Top Caregiver Header */}
-      <header className="bg-slate-900 text-white px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-md">
+      <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md text-slate-900 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs border-b border-stone-200/70 transition-colors duration-300`}>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -933,23 +934,24 @@ export const ParentDashboard: React.FC = () => {
                 window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-slate-700 shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-stone-200 shadow-2xs"
             title="Return to Child View"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>← Return to Child View 🧒</span>
+            <ArrowLeft className="w-4 h-4 text-slate-600" />
+            <span>Return to Child View</span>
           </button>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black shadow-2xs">
-            <span>👑 Caregiver Controller</span>
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} text-xs font-black shadow-2xs`}>
+            <Crown className="w-3.5 h-3.5" />
+            <span>Caregiver Controller</span>
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
-              <span>Parent & Caregiver Hub</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
+              <span>Parent &amp; Caregiver Hub</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-900'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}>
                 BeeYou Support
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Child: {childProfile.name} • Private & Secure</p>
+            <p className="text-xs text-slate-500 font-medium">Child: {childProfile.name} • Private &amp; Secure</p>
           </div>
         </div>
 
@@ -962,8 +964,8 @@ export const ParentDashboard: React.FC = () => {
             }}
             className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
               plansChanged.active
-                ? 'bg-amber-400 text-amber-950 animate-pulse ring-2 ring-amber-300'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white animate-pulse ring-2 ring-amber-300`
+                : 'bg-white/90 hover:bg-white text-slate-700 border border-stone-200 shadow-2xs'
             }`}
           >
             <AlertTriangle className="w-4 h-4" />
@@ -983,7 +985,7 @@ export const ParentDashboard: React.FC = () => {
       {/* Main Layout: Sidebar Tabs + Content Area */}
       <div className="flex-1 max-w-6xl mx-auto w-full flex flex-col md:flex-row p-3 sm:p-6 gap-5">
         {/* Navigation Sidebar */}
-        <aside className="w-full md:w-64 bg-white rounded-3xl p-3 border-2 border-slate-200 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+        <aside className="w-full md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-3 border-2 border-stone-200/80 shadow-xs flex md:flex-col gap-1 overflow-x-auto shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           {[
             { 
               id: 'home', 
@@ -1051,13 +1053,13 @@ export const ParentDashboard: React.FC = () => {
                 }}
                 className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 ${
                   isActive
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'hover:bg-slate-100 text-slate-700'
+                    ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-md ring-2 ring-amber-300/60`
+                    : `hover:${activeTheme?.palette?.primaryLight || 'hover:bg-amber-50'} text-slate-700`
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                    isActive ? 'bg-white/20 text-white' : `${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`
                   }`}>
                     <Icon className="w-4 h-4 stroke-[2.4]" />
                   </div>
@@ -1065,7 +1067,9 @@ export const ParentDashboard: React.FC = () => {
                 </div>
                 {tab.badge && (
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    tab.id === 'routines' ? 'bg-sky-400 text-sky-950' : 'bg-amber-400 text-amber-950'
+                    tab.id === 'routines' 
+                      ? 'bg-sky-100 text-sky-950 border border-sky-200' 
+                      : `${activeTheme?.palette?.badgeBg || 'bg-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
                   }`}>
                     {tab.badge}
                   </span>
@@ -1076,7 +1080,7 @@ export const ParentDashboard: React.FC = () => {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 min-w-0 bg-white rounded-3xl p-5 sm:p-7 border-2 border-slate-200 shadow-xs">
+        <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-7 border-2 border-stone-200/80 shadow-xs">
           {/* Quick Access to Routine Templates Library if on another tab */}
           {activeTab !== 'routines' && activeTab !== 'subscription' && (
             <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-2 border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">

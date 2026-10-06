@@ -23,6 +23,7 @@ const CaregiverAppContent: React.FC = () => {
     setShowOnboardingModal,
     showFamilyAuthModal,
     setShowFamilyAuthModal,
+    activeTheme,
   } = useApp();
 
   useEffect(() => {
@@ -44,9 +45,9 @@ const CaregiverAppContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+    <div className={`min-h-screen w-full ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-300`}>
       <Suspense fallback={
-        <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-amber-400 font-bold text-lg">
+        <div className={`h-screen w-screen flex items-center justify-center ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} text-amber-600 font-bold text-lg`}>
           Loading Caregiver Controller Hub...
         </div>
       }>
