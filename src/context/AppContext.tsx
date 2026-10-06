@@ -616,10 +616,11 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
     _setShowAvatarCreator(val);
   };
+
   const [incomingCaregiverMessage, setIncomingCaregiverMessage] = useState<CaregiverMessage | null>(null);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatusInfo>(getLiveConnectionStatus());
-  const isCaregiverConnected = connectionStatus.isConnected && connectionStatus.peerRole === 'caregiver';
+  const isCaregiverConnected = connectionStatus.isConnected && (connectionStatus.peerRole === 'caregiver' || !connectionStatus.peerRole || connectionStatus.lastPingAgoSeconds <= 35);
 
   const dismissIncomingCaregiverMessage = () => {
     setIncomingCaregiverMessage(null);

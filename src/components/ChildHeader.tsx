@@ -129,16 +129,16 @@ export const ChildHeader: React.FC = () => {
             setShowCaregiverModal(true);
             playChime('tap');
           }}
-          className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl text-[11px] font-extrabold border transition-all cursor-pointer shadow-2xs active:scale-95 ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-2xl text-[11px] sm:text-xs font-black border transition-all cursor-pointer shadow-xs active:scale-95 ${
             isCaregiverConnected
-              ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400 shadow-md shadow-emerald-200 ring-2 ring-emerald-300/70'
               : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
           }`}
           title={isCaregiverConnected ? `🟢 Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : '⚪ Tap to link with Caregiver Phone/Tablet'}
         >
-          <span className={`w-2 h-2 rounded-full shrink-0 ${isCaregiverConnected ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400'}`} />
-          <span className="hidden sm:inline">
-            {isCaregiverConnected ? 'Caregiver Live' : 'Link Caregiver'}
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isCaregiverConnected ? 'bg-white shadow-xs animate-ping' : 'bg-stone-400'}`} />
+          <span>
+            {isCaregiverConnected ? '🟢 Connected (Live)' : '⚪ Link Caregiver'}
           </span>
         </button>
 
