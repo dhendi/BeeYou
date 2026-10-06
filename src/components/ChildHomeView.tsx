@@ -226,67 +226,172 @@ export const ChildHomeView: React.FC = () => {
       {/* 2. MAIN 2-COLUMN TACTILE WORKSPACE (Matching Image Graphic) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         
-        {/* ── LEFT COLUMN (60% on Desktop/Tablet): Tactile Silicone AAC Board ── */}
+        {/* ── LEFT COLUMN (60% on Desktop/Tablet): Tactile Silicone AAC Board OR Visual Schedule Hub if AAC is Off ── */}
         <div className="lg:col-span-7 flex flex-col space-y-3">
-          
-          {/* Header Bar for AAC Board */}
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-wider text-stone-500">
-                AAC Sensory Board • Tap to Speak
-              </span>
-            </div>
-            <button
-              onClick={() => setChildView('aac')}
-              className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer bg-stone-200/60 hover:bg-stone-200 px-3 py-1 rounded-xl transition-all"
-            >
-              <span>Full Vocabulary Board</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Recessed Silicone Tray Base */}
-          <div className="p-3 sm:p-5 rounded-[32px] bg-[#EFE9DF] border border-[#E0D8CB] shadow-[inset_0_3px_8px_rgba(0,0,0,0.06),0_2px_12px_rgba(0,0,0,0.02)]">
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              {TACTILE_AAC_TILES.map((tile) => (
-                <div 
-                  key={tile.id}
-                  className="aspect-square rounded-[24px] bg-[#E4DDD0] p-1 shadow-[inset_0_2px_5px_rgba(0,0,0,0.12)] flex items-center justify-center"
+          {enabledFeatures?.aacCommunication !== false ? (
+            <>
+              {/* Header Bar for AAC Board */}
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-xs font-black uppercase tracking-wider text-stone-500">
+                    AAC Sensory Board • Tap to Speak
+                  </span>
+                </div>
+                <button
+                  onClick={() => setChildView('aac')}
+                  className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer bg-stone-200/60 hover:bg-stone-200 px-3 py-1 rounded-xl transition-all"
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleTactileTileClick(tile)}
-                    className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
-                    title={`Speak "${tile.label}"`}
-                  >
-                    {/* Mulberry Symbol Image */}
-                    <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
-                      <img
-                        src={resolveAacImageUrl(tile)}
-                        alt={tile.label}
-                        className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
-                        loading="lazy"
-                      />
+                  <span>Full Vocabulary Board</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Recessed Silicone Tray Base */}
+              <div className="p-3 sm:p-5 rounded-[32px] bg-[#EFE9DF] border border-[#E0D8CB] shadow-[inset_0_3px_8px_rgba(0,0,0,0.06),0_2px_12px_rgba(0,0,0,0.02)]">
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                  {TACTILE_AAC_TILES.map((tile) => (
+                    <div 
+                      key={tile.id}
+                      className="aspect-square rounded-[24px] bg-[#E4DDD0] p-1 shadow-[inset_0_2px_5px_rgba(0,0,0,0.12)] flex items-center justify-center"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleTactileTileClick(tile)}
+                        className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
+                        title={`Speak "${tile.label}"`}
+                      >
+                        {/* Mulberry Symbol Image */}
+                        <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+                          <img
+                            src={resolveAacImageUrl(tile)}
+                            alt={tile.label}
+                            className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        {/* Button Label */}
+                        <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
+                          {tile.label}
+                        </span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Speak Sentence Strip Preview */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-600" />
+                  <span>Instant Voice Output is active. Tap any tile above to speak aloud.</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* NON-AAC FALLBACK: Interactive Daily Schedule & Life Rhythm Stepper Hub */
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-black uppercase tracking-wider text-stone-500">
+                    Visual Schedule & Daily Rhythm Stepper
+                  </span>
+                </div>
+                <button
+                  onClick={() => setChildView('my-day')}
+                  className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer bg-stone-200/60 hover:bg-stone-200 px-3 py-1 rounded-xl transition-all"
+                >
+                  <span>Full Schedule</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Interactive Routine Stepper Card */}
+              {currentRoutine && (
+                <div className="p-4 sm:p-6 rounded-[32px] bg-[#FCF9F2] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl p-2 rounded-2xl bg-[#EFE9DF] border border-[#E0D8CB] shadow-2xs">
+                        {currentRoutine.emoji}
+                      </span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200">
+                          Active Routine
+                        </span>
+                        <h3 className="font-black text-base sm:text-lg text-stone-900 mt-0.5">
+                          {currentRoutine.title}
+                        </h3>
+                      </div>
                     </div>
 
-                    {/* Button Label */}
-                    <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
-                      {tile.label}
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+                    <button
+                      onClick={() => setChildView('my-day')}
+                      className="px-4 py-2 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
+                    >
+                      Start Routine →
+                    </button>
+                  </div>
 
-          {/* Quick Speak Sentence Strip Preview */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-600" />
-              <span>Instant Voice Output is active. Tap any tile above to speak aloud.</span>
+                  {/* Routine Step Cards */}
+                  <div className="space-y-2.5">
+                    {currentRoutine.steps.slice(0, 4).map((step, idx) => (
+                      <div
+                        key={step.id}
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
+                          step.completed
+                            ? 'bg-[#F0F7F2] border-emerald-300/80 text-emerald-950'
+                            : 'bg-[#F5EFE6] border-[#E8DFC2] text-stone-900 hover:bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="w-7 h-7 rounded-xl bg-white/90 border border-stone-200 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                            {idx + 1}
+                          </span>
+                          <span className="text-xl shrink-0">{step.emoji}</span>
+                          <span className="font-black text-xs sm:text-sm truncate">{step.title}</span>
+                        </div>
+
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 shadow-2xs ${
+                          step.completed ? 'bg-emerald-500 text-white' : 'bg-stone-200 text-stone-400'
+                        }`}>
+                          {step.completed ? '✓' : '○'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Life Adventure Spotlight Card */}
+              {todaysAdventure && (
+                <div
+                  onClick={() => setChildView('adventures')}
+                  className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)] flex items-center justify-between cursor-pointer hover:scale-[1.01] active:scale-98 transition-all"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="w-12 h-12 rounded-2xl bg-[#EFE9DF] border border-[#E0D8CB] flex items-center justify-center text-2xl shrink-0 shadow-xs">
+                      {todaysAdventure.emoji}
+                    </span>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
+                        Life Adventure Prep
+                      </span>
+                      <h4 className="font-black text-sm sm:text-base text-stone-900 mt-0.5">
+                        {todaysAdventure.title}
+                      </h4>
+                      <p className="text-xs text-stone-500 font-medium">
+                        Walkthrough, sensory guide & confidence tips.
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-stone-400 shrink-0" />
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* ── RIGHT COLUMN (40% on Desktop/Tablet): Companion Bento Hub ── */}

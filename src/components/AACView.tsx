@@ -688,32 +688,32 @@ export const AACView: React.FC = () => {
           <section
             data-tour="aac-sentence-strip"
             aria-label="Sentence builder"
-            className="w-full bg-white/95 backdrop-blur-md rounded-2xl border-2 border-slate-300 shadow-xs p-2 animate-in fade-in duration-150"
+            className="w-full bg-[#FCF9F2] rounded-3xl border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150"
           >
             <div className="flex items-center gap-2">
-              {/* Sentence Display Area */}
+              {/* Sentence Display Area (Debossed Silicone Slot) */}
               <div 
                 onClick={sentence.length > 0 ? speakSentence : undefined}
-                className={`flex-1 min-w-0 min-h-[52px] sm:min-h-[58px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-1.5 flex items-center gap-1.5 overflow-x-auto scrollbar-thin transition-colors ${
-                  sentence.length > 0 ? 'cursor-pointer hover:bg-amber-50/50' : ''
+                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors ${
+                  sentence.length > 0 ? 'cursor-pointer hover:bg-[#EAE3D7]' : ''
                 }`}
                 title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
               >
                 {sentence.length === 0 ? (
-                  <div className="flex items-center gap-2 text-slate-400 text-xs sm:text-sm font-medium px-2 select-none truncate">
+                  <div className="flex items-center gap-2 text-[#8C7E72] text-xs sm:text-sm font-semibold px-2 select-none truncate">
                     {instantSpeakMode ? (
-                      <span className="text-amber-600 font-bold flex items-center gap-1">
+                      <span className="text-[#A76318] font-bold flex items-center gap-1">
                         <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
                       </span>
                     ) : (
-                      <span>Tap words below to build a sentence... (tap message window to speak)</span>
+                      <span>Tap words below to build a sentence... (tap window to speak)</span>
                     )}
                   </div>
                 ) : (
                   sentence.map((item, idx) => (
                     <div
                       key={`${item.id}-${idx}`}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border shadow-xs animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
                         item.colorType
                       )}`}
                     >
@@ -729,12 +729,12 @@ export const AACView: React.FC = () => {
               </div>
 
               {/* Controls: Backspace, Clear, Speak, Save, Collapse */}
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {sentence.length > 0 && (
                   <>
                     <button
                       onClick={removeLastFromSentence}
-                      className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition-all cursor-pointer"
+                      className="p-2.5 rounded-2xl bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer"
                       title="Remove last word"
                       aria-label="Backspace"
                     >
@@ -742,7 +742,7 @@ export const AACView: React.FC = () => {
                     </button>
                     <button
                       onClick={clearSentence}
-                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 active:scale-95 transition-all cursor-pointer"
+                      className="p-2.5 rounded-2xl bg-[#FBEAE9] hover:bg-[#F6D6D4] text-[#9E3636] border border-[#EAC2C0] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer"
                       title="Clear sentence"
                       aria-label="Clear all"
                     >
@@ -750,7 +750,7 @@ export const AACView: React.FC = () => {
                     </button>
                     <button
                       onClick={saveSentenceAsQuickPhrase}
-                      className="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 active:scale-95 transition-all cursor-pointer hidden sm:block"
+                      className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block"
                       title="Save to quick phrases"
                     >
                       <BookmarkPlus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -761,13 +761,13 @@ export const AACView: React.FC = () => {
                 {isSpeaking ? (
                   <button
                     onClick={stopSpeaking}
-                    className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 bg-rose-500 hover:bg-rose-600 text-white animate-pulse cursor-pointer"
+                    className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.7)] transition-all active:scale-95 bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] border-2 border-[#D57B7B] animate-pulse cursor-pointer"
                     title="Stop speaking"
                   >
                     <div className="flex items-center gap-0.5 mr-0.5">
-                      <span className="w-1 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="w-1.5 h-3.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-4.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-2.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                     <span>STOP</span>
                   </button>
@@ -775,10 +775,10 @@ export const AACView: React.FC = () => {
                   <button
                     onClick={speakSentence}
                     disabled={sentence.length === 0}
-                    className={`flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
                       sentence.length > 0
-                        ? 'bg-amber-400 hover:bg-amber-500 text-amber-950 ring-2 ring-amber-500 animate-pulse'
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        ? 'bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                        : 'bg-[#EAE4D9] text-[#A89C8F] border border-[#DCD3C4] cursor-not-allowed'
                     }`}
                   >
                     <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -788,7 +788,7 @@ export const AACView: React.FC = () => {
 
                 <button
                   onClick={() => setIsSentenceBarCollapsed(true)}
-                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all cursor-pointer hidden md:block"
+                  className="p-2 rounded-2xl bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#7A6C60] border border-[#E0D8CB] transition-all cursor-pointer hidden md:block"
                   title="Minimize sentence bar"
                 >
                   <ChevronUp className="w-4 h-4" />
@@ -800,14 +800,14 @@ export const AACView: React.FC = () => {
 
         {/* Minimized Sentence Bar Restorer */}
         {isSentenceBarCollapsed && (
-          <div className="flex items-center justify-between bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-600">
+          <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 text-xs font-bold text-[#6B5E52] shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
             <span className="flex items-center gap-1.5">
               <span>💬 Sentence Bar Minimized</span>
-              {instantSpeakMode && <span className="text-amber-600 font-black">(⚡ Instant Speak is Active)</span>}
+              {instantSpeakMode && <span className="text-[#A76318] font-black">(⚡ Instant Speak is Active)</span>}
             </span>
             <button
               onClick={() => setIsSentenceBarCollapsed(false)}
-              className="flex items-center gap-1 text-amber-700 hover:underline cursor-pointer"
+              className="flex items-center gap-1 text-[#8B571A] hover:underline cursor-pointer font-black"
             >
               <span>Show Bar</span>
               <ChevronDown className="w-4 h-4" />
@@ -817,9 +817,9 @@ export const AACView: React.FC = () => {
 
         {/* 3. CONTEXTUAL AAC STRIP (Plans changed / Dentist visit) */}
         {plansChanged.active ? (
-          <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-2 flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
+          <div className="bg-[#FFF4E5] border-2 border-[#F0CA86] rounded-2xl p-2.5 flex flex-col gap-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#7A4B13]">
+              <AlertTriangle className="w-4 h-4 text-[#D97706]" />
               <span>Context Words: Plans Changed</span>
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
@@ -827,7 +827,7 @@ export const AACView: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => speak(phrase)}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 text-amber-950 font-bold text-xs border border-amber-300 shadow-2xs shrink-0 active:scale-95 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer"
                 >
                   💬 {phrase}
                 </button>
@@ -838,7 +838,7 @@ export const AACView: React.FC = () => {
 
         {/* 4. PROLOQUO2GO BREADCRUMB STRIP (If Inside A Category Folder) */}
         {activeCategory !== 'core' && activeCategory !== 'all' && activeCategory !== 'favorites' && !activeSceneData && (
-          <div className="flex items-center justify-between bg-white border-2 border-slate-300 rounded-2xl px-3 py-2 shadow-xs animate-in fade-in">
+          <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.03)] animate-in fade-in">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -846,20 +846,20 @@ export const AACView: React.FC = () => {
                   setActiveCategory('core');
                   playChime('tap');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-xs flex items-center gap-1.5 shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.8)] border border-[#E2A44E] active:scale-95 transition-all cursor-pointer"
               >
                 <HomeIcon className="w-4 h-4" />
                 <span>Core Board</span>
               </button>
-              <span className="text-slate-300 font-bold text-sm">/</span>
-              <span className="font-black text-xs sm:text-sm text-slate-800 flex items-center gap-1.5">
+              <span className="text-[#C8BCAC] font-bold text-sm">/</span>
+              <span className="font-black text-xs sm:text-sm text-[#3E342B] flex items-center gap-1.5">
                 <span>{categories.find(c => c.id === activeCategory)?.emoji}</span>
                 <span>{categories.find(c => c.id === activeCategory)?.label} Folder</span>
               </span>
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">
+              <span className="text-[11px] font-bold text-[#8C7E72] hidden sm:inline">
                 {displayedItems.length} words
               </span>
             </div>
@@ -867,10 +867,10 @@ export const AACView: React.FC = () => {
         )}
 
         {/* 5. TOOLBAR & PROLOQUO2GO QUICK ACTIONS */}
-        <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-0.5 scrollbar-thin">
+        <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-1 scrollbar-thin">
           
           {/* Category Navigation Pills */}
-          <div data-tour="aac-categories" className="flex items-center gap-1 shrink-0">
+          <div data-tour="aac-categories" className="flex items-center gap-1.5 shrink-0 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB]">
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -880,14 +880,14 @@ export const AACView: React.FC = () => {
                   setSearchQuery('');
                   playChime('tap');
                 }}
-                className={`px-2.5 py-1 rounded-xl font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                   !activeSceneData && activeCategory === cat.id
                     ? cat.id === 'core'
-                      ? 'bg-amber-400 text-amber-950 shadow-xs ring-2 ring-amber-500 font-black'
+                      ? 'bg-[#F5B865] text-[#4A2F0F] border border-[#E2A44E] shadow-[0_3px_8px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
                       : cat.id === 'favorites'
-                      ? 'bg-rose-500 text-white shadow-xs ring-2 ring-rose-600 font-black'
-                      : 'bg-slate-800 text-white shadow-xs ring-2 ring-slate-800 font-black'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      ? 'bg-[#E68E8E] text-[#4A1616] border border-[#D57B7B] shadow-[0_3px_8px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                      : 'bg-[#4A3E34] text-white shadow-[0_3px_8px_rgba(0,0,0,0.08)]'
+                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] border border-[#E0D8CB]'
                 }`}
               >
                 <span>{cat.emoji}</span>
@@ -897,9 +897,9 @@ export const AACView: React.FC = () => {
           </div>
 
           {/* Clinical AAC Tools: Quick-Chat, Masking Mode, Instant Speak, Add Word, Symbol Picker */}
-          <div className="flex items-center gap-1 shrink-0 ml-auto flex-wrap">
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
             
-            {/* Quick-Chat Expressions Drawer Button (Instant Speech without clearing sentence) */}
+            {/* Quick-Chat Expressions Drawer Button */}
             <button
               data-tour="aac-quickchat"
               type="button"
@@ -907,10 +907,10 @@ export const AACView: React.FC = () => {
                 setShowQuickChatDrawer(true);
                 playChime('tap');
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-black border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              className="px-3 py-1.5 rounded-xl text-xs font-black border border-[#B8B4DC] bg-[#D7D4F0] hover:bg-[#CBC8E8] text-[#2C2954] flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)]"
               title="Quick-Chat: Instant expressions that won't clear your sentence"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-purple-600" />
+              <MessageCircle className="w-3.5 h-3.5 text-[#51488C]" />
               <span>Quick Chat</span>
             </button>
 
@@ -921,10 +921,10 @@ export const AACView: React.FC = () => {
                 setIsMaskingMode(!isMaskingMode);
                 playChime('tap');
               }}
-              className={`px-2 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
                 isMaskingMode
-                  ? 'bg-emerald-600 text-white border-emerald-700 font-black shadow-xs ring-2 ring-emerald-400'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-[#99C2A2] text-[#1C3E25] border-[#85AE8E] font-black shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
               }`}
               title="Vocabulary Masking: Hide words while preserving exact motor planning coordinates"
             >
@@ -939,14 +939,14 @@ export const AACView: React.FC = () => {
                 setInstantSpeakMode(!instantSpeakMode);
                 playChime('tap');
               }}
-              className={`px-2 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
                 instantSpeakMode
-                  ? 'bg-amber-400 text-amber-950 border-amber-500 font-black shadow-2xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-[#F5B865] text-[#4A2F0F] border-[#E2A44E] font-black shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
               }`}
               title="Instant Speak Mode: Tap any tile to speak it aloud immediately"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-600" />
+              <Zap className="w-3.5 h-3.5 text-[#A76318]" />
               <span className="hidden sm:inline">Instant</span>
             </button>
 
@@ -957,10 +957,10 @@ export const AACView: React.FC = () => {
                 setEditingItem(null);
                 setShowWordEditor(true);
               }}
-              className="px-2 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              className="px-2.5 py-1.5 rounded-xl text-xs font-black border border-[#E2A44E] bg-[#FDE293] hover:bg-[#FCD876] text-[#4A2F0F] flex items-center gap-1 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)]"
               title="Add a custom word or favorite phrase"
             >
-              <Plus className="w-3.5 h-3.5 text-amber-700" />
+              <Plus className="w-3.5 h-3.5 text-[#8B571A]" />
               <span className="hidden sm:inline">Add Word</span>
             </button>
 
@@ -1312,7 +1312,7 @@ export const AACView: React.FC = () => {
           </div>
         ) : (
         <main
-          className={`grid ${gridColsClass} gap-1.5 sm:gap-2 pb-10`}
+          className={`grid ${gridColsClass} gap-2 pb-10 bg-[#EFE9DF] p-3 sm:p-4 rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)]`}
           aria-label="Vocabulary grid"
         >
           {/* FOLDER TILES (Rendered at top of Core View for Proloquo2Go architecture) */}
@@ -1324,10 +1324,10 @@ export const AACView: React.FC = () => {
                   setActiveCategory(folder.category);
                   playChime('tap');
                 }}
-                className={`w-full h-full flex flex-col items-center p-1.5 sm:p-2 rounded-2xl border-3 shadow-md transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-slate-100 hover:bg-slate-200 border-slate-400/80 text-slate-950`}
+                className={`w-full h-full flex flex-col items-center p-2 rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]`}
               >
                 {/* Folder Top-Right Corner Tab / Badge */}
-                <div className="absolute top-1 right-1 z-10 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
+                <div className="absolute top-1.5 right-1.5 z-10 bg-[#4A3E34] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
                   <Folder className="w-2.5 h-2.5 fill-white" />
                   <span>FOLDER</span>
                 </div>
@@ -1343,7 +1343,7 @@ export const AACView: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-xs w-full mt-1 ${
+                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${
                   settings.gridColumns === 2 ? 'text-sm sm:text-base' :
                   settings.gridColumns === 3 ? 'text-xs sm:text-sm' :
                   settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' :
@@ -1362,12 +1362,12 @@ export const AACView: React.FC = () => {
             const hasInflections = inflections.length > 1;
             const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category) && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
 
-            // When masked and not in masking mode, render as a fixed blank placeholder
+            // When masked and not in masking mode, render as a fixed blank placeholder (Debossed well)
             if (isMasked && !isMaskingMode) {
               return (
                 <div
                   key={item.id}
-                  className="relative aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/40 select-none"
+                  className="relative aspect-square rounded-2xl border-2 border-dashed border-[#D8CEBA] bg-[#E5DFD4]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] select-none"
                   aria-hidden="true"
                 />
               );
@@ -1376,7 +1376,7 @@ export const AACView: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className={`relative group aspect-square ${isMasked ? 'opacity-40 grayscale ring-2 ring-emerald-500 rounded-2xl' : ''}`}
+                className={`relative group aspect-square ${isMasked ? 'opacity-40 grayscale ring-2 ring-[#99C2A2] rounded-2xl' : ''}`}
                 onMouseDown={() => handleLongPressStart(item)}
                 onMouseUp={handleLongPressEnd}
                 onTouchStart={() => handleLongPressStart(item)}
@@ -1385,11 +1385,11 @@ export const AACView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleTileClick(item)}
-                  className={`w-full h-full flex flex-col items-center p-1.5 sm:p-2 ${
+                  className={`w-full h-full flex flex-col items-center p-2 ${
                     activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
                   } ${
                     activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-                  } shadow-xs transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
+                  } shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
                     hasThemedArt ? 'border-opacity-60' : ''
                   } ${getColorStyles(item.colorType)}`}
                 >
@@ -1414,7 +1414,7 @@ export const AACView: React.FC = () => {
 
                   {/* Label */}
                   <span
-                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none drop-shadow-xs w-full mt-1 ${
+                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${
                       settings.largeButtonMode
                         ? (settings.gridColumns === 2 ? 'text-base sm:text-lg' : settings.gridColumns === 3 ? 'text-sm sm:text-base' : 'text-xs sm:text-sm')
                         : (settings.gridColumns === 2 ? 'text-sm sm:text-base' : settings.gridColumns === 3 ? 'text-xs sm:text-sm' : settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-xs')

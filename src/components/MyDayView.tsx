@@ -230,7 +230,7 @@ export const MyDayView: React.FC = () => {
       )}
 
       {/* 2. TOP CONTROLS: CATEGORY FILTER & HELP */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#FCF9F2] p-3 sm:p-4 rounded-[28px] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]">
         
         {/* Category Filter Chips */}
         <div data-tour="myday-categoryfilter" className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
@@ -240,10 +240,10 @@ export const MyDayView: React.FC = () => {
               setCategoryFilter('all');
               playChime('tap');
             }}
-            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 ${
+            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 ${
               categoryFilter === 'all'
-                ? 'bg-slate-900 dark:bg-amber-400 text-white dark:text-amber-950 shadow-xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                ? 'bg-stone-900 text-white shadow-xs'
+                : 'bg-[#F5EFE6] text-stone-700 hover:bg-white border border-[#E8DFC2]'
             }`}
           >
             All Schedules
@@ -255,10 +255,10 @@ export const MyDayView: React.FC = () => {
               setCategoryFilter('morning');
               playChime('tap');
             }}
-            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
               categoryFilter === 'morning'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 hover:bg-amber-100'
+                ? 'bg-[#F5B865] text-stone-950 shadow-xs border border-[#E2A44E]'
+                : 'bg-amber-50/80 text-amber-900 hover:bg-amber-100 border border-amber-200'
             }`}
           >
             <Sun className="w-3.5 h-3.5" />
@@ -271,10 +271,10 @@ export const MyDayView: React.FC = () => {
               setCategoryFilter('evening');
               playChime('tap');
             }}
-            className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
               categoryFilter === 'evening'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-300 hover:bg-indigo-100'
+                ? 'bg-[#99C2A2] text-stone-950 shadow-xs border border-[#85AE8E]'
+                : 'bg-indigo-50/80 text-indigo-900 hover:bg-indigo-100 border border-indigo-200'
             }`}
           >
             <Moon className="w-3.5 h-3.5" />
@@ -284,17 +284,17 @@ export const MyDayView: React.FC = () => {
 
         {/* View Mode Switcher & Contextual Help Button */}
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-          <div data-tour="myday-viewmode" className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div data-tour="myday-viewmode" className="flex items-center p-1 bg-[#F5EFE6] rounded-2xl border border-[#E8DFC2]">
             <button
               type="button"
               onClick={() => {
                 setScheduleViewMode('focus_mode');
                 playChime('tap');
               }}
-              className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all flex items-center gap-1 ${
                 scheduleViewMode === 'focus_mode'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
-                  : 'text-slate-600 dark:text-slate-400'
+                  ? 'bg-white text-stone-900 shadow-xs font-black border border-[#E8DFC2]'
+                  : 'text-stone-600'
               }`}
               title="Focus on one activity at a time"
             >
@@ -307,10 +307,10 @@ export const MyDayView: React.FC = () => {
                 setScheduleViewMode('list_mode');
                 playChime('tap');
               }}
-              className={`px-3 py-1 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all flex items-center gap-1 ${
                 scheduleViewMode === 'list_mode'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
-                  : 'text-slate-600 dark:text-slate-400'
+                  ? 'bg-white text-stone-900 shadow-xs font-black border border-[#E8DFC2]'
+                  : 'text-stone-600'
               }`}
               title="View full schedule checklist"
             >
@@ -324,7 +324,7 @@ export const MyDayView: React.FC = () => {
               setIsCoachMarksActive(true);
               playChime('tap');
             }}
-            className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all border border-amber-300"
+            className="px-3.5 py-1.5 rounded-2xl bg-[#F5B865] hover:bg-[#EEAC53] text-stone-950 font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all border border-[#E2A44E]"
             title="Interactive live tutorial on where to click"
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -349,15 +349,15 @@ export const MyDayView: React.FC = () => {
                 setSelectedRoutineId(routine.id);
                 playChime('tap');
               }}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm border-2 transition-all shrink-0 cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs sm:text-sm border transition-all shrink-0 cursor-pointer ${
                 isSelected
-                  ? 'bg-amber-500 text-white border-amber-600 shadow-md ring-2 ring-amber-300'
-                  : 'bg-white dark:bg-slate-850 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                  ? 'bg-[#F5B865] text-stone-950 border-[#E2A44E] shadow-sm ring-2 ring-[#F5B865]/40'
+                  : 'bg-[#FCF9F2] hover:bg-white text-stone-800 border-[#EBE3D5] shadow-2xs'
               }`}
             >
               <span className="text-lg">{routine.emoji}</span>
               <span>{routine.title}</span>
-              {isAllDone && <CheckCircle2 className="w-4 h-4 text-emerald-300 fill-emerald-500" />}
+              {isAllDone && <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-100" />}
             </button>
           );
         })}
@@ -368,21 +368,21 @@ export const MyDayView: React.FC = () => {
         <section
           data-tour="myday-firstthen"
           aria-label="First then board"
-          className="bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-850 border-2 border-indigo-200 dark:border-indigo-800 rounded-3xl p-4 sm:p-5 shadow-xs"
+          className="bg-[#FCF9F2] border border-[#EBE3D5] rounded-[28px] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]"
         >
-          <div className="text-[11px] font-black uppercase tracking-wider text-indigo-900 dark:text-indigo-300 mb-2 flex items-center justify-between">
-            <span>First → Then</span>
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Tap when done!</span>
+          <div className="text-[11px] font-black uppercase tracking-wider text-stone-500 mb-2.5 flex items-center justify-between">
+            <span>First → Then Routine Flow</span>
+            <span className="text-stone-400 font-bold">Tap when completed!</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
             {/* FIRST */}
             <button
               onClick={() => toggleFirstThen(currentRoutine.id, 'first')}
-              className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all active:scale-95 text-left cursor-pointer ${
+              className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedFirst
-                  ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-inner'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-xs'
+                  ? 'bg-[#F0F7F2] border-emerald-300 text-emerald-950 shadow-inner'
+                  : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
               }`}
             >
               <div className="w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0">
@@ -390,7 +390,7 @@ export const MyDayView: React.FC = () => {
               </div>
               <span className="text-3xl">{currentRoutine.firstThen.firstEmoji}</span>
               <div className="flex-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                <span className="text-[10px] font-black text-sky-700 uppercase tracking-wider block">
                   First
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
@@ -400,17 +400,17 @@ export const MyDayView: React.FC = () => {
               {currentRoutine.firstThen.completedFirst ? (
                 <CheckCircle2 className="w-6 h-6 text-emerald-600 fill-emerald-200" />
               ) : (
-                <Circle className="w-6 h-6 text-slate-300" />
+                <Circle className="w-6 h-6 text-stone-300" />
               )}
             </button>
 
             {/* THEN */}
             <button
               onClick={() => toggleFirstThen(currentRoutine.id, 'then')}
-              className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all active:scale-95 text-left cursor-pointer ${
+              className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedThen
-                  ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-inner'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 shadow-xs'
+                  ? 'bg-[#F0F7F2] border-emerald-300 text-emerald-950 shadow-inner'
+                  : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
               }`}
             >
               <div className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
@@ -418,7 +418,7 @@ export const MyDayView: React.FC = () => {
               </div>
               <span className="text-3xl">{currentRoutine.firstThen.thenEmoji}</span>
               <div className="flex-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider block">
                   Then
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
@@ -428,7 +428,7 @@ export const MyDayView: React.FC = () => {
               {currentRoutine.firstThen.completedThen ? (
                 <CheckCircle2 className="w-6 h-6 text-emerald-600 fill-emerald-200" />
               ) : (
-                <Circle className="w-6 h-6 text-slate-300" />
+                <Circle className="w-6 h-6 text-stone-300" />
               )}
             </button>
           </div>
@@ -444,18 +444,18 @@ export const MyDayView: React.FC = () => {
       </div>
 
       {/* 6. ROUTINE PROGRESS & REWARD BANNER */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs">
+      <div className="bg-[#FCF9F2] rounded-[28px] border border-[#EBE3D5] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <span className="text-3xl sm:text-4xl">{currentRoutine.emoji}</span>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-black text-stone-900">
                 {currentRoutine.title}
               </h2>
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2 text-xs font-bold text-stone-500">
                 {currentRoutine.time && (
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <Clock className="w-3.5 h-3.5 text-stone-400" />
                     {currentRoutine.time}
                   </span>
                 )}
@@ -469,7 +469,7 @@ export const MyDayView: React.FC = () => {
 
           <button
             onClick={() => resetRoutine(currentRoutine.id)}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-700 font-black text-xs flex items-center gap-1 transition-all cursor-pointer border border-[#E8DFC2]"
             title="Reset routine"
           >
             <RotateCcw className="w-4 h-4" />
@@ -478,30 +478,30 @@ export const MyDayView: React.FC = () => {
         </div>
 
         {/* Visual Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div className="w-full bg-[#EFE9DF] h-3 rounded-full overflow-hidden border border-[#E0D8CB]">
           <div
-            className="bg-emerald-500 h-full transition-all duration-500 rounded-full"
+            className="bg-[#99C2A2] h-full transition-all duration-500 rounded-full"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         {/* Digital Sticker Reward Banner */}
-        <div className="mt-3.5 p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 transition-all bg-gradient-to-r from-amber-50 via-yellow-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border-amber-300/80">
+        <div className="mt-3.5 p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 transition-all bg-[#F5EFE6] border-[#E8DFC2]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-amber-200 flex items-center justify-center text-2xl shadow-xs shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-white border border-amber-200 flex items-center justify-center text-2xl shadow-2xs shrink-0">
               {routineStickerDef.emoji}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
-                  {isRoutineCompleted ? '🎉 Sticker Unlocked!' : '🎁 Complete Routine Reward'}
+                  {isRoutineCompleted ? '🎉 Sticker Unlocked!' : '🎁 Routine Completion Reward'}
                 </span>
-                <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                <span className="text-[11px] font-bold text-amber-800">
                   +{routineStickerDef.starsAward} Stars
                 </span>
               </div>
-              <p className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 mt-0.5">
-                {routineStickerDef.stickerName}: <span className="text-slate-500 dark:text-slate-400 font-medium">{routineStickerDef.description}</span>
+              <p className="font-black text-xs sm:text-sm text-stone-900 mt-0.5">
+                {routineStickerDef.stickerName}: <span className="text-stone-500 font-medium">{routineStickerDef.description}</span>
               </p>
             </div>
           </div>
@@ -512,7 +512,7 @@ export const MyDayView: React.FC = () => {
               setChildView('rewards');
               playChime('tap');
             }}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 dark:bg-slate-900 text-amber-900 dark:text-amber-200 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-stone-900 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs"
           >
             <span>Sticker Album ({earnedStickers.length})</span>
             <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
@@ -530,37 +530,37 @@ export const MyDayView: React.FC = () => {
               {/* CURRENT STEP (NOW) HERO CARD */}
               <div
                 data-tour="myday-activetask"
-                className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-500/10 border-3 border-amber-400 dark:border-amber-500/80 bg-white dark:bg-slate-900 shadow-md space-y-4"
+                className="p-5 sm:p-6 rounded-[32px] bg-[#FCF9F2] border-2 border-[#E2A44E] shadow-[0_6px_20px_rgba(0,0,0,0.04)] space-y-4"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-xs">
+                  <span className="px-3 py-1 rounded-full bg-[#F5B865] text-stone-950 font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-2xs border border-[#E2A44E]">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>NOW • Step {activeStepIndex + 1} of {totalStepsCount}</span>
                   </span>
                   {activeStep.durationMin && (
-                    <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 font-black text-xs">
+                    <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-950 font-black text-xs">
                       ⏱️ {activeStep.durationMin} minutes
                     </span>
                   )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left py-2">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-amber-100 dark:bg-amber-950/60 border-2 border-amber-300 flex items-center justify-center text-5xl sm:text-6xl shadow-sm shrink-0">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#F5EFE6] border-2 border-[#E8DFC2] flex items-center justify-center text-5xl sm:text-6xl shadow-sm shrink-0">
                     {activeStep.emoji}
                   </div>
 
                   <div className="flex-1 space-y-1.5">
-                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    <h3 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
                       {activeStep.title}
                     </h3>
                     {activeStep.instruction && (
-                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium">
+                      <p className="text-sm sm:text-base text-stone-600 font-medium">
                         {activeStep.instruction}
                       </p>
                     )}
                     {activeStep.sensoryNote && (
-                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-100 dark:bg-amber-950/60 px-3 py-1 rounded-xl mt-1">
-                        <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 px-3 py-1 rounded-xl mt-1">
+                        <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                         <span>Sensory tip: {activeStep.sensoryNote}</span>
                       </div>
                     )}
@@ -573,7 +573,7 @@ export const MyDayView: React.FC = () => {
                     data-tour="myday-starttimer"
                     type="button"
                     onClick={() => startTimerForStep(activeStep, true)}
-                    className="py-3.5 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="py-3.5 px-4 rounded-2xl bg-[#FDE293] hover:bg-[#F6D06F] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#F6D06F]"
                   >
                     <Timer className="w-5 h-5" />
                     <span>Start Timer ({activeStep.durationMin || 2}m)</span>
@@ -586,7 +586,7 @@ export const MyDayView: React.FC = () => {
                       toggleRoutineStep(currentRoutine.id, activeStep.id);
                       playChime('star');
                     }}
-                    className="py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="py-3.5 px-4 rounded-2xl bg-[#99C2A2] hover:bg-[#8BB594] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#85AE8E]"
                   >
                     <CheckCircle2 className="w-5 h-5" />
                     <span>✓ Mark as Done!</span>
@@ -596,7 +596,7 @@ export const MyDayView: React.FC = () => {
 
               {/* UP NEXT PREVIEW CARD */}
               {subsequentStep && (
-                <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+                <div className="p-4 rounded-3xl bg-[#FCF9F2] border border-[#EBE3D5] flex items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl sm:text-3xl">{subsequentStep.emoji}</span>
                     <div>

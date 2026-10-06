@@ -147,27 +147,27 @@ export const Rewards: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
       {/* 1. HERO REWARDS BANNER & STATS */}
-      <div className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-200 border-3 border-amber-300 rounded-3xl p-5 sm:p-6 text-amber-950 shadow-sm relative overflow-hidden">
+      <div className="bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-3xl p-5 sm:p-6 text-[#2D241E] shadow-[0_4px_16px_rgba(0,0,0,0.04)] relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white/80 p-1 flex items-center justify-center shadow-md shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#F5EFE6] border-2 border-[#E0D8CB] p-1 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] shrink-0">
               <span className="text-4xl sm:text-5xl animate-bounce">🏆</span>
             </div>
 
             <div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
-                <span className="text-[11px] font-black uppercase tracking-wider bg-amber-950/15 px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full">
                   Achievement Showcase
                 </span>
-                <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
+                <span className="text-xs font-bold text-[#A76318] flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 fill-[#F5B865] text-[#A76318]" />
                   {earnedCount} of {totalBadges} Badges
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black mt-1 leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-black mt-1 leading-tight text-[#2D241E]">
                 {childProfile.name}'s Rewards
               </h2>
-              <p className="text-xs sm:text-sm text-amber-900/80 font-medium mt-0.5">
+              <p className="text-xs sm:text-sm text-[#7A6C60] font-semibold mt-0.5">
                 Celebrate every step, routine, and achievement at your own pace!
               </p>
             </div>
@@ -175,13 +175,13 @@ export const Rewards: React.FC = () => {
 
           <div className="flex items-center gap-3 shrink-0">
             {/* Star Bank */}
-            <div className="bg-white/85 px-4 py-2.5 rounded-2xl border border-amber-300/80 shadow-xs flex items-center gap-2">
-              <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
+            <div className="bg-[#FAF7F2] px-4 py-2.5 rounded-2xl border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03)] flex items-center gap-2.5">
+              <Star className="w-5 h-5 fill-[#F5B865] text-[#E2A44E]" />
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-900/70 block">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8C7E72] block">
                   Stars Bank
                 </span>
-                <span className="text-base sm:text-lg font-black text-amber-950 leading-none">
+                <span className="text-base sm:text-lg font-black text-[#2D241E] leading-none">
                   {worldState.stars} Coins
                 </span>
               </div>
@@ -196,24 +196,24 @@ export const Rewards: React.FC = () => {
                   `Great work, ${childProfile.name}! You have earned ${earnedCount} badges and ${worldState.stars} shining star coins.`
                 );
               }}
-              className="p-3 rounded-2xl bg-white/80 hover:bg-white text-amber-950 shadow-xs transition-all cursor-pointer active:scale-95"
+              className="p-3 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03)] transition-all cursor-pointer active:scale-95"
               title="Hear achievement summary"
               aria-label="Hear achievement summary"
             >
-              <Volume2 className="w-5 h-5 text-amber-700" />
+              <Volume2 className="w-5 h-5 text-[#8B571A]" />
             </button>
           </div>
         </div>
 
         {/* Overall Progress Bar */}
-        <div className="mt-4 pt-4 border-t border-amber-500/20">
-          <div className="flex items-center justify-between text-xs font-black text-amber-950 mb-1.5">
+        <div className="mt-4 pt-4 border-t border-[#E0D8CB]">
+          <div className="flex items-center justify-between text-xs font-black text-[#2D241E] mb-1.5">
             <span>Overall Badge Completion</span>
             <span>{percentComplete}%</span>
           </div>
-          <div className="w-full bg-amber-950/15 h-3 rounded-full overflow-hidden">
+          <div className="w-full bg-[#EFE9DF] h-3 rounded-full overflow-hidden border border-[#E0D8CB]">
             <div
-              className="bg-amber-600 h-full rounded-full transition-all duration-700"
+              className="bg-[#F5B865] h-full rounded-full transition-all duration-700"
               style={{ width: `${percentComplete}%` }}
             />
           </div>
@@ -221,20 +221,20 @@ export const Rewards: React.FC = () => {
       </div>
 
       {/* 2. REWARDS NAVIGATION TABS */}
-      <div className="flex items-center gap-2 bg-white rounded-2xl p-1.5 border-2 border-slate-200 shadow-xs">
+      <div className="flex items-center gap-1.5 bg-[#EFE9DF] rounded-2xl p-1.5 border-2 border-[#E0D8CB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] overflow-x-auto">
         <button
           type="button"
           onClick={() => {
             setActiveTab('badges');
             playChime('tap');
           }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'badges'
-              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+              : 'text-[#6B5E52] hover:text-[#2D241E]'
           }`}
         >
-          <Trophy className="w-4 h-4" />
+          <Trophy className="w-4 h-4 text-[#E2A44E]" />
           <span>Badges Wall ({earnedCount})</span>
         </button>
 
@@ -244,13 +244,13 @@ export const Rewards: React.FC = () => {
             setActiveTab('stickers');
             playChime('tap');
           }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'stickers'
-              ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+              : 'text-[#6B5E52] hover:text-[#2D241E]'
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-4 h-4 text-[#8A79B8]" />
           <span>Sticker Album ({earnedStickers.length})</span>
         </button>
 
@@ -260,13 +260,13 @@ export const Rewards: React.FC = () => {
             setActiveTab('profile');
             playChime('tap');
           }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'profile'
-              ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-300'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+              : 'text-[#6B5E52] hover:text-[#2D241E]'
           }`}
         >
-          <User className="w-4 h-4" />
+          <User className="w-4 h-4 text-[#5B7BB2]" />
           <span>Profile Card</span>
         </button>
 
@@ -276,13 +276,13 @@ export const Rewards: React.FC = () => {
             setActiveTab('themes');
             playChime('tap');
           }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'themes'
-              ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+              : 'text-[#6B5E52] hover:text-[#2D241E]'
           }`}
         >
-          <Palette className="w-4 h-4" />
+          <Palette className="w-4 h-4 text-[#99C2A2]" />
           <span>Themes & Studio 🎨</span>
         </button>
       </div>

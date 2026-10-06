@@ -219,8 +219,8 @@ export const MoreView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-5">
       <header>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">More</h1>
-        <p className="text-sm text-slate-600 font-medium">
+        <h1 className="text-2xl sm:text-3xl font-black text-[#2D241E]">More</h1>
+        <p className="text-xs sm:text-sm text-[#7A6C60] font-semibold">
           Everything else in BeeYou. Turn sections on or off in Accessibility &amp; features.
         </p>
       </header>
@@ -230,15 +230,15 @@ export const MoreView: React.FC = () => {
           setShowToolsHubModal(true);
           playChime('tap');
         }}
-        className="w-full min-h-[58px] rounded-2xl bg-amber-50/80 hover:bg-amber-100/80 border-2 border-amber-200/90 text-amber-950 font-bold text-base flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer transition-all shadow-xs"
+        className="w-full min-h-[60px] rounded-3xl bg-[#F5B865] hover:bg-[#EDA548] border-2 border-[#E2A44E] text-[#4A2F0F] font-black text-base flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer transition-all shadow-[0_4px_14px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]"
       >
-        <span aria-hidden="true" className="text-xl">🧰</span>
+        <span aria-hidden="true" className="text-2xl">🧰</span>
         <span>Open Tools Hub</span>
       </button>
 
       {visibleSections.map((section) => (
         <section key={section.id} aria-labelledby={`more-${section.id}`}>
-          <h2 id={`more-${section.id}`} className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+          <h2 id={`more-${section.id}`} className="text-xs font-black uppercase tracking-wider text-[#8C7E72] mb-2.5 flex items-center gap-1.5">
             <span aria-hidden="true">{section.emoji}</span>
             <span>{section.title}</span>
           </h2>
@@ -250,12 +250,14 @@ export const MoreView: React.FC = () => {
                   playChime('tap');
                   item.onOpen();
                 }}
-                className="min-h-[72px] p-4 rounded-2xl bg-white hover:bg-amber-50/40 border-2 border-stone-200/90 hover:border-amber-300/80 text-left flex items-center gap-3.5 active:scale-98 transition-all cursor-pointer shadow-xs"
+                className="min-h-[76px] p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-left flex items-center gap-3.5 active:scale-98 transition-all cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)]"
               >
-                <span className="text-3xl shrink-0" aria-hidden="true">{item.emoji}</span>
+                <span className="w-12 h-12 rounded-2xl bg-[#F5EFE6] text-3xl flex items-center justify-center border border-[#E0D8CB] shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
+                  {item.emoji}
+                </span>
                 <span className="min-w-0">
-                  <span className="block font-bold text-slate-900 text-base">{item.title}</span>
-                  <span className="block text-xs text-slate-600 font-medium mt-0.5 leading-normal">{item.desc}</span>
+                  <span className="block font-black text-[#2D241E] text-base leading-snug">{item.title}</span>
+                  <span className="block text-xs text-[#7A6C60] font-semibold mt-0.5 leading-normal">{item.desc}</span>
                 </span>
               </button>
             ))}

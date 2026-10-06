@@ -244,38 +244,38 @@ export const ToolsHubModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in duration-200"
       onClick={() => setShowToolsHubModal(false)}
     >
       <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl overflow-hidden border-2 border-slate-200"
+        className="bg-[#FAF7F2] rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl overflow-hidden border-2 border-[#E0D8CB]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl p-2 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="flex items-center justify-between px-5 py-4 bg-[#FCF9F2] border-b-2 border-[#E0D8CB]">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl p-2 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
               🧰
             </span>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+              <h2 className="text-lg sm:text-xl font-black text-[#2D241E] leading-tight">
                 BeeYou Tools Hub
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-[#7A6C60] font-medium">
                 Sensory regulation, executive function & wellness tools
               </p>
             </div>
           </div>
           <button
             onClick={() => setShowToolsHubModal(false)}
-            className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all cursor-pointer border border-slate-200"
+            className="p-2 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] transition-all cursor-pointer border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.03)]"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-50/70 border-b border-slate-200 overflow-x-auto">
+        {/* Category Pills (Debossed Silicone Rail) */}
+        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#EFE9DF] border-b border-[#E0D8CB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] overflow-x-auto">
           {[
             { id: 'all' as const, label: 'All Tools', emoji: '✨' },
             { id: 'sensory' as const, label: 'Calm & Regulate', emoji: '🫧' },
@@ -288,10 +288,10 @@ export const ToolsHubModal: React.FC = () => {
                 setActiveCategory(cat.id);
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 activeCategory === cat.id
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                  ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+                  : 'text-[#6B5E52] hover:text-[#2D241E]'
               }`}
             >
               <span>{cat.emoji}</span>
@@ -302,13 +302,13 @@ export const ToolsHubModal: React.FC = () => {
 
         {/* Category description */}
         {activeCategory !== 'all' && (
-          <p className="px-5 pt-3 text-xs text-slate-600 font-medium">{CATEGORY_BLURB[activeCategory]}</p>
+          <p className="px-5 pt-3 text-xs text-[#7A6C60] font-medium">{CATEGORY_BLURB[activeCategory]}</p>
         )}
 
-        {/* Tools Grid - Single Clean Neutral Color for Low Stimulation */}
+        {/* Tools Grid - Tactile Bento Tiles */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredTools.length === 0 && (
-            <p className="col-span-full text-center text-sm text-slate-600 font-medium py-6">
+            <p className="col-span-full text-center text-sm text-[#7A6C60] font-medium py-6">
               Nothing here right now. You can turn tools on in Accessibility &amp; Sensory Hub.
             </p>
           )}
@@ -317,34 +317,34 @@ export const ToolsHubModal: React.FC = () => {
               type="button"
               key={tool.id}
               onClick={tool.action}
-              className="min-h-[64px] text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50/80 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+              className="min-h-[64px] text-left p-3.5 sm:p-4 rounded-3xl border-2 border-[#E0D8CB] bg-[#FCF9F2] hover:bg-white shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-11 h-11 rounded-2xl bg-slate-100 text-2xl flex items-center justify-center border border-slate-200/80 shrink-0 shadow-2xs" aria-hidden="true">
+                <span className="w-11 h-11 rounded-2xl bg-[#F5EFE6] text-2xl flex items-center justify-center border border-[#E0D8CB] shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
                   {tool.emoji}
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB]">
                       {tool.badge}
                     </span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900 leading-tight">
+                  <h4 className="font-black text-sm text-[#2D241E] leading-tight">
                     {tool.title}
                   </h4>
-                  <p className="text-[11px] text-slate-600 font-medium leading-snug">
+                  <p className="text-[11px] text-[#7A6C60] font-medium leading-snug">
                     {tool.desc}
                   </p>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
+              <ArrowRight className="w-4 h-4 text-[#A89C8F] shrink-0" aria-hidden="true" />
             </button>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-slate-50 border-t border-slate-200 text-center">
-          <p className="text-[11px] text-slate-400 font-medium">
+        <div className="p-3 bg-[#FCF9F2] border-t-2 border-[#E0D8CB] text-center">
+          <p className="text-[11px] text-[#8C7E72] font-semibold">
             Tap any tool to open • You can also pin your favorites to the Home screen
           </p>
         </div>
