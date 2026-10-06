@@ -2835,7 +2835,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         if (Array.isArray(parsed) && parsed.length > 0) {
           const existingIds = new Set(parsed.map((p: any) => p.id));
           const missing = DEFAULT_DASHBOARD_WIDGETS.filter((d) => !existingIds.has(d.id));
-          return [...parsed, ...missing];
+          const combined = [...parsed, ...missing];
+          if (combined.some((w) => w.enabled)) {
+            return combined;
+          }
         }
       }
     } catch (e) {}

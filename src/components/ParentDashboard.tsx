@@ -921,25 +921,15 @@ export const ParentDashboard: React.FC = () => {
               setActiveDeviceView('child');
               setIsParentMode(false);
               playChime('tap');
-              if (typeof window !== 'undefined') {
-                if (window.location.port === '3001') {
-                  window.open(`http://${window.location.hostname || 'localhost'}:3000`, '_blank');
-                  return;
-                }
-                const url = new URL(window.location.href);
-                url.searchParams.set('role', 'child');
-                url.searchParams.delete('caregiver');
-                window.location.href = url.pathname + '?role=child';
-              }
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-slate-700 shadow-2xs"
-            title="Open Child Tablet (Port 3000) in separate window/tab"
+            title="Return to Child View"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Child Tablet (Port 3000) 🧒</span>
+            <span>← Return to Child View 🧒</span>
           </button>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black shadow-2xs">
-            <span>👑 Caregiver Controller (Port 3001)</span>
+            <span>👑 Caregiver Controller</span>
           </div>
           <div>
             <h1 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">

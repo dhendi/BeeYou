@@ -382,6 +382,8 @@ function isCurrentDeviceCaregiver(): boolean {
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  const subscribeStartTime = Date.now();
+  lastPollTimestamp = Date.now();
 
   // 1. Primary: Firebase Realtime Database WebSocket listeners
   try {
@@ -457,7 +459,7 @@ export function subscribeToCloudChannel(code: string): void {
   }
 
   currentSubscribedCode = safeCode;
-  lastPollTimestamp = Date.now() - 45000;
+  lastPollTimestamp = Date.now();
 
   // 1. Setup Direct WebRTC Peer Connection (PeerJS)
   try {
@@ -572,13 +574,16 @@ export function subscribeToCloudChannel(code: string): void {
         // Check active alert from polled state
         const activeAlert = data.state?.activeAlert || data.session?.activeAlert;
         if (activeAlert) {
-          if (activeAlert.status === 'active') {
+          const alertTime = activeAlert.acknowledgedAt || activeAlert.sentAt || activeAlert.timestamp || 0;
+          const isRecentAlert = (Date.now() - alertTime) < 15000;
+
+          if (activeAlert.status === 'active' && (isRecentAlert || alertTime > subscribeStartTime)) {
             handleIncomingSyncEnvelope({
               type: 'CAREGIVER_ALERT',
               alert: activeAlert,
               pairingCode: safeCode,
             });
-          } else if (activeAlert.status === 'acknowledged') {
+          } else if (activeAlert.status === 'acknowledged' && (isRecentAlert || alertTime > subscribeStartTime)) {
             handleIncomingSyncEnvelope({
               type: 'CAREGIVER_ALERT_ACK',
               ack: {

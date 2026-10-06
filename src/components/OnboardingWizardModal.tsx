@@ -156,10 +156,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         sessionStorage.setItem('beeyou_user_role', 'caregiver');
         sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
         if (typeof window !== 'undefined') {
-          if (window.location.port === '3000') {
-            window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(familyCode)}`;
-            return;
-          }
           window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(familyCode)}`);
           window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
         }

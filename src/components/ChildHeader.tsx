@@ -83,8 +83,8 @@ export const ChildHeader: React.FC = () => {
               >
                 {childProfile.name}
               </h1>
-              <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Tablet (3000)
+              <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Child Tablet 🧒
               </span>
             </div>
             <span className="text-[11px] font-semibold text-stone-500">
@@ -202,25 +202,14 @@ export const ChildHeader: React.FC = () => {
         <button
           type="button"
           onClick={() => {
-            setActiveDeviceView('caregiver');
-            setIsParentMode(true);
             playChime('tap');
-            if (typeof window !== 'undefined') {
-              if (window.location.port === '3000' || window.location.port === '') {
-                window.open(`http://${window.location.hostname || 'localhost'}:3001`, '_blank');
-                return;
-              }
-              const url = new URL(window.location.href);
-              url.searchParams.set('role', 'caregiver');
-              url.searchParams.delete('child');
-              window.location.href = url.pathname + '?role=caregiver';
-            }
+            setShowPinModal(true);
           }}
           className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
-          title="Open Caregiver Controller (Port 3001) in separate window/tab"
+          title="Open Caregiver Controller & Dashboard"
         >
-          <span className="hidden sm:inline">Caregiver Hub (Port 3001) 👑</span>
-          <span className="sm:hidden">👑 3001</span>
+          <span className="hidden sm:inline">Caregiver Hub 👑</span>
+          <span className="sm:hidden">👑 Hub</span>
         </button>
 
         {/* 5. Parent / Settings Lock */}

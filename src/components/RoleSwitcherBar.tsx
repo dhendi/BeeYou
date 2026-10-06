@@ -71,15 +71,11 @@ export const RoleSwitcherBar: React.FC = () => {
     const code = getPairingCode();
     if (isCaregiverView) {
       // Current tab is Caregiver -> Open Child Tablet
-      const targetUrl = window.location.port === '3001'
-        ? `http://localhost:3000/?role=child&code=${encodeURIComponent(code)}`
-        : `${window.location.origin}/?role=child&code=${encodeURIComponent(code)}`;
+      const targetUrl = `${window.location.origin}/?role=child&code=${encodeURIComponent(code)}`;
       window.open(targetUrl, 'BeeYouChildWindow', 'width=500,height=860,left=60,top=50');
     } else {
       // Current tab is Child -> Open Caregiver Hub
-      const targetUrl = window.location.port === '3000'
-        ? `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(code)}`
-        : `${window.location.origin}/?role=caregiver&code=${encodeURIComponent(code)}`;
+      const targetUrl = `${window.location.origin}/?role=caregiver&code=${encodeURIComponent(code)}`;
       window.open(targetUrl, 'BeeYouCaregiverWindow', 'width=520,height=860,left=580,top=50');
     }
   };
@@ -90,21 +86,13 @@ export const RoleSwitcherBar: React.FC = () => {
     if (isCaregiverView) {
       // Switch from Caregiver -> Child
       setActiveDeviceView('child');
-      if (window.location.port === '3001') {
-        window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(code)}`;
-      } else {
-        window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(code)}`);
-        window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
-      }
+      window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(code)}`);
+      window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
     } else {
       // Switch from Child -> Caregiver
       setActiveDeviceView('caregiver');
-      if (window.location.port === '3000') {
-        window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(code)}`;
-      } else {
-        window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(code)}`);
-        window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
-      }
+      window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(code)}`);
+      window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
     }
   };
 
@@ -258,7 +246,7 @@ export const RoleSwitcherBar: React.FC = () => {
             >
               <ExternalLink className="w-4 h-4" />
               <span>
-                {isCaregiverView ? '🚀 Open Child Tablet (Port 3000)' : '🚀 Open Caregiver Hub (Port 3001)'}
+                {isCaregiverView ? '🚀 Open Child Tablet' : '🚀 Open Caregiver Hub'}
               </span>
             </button>
 
@@ -308,7 +296,7 @@ export const RoleSwitcherBar: React.FC = () => {
               <span>{connectionInfo?.statusText || 'Ready to pair'}</span>
             </span>
             <span className="text-slate-500 font-mono">
-              Ports: 3000 (Child) | 3001 (Caregiver)
+              Live Cloud Sync
             </span>
           </div>
 

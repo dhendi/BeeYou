@@ -152,22 +152,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         if (asRole === 'caregiver') {
           setActiveDeviceView('caregiver');
           if (typeof window !== 'undefined') {
-            if (window.location.port === '3000') {
-              window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
-            } else {
-              window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(safeCode)}`);
-              window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
-            }
+            window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(safeCode)}`);
+            window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
           }
         } else {
           setActiveDeviceView('child');
           if (typeof window !== 'undefined') {
-            if (window.location.port === '3001') {
-              window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(safeCode)}`;
-            } else {
-              window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(safeCode)}`);
-              window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
-            }
+            window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(safeCode)}`);
+            window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
           }
         }
         onClose();

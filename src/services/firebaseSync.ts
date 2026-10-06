@@ -74,9 +74,18 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
 
   // 1. Listen for Active Alerts & Acknowledgments
   const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
+  const subscriptionStartTime = Date.now();
+  let initialAlertLoaded = false;
+
   activeAlertUnsub = onValue(alertRef, (snapshot) => {
     const data = snapshot.val();
-    if (!data) return;
+    if (!data) {
+      initialAlertLoaded = true;
+      return;
+    }
+
+    const eventTime = data.acknowledgedAt || data.sentAt || data.timestamp || 0;
+    const isRecent = (Date.now() - eventTime) < 15000;
 
     if (data.status === 'active') {
       lastKnownPeerPing = Date.now();
@@ -84,20 +93,27 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       lastKnownPeerName = data.childName || 'Child';
       notifyPresence();
 
-      alertListeners.forEach((fn) => fn(data));
+      // Only fire alert listener if it's recent or occurred after subscribing
+      if (!initialAlertLoaded || isRecent || eventTime > subscriptionStartTime) {
+        alertListeners.forEach((fn) => fn(data));
+      }
     } else if (data.status === 'acknowledged') {
       lastKnownPeerPing = Date.now();
       lastKnownPeerRole = 'caregiver';
       lastKnownPeerName = data.acknowledgedBy || 'Caregiver';
       notifyPresence();
 
-      ackListeners.forEach((fn) => fn({
-        alertId: data.id || code,
-        responseMessage: data.responseMessage,
-        responseId: data.responseId,
-        by: data.acknowledgedBy || 'Caregiver',
-      }));
+      // Only notify acks that are recent or arrived after initial subscription
+      if (initialAlertLoaded && (isRecent || eventTime > subscriptionStartTime)) {
+        ackListeners.forEach((fn) => fn({
+          alertId: data.id || code,
+          responseMessage: data.responseMessage,
+          responseId: data.responseId,
+          by: data.acknowledgedBy || 'Caregiver',
+        }));
+      }
     }
+    initialAlertLoaded = true;
   });
 
   // 2. Listen for Real-Time Messages

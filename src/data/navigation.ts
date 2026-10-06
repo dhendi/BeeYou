@@ -38,12 +38,12 @@ export const isWidgetAvailable = (id: DashboardWidgetId, features?: EnabledFeatu
 
 /** Widgets switched on by default for each age group. Everything else stays one tap away in the customizer. */
 export const AGE_DEFAULT_WIDGETS: Record<'kid' | 'teen' | 'adult', DashboardWidgetId[]> = {
-  // My Day, Communicate, motivation
-  kid: ['routine_schedule', 'quick_aac', 'mascot_companion'],
-  // My Day, Communicate, Mood, Energy
-  teen: ['routine_schedule', 'quick_aac', 'mood_journal', 'spoon_budget'],
+  // My Day, Communicate, mascot companion, 5-point scale, and visual timer
+  kid: ['routine_schedule', 'quick_aac', 'mascot_companion', 'five_point_scale', 'pie_timer'],
+  // My Day, Communicate, Mood, Energy, visual timer
+  teen: ['routine_schedule', 'quick_aac', 'mascot_companion', 'mood_journal', 'spoon_budget', 'pie_timer'],
   // Schedule, Communicate, Energy, Mood/reflection, Health reminders
-  adult: ['routine_schedule', 'quick_aac', 'spoon_budget', 'mood_journal', 'medication_tracker'],
+  adult: ['routine_schedule', 'quick_aac', 'spoon_budget', 'mood_journal', 'medication_tracker', 'pie_timer'],
 };
 
 /** The "Minimal" preset: just the day plan and quick communication. */
