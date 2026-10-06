@@ -98,34 +98,22 @@ if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
   }
 }
 
+import { pushNotificationService } from './pushNotificationService';
+
 /**
- * Trigger a browser Web Push Notification if permission is granted
+ * Trigger a high-priority browser Web Push Notification with vibration and interaction
  */
 export function triggerWebNotification(title: string, options?: NotificationOptions): void {
-  if (typeof window === 'undefined' || !('Notification' in window)) return;
-  
-  if (Notification.permission === 'granted') {
-    try {
-      new Notification(title, {
-        icon: '/icon.svg',
-        badge: '/icon.svg',
-        ...options,
-      });
-    } catch (e) {
-      console.warn('Notification trigger error:', e);
-    }
-  } else if (Notification.permission === 'default') {
-    Notification.requestPermission().then((perm) => {
-      if (perm === 'granted') {
-        try {
-          new Notification(title, {
-            icon: '/icon.svg',
-            ...options,
-          });
-        } catch {}
-      }
-    });
-  }
+  if (typeof window === 'undefined') return;
+
+  pushNotificationService.triggerAlertNotification({
+    title,
+    body: (options?.body as string) || 'BeeYou Alert Received',
+    tag: options?.tag,
+    icon: options?.icon || '/icon.svg',
+    priority: 'emergency',
+    data: options?.data,
+  });
 }
 
 /**

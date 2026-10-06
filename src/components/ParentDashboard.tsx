@@ -96,6 +96,7 @@ import { CameraQRScannerModal } from './CameraQRScannerModal';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 import { FamilyAuthModal } from './FamilyAuthModal';
 import { getActiveDeviceView } from '../services/authService';
+import { optimizeImageFile } from '../utils/mediaOptimizer';
 
 import { 
   getPairingCode, 
@@ -574,42 +575,16 @@ export const ParentDashboard: React.FC = () => {
   const [editingAacItem, setEditingAacItem] = useState<AACItem | null>(null);
   const parentAacFileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleParentAacPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleParentAacPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 320;
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            width = maxDim;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          setNewWordPhotoUrl(canvas.toDataURL('image/jpeg', 0.85));
-        } else {
-          setNewWordPhotoUrl(event.target?.result as string);
-        }
-        showNotification('Photo uploaded and compressed for AAC button!');
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const optimized = await optimizeImageFile(file, { maxWidth: 360, maxHeight: 360, quality: 0.82 });
+      setNewWordPhotoUrl(optimized);
+      showNotification('Photo optimized & compressed for AAC button!');
+    } catch (err) {
+      console.warn('Photo upload failed:', err);
+    }
   };
 
   const handlePickSymbol = (symbol: {
