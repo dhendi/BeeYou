@@ -6,7 +6,11 @@ import {
   Sparkles, 
   AlertCircle,
   ShieldAlert,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Crown,
+  Users,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -67,7 +71,7 @@ export const ChildHeader: React.FC = () => {
           title="About Me ID Card"
           aria-label="About Me ID Card"
         >
-          {childProfile.name.charAt(0).toUpperCase() || '🐝'}
+          {childProfile.name ? childProfile.name.charAt(0).toUpperCase() : 'B'}
         </button>
 
         <div className="flex flex-col">
@@ -84,7 +88,7 @@ export const ChildHeader: React.FC = () => {
                 {childProfile.name}
               </h1>
               <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Child Tablet 🧒
+                Child Tablet
               </span>
             </div>
             <span className="text-[11px] font-semibold text-stone-500">
@@ -134,12 +138,20 @@ export const ChildHeader: React.FC = () => {
               ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400 shadow-md shadow-emerald-200 ring-2 ring-emerald-300/70'
               : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
           }`}
-          title={isCaregiverConnected ? `🟢 Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : '⚪ Tap to link with Caregiver Phone/Tablet'}
+          title={isCaregiverConnected ? `Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : 'Tap to link with Caregiver Phone/Tablet'}
         >
-          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isCaregiverConnected ? 'bg-white shadow-xs animate-ping' : 'bg-stone-400'}`} />
-          <span>
-            {isCaregiverConnected ? '🟢 Connected (Live)' : '⚪ Link Caregiver'}
-          </span>
+          {isCaregiverConnected ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+              <Wifi className="w-3.5 h-3.5 text-white shrink-0" />
+              <span>Connected (Live)</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+              <span>Link Caregiver</span>
+            </>
+          )}
         </button>
 
         {/* Shared Family Email / Demo Quick Access */}
@@ -149,11 +161,12 @@ export const ChildHeader: React.FC = () => {
             setShowFamilyAuthModal(true);
             playChime('tap');
           }}
-          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] cursor-pointer shadow-2xs active:scale-95 transition-all"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] cursor-pointer shadow-2xs active:scale-95 transition-all"
           title="Sign in with Shared Family Email or Test with 1-Click Demo"
         >
-          <span className="hidden sm:inline">👨‍👩‍👧 Family Email</span>
-          <span className="sm:hidden text-xs">👨‍👩‍👧</span>
+          <Users className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <span className="hidden sm:inline">Family Email</span>
+          <span className="sm:hidden text-xs">Family</span>
         </button>
 
         {/* 1. Accessibility Preferences */}
@@ -213,11 +226,12 @@ export const ChildHeader: React.FC = () => {
               window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
           }}
-          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
           title="Open Caregiver Controller & Dashboard"
         >
-          <span className="hidden sm:inline">Caregiver Hub 👑</span>
-          <span className="sm:hidden">👑 Hub</span>
+          <Crown className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Caregiver Hub</span>
+          <span className="sm:hidden">Hub</span>
         </button>
 
         {/* 5. Parent / Settings Lock */}

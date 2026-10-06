@@ -89,6 +89,7 @@ export const ChildNavBar: React.FC = () => {
       <div className="max-w-3xl mx-auto flex items-center justify-around gap-1.5 sm:gap-2">
         {navItems.map((item) => {
           const isActive = item.id === 'more' ? isMoreView(childView) : childView === item.id;
+          const Icon = item.icon;
           return (
             <button
               key={item.id}
@@ -96,14 +97,14 @@ export const ChildNavBar: React.FC = () => {
               aria-current={isActive ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-2xl transition-all active:scale-95 cursor-pointer ${
                 isActive
-                  ? item.activeBg || 'bg-indigo-600 text-white shadow-md shadow-indigo-300/40 ring-2 ring-indigo-300/60 font-black'
-                  : 'bg-white/60 text-slate-700 hover:bg-white/90 border border-white/70 font-bold'
+                  ? item.activeBg || 'bg-[#2D241E] text-white shadow-md shadow-stone-400/20 font-black'
+                  : 'bg-white/60 text-stone-600 hover:bg-white/90 border border-white/70 hover:text-stone-900 font-bold'
               }`}
             >
-              <span className="text-xl sm:text-2xl leading-none transition-transform select-none">
-                {item.emoji}
-              </span>
-              <span className="text-[11px] sm:text-xs font-black tracking-tight mt-1 truncate max-w-full">
+              <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-white/20' : 'bg-transparent'}`}>
+                <Icon className="w-5 h-5 sm:w-5 sm:h-5 stroke-[2.4]" />
+              </div>
+              <span className="text-[11px] sm:text-xs font-black tracking-tight mt-0.5 truncate max-w-full">
                 {item.label}
               </span>
             </button>

@@ -34,7 +34,10 @@ import {
   Zap,
   Smartphone,
   Volume2,
-  Check
+  Check,
+  Headphones,
+  Briefcase,
+  HeartHandshake
 } from 'lucide-react';
 import { BeeMascot } from './BeeYouLogo';
 import { CaregiverHowItWorksModal } from './CaregiverHowItWorksModal';
@@ -346,22 +349,30 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 max-w-xl mx-auto text-left">
                   <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
-                    <span className="text-xl">📅</span>
+                    <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mb-1">
+                      <Calendar className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    </div>
                     <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">Visual Routines</h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Step-by-step clarity</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-sky-50/80 dark:bg-slate-800 border border-sky-200 dark:border-slate-700">
-                    <span className="text-xl">🗣️</span>
+                    <div className="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center mb-1">
+                      <MessageSquare className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                    </div>
                     <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">Mulberry AAC</h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Picture talker & TTS</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-emerald-50/80 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700">
-                    <span className="text-xl">🧸</span>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mb-1">
+                      <Smile className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                     <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">Sensory Tools</h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Fidgets & pacers</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-purple-50/80 dark:bg-slate-800 border border-purple-200 dark:border-slate-700">
-                    <span className="text-xl">💛</span>
+                    <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mb-1">
+                      <Heart className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    </div>
                     <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">Caregiver Link</h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Easy 2-way pairing</p>
                   </div>
@@ -409,7 +420,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">🧒</span>
+                      <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                        <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
                       {selectedPersona === 'kid' && (
                         <span className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
                           ✓
@@ -440,7 +453,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">🎧</span>
+                      <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                        <Headphones className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      </div>
                       {selectedPersona === 'teen' && (
                         <span className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
                           ✓
@@ -471,7 +486,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">💼</span>
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                        <Briefcase className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
                       {selectedPersona === 'adult' && (
                         <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
                           ✓
@@ -502,7 +519,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">💛</span>
+                      <div className="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
+                        <HeartHandshake className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                      </div>
                       {selectedPersona === 'caregiver' && (
                         <span className="w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold">
                           ✓
@@ -523,8 +542,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs font-medium text-amber-950 dark:text-amber-200">
-                  ✨ <strong>Flexible Choice:</strong> You can switch personas, change age presets, or toggle individual features at any time in Settings.
+                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs font-medium text-amber-950 dark:text-amber-200 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span><strong>Flexible Choice:</strong> You can switch personas, change age presets, or toggle individual features at any time in Settings.</span>
                 </div>
               </div>
             )}
@@ -554,7 +574,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🌟</span>
+                          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          </div>
                           <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">Visual Steps & Stickers</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -564,7 +586,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-sky-50/80 dark:bg-slate-800 border border-sky-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🗣️</span>
+                          <div className="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center">
+                            <MessageSquare className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                          </div>
                           <h4 className="font-black text-sm text-sky-950 dark:text-sky-200">Mulberry AAC Picture Talker</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -574,7 +598,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-emerald-50/80 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🧸</span>
+                          <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                            <Smile className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
                           <h4 className="font-black text-sm text-emerald-950 dark:text-emerald-200">Calming Sensory Corner</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -584,7 +610,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-rose-50/80 dark:bg-slate-800 border border-rose-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🆘</span>
+                          <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
+                            <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                          </div>
                           <h4 className="font-black text-sm text-rose-950 dark:text-rose-200">1-Tap Help Alerts</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -615,7 +643,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-4 rounded-3xl bg-indigo-50/80 dark:bg-slate-800 border border-indigo-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">⏱️</span>
+                          <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                            <Timer className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          </div>
                           <h4 className="font-black text-sm text-indigo-950 dark:text-indigo-200">Visual Pie Timers & Focus</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -625,7 +655,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-teal-50/80 dark:bg-slate-800 border border-teal-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🎧</span>
+                          <div className="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
+                            <Headphones className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                          </div>
                           <h4 className="font-black text-sm text-teal-950 dark:text-teal-200">Discreet Sensory & Reset</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -635,7 +667,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-purple-50/80 dark:bg-slate-800 border border-purple-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">💬</span>
+                          <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                            <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          </div>
                           <h4 className="font-black text-sm text-purple-950 dark:text-purple-200">Quick Phrases & Typing AAC</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -645,7 +679,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🎯</span>
+                          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                            <CheckCircle2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          </div>
                           <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">Life Skills & Checklists</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -676,7 +712,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-4 rounded-3xl bg-emerald-50/80 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🥄</span>
+                          <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                            <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
                           <h4 className="font-black text-sm text-emerald-950 dark:text-emerald-200">Spoon Theory Energy Budget</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -686,7 +724,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-blue-50/80 dark:bg-slate-800 border border-blue-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">💊</span>
+                          <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                            <Pill className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          </div>
                           <h4 className="font-black text-sm text-blue-950 dark:text-blue-200">Medication & Cycle Tracking</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -696,7 +736,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">📋</span>
+                          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          </div>
                           <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">Communication Passport</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -706,7 +748,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-purple-50/80 dark:bg-slate-800 border border-purple-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🎡</span>
+                          <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                            <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          </div>
                           <h4 className="font-black text-sm text-purple-950 dark:text-purple-200">Decision Wheel & Microsteps</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -737,7 +781,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="p-4 rounded-3xl bg-rose-50/80 dark:bg-slate-800 border border-rose-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">📱</span>
+                          <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
+                            <Smartphone className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                          </div>
                           <h4 className="font-black text-sm text-rose-950 dark:text-rose-200">Two-Way Device Pairing</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -747,17 +793,21 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🔔</span>
+                          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                            <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          </div>
                           <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">Real-Time Alerts & Replies</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
-                          Receive notifications when they need help and send 1-tap spoken reassurance replies ("❤️ I'm here", "🚗 On my way").
+                          Receive notifications when they need help and send 1-tap spoken reassurance replies ("I'm here", "On my way").
                         </p>
                       </div>
 
                       <div className="p-4 rounded-3xl bg-sky-50/80 dark:bg-slate-800 border border-sky-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">📅</span>
+                          <div className="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center">
+                            <Calendar className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                          </div>
                           <h4 className="font-black text-sm text-sky-950 dark:text-sky-200">Visual Schedules & Photos</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -767,7 +817,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                       <div className="p-4 rounded-3xl bg-indigo-50/80 dark:bg-slate-800 border border-indigo-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🎛️</span>
+                          <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                            <Sliders className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          </div>
                           <h4 className="font-black text-sm text-indigo-950 dark:text-indigo-200">Granular Feature Toggles</h4>
                         </div>
                         <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
@@ -812,7 +864,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">📅</span>
+                      <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
+                        <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white">Visual Schedules & Routines</h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400">Step-by-step progress, timers, and First/Then boards</p>
@@ -836,7 +890,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🗣️</span>
+                      <div className="w-9 h-9 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center shrink-0">
+                        <MessageSquare className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                      </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white">Mulberry AAC Speech Talker</h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400">Motor-stable symbol grid, sentence strip & offline voice</p>
@@ -860,7 +916,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🧸</span>
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center shrink-0">
+                        <Smile className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white">Digital Fidget Toys & Regulation</h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400">Bubble pop, sand ripple, marble roll & breathing pacers</p>
@@ -884,7 +942,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🌡️</span>
+                      <div className="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center shrink-0">
+                        <Activity className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                      </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white">5-Point Scale & Emotion Log</h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400">Visual regulation thermometer and instant coping actions</p>
@@ -908,7 +968,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🆘</span>
+                      <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center shrink-0">
+                        <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                      </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white">1-Tap Caregiver Help Alerts</h4>
                         <p className="text-xs text-slate-600 dark:text-slate-400">Predefined alert triggers and spoken reassurance replies</p>
@@ -933,7 +995,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">🥄</span>
+                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center shrink-0">
+                          <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        </div>
                         <div>
                           <h4 className="font-bold text-sm text-slate-900 dark:text-white">Spoon Theory Energy Budget</h4>
                           <p className="text-xs text-slate-600 dark:text-slate-400">Morning energy check-in and stamina cost tracker</p>
@@ -982,7 +1046,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   className="w-full p-3 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-amber-500/10 to-rose-500/10 border-2 border-indigo-300/80 hover:border-indigo-500 text-left flex items-center justify-between cursor-pointer transition-all group"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xl">⚡</span>
+                    <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    </div>
                     <div>
                       <span className="text-xs font-black text-indigo-950 dark:text-indigo-200 block">
                         Want to test right now? Use Demo Account
@@ -992,8 +1058,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       </span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-indigo-600 group-hover:underline">
-                    Use Demo ✨
+                  <span className="text-xs font-bold text-indigo-600 group-hover:underline flex items-center gap-1">
+                    Use Demo <Sparkles className="w-3.5 h-3.5" />
                   </span>
                 </button>
 
@@ -1057,8 +1123,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 text-[11px] text-amber-900 dark:text-amber-200">
-                    💡 <strong>How connectivity works:</strong> When you complete setup, you will immediately get a popup to connect to your child's device via camera QR scan or sync code (<code>{getDeterministicFamilyCode(caregiverEmail || 'demo@beeyou.app')}</code>).
+                  <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span><strong>How connectivity works:</strong> When you complete setup, you will immediately get a popup to connect to your child's device via camera QR scan or sync code (<code>{getDeterministicFamilyCode(caregiverEmail || 'demo@beeyou.app')}</code>).</span>
                   </div>
                 </div>
               </div>
@@ -1126,8 +1193,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-amber-950 dark:text-amber-200 text-xs font-medium">
-                  🎉 <strong>You're ready!</strong> Tap below to launch your tailored BeeYou space.
+                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-amber-950 dark:text-amber-200 text-xs font-medium flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span><strong>You're ready!</strong> Tap below to launch your tailored BeeYou space.</span>
                 </div>
               </div>
             )}
@@ -1178,7 +1246,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   }`}
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>{isCaregiver ? 'Register & Link Device 📱' : 'Start Using BeeYou 🎉'}</span>
+                  <span>{isCaregiver ? 'Register & Link Device' : 'Start Using BeeYou'}</span>
                 </button>
               )}
             </div>

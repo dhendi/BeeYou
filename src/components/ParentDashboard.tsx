@@ -51,7 +51,13 @@ import {
   ShieldAlert,
   Camera,
   Mail,
-  Zap
+  Zap,
+  LayoutDashboard,
+  Utensils,
+  Car,
+  Wind,
+  RotateCcw,
+  MessageCircle
 } from 'lucide-react';
 import { CaregiverHowItWorksModal, HelpTopic } from './CaregiverHowItWorksModal';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
@@ -982,90 +988,91 @@ export const ParentDashboard: React.FC = () => {
             { 
               id: 'home', 
               label: 'Caregiver Live Hub', 
-              emoji: '🏠', 
-              icon: Sparkles, 
-              badge: connectionStatus.isConnected ? 'Live 🟢' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : 'Home') 
+              icon: LayoutDashboard, 
+              badge: connectionStatus.isConnected ? 'Live' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : undefined) 
             },
             { 
               id: 'alerts', 
               label: 'Live Alerts & SOS Inbox', 
-              emoji: '🚨', 
               icon: ShieldAlert, 
-              badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : 'Safe 🟢' 
+              badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : undefined 
             },
             { 
               id: 'subscription', 
               label: 'Membership & Plan', 
-              emoji: '👑', 
               icon: Crown, 
-              badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium ✓') : '30d Free' 
+              badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '30d Free' 
             },
             { 
               id: 'guide', 
               label: 'How BeeYou Works', 
-              emoji: '💡', 
               icon: HelpCircle, 
               badge: 'Guide' 
             },
-            { id: 'routines', label: 'Routine Templates Library', emoji: '✨', icon: Calendar, badge: 'Library' },
+            { id: 'routines', label: 'Routine Templates Library', icon: Calendar, badge: 'Library' },
             { 
               id: 'medications', 
               label: 'Medication Reminders', 
-              emoji: '💊', 
               icon: Pill, 
-              badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? 'Low Stock' : `${medications.length} Meds` 
+              badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? 'Low Stock' : undefined 
             },
-            { id: 'recollection', label: 'Daily Mood & Therapist Summary', emoji: '📊', icon: BarChart3, badge: 'Therapy' },
+            { id: 'recollection', label: 'Daily Mood & Therapist Summary', icon: BarChart3, badge: 'Therapy' },
             { 
               id: 'mood-journal', 
               label: 'Mood & Reflection Journal', 
-              emoji: '📖', 
               icon: BookOpen, 
               badge: `${moodJournalEntries.length} Entries` 
             },
             { 
               id: 'cycle-tracker', 
               label: 'Cycle & Hormonal Rhythm', 
-              emoji: '🌸', 
               icon: HeartPulse, 
               badge: `Day ${cyclePhaseInfo.currentCycleDay}` 
             },
-            { id: 'caregiver', label: 'Live Caregiver Link', emoji: '❤️', icon: Heart, badge: 'Live' },
-            { id: 'plans-changed', label: 'Plans Changed', emoji: '🔄', icon: AlertTriangle, badge: plansChanged.active ? 'Active' : undefined },
-            { id: 'aac', label: 'AAC & Vocabulary', emoji: '🗣️', icon: MessageSquare },
-            { id: 'voice', label: 'Voice Testing Tool', emoji: '🎙️', icon: Volume2 },
-            { id: 'offline', label: 'Offline & PWA Storage', emoji: '💾', icon: Database },
-            { id: 'adventures', label: 'Life Adventures', emoji: '🚀', icon: Compass },
-            { id: 'skills', label: 'Life Skills', emoji: '⭐', icon: CheckCircle2 },
-            { id: 'profile', label: 'Child Profile', emoji: '👤', icon: User },
-            { id: 'themes', label: 'Themes & Studio', emoji: '🎨', icon: Palette, badge: 'Studio' },
-            { id: 'settings', label: 'Settings & PIN', emoji: '⚙️', icon: SettingsIcon },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id as any);
-                playChime('tap');
-              }}
-              className={`flex items-center justify-between p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-xl leading-none">{tab.emoji}</span>
-                <span>{tab.label}</span>
-              </div>
-              {tab.badge && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  tab.id === 'routines' ? 'bg-sky-400 text-sky-950' : 'bg-amber-400 text-amber-950'
-                }`}>
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          ))}
+            { id: 'caregiver', label: 'Live Caregiver Link', icon: Heart, badge: 'Live' },
+            { id: 'plans-changed', label: 'Plans Changed', icon: AlertTriangle, badge: plansChanged.active ? 'Active' : undefined },
+            { id: 'aac', label: 'AAC & Vocabulary', icon: MessageSquare },
+            { id: 'voice', label: 'Voice Testing Tool', icon: Volume2 },
+            { id: 'offline', label: 'Offline & PWA Storage', icon: Database },
+            { id: 'adventures', label: 'Life Adventures', icon: Compass },
+            { id: 'skills', label: 'Life Skills', icon: CheckCircle2 },
+            { id: 'profile', label: 'Child Profile', icon: User },
+            { id: 'themes', label: 'Themes & Studio', icon: Palette, badge: 'Studio' },
+            { id: 'settings', label: 'Settings & PIN', icon: SettingsIcon },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  playChime('tap');
+                }}
+                className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    <Icon className="w-4 h-4 stroke-[2.4]" />
+                  </div>
+                  <span>{tab.label}</span>
+                </div>
+                {tab.badge && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                    tab.id === 'routines' ? 'bg-sky-400 text-sky-950' : 'bg-amber-400 text-amber-950'
+                  }`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </aside>
 
         {/* Content Area */}
@@ -1394,25 +1401,27 @@ export const ParentDashboard: React.FC = () => {
                 {/* 1-Tap Quick Nudges Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
-                    { title: '5-Min Warning', text: '5 minutes until we leave or change activity! ⏳', emoji: '⏳', bg: 'hover:bg-amber-50 border-amber-200' },
-                    { title: 'Meal / Snack Time', text: 'Time for food or snack! 🍽️', emoji: '🍽️', bg: 'hover:bg-emerald-50 border-emerald-200' },
-                    { title: 'Medicine Time', text: 'Time to take your scheduled medicine 💊', emoji: '💊', bg: 'hover:bg-rose-50 border-rose-200' },
-                    { title: "I'm On My Way", text: "Caregiver is on the way to pick you up 🚗", emoji: '🚗', bg: 'hover:bg-indigo-50 border-indigo-200' },
-                    { title: 'Calm Breathing', text: "Let's take 3 slow, deep breaths together 🫁", emoji: '🫁', bg: 'hover:bg-sky-50 border-sky-200' },
-                    { title: 'Proud of You', text: 'Super proud of you! You are doing awesome ⭐', emoji: '⭐', bg: 'hover:bg-purple-50 border-purple-200' },
-                    { title: 'Plans Changed', text: 'Quick reminder: Our plans changed a little today 🔄', emoji: '🔄', bg: 'hover:bg-amber-50 border-amber-200' },
-                    { title: 'Check In', text: 'How are you feeling right now? Tap your feelings! 😊', emoji: '💬', bg: 'hover:bg-blue-50 border-blue-200' },
+                    { title: '5-Min Warning', text: '5 minutes until we leave or change activity!', icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
+                    { title: 'Meal / Snack Time', text: 'Time for food or snack!', icon: Utensils, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
+                    { title: 'Medicine Time', text: 'Time to take your scheduled medicine', icon: Pill, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', bg: 'hover:bg-rose-50/70 border-rose-200' },
+                    { title: "I'm On My Way", text: "Caregiver is on the way to pick you up", icon: Car, iconColor: 'text-indigo-700', iconBg: 'bg-indigo-100 border-indigo-200', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
+                    { title: 'Calm Breathing', text: "Let's take 3 slow, deep breaths together", icon: Wind, iconColor: 'text-sky-700', iconBg: 'bg-sky-100 border-sky-200', bg: 'hover:bg-sky-50/70 border-sky-200' },
+                    { title: 'Proud of You', text: 'Super proud of you! You are doing awesome', icon: Sparkles, iconColor: 'text-purple-700', iconBg: 'bg-purple-100 border-purple-200', bg: 'hover:bg-purple-50/70 border-purple-200' },
+                    { title: 'Plans Changed', text: 'Quick reminder: Our plans changed a little today', icon: RotateCcw, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
+                    { title: 'Check In', text: 'How are you feeling right now? Tap your feelings!', icon: MessageCircle, iconColor: 'text-blue-700', iconBg: 'bg-blue-100 border-blue-200', bg: 'hover:bg-blue-50/70 border-blue-200' },
                   ].map((nudge, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handleSendQuickNudge(nudge.title, nudge.text, nudge.emoji)}
-                      className={`p-3 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-1 shadow-2xs ${nudge.bg}`}
+                      onClick={() => handleSendQuickNudge(nudge.title, nudge.text, '')}
+                      className={`p-3.5 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-2 shadow-2xs ${nudge.bg}`}
                     >
-                      <div className="text-2xl">{nudge.emoji}</div>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${nudge.iconBg} ${nudge.iconColor} shadow-2xs`}>
+                        <nudge.icon className="w-5 h-5 stroke-[2.3]" />
+                      </div>
                       <div>
                         <div className="text-xs font-black text-slate-900">{nudge.title}</div>
-                        <div className="text-[10px] text-slate-500 truncate mt-0.5">{nudge.text}</div>
+                        <div className="text-[11px] text-slate-500 font-medium line-clamp-2 mt-0.5 leading-snug">{nudge.text}</div>
                       </div>
                     </button>
                   ))}
@@ -1421,18 +1430,28 @@ export const ParentDashboard: React.FC = () => {
                 {/* Custom Message Composer */}
                 <form onSubmit={handleSendCustomMessage} className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                   <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 shrink-0 border border-slate-200">
-                    {['❤️', '⭐', '🚗', '💊', '🥪', '👏'].map((em) => (
-                      <button
-                        key={em}
-                        type="button"
-                        onClick={() => setCustomMsgEmoji(em)}
-                        className={`w-8 h-8 rounded-xl text-lg flex items-center justify-center transition cursor-pointer ${
-                          customMsgEmoji === em ? 'bg-white shadow-xs scale-110' : 'opacity-60 hover:opacity-100'
-                        }`}
-                      >
-                        {em}
-                      </button>
-                    ))}
+                    {[
+                      { id: 'heart', icon: Heart, color: 'text-rose-600' },
+                      { id: 'star', icon: Sparkles, color: 'text-amber-500' },
+                      { id: 'car', icon: Car, color: 'text-indigo-600' },
+                      { id: 'med', icon: Pill, color: 'text-emerald-600' },
+                      { id: 'meal', icon: Utensils, color: 'text-orange-600' },
+                      { id: 'check', icon: CheckCircle2, color: 'text-teal-600' },
+                    ].map((btn) => {
+                      const Icon = btn.icon;
+                      return (
+                        <button
+                          key={btn.id}
+                          type="button"
+                          onClick={() => setCustomMsgEmoji(btn.id)}
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center transition cursor-pointer ${
+                            customMsgEmoji === btn.id ? 'bg-white shadow-xs scale-110 text-slate-900' : `${btn.color} opacity-60 hover:opacity-100`
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 stroke-[2.4]" />
+                        </button>
+                      );
+                    })}
                   </div>
 
                   <input
@@ -1465,14 +1484,14 @@ export const ParentDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {[
-                    { tab: 'alerts', title: 'Live Alerts & SOS Inbox', desc: 'Real-time emergency signals & response log', emoji: '🚨', color: 'from-rose-500/10 to-red-500/10 border-rose-300' },
-                    { tab: 'routines', title: 'Routines & My Day', desc: 'Visual schedules & First-Then boards', emoji: '✨', color: 'from-sky-500/10 to-indigo-500/10 border-sky-200' },
-                    { tab: 'aac', title: 'AAC & Vocabulary', desc: 'Manage core words & speech cards', emoji: '🗣️', color: 'from-amber-500/10 to-orange-500/10 border-amber-200' },
-                    { tab: 'plans-changed', title: 'Plans Changed', desc: 'Trigger calm unexpected plan changes', emoji: '🔄', color: 'from-rose-500/10 to-amber-500/10 border-rose-200' },
-                    { tab: 'medications', title: 'Medication Tracker', desc: 'Dosages, logs & low refill stock', emoji: '💊', color: 'from-emerald-500/10 to-teal-500/10 border-emerald-200' },
-                    { tab: 'recollection', title: 'Daily Therapist Summary', desc: 'Export mood & daily progress reports', emoji: '📊', color: 'from-purple-500/10 to-indigo-500/10 border-purple-200' },
-                    { tab: 'themes', title: 'Themes & Studio', desc: 'Wallpapers, high contrast & fonts', emoji: '🎨', color: 'from-pink-500/10 to-rose-500/10 border-pink-200' },
-                    { tab: 'caregiver', title: 'Device Link & QR', desc: 'Scan QR code & manage pairing', emoji: '📱', color: 'from-indigo-500/10 to-sky-500/10 border-indigo-200' },
+                    { tab: 'alerts', title: 'Live Alerts & SOS Inbox', desc: 'Real-time emergency signals & response log', icon: ShieldAlert, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', color: 'from-rose-500/10 to-red-500/10 border-rose-300' },
+                    { tab: 'routines', title: 'Routines & My Day', desc: 'Visual schedules & First-Then boards', icon: Calendar, iconColor: 'text-sky-700', iconBg: 'bg-sky-100 border-sky-200', color: 'from-sky-500/10 to-indigo-500/10 border-sky-200' },
+                    { tab: 'aac', title: 'AAC & Vocabulary', desc: 'Manage core words & speech cards', icon: MessageSquare, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', color: 'from-amber-500/10 to-orange-500/10 border-amber-200' },
+                    { tab: 'plans-changed', title: 'Plans Changed', desc: 'Trigger calm unexpected plan changes', icon: RotateCcw, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', color: 'from-rose-500/10 to-amber-500/10 border-rose-200' },
+                    { tab: 'medications', title: 'Medication Tracker', desc: 'Dosages, logs & low refill stock', icon: Pill, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', color: 'from-emerald-500/10 to-teal-500/10 border-emerald-200' },
+                    { tab: 'recollection', title: 'Daily Therapist Summary', desc: 'Export mood & daily progress reports', icon: BarChart3, iconColor: 'text-purple-700', iconBg: 'bg-purple-100 border-purple-200', color: 'from-purple-500/10 to-indigo-500/10 border-purple-200' },
+                    { tab: 'themes', title: 'Themes & Studio', desc: 'Wallpapers, high contrast & fonts', icon: Palette, iconColor: 'text-pink-700', iconBg: 'bg-pink-100 border-pink-200', color: 'from-pink-500/10 to-rose-500/10 border-pink-200' },
+                    { tab: 'caregiver', title: 'Device Link & QR', desc: 'Scan QR code & manage pairing', icon: Smartphone, iconColor: 'text-indigo-700', iconBg: 'bg-indigo-100 border-indigo-200', color: 'from-indigo-500/10 to-sky-500/10 border-indigo-200' },
                   ].map((item, idx) => (
                     <button
                       key={idx}
@@ -1483,7 +1502,9 @@ export const ParentDashboard: React.FC = () => {
                       }}
                       className={`p-4 rounded-3xl bg-gradient-to-br ${item.color} border-2 text-left hover:shadow-md transition active:scale-95 cursor-pointer flex flex-col justify-between gap-3`}
                     >
-                      <span className="text-3xl">{item.emoji}</span>
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${item.iconBg} ${item.iconColor} shadow-2xs`}>
+                        <item.icon className="w-5 h-5 stroke-[2.3]" />
+                      </div>
                       <div>
                         <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">{item.title}</h4>
                         <p className="text-[11px] text-slate-500 mt-1 leading-snug">{item.desc}</p>
