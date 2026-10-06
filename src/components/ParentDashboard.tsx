@@ -27,69 +27,8 @@ import {
 import { playChime } from '../utils/audio';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
-
-const CAREGIVER_COACH_STEPS: CoachMarkStep[] = [
-  {
-    targetSelector: '[data-tour="caregiver-live-card"]',
-    title: '1. Live Child Status & Mood',
-    instruction: "Shows your child's real-time device connection, current emotion, completed daily habits, and active 6-digit sync code.",
-    mascotHint: 'Always see what your child is doing! 📡',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-quick-actions"]',
-    title: '2. Instant Pairing & Family Login',
-    instruction: "Scan your child's QR code with your camera or log in with your shared family email to link devices instantly.",
-    mascotHint: 'Connects devices in seconds! 📱',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-alert-center"]',
-    title: '3. Real-Time Safety & SOS Inbox',
-    instruction: 'When your child asks for help, requests a break, or triggers an SOS, live emergency cards appear here with 1-tap responses.',
-    mascotHint: 'Tap "I\'m On My Way" to reassure your child! 🛡️',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-nudges-grid"]',
-    title: '4. Spoken Nudges & Spoken Messages',
-    instruction: "Tap any quick button (5-Min Warning, Meal Time, Medicine Time, Proud of You) or type a custom message to speak aloud on your child's tablet.",
-    mascotHint: "Sends voice announcements straight to child's tablet! 💬",
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-routines"]',
-    title: '5. Visual Routine Templates',
-    instruction: 'Create morning, bedtime, school, and First/Then schedules with step timers and reward stickers to build daily independence.',
-    mascotHint: 'Make daily routines easy and visual! 📅',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-medications"]',
-    title: '6. Medication & Refill Reminders',
-    instruction: 'Set daily pill dosages and reminder times. Automatic alerts warn you before refills run out.',
-    mascotHint: 'Never miss a dose or prescription! 💊',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-plans-changed"]',
-    title: '7. Plans Changed Alert System',
-    instruction: 'When daily schedules change unexpectedly, broadcast a calm visual announcement to your child to eliminate transition stress.',
-    mascotHint: 'Calms sudden unexpected schedule changes! ⚠️',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-aac"]',
-    title: '8. AAC Symbol Studio',
-    instruction: 'Personalize communication boards using 3,400+ clinical Mulberry symbols, family photos, custom voices, and categories.',
-    mascotHint: "Give your child their unique voice! 🗣️",
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-recollection"]',
-    title: '9. Mood & Therapist Reports',
-    instruction: 'Review daily mood trends, sensory patterns, and export easy summary charts for therapists and pediatricians.',
-    mascotHint: 'Great for doctor & therapy visits! 📊',
-  },
-  {
-    targetSelector: '[data-tour="caregiver-tab-settings"]',
-    title: '10. PIN Security & Preferences',
-    instruction: 'Protect caregiver controls with your custom 4-digit PIN lock and configure notification preferences.',
-    mascotHint: 'Keeps caregiver settings safe & private! 🔒',
-  },
-];
+import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
+import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
 import {
   getPairingCode,
   subscribeToCloudChannel,
@@ -178,12 +117,39 @@ export const ParentDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCaregiverTour, setShowCaregiverTour] = useState(false);
+  const [showTourDirectoryModal, setShowTourDirectoryModal] = useState(false);
+  const [activeTourSteps, setActiveTourSteps] = useState<CoachMarkStep[]>(() => SECTION_TOURS.fullApp.steps);
+  const [currentTourName, setCurrentTourName] = useState<string>('Caregiver App Overview');
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleStartTour = () => {
+  const handleOpenTourDirectory = () => {
+    setShowTourDirectoryModal(true);
+    playChime('tap');
+  };
+
+  const handleStartFullTour = () => {
+    setShowTourDirectoryModal(false);
     setActiveTab('home');
+    setActiveTourSteps(SECTION_TOURS.fullApp.steps);
+    setCurrentTourName(SECTION_TOURS.fullApp.title);
     setShowCaregiverTour(true);
     playChime('tap');
+  };
+
+  const handleStartSectionTour = (sectionId: TourSectionId) => {
+    const section = SECTION_TOURS[sectionId];
+    if (section) {
+      setShowTourDirectoryModal(false);
+      setActiveTab(section.tabId as TabType);
+      setActiveTourSteps(section.steps);
+      setCurrentTourName(section.title);
+      setShowCaregiverTour(true);
+      playChime('tap');
+    }
+  };
+
+  const handleStartTour = () => {
+    handleOpenTourDirectory();
   };
 
   // Live remote alerts & status
@@ -546,7 +512,7 @@ export const ParentDashboard: React.FC = () => {
               onOpenCaregiverModal={() => setShowCaregiverModal(true)}
               onShowFamilyAuthModal={() => setShowFamilyAuthModal(true)}
               onShowNotification={showNotification}
-              onStartTour={handleStartTour}
+              onStartTour={() => handleStartSectionTour('liveStatus')}
             />
           )}
 
@@ -560,6 +526,7 @@ export const ParentDashboard: React.FC = () => {
               onClearAlertHistory={handleClearAlertHistory}
               onTriggerTestAlert={handleTriggerTestAlert}
               onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('alerts')}
             />
           )}
 
@@ -572,30 +539,40 @@ export const ParentDashboard: React.FC = () => {
           {activeTab === 'guide' && (
             <CaregiverGuideTab
               onNavigateTab={(tab) => setActiveTab(tab as TabType)}
-              onStartTour={handleStartTour}
+              onStartTour={handleOpenTourDirectory}
             />
           )}
 
           {/* TAB: MEDICATION REMINDERS & SUPPLY MANAGEMENT */}
           {activeTab === 'medications' && (
-            <CaregiverMedicationsTab onShowNotification={showNotification} />
+            <CaregiverMedicationsTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('medications')}
+            />
           )}
 
           {/* TAB: DAILY MOOD & THERAPIST RECOLLECTION SUMMARY */}
           {activeTab === 'recollection' && (
             <div className="space-y-6">
-              <DailyRecollectionChart isParentPortal={true} />
+              <DailyRecollectionChart 
+                isParentPortal={true}
+                onStartTour={() => handleStartSectionTour('recollection')}
+              />
             </div>
           )}
 
           {/* TAB: MOOD JOURNAL & SELF-REFLECTION */}
           {activeTab === 'mood-journal' && (
-            <CaregiverMoodJournalTab />
+            <CaregiverMoodJournalTab 
+              onStartTour={() => handleStartSectionTour('moodJournal')}
+            />
           )}
 
           {/* TAB: CYCLE TRACKER & HORMONAL RHYTHM */}
           {activeTab === 'cycle-tracker' && (
-            <CaregiverCycleTrackerTab />
+            <CaregiverCycleTrackerTab 
+              onStartTour={() => handleStartSectionTour('cycleTracker')}
+            />
           )}
 
           {/* TAB: CAREGIVER LIVE LINK & REMOTE MONITOR */}
@@ -603,6 +580,7 @@ export const ParentDashboard: React.FC = () => {
             <CaregiverDeviceLinkTab
               onShowNotification={showNotification}
               onOpenScanner={() => setShowCameraScanner(true)}
+              onStartTour={() => handleStartSectionTour('pairing')}
             />
           )}
 
@@ -613,17 +591,26 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: PLANS CHANGED SYSTEM */}
           {activeTab === 'plans-changed' && (
-            <CaregiverPlansChangedTab onShowNotification={showNotification} />
+            <CaregiverPlansChangedTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('plansChanged')}
+            />
           )}
 
           {/* TAB: ROUTINES & MY DAY */}
           {activeTab === 'routines' && (
-            <CaregiverRoutinesTab onShowNotification={showNotification} />
+            <CaregiverRoutinesTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('routines')}
+            />
           )}
 
           {/* TAB: AAC & VOCABULARY */}
           {activeTab === 'aac' && (
-            <CaregiverAacStudioTab onShowNotification={showNotification} />
+            <CaregiverAacStudioTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('aac')}
+            />
           )}
 
           {/* TAB: VOICE SETTINGS & TESTING TOOL */}
@@ -648,7 +635,10 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: SETTINGS & PIN */}
           {activeTab === 'settings' && (
-            <CaregiverSettingsTab onShowNotification={showNotification} />
+            <CaregiverSettingsTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('settings')}
+            />
           )}
 
           {/* TAB: THEMES & CUSTOMIZATION STUDIO */}
@@ -680,13 +670,21 @@ export const ParentDashboard: React.FC = () => {
         onClose={() => setShowFamilyAuthModal(false)}
       />
 
+      {/* Interactive Section Tour Directory Modal */}
+      <CaregiverTourDirectoryModal
+        isOpen={showTourDirectoryModal}
+        onClose={() => setShowTourDirectoryModal(false)}
+        onStartFullTour={handleStartFullTour}
+        onSelectSection={handleStartSectionTour}
+      />
+
       {/* Interactive Caregiver CoachMarks Feature Tour */}
       <CoachMarksOverlay
         isActive={showCaregiverTour}
-        steps={CAREGIVER_COACH_STEPS}
+        steps={activeTourSteps}
         onComplete={() => setShowCaregiverTour(false)}
         onSkip={() => setShowCaregiverTour(false)}
-        tourName="Caregiver Features Tour"
+        tourName={currentTourName}
       />
     </div>
   );

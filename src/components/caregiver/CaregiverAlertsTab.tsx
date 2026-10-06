@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Sparkles } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { 
   getPairingCode, 
@@ -18,6 +18,7 @@ interface CaregiverAlertsTabProps {
   setAlertHistoryList: React.Dispatch<React.SetStateAction<CaregiverAlert[]>>;
   setActiveTab: (tab: any) => void;
   showNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
 export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
@@ -26,7 +27,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
   alertHistoryList,
   setAlertHistoryList,
   setActiveTab,
-  showNotification
+  showNotification,
+  onStartTour,
 }) => {
   const { childProfile, connectionStatus } = useApp();
 
@@ -82,8 +84,23 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                onStartTour();
+              }}
+              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              title="Tour this section"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>How This Works (Tour)</span>
+            </button>
+          )}
           <button
             type="button"
+            data-tour="alerts-test-button"
             onClick={handleTriggerTestAlert}
             className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
           >
@@ -127,7 +144,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
       </div>
 
       {/* 1. Active Alerts Section */}
-      <div className="space-y-3">
+      <div data-tour="alerts-active-card" className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
             <span>Active Urgent Alerts</span>
@@ -199,7 +216,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                   <span className="text-xs font-black text-rose-950 block">
                     Send Immediate Reassurance to {alert.childName}'s Screen:
                   </span>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
@@ -237,7 +254,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
       </div>
 
       {/* 2. Alert History Log Section */}
-      <div className="space-y-3 pt-2">
+      <div data-tour="alerts-history-list" className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">

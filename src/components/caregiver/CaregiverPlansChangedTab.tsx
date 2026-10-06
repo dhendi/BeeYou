@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Eye, Save, Trash2, Plus } from 'lucide-react';
+import { Eye, Save, Trash2, Plus, Sparkles } from 'lucide-react';
+import { playChime } from '../../utils/audio';
 
 interface CaregiverPlansChangedTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> = ({ onShowNotification }) => {
+export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> = ({ onShowNotification, onStartTour }) => {
   const {
     plansChanged,
     activatePlansChanged,
@@ -111,7 +113,21 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                onStartTour();
+              }}
+              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              title="Tour this section"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>How This Works (Tour)</span>
+            </button>
+          )}
           <button
             onClick={() => setShowPlansChangedModal(true)}
             className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
@@ -130,7 +146,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       </div>
 
       {/* Status Toggle Card */}
-      <div className="bg-amber-50/70 border-2 border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+      <div data-tour="plans-changed-toggle-card" className="bg-amber-50/70 border-2 border-amber-200 rounded-2xl p-4 flex items-center justify-between">
         <div>
           <h4 className="font-black text-amber-950 text-sm">
             Activate "Plans Changed" Alert for Child
@@ -154,7 +170,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       </div>
 
       {/* Quick Presets */}
-      <div>
+      <div data-tour="plans-changed-replacement-picker">
         <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
           Quick Presets (1-Tap Setup):
         </span>
@@ -187,7 +203,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       </div>
 
       {/* Form Fields */}
-      <div className="space-y-4">
+      <div data-tour="plans-changed-message-input" className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-black text-slate-700 block mb-1">

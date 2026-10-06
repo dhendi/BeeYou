@@ -4,13 +4,14 @@ import { Routine, RoutineTemplate } from '../../types';
 import { RoutineTemplatesLibrary } from '../RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from '../RoutineCustomizerModal';
 import { playChime } from '../../utils/audio';
-import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2 } from 'lucide-react';
+import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Sparkles } from 'lucide-react';
 
 interface CaregiverRoutinesTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onShowNotification }) => {
+export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onShowNotification, onStartTour }) => {
   const {
     childProfile,
     routines,
@@ -181,58 +182,75 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
           </p>
         </div>
 
-        {/* Sub-view switcher */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl shrink-0">
-          <button
-            onClick={() => {
-              setRoutinesSubView('library');
-              playChime('tap');
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
-              routinesSubView === 'library'
-                ? 'bg-white text-sky-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 text-sky-600" />
-            <span>Template Library</span>
-          </button>
-          <button
-            onClick={() => {
-              setRoutinesSubView('active');
-              playChime('tap');
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
-              routinesSubView === 'active'
-                ? 'bg-white text-sky-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-slate-600" />
-            <span>Active Routines ({routines.length})</span>
-          </button>
-          <button
-            onClick={() => {
-              if (!isPremium && routines.length >= 1) {
-                triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
-                return;
-              }
-              setRoutinesSubView('create');
-              playChime('tap');
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
-              routinesSubView === 'create'
-                ? 'bg-white text-sky-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            {!isPremium && routines.length >= 1 ? (
-              <Crown className="w-3.5 h-3.5 text-amber-500" />
-            ) : (
-              <Plus className="w-3.5 h-3.5 text-slate-600" />
-            )}
-            <span>Create Custom</span>
-          </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                onStartTour();
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              title="Tour visual routines features"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>How This Works (Tour)</span>
+            </button>
+          )}
+
+          {/* Sub-view switcher */}
+          <div data-tour="routines-subtabs" className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl shrink-0">
+            <button
+              onClick={() => {
+                setRoutinesSubView('library');
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+                routinesSubView === 'library'
+                  ? 'bg-white text-sky-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-sky-600" />
+              <span>Template Library</span>
+            </button>
+            <button
+              onClick={() => {
+                setRoutinesSubView('active');
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+                routinesSubView === 'active'
+                  ? 'bg-white text-sky-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-slate-600" />
+              <span>Active Routines ({routines.length})</span>
+            </button>
+            <button
+              onClick={() => {
+                if (!isPremium && routines.length >= 1) {
+                  triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+                  return;
+                }
+                setRoutinesSubView('create');
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
+                routinesSubView === 'create'
+                  ? 'bg-white text-sky-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {!isPremium && routines.length >= 1 ? (
+                <Crown className="w-3.5 h-3.5 text-amber-500" />
+              ) : (
+                <Plus className="w-3.5 h-3.5 text-slate-600" />
+              )}
+              <span>Create Custom</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -265,7 +283,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
       {/* VIEW 1: ROUTINE TEMPLATES LIBRARY */}
       {routinesSubView === 'library' && (
-        <div className="space-y-6">
+        <div data-tour="routines-templates-list" className="space-y-6">
           <RoutineTemplatesLibrary
             onQuickImport={handleQuickImportTemplate}
             onCustomizeTemplate={handleCustomizeTemplate}
@@ -297,7 +315,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
       {/* VIEW 2: ACTIVE ROUTINES LIST */}
       {routinesSubView === 'active' && (
-        <div className="space-y-4">
+        <div data-tour="routines-firstthen-card" className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-slate-500 uppercase tracking-wider block">
               Active Child Routines ({routines.length}):

@@ -31,7 +31,10 @@ import { EMOTIONS } from '../data/defaultData';
 import { playChime } from '../utils/audio';
 import { ThemedEmotionFace } from './ThemedEmotionFace';
 
-export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({ isParentPortal = false }) => {
+export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStartTour?: () => void }> = ({ 
+  isParentPortal = false,
+  onStartTour,
+}) => {
   const {
     dailyRecollections,
     setShowRecollectionModal,
@@ -81,7 +84,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
   return (
     <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
       {/* 1. HERO & ACTION BAR */}
-      <div className="bg-gradient-to-r from-amber-100 via-amber-50 to-yellow-100 dark:from-slate-800 dark:to-slate-850 rounded-3xl p-4 sm:p-5 border-2 border-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div data-tour="recollection-chart-card" className="bg-gradient-to-r from-amber-100 via-amber-50 to-yellow-100 dark:from-slate-800 dark:to-slate-850 rounded-3xl p-4 sm:p-5 border-2 border-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-200 px-2.5 py-0.5 rounded-full">
@@ -99,7 +102,16 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3 py-2 rounded-2xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
           <button
             onClick={() => {
               setShowRecollectionModal(true);
@@ -118,7 +130,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
       </div>
 
       {/* 2. CLINICAL OVERVIEW TILES */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+      <div data-tour="recollection-metrics-grid" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         <div className="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border-2 border-emerald-200 shadow-xs">
           <span className="text-[10px] font-black uppercase text-emerald-700 block">
             Positive Mood Rate
@@ -183,7 +195,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean }> = ({
       </div>
 
       {/* 3. THERAPIST SUMMARY REPORT CARD (Ready to Copy/Share) */}
-      <div className="bg-slate-50 dark:bg-slate-850 rounded-3xl border-2 border-slate-200 p-4 sm:p-5 space-y-3">
+      <div data-tour="recollection-export-btn" className="bg-slate-50 dark:bg-slate-850 rounded-3xl border-2 border-slate-200 p-4 sm:p-5 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-indigo-600" />

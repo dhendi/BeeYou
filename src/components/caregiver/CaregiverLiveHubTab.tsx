@@ -110,11 +110,14 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 <h2 className="text-lg sm:text-xl font-black text-slate-900">
                   {childProfile.name}'s Caregiver Command Hub
                 </h2>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-black flex items-center gap-1.5 ${
-                  connectionStatus.isConnected 
-                    ? 'bg-emerald-500 text-white shadow-xs' 
-                    : 'bg-amber-200 text-amber-950'
-                }`}>
+                <span
+                  data-tour="status-connection-badge"
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-black flex items-center gap-1.5 ${
+                    connectionStatus.isConnected 
+                      ? 'bg-emerald-500 text-white shadow-xs' 
+                      : 'bg-amber-200 text-amber-950'
+                  }`}
+                >
                   <span className={`w-2 h-2 rounded-full ${connectionStatus.isConnected ? 'bg-white animate-pulse' : 'bg-amber-600'}`} />
                   <span>{connectionStatus.isConnected ? `Connected: ${connectionStatus.peerName || 'Child Device'}` : 'Waiting for Device Connection'}</span>
                 </span>
@@ -188,7 +191,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
 
         {/* Live Snapshot Pills */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-amber-200/60 text-xs">
-          <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+          <div data-tour="status-mood-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Current Mood</span>
             <span className="text-sm font-black text-slate-900 flex items-center gap-1 mt-0.5 capitalize">
               <span>{currentMood === 'happy' ? '😊' : currentMood === 'calm' ? '😌' : currentMood === 'overwhelmed' ? '😫' : currentMood === 'sad' ? '😢' : '✨'}</span>
@@ -196,14 +199,14 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             </span>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+          <div data-tour="status-activity-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Current View</span>
             <span className="text-sm font-black text-slate-900 mt-0.5 block truncate">
               {liveChildStatus?.currentActivity || 'BeeYou Active'}
             </span>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+          <div data-tour="status-habits-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Habits Done</span>
             <span className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1">
               <span>⭐</span>
@@ -211,7 +214,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             </span>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
+          <div data-tour="status-pairing-code-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Pairing Code</span>
             <span className="text-sm font-black text-indigo-700 font-mono mt-0.5 block">
               {getPairingCode()}
@@ -392,7 +395,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         </div>
 
         {/* 1-Tap Quick Nudges Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div data-tour="nudges-grid-buttons" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
             { title: '5-Min Warning', text: '5 minutes until we leave or change activity!', icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
             { title: 'Meal / Snack Time', text: 'Time for food or snack!', icon: Utensils, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
@@ -421,7 +424,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         </div>
 
         {/* Custom Caregiver Message Input */}
-        <form onSubmit={handleSendCustomMessage} className="pt-2 flex items-center gap-2">
+        <form data-tour="nudges-custom-input" onSubmit={handleSendCustomMessage} className="pt-2 flex items-center gap-2">
           <input
             type="text"
             value={customMsgText}

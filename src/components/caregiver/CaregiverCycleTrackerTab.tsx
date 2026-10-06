@@ -3,7 +3,11 @@ import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
 
-export const CaregiverCycleTrackerTab: React.FC = () => {
+interface CaregiverCycleTrackerTabProps {
+  onStartTour?: () => void;
+}
+
+export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> = ({ onStartTour }) => {
   const {
     enabledFeatures,
     toggleFeature,
@@ -29,17 +33,28 @@ export const CaregiverCycleTrackerTab: React.FC = () => {
             Designed for teens and adults. Calculates cycle phases, predicts upcoming periods, and correlates sensory sensitivity & executive function with hormonal shifts.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setShowCycleTrackerModal(true);
-            playChime('tap');
-          }}
-          className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Open Cycle Studio & Log Day</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3.5 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setShowCycleTrackerModal(true);
+              playChime('tap');
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Open Cycle Studio & Log Day</span>
+          </button>
+        </div>
       </div>
 
       {/* Feature Active / Inactive Banner */}
@@ -70,7 +85,7 @@ export const CaregiverCycleTrackerTab: React.FC = () => {
       )}
 
       {/* Cycle Settings Card */}
-      <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+      <div data-tour="cycle-symptoms-forecast" className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
         <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
           Cycle Configuration & Preferences
         </h3>
@@ -131,7 +146,7 @@ export const CaregiverCycleTrackerTab: React.FC = () => {
       </div>
 
       {/* Status Banner */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-pink-50 to-amber-50 border-2 border-rose-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div data-tour="cycle-phase-card" className="p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-pink-50 to-amber-50 border-2 border-rose-200 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <span className="text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
             {cycleSettings.discreetMode ? '🌿' : '🌸'}

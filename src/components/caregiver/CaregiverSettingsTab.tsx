@@ -6,9 +6,13 @@ import { Palette, FileJson, Download, Upload } from 'lucide-react';
 
 interface CaregiverSettingsTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({ onShowNotification }) => {
+export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({ 
+  onShowNotification,
+  onStartTour,
+}) => {
   const {
     setIsParentMode,
     settings,
@@ -52,11 +56,22 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({ onSh
 
   return (
     <div className="space-y-5">
-      <div className="border-b border-slate-100 pb-3">
-        <h2 className="text-xl font-black text-slate-900">Settings & Security</h2>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          Protect parent controls and configure device preferences.
-        </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div>
+          <h2 className="text-xl font-black text-slate-900">Settings & Security</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Protect parent controls and configure device preferences.
+          </p>
+        </div>
+        {onStartTour && (
+          <button
+            type="button"
+            onClick={onStartTour}
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+          >
+            <span>💡 How This Works</span>
+          </button>
+        )}
       </div>
 
       {/* AGE EXPERIENCE & SETUP WIZARD */}
@@ -434,7 +449,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({ onSh
         </div>
       </div>
 
-      <div className="max-w-xs">
+      <div data-tour="settings-pin-card" className="max-w-xs">
         <label className="text-xs font-black text-slate-700 block mb-1">
           Parent Lock PIN:
         </label>
@@ -448,7 +463,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({ onSh
         <span className="text-[11px] text-slate-400 mt-1 block">Default: 1234</span>
       </div>
 
-      <div className="space-y-3 pt-2">
+      <div data-tour="settings-notifications-card" className="space-y-3 pt-2">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"

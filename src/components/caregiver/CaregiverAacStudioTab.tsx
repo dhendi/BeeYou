@@ -18,9 +18,10 @@ import {
 
 interface CaregiverAacStudioTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ onShowNotification }) => {
+export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ onShowNotification, onStartTour }) => {
   const {
     aacItems,
     addAacItem,
@@ -119,7 +120,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+      <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-slate-900">AAC Vocabulary Manager</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -127,18 +128,35 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           </p>
         </div>
 
-        {/* 1-Tap Chicken Nuggets Test Button */}
-        <button
-          type="button"
-          onClick={handleQuickAddChickenNuggets}
-          className="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs flex items-center gap-1.5 border border-orange-300 shadow-xs cursor-pointer"
-        >
-          <span>🍗 1-Tap Add "Chicken Nuggets"</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                onStartTour();
+              }}
+              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              title="Tour this section"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>How This Works (Tour)</span>
+            </button>
+          )}
+
+          {/* 1-Tap Chicken Nuggets Test Button */}
+          <button
+            type="button"
+            onClick={handleQuickAddChickenNuggets}
+            className="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs flex items-center gap-1.5 border border-orange-300 shadow-xs cursor-pointer"
+          >
+            <span>🍗 1-Tap Add "Chicken Nuggets"</span>
+          </button>
+        </div>
       </div>
 
       {/* ONLINE AAC SYMBOL STUDIO HERO BANNER */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div data-tour="aac-studio-search" className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0 shadow-inner">
             🌐
@@ -226,7 +244,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       </div>
 
       {/* Add Custom Word Form */}
-      <form onSubmit={handleAddCustomWord} className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
+      <form data-tour="aac-studio-add-button" onSubmit={handleAddCustomWord} className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Plus className="w-4 h-4 text-amber-600" />
@@ -380,7 +398,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       </form>
 
       {/* INDUSTRY STANDARD AAC PACKS */}
-      <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
+      <div data-tour="aac-studio-categories" className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">

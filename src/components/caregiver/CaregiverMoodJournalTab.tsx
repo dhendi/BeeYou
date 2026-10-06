@@ -4,7 +4,11 @@ import { MOOD_META, TRIGGER_META, COPING_META } from '../../data/defaultData';
 import { playChime } from '../../utils/audio';
 import { Plus, Trash2, AlertTriangle, Lock } from 'lucide-react';
 
-export const CaregiverMoodJournalTab: React.FC = () => {
+interface CaregiverMoodJournalTabProps {
+  onStartTour?: () => void;
+}
+
+export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = ({ onStartTour }) => {
   const {
     enabledFeatures,
     toggleFeature,
@@ -25,17 +29,29 @@ export const CaregiverMoodJournalTab: React.FC = () => {
             Designed for teens and adults. Tracks emotional intensity, energy levels, sensory distress, triggers, and neurodivergent coping strategies.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setShowMoodJournalModal(true);
-            playChime('tap');
-          }}
-          className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Open Mood Journal Studio</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3.5 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
+          <button
+            type="button"
+            data-tour="journal-add-entry-card"
+            onClick={() => {
+              setShowMoodJournalModal(true);
+              playChime('tap');
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Open Mood Journal Studio</span>
+          </button>
+        </div>
       </div>
 
       {/* Feature Active / Inactive Banner */}
@@ -98,7 +114,7 @@ export const CaregiverMoodJournalTab: React.FC = () => {
       </div>
 
       {/* Entries List */}
-      <div className="space-y-3">
+      <div data-tour="journal-entries-feed" className="space-y-3">
         <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
           Logged Reflections History
         </h3>

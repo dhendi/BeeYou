@@ -9,11 +9,13 @@ import { Heart, ExternalLink, Camera, Copy } from 'lucide-react';
 interface CaregiverDeviceLinkTabProps {
   onShowNotification: (msg: string) => void;
   onOpenScanner: () => void;
+  onStartTour?: () => void;
 }
 
 export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
   onShowNotification,
   onOpenScanner,
+  onStartTour,
 }) => {
   const {
     childProfile,
@@ -33,7 +35,16 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
           <a
             href={`/?caregiver=true&code=${getPairingCode()}`}
             target="_blank"
@@ -60,7 +71,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             </span>
           </div>
 
-          <div className="text-3xl sm:text-4xl font-black tracking-widest text-slate-900 font-mono select-all">
+          <div data-tour="pairing-code-display" className="text-3xl sm:text-4xl font-black tracking-widest text-slate-900 font-mono select-all">
             {getPairingCode()}
           </div>
           
@@ -108,7 +119,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
         </div>
 
         {/* Live High-Contrast Scannable QR Code */}
-        <div className="p-4 bg-white rounded-3xl border-2 border-rose-200 shadow-sm flex flex-col items-center gap-2 shrink-0">
+        <div data-tour="pairing-qr-card" className="p-4 bg-white rounded-3xl border-2 border-rose-200 shadow-sm flex flex-col items-center gap-2 shrink-0">
           <QRCodeView 
             value={getPairingCode()} 
             size={180} 
@@ -119,7 +130,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
       </div>
 
       {/* Embedded Live Companion Portal View */}
-      <div className="rounded-3xl border-2 border-slate-200 overflow-hidden shadow-xs">
+      <div data-tour="pairing-permissions-card" className="rounded-3xl border-2 border-slate-200 overflow-hidden shadow-xs">
         <CaregiverLivePortal initialCode={getPairingCode()} />
       </div>
     </div>

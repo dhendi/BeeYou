@@ -9,14 +9,17 @@ import {
   Clock,
   Crown,
   Edit3,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
+import { playChime } from '../../utils/audio';
 
 interface CaregiverMedicationsTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = ({ onShowNotification }) => {
+export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = ({ onShowNotification, onStartTour }) => {
   const {
     childProfile,
     medications,
@@ -126,27 +129,44 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenAddMed}
-          className={`px-4 py-2 rounded-2xl text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all shrink-0 ${
-            !isPremium && medications.length >= 1
-              ? 'bg-amber-600 hover:bg-amber-700'
-              : 'bg-indigo-600 hover:bg-indigo-700'
-          }`}
-        >
-          {!isPremium && medications.length >= 1 ? (
-            <>
-              <Crown className="w-4 h-4 text-amber-200" />
-              <span>Upgrade for More Meds</span>
-            </>
-          ) : (
-            <>
-              <Plus className="w-4 h-4" />
-              <span>Add New Medication</span>
-            </>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                onStartTour();
+              }}
+              className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition-all border border-amber-300"
+              title="Tour this section"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>How This Works (Tour)</span>
+            </button>
           )}
-        </button>
+          <button
+            type="button"
+            data-tour="meds-add-button"
+            onClick={handleOpenAddMed}
+            className={`px-4 py-2 rounded-2xl text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all shrink-0 ${
+              !isPremium && medications.length >= 1
+                ? 'bg-amber-600 hover:bg-amber-700'
+                : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
+          >
+            {!isPremium && medications.length >= 1 ? (
+              <>
+                <Crown className="w-4 h-4 text-amber-200" />
+                <span>Upgrade for More Meds</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                <span>Add New Medication</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* 1-Medication Basic Plan Limit Banner */}
@@ -438,7 +458,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
       )}
 
       {/* Medication Cards List */}
-      <div className="space-y-3">
+      <div data-tour="meds-list-card" className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
             Configured Medications ({medications.length})
@@ -517,7 +537,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     )}
 
                     {/* Stock Inventory Tracker */}
-                    <div className="flex items-center gap-3 mt-2.5">
+                    <div data-tour="meds-refill-alert" className="flex items-center gap-3 mt-2.5">
                       <div className="w-36 h-2 bg-slate-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
@@ -538,7 +558,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 {/* Right: Actions */}
                 <div className="flex flex-wrap items-center gap-2 self-end md:self-center shrink-0">
                   {/* Restock Buttons */}
-                  <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                  <div data-tour="meds-mark-taken-btn" className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
                     <button
                       type="button"
                       onClick={() => {
