@@ -12,9 +12,13 @@ import { Volume2, Sparkles, Mic, Check } from 'lucide-react';
 
 interface CaregiverVoiceTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ onShowNotification }) => {
+export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ 
+  onShowNotification,
+  onStartTour,
+}) => {
   const {
     settings,
     updateSettings,
@@ -41,7 +45,16 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ onShowNoti
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -63,7 +76,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ onShowNoti
       </div>
 
       {/* 1. CURRENTLY ACTIVE VOICE CARD */}
-      <div className="bg-gradient-to-r from-indigo-50 via-sky-50 to-purple-50 border-2 border-indigo-200 rounded-3xl p-5 shadow-xs">
+      <div data-tour="voice-active-card" className="bg-gradient-to-r from-indigo-50 via-sky-50 to-purple-50 border-2 border-indigo-200 rounded-3xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-indigo-200">
             Active AAC Vocalizer
@@ -109,7 +122,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ onShowNoti
       </div>
 
       {/* 2. INTERACTIVE TESTING SANDBOX */}
-      <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
+      <div data-tour="voice-pitch-rate-controls" className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Mic className="w-4 h-4 text-sky-600" />
@@ -193,7 +206,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({ onShowNoti
       </div>
 
       {/* 3. ALL AVAILABLE SYSTEM VOICES */}
-      <div className="space-y-3">
+      <div data-tour="voice-library-list" className="space-y-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">

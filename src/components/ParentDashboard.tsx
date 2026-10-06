@@ -468,7 +468,7 @@ export const ParentDashboard: React.FC = () => {
                   setActiveTab(tab.id as any);
                   playChime('tap');
                 }}
-                className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap md:whitespace-normal ${
                   isActive
                     ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-md ring-2 ring-amber-300/60`
                     : `hover:${activeTheme?.palette?.primaryLight || 'hover:bg-amber-50'} text-slate-700`
@@ -532,7 +532,10 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: SUBSCRIPTION, BILLING & LIFECYCLE MANAGEMENT */}
           {activeTab === 'subscription' && (
-            <CaregiverSubscriptionTab onShowNotification={showNotification} />
+            <CaregiverSubscriptionTab 
+              showNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('subscription')}
+            />
           )}
 
           {/* TAB: HOW BEEYOU WORKS & CAREGIVER GUIDE */}
@@ -586,7 +589,10 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: OFFLINE & PWA STORAGE DIAGNOSTICS */}
           {activeTab === 'offline' && (
-            <CaregiverOfflineTab onShowNotification={showNotification} />
+            <CaregiverOfflineTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('offline')}
+            />
           )}
 
           {/* TAB: PLANS CHANGED SYSTEM */}
@@ -615,22 +621,32 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: VOICE SETTINGS & TESTING TOOL */}
           {activeTab === 'voice' && (
-            <CaregiverVoiceTab onShowNotification={showNotification} />
+            <CaregiverVoiceTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('voice')}
+            />
           )}
 
           {/* TAB: LIFE ADVENTURES & CONTEXTUAL PHRASES */}
           {activeTab === 'adventures' && (
-            <CaregiverAdventuresTab />
+            <CaregiverAdventuresTab 
+              onStartTour={() => handleStartSectionTour('adventures')}
+            />
           )}
 
           {/* TAB: SKILLS */}
           {activeTab === 'skills' && (
-            <CaregiverSkillsTab />
+            <CaregiverSkillsTab 
+              onStartTour={() => handleStartSectionTour('skills')}
+            />
           )}
 
           {/* TAB: CHILD PROFILE & PERSONALIZATION */}
           {activeTab === 'profile' && (
-            <CaregiverProfileTab onShowNotification={showNotification} />
+            <CaregiverProfileTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('profile')}
+            />
           )}
 
           {/* TAB: SETTINGS & PIN */}
@@ -643,7 +659,9 @@ export const ParentDashboard: React.FC = () => {
 
           {/* TAB: THEMES & CUSTOMIZATION STUDIO */}
           {activeTab === 'themes' && (
-            <ThemeShopAndStudio />
+            <ThemeShopAndStudio 
+              onStartTour={() => handleStartSectionTour('themes')}
+            />
           )}
         </main>
       </div>

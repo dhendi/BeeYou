@@ -46,62 +46,69 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
 
   const currentStep = steps[currentStepIndex];
 
-  // Update target rect calculation without triggering scrolling
+  // Update target rect calculation with safe viewport bounds and smart placement
   const updateTargetRect = useCallback(() => {
     if (!isActive || !currentStep) return;
 
     const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const cardWidth = Math.min(360, windowWidth - 24);
+    const estimatedCardHeight = 250;
+
     if (el) {
       const rect = el.getBoundingClientRect();
-      const padding = 8;
+      const padding = 6;
       const targetBox: Rect = {
         top: Math.max(0, rect.top - padding),
         left: Math.max(0, rect.left - padding),
-        width: rect.width + padding * 2,
+        width: Math.min(windowWidth, rect.width + padding * 2),
         height: rect.height + padding * 2,
         bottom: rect.bottom + padding,
-        right: rect.right + padding,
+        right: Math.min(windowWidth, rect.right + padding),
       };
       setTargetRect(targetBox);
 
-      // Compute smart card placement
-      const cardWidth = Math.min(360, window.innerWidth - 32);
-      const cardHeight = 220;
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+      // Center horizontally relative to target, clamped securely inside screen bounds
+      let left = targetBox.left + (targetBox.width / 2) - (cardWidth / 2);
+      left = Math.max(12, Math.min(left, windowWidth - cardWidth - 12));
 
-      // Center horizontally relative to target, clamped to screen
-      let left = targetBox.left + targetBox.width / 2 - cardWidth / 2;
-      left = Math.max(16, Math.min(left, windowWidth - cardWidth - 16));
-
-      // Prefer placing below if space allows, otherwise place above
+      // Calculate vertical space above and below the target
       const spaceBelow = windowHeight - targetBox.bottom;
       const spaceAbove = targetBox.top;
 
-      let top = 0;
-      let arrowDir: 'up' | 'down' = 'up';
+      let top = 12;
+      let arrowDir: 'up' | 'down' | 'none' = 'up';
 
-      if (spaceBelow >= cardHeight + 20) {
+      if (spaceBelow >= estimatedCardHeight + 30) {
         // Place below target, arrow points UP
-        top = targetBox.bottom + 16;
+        top = targetBox.bottom + 14;
         arrowDir = 'up';
-      } else if (spaceAbove >= cardHeight + 20) {
+      } else if (spaceAbove >= estimatedCardHeight + 30) {
         // Place above target, arrow points DOWN
-        top = Math.max(16, targetBox.top - cardHeight - 16);
+        top = targetBox.top - estimatedCardHeight - 14;
         arrowDir = 'down';
       } else {
-        // Overlay inside available center space
-        top = Math.max(16, Math.min(targetBox.bottom + 10, windowHeight - cardHeight - 20));
-        arrowDir = spaceBelow > spaceAbove ? 'up' : 'down';
+        // If tight on both sides, pick side with most space and clamp
+        if (spaceBelow >= spaceAbove) {
+          top = targetBox.bottom + 10;
+          arrowDir = 'up';
+        } else {
+          top = targetBox.top - estimatedCardHeight - 10;
+          arrowDir = 'down';
+        }
       }
+
+      // Hard clamp top so card NEVER falls off-screen (minimum 10px, max windowHeight - estimatedCardHeight - 12px)
+      top = Math.max(10, Math.min(top, windowHeight - estimatedCardHeight - 12));
 
       setCardPosition({ top, left, arrowDir });
     } else {
-      // Fallback if target element not found in DOM
+      // Graceful centered fallback if target is not currently in DOM
       setTargetRect(null);
       setCardPosition({
-        top: window.innerHeight / 2 - 100,
-        left: Math.max(16, window.innerWidth / 2 - 180),
+        top: Math.max(12, windowHeight / 2 - 125),
+        left: Math.max(12, windowWidth / 2 - cardWidth / 2),
         arrowDir: 'none',
       });
     }
@@ -109,28 +116,34 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
 
   const rafRef = useRef<number | null>(null);
 
-  // Smoothly scroll target into view ONLY once when step changes
+  // Smoothly scroll target into center view once when step changes
   useEffect(() => {
     if (!isActive || !currentStep) return;
 
     setHasClickedTarget(false);
 
-    const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
-    if (el) {
-      try {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-      } catch {
-        // Fallback for older browsers
-        el.scrollIntoView();
+    const scrollToElement = () => {
+      const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
+      if (el) {
+        try {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        } catch {
+          el.scrollIntoView();
+        }
       }
-    }
-
-    // Initial position measurement after DOM settles
-    const timeoutId = setTimeout(() => {
       updateTargetRect();
-    }, 100);
+    };
 
-    return () => clearTimeout(timeoutId);
+    scrollToElement();
+
+    // Staggered retries in case tab is animating or re-rendering
+    const t1 = setTimeout(scrollToElement, 120);
+    const t2 = setTimeout(scrollToElement, 350);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [isActive, currentStepIndex, currentStep, updateTargetRect]);
 
   // Throttled scroll and resize listeners using requestAnimationFrame
@@ -278,7 +291,7 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
         )}
 
         {/* Coach Mark Card Content */}
-        <div className="w-full bg-white dark:bg-slate-900 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3">
+        <div className="w-full max-h-[calc(100dvh-32px)] overflow-y-auto bg-white dark:bg-slate-900 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3">
           {/* Header with Mascot & Step Counter */}
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
             <div className="flex items-center gap-2.5">

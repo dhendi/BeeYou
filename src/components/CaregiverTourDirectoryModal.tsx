@@ -6,19 +6,41 @@ import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
 interface CaregiverTourDirectoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectTour: (sectionId: TourSectionId) => void;
+  onSelectSection?: (sectionId: TourSectionId) => void;
+  onStartFullTour?: () => void;
+  onSelectTour?: (sectionId: TourSectionId) => void;
   activeTab?: string;
 }
 
 export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalProps> = ({
   isOpen,
   onClose,
+  onSelectSection,
+  onStartFullTour,
   onSelectTour,
   activeTab,
 }) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
   if (!isOpen) return null;
 
-  const tourList = Object.values(SECTION_TOURS).filter((t) => t.id !== 'fullApp');
+  const handlePick = (sectionId: TourSectionId) => {
+    playChime('tap');
+    if (sectionId === 'fullApp' && onStartFullTour) {
+      onStartFullTour();
+    } else if (onSelectSection) {
+      onSelectSection(sectionId);
+    } else if (onSelectTour) {
+      onSelectTour(sectionId);
+    }
+  };
+
+  const allTours = Object.values(SECTION_TOURS).filter((t) => t.id !== 'fullApp');
+  const filteredTours = allTours.filter((t) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
+  });
 
   return (
     <div className="fixed inset-0 z-[9990] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
@@ -35,11 +57,11 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                   Interactive Feature Guides
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 uppercase tracking-wide">
-                  Spotlight Tours
+                  {allTours.length} Guides Available
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
-                Choose any section below to see an interactive step-by-step guide right on your screen.
+                Choose any section below to launch its interactive step-by-step spotlight guide.
               </p>
             </div>
           </div>
@@ -69,16 +91,13 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                 <span>🌟 Complete Caregiver Hub Tour</span>
               </h3>
               <p className="text-xs text-amber-100 max-w-xl font-medium">
-                Walk through all 10 key features in under 2 minutes to learn how everything connects.
+                Walk through all key features step-by-step to learn how everything connects.
               </p>
             </div>
 
             <button
               type="button"
-              onClick={() => {
-                playChime('star');
-                onSelectTour('fullApp');
-              }}
+              onClick={() => handlePick('fullApp')}
               className="px-4 py-2.5 rounded-xl bg-white hover:bg-amber-50 text-slate-900 font-black text-xs shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition shrink-0"
             >
               <span>Start Full Tour</span>
@@ -86,20 +105,26 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
             </button>
           </div>
 
-          {/* Section-Specific Tours Grid */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
-              Or pick a specific section guide:
-            </h4>
+          {/* Section-Specific Search & Grid */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500">
+                Or pick an individual section guide:
+              </h4>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search guides..."
+                className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold w-full sm:w-56"
+              />
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {tourList.map((sec) => (
+              {filteredTours.map((sec) => (
                 <div
                   key={sec.id}
-                  onClick={() => {
-                    playChime('tap');
-                    onSelectTour(sec.id);
-                  }}
+                  onClick={() => handlePick(sec.id)}
                   className="p-3.5 sm:p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-white dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-start justify-between gap-3 group shadow-2xs"
                 >
                   <div className="flex items-start gap-3">

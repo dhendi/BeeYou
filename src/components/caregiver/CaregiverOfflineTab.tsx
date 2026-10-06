@@ -7,9 +7,13 @@ import { Database, ShieldCheck, Download } from 'lucide-react';
 
 interface CaregiverOfflineTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({ onShowNotification }) => {
+export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({ 
+  onShowNotification,
+  onStartTour,
+}) => {
   const {
     childProfile,
     aacItems,
@@ -55,8 +59,19 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({ onShow
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onStartTour && (
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <span>💡 How This Works</span>
+            </button>
+          )}
           <button
+            type="button"
+            data-tour="offline-reindex-btn"
             onClick={handleManualReindex}
             disabled={reindexingOffline}
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition active:scale-95 cursor-pointer"
@@ -67,7 +82,7 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({ onShow
       </div>
 
       {/* Status Banner */}
-      <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between">
+      <div data-tour="offline-status-banner" className="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
             <ShieldCheck className="w-6 h-6" />
@@ -85,7 +100,7 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({ onShow
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div data-tour="offline-metrics-grid" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
           <div className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">
             AAC Tiles Indexed

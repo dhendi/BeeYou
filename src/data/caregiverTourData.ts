@@ -13,6 +13,13 @@ export type TourSectionId =
   | 'recollection'
   | 'moodJournal'
   | 'cycleTracker'
+  | 'subscription'
+  | 'voice'
+  | 'offline'
+  | 'adventures'
+  | 'skills'
+  | 'profile'
+  | 'themes'
   | 'settings';
 
 export interface TourSectionMeta {
@@ -29,7 +36,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'fullApp',
     title: 'Full Caregiver Hub Tour',
     emoji: '🌟',
-    description: 'A complete step-by-step walkthrough covering every main tool and feature.',
+    description: 'A complete step-by-step walkthrough covering every main tool and feature in the app.',
     tabId: 'home',
     steps: [
       {
@@ -118,165 +125,165 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         targetSelector: '[data-tour="status-activity-pill"]',
         title: 'Current Child Activity',
         instruction: 'Shows the exact screen or routine step your child is viewing right now on their tablet or phone.',
-        mascotHint: 'Know what routine step is in progress! 📱',
+        mascotHint: 'Live status tells you what screen they are on! 📱',
       },
       {
         targetSelector: '[data-tour="status-habits-pill"]',
-        title: 'Daily Habits Completed',
-        instruction: 'Tracks how many visual checklist items and positive daily habits your child has completed today.',
-        mascotHint: 'Earns stars and stickers as tasks are finished! ⭐',
+        title: 'Daily Habits Tracker',
+        instruction: 'Tracks completed daily micro-routines like drinking water, taking deep breaths, and sensory breaks.',
+        mascotHint: 'Celebrate every daily win! ⭐',
       },
       {
         targetSelector: '[data-tour="status-pairing-code-pill"]',
-        title: '6-Digit Family Sync Code',
-        instruction: 'This unique code is used to link child and caregiver devices without passwords or complex setups.',
-        mascotHint: 'Type or scan this code on other devices to connect! 🔑',
-      },
-    ],
-  },
-
-  pairing: {
-    id: 'pairing',
-    title: 'Instant Device Pairing & Link',
-    emoji: '📱',
-    description: 'Learn how to connect phones, tablets, and caregiver accounts effortlessly.',
-    tabId: 'caregiver',
-    steps: [
-      {
-        targetSelector: '[data-tour="pairing-qr-card"]',
-        title: 'Device Pairing QR Code',
-        instruction: 'Point another camera at this QR code to connect instantly without typing any codes.',
-        mascotHint: 'Scan with camera for 1-tap connection! 📷',
-      },
-      {
-        targetSelector: '[data-tour="pairing-code-display"]',
-        title: 'Manual 6-Digit Code',
-        instruction: 'If you prefer typing, enter this 6-character code on the other device to establish a direct link.',
-        mascotHint: 'Simple 6-character link code! 🔤',
-      },
-      {
-        targetSelector: '[data-tour="pairing-permissions-card"]',
-        title: 'Caregiver Remote Permissions',
-        instruction: 'Control what caregiver devices can do: receive emergency SOS, send spoken audio nudges, or update AAC words.',
-        mascotHint: 'Customize permission toggles anytime! ⚙️',
-      },
-    ],
-  },
-
-  alerts: {
-    id: 'alerts',
-    title: 'Safety & SOS Alert Inbox',
-    emoji: '🚨',
-    description: 'How real-time emergency help requests and 1-tap replies operate.',
-    tabId: 'alerts',
-    steps: [
-      {
-        targetSelector: '[data-tour="alerts-active-card"]',
-        title: 'Live Emergency Alerts Banner',
-        instruction: 'When your child taps "SOS Help" or "I Need a Break", an urgent vibrating alert sounds and appears here immediately.',
-        mascotHint: 'Instant alerts keep your child safe! 🛡️',
-      },
-      {
-        targetSelector: '[data-tour="alerts-quick-reply-buttons"]',
-        title: '1-Tap Reassuring Replies',
-        instruction: 'Tap "I\'m On My Way 🚗" or "I\'m Here For You ❤️" to send an instant spoken voice message to your child\'s screen.',
-        mascotHint: 'Reassures child in seconds without calling! 💬',
-      },
-      {
-        targetSelector: '[data-tour="alerts-test-button"]',
-        title: 'Simulate Test Alert',
-        instruction: 'Tap this button to trigger a practice alert and verify your notifications, chime sounds, and response flow.',
-        mascotHint: 'Practice test alerts anytime! 🔔',
-      },
-      {
-        targetSelector: '[data-tour="alerts-history-list"]',
-        title: 'Alert History & Timestamp Log',
-        instruction: 'Review past alerts with exact timestamps and response records for peace of mind or therapist review.',
-        mascotHint: 'Complete safety audit log! 📋',
+        title: '6-Digit Sync Code',
+        instruction: 'Your active unique family pairing code. Use this code to connect phones, tablets, or caregiver web portals.',
+        mascotHint: 'Share this code to link other caregiver devices! 🔑',
       },
     ],
   },
 
   nudges: {
     id: 'nudges',
-    title: 'Spoken Audio Nudges & Reminders',
-    emoji: '💬',
-    description: 'Send predictable transition warnings and praise directly to child tablet.',
+    title: 'Spoken Audio Nudges',
+    emoji: '📣',
+    description: 'Broadcast spoken voice announcements and countdown alerts directly to your child\'s device.',
     tabId: 'home',
     steps: [
       {
         targetSelector: '[data-tour="nudges-grid-buttons"]',
-        title: '1-Tap Audio Nudges',
-        instruction: 'Tap preset buttons like 5-Min Warning ⏳, Meal Time 🥪, Medicine Time 💊, or Proud of You 🌟 to speak on the child\'s screen.',
-        mascotHint: 'Clear, predictable audio cues reduce meltdowns! 🔊',
+        title: '1-Tap Quick Spoken Nudges',
+        instruction: 'Tap preset buttons like "5-Min Warning ⏳", "Meal Time 🍽️", or "Proud of You 🌟" to speak aloud in your child\'s AAC voice immediately.',
+        mascotHint: 'Tap any button to broadcast voice instantly! 🔊',
       },
       {
         targetSelector: '[data-tour="nudges-custom-input"]',
-        title: 'Custom Spoken Message',
-        instruction: 'Type any custom phrase (e.g. "Grandma is coming over in 10 minutes") and tap Send to broadcast it with clear speech synthesis.',
-        mascotHint: 'Speaks whatever you type out loud! 🗣️',
+        title: 'Custom Announcement Broadcaster',
+        instruction: 'Type any personalized message or reminder (e.g. "Shoes on in 2 minutes, bus is coming!"). Tap Send to speak it aloud.',
+        mascotHint: 'Type your message and tap Send! 💬',
+      },
+    ],
+  },
+
+  pairing: {
+    id: 'pairing',
+    title: 'Instant Device Pairing',
+    emoji: '🔗',
+    description: 'Connect caregiver phones and child tablets in seconds using QR codes or shared email.',
+    tabId: 'caregiver',
+    steps: [
+      {
+        targetSelector: '[data-tour="pairing-qr-card"]',
+        title: 'Instant QR Code Pairing',
+        instruction: 'Scan this high-contrast QR code with your smartphone camera to launch the companion caregiver portal without entering passwords.',
+        mascotHint: 'Point your camera and tap the link! 📷',
+      },
+      {
+        targetSelector: '[data-tour="pairing-code-display"]',
+        title: '6-Letter Pairing Code',
+        instruction: 'Type this 6-character code into any browser to link devices without scanning.',
+        mascotHint: 'Type this code on other family devices! 🔡',
+      },
+      {
+        targetSelector: '[data-tour="pairing-permissions-card"]',
+        title: 'Remote Companion Portal',
+        instruction: 'Provides full live sync and remote controls from your computer or phone.',
+        mascotHint: 'Full remote companion dashboard! 🌐',
+      },
+    ],
+  },
+
+  alerts: {
+    id: 'alerts',
+    title: 'Safety & SOS Alerts Inbox',
+    emoji: '🚨',
+    description: 'Receive instant alerts when your child needs help, requests a break, or triggers an SOS.',
+    tabId: 'alerts',
+    steps: [
+      {
+        targetSelector: '[data-tour="alerts-active-card"]',
+        title: 'Active Emergency Alerts Card',
+        instruction: 'When your child asks for help, needs a break, or triggers SOS, live alert banners appear here with audio chimes.',
+        mascotHint: 'Emergency cards appear here immediately! ⚠️',
+      },
+      {
+        targetSelector: '[data-tour="alerts-quick-reply-buttons"]',
+        title: '1-Tap Instant Reassurances',
+        instruction: 'Tap "I\'m On My Way 🏃", "Take Deep Breaths 🫁", or "You Are Safe 🛡️" to send instant spoken responses to your child\'s screen.',
+        mascotHint: 'Reassure your child in 1 tap! 💬',
+      },
+      {
+        targetSelector: '[data-tour="alerts-test-button"]',
+        title: 'Simulate & Test Alert',
+        instruction: 'Test your device chime and notification channels without causing alarm for your child.',
+        mascotHint: 'Always test sound & notifications! 🔔',
+      },
+      {
+        targetSelector: '[data-tour="alerts-history-list"]',
+        title: 'Alerts Audit History Log',
+        instruction: 'Review time-stamped history of previous help requests, break requests, and response times.',
+        mascotHint: 'Keeps a secure record of all help calls! 📜',
       },
     ],
   },
 
   routines: {
     id: 'routines',
-    title: 'Routine Templates & First/Then',
+    title: 'Visual Routine Templates & First/Then',
     emoji: '📅',
-    description: 'Create predictable visual schedules, countdown timers, and reward stickers.',
+    description: 'Build step-by-step visual schedules, First/Then visual boards, and reward stickers.',
     tabId: 'routines',
     steps: [
       {
         targetSelector: '[data-tour="routines-subtabs"]',
-        title: 'Routine Categories & Views',
-        instruction: 'Switch between the Clinical Template Library, Active Routines, and the Custom Schedule Creator.',
-        mascotHint: 'Explore pre-built routines or make your own! 📚',
+        title: 'Routine Sub-Categories',
+        instruction: 'Switch between Routine Templates, First/Then visual boards, and Daily Schedules.',
+        mascotHint: 'Organize routines by morning, school, or bedtime! 📑',
       },
       {
         targetSelector: '[data-tour="routines-templates-list"]',
-        title: 'Clinical Schedule Templates',
-        instruction: 'Browse evidence-based schedules for Morning, Bedtime, After School, Hygiene, and Sensory Calm routines.',
-        mascotHint: '1-tap to clone and customize any template! 🌟',
+        title: 'Pre-Built Clinical Routines',
+        instruction: 'Select from tested morning, bedtime, brushing teeth, and school preparation routines with built-in timers.',
+        mascotHint: 'One-click import clinically validated schedules! ⏰',
       },
       {
         targetSelector: '[data-tour="routines-firstthen-card"]',
-        title: 'First / Then Visual Boards',
-        instruction: 'Pair a required task ("First: Clean up toys 🧸") with a motivating reward ("Then: 15m iPad 🎮") to build motivation.',
-        mascotHint: 'First/Then visual structure builds cooperation! 💡',
+        title: 'First / Then Visual Board Generator',
+        instruction: 'Create visual boards (e.g. "First Homework, Then iPad") to motivate transitions and eliminate power struggles.',
+        mascotHint: 'Visual First/Then boards make expectations clear! 🧩',
       },
     ],
   },
 
   medications: {
     id: 'medications',
-    title: 'Medication & Supply Reminders',
+    title: 'Medication Reminders & Refill Tracker',
     emoji: '💊',
-    description: 'Track daily pill schedules, dosage times, and low supply refill alerts.',
+    description: 'Track daily pill schedules, dosage times, and receive automatic warnings before refills run out.',
     tabId: 'medications',
     steps: [
       {
-        targetSelector: '[data-tour="meds-list-card"]',
-        title: 'Daily Medication Schedule',
-        instruction: 'View all active medications, dosage amounts, and scheduled reminder times (Morning, Afternoon, Evening, Bedtime).',
-        mascotHint: 'Keeps all daily prescriptions organized! 📋',
+        targetSelector: '[data-tour="meds-add-button"]',
+        title: 'Add Prescription & Dosage',
+        instruction: 'Add prescription name, dosage (e.g. 10mg), schedule times (Morning, Lunch, Bedtime), and total pill count.',
+        mascotHint: 'Add vitamins, daily meds, or inhalers! ➕',
       },
       {
-        targetSelector: '[data-tour="meds-mark-taken-btn"]',
-        title: 'Mark Taken & Log Adherence',
-        instruction: 'Tap "Mark Taken" when a dose is administered. BeeYou automatically deducts quantity and logs the timestamp.',
-        mascotHint: 'Tracks exact administration history! ✓',
+        targetSelector: '[data-tour="meds-list-card"]',
+        title: 'Active Medication Schedule',
+        instruction: 'Displays all scheduled medications for today with pill icons and remaining daily quantities.',
+        mascotHint: 'Check off doses as they are taken! 📋',
       },
       {
         targetSelector: '[data-tour="meds-refill-alert"]',
-        title: 'Automatic Low-Stock Refill Alerts',
-        instruction: 'When remaining pill stock falls below your threshold (e.g. 5 doses left), automatic refill warnings appear here.',
-        mascotHint: 'Never run out of essential medication! ⚠️',
+        title: 'Low Stock & Refill Warnings',
+        instruction: 'Warns you in advance when supply drops below your refill threshold so you never miss a pharmacy renewal.',
+        mascotHint: 'Never run out of important prescriptions! ⚠️',
       },
       {
-        targetSelector: '[data-tour="meds-add-button"]',
-        title: 'Add New Prescription',
-        instruction: 'Add new medications with custom dosages, instructions, pill counts, and reminder alarm times.',
-        mascotHint: 'Add medications in seconds! ➕',
+        targetSelector: '[data-tour="meds-mark-taken-btn"]',
+        title: 'Mark Taken & Log Timestamp',
+        instruction: 'Tap to confirm dose was taken. Automatically decrements inventory and logs the exact timestamp.',
+        mascotHint: 'Logs taken time for safety & doctor visits! ✓',
       },
     ],
   },
@@ -285,68 +292,68 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'plansChanged',
     title: 'Plans Changed Alert System',
     emoji: '⚠️',
-    description: 'Broadcast gentle transition warnings when daily schedules shift unexpectedly.',
+    description: 'Calm sudden schedule changes by broadcasting gentle visual explanations to your child.',
     tabId: 'plans-changed',
     steps: [
       {
         targetSelector: '[data-tour="plans-changed-toggle-card"]',
-        title: 'Activate Plans Changed Mode',
-        instruction: 'Turn on this toggle when an unexpected disruption occurs (rain canceled park, doctor visit delayed, different school bus).',
-        mascotHint: 'Instantly alerts child device calmly! 📢',
-      },
-      {
-        targetSelector: '[data-tour="plans-changed-message-input"]',
-        title: 'Change Description & Reassurance',
-        instruction: 'Explain what changed in simple words (e.g. "We are going to the library instead of the playground today").',
-        mascotHint: 'Clear explanations stop anxiety before it starts! 💬',
+        title: 'Activate Schedule Change',
+        instruction: 'Toggle this on when an unexpected event occurs (Rain cancelled park, Dentist appointment moved, School delay).',
+        mascotHint: 'Broadcasting prevents sudden meltdown distress! 📢',
       },
       {
         targetSelector: '[data-tour="plans-changed-replacement-picker"]',
-        title: 'Calm Replacement Activity',
-        instruction: 'Select a comforting alternative task (Reading books, drawing, sensory break) to give child a positive new focus.',
-        mascotHint: 'Offers a comforting alternative! 🎨',
+        title: 'Replacement Activity Picker',
+        instruction: 'Choose what will happen instead (e.g. "Instead of Soccer -> Board Game at Home") with clear pictograms.',
+        mascotHint: 'Giving a replacement restores predictability! 🔄',
+      },
+      {
+        targetSelector: '[data-tour="plans-changed-message-input"]',
+        title: 'Reassurance & Calming Note',
+        instruction: 'Type a comforting message that will appear on your child\'s screen in large, high-contrast text with speech.',
+        mascotHint: 'Helps your child feel calm and supported! ❤️',
       },
     ],
   },
 
   aac: {
     id: 'aac',
-    title: 'AAC Symbol Studio & Custom Speech',
+    title: 'AAC Symbol Studio & Custom Vocab',
     emoji: '🗣️',
-    description: 'Customize 3,400+ clinical Mulberry symbols, family photos, and custom speech.',
+    description: 'Customize AAC communication boards with 3,400+ Mulberry symbols, family photos, and custom speech.',
     tabId: 'aac',
     steps: [
       {
-        targetSelector: '[data-tour="aac-studio-search"]',
-        title: '3,400+ Clinical Symbol Search',
-        instruction: 'Search the research-backed Mulberry Symbol library for clinical AAC pictograms across thousands of words.',
-        mascotHint: 'Search any word to find clinical symbols! 🔍',
+        targetSelector: '[data-tour="aac-studio-categories"]',
+        title: 'Industry Standard Pre-Built Packs',
+        instruction: 'One-click import validated TouchChat and LAMP style vocabulary sets for School, Home, Emotions, and Mealtime.',
+        mascotHint: 'Import hundreds of speech words in 1 tap! 📚',
       },
       {
-        targetSelector: '[data-tour="aac-studio-categories"]',
-        title: 'Category Folders',
-        instruction: 'Organize communication buttons into intuitive folders: Food 🍕, Drinks 🧃, Play 🎮, Feelings 😊, and Help 🆘.',
-        mascotHint: 'Keeps vocabulary structured and easy to navigate! 📁',
+        targetSelector: '[data-tour="aac-studio-search"]',
+        title: 'Mulberry Clinical Symbol Search',
+        instruction: 'Search over 3,400 high-contrast clinical AAC symbols by keyword or speech category.',
+        mascotHint: 'Search any word to find its clinical symbol! 🔍',
       },
       {
         targetSelector: '[data-tour="aac-studio-add-button"]',
-        title: 'Add Custom Photos & Words',
-        instruction: 'Upload photos of family members, favorite snacks, toys, and pets with custom recorded speech pronunciation.',
-        mascotHint: 'Personalize with real family photos! 📸',
+        title: 'Add Custom Symbol / Upload Photo',
+        instruction: 'Upload family photos (e.g. Grandma, Family Dog, Favorite Blanket) and record personalized voice pronunciation.',
+        mascotHint: 'Add real photos of loved ones and favorite toys! 📸',
       },
     ],
   },
 
   recollection: {
     id: 'recollection',
-    title: 'Mood & Therapist Reports',
+    title: 'Clinical Mood & Therapist Summary',
     emoji: '📊',
-    description: 'Weekly emotional rhythm charts, sensory triggers, and printable doctor reports.',
+    description: 'Track daily regulation trends and export structured summary reports for therapists and IEPs.',
     tabId: 'recollection',
     steps: [
       {
         targetSelector: '[data-tour="recollection-chart-card"]',
-        title: '7-Day Emotional Trend Chart',
+        title: 'Day-to-Day Summary Chart',
         instruction: 'Visualizes daily mood fluctuations, identifying patterns in morning calm vs. evening sensory overload.',
         mascotHint: 'Spot emotional trends across the week! 📈',
       },
@@ -367,7 +374,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
 
   moodJournal: {
     id: 'moodJournal',
-    title: 'Mood Journal & Self-Reflection',
+    title: 'Mood & Self-Reflection Journal',
     emoji: '📖',
     description: 'Daily emotional reflections, voice notes, and sensory regulation logs.',
     tabId: 'mood-journal',
@@ -409,6 +416,184 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     ],
   },
 
+  subscription: {
+    id: 'subscription',
+    title: 'Membership & 30-Day Free Trial',
+    emoji: '👑',
+    description: 'Manage subscription plans, 30-day free trial, and billing cycles with $0 upfront.',
+    tabId: 'subscription',
+    steps: [
+      {
+        targetSelector: '[data-tour="subscription-tier-card"]',
+        title: 'Current Membership Plan',
+        instruction: 'Displays your current tier (Basic Free, 30-Day Trial, or Premium) with remaining trial days.',
+        mascotHint: 'Shows your active plan & trial status! 👑',
+      },
+      {
+        targetSelector: '[data-tour="subscription-billing-toggle"]',
+        title: 'Monthly vs. Yearly Billing',
+        instruction: 'Switch between monthly ($12.99/mo) and discounted annual billing ($129.99/yr, 2 months free).',
+        mascotHint: 'Annual plans save 17% every year! 💰',
+      },
+      {
+        targetSelector: '[data-tour="subscription-trial-button"]',
+        title: 'Start 30-Day Free Trial',
+        instruction: 'Unlock all 17 soundscapes, unlimited routines, and therapist clinical summaries with 1 tap.',
+        mascotHint: 'Start with $0 today and cancel anytime! ✨',
+      },
+    ],
+  },
+
+  voice: {
+    id: 'voice',
+    title: 'Voice Customization & Testing',
+    emoji: '🎙️',
+    description: 'Audition and fine-tune natural speech voices, pacing speed, and natural pitch.',
+    tabId: 'voice',
+    steps: [
+      {
+        targetSelector: '[data-tour="voice-active-card"]',
+        title: 'Active Voice Vocalizer',
+        instruction: 'Shows which text-to-speech voice is currently powering your child\'s AAC speech buttons.',
+        mascotHint: 'Listen to the current speaking voice! 🔊',
+      },
+      {
+        targetSelector: '[data-tour="voice-pitch-rate-controls"]',
+        title: 'Interactive Testing & Sliders',
+        instruction: 'Type custom test phrases and adjust conversational pacing (0.96x) and natural pitch (1.0).',
+        mascotHint: 'Adjust speed and pitch until it sounds natural! 🎚️',
+      },
+      {
+        targetSelector: '[data-tour="voice-library-list"]',
+        title: 'System Voice Library',
+        instruction: 'Compare and audition every available offline and neural voice installed on your device.',
+        mascotHint: 'Tap "Test" on any voice to hear how it speaks! 🎧',
+      },
+    ],
+  },
+
+  offline: {
+    id: 'offline',
+    title: 'Offline Readiness & Storage',
+    emoji: '💾',
+    description: 'Ensure all AAC pictograms, routines, and sensory tools work 100% without internet.',
+    tabId: 'offline',
+    steps: [
+      {
+        targetSelector: '[data-tour="offline-status-banner"]',
+        title: 'Offline Readiness Status',
+        instruction: 'Monitors service worker caching and local IndexedDB dual-storage health.',
+        mascotHint: 'Green badge means 100% offline ready! 🛡️',
+      },
+      {
+        targetSelector: '[data-tour="offline-reindex-btn"]',
+        title: 'Verify & Re-Index Storage',
+        instruction: 'Forces a fresh local storage sync of all custom words, social stories, and routines.',
+        mascotHint: 'Tap to ensure all files are cached locally! ⚡',
+      },
+      {
+        targetSelector: '[data-tour="offline-metrics-grid"]',
+        title: 'Indexed Data Counts',
+        instruction: 'Breakdown of indexed AAC pictograms, schedules, and offline audio files.',
+        mascotHint: 'See how many words are saved on device! 📊',
+      },
+    ],
+  },
+
+  adventures: {
+    id: 'adventures',
+    title: 'Life Adventures & Contextual AAC',
+    emoji: '🧭',
+    description: 'Prepare for community outings like dentists, grocery stores, and haircuts with suggested phrases.',
+    tabId: 'adventures',
+    steps: [
+      {
+        targetSelector: '[data-tour="adventures-list-card"]',
+        title: 'Life Adventure Scenarios',
+        instruction: 'Step-by-step preparation guides for doctors, airports, barbers, restaurants, and playgrounds.',
+        mascotHint: 'Helps prepare before heading out into the community! 🗺️',
+      },
+      {
+        targetSelector: '[data-tour="adventures-phrases-card"]',
+        title: 'Contextual Phrases',
+        instruction: 'Surfaces relevant AAC phrases (e.g. "I want to pay", "Too loud here") automatically during this outing.',
+        mascotHint: 'Gives the right words for the right location! 💬',
+      },
+    ],
+  },
+
+  skills: {
+    id: 'skills',
+    title: 'Independence Missions & Skills',
+    emoji: '⭐',
+    description: 'Break everyday tasks into rewarding micro-missions with star rewards.',
+    tabId: 'skills',
+    steps: [
+      {
+        targetSelector: '[data-tour="skills-missions-card"]',
+        title: 'Task Analysis Missions',
+        instruction: 'Step-by-step visual guides for hand washing, packing backpacks, dressing, and chores.',
+        mascotHint: 'Step-by-step visual breakdowns build independence! 🧼',
+      },
+      {
+        targetSelector: '[data-tour="skills-reward-badge"]',
+        title: 'Star Coins & Gamification',
+        instruction: 'Completing life skill missions awards star coins that unlock new themes, avatars, and stickers.',
+        mascotHint: 'Motivates through positive encouragement! 🌟',
+      },
+    ],
+  },
+
+  profile: {
+    id: 'profile',
+    title: 'Profile & Emergency ID Card',
+    emoji: '🪪',
+    description: 'Manage child interests, pronouns, sensory sensitivities, and digital advocacy badge.',
+    tabId: 'profile',
+    steps: [
+      {
+        targetSelector: '[data-tour="profile-digital-id-card"]',
+        title: 'Digital ID & Advocacy Badge',
+        instruction: 'Emergency advocacy card with emergency phone numbers, communication tips, and calming strategies for first responders.',
+        mascotHint: 'Essential emergency card for school & travel! 🪪',
+      },
+      {
+        targetSelector: '[data-tour="profile-fields-card"]',
+        title: 'Personalization & Interests',
+        instruction: 'Customize favorite comfort items, special interests (e.g. Dinosaurs, Trains), and preferred pronouns.',
+        mascotHint: 'Personalizes themes and avatar greetings! 🦖',
+      },
+    ],
+  },
+
+  themes: {
+    id: 'themes',
+    title: 'Custom Themes & Sensory Studio',
+    emoji: '🎨',
+    description: 'Choose ready-made themes or build personalized color palettes, mascots, and AAC emojis.',
+    tabId: 'themes',
+    steps: [
+      {
+        targetSelector: '[data-tour="themes-active-card"]',
+        title: 'Currently Active Theme',
+        instruction: 'Shows the equipped theme, mascot greeting, and customized AAC button color scheme.',
+        mascotHint: 'See which mascot is currently active! 🐢',
+      },
+      {
+        targetSelector: '[data-tour="themes-catalog-grid"]',
+        title: 'Ready-Made Theme Catalog',
+        instruction: 'Choose from 14+ neurodiversity-affirming themes like Jurassic Dino, Lily Frog, and Twilight Dark Mode.',
+        mascotHint: 'Pick any theme to transform the entire app! 🌈',
+      },
+      {
+        targetSelector: '[data-tour="themes-custom-studio-tab"]',
+        title: 'Custom Theme Studio',
+        instruction: 'Create your own custom theme with favorite colors, mascots, and custom AAC emojis.',
+        mascotHint: 'Design your dream theme from scratch! ✨',
+      },
+    ],
+  },
+
   settings: {
     id: 'settings',
     title: 'PIN Security & Safety Settings',
@@ -431,3 +616,5 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     ],
   },
 };
+
+export const SECTION_TOUR_LIST: TourSectionMeta[] = Object.values(SECTION_TOURS);

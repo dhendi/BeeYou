@@ -4,9 +4,13 @@ import { playChime } from '../../utils/audio';
 
 interface CaregiverProfileTabProps {
   onShowNotification: (msg: string) => void;
+  onStartTour?: () => void;
 }
 
-export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({ onShowNotification }) => {
+export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({ 
+  onShowNotification,
+  onStartTour,
+}) => {
   const {
     childProfile,
     updateChildProfile,
@@ -15,15 +19,26 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({ onShow
 
   return (
     <div className="space-y-5">
-      <div className="border-b border-slate-100 pb-3">
-        <h2 className="text-xl font-black text-slate-900">Profile & Emergency Identification</h2>
-        <p className="text-xs text-slate-500 font-medium mt-0.5">
-          Personalize the experience, sensory preferences, and emergency contacts.
-        </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div>
+          <h2 className="text-xl font-black text-slate-900">Profile & Emergency Identification</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Personalize the experience, sensory preferences, and emergency contacts.
+          </p>
+        </div>
+        {onStartTour && (
+          <button
+            type="button"
+            onClick={onStartTour}
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+          >
+            <span>💡 How This Works</span>
+          </button>
+        )}
       </div>
 
       {/* ABOUT ME & EMERGENCY ID BADGE CARD */}
-      <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 rounded-3xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+      <div data-tour="profile-digital-id-card" className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 rounded-3xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-3xl shadow-inner border border-white/30">
             🪪
@@ -53,7 +68,7 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({ onShow
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div data-tour="profile-fields-card" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-black text-slate-700 block mb-1">Child's Name:</label>
           <input

@@ -191,11 +191,13 @@ const POPULAR_MASCOTS = [
 interface ThemeShopAndStudioProps {
   onClose?: () => void;
   defaultMode?: 'shop' | 'studio';
+  onStartTour?: () => void;
 }
 
 export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   onClose,
   defaultMode = 'shop',
+  onStartTour,
 }) => {
   const {
     themes,
@@ -299,8 +301,17 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </p>
           </div>
 
-          {/* Action cluster: Default Theme Button + Star Wallet */}
+          {/* Action cluster: How This Works + Default Theme Button + Star Wallet */}
           <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto shrink-0">
+            {onStartTour && (
+              <button
+                type="button"
+                onClick={onStartTour}
+                className="px-3.5 py-2 rounded-2xl bg-white/90 hover:bg-white text-slate-900 font-black text-xs flex items-center gap-1.5 border border-white shadow-xs transition-all active:scale-95 cursor-pointer"
+              >
+                <span>💡 How This Works</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -353,6 +364,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
           <button
             type="button"
+            data-tour="themes-custom-studio-tab"
             onClick={() => {
               if (!isPremium) {
                 triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 30-day free trial.');
@@ -378,7 +390,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
       {activeTab === 'shop' && (
         <div className="space-y-4">
           {/* Currently Active Theme Highlight */}
-          <div className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div data-tour="themes-active-card" className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <span className="text-4xl sm:text-5xl p-2 rounded-2xl bg-amber-100/70 border border-amber-200 shrink-0">
                 {activeTheme.mascotEmoji}
@@ -621,7 +633,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           )}
 
           {/* Grid of All Themes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+          <div data-tour="themes-catalog-grid" className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {filteredThemes.map((theme) => {
               const isEquipped = theme.id === activeThemeId;
               const canAfford = worldState.stars >= theme.costStars;
