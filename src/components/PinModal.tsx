@@ -25,6 +25,7 @@ export const PinModal: React.FC = () => {
           setPinInput('');
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+            localStorage.setItem('beeyou_active_device_view', 'caregiver');
             window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
           }
         } else {
@@ -48,6 +49,7 @@ export const PinModal: React.FC = () => {
     playChime('star');
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+      localStorage.setItem('beeyou_active_device_view', 'caregiver');
       window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
     }
   };

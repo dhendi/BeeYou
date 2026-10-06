@@ -319,6 +319,8 @@ export const ParentDashboard: React.FC = () => {
     }
   }, [activeTab]);
 
+  const cyclePhaseInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : { currentCycleDay: 1 };
+
   const navGroups: {
     id: string;
     title: string;
