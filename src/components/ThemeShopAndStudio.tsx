@@ -440,6 +440,118 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </div>
           </div>
 
+          {/* 3 Signature Design Directions Showcase (Image 1, 2, 3 Samples) */}
+          <div className="bg-slate-50/90 rounded-3xl p-4 sm:p-5 border-2 border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✨</span>
+                <div>
+                  <h3 className="font-black text-slate-900 text-sm sm:text-base">
+                    3 Signature Interface Design Systems
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Switch between Apple-grade frosted glass, tactile soft silicone, or low-sensory dark mode anytime
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 1. Frosted Pastel Glass */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('theme-classic');
+                  playChime('star');
+                }}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                  activeThemeId === 'theme-classic'
+                    ? 'bg-white border-indigo-500 shadow-md ring-2 ring-indigo-200'
+                    : 'bg-white/80 hover:bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl p-1.5 rounded-xl bg-gradient-to-br from-[#FFE7D6] via-[#F4EBFA] to-[#E3EBFC] border border-slate-200">
+                    ✨
+                  </span>
+                  {activeThemeId === 'theme-classic' && (
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white font-black text-[10px] uppercase">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-black text-xs sm:text-sm text-slate-900">1. Frosted Pastel Glass</h4>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                    Apple-grade translucent frosted glass, Bento layout & pastel accents.
+                  </p>
+                </div>
+              </button>
+
+              {/* 2. Soft Silicone (Clay Neumorphism) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('theme-silicone');
+                  playChime('star');
+                }}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                  activeThemeId === 'theme-silicone'
+                    ? 'bg-[#EDE8DF] border-stone-600 shadow-md ring-2 ring-stone-300'
+                    : 'bg-[#F4EFE6]/90 hover:bg-[#EDE8DF] border-stone-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl p-1.5 rounded-xl bg-[#E5DFD5] border border-stone-300">
+                    🧸
+                  </span>
+                  {activeThemeId === 'theme-silicone' && (
+                    <span className="px-2 py-0.5 rounded-full bg-stone-800 text-white font-black text-[10px] uppercase">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-black text-xs sm:text-sm text-stone-900">2. Soft Silicone & Clay</h4>
+                  <p className="text-[11px] text-stone-600 font-medium mt-0.5">
+                    Sensory clay neumorphism, warm cream paper tone, tactile embossed slots.
+                  </p>
+                </div>
+              </button>
+
+              {/* 3. Twilight Low-Sensory Dark */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('theme-twilight');
+                  playChime('star');
+                }}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                  activeThemeId === 'theme-twilight'
+                    ? 'bg-[#1E283A] border-sky-400 text-white shadow-md ring-2 ring-sky-900/50'
+                    : 'bg-[#151C28] hover:bg-[#1E283A] border-slate-700 text-slate-200'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl p-1.5 rounded-xl bg-[#0F141F] border border-slate-700">
+                    🌌
+                  </span>
+                  {activeThemeId === 'theme-twilight' && (
+                    <span className="px-2 py-0.5 rounded-full bg-sky-500 text-slate-950 font-black text-[10px] uppercase">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-black text-xs sm:text-sm">3. Twilight Dark Mode</h4>
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    Deep slate/navy nighttime calm, soft glowing accents & zero blue-light strain.
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* Age Group & Category Filter Pills & Default Theme Quick Action */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
             <div className="flex flex-wrap items-center gap-2">

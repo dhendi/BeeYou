@@ -11,6 +11,9 @@ export interface ThemePalette {
   appBg: string;             // Tailwind background gradient
   headerBg: string;          // Header background class
   navActiveBg: string;       // Bottom nav active item class
+  cardBg?: string;           // Card surface styling class
+  cardInnerBg?: string;      // Inner nested container styling class
+  designStyle?: 'glassmorphism' | 'neumorphism' | 'twilight' | 'standard';
 }
 
 export type WallpaperPattern = 
@@ -317,36 +320,112 @@ export const PRESET_THEMES: AppTheme[] = [
     soundTheme: 'classic',
   },
 
-  // 6. BEEYOU HONEY SANCTUARY (Signature Brand Theme)
+  // 6. FROSTED PASTEL GLASS (Bento Box Grid & Glassmorphism - Default Signature System)
   {
     id: 'theme-classic',
-    name: 'BeeYou Sanctuary',
+    name: 'Frosted Pastel Glass',
     category: 'classic',
-    emoji: '🐝',
+    emoji: '✨',
     mascotName: 'Barnaby the Cozy Bee',
     mascotEmoji: '🐝',
-    greetingMessage: 'You can be yourself here. Take your time and have a peaceful day.',
-    description: 'Warm honey gold, soft sage accents, and a calming cream background.',
+    greetingMessage: 'Welcome to your calm Bento space! You can be yourself here.',
+    description: 'Apple-grade translucent frosted glass, soft pastel accents, and structured Bento layout.',
     costStars: 0,
     isUnlocked: true,
+    targetAudience: 'all',
     palette: {
-      primary: '#d97706',
-      primaryBg: 'bg-amber-500',
-      primaryHover: 'hover:bg-amber-600',
-      primaryLight: 'bg-amber-50/90',
-      primaryBorder: 'border-amber-300',
-      textAccent: 'text-amber-950',
-      badgeBg: 'bg-amber-100 text-amber-900 border border-amber-200/80',
-      appBg: 'bg-[#FAF8F5]',
-      headerBg: 'bg-white/95 border-b border-amber-200/60 shadow-2xs',
-      navActiveBg: 'bg-amber-500 text-white shadow-md ring-2 ring-amber-400',
+      primary: '#6366f1',
+      primaryBg: 'bg-indigo-600',
+      primaryHover: 'hover:bg-indigo-700',
+      primaryLight: 'bg-white/80 text-indigo-950',
+      primaryBorder: 'border-white/80',
+      textAccent: 'text-indigo-950',
+      badgeBg: 'bg-indigo-100 text-indigo-900 border border-indigo-200/80',
+      appBg: 'bg-gradient-to-br from-[#FFE7D6] via-[#F4EBFA] to-[#E3EBFC] text-slate-800',
+      headerBg: 'bg-white/70 backdrop-blur-xl border-b border-white/80 shadow-2xs',
+      navActiveBg: 'bg-indigo-600 text-white shadow-md shadow-indigo-300/50 ring-2 ring-indigo-300',
+      cardBg: 'bg-white/75 backdrop-blur-xl border border-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)]',
+      cardInnerBg: 'bg-white/80 border border-white/90 shadow-2xs',
+      designStyle: 'glassmorphism',
     },
-    wallpaperPattern: 'sparkles',
+    wallpaperPattern: 'none',
+    aacStyling: {
+      tileBorderRadius: 'rounded-3xl',
+      tileBorderWidth: 'border-2',
+    },
+    soundTheme: 'classic',
+  },
+
+  // 6b. SOFT SILICONE (Sensory Neumorphism / Clay Matte Finish)
+  {
+    id: 'theme-silicone',
+    name: 'Soft Silicone & Clay',
+    category: 'minimal',
+    emoji: '🧸',
+    mascotName: 'Pip the Sensory Bear',
+    mascotEmoji: '🧸',
+    greetingMessage: 'Low sensory glare, warm matte clay, and tactile soft-touch buttons.',
+    description: 'Sensory neumorphism with warm cream paper tone, tactile embossed slots, and zero visual fatigue.',
+    costStars: 0,
+    isUnlocked: true,
+    targetAudience: 'all',
+    palette: {
+      primary: '#78716c',
+      primaryBg: 'bg-stone-700',
+      primaryHover: 'hover:bg-stone-800',
+      primaryLight: 'bg-[#EDE8DF] text-stone-900',
+      primaryBorder: 'border-stone-300',
+      textAccent: 'text-stone-900',
+      badgeBg: 'bg-stone-200 text-stone-900 border border-stone-300',
+      appBg: 'bg-[#F4EFE6] text-stone-900',
+      headerBg: 'bg-[#EDE8DF]/95 border-b border-stone-300/80 shadow-2xs text-stone-900',
+      navActiveBg: 'bg-stone-800 text-white shadow-md ring-2 ring-stone-600',
+      cardBg: 'bg-[#EDE8DF] border border-stone-300/80 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.03)]',
+      cardInnerBg: 'bg-[#F4EFE6] border border-stone-300/70 shadow-2xs',
+      designStyle: 'neumorphism',
+    },
+    wallpaperPattern: 'none',
     aacStyling: {
       tileBorderRadius: 'rounded-2xl',
       tileBorderWidth: 'border-2',
     },
     soundTheme: 'classic',
+  },
+
+  // 6c. TWILIGHT (Low-Sensory Dark Mode)
+  {
+    id: 'theme-twilight',
+    name: 'Twilight Low-Sensory Dark',
+    category: 'dark',
+    emoji: '🌌',
+    mascotName: 'Nova the Twilight Owl',
+    mascotEmoji: '🦉',
+    greetingMessage: 'Deep nighttime calm with soft glowing accents and low blue-light strain.',
+    description: 'Deep slate/navy dark mode with soothing soft glowing cards, ideal for light sensitivity & evening focus.',
+    costStars: 0,
+    isUnlocked: true,
+    targetAudience: 'all',
+    palette: {
+      primary: '#38bdf8',
+      primaryBg: 'bg-sky-500',
+      primaryHover: 'hover:bg-sky-600',
+      primaryLight: 'bg-slate-800/80 text-sky-100',
+      primaryBorder: 'border-slate-700',
+      textAccent: 'text-sky-300',
+      badgeBg: 'bg-slate-800 text-sky-200 border border-slate-700',
+      appBg: 'bg-gradient-to-b from-[#131926] via-[#182030] to-[#0F141F] text-slate-100',
+      headerBg: 'bg-[#182030]/95 backdrop-blur-md border-b border-slate-700/80 text-slate-100',
+      navActiveBg: 'bg-sky-500 text-slate-950 shadow-md ring-2 ring-sky-300',
+      cardBg: 'bg-[#1E283A]/85 backdrop-blur-md border border-slate-700/60 shadow-[0_8px_30px_rgba(0,0,0,0.4)] text-slate-100',
+      cardInnerBg: 'bg-[#151E2D] border border-slate-700/50 shadow-2xs text-slate-200',
+      designStyle: 'twilight',
+    },
+    wallpaperPattern: 'none',
+    aacStyling: {
+      tileBorderRadius: 'rounded-2xl',
+      tileBorderWidth: 'border-2',
+    },
+    soundTheme: 'space',
   },
 
   // 7. SPEEDWAY RACING

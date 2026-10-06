@@ -85,8 +85,8 @@ export const ChildNavBar: React.FC = () => {
   };
 
   return (
-    <nav className="w-full bg-white/95 backdrop-blur-md border-t border-amber-200/70 px-2 sm:px-6 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shadow-lg select-none">
-      <div className="max-w-4xl mx-auto flex items-center justify-around gap-1.5 sm:gap-2">
+    <nav className="w-full bg-white/75 backdrop-blur-2xl border-t border-white/80 px-2 sm:px-6 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] select-none transition-colors">
+      <div className="max-w-3xl mx-auto flex items-center justify-around gap-1.5 sm:gap-2">
         {navItems.map((item) => {
           const isActive = item.id === 'more' ? isMoreView(childView) : childView === item.id;
           return (
@@ -96,8 +96,8 @@ export const ChildNavBar: React.FC = () => {
               aria-current={isActive ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-2xl transition-all active:scale-95 cursor-pointer ${
                 isActive
-                  ? item.activeBg
-                  : `bg-[#FAF8F5] text-stone-700 hover:bg-amber-50/70 border border-stone-200/80`
+                  ? item.activeBg || 'bg-indigo-600 text-white shadow-md shadow-indigo-300/40 ring-2 ring-indigo-300/60 font-black'
+                  : 'bg-white/60 text-slate-700 hover:bg-white/90 border border-white/70 font-bold'
               }`}
             >
               <span className="text-xl sm:text-2xl leading-none transition-transform select-none">

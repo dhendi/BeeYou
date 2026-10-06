@@ -20,10 +20,14 @@ import {
   BookOpen,
   HeartPulse,
   SlidersHorizontal,
-  LayoutGrid
+  LayoutGrid,
+  Check,
+  Clock,
+  Palette,
+  Shield
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { MOOD_META } from '../data/defaultData';
+import { resolveAacImageUrl } from '../services/symbolService';
 import { DashboardWidgetId } from '../types';
 import { isWidgetAvailable } from '../data/navigation';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -65,9 +69,11 @@ export const ChildHomeView: React.FC = () => {
     setShowPieTimerModal,
     setShowDecisionWheelModal,
     setShowFidgetModal,
+    setShowToolsHubModal,
     getTodaySpoonEntry,
     dashboardWidgets,
     setShowDashboardCustomizer,
+    addToSentence,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -79,6 +85,22 @@ export const ChildHomeView: React.FC = () => {
   const nextStep = currentRoutine?.steps.find((s) => !s.completed);
   const todaysAdventure = adventures[0];
 
+  // Card theme surface classes
+  const cardStyle = activeTheme?.palette?.cardBg || 'bg-white/75 backdrop-blur-xl border border-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.03)]';
+  const innerCardStyle = activeTheme?.palette?.cardInnerBg || 'bg-white/80 border border-white/90 shadow-2xs';
+
+  // Core AAC Folders for Home Screen Quick Access (Image 1 Style)
+  const HOME_AAC_TILES = [
+    { id: 'folder-food', label: 'Food', emoji: '🍕', symbolId: 'food', bg: 'bg-amber-50/90 hover:bg-amber-100 border-amber-200/80 text-amber-950', category: 'food' },
+    { id: 'folder-drinks', label: 'Drinks', emoji: '🧃', symbolId: 'drink', bg: 'bg-orange-50/90 hover:bg-orange-100 border-orange-200/80 text-orange-950', category: 'drinks' },
+    { id: 'folder-activities', label: 'Play & Fun', emoji: '🎮', symbolId: 'play_,_to', bg: 'bg-emerald-50/90 hover:bg-emerald-100 border-emerald-200/80 text-emerald-950', category: 'activities' },
+    { id: 'folder-places', label: 'Places', emoji: '🏠', symbolId: 'house', bg: 'bg-sky-50/90 hover:bg-sky-100 border-sky-200/80 text-sky-950', category: 'places' },
+    { id: 'folder-people', label: 'People', emoji: '👥', symbolId: 'good_person', bg: 'bg-indigo-50/90 hover:bg-indigo-100 border-indigo-200/80 text-indigo-950', category: 'people' },
+    { id: 'folder-feelings', label: 'Feelings', emoji: '💛', symbolId: 'happy_man', bg: 'bg-rose-50/90 hover:bg-rose-100 border-rose-200/80 text-rose-950', category: 'feelings' },
+    { id: 'tile-mine', label: 'My / Mine', emoji: '🤲', symbolId: 'mine', bg: 'bg-purple-50/90 hover:bg-purple-100 border-purple-200/80 text-purple-950', category: 'core' },
+    { id: 'tile-want', label: 'Want', emoji: '🤲', symbolId: 'want_,_to', bg: 'bg-teal-50/90 hover:bg-teal-100 border-teal-200/80 text-teal-950', category: 'core' },
+  ];
+
   // ── Modular Widget Renderers ──
 
   const renderMascotCompanion = () => (
@@ -88,22 +110,22 @@ export const ChildHomeView: React.FC = () => {
         setShowThemeModal(true);
         playChime('star');
       }}
-      className="rounded-3xl p-4 sm:p-5 border border-slate-200/90 bg-white hover:bg-slate-50/80 shadow-2xs transition-all hover:shadow-xs cursor-pointer active:scale-98 flex items-center justify-between gap-3"
+      className={`rounded-3xl p-4 sm:p-5 ${cardStyle} transition-all hover:scale-[1.01] cursor-pointer active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">
+        <span className="w-12 h-12 rounded-2xl bg-white/90 flex items-center justify-center text-3xl shrink-0 border border-white/80 shadow-xs">
           {activeTheme.mascotEmoji}
         </span>
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200/60">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-900 border border-indigo-200/60">
               {activeTheme.name}
             </span>
             <span className="text-xs font-bold text-slate-500">
               {activeTheme.mascotName}
             </span>
           </div>
-          <p className="text-xs sm:text-sm font-bold text-slate-800 mt-0.5">
+          <p className="text-xs sm:text-sm font-black text-slate-800 mt-1">
             "{activeTheme.greetingMessage}"
           </p>
         </div>
@@ -116,9 +138,9 @@ export const ChildHomeView: React.FC = () => {
           setShowThemeModal(true);
           playChime('tap');
         }}
-        className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1"
+        className="px-3.5 py-2 rounded-2xl bg-white/90 hover:bg-white text-slate-700 font-bold text-xs border border-white/90 shadow-2xs shrink-0 cursor-pointer hidden sm:flex items-center gap-1.5"
       >
-        <span>🎨 Themes</span>
+        <span>🎨 Themes & Studio</span>
       </button>
     </div>
   );
@@ -126,22 +148,22 @@ export const ChildHomeView: React.FC = () => {
   const renderRoutineSchedule = () => {
     if (!currentRoutine) return null;
     return (
-      <div key="routine_schedule" className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3">
+      <div key="routine_schedule" className={`rounded-3xl p-4 sm:p-5 ${cardStyle} space-y-3.5`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{currentRoutine.emoji}</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl p-2 rounded-2xl bg-white/80 border border-white/90 shadow-2xs">{currentRoutine.emoji}</span>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
                 Today's Schedule
               </span>
-              <h3 className="font-bold text-slate-800 text-base">
+              <h3 className="font-black text-slate-800 text-base sm:text-lg">
                 {currentRoutine.title}
               </h3>
             </div>
           </div>
           <button
             onClick={() => setChildView('my-day')}
-            className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer bg-white/60 hover:bg-white/90 px-3 py-1.5 rounded-xl border border-white/80 transition-all"
           >
             <span>Open Schedule</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -150,41 +172,52 @@ export const ChildHomeView: React.FC = () => {
 
         {/* First / Then quick strip */}
         {currentRoutine.firstThen && (
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
-              <span className="text-xl shrink-0">{currentRoutine.firstThen.firstEmoji}</span>
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase text-slate-500 block">First</span>
-                <span className="text-xs font-bold text-slate-800 truncate block">
-                  {currentRoutine.firstThen.first}
-                </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className={`p-3.5 rounded-2xl ${innerCardStyle} flex items-center justify-between gap-3`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-2xl shrink-0">{currentRoutine.firstThen.firstEmoji}</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 block">First</span>
+                  <span className="text-xs sm:text-sm font-black text-slate-800 truncate block">
+                    {currentRoutine.firstThen.first}
+                  </span>
+                </div>
               </div>
+              <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0 font-bold shadow-2xs">
+                ✓
+              </span>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
-              <span className="text-xl shrink-0">{currentRoutine.firstThen.thenEmoji}</span>
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase text-slate-500 block">Then</span>
-                <span className="text-xs font-bold text-slate-800 truncate block">
-                  {currentRoutine.firstThen.then}
-                </span>
+
+            <div className={`p-3.5 rounded-2xl ${innerCardStyle} flex items-center justify-between gap-3`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-2xl shrink-0">{currentRoutine.firstThen.thenEmoji}</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 block">Then</span>
+                  <span className="text-xs sm:text-sm font-black text-slate-800 truncate block">
+                    {currentRoutine.firstThen.then}
+                  </span>
+                </div>
               </div>
+              <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs shrink-0 font-bold shadow-2xs">
+                ○
+              </span>
             </div>
           </div>
         )}
 
         {/* Up Next Step */}
         {nextStep && (
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg">{nextStep.emoji}</span>
+          <div className={`p-3.5 rounded-2xl ${innerCardStyle} flex items-center justify-between gap-3`}>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-xl">{nextStep.emoji}</span>
               <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase text-slate-500 block">Up Next</span>
-                <span className="text-xs font-bold text-slate-900 truncate block">{nextStep.title}</span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Up Next</span>
+                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">{nextStep.title}</span>
               </div>
             </div>
             <button
               onClick={() => setChildView('my-day')}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-bold text-xs shrink-0 cursor-pointer shadow-2xs active:scale-95"
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
             >
               Start Step
             </button>
@@ -201,21 +234,21 @@ export const ChildHomeView: React.FC = () => {
         setShowFivePointModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🌡️</span>
+        <span className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl shrink-0 border border-rose-200/80 shadow-xs">🌡️</span>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+            <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md border border-rose-200/60">
               Regulation Tool
             </span>
           </div>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900">
+          <h3 className="font-black text-sm sm:text-base text-slate-900">
             Incredible 5-Point Scale
           </h3>
           <p className="text-xs text-slate-500 font-medium">
-            Where are you right now? 1 (Relaxed) to 5 (Meltdown). Tap to check in.
+            1 (Relaxed) to 5 (Meltdown). Tap to check in.
           </p>
         </div>
       </div>
@@ -230,23 +263,23 @@ export const ChildHomeView: React.FC = () => {
         setShowSpoonModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🥄</span>
+        <span className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shrink-0 border border-amber-200/80 shadow-xs">🥄</span>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
-              Energy & Fatigue Pacing
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200/60">
+              Energy Budget
             </span>
             {todaySpoonEntry && (
-              <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
                 {todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} Spoons Left
               </span>
             )}
           </div>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900">
-            Spoon Theory Energy Budget
+          <h3 className="font-black text-sm sm:text-base text-slate-900">
+            Spoon Theory Stamina Budget
           </h3>
           <p className="text-xs text-slate-500 font-medium">
             Track daily stamina, plan activities, and prevent burnout.
@@ -264,18 +297,18 @@ export const ChildHomeView: React.FC = () => {
         setShowPieTimerModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">⏰</span>
+        <span className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl shrink-0 border border-sky-200/80 shadow-xs">⏰</span>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
-              Time Awareness
+            <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2 py-0.5 rounded-md border border-sky-200/60">
+              Visual Time
             </span>
           </div>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900">
-            Visual Pie Clock (Time Timer)
+          <h3 className="font-black text-sm sm:text-base text-slate-900">
+            Time Pie Clock (Time Timer)
           </h3>
           <p className="text-xs text-slate-500 font-medium">
             Analog visual disk that shows time physically disappearing.
@@ -293,21 +326,21 @@ export const ChildHomeView: React.FC = () => {
         setShowDecisionWheelModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🎡</span>
+        <span className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shrink-0 border border-indigo-200/80 shadow-xs">🎡</span>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200/60">
               Choice Helper
             </span>
           </div>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900">
+          <h3 className="font-black text-sm sm:text-base text-slate-900">
             Decision Wheel Spinner
           </h3>
           <p className="text-xs text-slate-500 font-medium">
-            Stuck in choice paralysis? Spin the wheel to decide snacks, activities or breaks.
+            Stuck in choice paralysis? Spin the wheel to decide.
           </p>
         </div>
       </div>
@@ -322,21 +355,21 @@ export const ChildHomeView: React.FC = () => {
         setShowFidgetModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🫧</span>
+        <span className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl shrink-0 border border-purple-200/80 shadow-xs">🫧</span>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60">
               Discreet Stimming
             </span>
           </div>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900">
+          <h3 className="font-black text-sm sm:text-base text-slate-900">
             Digital Fidget Corner
           </h3>
           <p className="text-xs text-slate-500 font-medium">
-            Silent sensory regulation: silicone bubble pops, calming water sand ripples & marble maze.
+            Silicone bubble pops, calming water ripples & marble maze.
           </p>
         </div>
       </div>
@@ -357,16 +390,16 @@ export const ChildHomeView: React.FC = () => {
           setShowMedicationModal(true);
           playChime('tap');
         }}
-        className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3 cursor-pointer hover:border-slate-300 transition"
+        className={`rounded-3xl p-4 sm:p-5 ${cardStyle} space-y-3 cursor-pointer hover:scale-[1.01] transition`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl p-1.5 bg-slate-100 rounded-xl border border-slate-200/60">💊</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl p-2 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs">💊</span>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
                 Health & Medications
               </span>
-              <h3 className="font-bold text-slate-900 text-base">
+              <h3 className="font-black text-slate-900 text-base">
                 {pending.length > 0 ? `${pending.length} Doses Due Today` : 'All Meds Taken! ✨'}
               </h3>
             </div>
@@ -378,7 +411,7 @@ export const ChildHomeView: React.FC = () => {
               setShowMedicationModal(true);
               playChime('tap');
             }}
-            className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1"
+            className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 bg-white/60 px-3 py-1.5 rounded-xl border border-white/80"
           >
             <span>Manage Meds</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -386,10 +419,10 @@ export const ChildHomeView: React.FC = () => {
         </div>
 
         {pending.length > 0 && (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {pending.slice(0, 2).map((med) => (
-              <div key={med.id} className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
-                <span className="font-bold text-xs text-slate-900">{med.name} ({med.dosage})</span>
+              <div key={med.id} className={`p-3 rounded-2xl ${innerCardStyle} flex items-center justify-between gap-2`}>
+                <span className="font-black text-xs text-slate-900">{med.name} ({med.dosage})</span>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -398,7 +431,7 @@ export const ChildHomeView: React.FC = () => {
                     takeMedicationDose(med.id, nextDue);
                     playChime('complete');
                   }}
-                  className="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-bold text-[11px] shadow-2xs cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-2xs cursor-pointer active:scale-95"
                 >
                   Take Dose ✓
                 </button>
@@ -419,15 +452,15 @@ export const ChildHomeView: React.FC = () => {
           setShowMoodJournalModal(true);
           playChime('tap');
         }}
-        className="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer flex items-center justify-between gap-3"
+        className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] transition cursor-pointer flex items-center justify-between gap-3`}
       >
         <div className="flex items-center gap-3.5">
-          <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">📖</span>
+          <span className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-2xl shrink-0 border border-teal-200/80 shadow-xs">📖</span>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
-              Self-Reflection & Triggers
+            <span className="text-[10px] font-black uppercase tracking-wider text-teal-700 bg-teal-100 px-2 py-0.5 rounded-md border border-teal-200/60">
+              Reflection & Journal
             </span>
-            <h3 className="font-bold text-sm sm:text-base text-slate-900 mt-0.5">
+            <h3 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
               Deep Mood Journal
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -449,17 +482,17 @@ export const ChildHomeView: React.FC = () => {
           setShowCycleTrackerModal(true);
           playChime('tap');
         }}
-        className="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer flex items-center justify-between gap-3"
+        className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] transition cursor-pointer flex items-center justify-between gap-3`}
       >
         <div className="flex items-center gap-3.5">
-          <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">
+          <span className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center text-2xl shrink-0 border border-pink-200/80 shadow-xs">
             {cycleSettings.discreetMode ? '🌿' : '🌸'}
           </span>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+            <span className="text-[10px] font-black uppercase tracking-wider text-pink-700 bg-pink-100 px-2 py-0.5 rounded-md border border-pink-200/60">
               {cycleSettings.discreetMode ? 'Wellness Rhythm' : `Cycle Day ${cyclePhaseInfo.currentCycleDay}`}
             </span>
-            <h3 className="font-bold text-sm sm:text-base text-slate-900 mt-0.5">
+            <h3 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
               Sensory Tolerance & Rhythm
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -479,19 +512,19 @@ export const ChildHomeView: React.FC = () => {
         setShowPassportModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] transition cursor-pointer flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🪪</span>
+        <span className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl shrink-0 border border-purple-200/80 shadow-xs">🪪</span>
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
-            Printable Support Sheet
+          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200/60">
+            Emergency Passport
           </span>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900 mt-0.5">
+          <h3 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
             "How to Support Me" Passport
           </h3>
           <p className="text-xs text-slate-500 font-medium">
-            1-page guide covering communication preferences, sensory triggers & comfort items.
+            Communication preferences, sensory triggers & emergency contacts.
           </p>
         </div>
       </div>
@@ -505,15 +538,15 @@ export const ChildHomeView: React.FC = () => {
       <div
         key="adventure_spotlight"
         onClick={() => setChildView('adventures')}
-        className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-3xl p-4 sm:p-5 shadow-2xs flex items-center justify-between cursor-pointer transition-all active:scale-98"
+        className={`p-4 sm:p-5 rounded-3xl ${cardStyle} hover:scale-[1.01] flex items-center justify-between cursor-pointer transition-all active:scale-98`}
       >
         <div className="flex items-center gap-3.5">
-          <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">{todaysAdventure.emoji}</span>
+          <span className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-2xl shrink-0 border border-indigo-200/80 shadow-xs">{todaysAdventure.emoji}</span>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
-              Preparation Adventure
+            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200/60">
+              Life Adventure
             </span>
-            <h3 className="font-bold text-slate-900 text-base sm:text-lg mt-0.5">
+            <h3 className="font-black text-slate-900 text-base sm:text-lg mt-0.5">
               {todaysAdventure.title}
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -533,15 +566,15 @@ export const ChildHomeView: React.FC = () => {
         setShowRecollectionModal(true);
         playChime('tap');
       }}
-      className="p-4 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:border-slate-300 transition cursor-pointer flex items-center justify-between gap-3"
+      className={`p-4 rounded-3xl ${cardStyle} hover:scale-[1.01] transition cursor-pointer flex items-center justify-between gap-3`}
     >
       <div className="flex items-center gap-3.5">
-        <span className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-2xs">🌙</span>
+        <span className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 border border-slate-200/80 shadow-xs">🌙</span>
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 bg-slate-200/70 px-2 py-0.5 rounded-md border border-slate-300/60">
             Evening Check-In
           </span>
-          <h3 className="font-bold text-sm sm:text-base text-slate-900 mt-0.5">
+          <h3 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
             Daily Mood Recollection
           </h3>
           <p className="text-xs text-slate-500 font-medium">
@@ -554,14 +587,14 @@ export const ChildHomeView: React.FC = () => {
   );
 
   const renderQuickAAC = () => (
-    <div key="quick_aac" className="space-y-2">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-          Quick Communication:
+    <div key="quick_aac" className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+          Quick Communication
         </span>
         <button
           onClick={() => setChildView('aac')}
-          className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer"
+          className="text-xs font-black text-indigo-700 hover:text-indigo-900 flex items-center gap-1 cursor-pointer bg-white/60 hover:bg-white/90 px-3 py-1.5 rounded-xl border border-white/80 transition-all"
         >
           <span>Open Full AAC Board</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -570,10 +603,10 @@ export const ChildHomeView: React.FC = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
-          { text: 'I want pizza.', emoji: '🍕' },
-          { text: 'I need help.', emoji: '🆘' },
-          { text: 'I need a break.', emoji: '🛋️' },
-          { text: "What's next?", emoji: '❓' },
+          { text: 'I want pizza.', emoji: '🍕', bg: 'bg-amber-100/70 hover:bg-amber-100 text-amber-950 border-amber-200/80' },
+          { text: 'I need help.', emoji: '🆘', bg: 'bg-rose-100/70 hover:bg-rose-100 text-rose-950 border-rose-200/80' },
+          { text: 'I need a break.', emoji: '🛋️', bg: 'bg-sky-100/70 hover:bg-sky-100 text-sky-950 border-sky-200/80' },
+          { text: "What's next?", emoji: '❓', bg: 'bg-purple-100/70 hover:bg-purple-100 text-purple-950 border-purple-200/80' },
         ].map((item, idx) => (
           <button
             key={idx}
@@ -582,8 +615,9 @@ export const ChildHomeView: React.FC = () => {
               if (item.text.includes('break')) {
                 setShowCopingToolkit(true);
               }
+              playChime('tap');
             }}
-            className="p-3.5 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className={`p-3.5 rounded-2xl border ${item.bg} backdrop-blur-md font-black text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-2xs transition-all active:scale-95 cursor-pointer`}
           >
             <span className="text-2xl">{item.emoji}</span>
             <span className="leading-tight">{item.text}</span>
@@ -616,7 +650,7 @@ export const ChildHomeView: React.FC = () => {
       {plansChanged.active && (
         <div
           onClick={() => setShowPlansChangedModal(true)}
-          className="bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in"
+          className="bg-amber-100/90 backdrop-blur-md hover:bg-amber-200 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in"
         >
           <div className="flex items-center gap-3">
             <span className="text-3xl sm:text-4xl animate-bounce">🔄</span>
@@ -636,27 +670,27 @@ export const ChildHomeView: React.FC = () => {
         </div>
       )}
 
-      {/* 2. WELCOME HERO & EDITABLE DASHBOARD BUTTON */}
-      <div className="bg-white border border-amber-200/60 rounded-3xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 2. WELCOME HERO & EDITABLE DASHBOARD BUTTON (Image 1 Header) */}
+      <div className={`rounded-3xl p-4 sm:p-5 ${cardStyle} flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
         <div className="flex items-center gap-3.5 min-w-0">
           <div
             onClick={() => {
               setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-amber-300/80 text-amber-950 font-black text-lg flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
+            className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200/80 text-indigo-900 font-black text-xl flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 shadow-xs"
             title="About Me ID Card"
           >
             {childProfile.name.charAt(0).toUpperCase() || '🐝'}
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl sm:text-2xl font-black text-[#1E293B] tracking-tight leading-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
               Hi, {childProfile.name}! 👋
             </h2>
-            <p className="text-xs sm:text-sm text-stone-500 font-medium mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
               {userAgeGroup === 'adult'
                 ? 'Your personalized daily executive space • You can be yourself here'
-                : 'Here is your space for today • You can be yourself here'}
+                : 'Here is your plan and tools for today'}
             </p>
           </div>
         </div>
@@ -669,16 +703,16 @@ export const ChildHomeView: React.FC = () => {
               setShowDashboardCustomizer(true);
               playChime('tap');
             }}
-            className="px-3.5 py-2 rounded-2xl bg-[#FAF8F5] hover:bg-amber-50 text-stone-700 font-bold text-xs sm:text-sm shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-amber-200/80 transition-all"
+            className="px-3.5 py-2 rounded-2xl bg-white/80 hover:bg-white text-slate-700 font-bold text-xs sm:text-sm shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/90 transition-all"
             title="Add, remove, or rearrange widgets on your dashboard"
           >
-            <SlidersHorizontal className="w-4 h-4 text-amber-700" />
+            <SlidersHorizontal className="w-4 h-4 text-slate-600" />
             <span>Customize Dashboard ✏️</span>
           </button>
         </div>
       </div>
 
-      {/* 2b. QUICK HELP: talk, calm down, ask for help (respects feature toggles) */}
+      {/* 2b. QUICK HELP TRIAD: Talk, Calm Down, Ask for Help (Image 1 Style) */}
       {(enabledFeatures?.aacCommunication !== false ||
         enabledFeatures?.sensoryBreathingPacer !== false ||
         enabledFeatures?.emergencyAlertSOS !== false) && (
@@ -689,7 +723,7 @@ export const ChildHomeView: React.FC = () => {
                 setChildView('aac');
                 playChime('tap');
               }}
-              className="min-h-[76px] rounded-3xl bg-amber-50/90 hover:bg-amber-100 border-2 border-amber-300/90 text-amber-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
+              className="min-h-[82px] rounded-3xl bg-amber-100/75 hover:bg-amber-100/90 border border-amber-200/90 text-amber-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-xs transition-all backdrop-blur-md"
             >
               <span className="text-2xl" aria-hidden="true">💬</span>
               Talk
@@ -701,7 +735,7 @@ export const ChildHomeView: React.FC = () => {
                 setShowCopingToolkit(true);
                 playChime('tap');
               }}
-              className="min-h-[76px] rounded-3xl bg-[#E8F0EB] hover:bg-[#DCEAE1] border-2 border-[#82A792]/50 text-[#2F5233] font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
+              className="min-h-[82px] rounded-3xl bg-sky-100/75 hover:bg-sky-100/90 border border-sky-200/90 text-sky-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-xs transition-all backdrop-blur-md"
             >
               <span className="text-2xl" aria-hidden="true">🛋️</span>
               Calm down
@@ -713,7 +747,7 @@ export const ChildHomeView: React.FC = () => {
                 setShowCaregiverAlertModal(true);
                 playChime('tap');
               }}
-              className="min-h-[76px] rounded-3xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-300 text-rose-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-2xs transition-all"
+              className="min-h-[82px] rounded-3xl bg-rose-100/75 hover:bg-rose-100/90 border border-rose-200/90 text-rose-950 font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 active:scale-95 cursor-pointer shadow-xs transition-all backdrop-blur-md"
             >
               <span className="text-2xl" aria-hidden="true">🆘</span>
               I need help
@@ -722,9 +756,95 @@ export const ChildHomeView: React.FC = () => {
         </div>
       )}
 
-      {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS (hidden when their feature is switched off) */}
+      {/* 2c. AAC VISUAL BOARD PREVIEW (Image 1 Style Grid) */}
+      {enabledFeatures?.aacCommunication !== false && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+              AAC Board
+            </span>
+            <button
+              onClick={() => setChildView('aac')}
+              className="text-xs font-black text-indigo-700 hover:text-indigo-900 flex items-center gap-1 cursor-pointer bg-white/60 hover:bg-white/90 px-3 py-1.5 rounded-xl border border-white/80 transition-all"
+            >
+              <span>Explore All Words</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+            {HOME_AAC_TILES.slice(0, 6).map((tile) => (
+              <button
+                key={tile.id}
+                onClick={() => {
+                  setChildView('aac');
+                  playChime('tap');
+                }}
+                className={`p-2.5 rounded-3xl border ${tile.bg} backdrop-blur-md flex flex-col items-center justify-between aspect-square shadow-xs hover:scale-[1.03] active:scale-95 cursor-pointer transition-all`}
+              >
+                <div className="flex-1 w-full flex items-center justify-center p-1">
+                  <img
+                    src={resolveAacImageUrl(tile)}
+                    alt={tile.label}
+                    className="w-full h-full object-contain max-h-12 pointer-events-none"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="font-black text-xs tracking-tight text-center mt-1">
+                  {tile.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 2d. TOOLS HUB BENTO GRID (Image 1 Bottom Section) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+            Lumina Tools Hub
+          </span>
+          <button
+            onClick={() => setShowToolsHubModal(true)}
+            className="text-xs font-black text-indigo-700 hover:text-indigo-900 flex items-center gap-1 cursor-pointer bg-white/60 hover:bg-white/90 px-3 py-1.5 rounded-xl border border-white/80 transition-all"
+          >
+            <span>All Tools ({8})</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {[
+            { label: 'Incredible 5-Point Scale', emoji: '🌡️', bg: 'bg-rose-100/70 hover:bg-rose-100 text-rose-950 border-rose-200/80', action: () => setShowFivePointModal(true) },
+            { label: 'Time Pie Clock', emoji: '⏰', bg: 'bg-amber-100/70 hover:bg-amber-100 text-amber-950 border-amber-200/80', action: () => setShowPieTimerModal(true) },
+            { label: 'Medication Reminders', emoji: '💊', bg: 'bg-sky-100/70 hover:bg-sky-100 text-sky-950 border-sky-200/80', action: () => setShowMedicationModal(true) },
+            { label: 'About Me Emergency ID', emoji: '🪪', bg: 'bg-purple-100/70 hover:bg-purple-100 text-purple-950 border-purple-200/80', action: () => setShowAboutMeModal(true) },
+            { label: 'Digital Fidget Toys', emoji: '🫧', bg: 'bg-indigo-100/70 hover:bg-indigo-100 text-indigo-950 border-indigo-200/80', action: () => setShowFidgetModal(true) },
+            { label: 'Spoon Theory Budget', emoji: '🥄', bg: 'bg-amber-100/70 hover:bg-amber-100 text-amber-950 border-amber-200/80', action: () => setShowSpoonModal(true) },
+            { label: 'Themes & Studio', emoji: '🎨', bg: 'bg-pink-100/70 hover:bg-pink-100 text-pink-950 border-pink-200/80', action: () => setShowThemeModal(true) },
+            { label: 'Decision Spinner Wheel', emoji: '🎡', bg: 'bg-slate-100/80 hover:bg-slate-100 text-slate-950 border-slate-200/80', action: () => setShowDecisionWheelModal(true) },
+          ].map((tool, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                tool.action();
+                playChime('tap');
+              }}
+              className={`p-3 rounded-2xl border ${tool.bg} backdrop-blur-md font-black text-xs text-left flex items-center gap-2 shadow-2xs hover:scale-[1.02] active:scale-95 cursor-pointer transition-all`}
+            >
+              <span className="text-xl shrink-0">{tool.emoji}</span>
+              <span className="leading-tight truncate">{tool.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. DYNAMICALLY ORDERED CUSTOM WIDGETS (Routines, Mascot, Habits, etc.) */}
       {dashboardWidgets.map((widget) => {
         if (!widget.enabled || !isWidgetAvailable(widget.id, enabledFeatures)) return null;
+        // Skip duplicate widgets already showcased in the premier hero layout above
+        if (widget.id === 'quick_aac') return null;
         const renderer = widgetRenderMap[widget.id];
         return renderer ? renderer() : null;
       })}
