@@ -193,8 +193,11 @@ function getTopicForCode(code: string): string {
   return `beeyou-sync-${sanitized || 'default'}`;
 }
 
+import { Peer, DataConnection } from 'peerjs';
+
+let activePeer: Peer | null = null;
+let activePeerConn: DataConnection | null = null;
 let activeEventSource: EventSource | null = null;
-let activeNtfyEventSource: EventSource | null = null;
 let activePollingInterval: any = null;
 let currentSubscribedCode: string | null = null;
 
@@ -274,7 +277,7 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Publishes an event to the server relay and local BroadcastChannel
+ * Publishes an event to WebRTC DataChannel, server relay, and local BroadcastChannel
  */
 export async function publishCloudEvent(code: string, eventData: Record<string, any>): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
@@ -301,7 +304,14 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     } catch (e) {}
   }
 
-  // 2. Direct Server Event Relay (/api/caregiver/event)
+  // 2. Direct WebRTC DataChannel (0ms live peer delivery across devices)
+  if (activePeerConn && activePeerConn.open) {
+    try {
+      activePeerConn.send(envelope);
+    } catch (e) {}
+  }
+
+  // 3. Direct Server Event Relay (/api/caregiver/event)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -314,28 +324,38 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     }).catch(() => {});
     clearTimeout(timeoutId);
   } catch (e) {}
-
-  // 3. Global Public Web Pub/Sub Relay (ntfy.sh) - works on any live website across separate physical devices worldwide
-  try {
-    const topic = getTopicForCode(safeCode);
-    fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
-      method: 'POST',
-      body: JSON.stringify(envelope),
-      headers: { 'Title': 'BeeYou Sync', 'Priority': envelope.type === 'CAREGIVER_ALERT' ? 'urgent' : 'default' },
-    }).catch(() => {});
-  } catch (e) {}
 }
 
 let lastPollTimestamp = 0;
 
+function isCurrentDeviceCaregiver(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (window.location.port === '3001' || window.location.pathname.startsWith('/caregiver')) return true;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('role') === 'caregiver' || params.get('mode') === 'caregiver') return true;
+  if (params.get('role') === 'child') return false;
+  const sess = sessionStorage.getItem('beeyou_active_device_view');
+  if (sess === 'caregiver') return true;
+  if (sess === 'child') return false;
+  return localStorage.getItem('beeyou_user_role') === 'caregiver';
+}
+
 /**
- * Subscribes to the live cloud channel (Server SSE stream + Global ntfy.sh stream + Short-polling backup)
+ * Subscribes to the live cloud channel (Direct WebRTC PeerJS + Server SSE stream + Short-polling backup)
  */
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
-  if (currentSubscribedCode === safeCode && activeEventSource && activeEventSource.readyState !== EventSource.CLOSED) {
+  if (currentSubscribedCode === safeCode && activePeer && !activePeer.destroyed) {
     return;
+  }
+
+  if (activePeer) {
+    try {
+      activePeer.destroy();
+    } catch {}
+    activePeer = null;
+    activePeerConn = null;
   }
 
   if (activeEventSource) {
@@ -343,13 +363,6 @@ export function subscribeToCloudChannel(code: string): void {
       activeEventSource.close();
     } catch {}
     activeEventSource = null;
-  }
-
-  if (activeNtfyEventSource) {
-    try {
-      activeNtfyEventSource.close();
-    } catch {}
-    activeNtfyEventSource = null;
   }
 
   if (activePollingInterval) {
@@ -360,7 +373,74 @@ export function subscribeToCloudChannel(code: string): void {
   currentSubscribedCode = safeCode;
   lastPollTimestamp = Date.now() - 45000;
 
-  // 1. Live SSE Stream from App Server (/api/caregiver/events/:code)
+  // 1. Setup Direct WebRTC Peer Connection (PeerJS)
+  try {
+    const isCaregiver = isCurrentDeviceCaregiver();
+    const sanitized = safeCode.replace(/[^A-Z0-9]/g, '').toLowerCase() || 'demo';
+    const myPeerId = `by-${isCaregiver ? 'cg' : 'ch'}-${sanitized}`;
+    const remoteTargetPeerId = `by-${isCaregiver ? 'ch' : 'cg'}-${sanitized}`;
+
+    const peer = new Peer(myPeerId, {
+      debug: 0,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
+        ]
+      }
+    });
+    activePeer = peer;
+
+    const setupConnectionListeners = (conn: DataConnection) => {
+      activePeerConn = conn;
+      conn.on('open', () => {
+        lastPeerPingTimestamp = Date.now();
+        lastPeerRole = isCaregiver ? 'child_device' : 'caregiver';
+        lastPeerName = isCaregiver ? 'Child Tablet' : 'Sarah (Mom)';
+        notifyConnectionStatus();
+
+        // Send handshake
+        conn.send({
+          type: isCaregiver ? 'CAREGIVER_HEARTBEAT' : 'CHILD_HEARTBEAT',
+          role: isCaregiver ? 'caregiver' : 'child_device',
+          name: isCaregiver ? 'Sarah (Mom)' : 'Leo',
+          pairingCode: safeCode,
+          sentAt: Date.now(),
+        });
+      });
+
+      conn.on('data', (data) => {
+        handleIncomingSyncEnvelope(data);
+      });
+
+      conn.on('close', () => {
+        if (activePeerConn === conn) activePeerConn = null;
+      });
+    };
+
+    peer.on('open', () => {
+      // Connect to target companion peer
+      try {
+        const conn = peer.connect(remoteTargetPeerId, { reliable: true });
+        setupConnectionListeners(conn);
+      } catch (e) {}
+    });
+
+    peer.on('connection', (conn) => {
+      setupConnectionListeners(conn);
+    });
+
+    peer.on('error', (err: any) => {
+      // If peer ID is taken or target offline, retry connect periodically
+      if (err.type === 'peer-unavailable') {
+        // Target peer hasn't opened yet; will connect when incoming connection arrives
+      }
+    });
+  } catch (e) {
+    console.warn('WebRTC PeerJS init error:', e);
+  }
+
+  // 2. Live SSE Stream from App Server (/api/caregiver/events/:code)
   if ('EventSource' in window) {
     try {
       const sseUrl = `/api/caregiver/events/${encodeURIComponent(safeCode)}`;
@@ -374,32 +454,11 @@ export function subscribeToCloudChannel(code: string): void {
         } catch (e) {}
       };
 
-      es.onerror = () => {
-        // SSE auto-reconnects; short polling guarantees continuous delivery
-      };
-    } catch (e) {
-      console.warn('Could not establish SSE stream with server:', e);
-    }
-
-    // 2. Global Public Web EventSource (ntfy.sh SSE stream for live internet multi-device testing)
-    try {
-      const topic = getTopicForCode(safeCode);
-      const ntfyEs = new EventSource(`https://ntfy.sh/${encodeURIComponent(topic)}/sse`);
-      activeNtfyEventSource = ntfyEs;
-
-      ntfyEs.onmessage = (event) => {
-        try {
-          const ntfyPayload = JSON.parse(event.data);
-          if (ntfyPayload.event === 'message' && ntfyPayload.message) {
-            const envelope = JSON.parse(ntfyPayload.message);
-            handleIncomingSyncEnvelope(envelope);
-          }
-        } catch (e) {}
-      };
+      es.onerror = () => {};
     } catch (e) {}
   }
 
-  // 2. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
+  // 3. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
   const pollServer = async () => {
     try {
       const controller = new AbortController();
