@@ -64,7 +64,9 @@ const AppContent: React.FC = () => {
   const { 
     childView, 
     isParentMode, 
+    setIsParentMode,
     userRole,
+    setUserRole,
     showCaregiverModal, 
     setShowCaregiverModal,
     showFamilyAuthModal,
@@ -87,10 +89,14 @@ const AppContent: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const roleParam = params.get('role') || params.get('mode') || (params.get('caregiver') === 'true' ? 'caregiver' : null);
-      if (roleParam === 'caregiver') {
+      if (roleParam === 'caregiver' || window.location.port === '3001' || window.location.pathname.startsWith('/caregiver')) {
         setActiveDeviceView('caregiver');
+        if (setIsParentMode) setIsParentMode(true);
+        if (setUserRole && userRole !== 'caregiver') setUserRole('caregiver');
       } else if (roleParam === 'child') {
         setActiveDeviceView('child');
+        if (setIsParentMode) setIsParentMode(false);
+        if (setUserRole && userRole === 'caregiver') setUserRole('child_dependent');
       }
       const codeParam = params.get('code');
       if (codeParam) {

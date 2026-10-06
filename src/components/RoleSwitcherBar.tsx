@@ -18,6 +18,7 @@ import {
   getPairingCode, 
   setPairingCode, 
   subscribeToCloudChannel, 
+  sendHeartbeat,
   sendTestCaregiverAlert, 
   sendCaregiverMessage,
   onConnectionStatusChange,
@@ -120,6 +121,11 @@ export const RoleSwitcherBar: React.FC = () => {
     updateChildProfile({
       name: 'Leo',
       ageGroup: 'kid',
+    });
+    sendHeartbeat({
+      role: isCaregiverView ? 'caregiver' : 'child_device',
+      name: isCaregiverView ? 'Sarah (Mom)' : 'Leo',
+      pairingCode: demoCode,
     });
     playChime('complete');
     setTestSentNotice(`Configured demo profile: Leo & Mom (Code: ${demoCode})`);

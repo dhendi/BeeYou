@@ -413,6 +413,19 @@ export function subscribeToCloudChannel(code: string): void {
             });
           }
         }
+
+        // Live peer presence detection from server session
+        const now = Date.now();
+        const lastActive = data.session?.lastActiveTime ? new Date(data.session.lastActiveTime).getTime() : 0;
+        const lastUpdated = data.state?.lastUpdated || 0;
+        const recentTime = Math.max(lastActive, lastUpdated);
+        if (recentTime > 0 && (now - recentTime) < 35000) {
+          lastPeerPingTimestamp = Math.max(lastPeerPingTimestamp, recentTime);
+          if (data.session?.childName && !lastPeerName) {
+            lastPeerName = data.session.childName;
+          }
+          notifyConnectionStatus();
+        }
       }
     } catch (e) {}
   };
@@ -503,6 +516,21 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       try {
         localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(envelope.childStatus));
       } catch {}
+    }
+    return;
+  }
+
+  // 1b. Live Stream / Sync Initialization
+  if (type === 'SYNC_INIT' || type === 'FAMILY_STATE_UPDATED' || type === 'CONNECTED') {
+    if (envelope.state || envelope.session) {
+      const now = Date.now();
+      const stateUpdated = envelope.state?.lastUpdated || 0;
+      const sessionActive = envelope.session?.lastActiveTime ? new Date(envelope.session.lastActiveTime).getTime() : 0;
+      const recent = Math.max(stateUpdated, sessionActive, envelope.sentAt || 0);
+      if (recent > 0 && (now - recent) < 45000) {
+        lastPeerPingTimestamp = Math.max(lastPeerPingTimestamp, recent);
+        notifyConnectionStatus();
+      }
     }
     return;
   }

@@ -31,6 +31,11 @@ import {
   setActiveDeviceView,
   FamilyAccount
 } from '../services/authService';
+import { 
+  setPairingCode, 
+  subscribeToCloudChannel, 
+  sendHeartbeat 
+} from '../services/caregiverSync';
 import { BeeMascot } from './BeeYouLogo';
 
 interface FamilyAuthModalProps {
@@ -79,8 +84,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
   const applyAccountToContext = (account: FamilyAccount, asRole: 'child' | 'caregiver') => {
     try {
+      const code = account.familyCode || 'BEE-DEMO';
+      setPairingCode(code);
+      subscribeToCloudChannel(code);
+
       if (setLinkedDeviceCode) {
-        setLinkedDeviceCode(account.familyCode);
+        setLinkedDeviceCode(code);
       }
 
       if (asRole === 'caregiver') {
@@ -100,6 +109,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         try {
           speak(`You are connected to ${account.childProfile.name}`);
         } catch {}
+
+        sendHeartbeat({
+          role: 'caregiver',
+          name: account.caregiverName || 'Sarah (Mom)',
+          pairingCode: code,
+        });
       } else {
         setActiveDeviceView('child');
         try {
@@ -118,6 +133,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         try {
           speak(`${account.caregiverName} is connected to your device`);
         } catch {}
+
+        sendHeartbeat({
+          role: 'child_device',
+          name: account.childProfile.name || 'Leo',
+          pairingCode: code,
+        });
       }
 
       try {

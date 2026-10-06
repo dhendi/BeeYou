@@ -1217,17 +1217,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setConnectionStatus(status);
     });
 
-    // Send initial heartbeat and periodic keepalive (every 5s)
+    // Send initial heartbeat and periodic keepalive (every 3.5s)
     const code = getPairingCode();
     subscribeToCloudChannel(code);
 
+    const isCaregiver = 
+      userRole === 'caregiver' || 
+      isParentMode || 
+      (typeof window !== 'undefined' && (
+        window.location.port === '3001' || 
+        window.location.pathname.startsWith('/caregiver') || 
+        new URLSearchParams(window.location.search).get('role') === 'caregiver'
+      ));
+
     const sendPing = () => {
       sendHeartbeat({
-        role: userRole === 'caregiver' ? 'caregiver' : 'child_device',
-        name: userRole === 'caregiver' ? 'Caregiver' : childProfile.name,
+        role: isCaregiver ? 'caregiver' : 'child_device',
+        name: isCaregiver ? 'Sarah (Mom)' : (childProfile?.name || 'Leo'),
         pairingCode: code,
         childStatus: {
-          childName: childProfile.name,
+          childName: childProfile?.name || 'Leo',
           currentMood,
           currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : childView === 'skills' ? 'Life Skills' : childView === 'adventures' ? 'Life Adventures' : childView === 'feelings' ? 'Feelings Check-in' : 'BeeYou'}`,
           stars: worldState.stars,
@@ -1236,7 +1245,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     sendPing();
-    const interval = setInterval(sendPing, 5000);
+    const interval = setInterval(sendPing, 3500);
 
     return () => {
       unsubCaregiver();
@@ -1245,7 +1254,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       unsubConnection();
       clearInterval(interval);
     };
-  }, [userRole, childProfile.name, currentMood, childView, worldState.stars]);
+  }, [userRole, isParentMode, childProfile?.name, currentMood, childView, worldState.stars]);
 
   const isSyncingFromRemoteRef = useRef(false);
 

@@ -586,23 +586,35 @@ app.post('/api/caregiver/event', (req, res) => {
     session.activeAlert = envelope.alert;
     session.quickAlert = `ALERT: ${envelope.alert.label}`;
     session.lastActiveTime = new Date().toISOString();
+    session.lastChildActiveTime = new Date().toISOString();
   } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
     if (session.activeAlert) {
       session.activeAlert.status = 'acknowledged';
       session.activeAlert.acknowledgedBy = envelope.ack.by;
     }
+    session.lastCaregiverActiveTime = new Date().toISOString();
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
     session.messages.push(envelope.message);
     if (session.messages.length > 30) session.messages = session.messages.slice(-30);
+    session.lastCaregiverActiveTime = new Date().toISOString();
   } else if (envelope.type === 'CHILD_STATUS_UPDATE' && envelope.status) {
     Object.assign(session, envelope.status);
     session.lastActiveTime = new Date().toISOString();
-  } else if (envelope.type === 'CHILD_HEARTBEAT' || envelope.type === 'HEARTBEAT') {
+    session.lastChildActiveTime = new Date().toISOString();
+  } else if (envelope.type === 'CAREGIVER_HEARTBEAT' || envelope.role === 'caregiver') {
+    session.lastCaregiverActiveTime = new Date().toISOString();
+    session.lastActiveTime = new Date().toISOString();
+  } else if (envelope.type === 'CHILD_HEARTBEAT' || envelope.role === 'child_device' || envelope.type === 'HEARTBEAT') {
+    session.lastChildActiveTime = new Date().toISOString();
     session.lastActiveTime = new Date().toISOString();
     if (envelope.childStatus) {
       Object.assign(session, envelope.childStatus);
     }
   }
+
+  // Update persistent state timestamp
+  const familyState = getOrCreateFamilyState(pairingCode);
+  familyState.lastUpdated = Date.now();
 
   broadcastEvent(pairingCode, envelope);
   return res.json({ success: true, eventId: envelope.eventId });
