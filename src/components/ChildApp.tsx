@@ -83,11 +83,9 @@ const ChildAppContent: React.FC = () => {
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    setActiveDeviceView('child');
-    try {
-      localStorage.setItem('beeyou_user_role', 'child_dependent');
-      sessionStorage.setItem('beeyou_active_device_view', 'child');
-    } catch {}
+    if (sessionStorage.getItem('beeyou_active_device_view') !== 'caregiver') {
+      setActiveDeviceView('child');
+    }
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);

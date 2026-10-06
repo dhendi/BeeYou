@@ -203,7 +203,15 @@ export const ChildHeader: React.FC = () => {
           type="button"
           onClick={() => {
             playChime('tap');
-            setShowPinModal(true);
+            setIsParentMode(true);
+            setActiveDeviceView('caregiver');
+            try {
+              sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
+              localStorage.setItem('beeyou_active_device_view', 'caregiver');
+            } catch {}
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
+            }
           }}
           className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
           title="Open Caregiver Controller & Dashboard"
