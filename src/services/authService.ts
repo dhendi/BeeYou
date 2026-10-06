@@ -102,13 +102,10 @@ export function setActiveDeviceView(view: 'child' | 'caregiver'): void {
   if (typeof window === 'undefined') return;
   try {
     sessionStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
-    if (window.location.port === '3001' && view === 'caregiver') {
-      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, 'caregiver');
-    } else if (window.location.port === '3000' && view === 'child') {
-      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, 'child');
-    } else if (window.location.port !== '3000' && window.location.port !== '3001') {
-      localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
-    }
+    sessionStorage.setItem('beeyou_user_role', view === 'caregiver' ? 'caregiver' : 'child_dependent');
+    localStorage.setItem(ACTIVE_DEVICE_VIEW_KEY, view);
+    localStorage.setItem('beeyou_user_role', view === 'caregiver' ? 'caregiver' : 'child_dependent');
+    window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: view } }));
   } catch {}
 }
 

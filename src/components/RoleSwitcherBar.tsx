@@ -89,27 +89,21 @@ export const RoleSwitcherBar: React.FC = () => {
     const code = getPairingCode();
     if (isCaregiverView) {
       // Switch from Caregiver -> Child
+      setActiveDeviceView('child');
       if (window.location.port === '3001') {
         window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(code)}`;
       } else {
-        setIsParentMode(false);
-        try {
-          sessionStorage.setItem('beeyou_active_device_view', 'child');
-          localStorage.setItem('beeyou_user_role', 'kid');
-        } catch {}
-        window.location.search = `?role=child&code=${encodeURIComponent(code)}`;
+        window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(code)}`);
+        window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
       }
     } else {
       // Switch from Child -> Caregiver
+      setActiveDeviceView('caregiver');
       if (window.location.port === '3000') {
         window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(code)}`;
       } else {
-        setIsParentMode(true);
-        try {
-          sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
-          localStorage.setItem('beeyou_user_role', 'caregiver');
-        } catch {}
-        window.location.search = `?role=caregiver&code=${encodeURIComponent(code)}`;
+        window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(code)}`);
+        window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
       }
     }
   };

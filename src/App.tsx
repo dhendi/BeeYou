@@ -38,16 +38,25 @@ export default function App() {
   const [role, setRole] = useState<'caregiver' | 'child'>(getActiveRole);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setRole(getActiveRole());
+    const handleRoleUpdate = (e?: any) => {
+      if (e?.detail?.role) {
+        setRole(e.detail.role);
+      } else {
+        setRole(getActiveRole());
+      }
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+
+    window.addEventListener('popstate', handleRoleUpdate);
+    window.addEventListener('beeyou_role_change' as any, handleRoleUpdate);
+    return () => {
+      window.removeEventListener('popstate', handleRoleUpdate);
+      window.removeEventListener('beeyou_role_change' as any, handleRoleUpdate);
+    };
   }, []);
 
   if (role === 'caregiver') {
-    return <CaregiverApp />;
+    return <CaregiverApp key="caregiver-root-app" />;
   }
 
-  return <ChildApp />;
+  return <ChildApp key="child-root-app" />;
 }

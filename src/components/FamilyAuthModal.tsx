@@ -147,35 +147,31 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       try {
         playChime('complete');
       } catch {}
-      setCurrentAccount(account);
-
       setTimeout(() => {
-        onClose();
-        if (typeof window !== 'undefined') {
-          const safeCode = account.familyCode || 'BEE-DEMO';
-          if (asRole === 'caregiver') {
-            sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
-            sessionStorage.setItem('beeyou_user_role', 'caregiver');
-            localStorage.setItem('beeyou_user_role', 'caregiver');
-            localStorage.setItem('beeyou_active_device_view', 'caregiver');
+        const safeCode = account.familyCode || 'BEE-DEMO';
+        if (asRole === 'caregiver') {
+          setActiveDeviceView('caregiver');
+          if (typeof window !== 'undefined') {
             if (window.location.port === '3000') {
               window.location.href = `http://localhost:3001/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
             } else {
-              window.location.href = `${window.location.origin}/?role=caregiver&code=${encodeURIComponent(safeCode)}`;
+              window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(safeCode)}`);
+              window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
-          } else {
-            sessionStorage.setItem('beeyou_active_device_view', 'child');
-            sessionStorage.setItem('beeyou_user_role', 'child_dependent');
-            localStorage.setItem('beeyou_user_role', 'child_dependent');
-            localStorage.setItem('beeyou_active_device_view', 'child');
+          }
+        } else {
+          setActiveDeviceView('child');
+          if (typeof window !== 'undefined') {
             if (window.location.port === '3001') {
               window.location.href = `http://localhost:3000/?role=child&code=${encodeURIComponent(safeCode)}`;
             } else {
-              window.location.href = `${window.location.origin}/?role=child&code=${encodeURIComponent(safeCode)}`;
+              window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(safeCode)}`);
+              window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
             }
           }
         }
-      }, 300);
+        onClose();
+      }, 200);
     } catch (err) {
       console.error('Failed to apply account context:', err);
       onClose();

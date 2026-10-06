@@ -102,24 +102,35 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
 
   // 2. Listen for Real-Time Messages
   const messagesRef = ref(db, `beeyou/sessions/${code}/messages`);
-  let isFirstMsgLoad = true;
+  const seenMessageKeys = new Set<string>();
+  let initialMessagesLoaded = false;
+
   activeMessagesUnsub = onValue(messagesRef, (snapshot) => {
-    if (isFirstMsgLoad) {
-      isFirstMsgLoad = false;
+    const val = snapshot.val();
+    if (!val) {
+      initialMessagesLoaded = true;
       return;
     }
-    const val = snapshot.val();
-    if (!val) return;
-    const items = Object.values(val) as CaregiverMessage[];
-    if (items.length > 0) {
-      const latest = items[items.length - 1];
-      if (latest && (Date.now() - new Date(latest.timestamp).getTime()) < 30000) {
+
+    const entries = Object.entries(val) as [string, CaregiverMessage][];
+    
+    if (!initialMessagesLoaded) {
+      // Record all existing historical messages on initial load
+      entries.forEach(([k]) => seenMessageKeys.add(k));
+      initialMessagesLoaded = true;
+      return;
+    }
+
+    // Process all newly added messages
+    entries.forEach(([key, msg]) => {
+      if (!seenMessageKeys.has(key)) {
+        seenMessageKeys.add(key);
         lastKnownPeerPing = Date.now();
         lastKnownPeerRole = isCaregiver ? 'child_device' : 'caregiver';
         notifyPresence();
-        messageListeners.forEach((fn) => fn(latest));
+        messageListeners.forEach((fn) => fn(msg));
       }
-    }
+    });
   });
 
   // 3. Listen for Peer Presence & Heartbeats
