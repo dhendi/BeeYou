@@ -1226,11 +1226,18 @@ export async function sendCaregiverAlert(alertData: {
     saveAlertToHistory(alert);
   } catch {}
 
-  // 1. Send to server alert endpoint (server broadcasts CAREGIVER_ALERT over SSE to all listeners)
+  // 1. Firebase Cloud & Multi-channel Relay
+  await publishCloudEvent(code, {
+    type: 'CAREGIVER_ALERT',
+    alert,
+    pairingCode: code,
+  });
+
+  // 2. Direct Server fallback
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
-    await fetch('/api/caregiver/alert', {
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    fetch('/api/caregiver/alert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1239,21 +1246,10 @@ export async function sendCaregiverAlert(alertData: {
         ...alertData,
       }),
       signal: controller.signal,
-    });
+    }).catch(() => {});
     clearTimeout(timeoutId);
   } catch (err) {
     console.warn('Server alert sync error:', err);
-  }
-
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({
-        type: 'CAREGIVER_ALERT',
-        alert,
-        pairingCode: code,
-        sentAt: Date.now(),
-      });
-    } catch {}
   }
 
   return alert;
@@ -1285,25 +1281,23 @@ export async function acknowledgeCaregiverAlert(
 ): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage({
-        type: 'CAREGIVER_ALERT_ACK',
-        pairingCode: safeCode,
-        ack: {
-          alertId: safeCode,
-          responseMessage,
-          responseId,
-          by: acknowledgedBy || 'Caregiver',
-        },
-        sentAt: Date.now(),
-      });
-    } catch {}
-  }
+  const ackData = {
+    alertId: safeCode,
+    responseMessage: responseMessage || "I'm on my way ❤️",
+    responseId,
+    by: acknowledgedBy || 'Caregiver',
+  };
 
-  // Send to server acknowledge endpoint (server saves ack, updates state, and broadcasts single CAREGIVER_ALERT_ACK)
+  // 1. Firebase Cloud & Multi-channel Relay
+  await publishCloudEvent(safeCode, {
+    type: 'CAREGIVER_ALERT_ACK',
+    pairingCode: safeCode,
+    ack: ackData,
+  });
+
+  // 2. Direct Server fallback
   try {
-    await fetch('/api/caregiver/alert/acknowledge', {
+    fetch('/api/caregiver/alert/acknowledge', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1312,7 +1306,7 @@ export async function acknowledgeCaregiverAlert(
         responseMessage,
         responseId,
       }),
-    });
+    }).catch(() => {});
   } catch (err) {
     console.warn('Acknowledge alert error:', err);
   }
