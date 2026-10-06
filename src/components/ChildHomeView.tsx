@@ -196,9 +196,98 @@ export const ChildHomeView: React.FC = () => {
     });
   };
 
+  const enabledWidgets = dashboardWidgets.filter(
+    (w) => w.enabled && isWidgetAvailable(w.id, enabledFeatures)
+  );
+
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-7xl mx-auto w-full px-2 sm:px-4 py-2 space-y-4 select-none">
       
+      {/* ── TOP PROMINENT HEADER & DASHBOARD CONTROL BAR ── */}
+      <div className="bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-3xl p-3 sm:p-4 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Left: Friendly Greeting & Status */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div 
+            onClick={() => {
+              setShowAboutMeModal(true);
+              playChime('tap');
+            }}
+            className="w-11 h-11 rounded-2xl bg-[#F5EFE6] border-2 border-[#E0D8CB] text-2xl flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0"
+            title="About Me ID Card"
+          >
+            🐝
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
+                Hi, {childProfile.name}!
+              </h2>
+              <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-[#F5B865]" />
+                {worldState.stars} Coins
+              </span>
+            </div>
+            <p className="text-xs text-[#7A6C60] font-semibold">
+              You can be yourself here • Today's Dashboard
+            </p>
+          </div>
+        </div>
+
+        {/* Right: PROMINENT EDIT DASHBOARD & QUICK ACTION BUTTONS */}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+          {/* 🌟 PROMINENT CUSTOMIZE DASHBOARD BUTTON */}
+          <button
+            onClick={() => {
+              setShowDashboardCustomizer(true);
+              playChime('tap');
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0"
+            title="Customize and reorder dashboard widgets"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" />
+            <span>Customize Dashboard ✏️</span>
+          </button>
+
+          {/* Quick Tools Hub Button */}
+          <button
+            onClick={() => {
+              setShowToolsHubModal(true);
+              playChime('tap');
+            }}
+            className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+            title="Open Tools Hub"
+          >
+            <span className="text-base">🧰</span>
+          </button>
+
+          {/* Morning Brief (if enabled) */}
+          {enabledFeatures?.morningBrief !== false && (
+            <button
+              onClick={() => {
+                setShowMorningBrief(true);
+                playChime('tap');
+              }}
+              className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+              title="Open Morning Brief"
+            >
+              <Sun className="w-4 h-4 text-[#E2A44E]" />
+            </button>
+          )}
+
+          {/* Caregiver Alert / Connect */}
+          <button
+            onClick={() => {
+              setShowCaregiverModal(true);
+              playChime('tap');
+            }}
+            className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+            title="Caregiver Pairing & Connect"
+          >
+            <Heart className="w-4 h-4 text-[#D57B7B]" />
+          </button>
+        </div>
+      </div>
+
       {/* 1. PLANS CHANGED BANNER (If Active) */}
       {plansChanged.active && (
         <div
@@ -394,191 +483,396 @@ export const ChildHomeView: React.FC = () => {
           )}
         </div>
 
-        {/* ── RIGHT COLUMN (40% on Desktop/Tablet): Companion Bento Hub ── */}
-        <div className="lg:col-span-5 flex flex-col space-y-4">
+        {/* ── RIGHT COLUMN (40% on Desktop/Tablet): DYNAMIC CUSTOMIZABLE BENTO COMPANION HUB ── */}
+        <div className="lg:col-span-5 flex flex-col space-y-3.5">
           
-          {/* 1. Top Greeting Bento Card */}
-          <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div 
-                onClick={() => {
-                  setShowAboutMeModal(true);
-                  playChime('tap');
-                }}
-                className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 border border-amber-300 font-black text-xl flex items-center justify-center shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0"
-                title="About Me ID Card"
-              >
-                🐝
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight leading-none">
-                  Hi, {childProfile.name}! 🐝
-                </h2>
-                <p className="text-xs text-stone-500 font-bold mt-1">
-                  You can be yourself here
-                </p>
-              </div>
-            </div>
+          {/* Dynamic Widgets mapped directly from dashboardWidgets */}
+          {enabledWidgets.map((widget) => {
+            switch (widget.id) {
+              case 'mascot_companion':
+                return (
+                  <div 
+                    key={widget.id}
+                    className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div 
+                        onClick={() => {
+                          setShowAboutMeModal(true);
+                          playChime('tap');
+                        }}
+                        className="w-12 h-12 rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] font-black text-xl flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0"
+                        title="About Me ID Card"
+                      >
+                        🐝
+                      </div>
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none">
+                          Hi, {childProfile.name}! 🐝
+                        </h2>
+                        <p className="text-xs text-[#7A6C60] font-bold mt-1">
+                          You can be yourself here
+                        </p>
+                      </div>
+                    </div>
 
-            <button
-              onClick={() => {
-                setShowDashboardCustomizer(true);
-                playChime('tap');
-              }}
-              className="p-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-all cursor-pointer shadow-2xs border border-stone-200 shrink-0"
-              title="Customize Layout"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* 2. Three Chunky Pillowed Action Thumb Pads */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            {/* Talk Button (Honey Amber) */}
-            <button
-              onClick={() => {
-                setChildView('aac');
-                playChime('tap');
-              }}
-              className="py-3.5 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EEAC53] text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0_rgba(255,255,255,0.6)] active:scale-95 cursor-pointer transition-all border border-[#E2A44E]"
-            >
-              <span>💬</span>
-              <span>Talk</span>
-            </button>
-
-            {/* Calm Down Button (Matcha Green) */}
-            <button
-              onClick={() => {
-                setShowCopingToolkit(true);
-                playChime('tap');
-              }}
-              className="py-3.5 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#8BB594] text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0_rgba(255,255,255,0.6)] active:scale-95 cursor-pointer transition-all border border-[#85AE8E]"
-            >
-              <span>🛋️</span>
-              <span>Calm down</span>
-            </button>
-
-            {/* Need Help Button (Warm Rose) */}
-            <button
-              onClick={() => {
-                setShowCaregiverAlertModal(true);
-                playChime('tap');
-              }}
-              className="py-3.5 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#DD7F7F] text-stone-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0_rgba(255,255,255,0.6)] active:scale-95 cursor-pointer transition-all border border-[#D57B7B]"
-            >
-              <span>🆘</span>
-              <span>I need help</span>
-            </button>
-          </div>
-
-          {/* 3. First / Then Visual Routine Card */}
-          {currentRoutine && (
-            <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-stone-500">
-                  Today's Schedule • {currentRoutine.title}
-                </span>
-                <button
-                  onClick={() => setChildView('my-day')}
-                  className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Open Schedule</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                {/* FIRST Step */}
-                <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E8DFC2] flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl">🪥</span>
-                    <span className="font-black text-xs sm:text-sm text-stone-900 truncate">
-                      {currentRoutine.firstThen?.first ? `First: ${currentRoutine.firstThen.first}` : 'First: Brush teeth'}
-                    </span>
+                    <button
+                      onClick={() => {
+                        setShowDashboardCustomizer(true);
+                        playChime('tap');
+                      }}
+                      className="p-2.5 rounded-2xl bg-[#F5EFE6] hover:bg-white text-[#4A2F0F] transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-[#E0D8CB] shrink-0 active:scale-95"
+                      title="Edit & customize dashboard layout"
+                    >
+                      <SlidersHorizontal className="w-4 h-4" />
+                    </button>
                   </div>
-                  <span className="w-6 h-6 rounded-full bg-emerald-200 text-emerald-900 font-black text-xs flex items-center justify-center shrink-0">
-                    ✓
-                  </span>
-                </div>
+                );
 
-                {/* THEN Step */}
-                <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E8DFC2] flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl">📱</span>
-                    <span className="font-black text-xs sm:text-sm text-stone-900 truncate">
-                      {currentRoutine.firstThen?.then ? `Then: ${currentRoutine.firstThen.then}` : 'Then: Tablet time (15 min)'}
-                    </span>
+              case 'quick_aac':
+                return (
+                  <div key={widget.id} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {/* Talk Button (Honey Amber) */}
+                    <button
+                      onClick={() => {
+                        setChildView('aac');
+                        playChime('tap');
+                      }}
+                      className="py-3.5 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#E2A44E]"
+                    >
+                      <span>💬</span>
+                      <span>Talk</span>
+                    </button>
+
+                    {/* Calm Down Button (Matcha Green) */}
+                    <button
+                      onClick={() => {
+                        setShowCopingToolkit(true);
+                        playChime('tap');
+                      }}
+                      className="py-3.5 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#85AE8E]"
+                    >
+                      <span>🛋️</span>
+                      <span>Calm down</span>
+                    </button>
+
+                    {/* Need Help Button (Warm Rose) */}
+                    <button
+                      onClick={() => {
+                        setShowCaregiverAlertModal(true);
+                        playChime('tap');
+                      }}
+                      className="py-3.5 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#D57B7B]"
+                    >
+                      <span>🆘</span>
+                      <span>I need help</span>
+                    </button>
                   </div>
-                  <span className="w-6 h-6 rounded-full bg-stone-200 text-stone-500 font-black text-xs flex items-center justify-center shrink-0">
-                    ○
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
+                );
 
-          {/* 4. 2x2 Regulation & Executive Tools Grid */}
-          <div className="grid grid-cols-2 gap-2.5">
-            {/* Visual Pie Clock */}
-            <button
-              onClick={() => {
-                setShowPieTimerModal(true);
-                playChime('tap');
-              }}
-              className="p-3.5 rounded-[24px] bg-[#FDE293]/90 hover:bg-[#FDE293] border border-[#F6D06F] text-stone-900 font-black text-xs sm:text-sm flex flex-col items-start justify-between gap-2 shadow-[0_3px_10px_rgba(253,226,147,0.3),inset_0_1px_0_rgba(255,255,255,0.7)] active:scale-95 cursor-pointer transition-all"
-            >
-              <span className="text-2xl">⏰</span>
-              <div className="text-left">
-                <div className="leading-tight">Visual Pie Clock</div>
-                <div className="text-[10px] font-bold text-stone-600 mt-0.5">Analog disk timer</div>
-              </div>
-            </button>
+              case 'routine_schedule':
+                return currentRoutine ? (
+                  <div key={widget.id} className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase tracking-wider text-[#8C7E72]">
+                        Today's Schedule • {currentRoutine.title}
+                      </span>
+                      <button
+                        onClick={() => setChildView('my-day')}
+                        className="text-xs font-black text-[#4A2F0F] hover:text-[#2D241E] flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Open Schedule</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
-            {/* 5-Point Scale */}
-            <button
-              onClick={() => {
-                setShowFivePointModal(true);
-                playChime('tap');
-              }}
-              className="p-3.5 rounded-[24px] bg-[#C4E7D4]/90 hover:bg-[#C4E7D4] border border-[#AAD6BE] text-stone-900 font-black text-xs sm:text-sm flex flex-col items-start justify-between gap-2 shadow-[0_3px_10px_rgba(196,231,212,0.3),inset_0_1px_0_rgba(255,255,255,0.7)] active:scale-95 cursor-pointer transition-all"
-            >
-              <span className="text-2xl">🌡️</span>
-              <div className="text-left">
-                <div className="leading-tight">5-Point Scale</div>
-                <div className="text-[10px] font-bold text-stone-600 mt-0.5">Check regulation</div>
-              </div>
-            </button>
+                    <div className="space-y-2">
+                      {/* FIRST Step */}
+                      <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-xl">🪥</span>
+                          <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
+                            {currentRoutine.firstThen?.first ? `First: ${currentRoutine.firstThen.first}` : 'First: Brush teeth'}
+                          </span>
+                        </div>
+                        <span className="w-6 h-6 rounded-full bg-[#C4E7D4] text-[#1C3E25] font-black text-xs flex items-center justify-center shrink-0 border border-[#99C2A2]">
+                          ✓
+                        </span>
+                      </div>
 
-            {/* Fidget Corner */}
-            <button
-              onClick={() => {
-                setShowFidgetModal(true);
-                playChime('tap');
-              }}
-              className="p-3.5 rounded-[24px] bg-[#F6C0C0]/90 hover:bg-[#F6C0C0] border border-[#EAA4A4] text-stone-900 font-black text-xs sm:text-sm flex flex-col items-start justify-between gap-2 shadow-[0_3px_10px_rgba(246,192,192,0.3),inset_0_1px_0_rgba(255,255,255,0.7)] active:scale-95 cursor-pointer transition-all"
-            >
-              <span className="text-2xl">🫧</span>
-              <div className="text-left">
-                <div className="leading-tight">Fidget Corner</div>
-                <div className="text-[10px] font-bold text-stone-600 mt-0.5">Bubble pop & sand</div>
-              </div>
-            </button>
+                      {/* THEN Step */}
+                      <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-xl">📱</span>
+                          <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
+                            {currentRoutine.firstThen?.then ? `Then: ${currentRoutine.firstThen.then}` : 'Then: Tablet time (15 min)'}
+                          </span>
+                        </div>
+                        <span className="w-6 h-6 rounded-full bg-[#EAE2D5] text-[#8C7E72] font-black text-xs flex items-center justify-center shrink-0 border border-[#D8CEBA]">
+                          ○
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null;
 
-            {/* Themes & Studio */}
-            <button
-              onClick={() => {
-                setShowThemeModal(true);
-                playChime('tap');
-              }}
-              className="p-3.5 rounded-[24px] bg-[#D7D4F0]/90 hover:bg-[#D7D4F0] border border-[#BFBAE6] text-stone-900 font-black text-xs sm:text-sm flex flex-col items-start justify-between gap-2 shadow-[0_3px_10px_rgba(215,212,240,0.3),inset_0_1px_0_rgba(255,255,255,0.7)] active:scale-95 cursor-pointer transition-all"
-            >
-              <span className="text-2xl">🎨</span>
-              <div className="text-left">
-                <div className="leading-tight">Themes & Studio</div>
-                <div className="text-[10px] font-bold text-stone-600 mt-0.5">Switch look anytime</div>
-              </div>
-            </button>
-          </div>
+              case 'pie_timer':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowPieTimerModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FDE293] hover:bg-[#FCD876] border-2 border-[#E2A44E] text-[#4A2F0F] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(253,226,147,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#E2A44E] shrink-0">⏰</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Visual Pie Clock</div>
+                        <div className="text-[11px] font-semibold text-[#8B571A]">Time Timer analog visual countdown disk</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8B571A] shrink-0" />
+                  </button>
+                );
+
+              case 'five_point_scale':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowFivePointModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#C4E7D4] hover:bg-[#B2DEC5] border-2 border-[#85AE8E] text-[#1C3E25] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(196,231,212,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#85AE8E] shrink-0">🌡️</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">5-Point Emotional Scale</div>
+                        <div className="text-[11px] font-semibold text-[#2C5A37]">Thermometer & calming regulation tools</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#2C5A37] shrink-0" />
+                  </button>
+                );
+
+              case 'fidget_toys':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowFidgetModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#F6C0C0] hover:bg-[#EEADAD] border-2 border-[#D57B7B] text-[#4A1616] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(246,192,192,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#D57B7B] shrink-0">🫧</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Fidget Corner & Stimming</div>
+                        <div className="text-[11px] font-semibold text-[#8B3434]">Bubble pop, sand ripple & marble</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8B3434] shrink-0" />
+                  </button>
+                );
+
+              case 'decision_wheel':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowDecisionWheelModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#D7D4F0] hover:bg-[#CBC8E8] border-2 border-[#B8B4DC] text-[#2C2954] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(215,212,240,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#B8B4DC] shrink-0">🎡</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Decision Wheel</div>
+                        <div className="text-[11px] font-semibold text-[#51488C]">Spin to break choice paralysis</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#51488C] shrink-0" />
+                  </button>
+                );
+
+              case 'medication_tracker':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowMedicationModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💊</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Medication Reminders</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">{medications.length} active prescriptions</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                );
+
+              case 'spoon_budget':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowSpoonModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🥄</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Spoon Energy Budget</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">
+                          {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} spoons left today` : 'Track energy & prevent burnout'}
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                );
+
+              case 'mood_journal':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowMoodJournalModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">📖</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Mood Journal & Triggers</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">{moodJournalEntries.length} reflections recorded</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                );
+
+              case 'cycle_tracker':
+                return isTeenOrAdult ? (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowCycleTrackerModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💗</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Cycle & Rhythm Tracker</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">
+                          {cycleSettings.discreetMode ? 'Body rhythm tracking' : `Day ${cyclePhaseInfo?.currentCycleDay || 1}`}
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                ) : null;
+
+              case 'communication_passport':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowPassportModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🪪</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Communication Passport</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">1-page summary for teachers & dentists</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                );
+
+              case 'adventure_spotlight':
+                return todaysAdventure ? (
+                  <div
+                    key={widget.id}
+                    onClick={() => setChildView('adventures')}
+                    className="p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3 cursor-pointer active:scale-98 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl p-2 bg-[#F5EFE6] border border-[#E0D8CB] rounded-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                        {todaysAdventure.emoji}
+                      </span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#A76318] bg-[#FDE293] border border-[#E2A44E] px-2 py-0.5 rounded-lg">
+                          Life Adventure Prep
+                        </span>
+                        <h4 className="font-black text-sm sm:text-base text-[#2D241E] mt-0.5">
+                          {todaysAdventure.title}
+                        </h4>
+                        <p className="text-xs text-[#7A6C60] font-semibold">
+                          Walkthrough, sensory guide & confidence tips.
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-[#8C7E72] shrink-0" />
+                  </div>
+                ) : null;
+
+              case 'evening_reflection':
+                return (
+                  <button
+                    key={widget.id}
+                    onClick={() => {
+                      setShowRecollectionModal(true);
+                      playChime('tap');
+                    }}
+                    className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🌙</span>
+                      <div className="text-left">
+                        <div className="leading-tight font-black text-sm">Evening Reflection & Journal</div>
+                        <div className="text-[11px] font-semibold text-[#7A6C60]">Reflect on your day & celebrate wins</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  </button>
+                );
+
+              default:
+                return null;
+            }
+          })}
+
+          {/* Quick Add / Reorder Layout Footer Button */}
+          <button
+            onClick={() => {
+              setShowDashboardCustomizer(true);
+              playChime('tap');
+            }}
+            className="w-full py-3 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-1"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>＋ Customize / Reorder Dashboard Widgets</span>
+          </button>
 
         </div>
       </div>
