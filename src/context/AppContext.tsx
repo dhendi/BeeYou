@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { setLanguage } from '../services/translator';
+import { t, setLanguage } from '../services/translator';
 import confetti from 'canvas-confetti';
 import {
   AACItem,
@@ -1541,7 +1541,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // Speech Helper
   const speak = async (text: string) => {
     if (settings.soundEffects) playChime('speak');
-    await speakText(text, {
+    const spoken = t(text);
+    await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
       voiceURI: settings.selectedVoiceURI,
@@ -1654,7 +1655,15 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const speakSentence = async () => {
     if (sentence.length === 0) return;
-    const fullText = sentence.map((item) => item.speechText || item.label).join(' ');
+    const fullText = sentence
+      .map((item) => {
+        if (item.speechText) {
+          const tr = t(item.speechText);
+          if (tr !== item.speechText) return tr;
+        }
+        return t(item.label) || item.label;
+      })
+      .join(' ');
     recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
       childName: childProfile.name,

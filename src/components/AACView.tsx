@@ -611,7 +611,9 @@ export const AACView: React.FC = () => {
       setShowWordEditor(true);
       return;
     }
-    const speech = t(item.speechText || item.label);
+    const speech = (item.speechText && t(item.speechText) !== item.speechText)
+      ? t(item.speechText)
+      : t(item.label);
     if (instantSpeakMode) {
       speak(speech);
     } else {
@@ -1222,13 +1224,14 @@ export const AACView: React.FC = () => {
                   >
                     <div
                       onClick={() => {
-                        speak(fav.speechText || fav.text);
-                        recordSentenceSpoken(fav.text, fav.emoji);
+                        const spoken = t(fav.speechText || fav.text);
+                        speak(spoken);
+                        recordSentenceSpoken(spoken, fav.emoji);
                         playChime('speak');
                         addToSentence({
                           id: `fav-${Date.now()}`,
-                          label: fav.text,
-                          speechText: fav.speechText || fav.text,
+                          label: t(fav.text),
+                          speechText: spoken,
                           emoji: fav.emoji || '💬',
                           category: 'favorites',
                           colorType: 'social',
@@ -1244,7 +1247,7 @@ export const AACView: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
-                            {fav.text}
+                            {t(fav.text)}
                           </h4>
                           {fav.isParentPinned && (
                             <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-0.5">
@@ -1257,7 +1260,7 @@ export const AACView: React.FC = () => {
                             🔥 {fav.usageCount || 1}x spoken
                           </span>
                           <span>•</span>
-                          <span className="text-slate-400">Tap to speak</span>
+                          <span className="text-slate-400">{t('Tap to speak')}</span>
                         </div>
                       </div>
                     </div>
@@ -1266,13 +1269,14 @@ export const AACView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          speak(fav.speechText || fav.text);
-                          recordSentenceSpoken(fav.text, fav.emoji);
+                          const spoken = t(fav.speechText || fav.text);
+                          speak(spoken);
+                          recordSentenceSpoken(spoken, fav.emoji);
                           playChime('speak');
                           addToSentence({
                             id: `fav-${Date.now()}`,
-                            label: fav.text,
-                            speechText: fav.speechText || fav.text,
+                            label: t(fav.text),
+                            speechText: spoken,
                             emoji: fav.emoji || '💬',
                             category: 'favorites',
                             colorType: 'social',

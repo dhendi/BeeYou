@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
+import { t } from '../services/translator';
 
 export interface TaskTimerPreset {
   id: string;
@@ -279,14 +280,14 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
-                Visual Countdown
+                {t('Visual Countdown')}
               </span>
               <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
-                Non-pressuring • At your pace
+                {t('Non-pressuring • At your pace')}
               </span>
             </div>
             <h3 className="font-black text-slate-900 text-sm sm:text-base leading-tight">
-              {selectedPreset.title}
+              {t(selectedPreset.title)}
             </h3>
           </div>
         </div>
@@ -334,10 +335,10 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
             <span className="text-2xl">{selectedPreset.emoji}</span>
             <div>
               <span className="font-black text-xs text-slate-800 block">
-                {selectedPreset.title}
+                {t(selectedPreset.title)}
               </span>
               <span className="text-xs font-bold text-sky-600 font-mono">
-                {formatTime(remainingSeconds)} remaining
+                {formatTime(remainingSeconds)} {t('remaining')}
               </span>
             </div>
           </div>
@@ -351,7 +352,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
               }`}
             >
               {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-              <span>{isRunning ? 'Pause' : 'Start'}</span>
+              <span>{isRunning ? t('Pause') : t('Start')}</span>
             </button>
           </div>
         </div>
@@ -364,9 +365,9 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-                Choose an Activity:
+                {t('Choose an Activity:')}
               </span>
-              <span className="text-[11px] text-slate-400">Tap to switch</span>
+              <span className="text-[11px] text-slate-400">{t('Tap to switch')}</span>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
               {DEFAULT_TASK_PRESETS.map((preset) => {
@@ -384,7 +385,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                   >
                     <span className="text-xl sm:text-2xl mb-0.5 block">{preset.emoji}</span>
                     <span className="font-bold text-[11px] leading-tight truncate w-full block">
-                      {preset.title}
+                      {t(preset.title)}
                     </span>
                     <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
                       {Math.round(preset.durationSeconds / 60)}m
@@ -430,7 +431,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                   <div className="animate-bounce">
                     <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
                     <span className="text-xs font-black text-emerald-700 mt-1 block">
-                      All Done!
+                      {t('All Done!')}
                     </span>
                   </div>
                 ) : (
@@ -439,7 +440,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                       {formatTime(remainingSeconds)}
                     </span>
                     <span className="text-[11px] font-bold text-slate-400 mt-0.5">
-                      {isRunning ? 'Relaxing...' : remainingSeconds === totalSeconds ? 'Ready' : 'Paused'}
+                      {isRunning ? t('Relaxing...') : remainingSeconds === totalSeconds ? t('Ready') : t('Paused')}
                     </span>
                   </>
                 )}
@@ -452,7 +453,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
               <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3 flex items-start gap-2.5 w-full">
                 <Heart className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-sky-900 font-medium leading-relaxed">
-                  {selectedPreset.calmMessage}
+                  {t(selectedPreset.calmMessage)}
                 </p>
               </div>
 
@@ -472,17 +473,17 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                   {isCompleted ? (
                     <>
                       <RotateCcw className="w-5 h-5" />
-                      <span>Start Again</span>
+                      <span>{t('Start Again')}</span>
                     </>
                   ) : isRunning ? (
                     <>
                       <Pause className="w-5 h-5" />
-                      <span>Take a Pause</span>
+                      <span>{t('Take a Pause')}</span>
                     </>
                   ) : (
                     <>
                       <Play className="w-5 h-5 fill-current" />
-                      <span>Start Gentle Timer</span>
+                      <span>{t('Start Gentle Timer')}</span>
                     </>
                   )}
                 </button>
@@ -500,7 +501,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
 
               {/* Non-pressuring +1m / -1m adjusters */}
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs font-bold text-slate-500">Need more or less time?</span>
+                <span className="text-xs font-bold text-slate-500">{t('Need more or less time?')}</span>
                 <button
                   type="button"
                   onClick={() => handleAdjustTime(60)}
@@ -508,7 +509,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                   title="Add 1 calm minute"
                 >
                   <Plus className="w-3 h-3" />
-                  <span>1 min</span>
+                  <span>1 {t('min')}</span>
                 </button>
                 {totalSeconds > 60 && (
                   <button
@@ -518,7 +519,7 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
                     title="Subtract 1 minute"
                   >
                     <Minus className="w-3 h-3" />
-                    <span>1 min</span>
+                    <span>1 {t('min')}</span>
                   </button>
                 )}
               </div>

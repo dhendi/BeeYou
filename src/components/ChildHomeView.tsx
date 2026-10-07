@@ -145,7 +145,7 @@ export const ChildHomeView: React.FC = () => {
       label: 'My/Mine',
       speechText: 'This is mine',
       emoji: '🤲',
-      symbolId: 'mine',
+      symbolId: 'personal_passport',
       bgTone: 'bg-[#FCF9F2]',
       colorType: 'subject' as const,
       category: 'core' as const,
@@ -184,7 +184,7 @@ export const ChildHomeView: React.FC = () => {
 
   const handleTactileTileClick = (tile: typeof TACTILE_AAC_TILES[0]) => {
     const label = t(tile.label);
-    const speech = t(tile.speechText);
+    const speech = t(tile.speechText) !== tile.speechText ? t(tile.speechText) : label;
     speak(speech);
     playChime('tap');
     addToSentence({
@@ -465,8 +465,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#E2A44E] shrink-0">⏰</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Visual Pie Clock</div>
-                      <div className="text-[11px] font-semibold text-[#8B571A]">Time Timer analog visual countdown disk</div>
+                      <div className="leading-tight font-black text-sm">{t('Visual Pie Clock')}</div>
+                      <div className="text-[11px] font-semibold text-[#8B571A]">{t('Time Timer analog visual countdown disk')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8B571A] shrink-0" />
@@ -486,8 +486,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#85AE8E] shrink-0">🌡️</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">5-Point Emotional Scale</div>
-                      <div className="text-[11px] font-semibold text-[#2C5A37]">Thermometer & calming regulation tools</div>
+                      <div className="leading-tight font-black text-sm">{t('5-Point Emotional Scale')}</div>
+                      <div className="text-[11px] font-semibold text-[#2C5A37]">{t('Thermometer & calming regulation tools')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#2C5A37] shrink-0" />
@@ -507,8 +507,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#D57B7B] shrink-0">🫧</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Fidget Corner & Stimming</div>
-                      <div className="text-[11px] font-semibold text-[#8B3434]">Bubble pop, sand ripple & marble</div>
+                      <div className="leading-tight font-black text-sm">{t('Fidget Corner & Stimming')}</div>
+                      <div className="text-[11px] font-semibold text-[#8B3434]">{t('Bubble pop, sand ripple & marble')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8B3434] shrink-0" />
@@ -528,8 +528,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#B8B4DC] shrink-0">🎡</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Decision Wheel</div>
-                      <div className="text-[11px] font-semibold text-[#51488C]">Spin to break choice paralysis</div>
+                      <div className="leading-tight font-black text-sm">{t('Decision Wheel')}</div>
+                      <div className="text-[11px] font-semibold text-[#51488C]">{t('Spin to break choice paralysis')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#51488C] shrink-0" />
@@ -549,8 +549,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💊</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Medication Reminders</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{medications.length} active prescriptions</div>
+                      <div className="leading-tight font-black text-sm">{t('Medication Reminders')}</div>
+                      <div className="text-[11px] font-semibold text-[#7A6C60]">{medications.length} {t('active prescriptions')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
@@ -570,9 +570,9 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🥄</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Spoon Energy Budget</div>
+                      <div className="leading-tight font-black text-sm">{t('Spoon Energy Budget')}</div>
                       <div className="text-[11px] font-semibold text-[#7A6C60]">
-                        {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} spoons left today` : 'Track energy & prevent burnout'}
+                        {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} ${t('spoons left today')}` : t('Track energy & prevent burnout')}
                       </div>
                     </div>
                   </div>
@@ -593,8 +593,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">📖</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Mood Journal & Triggers</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{moodJournalEntries.length} reflections recorded</div>
+                      <div className="leading-tight font-black text-sm">{t('Mood Journal & Triggers')}</div>
+                      <div className="text-[11px] font-semibold text-[#7A6C60]">{moodJournalEntries.length} {t('reflections recorded')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
@@ -614,9 +614,9 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💗</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Cycle & Rhythm Tracker</div>
+                      <div className="leading-tight font-black text-sm">{t('Cycle & Rhythm Tracker')}</div>
                       <div className="text-[11px] font-semibold text-[#7A6C60]">
-                        {cycleSettings.discreetMode ? 'Body rhythm tracking' : `Day ${cyclePhaseInfo?.currentCycleDay || 1}`}
+                        {cycleSettings.discreetMode ? t('Body rhythm tracking') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
                       </div>
                     </div>
                   </div>
@@ -637,8 +637,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🪪</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Communication Passport</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">1-page summary for teachers & dentists</div>
+                      <div className="leading-tight font-black text-sm">{t('Communication Passport')}</div>
+                      <div className="text-[11px] font-semibold text-[#7A6C60]">{t('1-page summary for teachers & dentists')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
@@ -658,13 +658,13 @@ export const ChildHomeView: React.FC = () => {
                     </span>
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-[#A76318] bg-[#FDE293] border border-[#E2A44E] px-2 py-0.5 rounded-lg">
-                        Life Adventure Prep
+                        {t('Life Adventure Prep')}
                       </span>
                       <h4 className="font-black text-sm sm:text-base text-[#2D241E] mt-0.5">
-                        {todaysAdventure.title}
+                        {t(todaysAdventure.title)}
                       </h4>
                       <p className="text-xs text-[#7A6C60] font-semibold">
-                        Walkthrough, sensory guide & confidence tips.
+                        {t('Walkthrough, sensory guide & confidence tips.')}
                       </p>
                     </div>
                   </div>
@@ -685,8 +685,8 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🌙</span>
                     <div className="text-left">
-                      <div className="leading-tight font-black text-sm">Evening Reflection & Journal</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">Reflect on your day & celebrate wins</div>
+                      <div className="leading-tight font-black text-sm">{t('Evening Reflection & Journal')}</div>
+                      <div className="text-[11px] font-semibold text-[#7A6C60]">{t('Reflect on your day & celebrate wins')}</div>
                     </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
@@ -708,7 +708,7 @@ export const ChildHomeView: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
                     <span className="text-xs font-black uppercase tracking-wider text-stone-500">
-                      AAC Sensory Board • Tap to Speak
+                      {t('AAC Sensory Board • Tap to Speak')}
                     </span>
                   </div>
                   <button
@@ -737,9 +737,12 @@ export const ChildHomeView: React.FC = () => {
                           <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
                             <img
                               src={resolveAacImageUrl(tile)}
-                              alt={tile.label}
+                              alt={t(tile.label)}
                               className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
                               loading="lazy"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none';
+                              }}
                             />
                           </div>
                           <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">

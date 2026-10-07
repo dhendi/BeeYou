@@ -1873,14 +1873,29 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
   const voices = getAvailableVoices();
   if (!voices || voices.length === 0) return null;
 
+  const targetPrefix = (langPrefix || 'en').toLowerCase();
+  const isFilipino = targetPrefix === 'fil' || targetPrefix === 'tl' || targetPrefix === 'fi';
+
   const matchingVoices = voices.filter((v) => {
-    return !langPrefix || v.lang.toLowerCase().startsWith(langPrefix.toLowerCase());
+    const l = v.lang.toLowerCase();
+    if (isFilipino) {
+      return l.startsWith('fil') || l.startsWith('tl');
+    }
+    return l.startsWith(targetPrefix);
   });
 
-  const targetList = matchingVoices.length > 0 ? matchingVoices : voices;
+  if (matchingVoices.length === 0) {
+    if (targetPrefix === 'en') {
+      const sorted = [...voices].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
+      return sorted[0] || null;
+    }
+    // Return null when no matching voice is installed for non-English languages,
+    // allowing the browser/OS to use its native synthesizer for utterance.lang without forcing an English voice
+    return null;
+  }
 
   // Sort descending by naturalness score
-  const sorted = [...targetList].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
+  const sorted = [...matchingVoices].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
 
   return sorted[0] || null;
 }
@@ -2143,11 +2158,18 @@ function speakWithBrowserSpeechSynthesis(
       const voices = getAvailableVoices();
       if (options?.voiceURI) {
         const explicit = voices.find((v) => v.voiceURI === options.voiceURI);
-        if (explicit) utterance.voice = explicit;
+        if (explicit) {
+          const vLang = explicit.lang.toLowerCase();
+          const tPrefix = (options?.lang || 'en').toLowerCase();
+          if (tPrefix === 'en' || vLang.startsWith(tPrefix) || (tPrefix === 'fil' && (vLang.startsWith('fil') || vLang.startsWith('tl')))) {
+            utterance.voice = explicit;
+          }
+        }
       }
 
       if (!utterance.voice && voices.length > 0) {
-        const bestVoice = getBestSystemVoice(targetLang.substring(0, 2));
+        const targetPrefix = options?.lang === 'fil' ? 'fil' : targetLang.substring(0, 2);
+        const bestVoice = getBestSystemVoice(targetPrefix);
         if (bestVoice) {
           utterance.voice = bestVoice;
         }
