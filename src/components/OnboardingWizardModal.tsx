@@ -98,7 +98,20 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   
   // Features state
   const [features, setFeatures] = useState<EnabledFeatures>(() => {
-    return contextFeatures || getDefaultFeaturesForAge(selectedPersona === 'caregiver' ? 'kid' : selectedPersona);
+    const base = contextFeatures || getDefaultFeaturesForAge(selectedPersona === 'caregiver' ? 'kid' : selectedPersona);
+    return {
+      ...base,
+      aac: base.aacCommunication !== false && base.aac !== false,
+      aacCommunication: base.aacCommunication !== false && base.aac !== false,
+      routines: base.firstThenSchedules !== false && base.routines !== false,
+      firstThenSchedules: base.firstThenSchedules !== false && base.routines !== false,
+      caregiverMessaging: base.emergencyAlertSOS !== false && base.caregiverMessaging !== false,
+      emergencyAlertSOS: base.emergencyAlertSOS !== false && base.caregiverMessaging !== false,
+      sensoryTools: base.sensoryBreathingPacer !== false && base.sensoryTools !== false,
+      sensoryBreathingPacer: base.sensoryBreathingPacer !== false && base.sensoryTools !== false,
+      emotions: base.dailyMoodRecollection !== false && base.emotions !== false,
+      dailyMoodRecollection: base.dailyMoodRecollection !== false && base.emotions !== false,
+    };
   });
 
   const isCaregiver = selectedPersona === 'caregiver';
@@ -108,7 +121,20 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     setSelectedPersona(persona);
     playChime('tap');
     const ageForDefaults: UserAgeGroup = persona === 'caregiver' ? 'kid' : persona;
-    setFeatures(getDefaultFeaturesForAge(ageForDefaults));
+    const base = getDefaultFeaturesForAge(ageForDefaults);
+    setFeatures({
+      ...base,
+      aac: base.aacCommunication !== false && base.aac !== false,
+      aacCommunication: base.aacCommunication !== false && base.aac !== false,
+      routines: base.firstThenSchedules !== false && base.routines !== false,
+      firstThenSchedules: base.firstThenSchedules !== false && base.routines !== false,
+      caregiverMessaging: base.emergencyAlertSOS !== false && base.caregiverMessaging !== false,
+      emergencyAlertSOS: base.emergencyAlertSOS !== false && base.caregiverMessaging !== false,
+      sensoryTools: base.sensoryBreathingPacer !== false && base.sensoryTools !== false,
+      sensoryBreathingPacer: base.sensoryBreathingPacer !== false && base.sensoryTools !== false,
+      emotions: base.dailyMoodRecollection !== false && base.emotions !== false,
+      dailyMoodRecollection: base.dailyMoodRecollection !== false && base.emotions !== false,
+    });
     if (persona === 'adult' && (name === 'Leo' || !name)) {
       setName('Alex');
     } else if (persona === 'caregiver' && (name === 'Leo' || !name)) {
@@ -121,10 +147,34 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
   const handleToggleFeature = (featureKey: keyof EnabledFeatures) => {
     playChime('tap');
-    setFeatures((prev) => ({
-      ...prev,
-      [featureKey]: !prev[featureKey],
-    }));
+    setFeatures((prev) => {
+      const nextVal = !prev[featureKey];
+      const updated = {
+        ...prev,
+        [featureKey]: nextVal,
+      };
+      if (featureKey === 'aac' || featureKey === 'aacCommunication') {
+        updated.aac = nextVal;
+        updated.aacCommunication = nextVal;
+      }
+      if (featureKey === 'routines' || featureKey === 'firstThenSchedules') {
+        updated.routines = nextVal;
+        updated.firstThenSchedules = nextVal;
+      }
+      if (featureKey === 'caregiverMessaging' || featureKey === 'emergencyAlertSOS') {
+        updated.caregiverMessaging = nextVal;
+        updated.emergencyAlertSOS = nextVal;
+      }
+      if (featureKey === 'sensoryTools' || featureKey === 'sensoryBreathingPacer') {
+        updated.sensoryTools = nextVal;
+        updated.sensoryBreathingPacer = nextVal;
+      }
+      if (featureKey === 'emotions' || featureKey === 'dailyMoodRecollection') {
+        updated.emotions = nextVal;
+        updated.dailyMoodRecollection = nextVal;
+      }
+      return updated;
+    });
   };
 
   const handleFinishOnboarding = async (actionAfter?: 'morning_routine' | 'home' | 'caregiver_setup') => {

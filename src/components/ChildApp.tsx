@@ -11,13 +11,14 @@ import { ChildHeader } from './ChildHeader';
 import { ChildNavBar } from './ChildNavBar';
 import { ChildHomeView } from './ChildHomeView';
 import { AACView } from './AACView';
+import { CommunicateView } from './CommunicateView';
+import { MeView } from './MeView';
+import { MyRoutineView } from './MyRoutineView';
+import { ToolsView } from './ToolsView';
 import { MyDayView } from './MyDayView';
 import { AdventuresView } from './AdventuresView';
 import { SkillsView } from './SkillsView';
 import { FeelingsView } from './FeelingsView';
-import { MyWorldView } from './MyWorldView';
-import { MoreView } from './MoreView';
-import { Rewards } from './Rewards';
 import { QuickPhrasesDrawer } from './QuickPhrasesDrawer';
 import { PinModal } from './PinModal';
 import { CaregiverMessageToast } from './CaregiverMessageToast';
@@ -174,13 +175,14 @@ const ChildAppContent: React.FC = () => {
       >
         {childView === 'home' && <ChildHomeView />}
         {childView === 'aac' && <AACView />}
+        {childView === 'communicate' && <CommunicateView />}
+        {childView === 'me' && <MeView />}
+        {childView === 'my-routine' && <MyRoutineView />}
+        {childView === 'tools' && <ToolsView />}
         {childView === 'my-day' && <MyDayView />}
         {childView === 'adventures' && <AdventuresView />}
         {childView === 'skills' && <SkillsView />}
         {childView === 'feelings' && <FeelingsView />}
-        {childView === 'my-world' && <MyWorldView />}
-        {childView === 'rewards' && <Rewards />}
-        {childView === 'more' && <MoreView />}
       </main>
 
       {/* Floating SOS / Alert Caregiver Button */}

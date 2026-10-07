@@ -58,21 +58,6 @@ export const ChildHeader: React.FC = () => {
           >
             {childProfile.name}
           </h1>
-
-          {enabledFeatures?.starsAndRewards !== false && (
-            <button
-              type="button"
-              onClick={() => {
-                setChildView('rewards');
-                playChime('star');
-              }}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-[11px] font-black text-amber-800 border border-amber-200/80 cursor-pointer transition-colors shrink-0"
-              title="View earned rewards"
-            >
-              <Sparkles className="w-2.5 h-2.5 text-amber-500 fill-amber-400" />
-              <span>{worldState.stars}</span>
-            </button>
-          )}
         </div>
       </div>
 

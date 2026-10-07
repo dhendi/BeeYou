@@ -119,6 +119,10 @@ import { resolveAacImageUrl } from '../services/symbolService';
 type ChildViewType = 
   | 'home'
   | 'aac'
+  | 'communicate'
+  | 'me'
+  | 'my-routine'
+  | 'tools'
   | 'my-day'
   | 'adventures'
   | 'skills'
@@ -1074,19 +1078,38 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     } catch (e) {}
   };
 
+  const normalizeFeatures = (updates: Partial<EnabledFeatures>, base?: EnabledFeatures): EnabledFeatures => {
+    const next = { ...(base || enabledFeatures), ...updates };
+    if (updates.aac !== undefined) next.aacCommunication = updates.aac;
+    if (updates.aacCommunication !== undefined) next.aac = updates.aacCommunication;
+    if (updates.routines !== undefined) next.firstThenSchedules = updates.routines;
+    if (updates.firstThenSchedules !== undefined) next.routines = updates.firstThenSchedules;
+    if (updates.caregiverMessaging !== undefined) next.emergencyAlertSOS = updates.caregiverMessaging;
+    if (updates.emergencyAlertSOS !== undefined) next.caregiverMessaging = updates.emergencyAlertSOS;
+    if (updates.sensoryTools !== undefined) next.sensoryBreathingPacer = updates.sensoryTools;
+    if (updates.sensoryBreathingPacer !== undefined) next.sensoryTools = updates.sensoryBreathingPacer;
+    if (updates.emotions !== undefined) next.dailyMoodRecollection = updates.emotions;
+    if (updates.dailyMoodRecollection !== undefined) next.emotions = updates.dailyMoodRecollection;
+    return next;
+  };
+
   const updateEnabledFeatures = (updates: Partial<EnabledFeatures>) => {
     setEnabledFeatures((prev) => {
-      const next = { ...prev, ...updates };
+      const next = normalizeFeatures(updates, prev);
       try {
         localStorage.setItem('beeyou_enabled_features', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
+    setSettings((prev) => ({
+      ...prev,
+      features: normalizeFeatures(updates, prev.features),
+    }));
   };
 
   const toggleFeature = (key: keyof EnabledFeatures) => {
     setEnabledFeatures((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
+      const next = normalizeFeatures({ [key]: !prev[key] }, prev);
       try {
         localStorage.setItem('beeyou_enabled_features', JSON.stringify(next));
       } catch (e) {}
