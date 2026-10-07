@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { Routine, RoutineTemplate } from '../../types';
 import { RoutineTemplatesLibrary } from '../RoutineTemplatesLibrary';
@@ -172,13 +173,13 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
       <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <span>Visual Schedules & Routines</span>
+            <span>{t("Visual Schedules & Routines")}</span>
             <span className="text-xs font-black text-sky-700 bg-sky-100 px-2.5 py-0.5 rounded-full">
-              First / Then Motor Planning
+              {t("First / Then Motor Planning")}
             </span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Build predictable morning, school, bedtime, or appointment routines with visual sequencing.
+            {t("Build predictable morning, school, bedtime, or appointment routines with visual sequencing.")}
           </p>
         </div>
 
@@ -191,10 +192,10 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                 onStartTour();
               }}
               className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
-              title="Tour visual routines features"
+              title={t("Tour visual routines features")}
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>How This Works (Tour)</span>
+              <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
 
@@ -212,7 +213,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               }`}
             >
               <BookOpen className="w-3.5 h-3.5 text-sky-600" />
-              <span>Template Library</span>
+              <span>{t("Template Library")}</span>
             </button>
             <button
               onClick={() => {
@@ -248,7 +249,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               ) : (
                 <Plus className="w-3.5 h-3.5 text-slate-600" />
               )}
-              <span>Create Custom</span>
+              <span>{t("Create Custom")}</span>
             </button>
           </div>
         </div>
@@ -263,11 +264,11 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-amber-950 uppercase tracking-wide">Basic Plan Limit (1/1 Routine)</span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
+                <span className="text-xs font-black text-amber-950 uppercase tracking-wide">{t("Basic Plan Limit (1/1 Routine)")}</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">{t("Free Tier")}</span>
               </div>
               <p className="text-xs text-amber-900 font-medium mt-0.5">
-                The Basic plan includes 1 active visual routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.
+                {t("The Basic plan includes 1 active visual routine (\"Routines 1 is good enough\"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.")}
               </p>
             </div>
           </div>
@@ -276,7 +277,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
           >
             <Crown className="w-3.5 h-3.5 text-amber-200" />
-            <span>Start 30-Day Free Trial</span>
+            <span>{t("Start 30-Day Free Trial")}</span>
           </button>
         </div>
       )}
@@ -296,7 +297,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               <span className="text-xl">📋</span>
               <div>
                 <span className="text-xs font-black text-slate-800 block">
-                  Looking for active child routines?
+                  {t("Looking for active child routines?")}
                 </span>
                 <span className="text-[11px] text-slate-500">
                   {routines.length} routines currently in {childProfile.name}'s daily schedule.
@@ -307,7 +308,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               onClick={() => setRoutinesSubView('active')}
               className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 cursor-pointer"
             >
-              View Active Routines →
+              {t("View Active Routines →")}
             </button>
           </div>
         </div>
@@ -325,7 +326,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               className="text-xs font-black text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Browse Template Library</span>
+              <span>{t("Browse Template Library")}</span>
             </button>
           </div>
 
@@ -372,16 +373,16 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                   <button
                     onClick={() => handleEditActiveRoutine(r)}
                     className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-800 border border-slate-200 hover:border-sky-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
-                    title="Customize steps, times, and rewards"
+                    title={t("Customize steps, times, and rewards")}
                   >
                     <Edit3 className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Customize</span>
+                    <span>{t("Customize")}</span>
                   </button>
 
                   <button
                     onClick={() => handleDuplicateRoutine(r)}
                     className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition cursor-pointer"
-                    title="Duplicate routine"
+                    title={t("Duplicate routine")}
                   >
                     <Copy className="w-3.5 h-3.5" />
                   </button>
@@ -394,7 +395,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                       }
                     }}
                     className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                    title="Delete routine"
+                    title={t("Delete routine")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -405,16 +406,16 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
             {routines.length === 0 && (
               <div className="p-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 space-y-3">
                 <span className="text-3xl">📅</span>
-                <h4 className="font-black text-slate-800 text-sm">No active routines yet</h4>
+                <h4 className="font-black text-slate-800 text-sm">{t("No active routines yet")}</h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Import from our pre-built library of Morning, School Day, and Bedtime templates to get started quickly.
+                  {t("Import from our pre-built library of Morning, School Day, and Bedtime templates to get started quickly.")}
                 </p>
                 <button
                   onClick={() => setRoutinesSubView('library')}
                   className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-black cursor-pointer shadow-xs inline-flex items-center gap-1.5"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  <span>Browse Template Library</span>
+                  <span>{t("Browse Template Library")}</span>
                 </button>
               </div>
             )}
@@ -428,43 +429,43 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
               <Plus className="w-4 h-4 text-sky-600" />
-              <span>Create New Routine with First / Then</span>
+              <span>{t("Create New Routine with First / Then")}</span>
             </h3>
             <button
               type="button"
               onClick={() => setRoutinesSubView('library')}
               className="text-xs text-sky-600 font-bold hover:underline cursor-pointer"
             >
-              Or import a pre-built template →
+              {t("Or import a pre-built template →")}
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Routine Title:</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">{t("Routine Title:")}</label>
               <input
                 type="text"
                 value={newRoutineTitle}
                 onChange={(e) => setNewRoutineTitle(e.target.value)}
-                placeholder="e.g. Weekend Park Routine"
+                placeholder={t("e.g. Weekend Park Routine")}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
                 required
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Time:</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">{t("Time:")}</label>
               <input
                 type="text"
                 value={newRoutineTime}
                 onChange={(e) => setNewRoutineTime(e.target.value)}
-                placeholder="e.g. 9:00 AM"
+                placeholder={t("e.g. 9:00 AM")}
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Icon Emoji:</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">{t("Icon Emoji:")}</label>
               <input
                 type="text"
                 value={newRoutineEmoji}
@@ -476,22 +477,22 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-2xl border border-slate-200">
             <div>
-              <label className="text-xs font-black text-sky-800 block mb-1">FIRST task:</label>
+              <label className="text-xs font-black text-sky-800 block mb-1">{t("FIRST task:")}</label>
               <input
                 type="text"
                 value={newFirstTask}
                 onChange={(e) => setNewFirstTask(e.target.value)}
-                placeholder="e.g. Brush teeth"
+                placeholder={t("e.g. Brush teeth")}
                 className="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold text-xs"
               />
             </div>
             <div>
-              <label className="text-xs font-black text-purple-800 block mb-1">THEN reward/next task:</label>
+              <label className="text-xs font-black text-purple-800 block mb-1">{t("THEN reward/next task:")}</label>
               <input
                 type="text"
                 value={newThenTask}
                 onChange={(e) => setNewThenTask(e.target.value)}
-                placeholder="e.g. Tablet time (15m)"
+                placeholder={t("e.g. Tablet time (15m)")}
                 className="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold text-xs"
               />
             </div>
@@ -502,14 +503,14 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               type="submit"
               className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs cursor-pointer shadow-xs"
             >
-              Create Routine
+              {t("Create Routine")}
             </button>
             <button
               type="button"
               onClick={() => setRoutinesSubView('active')}
               className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
             >
-              View Active Routines
+              {t("View Active Routines")}
             </button>
           </div>
         </form>

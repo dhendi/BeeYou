@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import {
   rateVoiceNaturalness,
@@ -38,10 +39,10 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-indigo-600" />
-            <span>Voice Settings & Testing Tool</span>
+            <span>{t("Voice Settings & Testing Tool")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Test and compare all available system voices on this device with real AAC phrases to choose the most natural, fluid voice for your child.
+            {t("Test and compare all available system voices on this device with real AAC phrases to choose the most natural, fluid voice for your child.")}
           </p>
         </div>
 
@@ -52,7 +53,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
               onClick={onStartTour}
               className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>💡 How This Works</span>
+              <span>{t("💡 How This Works")}</span>
             </button>
           )}
           <button
@@ -70,7 +71,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
             className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Auto-Pick Most Natural Voice</span>
+            <span>{t("Auto-Pick Most Natural Voice")}</span>
           </button>
         </div>
       </div>
@@ -79,10 +80,10 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
       <div data-tour="voice-active-card" className="bg-gradient-to-r from-indigo-50 via-sky-50 to-purple-50 border-2 border-indigo-200 rounded-3xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-indigo-200">
-            Active AAC Vocalizer
+            {t("Active AAC Vocalizer")}
           </span>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
-            Offline Ready
+            {t("Offline Ready")}
           </span>
         </div>
 
@@ -91,11 +92,11 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
             <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
               <span>{settings.selectedVoiceURI ? (offlineVoices.find(v => v.voiceURI === settings.selectedVoiceURI)?.name || settings.selectedVoiceURI) : (settings.voicePersona ? `Neural Voice (${settings.voicePersona})` : 'Auto-Selected Best Natural Voice')}</span>
               <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
-                Active
+                {t("Active")}
               </span>
             </h3>
             <p className="text-xs text-slate-600 mt-1">
-              Pacing: <strong>{settings.voiceRate.toFixed(2)}x</strong> • Natural Pitch: <strong>{settings.voicePitch.toFixed(2)}</strong> • Language: <strong>{settings.language.toUpperCase()}</strong>
+              {t("Pacing:")} <strong>{settings.voiceRate.toFixed(2)}x</strong> {t("• Natural Pitch:")} <strong>{settings.voicePitch.toFixed(2)}</strong> {t("• Language:")} <strong>{settings.language.toUpperCase()}</strong>
             </p>
           </div>
 
@@ -108,14 +109,14 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
               className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" />
-              <span>Test Active Voice</span>
+              <span>{t("Test Active Voice")}</span>
             </button>
             <button
               type="button"
               onClick={() => haltSpeaking()}
               className="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
             >
-              Stop
+              {t("Stop")}
             </button>
           </div>
         </div>
@@ -126,27 +127,27 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Mic className="w-4 h-4 text-sky-600" />
-            <span>Interactive Phrase Testing Sandbox</span>
+            <span>{t("Interactive Phrase Testing Sandbox")}</span>
           </h3>
-          <span className="text-[11px] text-slate-400 font-medium">Type any word or pick a preset</span>
+          <span className="text-[11px] text-slate-400 font-medium">{t("Type any word or pick a preset")}</span>
         </div>
 
         <div>
           <label className="text-xs font-bold text-slate-600 block mb-1">
-            Phrase to Test:
+            {t("Phrase to Test:")}
           </label>
           <input
             type="text"
             value={voiceTestText}
             onChange={(e) => setVoiceTestText(e.target.value)}
-            placeholder="Type words to test (e.g. I want pizza please)"
+            placeholder={t("Type words to test (e.g. I want pizza please)")}
             className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         {/* Quick Presets */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-bold text-slate-500 mr-1">Quick Presets:</span>
+          <span className="text-[11px] font-bold text-slate-500 mr-1">{t("Quick Presets:")}</span>
           {[
             'I want pizza please.',
             'I need a break.',
@@ -174,7 +175,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
               <span>Pacing / Speed: {settings.voiceRate.toFixed(2)}x</span>
-              <span className="text-[10px] text-slate-400 font-normal">0.96x is conversational</span>
+              <span className="text-[10px] text-slate-400 font-normal">{t("0.96x is conversational")}</span>
             </div>
             <input
               type="range"
@@ -190,7 +191,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
               <span>Natural Pitch: {settings.voicePitch.toFixed(2)}</span>
-              <span className="text-[10px] text-slate-400 font-normal">1.0 avoids metallic pitch</span>
+              <span className="text-[10px] text-slate-400 font-normal">{t("1.0 avoids metallic pitch")}</span>
             </div>
             <input
               type="range"
@@ -213,7 +214,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
               All Available System Voices ({offlineVoices.length} Found)
             </h3>
             <p className="text-xs text-slate-500">
-              Click the <strong>"Test"</strong> button on any voice to audition how it sounds with your test phrase.
+              {t("Click the")} <strong>{t("\"Test\"")}</strong> {t("button on any voice to audition how it sounds with your test phrase.")}
             </p>
           </div>
 
@@ -223,7 +224,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
               type="text"
               value={voiceSearchQuery}
               onChange={(e) => setVoiceSearchQuery(e.target.value)}
-              placeholder="Search voice name..."
+              placeholder={t("Search voice name...")}
               className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold w-40"
             />
 
@@ -236,7 +237,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                   : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               }`}
             >
-              🌟 Natural / Fluid Only
+              {t("🌟 Natural / Fluid Only")}
             </button>
           </div>
         </div>
@@ -245,7 +246,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
         <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
           {offlineVoices.length === 0 ? (
             <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
-              Querying system voices from device... (If none appear, click Test to initialize browser speech)
+              {t("Querying system voices from device... (If none appear, click Test to initialize browser speech)")}
             </div>
           ) : (
             offlineVoices
@@ -280,11 +281,11 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                         </span>
                         {isFluid ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
-                            🌟 Fluid Human Voice
+                            {t("🌟 Fluid Human Voice")}
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
-                            Standard Voice
+                            {t("Standard Voice")}
                           </span>
                         )}
                         {voice.localService && (
@@ -294,7 +295,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                         )}
                       </div>
                       <span className="text-xs text-slate-500 font-medium block mt-0.5">
-                        Language: <strong>{voice.lang}</strong> • Naturalness Rating: <strong>{score}</strong>
+                        {t("Language:")} <strong>{voice.lang}</strong> {t("• Naturalness Rating:")} <strong>{score}</strong>
                       </span>
                     </div>
 
@@ -341,10 +342,10 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                         {isSelected ? (
                           <>
                             <Check className="w-4 h-4" />
-                            <span>Selected</span>
+                            <span>{t("Selected")}</span>
                           </>
                         ) : (
-                          <span>Select for AAC</span>
+                          <span>{t("Select for AAC")}</span>
                         )}
                       </button>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { UserAgeGroup, DEFAULT_KID_FEATURES, DEFAULT_TEEN_FEATURES, DEFAULT_ADULT_FEATURES } from '../../types';
 import { playChime } from '../../utils/audio';
@@ -58,9 +59,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div>
-          <h2 className="text-xl font-black text-slate-900">Settings & Security</h2>
+          <h2 className="text-xl font-black text-slate-900">{t("Settings & Security")}</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Protect parent controls and configure device preferences.
+            {t("Protect parent controls and configure device preferences.")}
           </p>
         </div>
         {onStartTour && (
@@ -69,7 +70,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             onClick={onStartTour}
             className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
           >
-            <span>💡 How This Works</span>
+            <span>{t("💡 How This Works")}</span>
           </button>
         )}
       </div>
@@ -78,9 +79,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
       <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-black text-slate-800">Age Experience Mode</h3>
+            <h3 className="text-base font-black text-slate-800">{t("Age Experience Mode")}</h3>
             <p className="text-xs text-slate-500 font-medium">
-              Controls terminology, visual tone, and recommended feature layouts.
+              {t("Controls terminology, visual tone, and recommended feature layouts.")}
             </p>
           </div>
           <button
@@ -91,7 +92,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             }}
             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <span>✨ Relaunch Onboarding Setup Wizard</span>
+            <span>{t("✨ Relaunch Onboarding Setup Wizard")}</span>
           </button>
         </div>
 
@@ -128,13 +129,13 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
       <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
           <div>
-            <h3 className="text-base font-black text-slate-800">Modular Feature Controls</h3>
+            <h3 className="text-base font-black text-slate-800">{t("Modular Feature Controls")}</h3>
             <p className="text-xs text-slate-500 font-medium">
-              Turn any feature on or off. Adults can use stickers/mascots, and kids can have a minimal layout.
+              {t("Turn any feature on or off. Adults can use stickers/mascots, and kids can have a minimal layout.")}
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-400">Presets:</span>
+            <span className="text-[11px] font-bold text-slate-400">{t("Presets:")}</span>
             <button
               type="button"
               onClick={() => {
@@ -143,7 +144,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs cursor-pointer"
             >
-              Kid
+              {t("Kid")}
             </button>
             <button
               type="button"
@@ -153,7 +154,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className="px-2.5 py-1 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-xs cursor-pointer"
             >
-              Teen
+              {t("Teen")}
             </button>
             <button
               type="button"
@@ -163,7 +164,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs cursor-pointer"
             >
-              Adult
+              {t("Adult")}
             </button>
           </div>
         </div>
@@ -222,21 +223,21 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
               <Palette className="w-4 h-4 text-indigo-600" />
-              <span>AAC Tile Colors & Accessibility</span>
+              <span>{t("AAC Tile Colors & Accessibility")}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Configure communication tile colors and fine-motor touch options.
+              {t("Configure communication tile colors and fine-motor touch options.")}
             </p>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 self-start sm:self-auto">
-            Clinical Standard Available
+            {t("Clinical Standard Available")}
           </span>
         </div>
 
         {/* AAC Button Background Modes */}
         <div className="space-y-2">
           <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
-            Tile Background Color Scheme:
+            {t("Tile Background Color Scheme:")}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Option 1: Fitzgerald Key */}
@@ -257,24 +258,24 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   <span className="text-xl">🌈</span>
                   {(settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      Active (Default)
+                      {t("Active (Default)")}
                     </span>
                   )}
                 </div>
                 <h4 className="text-xs font-black text-slate-900 mt-2">
-                  Fitzgerald Key (Clinical)
+                  {t("Fitzgerald Key (Clinical)")}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
-                  Color-codes tiles by speech grammar (Yellow = People, Green = Actions, Orange = Objects, Blue = Descriptors). Recommended by SLPs for visual scanning & motor planning.
+                  {t("Color-codes tiles by speech grammar (Yellow = People, Green = Actions, Orange = Objects, Blue = Descriptors). Recommended by SLPs for visual scanning & motor planning.")}
                 </p>
               </div>
 
               <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-slate-100">
-                <span className="w-3.5 h-3.5 rounded bg-amber-200 border border-amber-300" title="Yellow" />
-                <span className="w-3.5 h-3.5 rounded bg-emerald-200 border border-emerald-300" title="Green" />
-                <span className="w-3.5 h-3.5 rounded bg-orange-200 border border-orange-300" title="Orange" />
-                <span className="w-3.5 h-3.5 rounded bg-sky-200 border border-sky-300" title="Blue" />
-                <span className="w-3.5 h-3.5 rounded bg-purple-200 border border-purple-300" title="Purple" />
+                <span className="w-3.5 h-3.5 rounded bg-amber-200 border border-amber-300" title={t("Yellow")} />
+                <span className="w-3.5 h-3.5 rounded bg-emerald-200 border border-emerald-300" title={t("Green")} />
+                <span className="w-3.5 h-3.5 rounded bg-orange-200 border border-orange-300" title={t("Orange")} />
+                <span className="w-3.5 h-3.5 rounded bg-sky-200 border border-sky-300" title={t("Blue")} />
+                <span className="w-3.5 h-3.5 rounded bg-purple-200 border border-purple-300" title={t("Purple")} />
               </div>
             </button>
 
@@ -296,15 +297,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   <span className="text-xl">🎭</span>
                   {settings.aacButtonColorMode === 'theme' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
-                      Active
+                      {t("Active")}
                     </span>
                   )}
                 </div>
                 <h4 className="text-xs font-black text-slate-900 mt-2">
-                  Theme-Tinted Palette
+                  {t("Theme-Tinted Palette")}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
-                  Adapts button backgrounds to match the equipped theme colors (e.g. emerald greens for turtles, sunny ambers for Leo). Great for older teens or adults seeking a unified look.
+                  {t("Adapts button backgrounds to match the equipped theme colors (e.g. emerald greens for turtles, sunny ambers for Leo). Great for older teens or adults seeking a unified look.")}
                 </p>
               </div>
 
@@ -312,7 +313,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
                 <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
                 <span className="w-3.5 h-3.5 rounded bg-slate-200 border border-slate-300" />
-                <span className="text-[10px] font-bold text-slate-400 ml-1">Theme matching</span>
+                <span className="text-[10px] font-bold text-slate-400 ml-1">{t("Theme matching")}</span>
               </div>
             </button>
 
@@ -334,15 +335,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   <span className="text-xl">⚪</span>
                   {settings.aacButtonColorMode === 'high_contrast_white' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
-                      Active
+                      {t("Active")}
                     </span>
                   )}
                 </div>
                 <h4 className="text-xs font-black text-slate-900 mt-2">
-                  High-Contrast White
+                  {t("High-Contrast White")}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
-                  Pure white buttons with high-contrast dark borders. Eliminates background colors for communicators with visual sensitivities or CVI.
+                  {t("Pure white buttons with high-contrast dark borders. Eliminates background colors for communicators with visual sensitivities or CVI.")}
                 </p>
               </div>
 
@@ -350,7 +351,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
                 <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
                 <span className="w-3.5 h-3.5 rounded bg-white border-2 border-slate-900" />
-                <span className="text-[10px] font-bold text-slate-600 ml-1">High contrast</span>
+                <span className="text-[10px] font-bold text-slate-600 ml-1">{t("High contrast")}</span>
               </div>
             </button>
           </div>
@@ -360,10 +361,10 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="space-y-2 pt-2 border-t border-slate-200">
           <div>
             <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
-              AAC Button Size & Grid Density:
+              {t("AAC Button Size & Grid Density:")}
             </label>
             <p className="text-[11px] text-slate-500 font-medium">
-              Make buttons bigger for easier tapping and fine-motor needs, or smaller to fit more words on screen.
+              {t("Make buttons bigger for easier tapping and fine-motor needs, or smaller to fit more words on screen.")}
             </p>
           </div>
 
@@ -396,7 +397,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                     <span className="text-xl">{preset.icon}</span>
                     {isSelected && (
                       <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700">
-                        Active
+                        {t("Active")}
                       </span>
                     )}
                   </div>
@@ -416,8 +417,8 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             <div className="flex items-center gap-2.5">
               <span className="text-lg">🔲</span>
               <div>
-                <h4 className="text-xs font-black text-slate-800">Extra-Large Label Text</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Enlarge text under AAC pictograms.</p>
+                <h4 className="text-xs font-black text-slate-800">{t("Extra-Large Label Text")}</h4>
+                <p className="text-[11px] text-slate-500 font-medium">{t("Enlarge text under AAC pictograms.")}</p>
               </div>
             </div>
             <input
@@ -432,8 +433,8 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             <div className="flex items-center gap-2.5">
               <span className="text-lg">⏱️</span>
               <div>
-                <h4 className="text-xs font-black text-slate-800">Touch Hold Delay</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Accidental touch / tremor protection.</p>
+                <h4 className="text-xs font-black text-slate-800">{t("Touch Hold Delay")}</h4>
+                <p className="text-[11px] text-slate-500 font-medium">{t("Accidental touch / tremor protection.")}</p>
               </div>
             </div>
             <select
@@ -441,9 +442,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               onChange={(e) => updateSettings({ touchHoldDelayMs: parseInt(e.target.value) })}
               className="px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold text-xs bg-slate-50 text-slate-800"
             >
-              <option value={0}>Instant (0 ms)</option>
-              <option value={200}>Light (200 ms)</option>
-              <option value={400}>Medium (400 ms)</option>
+              <option value={0}>{t("Instant (0 ms)")}</option>
+              <option value={200}>{t("Light (200 ms)")}</option>
+              <option value={400}>{t("Medium (400 ms)")}</option>
             </select>
           </div>
         </div>
@@ -451,7 +452,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
       <div data-tour="settings-pin-card" className="max-w-xs">
         <label className="text-xs font-black text-slate-700 block mb-1">
-          Parent Lock PIN:
+          {t("Parent Lock PIN:")}
         </label>
         <input
           type="text"
@@ -460,7 +461,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           onChange={(e) => updateSettings({ pin: e.target.value })}
           className="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-black text-center text-lg tracking-widest"
         />
-        <span className="text-[11px] text-slate-400 mt-1 block">Default: 1234</span>
+        <span className="text-[11px] text-slate-400 mt-1 block">{t("Default: 1234")}</span>
       </div>
 
       <div data-tour="settings-notifications-card" className="space-y-3 pt-2">
@@ -472,7 +473,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
           />
           <span className="text-xs sm:text-sm font-bold text-slate-700">
-            Play cheerful auditory chimes on taps & completions
+            {t("Play cheerful auditory chimes on taps & completions")}
           </span>
         </label>
 
@@ -484,7 +485,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
           />
           <span className="text-xs sm:text-sm font-bold text-slate-700">
-            Speak word immediately upon tap (Immediate feedback)
+            {t("Speak word immediately upon tap (Immediate feedback)")}
           </span>
         </label>
 
@@ -492,14 +493,14 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 mt-2">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Alert & Help Customizer
+              {t("Alert & Help Customizer")}
             </h4>
             <button
               type="button"
               onClick={() => setShowEditAlertsModal(true)}
               className="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <span>⚙️ Edit Alert Buttons & Replies</span>
+              <span>{t("⚙️ Edit Alert Buttons & Replies")}</span>
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -510,7 +511,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 onChange={(e) => updateSettings({ visualAlerts: e.target.checked })}
                 className="w-4 h-4 rounded text-indigo-600"
               />
-              <span>Visual on-screen banners</span>
+              <span>{t("Visual on-screen banners")}</span>
             </label>
 
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -520,7 +521,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 onChange={(e) => updateSettings({ soundAlerts: e.target.checked })}
                 className="w-4 h-4 rounded text-indigo-600"
               />
-              <span>Sound chimes on alert</span>
+              <span>{t("Sound chimes on alert")}</span>
             </label>
 
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -530,7 +531,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 onChange={(e) => updateSettings({ vibrationAlerts: e.target.checked })}
                 className="w-4 h-4 rounded text-indigo-600"
               />
-              <span>Vibration haptics</span>
+              <span>{t("Vibration haptics")}</span>
             </label>
 
             <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -540,7 +541,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 onChange={(e) => updateSettings({ spokenAlerts: e.target.checked })}
                 className="w-4 h-4 rounded text-indigo-600"
               />
-              <span>Read responses aloud (TTS)</span>
+              <span>{t("Read responses aloud (TTS)")}</span>
             </label>
           </div>
         </div>
@@ -549,10 +550,10 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200 flex items-center justify-between gap-3">
           <div>
             <h4 className="text-xs font-black text-teal-950 uppercase tracking-wider">
-              Calm Down Tools & Breathing Pacer
+              {t("Calm Down Tools & Breathing Pacer")}
             </h4>
             <p className="text-[11px] text-teal-700 font-medium mt-0.5">
-              Customize second-by-second breathing timings (Box 4-4-4-4, 4-7-8) and manage personal coping strategies.
+              {t("Customize second-by-second breathing timings (Box 4-4-4-4, 4-7-8) and manage personal coping strategies.")}
             </p>
           </div>
           <button
@@ -560,7 +561,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             onClick={() => setShowEditCalmModal(true)}
             className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
           >
-            <span>🫁 Edit Calm Tools</span>
+            <span>{t("🫁 Edit Calm Tools")}</span>
           </button>
         </div>
       </div>
@@ -574,13 +575,13 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             </div>
             <div>
               <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                Profile Backup & Data Portability
+                {t("Profile Backup & Data Portability")}
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Offline Safe
+                  {t("Offline Safe")}
                 </span>
               </h4>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Export all personalized AAC symbols, voice setups, routines, skills, adventures, medication logs, and cycle data into a single offline backup file. Transfer or restore anytime across devices.
+                {t("Export all personalized AAC symbols, voice setups, routines, skills, adventures, medication logs, and cycle data into a single offline backup file. Transfer or restore anytime across devices.")}
               </p>
             </div>
           </div>
@@ -595,7 +596,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm inline-flex items-center gap-2 transition-all cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              Export Backup (JSON)
+              {t("Export Backup (JSON)")}
             </button>
 
             <button
@@ -604,7 +605,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-900 border border-indigo-200 font-bold text-xs shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer"
             >
               <Upload className="w-4 h-4 text-indigo-600" />
-              Restore from Backup File
+              {t("Restore from Backup File")}
             </button>
             <input
               ref={fileInputRef}
@@ -627,7 +628,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           }}
           className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-300 cursor-pointer"
         >
-          Reset App State to Initial Sample Data
+          {t("Reset App State to Initial Sample Data")}
         </button>
       </div>
     </div>

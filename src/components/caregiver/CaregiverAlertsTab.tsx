@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { ShieldAlert, ArrowLeft, Sparkles } from 'lucide-react';
 import { playChime } from '../../utils/audio';
+import { t } from '../../services/translator';
 import { 
   getPairingCode, 
   acknowledgeCaregiverAlert,
@@ -36,27 +37,27 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
     resolveEmergencyAlert(alertId, getPairingCode());
     acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here');
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
-    showNotification('Alert marked as resolved.');
+    showNotification(t('Alert marked as resolved.'));
     playChime('tap');
   };
 
   const handleAcknowledgeAlert = (alertId: string, replyText: string, replyId?: any) => {
     acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
-    showNotification(`Sent reassurance reply: "${replyText}"`);
+    showNotification(`${t('Sent reassurance reply:')} "${replyText}"`);
     playChime('star');
   };
 
   const handleTriggerTestAlert = () => {
     sendTestCaregiverAlert(getPairingCode(), childProfile.name || 'Child');
-    showNotification('Test alert dispatched to this hub!');
+    showNotification(t('Test alert dispatched to this hub!'));
     playChime('tap');
   };
 
   const handleClearAlertHistory = () => {
     clearAlertHistory();
     setAlertHistoryList([]);
-    showNotification('Alert history cleared.');
+    showNotification(t('Alert history cleared.'));
     playChime('clear');
   };
 
@@ -68,18 +69,18 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-6 h-6 text-rose-600" />
-              <span>Live Alerts &amp; SOS Inbox</span>
+              <span>{t('Live Alerts & SOS Inbox')}</span>
             </h2>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
               activeAlerts.length > 0 
                 ? 'bg-rose-500 text-white animate-pulse' 
                 : 'bg-emerald-100 text-emerald-800'
             }`}>
-              {activeAlerts.length > 0 ? `${activeAlerts.length} Active Alert` : '🟢 Safe & Clear'}
+              {activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Active Alert')}` : `🟢 ${t('Safe & Clear')}`}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Receive urgent sensory overload notices, help requests, and instant check-ins from {childProfile.name} in real time.
+            {t('Receive urgent sensory overload notices, help requests, and instant check-ins from')} {childProfile.name} {t('in real time.')}
           </p>
         </div>
 
@@ -92,10 +93,10 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 onStartTour();
               }}
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
-              title="Tour this section"
+              title={t('Tour this section')}
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>How This Works (Tour)</span>
+              <span>{t('How This Works (Tour)')}</span>
             </button>
           )}
           <button
@@ -105,7 +106,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
           >
             <ShieldAlert className="w-4 h-4 text-amber-300" />
-            <span>Send Test Alert 🚨</span>
+            <span>{t('Send Test Alert 🚨')}</span>
           </button>
           <button
             type="button"
@@ -116,7 +117,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Home</span>
+            <span>{t('Back to Home')}</span>
           </button>
         </div>
       </div>
@@ -129,16 +130,16 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
           </div>
           <div>
             <span className="font-black text-slate-900 block">
-              Connection Channel: <span className="font-mono text-indigo-700">{getPairingCode()}</span>
+              {t('Connection Channel:')} <span className="font-mono text-indigo-700">{getPairingCode()}</span>
             </span>
             <span className="text-slate-600 font-medium">
-              Status: {connectionStatus.isConnected ? `Connected Live (${connectionStatus.peerName || 'Child Device'})` : 'Listening on cloud channel (ready for child alerts)'}
+              {t('Status:')} {connectionStatus.isConnected ? `${t('Connected Live')} (${connectionStatus.peerName || t('Child Device')})` : t('Listening on cloud channel (ready for child alerts)')}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className={`px-2.5 py-1 rounded-full text-xs font-black ${connectionStatus.isConnected ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-900'}`}>
-            {connectionStatus.isConnected ? '● Connected' : 'Waiting on Child Ping'}
+            {connectionStatus.isConnected ? `● ${t('Connected')}` : t('Waiting on Child Ping')}
           </span>
         </div>
       </div>
@@ -147,7 +148,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
       <div data-tour="alerts-active-card" className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-            <span>Active Urgent Alerts</span>
+            <span>{t('Active Urgent Alerts')}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
               activeAlerts.length > 0 ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'
             }`}>
@@ -161,9 +162,9 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
               ✓
             </div>
-            <h4 className="text-sm font-black text-slate-800">No active alerts right now</h4>
+            <h4 className="text-sm font-black text-slate-800">{t('No active alerts right now')}</h4>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              When {childProfile.name} taps the Help or Sensory Overload button on their tablet, it will instantly sound a chime and show up here with 1-tap reply options.
+              {t('When')} {childProfile.name} {t('taps the Help or Sensory Overload button on their tablet, it will instantly sound a chime and show up here with 1-tap reply options.')}
             </p>
             <div className="pt-2">
               <button
@@ -171,7 +172,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 onClick={handleTriggerTestAlert}
                 className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
               >
-                <span>Test Alert Simulation 🚨</span>
+                <span>{t('Test Alert Simulation 🚨')}</span>
               </button>
             </div>
           </div>
@@ -188,11 +189,11 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       <div className="flex items-center gap-2">
                         <h4 className="text-base font-black text-slate-900">{alert.label}</h4>
                         <span className="px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 text-[10px] font-black uppercase">
-                          Urgent
+                          {t('Urgent')}
                         </span>
                       </div>
                       <p className="text-xs text-slate-600 font-medium mt-0.5">
-                        Sent by: <strong>{alert.childName}</strong> • {alert.location ? `Location: ${alert.location}` : 'Location unknown'}
+                        {t('Sent by:')} <strong>{alert.childName}</strong> • {alert.location ? `${t('Location:')} ${alert.location}` : t('Location unknown')}
                         {alert.note && !alert.note.toLowerCase().includes('location') ? ` • "${alert.note}"` : ''}
                       </p>
                     </div>
@@ -206,7 +207,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       onClick={() => handleResolveAlert(alert.id)}
                       className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black cursor-pointer shadow-2xs"
                     >
-                      Resolve ✓
+                      {t('Resolve ✓')}
                     </button>
                   </div>
                 </div>
@@ -214,7 +215,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 {/* Quick responses */}
                 <div className="pt-3 border-t border-rose-200/80 space-y-2">
                   <span className="text-xs font-black text-rose-950 block">
-                    Send Immediate Reassurance to {alert.childName}'s Screen:
+                    {t('Send Immediate Reassurance to')} {alert.childName}{t("'s Screen:")}
                   </span>
                   <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
                     <button
@@ -222,28 +223,28 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
                       className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
                     >
-                      <span>🚗 I'm On My Way</span>
+                      <span>{t("🚗 I'm On My Way")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
                       className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
                     >
-                      <span>❤️ I'm Here For You</span>
+                      <span>{t("❤️ I'm Here For You")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
                       className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
                     >
-                      <span>⏳ 5 Minutes</span>
+                      <span>{t("⏳ 5 Minutes")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAcknowledgeAlert(alert.id, "You are safe. Sit down and take a slow sip of water 💧", 'safe')}
                       className="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
                     >
-                      <span>💧 You Are Safe</span>
+                      <span>{t("💧 You Are Safe")}</span>
                     </button>
                   </div>
                 </div>
@@ -258,13 +259,13 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <span>Alert History &amp; Audit Log</span>
+              <span>{t('Alert History & Audit Log')}</span>
               <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
-                {alertHistoryList.length} Total
+                {alertHistoryList.length} {t('Total')}
               </span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              All received alerts are permanently archived here for clinical and caregiver review.
+              {t('All received alerts are permanently archived here for clinical and caregiver review.')}
             </p>
           </div>
 
@@ -274,14 +275,14 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               onClick={handleClearAlertHistory}
               className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer transition"
             >
-              Clear History
+              {t('Clear History')}
             </button>
           )}
         </div>
 
         {alertHistoryList.length === 0 ? (
           <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center text-xs text-slate-400">
-            No alert history recorded yet.
+            {t('No alert history recorded yet.')}
           </div>
         ) : (
           <div className="bg-white rounded-3xl border-2 border-slate-200 divide-y divide-slate-100 overflow-hidden shadow-xs">
@@ -310,7 +311,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       minute: '2-digit',
                     })}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600">Archived ✓</span>
+                  <span className="text-[10px] font-bold text-emerald-600">{t('Archived ✓')}</span>
                 </div>
               </div>
             ))}

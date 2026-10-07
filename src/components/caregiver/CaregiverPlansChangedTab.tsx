@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { Eye, Save, Trash2, Plus, Sparkles } from 'lucide-react';
 import { playChime } from '../../utils/audio';
@@ -101,15 +102,15 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <span>Plans Changed System</span>
+            <span>{t("Plans Changed System")}</span>
             {pcActive && (
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300">
-                Active on Child Screen
+                {t("Active on Child Screen")}
               </span>
             )}
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Prepare your child for unexpected schedule disruptions with calm explanations and reassuring alternatives.
+            {t("Prepare your child for unexpected schedule disruptions with calm explanations and reassuring alternatives.")}
           </p>
         </div>
 
@@ -122,10 +123,10 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 onStartTour();
               }}
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
-              title="Tour this section"
+              title={t("Tour this section")}
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>How This Works (Tour)</span>
+              <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
           <button
@@ -133,14 +134,14 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
           >
             <Eye className="w-4 h-4" />
-            <span>Preview Child Modal</span>
+            <span>{t("Preview Child Modal")}</span>
           </button>
           <button
             onClick={handleSavePlansChanged}
             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>Save & Update</span>
+            <span>{t("Save & Update")}</span>
           </button>
         </div>
       </div>
@@ -149,10 +150,10 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       <div data-tour="plans-changed-toggle-card" className="bg-amber-50/70 border-2 border-amber-200 rounded-2xl p-4 flex items-center justify-between">
         <div>
           <h4 className="font-black text-amber-950 text-sm">
-            Activate "Plans Changed" Alert for Child
+            {t("Activate \"Plans Changed\" Alert for Child")}
           </h4>
           <p className="text-xs text-amber-800 font-medium">
-            When active, a calm notification card and contextual phrases appear in the child's app.
+            {t("When active, a calm notification card and contextual phrases appear in the child's app.")}
           </p>
         </div>
         <button
@@ -172,7 +173,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       {/* Quick Presets */}
       <div data-tour="plans-changed-replacement-picker">
         <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
-          Quick Presets (1-Tap Setup):
+          {t("Quick Presets (1-Tap Setup):")}
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <button
@@ -180,24 +181,24 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer"
           >
             <span className="text-2xl mb-1 block">🦷</span>
-            <span className="font-black text-xs text-slate-800 block">Dentist/Doctor Closed</span>
-            <span className="text-[11px] text-slate-500">Pizza lunch & playground instead</span>
+            <span className="font-black text-xs text-slate-800 block">{t("Dentist/Doctor Closed")}</span>
+            <span className="text-[11px] text-slate-500">{t("Pizza lunch & playground instead")}</span>
           </button>
           <button
             onClick={() => handleApplyPreset('rain')}
             className="p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all cursor-pointer"
           >
             <span className="text-2xl mb-1 block">🌧️</span>
-            <span className="font-black text-xs text-slate-800 block">Rainy Day / Trip Cancelled</span>
-            <span className="text-[11px] text-slate-500">Blanket fort & cozy movie</span>
+            <span className="font-black text-xs text-slate-800 block">{t("Rainy Day / Trip Cancelled")}</span>
+            <span className="text-[11px] text-slate-500">{t("Blanket fort & cozy movie")}</span>
           </button>
           <button
             onClick={() => handleApplyPreset('school')}
             className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition-all cursor-pointer"
           >
             <span className="text-2xl mb-1 block">🏫</span>
-            <span className="font-black text-xs text-slate-800 block">School Early Dismissal</span>
-            <span className="text-[11px] text-slate-500">Pick up early & quiet afternoon</span>
+            <span className="font-black text-xs text-slate-800 block">{t("School Early Dismissal")}</span>
+            <span className="text-[11px] text-slate-500">{t("Pick up early & quiet afternoon")}</span>
           </button>
         </div>
       </div>
@@ -207,26 +208,26 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-black text-slate-700 block mb-1">
-              Original Plan (What is being replaced):
+              {t("Original Plan (What is being replaced):")}
             </label>
             <input
               type="text"
               value={pcOriginal}
               onChange={(e) => setPcOriginal(e.target.value)}
-              placeholder="e.g. Dentist appointment at 2:00 PM"
+              placeholder={t("e.g. Dentist appointment at 2:00 PM")}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm focus:ring-2 focus:ring-amber-400 outline-none"
             />
           </div>
 
           <div>
             <label className="text-xs font-black text-slate-700 block mb-1">
-              New Plan Title:
+              {t("New Plan Title:")}
             </label>
             <input
               type="text"
               value={pcNewTitle}
               onChange={(e) => setPcNewTitle(e.target.value)}
-              placeholder="e.g. Lunch & Park Swings"
+              placeholder={t("e.g. Lunch & Park Swings")}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm focus:ring-2 focus:ring-amber-400 outline-none"
             />
           </div>
@@ -234,20 +235,20 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
 
         <div>
           <label className="text-xs font-black text-slate-700 block mb-1">
-            Calm Explanation (Why it changed):
+            {t("Calm Explanation (Why it changed):")}
           </label>
           <input
             type="text"
             value={pcReason}
             onChange={(e) => setPcReason(e.target.value)}
-            placeholder="e.g. The dental clinic is closed today because the doctor is sick."
+            placeholder={t("e.g. The dental clinic is closed today because the doctor is sick.")}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm focus:ring-2 focus:ring-amber-400 outline-none"
           />
         </div>
 
         <div>
           <label className="text-xs font-black text-slate-700 block mb-1">
-            Reassuring Message for Child:
+            {t("Reassuring Message for Child:")}
           </label>
           <textarea
             rows={2}
@@ -260,7 +261,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
         {/* Step-by-Step New Schedule */}
         <div>
           <label className="text-xs font-black text-slate-700 block mb-2">
-            New Plan Steps:
+            {t("New Plan Steps:")}
           </label>
           <div className="space-y-2 mb-3">
             {pcSteps.map((step, idx) => (
@@ -296,21 +297,21 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               type="text"
               value={newStepTitle}
               onChange={(e) => setNewStepTitle(e.target.value)}
-              placeholder="Step name (e.g. Draw pictures at home)"
+              placeholder={t("Step name (e.g. Draw pictures at home)")}
               className="flex-1 min-w-[200px] px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold"
             />
             <input
               type="text"
               value={newStepEmoji}
               onChange={(e) => setNewStepEmoji(e.target.value)}
-              placeholder="Emoji"
+              placeholder={t("Emoji")}
               className="w-16 px-2 py-2 text-center rounded-xl bg-white border border-slate-300 text-sm"
             />
             <input
               type="text"
               value={newStepTime}
               onChange={(e) => setNewStepTime(e.target.value)}
-              placeholder="Time (optional)"
+              placeholder={t("Time (optional)")}
               className="w-28 px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold"
             />
             <button
@@ -327,7 +328,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               className="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Step</span>
+              <span>{t("Add Step")}</span>
             </button>
           </div>
         </div>
@@ -335,7 +336,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
         {/* Relevant Communication Phrases */}
         <div>
           <label className="text-xs font-black text-slate-700 block mb-2">
-            Child Communication Phrases for this Change:
+            {t("Child Communication Phrases for this Change:")}
           </label>
           <div className="flex flex-wrap gap-2 mb-3">
             {pcPhrases.map((phrase, idx) => (
@@ -359,7 +360,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               type="text"
               value={newPhraseInput}
               onChange={(e) => setNewPhraseInput(e.target.value)}
-              placeholder="Add custom phrase (e.g. Can I have my dinosaur?)"
+              placeholder={t("Add custom phrase (e.g. Can I have my dinosaur?)")}
               className="flex-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-xs"
             />
             <button
@@ -371,7 +372,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               }}
               className="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs cursor-pointer"
             >
-              Add Phrase
+              {t("Add Phrase")}
             </button>
           </div>
         </div>
@@ -385,14 +386,14 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             }}
             className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
           >
-            Clear & Deactivate
+            {t("Clear & Deactivate")}
           </button>
           <button
             onClick={handleSavePlansChanged}
             className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-md cursor-pointer flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            <span>Save & Activate Plans Changed</span>
+            <span>{t("Save & Activate Plans Changed")}</span>
           </button>
         </div>
       </div>

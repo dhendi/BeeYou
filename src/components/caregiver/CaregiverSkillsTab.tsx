@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 
 interface CaregiverSkillsTabProps {
@@ -12,9 +13,9 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div>
-          <h2 className="text-xl font-black text-slate-900">Independence Missions & Skills</h2>
+          <h2 className="text-xl font-black text-slate-900">{t("Independence Missions & Skills")}</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Break down everyday routines like tooth brushing and dressing into rewarding micro-missions.
+            {t("Break down everyday routines like tooth brushing and dressing into rewarding micro-missions.")}
           </p>
         </div>
         {onStartTour && (
@@ -23,7 +24,7 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
             onClick={onStartTour}
             className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
           >
-            <span>💡 How This Works</span>
+            <span>{t("💡 How This Works")}</span>
           </button>
         )}
       </div>

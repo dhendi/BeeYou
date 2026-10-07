@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { AACItem, AACCategory } from '../../types';
 import { INDUSTRY_AAC_PACKS } from '../../services/symbolService';
@@ -122,9 +123,9 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
     <div className="space-y-6">
       <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-black text-slate-900">AAC Vocabulary Manager</h2>
+          <h2 className="text-xl font-black text-slate-900">{t("AAC Vocabulary Manager")}</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Add custom words, family photos, and quick phrases. Fixed motor planning ensures vocabulary stays predictable.
+            {t("Add custom words, family photos, and quick phrases. Fixed motor planning ensures vocabulary stays predictable.")}
           </p>
         </div>
 
@@ -137,10 +138,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                 onStartTour();
               }}
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
-              title="Tour this section"
+              title={t("Tour this section")}
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>How This Works (Tour)</span>
+              <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
 
@@ -150,7 +151,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             onClick={handleQuickAddChickenNuggets}
             className="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs flex items-center gap-1.5 border border-orange-300 shadow-xs cursor-pointer"
           >
-            <span>🍗 1-Tap Add "Chicken Nuggets"</span>
+            <span>{t("🍗 1-Tap Add \"Chicken Nuggets\"")}</span>
           </button>
         </div>
       </div>
@@ -164,17 +165,17 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
-                Clinical Standard
+                {t("Clinical Standard")}
               </span>
               <span className="text-xs text-indigo-200 font-bold">
                 3,400+ Mulberry Symbols (CC BY-SA)
               </span>
             </div>
             <h3 className="text-base sm:text-lg font-black mt-0.5">
-              Online AAC Symbol & Logo Studio
+              {t("Online AAC Symbol & Logo Studio")}
             </h3>
             <p className="text-xs text-indigo-100 font-medium max-w-xl">
-              Access official Mulberry Symbols (CC BY-SA Straight Street / Paxtoncrafts Charitable Trust) crafted for AAC devices, or upload real photos from your camera for photo modeling.
+              {t("Access official Mulberry Symbols (CC BY-SA Straight Street / Paxtoncrafts Charitable Trust) crafted for AAC devices, or upload real photos from your camera for photo modeling.")}
             </p>
           </div>
         </div>
@@ -187,10 +188,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onShowNotification('Upgraded all AAC buttons to official Mulberry Symbols!');
             }}
             className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
-            title="Convert all AAC buttons to Mulberry symbols"
+            title={t("Convert all AAC buttons to Mulberry symbols")}
           >
             <Sparkles className="w-4 h-4 text-amber-950" />
-            <span>Apply Mulberry to All Buttons</span>
+            <span>{t("Apply Mulberry to All Buttons")}</span>
           </button>
 
           <button
@@ -202,7 +203,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             className="px-5 py-2.5 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-900 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
           >
             <Search className="w-4 h-4 text-indigo-600" />
-            <span>Browse Online Symbols</span>
+            <span>{t("Browse Online Symbols")}</span>
           </button>
         </div>
       </div>
@@ -212,8 +213,8 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
         <div className="flex items-center gap-2.5">
           <Palette className="w-5 h-5 text-indigo-600 shrink-0" />
           <div>
-            <h4 className="text-xs font-black text-slate-800">Button Background Color Mode</h4>
-            <p className="text-[11px] text-slate-500 font-medium">Controls the background coloring of all AAC tiles across the app.</p>
+            <h4 className="text-xs font-black text-slate-800">{t("Button Background Color Mode")}</h4>
+            <p className="text-[11px] text-slate-500 font-medium">{t("Controls the background coloring of all AAC tiles across the app.")}</p>
           </div>
         </div>
 
@@ -248,12 +249,12 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Plus className="w-4 h-4 text-amber-600" />
-            <span>Create Custom AAC Button</span>
+            <span>{t("Create Custom AAC Button")}</span>
           </h3>
 
           {newWordPhotoUrl && (
             <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              <span>Symbol Attached ✓</span>
+              <span>{t("Symbol Attached ✓")}</span>
             </span>
           )}
         </div>
@@ -280,58 +281,58 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onClick={() => setNewWordPhotoUrl('')}
               className="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer"
             >
-              Clear Symbol
+              {t("Clear Symbol")}
             </button>
           </div>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Word Label:</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Word Label:")}</label>
             <input
               type="text"
               value={newWordLabel}
               onChange={(e) => setNewWordLabel(e.target.value)}
-              placeholder="e.g. Chicken Nuggets"
+              placeholder={t("e.g. Chicken Nuggets")}
               className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
               required
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Speech Text (spoken aloud):</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Speech Text (spoken aloud):")}</label>
             <input
               type="text"
               value={newWordSpeech}
               onChange={(e) => setNewWordSpeech(e.target.value)}
-              placeholder="e.g. Chicken nuggets please"
+              placeholder={t("e.g. Chicken nuggets please")}
               className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Category:</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Category:")}</label>
             <select
               value={newWordCategory}
               onChange={(e) => setNewWordCategory(e.target.value as any)}
               className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
             >
-              <option value="food">Food 🍕</option>
-              <option value="drinks">Drinks 🧃</option>
-              <option value="activities">Play & Fun 🎮</option>
-              <option value="places">Places 🏠</option>
-              <option value="people">People 👥</option>
-              <option value="feelings">Feelings 💛</option>
-              <option value="sensory">Sensory 🎧</option>
-              <option value="actions">Actions 🏃</option>
-              <option value="core">Core Words ⭐</option>
+              <option value="food">{t("Food 🍕")}</option>
+              <option value="drinks">{t("Drinks 🧃")}</option>
+              <option value="activities">{t("Play & Fun 🎮")}</option>
+              <option value="places">{t("Places 🏠")}</option>
+              <option value="people">{t("People 👥")}</option>
+              <option value="feelings">{t("Feelings 💛")}</option>
+              <option value="sensory">{t("Sensory 🎧")}</option>
+              <option value="actions">{t("Actions 🏃")}</option>
+              <option value="core">{t("Core Words ⭐")}</option>
             </select>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Emoji Icon (Fallback):</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Emoji Icon (Fallback):")}</label>
             <input
               type="text"
               value={newWordEmoji}
@@ -341,18 +342,18 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Color Key (Fitzgerald):</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Color Key (Fitzgerald):")}</label>
             <select
               value={newWordColorType}
               onChange={(e) => setNewWordColorType(e.target.value as any)}
               className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
             >
-              <option value="noun">Noun (Orange)</option>
-              <option value="verb">Verb (Green)</option>
-              <option value="subject">Subject/Pronoun (Yellow)</option>
-              <option value="adjective">Adjective (Blue)</option>
-              <option value="emergency">Emergency/Stop (Red)</option>
-              <option value="social">Social (Purple)</option>
+              <option value="noun">{t("Noun (Orange)")}</option>
+              <option value="verb">{t("Verb (Green)")}</option>
+              <option value="subject">{t("Subject/Pronoun (Yellow)")}</option>
+              <option value="adjective">{t("Adjective (Blue)")}</option>
+              <option value="emergency">{t("Emergency/Stop (Red)")}</option>
+              <option value="social">{t("Social (Purple)")}</option>
             </select>
           </div>
 
@@ -368,10 +369,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               type="button"
               onClick={() => parentAacFileInputRef.current?.click()}
               className="flex-1 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-300 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
-              title="Upload a photo from your camera or computer"
+              title={t("Upload a photo from your camera or computer")}
             >
               <Upload className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Upload Photo</span>
+              <span>{t("Upload Photo")}</span>
             </button>
 
             <button
@@ -393,7 +394,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs cursor-pointer flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
-          <span>Add to Child's AAC Board</span>
+          <span>{t("Add to Child's AAC Board")}</span>
         </button>
       </form>
 
@@ -403,10 +404,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           <div>
             <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-purple-600" />
-              <span>Pre-Built AAC Standard Packs (TouchChat & LAMP Systems)</span>
+              <span>{t("Pre-Built AAC Standard Packs (TouchChat & LAMP Systems)")}</span>
             </h3>
             <p className="text-[11px] text-slate-500">
-              Instantly import clinically validated vocabulary collections used in speech therapy and special ed.
+              {t("Instantly import clinically validated vocabulary collections used in speech therapy and special ed.")}
             </p>
           </div>
         </div>
@@ -454,7 +455,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               <span>Active Vocabulary Buttons ({aacItems.length})</span>
             </h3>
             <p className="text-[11px] text-slate-500">
-              Click "Change Symbol" on any button to swap its logo with an online Mulberry symbol or personal photo.
+              {t("Click \"Change Symbol\" on any button to swap its logo with an online Mulberry symbol or personal photo.")}
             </p>
           </div>
         </div>
@@ -488,9 +489,9 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                     setShowSymbolPicker(true);
                   }}
                   className="flex-1 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] cursor-pointer"
-                  title="Change symbol for this button"
+                  title={t("Change symbol for this button")}
                 >
-                  Change Symbol
+                  {t("Change Symbol")}
                 </button>
                 {item.isCustom && (
                   <button
@@ -500,7 +501,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                       onShowNotification(`Deleted "${item.label}" from AAC.`);
                     }}
                     className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
-                    title="Delete custom word"
+                    title={t("Delete custom word")}
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -516,17 +517,17 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Volume2 className="w-4 h-4 text-indigo-600" />
-            <span>Fluid Human Voice & Speech Settings</span>
+            <span>{t("Fluid Human Voice & Speech Settings")}</span>
           </h3>
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
-            Offline Ready
+            {t("Offline Ready")}
           </span>
         </div>
 
         {/* Voice Persona Selector */}
         <div>
           <label className="text-xs font-black text-slate-700 block mb-1.5">
-            Human Voice Persona:
+            {t("Human Voice Persona:")}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
@@ -582,7 +583,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onChange={(e) => updateSettings({ voiceRate: parseFloat(e.target.value) })}
               className="w-full accent-indigo-600 cursor-pointer"
             />
-            <span className="text-[10px] text-slate-400 block mt-0.5">0.96x sounds most natural</span>
+            <span className="text-[10px] text-slate-400 block mt-0.5">{t("0.96x sounds most natural")}</span>
           </div>
 
           <div>
@@ -598,7 +599,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onChange={(e) => updateSettings({ voicePitch: parseFloat(e.target.value) })}
               className="w-full accent-indigo-600 cursor-pointer"
             />
-            <span className="text-[10px] text-slate-400 block mt-0.5">1.0 preserves human resonance</span>
+            <span className="text-[10px] text-slate-400 block mt-0.5">{t("1.0 preserves human resonance")}</span>
           </div>
 
         </div>
@@ -610,10 +611,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5"
           >
             <Volume2 className="w-4 h-4" />
-            <span>Audition Fluid Voice</span>
+            <span>{t("Audition Fluid Voice")}</span>
           </button>
           <span className="text-xs text-slate-500">
-            Active: <strong>{settings.voicePersona === 'system' ? (settings.selectedVoiceURI || 'Auto-Selected Best Fluid System Voice') : (settings.voicePersona || 'Kore')}</strong>
+            {t("Active:")} <strong>{settings.voicePersona === 'system' ? (settings.selectedVoiceURI || 'Auto-Selected Best Fluid System Voice') : (settings.voicePersona || 'Kore')}</strong>
           </span>
         </div>
 
@@ -625,7 +626,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                 Detected System Voices on this Device ({offlineVoices.length})
               </h4>
               <p className="text-[11px] text-slate-500">
-                Querying <code>window.speechSynthesis.getVoices()</code>. Non-robotic voices with fluid natural human prosody are automatically ranked at the top.
+                {t("Querying")} <code>{t("window.speechSynthesis.getVoices()")}</code>. Non-robotic voices with fluid natural human prosody are automatically ranked at the top.
               </p>
             </div>
 
@@ -637,14 +638,14 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               }}
               className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs cursor-pointer"
             >
-              Auto-Pick Best Fluid Voice
+              {t("Auto-Pick Best Fluid Voice")}
             </button>
           </div>
 
           <div className="max-h-60 overflow-y-auto space-y-2 border border-slate-200 rounded-2xl p-2 bg-white">
             {offlineVoices.length === 0 ? (
               <p className="text-xs text-slate-400 p-3 text-center">
-                Detecting device speech synthesis voices... (Click Audition to initialize)
+                {t("Detecting device speech synthesis voices... (Click Audition to initialize)")}
               </p>
             ) : (
               offlineVoices.slice(0, 20).map((voice) => {
@@ -668,12 +669,12 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                         </span>
                         {isFluid && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0">
-                            🌟 Fluid Human Voice
+                            {t("🌟 Fluid Human Voice")}
                           </span>
                         )}
                         {voice.localService && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-200 text-slate-600 shrink-0">
-                            Offline
+                            {t("Offline")}
                           </span>
                         )}
                       </div>
@@ -694,10 +695,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                           });
                         }}
                         className="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
-                        title="Test this specific voice"
+                        title={t("Test this specific voice")}
                       >
                         <Volume2 className="w-3.5 h-3.5" />
-                        <span>Audition</span>
+                        <span>{t("Audition")}</span>
                       </button>
 
                       <button

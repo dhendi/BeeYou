@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { MOOD_META, TRIGGER_META, COPING_META } from '../../data/defaultData';
 import { playChime } from '../../utils/audio';
@@ -23,10 +24,10 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <span className="text-2xl">📖</span>
-            <span>Mood Journal & Self-Reflection Hub</span>
+            <span>{t("Mood Journal & Self-Reflection Hub")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Designed for teens and adults. Tracks emotional intensity, energy levels, sensory distress, triggers, and neurodivergent coping strategies.
+            {t("Designed for teens and adults. Tracks emotional intensity, energy levels, sensory distress, triggers, and neurodivergent coping strategies.")}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
@@ -36,7 +37,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
               onClick={onStartTour}
               className="px-3.5 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>💡 How This Works</span>
+              <span>{t("💡 How This Works")}</span>
             </button>
           )}
           <button
@@ -49,7 +50,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
             className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Open Mood Journal Studio</span>
+            <span>{t("Open Mood Journal Studio")}</span>
           </button>
         </div>
       </div>
@@ -61,10 +62,10 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
               <p className="text-xs font-black text-amber-900">
-                Mood Journal is currently turned off for this profile.
+                {t("Mood Journal is currently turned off for this profile.")}
               </p>
               <p className="text-[11px] text-amber-800">
-                Enable it in Feature Controls to display in the user's header and feelings tab.
+                {t("Enable it in Feature Controls to display in the user's header and feelings tab.")}
               </p>
             </div>
           </div>
@@ -76,7 +77,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
             }}
             className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shrink-0 cursor-pointer"
           >
-            Enable Feature
+            {t("Enable Feature")}
           </button>
         </div>
       )}
@@ -84,17 +85,17 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
       {/* Statistics Overview */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-4 bg-purple-50/70 border border-purple-200 rounded-2xl">
-          <span className="text-[10px] font-black uppercase text-purple-700 block">Total Reflections</span>
+          <span className="text-[10px] font-black uppercase text-purple-700 block">{t("Total Reflections")}</span>
           <span className="text-2xl font-black text-purple-950 mt-1 block">{moodJournalEntries.length}</span>
         </div>
         <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-          <span className="text-[10px] font-black uppercase text-slate-500 block">Private Entries</span>
+          <span className="text-[10px] font-black uppercase text-slate-500 block">{t("Private Entries")}</span>
           <span className="text-2xl font-black text-slate-900 mt-1 block">
             {moodJournalEntries.filter((e) => e.isPrivate).length}
           </span>
         </div>
         <div className="p-4 bg-sky-50/70 border border-sky-200 rounded-2xl">
-          <span className="text-[10px] font-black uppercase text-sky-700 block">Average Energy</span>
+          <span className="text-[10px] font-black uppercase text-sky-700 block">{t("Average Energy")}</span>
           <span className="text-2xl font-black text-sky-950 mt-1 block">
             {moodJournalEntries.length > 0
               ? (moodJournalEntries.reduce((acc, e) => acc + e.energyLevel, 0) / moodJournalEntries.length).toFixed(1)
@@ -103,7 +104,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
           </span>
         </div>
         <div className="p-4 bg-rose-50/70 border border-rose-200 rounded-2xl">
-          <span className="text-[10px] font-black uppercase text-rose-700 block">Avg Sensory Load</span>
+          <span className="text-[10px] font-black uppercase text-rose-700 block">{t("Avg Sensory Load")}</span>
           <span className="text-2xl font-black text-rose-950 mt-1 block">
             {moodJournalEntries.length > 0
               ? (moodJournalEntries.reduce((acc, e) => acc + e.sensoryDistress, 0) / moodJournalEntries.length).toFixed(1)
@@ -116,15 +117,15 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
       {/* Entries List */}
       <div data-tour="journal-entries-feed" className="space-y-3">
         <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-          Logged Reflections History
+          {t("Logged Reflections History")}
         </h3>
 
         {moodJournalEntries.length === 0 ? (
           <div className="p-8 border-2 border-dashed border-slate-200 rounded-3xl text-center space-y-2">
             <span className="text-3xl block">📖</span>
-            <p className="text-xs font-bold text-slate-600">No reflections logged yet</p>
+            <p className="text-xs font-bold text-slate-600">{t("No reflections logged yet")}</p>
             <p className="text-[11px] text-slate-400">
-              When the user reflects on their emotions and sensory experiences, entries will appear here.
+              {t("When the user reflects on their emotions and sensory experiences, entries will appear here.")}
             </p>
           </div>
         ) : (
@@ -157,7 +158,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
                         )}
                         {entry.isPrivate && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center gap-0.5">
-                            <Lock className="w-3 h-3" /> Private
+                            <Lock className="w-3 h-3" /> {t("Private")}
                           </span>
                         )}
                       </div>
@@ -175,7 +176,7 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
                         playChime('tap');
                       }}
                       className="text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-2 rounded-xl cursor-pointer"
-                      title="Delete entry"
+                      title={t("Delete entry")}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -194,9 +195,9 @@ export const CaregiverMoodJournalTab: React.FC<CaregiverMoodJournalTabProps> = (
                 )}
 
                 <div className="flex flex-wrap gap-1.5">
-                  {entry.triggers.map((t) => (
-                    <span key={t} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-                      {TRIGGER_META[t] ? `${TRIGGER_META[t].emoji} ${TRIGGER_META[t].label}` : `⚡ ${t}`}
+                  {entry.triggers.map((trig) => (
+                    <span key={trig} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
+                      {TRIGGER_META[trig] ? `${TRIGGER_META[trig].emoji} ${TRIGGER_META[trig].label}` : `⚡ `}
                     </span>
                   ))}
                   {entry.copingStrategies.map((c) => (

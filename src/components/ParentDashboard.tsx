@@ -497,7 +497,7 @@ export const ParentDashboard: React.FC = () => {
               }
             }}
             className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-stone-200 shadow-2xs shrink-0"
-            title="Return to Child View"
+            title={t('Return to Child View')}
           >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
             <span className="hidden sm:inline">{t('Return to Child')}</span>
@@ -534,7 +534,7 @@ export const ParentDashboard: React.FC = () => {
             type="button"
             onClick={handleStartTour}
             className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100 text-xs font-black transition-all active:scale-95 cursor-pointer border border-amber-300/80 shadow-2xs"
-            title="Launch Interactive In-Place Coachmark Tour"
+            title={t('Launch Interactive In-Place Coachmark Tour')}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span className="hidden sm:inline">{t('Feature Tour (Guide)')}</span>
@@ -547,10 +547,10 @@ export const ParentDashboard: React.FC = () => {
                 activatePlansChanged({ active: false });
               }}
               className="px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1 bg-amber-500 text-white animate-pulse shadow-xs cursor-pointer"
-              title="Plans Changed is active for child. Tap to turn off."
+              title={t('Plans Changed is active for child. Tap to turn off.')}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span className="text-[11px]">Plans Changed Active</span>
+              <span className="text-[11px]">{t('Plans Changed Active')}</span>
             </button>
           )}
         </div>
@@ -590,7 +590,7 @@ export const ParentDashboard: React.FC = () => {
                 >
                   <span className="text-base leading-tight">{group.emoji}</span>
                   <span className="text-[10px] leading-tight truncate max-w-full font-bold mt-0.5">
-                    {group.id === 'live' ? 'Live' : group.id === 'routines' ? 'Routines' : group.id === 'skills' ? 'Skills' : 'Setup'}
+                    {group.id === 'live' ? t('Live') : group.id === 'routines' ? t('Routines') : group.id === 'skills' ? t('Skills') : t('Setup')}
                   </span>
                 </button>
               );
@@ -617,10 +617,10 @@ export const ParentDashboard: React.FC = () => {
               className="w-full pl-11 pr-9 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
             >
               {navGroups.map((group) => (
-                <optgroup key={group.id} label={`${group.emoji} ${group.title}`}>
+                <optgroup key={group.id} label={`${group.emoji} ${t(group.title)}`}>
                   {group.items.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item.label} {item.badge ? `(${item.badge})` : ''}
+                      {t(item.label)} {item.badge ? `(${t(item.badge)})` : ''}
                     </option>
                   ))}
                 </optgroup>
@@ -638,7 +638,7 @@ export const ParentDashboard: React.FC = () => {
             <div key={group.id} className="flex flex-col gap-1">
               <div className="px-2 py-1 flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
                 <span>{group.emoji}</span>
-                <span>{group.title}</span>
+                <span>{t(group.title)}</span>
               </div>
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
@@ -672,7 +672,7 @@ export const ParentDashboard: React.FC = () => {
                         >
                           <Icon className="w-3.5 h-3.5 stroke-[2.4]" />
                         </div>
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate">{t(item.label)}</span>
                       </div>
                       {item.badge && (
                         <span
@@ -684,7 +684,7 @@ export const ParentDashboard: React.FC = () => {
                               : `${activeTheme?.palette?.badgeBg || 'bg-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
                           }`}
                         >
-                          {item.badge}
+                          {t(item.badge)}
                         </span>
                       )}
                     </button>
@@ -867,8 +867,8 @@ export const ParentDashboard: React.FC = () => {
         isOpen={showCameraScanner}
         onClose={() => setShowCameraScanner(false)}
         onScan={handleScanCaregiverQR}
-        title="Scan Child Device QR Code"
-        subtitle="Point camera at the QR code on the child's phone or tablet"
+        title={t("Scan Child Device QR Code")}
+        subtitle={t("Point camera at the QR code on the child's phone or tablet")}
       />
 
       {/* Connection Feedback Modal (Success / Failure) */}

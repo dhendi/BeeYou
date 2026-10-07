@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { MedicationReminder, MedicationFrequency } from '../../types';
 import {
@@ -122,7 +123,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <span className="text-2xl">💊</span>
-            <span>Medication Reminders & Supply Hub</span>
+            <span>{t("Medication Reminders & Supply Hub")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
             Configure medications, scheduled dose times, dosages, and keep track of remaining pill supply for {childProfile.name}.
@@ -138,10 +139,10 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 onStartTour();
               }}
               className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition-all border border-amber-300"
-              title="Tour this section"
+              title={t("Tour this section")}
             >
               <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>How This Works (Tour)</span>
+              <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
           <button
@@ -157,12 +158,12 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             {!isPremium && medications.length >= 1 ? (
               <>
                 <Crown className="w-4 h-4 text-amber-200" />
-                <span>Upgrade for More Meds</span>
+                <span>{t("Upgrade for More Meds")}</span>
               </>
             ) : (
               <>
                 <Plus className="w-4 h-4" />
-                <span>Add New Medication</span>
+                <span>{t("Add New Medication")}</span>
               </>
             )}
           </button>
@@ -178,11 +179,11 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-amber-950 uppercase tracking-wide">Basic Plan Limit (1/1 Medication)</span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">Free Tier</span>
+                <span className="text-xs font-black text-amber-950 uppercase tracking-wide">{t("Basic Plan Limit (1/1 Medication)")}</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">{t("Free Tier")}</span>
               </div>
               <p className="text-xs text-amber-900 font-medium mt-0.5">
-                You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.
+                {t("You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.")}
               </p>
             </div>
           </div>
@@ -191,7 +192,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
           >
             <Crown className="w-3.5 h-3.5 text-amber-200" />
-            <span>Start 30-Day Free Trial</span>
+            <span>{t("Start 30-Day Free Trial")}</span>
           </button>
         </div>
       )}
@@ -225,14 +226,14 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                   required
                   value={medName}
                   onChange={(e) => setMedName(e.target.value)}
-                  placeholder="e.g. Morning Multivitamin Gummy, Asthma Inhaler"
+                  placeholder={t("e.g. Morning Multivitamin Gummy, Asthma Inhaler")}
                   className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  Icon / Emoji
+                  {t("Icon / Emoji")}
                 </label>
                 <div className="flex items-center gap-1.5 overflow-x-auto">
                   {['💊', '🍬', '🫁', '💧', '🧴', '🩹'].map((em) => (
@@ -274,13 +275,13 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 mt-1 block">
-                  Decrements automatically each time a dose is taken.
+                  {t("Decrements automatically each time a dose is taken.")}
                 </span>
               </div>
 
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  Low Supply Alert Threshold
+                  {t("Low Supply Alert Threshold")}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -292,11 +293,11 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <span className="text-xs font-bold text-slate-500 shrink-0">
-                    alert when remaining count is low
+                    {t("alert when remaining count is low")}
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 mt-1 block">
-                  Alerts caregiver when supply falls to or below this count.
+                  {t("Alerts caregiver when supply falls to or below this count.")}
                 </span>
               </div>
             </div>
@@ -339,7 +340,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-black text-slate-700">
-                    4. What Time Should They Take Them (Dose Times) *
+                    {t("4. What Time Should They Take Them (Dose Times) *")}
                   </label>
                   <button
                     type="button"
@@ -347,16 +348,16 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
-                    <span>Add Time Slot</span>
+                    <span>{t("Add Time Slot")}</span>
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2 items-center">
-                  {medTimes.map((t, idx) => (
+                  {medTimes.map((timeVal, idx) => (
                     <div key={idx} className="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-slate-300">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
                       <input
                         type="time"
-                        value={t}
+                        value={timeVal}
                         onChange={(e) => {
                           const updated = [...medTimes];
                           updated[idx] = e.target.value;
@@ -369,7 +370,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                           type="button"
                           onClick={() => setMedTimes(medTimes.filter((_, i) => i !== idx))}
                           className="text-slate-400 hover:text-rose-500 p-0.5 cursor-pointer"
-                          title="Remove time"
+                          title={t("Remove time")}
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -384,7 +385,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  5. How Many Should They Take (Dosage Amount) *
+                  {t("5. How Many Should They Take (Dosage Amount) *")}
                 </label>
                 <input
                   type="number"
@@ -394,27 +395,27 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                   required
                   value={medDosage}
                   onChange={(e) => setMedDosage(Number(e.target.value))}
-                  placeholder="e.g. 1, 2"
+                  placeholder={t("e.g. 1, 2")}
                   className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  Unit Form
+                  {t("Unit Form")}
                 </label>
                 <select
                   value={medUnit}
                   onChange={(e) => setMedUnit(e.target.value)}
                   className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="pill">pill(s)</option>
-                  <option value="tablet">tablet(s)</option>
-                  <option value="gummy">gummy / chewable(s)</option>
-                  <option value="puffs">puff(s) / spray</option>
-                  <option value="dropper">dropper / drops</option>
-                  <option value="spoonful">spoonful / ml</option>
-                  <option value="patch">patch</option>
+                  <option value="pill">{t("pill(s)")}</option>
+                  <option value="tablet">{t("tablet(s)")}</option>
+                  <option value="gummy">{t("gummy / chewable(s)")}</option>
+                  <option value="puffs">{t("puff(s) / spray")}</option>
+                  <option value="dropper">{t("dropper / drops")}</option>
+                  <option value="spoonful">{t("spoonful / ml")}</option>
+                  <option value="patch">{t("patch")}</option>
                 </select>
               </div>
             </div>
@@ -422,13 +423,13 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             {/* Instructions */}
             <div>
               <label className="block text-xs font-black text-slate-700 mb-1">
-                Special Instructions & Guidance (Optional)
+                {t("Special Instructions & Guidance (Optional)")}
               </label>
               <input
                 type="text"
                 value={medInstructions}
                 onChange={(e) => setMedInstructions(e.target.value)}
-                placeholder="e.g. Take with breakfast and a glass of water; Shake well before use"
+                placeholder={t("e.g. Take with breakfast and a glass of water; Shake well before use")}
                 className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-medium text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -443,7 +444,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 }}
                 className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
               >
-                Cancel
+                {t("Cancel")}
               </button>
               <button
                 type="submit"
@@ -467,8 +468,8 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
 
         {medications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-300">
-            <p className="font-semibold text-sm">No medications configured yet.</p>
-            <p className="text-xs mt-1">Click "Add New Medication" above to set up reminders and stock tracking.</p>
+            <p className="font-semibold text-sm">{t("No medications configured yet.")}</p>
+            <p className="text-xs mt-1">{t("Click \"Add New Medication\" above to set up reminders and stock tracking.")}</p>
           </div>
         ) : (
           medications.map((med) => {
@@ -496,12 +497,12 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                       {isLow && (
                         <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
                           <AlertTriangle className="w-3 h-3" />
-                          <span>Low Supply!</span>
+                          <span>{t("Low Supply!")}</span>
                         </span>
                       )}
                       {!med.active && (
                         <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold">
-                          Paused
+                          {t("Paused")}
                         </span>
                       )}
                     </div>
@@ -520,9 +521,9 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                           <span>•</span>
                           <span className="flex items-center gap-1 font-bold text-slate-700">
                             <Clock className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{med.times.map((t) => {
-                              const [h, m] = t.split(':').map(Number);
-                              if (isNaN(h)) return t;
+                            <span>{med.times.map((timeStr) => {
+                              const [h, m] = timeStr.split(':').map(Number);
+                              if (isNaN(h)) return timeStr;
                               return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
                             }).join(', ')}</span>
                           </span>
@@ -566,7 +567,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                         onShowNotification(`Added +10 to ${med.name} supply!`);
                       }}
                       className="px-2 py-1 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:shadow-2xs cursor-pointer transition-all"
-                      title="Add 10"
+                      title={t("Add 10")}
                     >
                       +10
                     </button>
@@ -577,7 +578,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                         onShowNotification(`Added +30 (1 month) to ${med.name} supply!`);
                       }}
                       className="px-2.5 py-1 rounded-lg text-xs font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 cursor-pointer transition-all"
-                      title="Add 30 (1 month supply)"
+                      title={t("Add 30 (1 month supply)")}
                     >
                       +30
                     </button>
@@ -588,9 +589,9 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                         setQuickRestockAmount(30);
                       }}
                       className="px-2 py-1 rounded-lg text-xs font-bold text-indigo-600 hover:bg-white cursor-pointer transition-all"
-                      title="Custom Refill Amount"
+                      title={t("Custom Refill Amount")}
                     >
-                      Refill
+                      {t("Refill")}
                     </button>
                   </div>
 
@@ -598,7 +599,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     type="button"
                     onClick={() => handleOpenEditMed(med)}
                     className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition-all"
-                    title="Edit Medication"
+                    title={t("Edit Medication")}
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -612,7 +613,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                       }
                     }}
                     className="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 cursor-pointer transition-all"
-                    title="Delete Medication"
+                    title={t("Delete Medication")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -651,14 +652,14 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs cursor-pointer shadow-xs"
               >
-                Add to Supply
+                {t("Add to Supply")}
               </button>
               <button
                 type="button"
                 onClick={() => setQuickRestockId(null)}
                 className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
               >
-                Cancel
+                {t("Cancel")}
               </button>
             </div>
           </div>
@@ -670,17 +671,17 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
-              Dose History & Adherence Record
+              {t("Dose History & Adherence Record")}
             </h3>
             <p className="text-xs text-slate-500">
-              Exportable logs for pediatrician checkups, occupational therapy, and routine review.
+              {t("Exportable logs for pediatrician checkups, occupational therapy, and routine review.")}
             </p>
           </div>
         </div>
 
         {medicationLogs.length === 0 ? (
           <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">
-            No dose logs recorded yet. Once doses are taken, they will appear here.
+            {t("No dose logs recorded yet. Once doses are taken, they will appear here.")}
           </div>
         ) : (
           <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
@@ -688,11 +689,11 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-black uppercase text-[10px]">
                   <tr>
-                    <th className="py-2.5 px-4">Medication</th>
-                    <th className="py-2.5 px-4">Dosage Taken</th>
-                    <th className="py-2.5 px-4">Scheduled Time</th>
-                    <th className="py-2.5 px-4">Date & Time</th>
-                    <th className="py-2.5 px-4">Notes</th>
+                    <th className="py-2.5 px-4">{t("Medication")}</th>
+                    <th className="py-2.5 px-4">{t("Dosage Taken")}</th>
+                    <th className="py-2.5 px-4">{t("Scheduled Time")}</th>
+                    <th className="py-2.5 px-4">{t("Date & Time")}</th>
+                    <th className="py-2.5 px-4">{t("Notes")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">

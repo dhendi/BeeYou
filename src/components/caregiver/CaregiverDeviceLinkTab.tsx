@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
@@ -28,7 +29,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
-            <span>Caregiver Live Link & Remote Monitor</span>
+            <span>{t("Caregiver Live Link & Remote Monitor")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
             See what {childProfile.name} is doing or feeling in real-time, even when you're away at work or in another room.
@@ -42,7 +43,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               onClick={onStartTour}
               className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>💡 How This Works</span>
+              <span>{t("💡 How This Works")}</span>
             </button>
           )}
           <a
@@ -52,7 +53,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             className="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer"
           >
             <ExternalLink className="w-4 h-4" />
-            <span>Open Remote Portal in New Window</span>
+            <span>{t("Open Remote Portal in New Window")}</span>
           </a>
         </div>
       </div>
@@ -62,7 +63,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
         <div className="space-y-2 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-rose-700 uppercase tracking-wider block">
-              Child's Remote Pairing Code
+              {t("Child's Remote Pairing Code")}
             </span>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
               connectionStatus.isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
@@ -76,7 +77,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </div>
           
           <p className="text-xs text-slate-600 font-medium">
-            Scan this QR code with your phone camera or enter the 6-letter code to link instantly.
+            {t("Scan this QR code with your phone camera or enter the 6-letter code to link instantly.")}
           </p>
 
           <div className="flex items-center gap-2 pt-2 flex-wrap">
@@ -87,10 +88,10 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
                 playChime('tap');
               }}
               className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
-              title="Open device camera to scan pairing QR code"
+              title={t("Open device camera to scan pairing QR code")}
             >
               <Camera className="w-4 h-4" />
-              <span>Scan QR with Camera</span>
+              <span>{t("Scan QR with Camera")}</span>
             </button>
 
             <button
@@ -103,7 +104,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
             >
               <Copy className="w-4 h-4" />
-              <span>Copy Direct Portal URL</span>
+              <span>{t("Copy Direct Portal URL")}</span>
             </button>
 
             <a
@@ -113,7 +114,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
             >
               <ExternalLink className="w-4 h-4" />
-              <span>Open Portal In New Tab</span>
+              <span>{t("Open Portal In New Tab")}</span>
             </a>
           </div>
         </div>
@@ -124,7 +125,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             value={getPairingCode()} 
             size={180} 
             title={`Pair with ${childProfile.name}`}
-            subtitle="Scan with phone camera"
+            subtitle={t("Scan with phone camera")}
           />
         </div>
       </div>
