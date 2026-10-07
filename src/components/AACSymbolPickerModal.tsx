@@ -41,6 +41,7 @@ interface AACSymbolPickerModalProps {
     colorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   }) => void;
   initialQuery?: string;
+  initialSearch?: string;
   initialColorType?: 'subject' | 'verb' | 'noun' | 'adjective' | 'social' | 'emergency';
   activeCategory?: AACCategory;
   existingItems?: AACItem[];

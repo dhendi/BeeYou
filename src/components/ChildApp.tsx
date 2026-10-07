@@ -58,7 +58,6 @@ const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ defa
 const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
 const FamilyAuthModal = lazy(() => import('./FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
 const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
-const CaregiverHowItWorksModal = lazy(() => import('./CaregiverHowItWorksModal').then(m => ({ default: m.CaregiverHowItWorksModal })));
 
 const ChildAppContent: React.FC = () => {
   const { 
@@ -146,7 +145,6 @@ const ChildAppContent: React.FC = () => {
             onClose={() => setShowFamilyAuthModal(false)}
           />
           <ThemeCustomizerModal />
-          <CaregiverHowItWorksModal />
           <CaregiverMessageToast />
           <OfflineIndicator />
         </Suspense>

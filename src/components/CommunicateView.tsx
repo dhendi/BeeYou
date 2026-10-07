@@ -27,7 +27,7 @@ export const CommunicateView: React.FC = () => {
     setShowAboutMeModal,
     setShowPassportModal,
     setShowQuickPhrasesDrawer,
-    setShowAacKeyboard,
+    setShowAacKeyboardModal,
     speak,
     quickPhrases,
     activeTheme,
@@ -127,7 +127,7 @@ export const CommunicateView: React.FC = () => {
       color: 'border-stone-300 bg-stone-50/70 hover:bg-stone-100/70 text-stone-900',
       iconColor: 'bg-stone-700 text-white',
       action: () => {
-        setShowAacKeyboard(true);
+        setShowAacKeyboardModal(true);
         playChime('tap');
       },
     },

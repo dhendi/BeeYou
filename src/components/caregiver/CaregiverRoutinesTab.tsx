@@ -45,7 +45,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
     addRoutine({
       title: newRoutineTitle.trim(),
-      category: newRoutineCategory,
+      category: newRoutineCategory as any,
       emoji: newRoutineEmoji,
       time: newRoutineTime,
       firstThen: {

@@ -4,7 +4,7 @@ import { X, Lock, KeyRound, Check, Users } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 export const PinModal: React.FC = () => {
-  const { showPinModal, setShowPinModal, setIsParentMode, settings } = useApp();
+  const { showPinModal, setShowPinModal, setIsParentMode, settings, setShowFamilyAuthModal } = useApp();
   const [pinInput, setPinInput] = useState('');
   const [error, setError] = useState(false);
 

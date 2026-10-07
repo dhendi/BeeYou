@@ -601,19 +601,6 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             <span className="text-[10px] text-slate-400 block mt-0.5">1.0 preserves human resonance</span>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">Language:</label>
-            <select
-              value={settings.language}
-              onChange={(e) => updateSettings({ language: e.target.value as any })}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
-            >
-              <option value="en">English (US)</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="fil">Filipino</option>
-            </select>
-          </div>
         </div>
 
         <div className="pt-2 flex flex-wrap items-center gap-3">

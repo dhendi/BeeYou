@@ -285,7 +285,7 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
   const myTabId = getTabId();
   const eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-  const envelope = {
+  const envelope: any = {
     ...eventData,
     eventId,
     senderDeviceId: myDeviceId,
@@ -1251,9 +1251,10 @@ export async function sendCaregiverAlert(alertData: {
 /**
  * Fires a test alert to verify real-time caregiver delivery, sound, and visual indicators
  */
-export async function sendTestCaregiverAlert(childName = 'Leo'): Promise<CaregiverAlert> {
+export async function sendTestCaregiverAlert(pairingCodeOrChildName = 'Leo', childName?: string): Promise<CaregiverAlert> {
+  const actualName = childName || (pairingCodeOrChildName.length > 10 ? 'Child' : pairingCodeOrChildName) || 'Leo';
   return await sendCaregiverAlert({
-    childName,
+    childName: actualName,
     emotion: 'need_help',
     alertId: 'need_help',
     label: 'Test Emergency Alert',

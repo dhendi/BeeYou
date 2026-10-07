@@ -685,15 +685,13 @@ export const ParentDashboard: React.FC = () => {
           {activeTab === 'home' && (
             <CaregiverLiveHubTab
               activeAlerts={activeAlerts}
+              setActiveAlerts={setActiveAlerts}
               liveChildStatus={liveChildStatus}
-              currentMood={currentMood}
-              onNavigateTab={(tab) => setActiveTab(tab as TabType)}
-              onSendQuickNudge={handleSendQuickNudge}
-              onAcknowledgeAlert={handleAcknowledgeAlert}
-              onTriggerTestAlert={handleTriggerTestAlert}
-              onOpenCaregiverModal={() => setShowCaregiverModal(true)}
-              onShowFamilyAuthModal={() => setShowFamilyAuthModal(true)}
-              onShowNotification={showNotification}
+              setAlertHistoryList={setAlertHistoryList}
+              setShowFamilyAuthModal={setShowFamilyAuthModal}
+              setShowCameraScanner={setShowCameraScanner}
+              setActiveTab={(tab: any) => setActiveTab(tab)}
+              showNotification={showNotification}
               onStartTour={() => handleStartSectionTour('liveStatus')}
             />
           )}
@@ -702,12 +700,11 @@ export const ParentDashboard: React.FC = () => {
           {activeTab === 'alerts' && (
             <CaregiverAlertsTab
               activeAlerts={activeAlerts}
+              setActiveAlerts={setActiveAlerts}
               alertHistoryList={alertHistoryList}
-              onAcknowledgeAlert={handleAcknowledgeAlert}
-              onResolveAlert={handleResolveAlert}
-              onClearAlertHistory={handleClearAlertHistory}
-              onTriggerTestAlert={handleTriggerTestAlert}
-              onShowNotification={showNotification}
+              setAlertHistoryList={setAlertHistoryList}
+              setActiveTab={(tab: any) => setActiveTab(tab)}
+              showNotification={showNotification}
               onStartTour={() => handleStartSectionTour('alerts')}
             />
           )}

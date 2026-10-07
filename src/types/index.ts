@@ -450,6 +450,7 @@ export interface EnabledFeatures {
   emotions?: boolean;
   caregiverMessaging?: boolean;
   spoonBudget?: boolean;
+  morningBrief?: boolean;
 }
 
 export const DEFAULT_KID_FEATURES: EnabledFeatures = {

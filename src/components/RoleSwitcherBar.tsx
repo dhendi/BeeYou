@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { setActiveDeviceView } from '../services/authService';
 import { 
   Smartphone, 
   Crown, 

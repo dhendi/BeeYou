@@ -106,7 +106,7 @@ export const MeView: React.FC = () => {
       id: 'spoon-budget',
       title: 'Spoon Energy Budget',
       desc: todaySpoon 
-        ? `${todaySpoon.remainingSpoons} of ${todaySpoon.totalSpoons} spoons remaining today.`
+        ? `${Math.max(0, todaySpoon.totalSpoons - todaySpoon.usedSpoons)} of ${todaySpoon.totalSpoons} spoons remaining today.`
         : 'Check your morning stamina and manage energy costs for the day.',
       emoji: '🥄',
       icon: BatteryCharging,

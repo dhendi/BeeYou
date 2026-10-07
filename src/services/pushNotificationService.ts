@@ -65,7 +65,7 @@ class PushNotificationService {
       ? [300, 100, 300, 100, 500, 150, 500] 
       : [150, 75, 150];
 
-    const notificationOptions: NotificationOptions = {
+    const notificationOptions: any = {
       body: payload.body,
       icon: payload.icon || '/icon.svg',
       badge: payload.badge || '/icon.svg',

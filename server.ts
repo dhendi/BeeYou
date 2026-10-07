@@ -82,6 +82,8 @@ interface CaregiverSessionData {
   userRole?: string;
   permissions?: any;
   unlinked?: boolean;
+  lastChildActiveTime?: string;
+  lastCaregiverActiveTime?: string;
 }
 
 const caregiverSessions = new Map<string, CaregiverSessionData>();
