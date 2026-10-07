@@ -583,7 +583,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onChange={(e) => updateSettings({ voiceRate: parseFloat(e.target.value) })}
               className="w-full accent-indigo-600 cursor-pointer"
             />
-            <span className="text-[10px] text-slate-400 block mt-0.5">{t("0.96x sounds most natural")}</span>
+            <span className="text-[10px] text-slate-400 block mt-0.5">{t("0.85x is calm & clear")}</span>
           </div>
 
           <div>

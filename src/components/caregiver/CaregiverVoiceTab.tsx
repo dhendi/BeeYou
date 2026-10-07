@@ -175,7 +175,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
           <div>
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
               <span>Pacing / Speed: {settings.voiceRate.toFixed(2)}x</span>
-              <span className="text-[10px] text-slate-400 font-normal">{t("0.96x is conversational")}</span>
+              <span className="text-[10px] text-slate-400 font-normal">{t("0.85x is calm & clear")}</span>
             </div>
             <input
               type="range"

@@ -1467,7 +1467,11 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         if (parsed.avatar) setAvatar(parsed.avatar);
         if (parsed.childProfile) setChildProfile(parsed.childProfile);
         if (parsed.settings) {
-          setSettings({ ...INITIAL_APP_SETTINGS, ...parsed.settings });
+          const loaded = { ...INITIAL_APP_SETTINGS, ...parsed.settings };
+          if (loaded.voiceRate >= 0.95) {
+            loaded.voiceRate = 0.85;
+          }
+          setSettings(loaded);
         }
       }
     } catch (e) {

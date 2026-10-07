@@ -440,10 +440,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                      Speech Rate ({settings.voiceRate}x)
+                      Speech Rate ({settings.voiceRate.toFixed(2)}x)
                     </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                      Adjust speech speed to be slower and clearer or faster.
+                      Adjust speech speed to be slower and clearer or faster (0.85x recommended).
                     </p>
                   </div>
                   <button

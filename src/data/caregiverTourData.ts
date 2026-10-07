@@ -460,7 +460,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
       {
         targetSelector: '[data-tour="voice-pitch-rate-controls"]',
         title: 'Interactive Testing & Sliders',
-        instruction: 'Type custom test phrases and adjust conversational pacing (0.96x) and natural pitch (1.0).',
+        instruction: 'Type custom test phrases and adjust conversational pacing (0.85x) and natural pitch (1.0).',
         mascotHint: 'Adjust speed and pitch until it sounds natural! 🎚️',
       },
       {

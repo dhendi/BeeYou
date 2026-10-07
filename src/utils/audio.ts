@@ -2049,7 +2049,7 @@ export async function speakText(
     if (audioMemoryCache.has(cacheKey)) {
       try {
         const audioSrc = audioMemoryCache.get(cacheKey)!;
-        await playAudioUrl(audioSrc, formattedText);
+        await playAudioUrl(audioSrc, formattedText, options?.rate);
         return;
       } catch (e) {
         // Fallback to device speech synthesis below
@@ -2064,11 +2064,12 @@ export async function speakText(
 /**
  * Audio playback helper for base64 / audio URL
  */
-function playAudioUrl(src: string, originalText: string): Promise<void> {
+function playAudioUrl(src: string, originalText: string, rate?: number): Promise<void> {
   return new Promise((resolve) => {
     try {
       stopSpeaking();
       const audio = new Audio(src);
+      audio.playbackRate = Math.max(0.65, Math.min(1.2, rate ?? 0.85));
       activeAudioElement = audio;
       notifySpeechState(true, originalText);
 
@@ -2150,15 +2151,16 @@ function speakWithBrowserSpeechSynthesis(
       activeUtterance = utterance;
       activeUtterancesSet.add(utterance);
 
-      // Natural Human Cadence Calibration
+      // Natural Human Cadence Calibration (Deliberate & gentle for AAC clarity)
       utterance.pitch = Math.max(0.85, Math.min(1.15, options?.pitch ?? 1.0));
-      utterance.rate = Math.max(0.7, Math.min(1.3, options?.rate ?? 0.96));
+      utterance.rate = Math.max(0.65, Math.min(1.2, options?.rate ?? 0.85));
 
       const langMap: Record<string, string> = {
         en: 'en-US',
         es: 'es-ES',
-        fr: 'fr-FR',
+        fr: 'fr-CA',
         fil: 'fil-PH',
+        ja: 'ja-JP',
       };
       const targetLang = langMap[options?.lang ?? 'en'] || 'en-US';
       utterance.lang = targetLang;

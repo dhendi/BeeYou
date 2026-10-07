@@ -121,7 +121,7 @@ export const INITIAL_CHILD_PROFILE: ChildProfile = {
 
 export const INITIAL_APP_SETTINGS: AppSettings = {
   pin: '1234',
-  voiceRate: 0.96,
+  voiceRate: 0.85,
   voicePitch: 1.0,
   selectedVoiceURI: '',
   voicePersona: 'Kore',
