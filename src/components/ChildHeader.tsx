@@ -12,10 +12,16 @@ import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
 import { setActiveDeviceView } from '../services/authService';
 import { t } from '../services/translator';
-import { LanguagePickerModal } from './LanguagePickerModal';
+
+const LANGUAGE_LIST: Array<{ code: 'en' | 'fil' | 'es' | 'fr' | 'ja'; label: string; nextLabel: string }> = [
+  { code: 'en', label: '🇺🇸 EN', nextLabel: 'Filipino' },
+  { code: 'fil', label: '🇵🇭 FIL', nextLabel: 'Español' },
+  { code: 'es', label: '🇪🇸 ES', nextLabel: 'Français' },
+  { code: 'fr', label: '🇨🇦 FR', nextLabel: '日本語' },
+  { code: 'ja', label: '🇯🇵 JA', nextLabel: 'English' },
+];
 
 export const ChildHeader: React.FC = () => {
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const {
     settings,
     updateSettings,
@@ -79,21 +85,21 @@ export const ChildHeader: React.FC = () => {
 
       {/* Right: Streamlined Compact Actions */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        {/* 1-Tap Language Selector */}
+        {/* 1-Tap In-Place Language Toggle */}
         <button
           type="button"
           onClick={() => {
-            setShowLanguageModal(true);
+            const currentIndex = LANGUAGE_LIST.findIndex(l => l.code === settings.language);
+            const nextIndex = (currentIndex + 1) % LANGUAGE_LIST.length;
+            const nextItem = LANGUAGE_LIST[nextIndex >= 0 ? nextIndex : 0];
+            updateSettings({ language: nextItem.code });
             playChime('tap');
           }}
-          className="flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-          title={t('Choose Language')}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+          title={`Language: ${LANGUAGE_LIST.find(l => l.code === settings.language)?.label || 'EN'}. Tap to switch to ${LANGUAGE_LIST[(LANGUAGE_LIST.findIndex(l => l.code === settings.language) + 1) % LANGUAGE_LIST.length]?.nextLabel || 'next language'}.`}
         >
           <span>
-            {settings.language === 'fil' ? '🇵🇭 FIL' :
-             settings.language === 'es' ? '🇪🇸 ES' :
-             settings.language === 'fr' ? '🇨🇦 FR' :
-             settings.language === 'ja' ? '🇯🇵 JA' : '🇺🇸 EN'}
+            {LANGUAGE_LIST.find(l => l.code === settings.language)?.label || '🇺🇸 EN'}
           </span>
         </button>
 
@@ -159,12 +165,6 @@ export const ChildHeader: React.FC = () => {
           <Lock className="w-3 h-3 text-stone-500" />
         </button>
       </div>
-
-      {/* Language Picker Modal */}
-      <LanguagePickerModal
-        isOpen={showLanguageModal}
-        onClose={() => setShowLanguageModal(false)}
-      />
     </header>
   );
 };

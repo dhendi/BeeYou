@@ -30,8 +30,15 @@ import { t } from '../services/translator';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
-import { LanguagePickerModal } from './LanguagePickerModal';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
+
+const LANGUAGE_LIST: Array<{ code: 'en' | 'fil' | 'es' | 'fr' | 'ja'; label: string; nextLabel: string }> = [
+  { code: 'en', label: '🇺🇸 EN', nextLabel: 'Filipino' },
+  { code: 'fil', label: '🇵🇭 FIL', nextLabel: 'Español' },
+  { code: 'es', label: '🇪🇸 ES', nextLabel: 'Français' },
+  { code: 'fr', label: '🇨🇦 FR', nextLabel: '日本語' },
+  { code: 'ja', label: '🇯🇵 JA', nextLabel: 'English' },
+];
 import {
   getPairingCode,
   subscribeToCloudChannel,
@@ -123,7 +130,6 @@ export const ParentDashboard: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCaregiverTour, setShowCaregiverTour] = useState(false);
   const [showTourDirectoryModal, setShowTourDirectoryModal] = useState(false);
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [activeTourSteps, setActiveTourSteps] = useState<CoachMarkStep[]>(() => SECTION_TOURS.fullApp.steps);
   const [currentTourName, setCurrentTourName] = useState<string>('Caregiver App Overview');
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
@@ -518,21 +524,21 @@ export const ParentDashboard: React.FC = () => {
 
         {/* Right: Feature Guide & Plans Changed Status */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* 1-Tap Language Selector */}
+          {/* 1-Tap In-Place Language Toggle */}
           <button
             type="button"
             onClick={() => {
-              setShowLanguageModal(true);
+              const currentIndex = LANGUAGE_LIST.findIndex(l => l.code === settings.language);
+              const nextIndex = (currentIndex + 1) % LANGUAGE_LIST.length;
+              const nextItem = LANGUAGE_LIST[nextIndex >= 0 ? nextIndex : 0];
+              updateSettings({ language: nextItem.code });
               playChime('tap');
             }}
             className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs border border-amber-300/80 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-            title={t('Choose Language')}
+            title={`Language: ${LANGUAGE_LIST.find(l => l.code === settings.language)?.label || 'EN'}. Tap to switch to ${LANGUAGE_LIST[(LANGUAGE_LIST.findIndex(l => l.code === settings.language) + 1) % LANGUAGE_LIST.length]?.nextLabel || 'next language'}.`}
           >
             <span>
-              {settings.language === 'fil' ? '🇵🇭 FIL' :
-               settings.language === 'es' ? '🇪🇸 ES' :
-               settings.language === 'fr' ? '🇨🇦 FR' :
-               settings.language === 'ja' ? '🇯🇵 JA' : '🇺🇸 EN'}
+              {LANGUAGE_LIST.find(l => l.code === settings.language)?.label || '🇺🇸 EN'}
             </span>
           </button>
 
@@ -905,12 +911,6 @@ export const ParentDashboard: React.FC = () => {
         onComplete={() => setShowCaregiverTour(false)}
         onSkip={() => setShowCaregiverTour(false)}
         tourName={currentTourName}
-      />
-
-      {/* Language Picker Modal */}
-      <LanguagePickerModal
-        isOpen={showLanguageModal}
-        onClose={() => setShowLanguageModal(false)}
       />
     </div>
   );
