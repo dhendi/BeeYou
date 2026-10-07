@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
+import { t } from '../services/translator';
 
 export const FeelingsView: React.FC = () => {
   const {
@@ -112,7 +113,7 @@ export const FeelingsView: React.FC = () => {
           }`}
         >
           <Smile className="w-4 h-4 text-[#E2A44E]" />
-          <span>Feelings</span>
+          <span>{t('Feelings')}</span>
         </button>
 
         {showMoodJournalTab && (
@@ -129,7 +130,7 @@ export const FeelingsView: React.FC = () => {
             }`}
           >
             <BookOpen className="w-4 h-4 text-[#8A79B8]" />
-            <span>Journal ({moodJournalEntries.length})</span>
+            <span>{t('Journal')} ({moodJournalEntries.length})</span>
           </button>
         )}
 
@@ -148,7 +149,7 @@ export const FeelingsView: React.FC = () => {
           >
             <HeartPulse className="w-4 h-4 text-[#D57B7B]" />
             <span>
-              {cycleSettings.discreetMode ? 'Rhythm' : `Day ${cyclePhaseInfo?.currentCycleDay || 1}`}
+              {cycleSettings.discreetMode ? t('Rhythm') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
             </span>
           </button>
         )}
@@ -166,7 +167,7 @@ export const FeelingsView: React.FC = () => {
           }`}
         >
           <BarChart3 className="w-4 h-4 text-[#5B7BB2]" />
-          <span>Reflections ({dailyRecollections.length})</span>
+          <span>{t('Reflections')} ({dailyRecollections.length})</span>
         </button>
 
         <button
@@ -179,7 +180,7 @@ export const FeelingsView: React.FC = () => {
           title="Open 5-Point Emotional Scale"
         >
           <span>🌡️</span>
-          <span>Scale</span>
+          <span>{t('Scale')}</span>
         </button>
       </div>
 
@@ -314,10 +315,10 @@ export const FeelingsView: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-[#E0D8CB]">
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#2D241E] tracking-tight">
-                How are you feeling?
+                {t('How are you feeling?')}
               </h2>
               <p className="text-xs text-[#7A6C60] font-medium mt-0.5">
-                Select your feeling to share how you feel and find calming tools.
+                {t('Select your feeling to share how you feel and find calming tools.')}
               </p>
             </div>
 
@@ -327,7 +328,7 @@ export const FeelingsView: React.FC = () => {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] border-2 border-[#85AE8E] font-black text-xs active:scale-95 transition-all cursor-pointer shadow-[0_3px_8px_rgba(153,194,162,0.35),inset_0_1px_0.5px_rgba(255,255,255,0.8)]"
               >
                 <Wind className="w-3.5 h-3.5 text-[#1C3E25]" />
-                <span>Calm Tools</span>
+                <span>{t('Calm Tools')}</span>
               </button>
             </div>
           </div>
@@ -356,7 +357,7 @@ export const FeelingsView: React.FC = () => {
                     className="font-black text-xs sm:text-sm tracking-tight text-center leading-tight"
                     style={{ color: emo.color }}
                   >
-                    {emo.label}
+                    {t(emo.label)}
                   </span>
                 </button>
               );
@@ -367,7 +368,7 @@ export const FeelingsView: React.FC = () => {
           {selectedEmotion && (
             <div className="bg-[#FCF9F2] p-4 sm:p-5 rounded-3xl border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3 animate-in fade-in duration-200">
               <h3 className="text-xs font-black text-[#8C7E72] uppercase tracking-wider">
-                What happened? (Optional)
+                {t('What happened? (Optional)')}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {reasons.map((r, idx) => (
@@ -384,7 +385,7 @@ export const FeelingsView: React.FC = () => {
                     }`}
                   >
                     <span className="text-xl">{r.emoji}</span>
-                    <span>{r.text}</span>
+                    <span>{t(r.text)}</span>
                   </button>
                 ))}
               </div>
@@ -395,7 +396,7 @@ export const FeelingsView: React.FC = () => {
           {selectedEmotion && (
             <div className="bg-[#FCF9F2] p-4 sm:p-5 rounded-3xl border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3 animate-in fade-in duration-200">
               <h3 className="text-xs font-black text-[#8C7E72] uppercase tracking-wider">
-                What would help you right now?
+                {t('What would help you right now?')}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {needs.map((n, idx) => (
@@ -415,10 +416,10 @@ export const FeelingsView: React.FC = () => {
                     }`}
                   >
                     <span className="text-xl">{n.emoji}</span>
-                    <span className="flex-1">{n.text}</span>
+                    <span className="flex-1">{t(n.text)}</span>
                     {n.action === 'toolkit' && (
                       <span className="text-[10px] font-black text-[#1C3E25] bg-[#C4E7D4] border border-[#99C2A2] px-2 py-0.5 rounded-lg">
-                        Toolkit
+                        {t('Toolkit')}
                       </span>
                     )}
                   </button>
@@ -436,7 +437,7 @@ export const FeelingsView: React.FC = () => {
                   className="flex-1 py-3.5 px-6 rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-sm sm:text-base shadow-[0_4px_14px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <CheckCircle2 className="w-5 h-5 text-[#4A2F0F]" />
-                  <span>Save Check-In</span>
+                  <span>{t('Save Check-In')}</span>
                 </button>
                 <button
                   type="button"
@@ -454,7 +455,7 @@ export const FeelingsView: React.FC = () => {
               {savedCheckIn && (
                 <p className="text-xs font-black text-[#1C3E25] bg-[#EAF6ED] border border-[#99C2A2] px-3 py-1.5 rounded-xl mt-2 flex items-center gap-1.5 animate-in fade-in">
                   <CheckCircle2 className="w-4 h-4 text-[#85AE8E]" />
-                  <span>Check-in recorded! You are taking great care of yourself.</span>
+                  <span>{t('Check-in recorded! You are taking great care of yourself.')}</span>
                 </p>
               )}
             </div>

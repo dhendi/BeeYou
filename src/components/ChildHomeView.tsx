@@ -227,15 +227,15 @@ export const ChildHomeView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
-                Hi, {childProfile.name}!
+                {t('Hi')}, {childProfile.name}!
               </h2>
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-[#F5B865]" />
-                {worldState.stars} Coins
+                {worldState.stars} {t('Coins')}
               </span>
             </div>
             <p className="text-xs text-[#7A6C60] font-semibold">
-              You can be yourself here • Today's Dashboard
+              {t('You can be yourself here')} • {t("Today's Dashboard")}
             </p>
           </div>
         </div>
@@ -252,7 +252,7 @@ export const ChildHomeView: React.FC = () => {
             title="Customize and reorder dashboard widgets"
           >
             <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" />
-            <span>Customize Dashboard ✏️</span>
+            <span>{t('Customize Dashboard')} ✏️</span>
           </button>
 
           {/* Quick Tools Hub Button */}
@@ -346,10 +346,10 @@ export const ChildHomeView: React.FC = () => {
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none">
-                        Hi, {childProfile.name}! 🐝
+                        {t('Hi')}, {childProfile.name}! 🐝
                       </h2>
                       <p className="text-xs text-[#7A6C60] font-bold mt-1">
-                        You can be yourself here
+                        {t('You can be yourself here')}
                       </p>
                     </div>
                   </div>
@@ -378,7 +378,7 @@ export const ChildHomeView: React.FC = () => {
                     className="py-3.5 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#E2A44E]"
                   >
                     <span>💬</span>
-                    <span>Talk</span>
+                    <span>{t('Talk')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -388,7 +388,7 @@ export const ChildHomeView: React.FC = () => {
                     className="py-3.5 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#85AE8E]"
                   >
                     <span>🛋️</span>
-                    <span>Calm down</span>
+                    <span>{t('Calm down')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -398,7 +398,7 @@ export const ChildHomeView: React.FC = () => {
                     className="py-3.5 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#D57B7B]"
                   >
                     <span>🆘</span>
-                    <span>I need help</span>
+                    <span>{t('I need help')}</span>
                   </button>
                 </div>
               ) : null;
@@ -413,13 +413,13 @@ export const ChildHomeView: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black uppercase tracking-wider text-[#8C7E72]">
-                      Today's Schedule • {currentRoutine.title}
+                      {t("Today's Schedule")} • {t(currentRoutine.title)}
                     </span>
                     <button
                       onClick={() => setChildView('my-day')}
                       className="text-xs font-black text-[#4A2F0F] hover:text-[#2D241E] flex items-center gap-1 cursor-pointer"
                     >
-                      <span>Open Schedule</span>
+                      <span>{t('Open Schedule')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -429,7 +429,7 @@ export const ChildHomeView: React.FC = () => {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="text-xl">🪥</span>
                         <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
-                          {currentRoutine.firstThen?.first ? `First: ${currentRoutine.firstThen.first}` : 'First: Brush teeth'}
+                          {currentRoutine.firstThen?.first ? `${t('First')}: ${t(currentRoutine.firstThen.first)}` : `${t('First')}: ${t('Brush teeth')}`}
                         </span>
                       </div>
                       <span className="w-6 h-6 rounded-full bg-[#C4E7D4] text-[#1C3E25] font-black text-xs flex items-center justify-center shrink-0 border border-[#99C2A2]">
@@ -441,7 +441,7 @@ export const ChildHomeView: React.FC = () => {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="text-xl">📱</span>
                         <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
-                          {currentRoutine.firstThen?.then ? `Then: ${currentRoutine.firstThen.then}` : 'Then: Tablet time (15 min)'}
+                          {currentRoutine.firstThen?.then ? `${t('Then')}: ${t(currentRoutine.firstThen.then)}` : `${t('Then')}: ${t('Tablet time (15 min)')}`}
                         </span>
                       </div>
                       <span className="w-6 h-6 rounded-full bg-[#EAE2D5] text-[#8C7E72] font-black text-xs flex items-center justify-center shrink-0 border border-[#D8CEBA]">
@@ -715,7 +715,7 @@ export const ChildHomeView: React.FC = () => {
                     onClick={() => setChildView('aac')}
                     className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer bg-stone-200/60 hover:bg-stone-200 px-3 py-1 rounded-xl transition-all"
                   >
-                    <span>Full Vocabulary Board</span>
+                    <span>{t('Full Vocabulary Board')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -755,7 +755,7 @@ export const ChildHomeView: React.FC = () => {
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-amber-600" />
-                    <span>Instant Voice Output is active. Tap any tile above to speak aloud.</span>
+                    <span>{t('Instant Voice Output is active. Tap any tile above to speak aloud.')}</span>
                   </div>
                 </div>
               </div>
@@ -772,7 +772,7 @@ export const ChildHomeView: React.FC = () => {
                   className="w-full py-3 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-1"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>＋ Customize / Reorder Dashboard Widgets</span>
+                  <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
                 </button>
               </div>
             </div>

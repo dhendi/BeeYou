@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
+import { t } from '../services/translator';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { VisualScheduleStep } from '../types';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -298,7 +299,7 @@ export const MyDayView: React.FC = () => {
               }`}
               title="Focus on one activity at a time"
             >
-              <span>🎯 One at a Time</span>
+              <span>🎯 {t('One at a Time')}</span>
             </button>
 
             <button
@@ -314,7 +315,7 @@ export const MyDayView: React.FC = () => {
               }`}
               title="View full schedule checklist"
             >
-              <span>📋 Full List</span>
+              <span>📋 {t('Full List')}</span>
             </button>
           </div>
 
@@ -328,7 +329,7 @@ export const MyDayView: React.FC = () => {
             title="Interactive live tutorial on where to click"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Help Me</span>
+            <span>{t('Help Me')}</span>
           </button>
 
           <ContextualHelpButton topic="schedules" label="Guide" variant="pill" />
@@ -356,7 +357,7 @@ export const MyDayView: React.FC = () => {
               }`}
             >
               <span className="text-lg">{routine.emoji}</span>
-              <span>{routine.title}</span>
+              <span>{t(routine.title)}</span>
               {isAllDone && <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-100" />}
             </button>
           );
@@ -371,8 +372,8 @@ export const MyDayView: React.FC = () => {
           className="bg-[#FCF9F2] border border-[#EBE3D5] rounded-[28px] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]"
         >
           <div className="text-[11px] font-black uppercase tracking-wider text-stone-500 mb-2.5 flex items-center justify-between">
-            <span>First → Then Routine Flow</span>
-            <span className="text-stone-400 font-bold">Tap when completed!</span>
+            <span>{t('First → Then Routine Flow')}</span>
+            <span className="text-stone-400 font-bold">{t('Tap when completed!')}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
@@ -391,10 +392,10 @@ export const MyDayView: React.FC = () => {
               <span className="text-3xl">{currentRoutine.firstThen.firstEmoji}</span>
               <div className="flex-1">
                 <span className="text-[10px] font-black text-sky-700 uppercase tracking-wider block">
-                  First
+                  {t('First')}
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
-                  {currentRoutine.firstThen.first}
+                  {t(currentRoutine.firstThen.first)}
                 </span>
               </div>
               {currentRoutine.firstThen.completedFirst ? (
@@ -419,10 +420,10 @@ export const MyDayView: React.FC = () => {
               <span className="text-3xl">{currentRoutine.firstThen.thenEmoji}</span>
               <div className="flex-1">
                 <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider block">
-                  Then
+                  {t('Then')}
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
-                  {currentRoutine.firstThen.then}
+                  {t(currentRoutine.firstThen.then)}
                 </span>
               </div>
               {currentRoutine.firstThen.completedThen ? (
@@ -473,7 +474,7 @@ export const MyDayView: React.FC = () => {
             title="Reset routine"
           >
             <RotateCcw className="w-4 h-4" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">{t('Reset')}</span>
           </button>
         </div>
 
@@ -494,14 +495,14 @@ export const MyDayView: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
-                  {isRoutineCompleted ? '🎉 Sticker Unlocked!' : '🎁 Routine Completion Reward'}
+                  {isRoutineCompleted ? `🎉 ${t('Sticker Unlocked!')}` : `🎁 ${t('Routine Completion Reward')}`}
                 </span>
                 <span className="text-[11px] font-bold text-amber-800">
-                  +{routineStickerDef.starsAward} Stars
+                  +{routineStickerDef.starsAward} {t('Stars')}
                 </span>
               </div>
               <p className="font-black text-xs sm:text-sm text-stone-900 mt-0.5">
-                {routineStickerDef.stickerName}: <span className="text-stone-500 font-medium">{routineStickerDef.description}</span>
+                {t(routineStickerDef.stickerName)}: <span className="text-stone-500 font-medium">{t(routineStickerDef.description)}</span>
               </p>
             </div>
           </div>
@@ -514,7 +515,7 @@ export const MyDayView: React.FC = () => {
             }}
             className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-stone-900 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs"
           >
-            <span>Sticker Album ({earnedStickers.length})</span>
+            <span>{t('Sticker Album')} ({earnedStickers.length})</span>
             <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
           </button>
         </div>
@@ -535,11 +536,11 @@ export const MyDayView: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="px-3 py-1 rounded-full bg-[#F5B865] text-stone-950 font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-2xs border border-[#E2A44E]">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>NOW • Step {activeStepIndex + 1} of {totalStepsCount}</span>
+                    <span>{t('NOW')} • {t('Step')} {activeStepIndex + 1} of {totalStepsCount}</span>
                   </span>
                   {activeStep.durationMin && (
                     <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-950 font-black text-xs">
-                      ⏱️ {activeStep.durationMin} minutes
+                      ⏱️ {activeStep.durationMin} {t('minutes')}
                     </span>
                   )}
                 </div>
@@ -551,11 +552,11 @@ export const MyDayView: React.FC = () => {
 
                   <div className="flex-1 space-y-1.5">
                     <h3 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
-                      {activeStep.title}
+                      {t(activeStep.title)}
                     </h3>
                     {activeStep.instruction && (
                       <p className="text-sm sm:text-base text-stone-600 font-medium">
-                        {activeStep.instruction}
+                        {t(activeStep.instruction)}
                       </p>
                     )}
                     {activeStep.sensoryNote && (
@@ -576,7 +577,7 @@ export const MyDayView: React.FC = () => {
                     className="py-3.5 px-4 rounded-2xl bg-[#FDE293] hover:bg-[#F6D06F] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#F6D06F]"
                   >
                     <Timer className="w-5 h-5" />
-                    <span>Start Timer ({activeStep.durationMin || 2}m)</span>
+                    <span>{t('Start Timer')} ({activeStep.durationMin || 2}m)</span>
                   </button>
 
                   <button
@@ -589,7 +590,7 @@ export const MyDayView: React.FC = () => {
                     className="py-3.5 px-4 rounded-2xl bg-[#99C2A2] hover:bg-[#8BB594] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#85AE8E]"
                   >
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>✓ Mark as Done!</span>
+                    <span>✓ {t('Mark as Done!')}</span>
                   </button>
                 </div>
               </div>

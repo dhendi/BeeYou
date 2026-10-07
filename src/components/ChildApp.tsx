@@ -8,6 +8,7 @@ import { ShieldAlert } from 'lucide-react';
 import { AppProvider, useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
 import { ChildHeader } from './ChildHeader';
+import { t } from '../services/translator';
 import { ChildNavBar } from './ChildNavBar';
 import { ChildHomeView } from './ChildHomeView';
 import { AACView } from './AACView';
@@ -197,7 +198,7 @@ const ChildAppContent: React.FC = () => {
             <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-4 h-4 text-white" />
             </div>
-            <span className="tracking-wide">Alert Caregiver 🚨</span>
+            <span className="tracking-wide">{t('Alert Caregiver')} 🚨</span>
           </button>
         </div>
       )}

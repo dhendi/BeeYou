@@ -14,6 +14,7 @@ import { playChime } from '../utils/audio';
 import { MyDayView } from './MyDayView';
 import { AdventuresView } from './AdventuresView';
 import { SkillsView } from './SkillsView';
+import { t } from '../services/translator';
 
 export const MyRoutineView: React.FC = () => {
   const {
@@ -56,7 +57,7 @@ export const MyRoutineView: React.FC = () => {
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Schedules</span>
+            <span>{t('Schedules')}</span>
           </button>
 
           {enabledFeatures?.socialStories !== false && (
@@ -74,7 +75,7 @@ export const MyRoutineView: React.FC = () => {
               }`}
             >
               <Compass className="w-3.5 h-3.5" />
-              <span>{userAgeGroup === 'adult' ? 'Guides' : userAgeGroup === 'teen' ? 'Scenarios' : 'Adventures'}</span>
+              <span>{userAgeGroup === 'adult' ? t('Guides') : userAgeGroup === 'teen' ? t('Scenarios') : t('Adventures')}</span>
             </button>
           )}
 
@@ -93,7 +94,7 @@ export const MyRoutineView: React.FC = () => {
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Life Skills</span>
+              <span>{t('Life Skills')}</span>
             </button>
           )}
         </div>
@@ -114,8 +115,8 @@ export const MyRoutineView: React.FC = () => {
             title="Plans Changed transition tool"
           >
             <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Plans Changed</span>
-            <span className="sm:hidden">Plans</span>
+            <span className="hidden sm:inline">{t('Plans Changed')}</span>
+            <span className="sm:hidden">{t('Plans')}</span>
           </button>
 
           <button
@@ -128,7 +129,7 @@ export const MyRoutineView: React.FC = () => {
             title="Visual Countdown Timer"
           >
             <Clock className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="hidden sm:inline">Timer</span>
+            <span className="hidden sm:inline">{t('Timer')}</span>
           </button>
 
           <button
@@ -141,7 +142,7 @@ export const MyRoutineView: React.FC = () => {
             title="Morning Briefing"
           >
             <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Brief</span>
+            <span className="hidden sm:inline">{t('Brief')}</span>
           </button>
         </div>
       </div>

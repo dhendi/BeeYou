@@ -16,6 +16,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const CommunicateView: React.FC = () => {
   const {
@@ -139,10 +140,10 @@ export const CommunicateView: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Communicate 💬
+            {t('Communicate')} 💬
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
-            Ways to express yourself, connect with caregivers, and share your ID.
+            {t('Ways to express yourself, connect with caregivers, and share your ID.')}
           </p>
         </div>
       </header>
@@ -154,7 +155,7 @@ export const CommunicateView: React.FC = () => {
             type="text"
             value={customText}
             onChange={(e) => setCustomText(e.target.value)}
-            placeholder="Type anything to speak out loud..."
+            placeholder={t('Type anything to speak out loud...')}
             className="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-amber-400 focus:bg-white text-slate-900 font-bold text-xs sm:text-sm outline-none transition-all"
           />
           {customText && (
@@ -173,7 +174,7 @@ export const CommunicateView: React.FC = () => {
           className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
         >
           <Volume2 className="w-4 h-4" />
-          <span>Speak</span>
+          <span>{t('Speak')}</span>
         </button>
       </form>
 
@@ -193,16 +194,16 @@ export const CommunicateView: React.FC = () => {
                     <Icon className="w-5 h-5 stroke-[2.4]" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black leading-tight">{card.title}</h3>
+                    <h3 className="text-base font-black leading-tight">{t(card.title)}</h3>
                     <span className="text-[10px] font-black uppercase tracking-wider opacity-75">
-                      {card.badge}
+                      {t(card.badge)}
                     </span>
                   </div>
                 </div>
                 <span className="text-xl" aria-hidden="true">{card.emoji}</span>
               </div>
               <p className="text-xs font-medium leading-relaxed opacity-90">
-                {card.desc}
+                {t(card.desc)}
               </p>
             </button>
           );

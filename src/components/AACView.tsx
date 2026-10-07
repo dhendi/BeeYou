@@ -771,7 +771,7 @@ export const AACView: React.FC = () => {
                       <span className="w-1.5 h-4.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                       <span className="w-1.5 h-2.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
-                    <span>STOP</span>
+                    <span>{t('STOP')}</span>
                   </button>
                 ) : (
                   <button
@@ -784,7 +784,7 @@ export const AACView: React.FC = () => {
                     }`}
                   >
                     <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>SPEAK</span>
+                    <span>{t('SPEAK')}</span>
                   </button>
                 )}
 
@@ -804,14 +804,14 @@ export const AACView: React.FC = () => {
         {isSentenceBarCollapsed && (
           <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 text-xs font-bold text-[#6B5E52] shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
             <span className="flex items-center gap-1.5">
-              <span>💬 Sentence Bar Minimized</span>
-              {instantSpeakMode && <span className="text-[#A76318] font-black">(⚡ Instant Speak is Active)</span>}
+              <span>💬 {t('Sentence Bar Minimized')}</span>
+              {instantSpeakMode && <span className="text-[#A76318] font-black">({t('Instant Speak is Active')})</span>}
             </span>
             <button
               onClick={() => setIsSentenceBarCollapsed(false)}
               className="flex items-center gap-1 text-[#8B571A] hover:underline cursor-pointer font-black"
             >
-              <span>Show Bar</span>
+              <span>{t('Show Bar')}</span>
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
@@ -913,7 +913,7 @@ export const AACView: React.FC = () => {
               title="Quick-Chat: Instant expressions that won't clear your sentence"
             >
               <MessageCircle className="w-3.5 h-3.5 text-[#51488C]" />
-              <span>Quick Chat</span>
+              <span>{t('Quick Chat')}</span>
             </button>
 
             {/* Motor Masking / Blank Slots Mode */}
@@ -931,7 +931,7 @@ export const AACView: React.FC = () => {
               title="Vocabulary Masking: Hide words while preserving exact motor planning coordinates"
             >
               {isMaskingMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isMaskingMode ? 'Masking ON' : 'Mask'}</span>
+              <span className="hidden sm:inline">{isMaskingMode ? t('Masking ON') : t('Mask')}</span>
             </button>
 
             {/* Instant Speak Mode */}
@@ -949,7 +949,7 @@ export const AACView: React.FC = () => {
               title="Instant Speak Mode: Tap any tile to speak it aloud immediately"
             >
               <Zap className="w-3.5 h-3.5 text-[#A76318]" />
-              <span className="hidden sm:inline">Instant</span>
+              <span className="hidden sm:inline">{t('Instant')}</span>
             </button>
 
             {/* Add Word Button */}
@@ -963,7 +963,7 @@ export const AACView: React.FC = () => {
               title="Add a custom word or favorite phrase"
             >
               <Plus className="w-3.5 h-3.5 text-[#8B571A]" />
-              <span className="hidden sm:inline">Add Word</span>
+              <span className="hidden sm:inline">{t('Add Word')}</span>
             </button>
 
             {/* Edit Mode Toggle */}
@@ -981,7 +981,7 @@ export const AACView: React.FC = () => {
               title="Toggle Edit Mode to customize words or set favorites"
             >
               <Edit3 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
+              <span className="hidden sm:inline">{isEditMode ? t('Done') : t('Edit')}</span>
             </button>
 
             {/* Mulberry Symbols Picker */}
@@ -997,7 +997,7 @@ export const AACView: React.FC = () => {
                 title="Add words from the Mulberry Symbols AAC library (CC BY-SA)"
               >
                 <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                <span>Symbols</span>
+                <span>{t('Symbols')}</span>
               </button>
               <button
                 type="button"
@@ -1023,7 +1023,7 @@ export const AACView: React.FC = () => {
               title="Open Interactive AAC Coach Marks Guide"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>AAC Guide 💡</span>
+              <span>{t('AAC Guide')} 💡</span>
             </button>
 
           </div>
@@ -1331,7 +1331,7 @@ export const AACView: React.FC = () => {
                 {/* Folder Top-Right Corner Tab / Badge */}
                 <div className="absolute top-1.5 right-1.5 z-10 bg-[#4A3E34] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
                   <Folder className="w-2.5 h-2.5 fill-white" />
-                  <span>FOLDER</span>
+                  <span>{t('Folder')}</span>
                 </div>
 
                 {/* Mulberry Symbol Area */}
@@ -1351,7 +1351,7 @@ export const AACView: React.FC = () => {
                   settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' :
                   'text-[11px] sm:text-xs'
                 }`}>
-                  {folder.label}
+                  {t(folder.label)}
                 </span>
               </button>
             </div>

@@ -14,6 +14,7 @@ import {
   BatteryCharging
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const MeView: React.FC = () => {
   const {
@@ -141,10 +142,10 @@ export const MeView: React.FC = () => {
       {/* Header */}
       <header>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Me 💛
+          {t('Me')} 💛
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
-          Feelings, health reminders, energy tracking, and personal reflections.
+          {t('Feelings, health reminders, energy tracking, and personal reflections.')}
         </p>
       </header>
 
@@ -164,16 +165,16 @@ export const MeView: React.FC = () => {
                     <Icon className="w-5 h-5 stroke-[2.4]" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black leading-tight">{card.title}</h3>
+                    <h3 className="text-base font-black leading-tight">{t(card.title)}</h3>
                     <span className="text-[10px] font-black uppercase tracking-wider opacity-75">
-                      {card.badge}
+                      {t(card.badge)}
                     </span>
                   </div>
                 </div>
                 <span className="text-xl" aria-hidden="true">{card.emoji}</span>
               </div>
               <p className="text-xs font-medium leading-relaxed opacity-90">
-                {card.desc}
+                {t(card.desc)}
               </p>
             </button>
           );

@@ -42,7 +42,27 @@ export async function setLanguage(lang: string): Promise<void> {
 
 export function t(text: string): string {
   if (!text || currentLang === 'en') return text;
-  return dictionary[text] || dictionary[text.trim()] || text;
+  if (dictionary[text]) return dictionary[text];
+
+  const trimmed = text.trim();
+  if (dictionary[trimmed]) return dictionary[trimmed];
+
+  const lower = trimmed.toLowerCase();
+  for (const k in dictionary) {
+    if (k.toLowerCase() === lower) return dictionary[k];
+  }
+
+  // Handle slash compounds like "I / Me", "Hurt / Pain", "Toilet / Potty"
+  if (trimmed.includes(' / ')) {
+    const parts = trimmed.split(' / ').map(p => t(p.trim()));
+    return Array.from(new Set(parts)).join(' / ');
+  }
+  if (trimmed.includes('/') && !trimmed.startsWith('http')) {
+    const parts = trimmed.split('/').map(p => t(p.trim()));
+    return Array.from(new Set(parts)).join(' / ');
+  }
+
+  return text;
 }
 
 export function translateItem<T extends { label?: string; speechText?: string }>(item: T): T {

@@ -536,6 +536,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const [showPaywallModal, setShowPaywallModal] = useState<boolean>(false);
   const [paywallTriggerReason, setPaywallTriggerReason] = useState<string>('Unlock all BeeYou Premium features');
+  const [, setLangVersion] = useState(0);
+
+  useEffect(() => {
+    const handleLangChanged = () => setLangVersion((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChanged);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChanged);
+  }, []);
 
   useEffect(() => {
     try {
@@ -1191,7 +1198,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     window.addEventListener('offline', handleOffline);
 
     setOfflineVoices(getOfflineCapableVoices(settings.language));
-    setLanguage(settings.language || 'en');
+    setLanguage(settings.language || 'en').then(() => {
+      setLangVersion((v) => v + 1);
+    });
 
     return () => {
       unsubSpeech();
