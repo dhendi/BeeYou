@@ -45,6 +45,61 @@ app.get('/api/translate', async (req, res) => {
   }
 });
 
+// Authentic High-Fidelity Audio Streaming Endpoint (Google Neural TTS Stream)
+// Provides authentic native Filipino, Spanish, French, Japanese pronunciation
+const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
+
+app.get('/api/tts', async (req, res) => {
+  const text = String(req.query.text || '').trim();
+  const lang = String(req.query.lang || 'fil').trim().toLowerCase();
+  if (!text) {
+    return res.status(400).send('Missing text parameter');
+  }
+
+  // Normalize language codes (e.g., fil-PH -> fil, tl-PH -> fil)
+  const normalizedLang = lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' : lang.substring(0, 2);
+  const cacheKey = `${normalizedLang}_${text.toLowerCase()}`;
+
+  if (ttsAudioCache.has(cacheKey)) {
+    const cached = ttsAudioCache.get(cacheKey)!;
+    res.setHeader('Content-Type', cached.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    return res.send(cached.buffer);
+  }
+
+  try {
+    const safeText = text.length > 200 ? text.slice(0, 200) : text;
+    const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(safeText)}`;
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://translate.google.com/',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).send('TTS upstream error');
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const contentType = response.headers.get('content-type') || 'audio/mpeg';
+
+    if (ttsAudioCache.size > 500) {
+      const firstKey = ttsAudioCache.keys().next().value;
+      if (firstKey) ttsAudioCache.delete(firstKey);
+    }
+    ttsAudioCache.set(cacheKey, { buffer, contentType });
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    return res.send(buffer);
+  } catch (err: any) {
+    console.error('[TTS Proxy Error]:', err);
+    return res.status(500).send('TTS internal error');
+  }
+});
+
 // -------------------------------------------------------------
 // Live Caregiver Companion & Sync Endpoints
 // Enables caregivers to see child's current activity, feelings,

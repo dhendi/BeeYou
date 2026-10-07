@@ -2049,10 +2049,50 @@ export async function speakText(
     if (audioMemoryCache.has(cacheKey)) {
       try {
         const audioSrc = audioMemoryCache.get(cacheKey)!;
-        await playAudioUrl(audioSrc, formattedText, options?.rate);
-        return;
+        const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
+        if (played) return;
       } catch (e) {
         // Fallback to device speech synthesis below
+      }
+    }
+  }
+
+  // Authentic Native Pronunciation Audio Stream:
+  // When speaking non-English languages (especially Filipino where Windows, macOS, and desktop browsers
+  // do not install a native fil-PH voice by default), stream high-fidelity native Google Neural audio
+  // so phrases are pronounced with genuine native inflection instead of a harsh robotic English accent.
+  const lang = (options?.lang || 'en').toLowerCase();
+  const normalizedLang = lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' : lang.substring(0, 2);
+
+  if (normalizedLang !== 'en' && !options?.preferOfflineOnly && !options?.voiceURI) {
+    const localVoice = getBestSystemVoice(normalizedLang);
+    const hasAuthenticLocalVoice = localVoice && (
+      normalizedLang === 'fil'
+        ? (localVoice.lang.toLowerCase().startsWith('fil') || localVoice.lang.toLowerCase().startsWith('tl'))
+        : localVoice.lang.toLowerCase().startsWith(normalizedLang)
+    );
+
+    if (!hasAuthenticLocalVoice) {
+      const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
+      if (audioMemoryCache.has(cacheKey)) {
+        try {
+          const audioSrc = audioMemoryCache.get(cacheKey)!;
+          const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
+          if (played) return;
+        } catch (e) {
+          // Fall through to fetch
+        }
+      }
+
+      try {
+        const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
+        const played = await playAudioUrl(streamUrl, formattedText, options?.rate);
+        if (played) {
+          audioMemoryCache.set(cacheKey, streamUrl);
+          return;
+        }
+      } catch (err) {
+        console.warn(`[Audio] Authentic ${normalizedLang} audio stream playback failed, falling back to local speech synthesis:`, err);
       }
     }
   }
@@ -2064,7 +2104,7 @@ export async function speakText(
 /**
  * Audio playback helper for base64 / audio URL
  */
-function playAudioUrl(src: string, originalText: string, rate?: number): Promise<void> {
+function playAudioUrl(src: string, originalText: string, rate?: number): Promise<boolean> {
   return new Promise((resolve) => {
     try {
       stopSpeaking();
@@ -2076,13 +2116,13 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
       audio.onended = () => {
         activeAudioElement = null;
         notifySpeechState(false, null);
-        resolve();
+        resolve(true);
       };
 
       audio.onerror = () => {
         activeAudioElement = null;
         notifySpeechState(false, null);
-        resolve();
+        resolve(false);
       };
 
       const playPromise = audio.play();
@@ -2090,13 +2130,13 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
         playPromise.catch(() => {
           activeAudioElement = null;
           notifySpeechState(false, null);
-          resolve();
+          resolve(false);
         });
       }
     } catch (e) {
       activeAudioElement = null;
       notifySpeechState(false, null);
-      resolve();
+      resolve(false);
     }
   });
 }
