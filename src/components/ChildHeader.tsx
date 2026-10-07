@@ -11,9 +11,12 @@ import {
 import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
 import { setActiveDeviceView } from '../services/authService';
+import { t } from '../services/translator';
 
 export const ChildHeader: React.FC = () => {
   const {
+    settings,
+    updateSettings,
     childProfile,
     worldState,
     setShowPinModal,
@@ -68,12 +71,26 @@ export const ChildHeader: React.FC = () => {
           className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95"
         >
           <AlertCircle className="w-3.5 h-3.5" />
-          <span className="truncate max-w-[150px]">Plans Changed</span>
+          <span className="truncate max-w-[150px]">{t('Plans Changed')}</span>
         </button>
       )}
 
       {/* Right: Streamlined Compact Actions */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        {/* 1-Tap Language Toggle */}
+        <button
+          type="button"
+          onClick={() => {
+            const nextLang = settings.language === 'fil' ? 'en' : 'fil';
+            updateSettings({ language: nextLang });
+            playChime('tap');
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+          title={settings.language === 'fil' ? 'Wika: Filipino. Pindutin para sa English.' : 'Language: English. Tap for Filipino.'}
+        >
+          <span>{settings.language === 'fil' ? '🇵🇭 FIL' : '🇺🇸 EN'}</span>
+        </button>
+
         {/* Compact Live Connection Indicator Pill */}
         <button
           type="button"
@@ -86,18 +103,18 @@ export const ChildHeader: React.FC = () => {
               ? 'bg-emerald-500 text-white border-emerald-400 shadow-xs'
               : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
           }`}
-          title={isCaregiverConnected ? `Caregiver Online (${connectionStatus.peerName || 'Caregiver'})` : 'Tap to link with Caregiver'}
+          title={isCaregiverConnected ? `${t('Live')} (${connectionStatus.peerName || 'Caregiver'})` : t('Link')}
         >
           {isCaregiverConnected ? (
             <>
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
               <Wifi className="w-3 h-3 text-white shrink-0" />
-              <span className="hidden sm:inline">Live</span>
+              <span className="hidden sm:inline">{t('Live')}</span>
             </>
           ) : (
             <>
               <WifiOff className="w-3 h-3 text-stone-400 shrink-0" />
-              <span className="hidden sm:inline">Link</span>
+              <span className="hidden sm:inline">{t('Link')}</span>
             </>
           )}
         </button>
@@ -124,7 +141,7 @@ export const ChildHeader: React.FC = () => {
           title="Open Caregiver Hub"
         >
           <Crown className="w-3 h-3" />
-          <span>Hub</span>
+          <span>{t('Hub')}</span>
         </button>
 
         {/* PIN / Lock */}

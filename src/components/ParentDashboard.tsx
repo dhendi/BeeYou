@@ -26,6 +26,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
@@ -92,6 +93,8 @@ export const ParentDashboard: React.FC = () => {
     subscription,
     isPremium,
     getTrialDaysRemaining,
+    settings,
+    updateSettings,
   } = useApp();
 
   type TabType =
@@ -497,13 +500,13 @@ export const ParentDashboard: React.FC = () => {
             title="Return to Child View"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
-            <span className="hidden sm:inline">Return to Child</span>
-            <span className="sm:hidden">Child</span>
+            <span className="hidden sm:inline">{t('Return to Child')}</span>
+            <span className="sm:hidden">{t('Back')}</span>
           </button>
 
           <div className="flex items-center gap-1.5 min-w-0">
             <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 truncate">
-              Caregiver Hub
+              {t('Caregiver Hub')}
             </h1>
             <span className="text-xs text-slate-500 font-medium truncate hidden sm:inline">
               • {childProfile.name}
@@ -513,6 +516,20 @@ export const ParentDashboard: React.FC = () => {
 
         {/* Right: Feature Guide & Plans Changed Status */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* 1-Tap Language Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const nextLang = settings.language === 'fil' ? 'en' : 'fil';
+              updateSettings({ language: nextLang });
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs border border-amber-300/80 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+            title={settings.language === 'fil' ? 'Wika: Filipino. Pindutin para sa English.' : 'Language: English. Tap for Filipino.'}
+          >
+            <span>{settings.language === 'fil' ? '🇵🇭 FIL' : '🇺🇸 EN'}</span>
+          </button>
+
           <button
             type="button"
             onClick={handleStartTour}
@@ -520,8 +537,8 @@ export const ParentDashboard: React.FC = () => {
             title="Launch Interactive In-Place Coachmark Tour"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span className="hidden sm:inline">Feature Guide</span>
-            <span className="sm:hidden">Guide</span>
+            <span className="hidden sm:inline">{t('Feature Tour (Guide)')}</span>
+            <span className="sm:hidden">{t('Guide')}</span>
           </button>
 
           {plansChanged.active && (

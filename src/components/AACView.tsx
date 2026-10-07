@@ -9,6 +9,7 @@ import { AACWordEditorModal } from './AACWordEditorModal';
 import { AACGuideModal } from './AACGuideModal';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
+import { t } from '../services/translator';
 
 const AAC_COACH_STEPS: CoachMarkStep[] = [
   {
@@ -223,17 +224,17 @@ export const AACView: React.FC = () => {
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; emoji: string }[] = [
-    { id: 'core', label: 'Core Board', emoji: '⭐' },
-    { id: 'favorite_sentences', label: 'Favorite Sentences', emoji: '💬' },
-    { id: 'favorites', label: 'Favorites', emoji: '❤️' },
-    { id: 'food', label: 'Food', emoji: '🍕' },
-    { id: 'drinks', label: 'Drinks', emoji: '🧃' },
-    { id: 'activities', label: 'Play & Fun', emoji: '🎮' },
-    { id: 'places', label: 'Places', emoji: '🏠' },
-    { id: 'people', label: 'People', emoji: '👥' },
-    { id: 'feelings', label: 'Feelings', emoji: '💛' },
-    { id: 'sensory', label: 'Sensory', emoji: '🎧' },
-    { id: 'all', label: 'All Words', emoji: '🌐' },
+    { id: 'core', label: t('Core Board'), emoji: '⭐' },
+    { id: 'favorite_sentences', label: t('Favorite Sentences'), emoji: '💬' },
+    { id: 'favorites', label: t('Favorites'), emoji: '❤️' },
+    { id: 'food', label: t('Food'), emoji: '🍕' },
+    { id: 'drinks', label: t('Drinks'), emoji: '🧃' },
+    { id: 'activities', label: t('Play & Fun'), emoji: '🎮' },
+    { id: 'places', label: t('Places'), emoji: '🏠' },
+    { id: 'people', label: t('People'), emoji: '👥' },
+    { id: 'feelings', label: t('Feelings'), emoji: '💛' },
+    { id: 'sensory', label: t('Sensory'), emoji: '🎧' },
+    { id: 'all', label: t('All Words'), emoji: '🌐' },
   ];
 
   // Filter items while keeping consistent motor planning order (sorted by motorIndex)
@@ -610,12 +611,13 @@ export const AACView: React.FC = () => {
       setShowWordEditor(true);
       return;
     }
+    const speech = t(item.speechText || item.label);
     if (instantSpeakMode) {
-      speak(item.speechText || item.label);
+      speak(speech);
     } else {
-      addToSentence(item);
+      addToSentence({ ...item, label: t(item.label), speechText: speech });
       if (!settings.autoSpeakSentence) {
-        speak(item.speechText || item.label);
+        speak(speech);
       }
     }
     playChime('tap');
@@ -1420,7 +1422,7 @@ export const AACView: React.FC = () => {
                         : (settings.gridColumns === 2 ? 'text-sm sm:text-base' : settings.gridColumns === 3 ? 'text-xs sm:text-sm' : settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-xs')
                     }`}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </span>
                 </button>
 

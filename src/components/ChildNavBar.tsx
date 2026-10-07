@@ -9,6 +9,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const ChildNavBar: React.FC = () => {
   const { 
@@ -118,7 +119,7 @@ export const ChildNavBar: React.FC = () => {
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.4]" />
               </div>
               <span className="text-[10px] sm:text-xs font-black tracking-tight mt-0.5 truncate max-w-full">
-                {item.label}
+                {t(item.label)}
               </span>
             </button>
           );

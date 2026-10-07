@@ -33,6 +33,7 @@ import { resolveAacImageUrl } from '../services/symbolService';
 import { DashboardWidgetId, AACItem } from '../types';
 import { isWidgetAvailable } from '../data/navigation';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import { t } from '../services/translator';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -182,12 +183,14 @@ export const ChildHomeView: React.FC = () => {
   ];
 
   const handleTactileTileClick = (tile: typeof TACTILE_AAC_TILES[0]) => {
-    speak(tile.speechText);
+    const label = t(tile.label);
+    const speech = t(tile.speechText);
+    speak(speech);
     playChime('tap');
     addToSentence({
       id: tile.id,
-      label: tile.label,
-      speechText: tile.speechText,
+      label,
+      speechText: speech,
       emoji: tile.emoji,
       symbolId: tile.symbolId,
       category: tile.category,
@@ -740,7 +743,7 @@ export const ChildHomeView: React.FC = () => {
                             />
                           </div>
                           <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
-                            {tile.label}
+                            {t(tile.label)}
                           </span>
                         </button>
                       </div>

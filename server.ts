@@ -29,6 +29,22 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
 });
 
+// Lightweight On-Demand Translation Endpoint (Free Google Translate API fallback)
+app.get('/api/translate', async (req, res) => {
+  const text = String(req.query.text || '').trim();
+  const to = String(req.query.to || 'fil').trim();
+  if (!text) return res.json({ translated: text });
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const response = await fetch(url);
+    const data: any = await response.json();
+    const translated = data?.[0]?.[0]?.[0] || text;
+    res.json({ translated });
+  } catch (err: any) {
+    res.json({ translated: text });
+  }
+});
+
 // -------------------------------------------------------------
 // Live Caregiver Companion & Sync Endpoints
 // Enables caregivers to see child's current activity, feelings,

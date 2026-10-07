@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { setLanguage } from '../services/translator';
 import confetti from 'canvas-confetti';
 import {
   AACItem,
@@ -1190,6 +1191,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     window.addEventListener('offline', handleOffline);
 
     setOfflineVoices(getOfflineCapableVoices(settings.language));
+    setLanguage(settings.language || 'en');
 
     return () => {
       unsubSpeech();
