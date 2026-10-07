@@ -734,16 +734,23 @@ export const ChildHomeView: React.FC = () => {
                           className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
                           title={`Speak "${tile.label}"`}
                         >
-                          <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+                          <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform relative">
                             <img
                               src={resolveAacImageUrl(tile)}
-                              alt={t(tile.label)}
+                              alt=""
                               className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
                               loading="lazy"
                               onError={(e) => {
-                                (e.currentTarget as HTMLElement).style.display = 'none';
+                                const target = e.currentTarget as HTMLElement;
+                                target.style.display = 'none';
+                                if (target.nextElementSibling) {
+                                  (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                                }
                               }}
                             />
+                            <span className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
+                              {tile.emoji}
+                            </span>
                           </div>
                           <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
                             {t(tile.label)}

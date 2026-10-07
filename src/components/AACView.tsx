@@ -723,9 +723,17 @@ export const AACView: React.FC = () => {
                     >
                       <img
                         src={resolveAacImageUrl(item)}
-                        alt={item.label}
+                        alt=""
                         className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLElement;
+                          target.style.display = 'none';
+                          if (target.nextElementSibling) {
+                            (target.nextElementSibling as HTMLElement).style.display = 'inline';
+                          }
+                        }}
                       />
+                      <span className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
                       <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
                     </div>
                   ))
@@ -1412,10 +1420,20 @@ export const AACView: React.FC = () => {
                   <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
                     <img
                       src={resolveAacImageUrl(item)}
-                      alt={item.label}
+                      alt=""
                       className="w-full h-full object-contain rounded-lg pointer-events-none"
                       loading="lazy"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        target.style.display = 'none';
+                        if (target.nextElementSibling) {
+                          (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                        }
+                      }}
                     />
+                    <span className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
+                      {item.emoji || '💬'}
+                    </span>
                   </div>
 
                   {/* Label */}

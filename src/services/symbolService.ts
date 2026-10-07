@@ -330,7 +330,9 @@ export function resolveAacImageUrl(item: {
 }): string {
   // 1. Direct explicit Mulberry Symbol ID or Filename
   if (item.symbolId && typeof item.symbolId === 'string' && item.symbolId.trim().length > 0) {
-    return getMulberrySymbolUrl(item.symbolId);
+    const rawId = item.symbolId.trim().toLowerCase();
+    const resolvedId = MULBERRY_WORD_MAP[rawId] || rawId;
+    return getMulberrySymbolUrl(resolvedId);
   }
 
   // 2. Custom uploaded photo (data URL or blob) takes immediate priority
