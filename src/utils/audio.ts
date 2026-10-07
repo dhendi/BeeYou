@@ -1875,16 +1875,28 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
 
   const targetPrefix = (langPrefix || 'en').toLowerCase();
   const isFilipino = targetPrefix === 'fil' || targetPrefix === 'tl' || targetPrefix === 'fi';
+  const isCanadianFrench = targetPrefix === 'fr_ca' || targetPrefix === 'fr-ca';
 
   const matchingVoices = voices.filter((v) => {
     const l = v.lang.toLowerCase();
     if (isFilipino) {
       return l.startsWith('fil') || l.startsWith('tl');
     }
+    if (isCanadianFrench) {
+      return l.startsWith('fr') && (l.includes('ca') || v.name.toLowerCase().includes('canada'));
+    }
     return l.startsWith(targetPrefix);
   });
 
   if (matchingVoices.length === 0) {
+    if (isCanadianFrench) {
+      // Fallback to any French voice if no Canada-specific voice
+      const anyFr = voices.filter(v => v.lang.toLowerCase().startsWith('fr'));
+      if (anyFr.length > 0) {
+        const sortedFr = [...anyFr].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
+        return sortedFr[0] || null;
+      }
+    }
     if (targetPrefix === 'en') {
       const sorted = [...voices].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
       return sorted[0] || null;
@@ -1897,11 +1909,17 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
   // Sort descending by naturalness score
   const sorted = [...matchingVoices].sort((a, b) => {
     // For Canadian French, give priority to fr-CA voices
-    if (targetPrefix === 'fr') {
+    if (isCanadianFrench || targetPrefix === 'fr') {
       const aIsCa = a.lang.toLowerCase().includes('ca') || a.name.toLowerCase().includes('canada');
       const bIsCa = b.lang.toLowerCase().includes('ca') || b.name.toLowerCase().includes('canada');
-      if (aIsCa && !bIsCa) return -1;
-      if (!aIsCa && bIsCa) return 1;
+      if (isCanadianFrench) {
+        if (aIsCa && !bIsCa) return -1;
+        if (!aIsCa && bIsCa) return 1;
+      } else {
+        // France French: prefer non-Canadian FR voices (fr-FR)
+        if (!aIsCa && bIsCa) return -1;
+        if (aIsCa && !bIsCa) return 1;
+      }
     }
     return rateVoiceNaturalness(b) - rateVoiceNaturalness(a);
   });
@@ -2068,7 +2086,11 @@ export async function speakText(
   // do not install a native fil-PH voice by default), stream high-fidelity native Google Neural audio
   // so phrases are pronounced with genuine native inflection instead of a harsh robotic English accent.
   const lang = (options?.lang || 'en').toLowerCase();
-  const normalizedLang = lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' : lang.substring(0, 2);
+  const normalizedLang = 
+    lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' :
+    (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
+    (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
+    lang.substring(0, 2);
 
   if (normalizedLang !== 'en' && !options?.preferOfflineOnly) {
     const voices = getAvailableVoices();
@@ -2076,6 +2098,8 @@ export async function speakText(
     const isExplicitVoiceAuthenticForLang = explicitVoice && (
       normalizedLang === 'fil'
         ? (explicitVoice.lang.toLowerCase().startsWith('fil') || explicitVoice.lang.toLowerCase().startsWith('tl'))
+        : normalizedLang === 'fr_ca'
+        ? explicitVoice.lang.toLowerCase().startsWith('fr')
         : explicitVoice.lang.toLowerCase().startsWith(normalizedLang)
     );
 
@@ -2085,6 +2109,8 @@ export async function speakText(
       const hasAuthenticLocalVoice = localVoice && (
         normalizedLang === 'fil'
           ? (localVoice.lang.toLowerCase().startsWith('fil') || localVoice.lang.toLowerCase().startsWith('tl'))
+          : normalizedLang === 'fr_ca'
+          ? localVoice.lang.toLowerCase().startsWith('fr')
           : localVoice.lang.toLowerCase().startsWith(normalizedLang)
       );
 
@@ -2235,9 +2261,16 @@ function speakWithBrowserSpeechSynthesis(
       const langMap: Record<string, string> = {
         en: 'en-US',
         es: 'es-ES',
-        fr: 'fr-CA',
         fil: 'fil-PH',
+        fr: 'fr-FR',
+        fr_ca: 'fr-CA',
+        de: 'de-DE',
+        el: 'el-GR',
+        ru: 'ru-RU',
+        vi: 'vi-VN',
+        zh: 'zh-CN',
         ja: 'ja-JP',
+        ko: 'ko-KR',
       };
       const targetLang = langMap[options?.lang ?? 'en'] || 'en-US';
       utterance.lang = targetLang;
@@ -2249,14 +2282,22 @@ function speakWithBrowserSpeechSynthesis(
         if (explicit) {
           const vLang = explicit.lang.toLowerCase();
           const tPrefix = (options?.lang || 'en').toLowerCase();
-          if (tPrefix === 'en' || vLang.startsWith(tPrefix) || (tPrefix === 'fil' && (vLang.startsWith('fil') || vLang.startsWith('tl')))) {
+          if (
+            tPrefix === 'en' ||
+            vLang.startsWith(tPrefix) ||
+            (tPrefix === 'fil' && (vLang.startsWith('fil') || vLang.startsWith('tl'))) ||
+            (tPrefix === 'fr_ca' && vLang.startsWith('fr'))
+          ) {
             utterance.voice = explicit;
           }
         }
       }
 
       if (!utterance.voice && voices.length > 0) {
-        const targetPrefix = options?.lang === 'fil' ? 'fil' : targetLang.substring(0, 2);
+        const targetPrefix = 
+          options?.lang === 'fil' ? 'fil' :
+          options?.lang === 'fr_ca' ? 'fr_ca' :
+          targetLang.substring(0, 2);
         const bestVoice = getBestSystemVoice(targetPrefix);
         if (bestVoice) {
           utterance.voice = bestVoice;

@@ -4,8 +4,10 @@ import { ChevronDown, Check, Globe } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 
+import { AppLanguage } from '../types';
+
 export interface LanguageOption {
-  code: 'en' | 'fil' | 'es' | 'fr' | 'ja';
+  code: AppLanguage;
   label: string;
   flag: string;
   name: string;
@@ -16,8 +18,15 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'en', label: 'EN', flag: '🇺🇸', name: 'English', nativeName: 'English' },
   { code: 'es', label: 'ES', flag: '🇪🇸', name: 'Spanish', nativeName: 'Español' },
   { code: 'fil', label: 'FIL', flag: '🇵🇭', name: 'Filipino', nativeName: 'Filipino' },
-  { code: 'fr', label: 'FR', flag: '🇨🇦', name: 'French', nativeName: 'Français' },
+  { code: 'fr', label: 'FR', flag: '🇫🇷', name: 'French (France)', nativeName: 'Français (France)' },
+  { code: 'fr_ca', label: 'FR-CA', flag: '🇨🇦', name: 'French (Canada)', nativeName: 'Français (Canada)' },
+  { code: 'de', label: 'DE', flag: '🇩🇪', name: 'German', nativeName: 'Deutsch' },
+  { code: 'el', label: 'EL', flag: '🇬🇷', name: 'Greek', nativeName: 'Ελληνικά' },
+  { code: 'ru', label: 'RU', flag: '🇷🇺', name: 'Russian', nativeName: 'Русский' },
+  { code: 'vi', label: 'VI', flag: '🇻🇳', name: 'Vietnamese', nativeName: 'Tiếng Việt' },
+  { code: 'zh', label: 'ZH', flag: '🇨🇳', name: 'Chinese', nativeName: '中文' },
   { code: 'ja', label: 'JA', flag: '🇯🇵', name: 'Japanese', nativeName: '日本語' },
+  { code: 'ko', label: 'KO', flag: '🇰🇷', name: 'Korean', nativeName: '한국어' },
 ];
 
 interface LanguageDropdownProps {
@@ -103,7 +112,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 top-full mt-1.5 w-48 sm:w-52 rounded-2xl bg-white shadow-xl border border-amber-200/90 z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 origin-top-right"
+          className="absolute right-0 top-full mt-1.5 w-56 sm:w-60 rounded-2xl bg-white shadow-xl border border-amber-200/90 z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 origin-top-right"
         >
           {/* Header indicator */}
           <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-900/60 border-b border-amber-100 mb-1">
@@ -112,7 +121,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
           </div>
 
           {/* Options list */}
-          <div className="space-y-0.5 max-h-64 overflow-y-auto">
+          <div className="space-y-0.5 max-h-80 overflow-y-auto overscroll-contain">
             {SUPPORTED_LANGUAGES.map((lang) => {
               const isSelected = lang.code === currentLang.code;
               return (

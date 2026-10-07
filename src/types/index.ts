@@ -595,13 +595,27 @@ export interface EarnedRoutineSticker {
   starsAwarded: number;
 }
 
+export type AppLanguage = 
+  | 'en' 
+  | 'es' 
+  | 'fil' 
+  | 'fr' 
+  | 'fr_ca' 
+  | 'de' 
+  | 'el' 
+  | 'ru' 
+  | 'vi' 
+  | 'zh' 
+  | 'ja' 
+  | 'ko';
+
 export interface AppSettings {
   pin: string;
   voiceRate: number;
   voicePitch: number;
   selectedVoiceURI: string;
   voicePersona?: 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir' | 'system';
-  language: 'en' | 'es' | 'fr' | 'fil' | 'ja';
+  language: AppLanguage;
   gridColumns: 2 | 3 | 4 | 6 | 8;
   largeButtonMode: boolean;
   highContrast: boolean;

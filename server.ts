@@ -56,8 +56,17 @@ app.get('/api/tts', async (req, res) => {
     return res.status(400).send('Missing text parameter');
   }
 
-  // Normalize language codes (e.g., fil-PH -> fil, tl-PH -> fil)
-  const normalizedLang = lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' : lang.substring(0, 2);
+  // Normalize language codes (e.g., fil-PH -> fil, tl-PH -> fil, fr_ca -> fr-CA, zh -> zh-CN)
+  let normalizedLang = 'en';
+  if (lang.startsWith('fil') || lang.startsWith('tl')) {
+    normalizedLang = 'fil';
+  } else if (lang === 'fr_ca' || lang === 'fr-ca') {
+    normalizedLang = 'fr-CA';
+  } else if (lang === 'zh' || lang.startsWith('zh')) {
+    normalizedLang = 'zh-CN';
+  } else {
+    normalizedLang = lang.substring(0, 2);
+  }
   const cacheKey = `${normalizedLang}_${text.toLowerCase()}`;
 
   if (ttsAudioCache.has(cacheKey)) {
