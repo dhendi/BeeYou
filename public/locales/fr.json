@@ -128,7 +128,7 @@
   "Mask": "Masque",
   "Instant": "Instantané",
   "You": "Toi",
-  "My / Mine": "My / Mine",
+  "My / Mine": "Mon",
   "Masking ON": "Masquage activé",
   "Add Word": "Ajouter un mot",
   "I / Me": "Je/Moi",
@@ -974,5 +974,6 @@
   "0.85x is calm & clear": "0,85x est calme et clair",
   "Select Language": "Choisir la langue",
   "Authentic Neural Accent": "Accent neuronal authentique",
-  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 Voix philippine authentique (flux neuronal)"
+  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 Voix philippine authentique (flux neuronal)",
+  "My/Mine": "Mon"
 }

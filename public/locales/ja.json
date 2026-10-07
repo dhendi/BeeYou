@@ -132,7 +132,7 @@
   "AAC Guide": "AACガイド",
   "Add Word": "単語を追加",
   "Instant Speak is Active": "インスタント スピーキングがアクティブです",
-  "My / Mine": "私の/私のもの",
+  "My / Mine": "私の",
   "Masking ON": "マスキングON",
   "I / Me": "私/私",
   "Show Bar": "バーを表示",
@@ -143,7 +143,7 @@
   "Go": "行く",
   "Stop": "停止",
   "I need help": "私は助けが必要です",
-  "Mine": "私の",
+  "Mine": "私のもの",
   "My": "私の",
   "Like": "のように",
   "Don't like": "好きではない",
@@ -974,5 +974,6 @@
   "0.85x is calm & clear": "0.85倍は穏やかで聞き取りやすい",
   "Select Language": "言語を選択",
   "Authentic Neural Accent": "自然なニューラル発音",
-  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 本格フィリピン音声 (ニューラル配信)"
+  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 本格フィリピン音声 (ニューラル配信)",
+  "My/Mine": "私の"
 }

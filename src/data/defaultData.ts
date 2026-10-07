@@ -158,17 +158,17 @@ const mulberry = (filename: string) => `https://raw.githubusercontent.com/mulber
 
 export const DEFAULT_AAC_ITEMS: AACItem[] = [
   // --- CORE SUBJECTS (Yellow/Amber) ---
-  { id: 'c-1', label: 'I / Me', speechText: 'I', emoji: '🙋', symbolId: 'good_person', symbolSource: 'mulberry', photoUrl: mulberry('good_person'), category: 'core', colorType: 'subject', motorIndex: 0, isFavorite: true },
+  { id: 'c-1', label: 'I', speechText: 'I', emoji: '🙋', symbolId: 'good_person', symbolSource: 'mulberry', photoUrl: mulberry('good_person'), category: 'core', colorType: 'subject', motorIndex: 0, isFavorite: true },
   { id: 'c-2', label: 'You', speechText: 'You', emoji: '👉', symbolId: 'good_person', symbolSource: 'mulberry', photoUrl: mulberry('good_person'), category: 'core', colorType: 'subject', motorIndex: 1 },
   { id: 'c-3', label: 'We', speechText: 'We', emoji: '👥', symbolId: 'good_person', symbolSource: 'mulberry', photoUrl: mulberry('good_person'), category: 'core', colorType: 'subject', motorIndex: 2 },
-  { id: 'c-4', label: 'My / Mine', speechText: 'My', emoji: '🤲', symbolId: 'personal_passport', symbolSource: 'mulberry', photoUrl: mulberry('personal_passport'), category: 'core', colorType: 'subject', motorIndex: 3 },
+  { id: 'c-4', label: 'My', speechText: 'My', emoji: '🤲', symbolId: 'personal_passport', symbolSource: 'mulberry', photoUrl: mulberry('personal_passport'), category: 'core', colorType: 'subject', motorIndex: 3 },
 
   // --- CORE VERBS (Green) ---
   { id: 'c-5', label: 'Want', speechText: 'Want', emoji: '🤲', symbolId: 'want_,_to', symbolSource: 'mulberry', photoUrl: mulberry('want_,_to'), category: 'core', colorType: 'verb', motorIndex: 4, isFavorite: true },
   { id: 'c-6', label: 'Need', speechText: 'Need', emoji: '❗', symbolId: 'want_,_to', symbolSource: 'mulberry', photoUrl: mulberry('want_,_to'), category: 'core', colorType: 'verb', motorIndex: 5 },
   { id: 'c-7', label: 'Like', speechText: 'Like', emoji: '👍', symbolId: 'good', symbolSource: 'mulberry', photoUrl: mulberry('good'), category: 'core', colorType: 'verb', motorIndex: 6 },
   { id: 'c-8', label: 'Go', speechText: 'Go', emoji: '🚶', symbolId: 'go_,_to', symbolSource: 'mulberry', photoUrl: mulberry('go_,_to'), category: 'core', colorType: 'verb', motorIndex: 7 },
-  { id: 'c-9', label: 'See / Look', speechText: 'See', emoji: '👀', symbolId: 'look_,_to', symbolSource: 'mulberry', photoUrl: mulberry('look_,_to'), category: 'core', colorType: 'verb', motorIndex: 8 },
+  { id: 'c-9', label: 'See', speechText: 'See', emoji: '👀', symbolId: 'look_,_to', symbolSource: 'mulberry', photoUrl: mulberry('look_,_to'), category: 'core', colorType: 'verb', motorIndex: 8 },
   { id: 'c-10', label: 'Feel', speechText: 'Feel', emoji: '💖', symbolId: 'happy_man', symbolSource: 'mulberry', photoUrl: mulberry('happy_man'), category: 'core', colorType: 'verb', motorIndex: 9 },
   { id: 'c-11', label: 'Eat', speechText: 'Eat', emoji: '🍽️', symbolId: 'eat_,_to', symbolSource: 'mulberry', photoUrl: mulberry('eat_,_to'), category: 'core', colorType: 'verb', motorIndex: 10 },
   { id: 'c-12', label: 'Drink', speechText: 'Drink', emoji: '🥤', symbolId: 'drink', symbolSource: 'mulberry', photoUrl: mulberry('drink'), category: 'core', colorType: 'verb', motorIndex: 11 },
@@ -180,7 +180,7 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   // --- CORE MODIFIERS & ADJECTIVES (Blue) ---
   { id: 'c-17', label: 'More', speechText: 'More', emoji: '➕', symbolId: 'more', symbolSource: 'mulberry', photoUrl: mulberry('more'), category: 'core', colorType: 'adjective', motorIndex: 16, isFavorite: true },
   { id: 'c-18', label: 'All Done', speechText: 'All done', emoji: '🏁', symbolId: 'finish', symbolSource: 'mulberry', photoUrl: mulberry('finish'), category: 'core', colorType: 'adjective', motorIndex: 17 },
-  { id: 'c-19', label: "Don't / Not", speechText: "Don't", emoji: '❌', symbolId: 'mistake_no_wrong', symbolSource: 'mulberry', photoUrl: mulberry('mistake_no_wrong'), category: 'core', colorType: 'adjective', motorIndex: 18 },
+  { id: 'c-19', label: "Don't", speechText: "Don't", emoji: '❌', symbolId: 'mistake_no_wrong', symbolSource: 'mulberry', photoUrl: mulberry('mistake_no_wrong'), category: 'core', colorType: 'adjective', motorIndex: 18 },
   { id: 'c-20', label: 'Yes', speechText: 'Yes', emoji: '✅', symbolId: 'good', symbolSource: 'mulberry', photoUrl: mulberry('good'), category: 'core', colorType: 'social', motorIndex: 19, isFavorite: true },
   { id: 'c-21', label: 'No', speechText: 'No', emoji: '⛔', symbolId: 'mistake_no_wrong', symbolSource: 'mulberry', photoUrl: mulberry('mistake_no_wrong'), category: 'core', colorType: 'emergency', motorIndex: 20, isFavorite: true },
   { id: 'c-22', label: 'Break', speechText: 'I need a break', emoji: '🛋️', symbolId: 'break_,_to', symbolSource: 'mulberry', photoUrl: mulberry('break_,_to'), category: 'core', colorType: 'emergency', motorIndex: 21, isFavorite: true },
@@ -204,14 +204,14 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   { id: 'd-4', label: 'Smoothie', speechText: 'Smoothie', emoji: '🥤', symbolId: 'blender_drinks', symbolSource: 'mulberry', photoUrl: mulberry('blender_drinks'), category: 'drinks', colorType: 'noun', motorIndex: 35 },
 
   // --- ACTIVITIES ---
-  { id: 'a-1', label: 'Tablet / iPad', speechText: 'Tablet', emoji: '📱', symbolId: 'touch_screen', symbolSource: 'mulberry', photoUrl: mulberry('touch_screen'), category: 'activities', colorType: 'noun', motorIndex: 36, isFavorite: true },
+  { id: 'a-1', label: 'Tablet', speechText: 'Tablet', emoji: '📱', symbolId: 'touch_screen', symbolSource: 'mulberry', photoUrl: mulberry('touch_screen'), category: 'activities', colorType: 'noun', motorIndex: 36, isFavorite: true },
   { id: 'a-2', label: 'Playground', speechText: 'Playground', emoji: '🛝', symbolId: 'play_area', symbolSource: 'mulberry', photoUrl: mulberry('play_area'), category: 'activities', colorType: 'noun', motorIndex: 37 },
   { id: 'a-3', label: 'Read Book', speechText: 'Read book', emoji: '📖', symbolId: 'communication_book', symbolSource: 'mulberry', photoUrl: mulberry('communication_book'), category: 'activities', colorType: 'noun', motorIndex: 38 },
   { id: 'a-4', label: 'Drawing', speechText: 'Drawing', emoji: '🖍️', symbolId: 'draw_,_to', symbolSource: 'mulberry', photoUrl: mulberry('draw_,_to'), category: 'activities', colorType: 'noun', motorIndex: 39 },
   { id: 'a-5', label: 'Music', speechText: 'Listen to music', emoji: '🎵', symbolId: 'music', symbolSource: 'mulberry', photoUrl: mulberry('music'), category: 'activities', colorType: 'noun', motorIndex: 40 },
-  { id: 'a-6', label: 'Blocks / LEGO', speechText: 'Building blocks', emoji: '🧱', symbolId: 'lego', symbolSource: 'mulberry', photoUrl: mulberry('lego'), category: 'activities', colorType: 'noun', motorIndex: 41 },
+  { id: 'a-6', label: 'Blocks', speechText: 'Building blocks', emoji: '🧱', symbolId: 'lego', symbolSource: 'mulberry', photoUrl: mulberry('lego'), category: 'activities', colorType: 'noun', motorIndex: 41 },
   { id: 'a-7', label: 'Puzzles', speechText: 'Puzzles', emoji: '🧩', symbolId: 'jigsaw_puzzle', symbolSource: 'mulberry', photoUrl: mulberry('jigsaw_puzzle'), category: 'activities', colorType: 'noun', motorIndex: 42 },
-  { id: 'a-8', label: 'Outside / Walk', speechText: 'Go outside', emoji: '🌳', symbolId: 'go_outside_,_to', symbolSource: 'mulberry', photoUrl: mulberry('go_outside_,_to'), category: 'activities', colorType: 'noun', motorIndex: 43 },
+  { id: 'a-8', label: 'Outside', speechText: 'Go outside', emoji: '🌳', symbolId: 'go_outside_,_to', symbolSource: 'mulberry', photoUrl: mulberry('go_outside_,_to'), category: 'activities', colorType: 'noun', motorIndex: 43 },
 
   // --- PLACES ---
   { id: 'p-1', label: 'Home', speechText: 'Home', emoji: '🏠', symbolId: 'house', symbolSource: 'mulberry', photoUrl: mulberry('house'), category: 'places', colorType: 'noun', motorIndex: 44, isFavorite: true },
@@ -221,7 +221,7 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   { id: 'p-5', label: 'Doctor', speechText: "Doctor's office", emoji: '🩺', symbolId: 'doctor_1a', symbolSource: 'mulberry', photoUrl: mulberry('doctor_1a'), category: 'places', colorType: 'noun', motorIndex: 48 },
   { id: 'p-6', label: 'Restaurant', speechText: 'Restaurant', emoji: '🍽️', symbolId: 'cafe', symbolSource: 'mulberry', photoUrl: mulberry('cafe'), category: 'places', colorType: 'noun', motorIndex: 49 },
   { id: 'p-7', label: 'Store', speechText: 'Grocery store', emoji: '🛒', symbolId: 'shop', symbolSource: 'mulberry', photoUrl: mulberry('shop'), category: 'places', colorType: 'noun', motorIndex: 50 },
-  { id: 'p-8', label: 'Car / Bus', speechText: 'Car', emoji: '🚗', symbolId: 'car', symbolSource: 'mulberry', photoUrl: mulberry('car'), category: 'places', colorType: 'noun', motorIndex: 51 },
+  { id: 'p-8', label: 'Car', speechText: 'Car', emoji: '🚗', symbolId: 'car', symbolSource: 'mulberry', photoUrl: mulberry('car'), category: 'places', colorType: 'noun', motorIndex: 51 },
 
   // --- PEOPLE ---
   { id: 'pp-1', label: 'Mom', speechText: 'Mom', emoji: '👩', symbolId: 'mum_parent', symbolSource: 'mulberry', photoUrl: mulberry('mum_parent'), category: 'people', colorType: 'noun', motorIndex: 52, isFavorite: true },
@@ -246,8 +246,8 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
   { id: 'fl-4', label: 'Tired', speechText: 'I am tired', emoji: '🥱', symbolId: 'sleep_male_,_to', symbolSource: 'mulberry', photoUrl: mulberry('sleep_male_,_to'), category: 'feelings', colorType: 'adjective', motorIndex: 67 },
   { id: 'fl-5', label: 'Angry', speechText: 'I feel angry', emoji: '😠', symbolId: 'angry_man', symbolSource: 'mulberry', photoUrl: mulberry('angry_man'), category: 'feelings', colorType: 'adjective', motorIndex: 68 },
   { id: 'fl-6', label: 'Scared', speechText: 'I am scared', emoji: '😨', symbolId: 'afraid_man', symbolSource: 'mulberry', photoUrl: mulberry('afraid_man'), category: 'feelings', colorType: 'emergency', motorIndex: 69 },
-  { id: 'fl-7', label: 'Hurt / Pain', speechText: 'Something hurts', emoji: '🤕', symbolId: 'headache', symbolSource: 'mulberry', photoUrl: mulberry('headache'), category: 'feelings', colorType: 'emergency', motorIndex: 70, isFavorite: true },
-  { id: 'fl-8', label: 'Toilet / Potty', speechText: 'I need to use the toilet', emoji: '🚽', symbolId: 'toilet', symbolSource: 'mulberry', photoUrl: mulberry('toilet'), category: 'personal', colorType: 'noun', motorIndex: 71, isFavorite: true },
+  { id: 'fl-7', label: 'Hurt', speechText: 'Something hurts', emoji: '🤕', symbolId: 'headache', symbolSource: 'mulberry', photoUrl: mulberry('headache'), category: 'feelings', colorType: 'emergency', motorIndex: 70, isFavorite: true },
+  { id: 'fl-8', label: 'Toilet', speechText: 'I need to use the toilet', emoji: '🚽', symbolId: 'toilet', symbolSource: 'mulberry', photoUrl: mulberry('toilet'), category: 'personal', colorType: 'noun', motorIndex: 71, isFavorite: true },
 ];
 
 export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [

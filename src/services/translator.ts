@@ -52,14 +52,15 @@ export function t(text: string): string {
     if (k.toLowerCase() === lower) return dictionary[k];
   }
 
-  // Handle slash compounds like "I / Me", "Hurt / Pain", "Toilet / Potty"
+  // Handle slash compounds like "I / Me", "My/Mine", "Hurt / Pain", "Toilet / Potty"
+  // Return only the primary word so it never speaks "slash" or repeats both options
   if (trimmed.includes(' / ')) {
     const parts = trimmed.split(' / ').map(p => t(p.trim()));
-    return Array.from(new Set(parts)).join(' / ');
+    return parts[0] || text;
   }
   if (trimmed.includes('/') && !trimmed.startsWith('http')) {
     const parts = trimmed.split('/').map(p => t(p.trim()));
-    return Array.from(new Set(parts)).join(' / ');
+    return parts[0] || text;
   }
 
   return text;

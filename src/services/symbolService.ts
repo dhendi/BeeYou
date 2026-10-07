@@ -508,19 +508,19 @@ export const CURATED_AAC_SYMBOLS: AacSymbolItem[] = [
   { id: 'backstop', label: 'Stop', imageUrl: getMulberrySymbolUrl('backstop'), category: 'core', colorType: 'emergency', source: 'mulberry' },
   { id: 'more', label: 'More', imageUrl: getMulberrySymbolUrl('more'), category: 'core', colorType: 'adjective', source: 'mulberry' },
   { id: 'break_,_to', label: 'Break', imageUrl: getMulberrySymbolUrl('break_,_to'), category: 'core', colorType: 'emergency', source: 'mulberry' },
-  { id: 'good', label: 'Yes / Good', imageUrl: getMulberrySymbolUrl('good'), category: 'core', colorType: 'social', source: 'mulberry' },
-  { id: 'mistake_no_wrong', label: 'No / Stop', imageUrl: getMulberrySymbolUrl('mistake_no_wrong'), category: 'core', colorType: 'emergency', source: 'mulberry' },
+  { id: 'good', label: 'Yes', imageUrl: getMulberrySymbolUrl('good'), category: 'core', colorType: 'social', source: 'mulberry' },
+  { id: 'mistake_no_wrong', label: 'No', imageUrl: getMulberrySymbolUrl('mistake_no_wrong'), category: 'core', colorType: 'emergency', source: 'mulberry' },
   { id: 'play_,_to', label: 'Play', imageUrl: getMulberrySymbolUrl('play_,_to'), category: 'activities', colorType: 'verb', source: 'mulberry' },
   { id: 'eat_,_to', label: 'Eat', imageUrl: getMulberrySymbolUrl('eat_,_to'), category: 'food', colorType: 'verb', source: 'mulberry' },
   { id: 'drink', label: 'Drink', imageUrl: getMulberrySymbolUrl('drink'), category: 'drinks', colorType: 'verb', source: 'mulberry' },
 
   // Daily Living & Places
-  { id: 'toilet', label: 'Toilet / Potty', imageUrl: getMulberrySymbolUrl('toilet'), category: 'personal', colorType: 'noun', source: 'mulberry' },
+  { id: 'toilet', label: 'Toilet', imageUrl: getMulberrySymbolUrl('toilet'), category: 'personal', colorType: 'noun', source: 'mulberry' },
   { id: 'water', label: 'Water', imageUrl: getMulberrySymbolUrl('water'), category: 'drinks', colorType: 'noun', source: 'mulberry' },
   { id: 'house', label: 'Home', imageUrl: getMulberrySymbolUrl('house'), category: 'places', colorType: 'noun', source: 'mulberry' },
   { id: 'school', label: 'School', imageUrl: getMulberrySymbolUrl('school'), category: 'places', colorType: 'noun', source: 'mulberry' },
-  { id: 'car', label: 'Car / Drive', imageUrl: getMulberrySymbolUrl('car'), category: 'places', colorType: 'noun', source: 'mulberry' },
-  { id: 'headache', label: 'Hurt / Pain', imageUrl: getMulberrySymbolUrl('headache'), category: 'feelings', colorType: 'emergency', source: 'mulberry' },
+  { id: 'car', label: 'Car', imageUrl: getMulberrySymbolUrl('car'), category: 'places', colorType: 'noun', source: 'mulberry' },
+  { id: 'headache', label: 'Hurt', imageUrl: getMulberrySymbolUrl('headache'), category: 'feelings', colorType: 'emergency', source: 'mulberry' },
 
   // Feelings & Regulation
   { id: 'happy_man', label: 'Happy', imageUrl: getMulberrySymbolUrl('happy_man'), category: 'feelings', colorType: 'adjective', source: 'mulberry' },
@@ -588,7 +588,7 @@ export const INDUSTRY_AAC_PACKS: IndustryAacPack[] = [
       { label: 'Finished', speechText: 'I am finished with this', emoji: '🏁', photoUrl: getMulberrySymbolUrl('finish'), category: 'core', colorType: 'adjective' },
       { label: 'My Turn', speechText: 'It is my turn please', emoji: '✋', photoUrl: getMulberrySymbolUrl('personal_passport'), category: 'social', colorType: 'social' },
       { label: 'Snack Time', speechText: 'Is it snack time?', emoji: '🍎', photoUrl: getMulberrySymbolUrl('apple'), category: 'food', colorType: 'noun' },
-      { label: 'Outside / Recess', speechText: 'I want to go to recess', emoji: '🛝', photoUrl: getMulberrySymbolUrl('play_area'), category: 'places', colorType: 'noun' },
+      { label: 'Outside', speechText: 'I want to go to recess', emoji: '🛝', photoUrl: getMulberrySymbolUrl('play_area'), category: 'places', colorType: 'noun' },
       { label: 'Speech Therapy', speechText: 'Time for speech therapy', emoji: '🗣️', photoUrl: getMulberrySymbolUrl('talk_1_,_to'), category: 'activities', colorType: 'noun' },
     ],
   },

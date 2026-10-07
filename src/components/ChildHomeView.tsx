@@ -37,6 +37,7 @@ import { t } from '../services/translator';
 
 export const ChildHomeView: React.FC = () => {
   const {
+    settings,
     childProfile,
     worldState,
     setChildView,
@@ -142,8 +143,8 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-mine',
-      label: 'My/Mine',
-      speechText: 'This is mine',
+      label: 'My',
+      speechText: 'My',
       emoji: '🤲',
       symbolId: 'personal_passport',
       bgTone: 'bg-[#FCF9F2]',
@@ -172,8 +173,8 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-more',
-      label: 'More / All Done',
-      speechText: 'More please, or all done',
+      label: 'More',
+      speechText: 'More',
       emoji: '➕',
       symbolId: 'more',
       bgTone: 'bg-[#FCF9F2]',
@@ -185,7 +186,6 @@ export const ChildHomeView: React.FC = () => {
   const handleTactileTileClick = (tile: typeof TACTILE_AAC_TILES[0]) => {
     const label = t(tile.label);
     const speech = t(tile.speechText) !== tile.speechText ? t(tile.speechText) : label;
-    speak(speech);
     playChime('tap');
     addToSentence({
       id: tile.id,
@@ -197,6 +197,10 @@ export const ChildHomeView: React.FC = () => {
       colorType: tile.colorType,
       motorIndex: 0,
     });
+    // Only speak here if autoSpeakSentence is disabled, avoiding double speech
+    if (!settings.autoSpeakSentence) {
+      speak(speech);
+    }
   };
 
   const isWidgetEnabled = (id: string) => {

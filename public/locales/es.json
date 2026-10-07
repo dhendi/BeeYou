@@ -135,7 +135,7 @@
   "Show Bar": "Mostrar barra",
   "AAC Guide": "Guía CAA",
   "We": "We",
-  "My / Mine": "My / Mine",
+  "My / Mine": "Mi",
   "Masking ON": "Enmascaramiento activado",
   "Context Words: Plans Changed": "Palabras de contexto: planes cambiados",
   "Want": "Desear",
@@ -974,5 +974,6 @@
   "0.85x is calm & clear": "0,85x es calmado y claro",
   "Select Language": "Seleccionar idioma",
   "Authentic Neural Accent": "Acento neuronal auténtico",
-  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 Voz filipina auténtica (Neural Stream)"
+  "🇵🇭 Authentic Filipino Voice (Neural Stream)": "🇵🇭 Voz filipina auténtica (Neural Stream)",
+  "My/Mine": "Mi"
 }

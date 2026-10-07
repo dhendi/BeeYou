@@ -1983,6 +1983,12 @@ function formatForNaturalSpeech(text: string): string {
   let cleaned = stripEmojis(text.trim());
   if (!cleaned) return '';
 
+  // Clean dual slash labels like "My/Mine", "My / Mine", "I / Me", "Yes / Good", "No / Stop"
+  // Speak ONLY the first word so it never repeats or pronounces "slash"
+  if (cleaned.includes('/')) {
+    cleaned = cleaned.split('/')[0].trim();
+  }
+
   // Capitalize first letter
   cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 
@@ -2064,35 +2070,50 @@ export async function speakText(
   const lang = (options?.lang || 'en').toLowerCase();
   const normalizedLang = lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' : lang.substring(0, 2);
 
-  if (normalizedLang !== 'en' && !options?.preferOfflineOnly && !options?.voiceURI) {
-    const localVoice = getBestSystemVoice(normalizedLang);
-    const hasAuthenticLocalVoice = localVoice && (
+  if (normalizedLang !== 'en' && !options?.preferOfflineOnly) {
+    const voices = getAvailableVoices();
+    const explicitVoice = options?.voiceURI ? voices.find(v => v.voiceURI === options.voiceURI) : null;
+    const isExplicitVoiceAuthenticForLang = explicitVoice && (
       normalizedLang === 'fil'
-        ? (localVoice.lang.toLowerCase().startsWith('fil') || localVoice.lang.toLowerCase().startsWith('tl'))
-        : localVoice.lang.toLowerCase().startsWith(normalizedLang)
+        ? (explicitVoice.lang.toLowerCase().startsWith('fil') || explicitVoice.lang.toLowerCase().startsWith('tl'))
+        : explicitVoice.lang.toLowerCase().startsWith(normalizedLang)
     );
 
-    if (!hasAuthenticLocalVoice) {
-      const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
-      if (audioMemoryCache.has(cacheKey)) {
-        try {
-          const audioSrc = audioMemoryCache.get(cacheKey)!;
-          const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
-          if (played) return;
-        } catch (e) {
-          // Fall through to fetch
-        }
-      }
+    // If no authentic local voice is explicitly chosen, check if OS has any authentic local voice installed
+    if (!isExplicitVoiceAuthenticForLang) {
+      const localVoice = getBestSystemVoice(normalizedLang);
+      const hasAuthenticLocalVoice = localVoice && (
+        normalizedLang === 'fil'
+          ? (localVoice.lang.toLowerCase().startsWith('fil') || localVoice.lang.toLowerCase().startsWith('tl'))
+          : localVoice.lang.toLowerCase().startsWith(normalizedLang)
+      );
 
-      try {
-        const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
-        const played = await playAudioUrl(streamUrl, formattedText, options?.rate);
-        if (played) {
-          audioMemoryCache.set(cacheKey, streamUrl);
-          return;
+      // When device lacks native voice pack for this language (e.g. Windows Filipino), stream authentic neural audio
+      if (!hasAuthenticLocalVoice) {
+        const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
+        if (audioMemoryCache.has(cacheKey)) {
+          try {
+            const audioSrc = audioMemoryCache.get(cacheKey)!;
+            const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
+            if (played) return;
+          } catch (e) {
+            // Fall through to fetch
+          }
         }
-      } catch (err) {
-        console.warn(`[Audio] Authentic ${normalizedLang} audio stream playback failed, falling back to local speech synthesis:`, err);
+
+        try {
+          const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
+          const response = await fetch(streamUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, blobUrl);
+            const played = await playAudioUrl(blobUrl, formattedText, options?.rate);
+            if (played) return;
+          }
+        } catch (err) {
+          console.warn(`[Audio] Authentic ${normalizedLang} audio stream playback failed, falling back to local speech synthesis:`, err);
+        }
       }
     }
   }
@@ -2108,10 +2129,23 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
   return new Promise((resolve) => {
     try {
       stopSpeaking();
-      const audio = new Audio(src);
-      audio.playbackRate = Math.max(0.65, Math.min(1.2, rate ?? 0.85));
+      const audio = new Audio();
+      audio.preload = 'auto';
+      audio.src = src;
       activeAudioElement = audio;
       notifySpeechState(true, originalText);
+
+      const targetRate = Math.max(0.65, Math.min(1.2, rate ?? 0.85));
+      try {
+        audio.playbackRate = targetRate;
+        audio.defaultPlaybackRate = targetRate;
+      } catch (e) {}
+
+      audio.onplay = () => {
+        try {
+          audio.playbackRate = targetRate;
+        } catch (e) {}
+      };
 
       audio.onended = () => {
         activeAudioElement = null;
@@ -2119,7 +2153,8 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
         resolve(true);
       };
 
-      audio.onerror = () => {
+      audio.onerror = (err) => {
+        console.warn('[Audio] playAudioUrl error:', err, audio.error);
         activeAudioElement = null;
         notifySpeechState(false, null);
         resolve(false);
@@ -2127,13 +2162,15 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
 
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
+        playPromise.catch((err) => {
+          console.warn('[Audio] playAudioUrl rejected:', err);
           activeAudioElement = null;
           notifySpeechState(false, null);
           resolve(false);
         });
       }
     } catch (e) {
+      console.warn('[Audio] playAudioUrl exception:', e);
       activeAudioElement = null;
       notifySpeechState(false, null);
       resolve(false);
