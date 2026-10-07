@@ -425,7 +425,7 @@
   "Enter Pairing Code": "Enter Pairing Code",
   "Pair with Child Device": "Pair with Child Device",
   "Offline & Storage Sync": "Offline & Storage Sync",
-  "Language": "Language",
+  "Language": "言語",
   "Themes & Studio": "Themes & Studio",
   "Scan QR Code": "Scan QR Code",
   "Disconnected": "Disconnected",
@@ -971,5 +971,6 @@
   "View Active Routines →": "View Active Routines →",
   "You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.": "You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.",
   "View Active Routines": "View Active Routines",
-  "0.85x is calm & clear": "0.85倍は穏やかで聞き取りやすい"
+  "0.85x is calm & clear": "0.85倍は穏やかで聞き取りやすい",
+  "Select Language": "言語を選択"
 }

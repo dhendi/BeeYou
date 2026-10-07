@@ -13,13 +13,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { setActiveDeviceView } from '../services/authService';
 import { t } from '../services/translator';
 
-const LANGUAGE_LIST: Array<{ code: 'en' | 'fil' | 'es' | 'fr' | 'ja'; label: string; nextLabel: string }> = [
-  { code: 'en', label: '🇺🇸 EN', nextLabel: 'Filipino' },
-  { code: 'fil', label: '🇵🇭 FIL', nextLabel: 'Español' },
-  { code: 'es', label: '🇪🇸 ES', nextLabel: 'Français' },
-  { code: 'fr', label: '🇨🇦 FR', nextLabel: '日本語' },
-  { code: 'ja', label: '🇯🇵 JA', nextLabel: 'English' },
-];
+import { LanguageDropdown } from './LanguageDropdown';
 
 export const ChildHeader: React.FC = () => {
   const {
@@ -85,23 +79,8 @@ export const ChildHeader: React.FC = () => {
 
       {/* Right: Streamlined Compact Actions */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        {/* 1-Tap In-Place Language Toggle */}
-        <button
-          type="button"
-          onClick={() => {
-            const currentIndex = LANGUAGE_LIST.findIndex(l => l.code === settings.language);
-            const nextIndex = (currentIndex + 1) % LANGUAGE_LIST.length;
-            const nextItem = LANGUAGE_LIST[nextIndex >= 0 ? nextIndex : 0];
-            updateSettings({ language: nextItem.code });
-            playChime('tap');
-          }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-          title={`Language: ${LANGUAGE_LIST.find(l => l.code === settings.language)?.label || 'EN'}. Tap to switch to ${LANGUAGE_LIST[(LANGUAGE_LIST.findIndex(l => l.code === settings.language) + 1) % LANGUAGE_LIST.length]?.nextLabel || 'next language'}.`}
-        >
-          <span>
-            {LANGUAGE_LIST.find(l => l.code === settings.language)?.label || '🇺🇸 EN'}
-          </span>
-        </button>
+        {/* Language Dropdown Choices */}
+        <LanguageDropdown />
 
         {/* Compact Live Connection Indicator Pill */}
         <button
