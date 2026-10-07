@@ -601,7 +601,7 @@ export interface AppSettings {
   voicePitch: number;
   selectedVoiceURI: string;
   voicePersona?: 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir' | 'system';
-  language: 'en' | 'es' | 'fr' | 'fil';
+  language: 'en' | 'es' | 'fr' | 'fil' | 'ja';
   gridColumns: 2 | 3 | 4 | 6 | 8;
   largeButtonMode: boolean;
   highContrast: boolean;

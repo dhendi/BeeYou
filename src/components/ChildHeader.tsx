@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Lock, 
@@ -12,8 +12,10 @@ import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
 import { setActiveDeviceView } from '../services/authService';
 import { t } from '../services/translator';
+import { LanguagePickerModal } from './LanguagePickerModal';
 
 export const ChildHeader: React.FC = () => {
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const {
     settings,
     updateSettings,
@@ -77,18 +79,22 @@ export const ChildHeader: React.FC = () => {
 
       {/* Right: Streamlined Compact Actions */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        {/* 1-Tap Language Toggle */}
+        {/* 1-Tap Language Selector */}
         <button
           type="button"
           onClick={() => {
-            const nextLang = settings.language === 'fil' ? 'en' : 'fil';
-            updateSettings({ language: nextLang });
+            setShowLanguageModal(true);
             playChime('tap');
           }}
           className="flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-          title={settings.language === 'fil' ? 'Wika: Filipino. Pindutin para sa English.' : 'Language: English. Tap for Filipino.'}
+          title={t('Choose Language')}
         >
-          <span>{settings.language === 'fil' ? '🇵🇭 FIL' : '🇺🇸 EN'}</span>
+          <span>
+            {settings.language === 'fil' ? '🇵🇭 FIL' :
+             settings.language === 'es' ? '🇪🇸 ES' :
+             settings.language === 'fr' ? '🇨🇦 FR' :
+             settings.language === 'ja' ? '🇯🇵 JA' : '🇺🇸 EN'}
+          </span>
         </button>
 
         {/* Compact Live Connection Indicator Pill */}
@@ -153,6 +159,12 @@ export const ChildHeader: React.FC = () => {
           <Lock className="w-3 h-3 text-stone-500" />
         </button>
       </div>
+
+      {/* Language Picker Modal */}
+      <LanguagePickerModal
+        isOpen={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+      />
     </header>
   );
 };

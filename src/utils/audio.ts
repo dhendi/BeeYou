@@ -1895,7 +1895,16 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
   }
 
   // Sort descending by naturalness score
-  const sorted = [...matchingVoices].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
+  const sorted = [...matchingVoices].sort((a, b) => {
+    // For Canadian French, give priority to fr-CA voices
+    if (targetPrefix === 'fr') {
+      const aIsCa = a.lang.toLowerCase().includes('ca') || a.name.toLowerCase().includes('canada');
+      const bIsCa = b.lang.toLowerCase().includes('ca') || b.name.toLowerCase().includes('canada');
+      if (aIsCa && !bIsCa) return -1;
+      if (!aIsCa && bIsCa) return 1;
+    }
+    return rateVoiceNaturalness(b) - rateVoiceNaturalness(a);
+  });
 
   return sorted[0] || null;
 }

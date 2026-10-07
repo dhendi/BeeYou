@@ -30,6 +30,7 @@ import { t } from '../services/translator';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
+import { LanguagePickerModal } from './LanguagePickerModal';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
 import {
   getPairingCode,
@@ -122,6 +123,7 @@ export const ParentDashboard: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCaregiverTour, setShowCaregiverTour] = useState(false);
   const [showTourDirectoryModal, setShowTourDirectoryModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [activeTourSteps, setActiveTourSteps] = useState<CoachMarkStep[]>(() => SECTION_TOURS.fullApp.steps);
   const [currentTourName, setCurrentTourName] = useState<string>('Caregiver App Overview');
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
@@ -516,18 +518,22 @@ export const ParentDashboard: React.FC = () => {
 
         {/* Right: Feature Guide & Plans Changed Status */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* 1-Tap Language Toggle */}
+          {/* 1-Tap Language Selector */}
           <button
             type="button"
             onClick={() => {
-              const nextLang = settings.language === 'fil' ? 'en' : 'fil';
-              updateSettings({ language: nextLang });
+              setShowLanguageModal(true);
               playChime('tap');
             }}
             className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs border border-amber-300/80 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-            title={settings.language === 'fil' ? 'Wika: Filipino. Pindutin para sa English.' : 'Language: English. Tap for Filipino.'}
+            title={t('Choose Language')}
           >
-            <span>{settings.language === 'fil' ? '🇵🇭 FIL' : '🇺🇸 EN'}</span>
+            <span>
+              {settings.language === 'fil' ? '🇵🇭 FIL' :
+               settings.language === 'es' ? '🇪🇸 ES' :
+               settings.language === 'fr' ? '🇨🇦 FR' :
+               settings.language === 'ja' ? '🇯🇵 JA' : '🇺🇸 EN'}
+            </span>
           </button>
 
           <button
@@ -899,6 +905,12 @@ export const ParentDashboard: React.FC = () => {
         onComplete={() => setShowCaregiverTour(false)}
         onSkip={() => setShowCaregiverTour(false)}
         tourName={currentTourName}
+      />
+
+      {/* Language Picker Modal */}
+      <LanguagePickerModal
+        isOpen={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
       />
     </div>
   );
