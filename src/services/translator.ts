@@ -27,7 +27,7 @@ export async function setLanguage(lang: string): Promise<void> {
     dictionary = {};
   } else {
     try {
-      const res = await fetch(`/locales/${lang}.json`);
+      const res = await fetch(`/locales/${lang}.json?v=${Date.now()}`, { cache: 'no-cache' });
       if (res.ok) {
         dictionary = await res.json();
         localStorage.setItem(`beeyou_dict_${lang}`, JSON.stringify(dictionary));

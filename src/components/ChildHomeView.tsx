@@ -308,12 +308,12 @@ export const ChildHomeView: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
-                  Plans Changed
+                  {t('Plans Changed')}
                 </span>
-                <span className="text-xs font-bold text-amber-900">Tap to see calm plan</span>
+                <span className="text-xs font-bold text-amber-900">{t('Tap to see calm plan')}</span>
               </div>
               <h2 className="text-base sm:text-lg font-black text-amber-950 mt-0.5">
-                New Plan: {plansChanged.newPlanTitle}
+                {t('New Plan')}: {t(plansChanged.newPlanTitle)}
               </h2>
             </div>
           </div>
@@ -734,7 +734,7 @@ export const ChildHomeView: React.FC = () => {
                           type="button"
                           onClick={() => handleTactileTileClick(tile)}
                           className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
-                          title={`Speak "${tile.label}"`}
+                          title={t(tile.speechText || tile.label)}
                         >
                           <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform relative">
                             <img
