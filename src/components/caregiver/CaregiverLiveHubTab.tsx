@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
+import { getQuickRepliesForAlert } from '../../utils/alertResponses';
 import { 
   getPairingCode, 
   sendCaregiverMessage, 
@@ -309,27 +310,16 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
 
                 <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
                   <span className="text-xs font-bold text-slate-500">{t("Quick Reply:")}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
-                    className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-2xs cursor-pointer active:scale-95"
-                  >
-                    {t("🚗 I'm On My Way")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
-                    className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs shadow-2xs cursor-pointer active:scale-95"
-                  >
-                    {t("❤️ I'm Here For You")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer active:scale-95"
-                  >
-                    {t("⏳ 5 Minutes")}
-                  </button>
+                  {getQuickRepliesForAlert(alert, t).map((reply) => (
+                    <button
+                      key={reply.id}
+                      type="button"
+                      onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
+                      className={`px-3 py-1.5 rounded-xl font-black text-xs shadow-2xs cursor-pointer active:scale-95 transition flex items-center gap-1.5 ${reply.className}`}
+                    >
+                      <span>{reply.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             ))}

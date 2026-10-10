@@ -79,7 +79,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     ttsAnnouncement: 'I sent an alert that I need a calm break.',
   },
   {
-    id: 'im_okay',
+    id: 'love_hug',
     label: 'Send Love / Hug',
     sublabel: 'Thinking of you and safe',
     emoji: '❤️',
@@ -88,7 +88,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     ttsAnnouncement: 'I sent a loving check-in to my caregiver.',
   },
   {
-    id: 'want_to_talk',
+    id: 'pickup_ready',
     label: 'Ready for Pickup / Home',
     sublabel: 'Ready to be picked up or go home',
     emoji: '🚗',
@@ -97,7 +97,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     ttsAnnouncement: 'I sent an alert that I am ready to go home.',
   },
   {
-    id: 'need_break',
+    id: 'hungry_thirsty',
     label: 'Hungry / Thirsty',
     sublabel: 'Need snack, meal or water',
     emoji: '🥪',
@@ -106,7 +106,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     ttsAnnouncement: 'I sent an alert that I need food or water.',
   },
   {
-    id: 'need_help',
+    id: 'restroom',
     label: 'Need Restroom',
     sublabel: 'Need to use the bathroom',
     emoji: '🚽',
@@ -115,7 +115,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     ttsAnnouncement: 'I sent an alert that I need the restroom.',
   },
   {
-    id: 'im_okay',
+    id: 'task_done',
     label: 'Finished My Task! ⭐',
     sublabel: 'Done with my routine or schedule',
     emoji: '✅',

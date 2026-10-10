@@ -1170,10 +1170,12 @@ export const DEFAULT_HELP_ALERT_PRESETS: HelpAlertPreset[] = [
 ];
 
 export const DEFAULT_CAREGIVER_RESPONSES: CaregiverResponsePreset[] = [
+  { id: 'good_job', label: "Great job!", text: "Super proud of you! Great job finishing your task! ⭐", emoji: '🌟' },
   { id: 'im_here', label: "I'm here", text: "I'm here for you ❤️", emoji: '❤️' },
   { id: 'coming', label: "I'm coming", text: "I'm on my way 🚗", emoji: '🚗' },
   { id: 'okay', label: "Okay", text: "Okay, got your message 👍", emoji: '👍' },
   { id: 'give_minutes', label: "Give me a few minutes", text: "Give me a few minutes ⏳", emoji: '⏳' },
+  { id: 'love_you', label: "Love you", text: "Love you so much! Sending big hugs! ❤️", emoji: '❤️' },
 ];
 
 export const DEFAULT_CALM_STRATEGIES: CalmCopingStrategy[] = [

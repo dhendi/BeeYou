@@ -707,6 +707,11 @@ export type PredefinedAlertId =
   | 'need_break'     // 🧘 I NEED A BREAK
   | 'want_to_talk'   // 💬 I WANT TO TALK
   | 'im_okay'        // ❤️ I'M OKAY
+  | 'task_done'      // ⭐ FINISHED MY TASK
+  | 'love_hug'       // ❤️ SEND LOVE / HUG
+  | 'pickup_ready'   // 🚗 READY FOR PICKUP
+  | 'hungry_thirsty' // 🥪 HUNGRY / THIRSTY
+  | 'restroom'       // 🚽 NEED RESTROOM
   | string;          // Custom user-defined alert IDs
 
 export interface HelpAlertPreset {
@@ -726,6 +731,16 @@ export type PredefinedCaregiverResponseId =
   | 'coming'         // 🚗 I'm coming
   | 'okay'           // 👍 Okay
   | 'give_minutes'   // ⏳ Give me a few minutes
+  | 'good_job'       // 🌟 Good job / proud
+  | 'awesome_work'   // 🎉 Awesome work
+  | 'proud'          // 👏 Proud of you
+  | 'love_you'       // ❤️ Love you too
+  | 'hug_back'       // 🤗 Big hug back
+  | 'snack_coming'   // 🍎 Snack coming
+  | 'drink_water'    // 💧 Drink some water
+  | 'go_ahead'       // 🚻 Go right ahead
+  | 'take_time'      // 🧘 Take your time
+  | 'headphones'     // 🎧 Put on headphones
   | string;          // Custom user-defined response IDs
 
 export interface CaregiverResponsePreset {

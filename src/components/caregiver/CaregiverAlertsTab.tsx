@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { ShieldAlert, ArrowLeft, Sparkles } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
+import { getQuickRepliesForAlert } from '../../utils/alertResponses';
 import { 
   getPairingCode, 
   acknowledgeCaregiverAlert,
@@ -220,34 +221,16 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                     {t('Send Immediate Reassurance to')} {alert.childName}{t("'s Screen:")}
                   </span>
                   <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => handleAcknowledgeAlert(alert.id, "I'm on my way! 🚗", 'coming')}
-                      className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
-                    >
-                      <span>{t("🚗 I'm On My Way")}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAcknowledgeAlert(alert.id, "I'm here for you ❤️ Take a deep breath.", 'im_here')}
-                      className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
-                    >
-                      <span>{t("❤️ I'm Here For You")}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAcknowledgeAlert(alert.id, "Give me 5 minutes, finish what you're doing ⏳", 'give_minutes')}
-                      className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
-                    >
-                      <span>{t("⏳ 5 Minutes")}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAcknowledgeAlert(alert.id, "You are safe. Sit down and take a slow sip of water 💧", 'safe')}
-                      className="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5"
-                    >
-                      <span>{t("💧 You Are Safe")}</span>
-                    </button>
+                    {getQuickRepliesForAlert(alert, t).map((reply) => (
+                      <button
+                        key={reply.id}
+                        type="button"
+                        onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
+                        className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5 transition ${reply.className}`}
+                      >
+                        <span>{reply.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>

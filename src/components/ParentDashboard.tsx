@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { getQuickRepliesForAlert } from '../utils/alertResponses';
 import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } from '../types';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
@@ -728,20 +729,16 @@ export const ParentDashboard: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, "I'm on my way ❤️", 'coming')}
-                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition"
-                >
-                  {t("I'm on my way ❤️")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, "Take deep slow breaths. You are safe 🧘", 'breathe')}
-                  className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition"
-                >
-                  {t("Breathe 🧘")}
-                </button>
+                {getQuickRepliesForAlert(activeAlerts[0], t).slice(0, 2).map((reply) => (
+                  <button
+                    key={reply.id}
+                    type="button"
+                    onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, reply.text, reply.id)}
+                    className={`px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition flex items-center gap-1.5 ${reply.className}`}
+                  >
+                    <span>{reply.label}</span>
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={() => {
