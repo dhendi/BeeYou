@@ -86,13 +86,21 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
   const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
   const subscriptionStartTime = Date.now();
   let initialAlertLoaded = false;
+  let lastProcessedAlertKey = '';
 
   activeAlertUnsub = onValue(alertRef, (snapshot) => {
     const data = snapshot.val();
     if (!data) {
       initialAlertLoaded = true;
+      lastProcessedAlertKey = '';
       return;
     }
+
+    const currentAlertKey = `${data.id || data.alertId || ''}:${data.status || ''}:${data.acknowledgedAt || data.timestamp || ''}:${data.responseMessage || ''}`;
+    if (currentAlertKey === lastProcessedAlertKey) {
+      return;
+    }
+    lastProcessedAlertKey = currentAlertKey;
 
     const eventTime = parseTimestampMs(data.sentAt || data.acknowledgedAt || data.timestamp);
     const now = Date.now();

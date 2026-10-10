@@ -1242,8 +1242,15 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         sessionStorage.getItem('beeyou_active_device_view') === 'caregiver'
       ));
 
+    let lastSpokenAlertId = '';
+    let lastSpokenAckKey = '';
+
     const unsubAlert = onCaregiverAlert((alert) => {
       if (isCaregiver) {
+        const alertKey = `${alert.id || alert.label}:${alert.status || 'active'}`;
+        if (lastSpokenAlertId === alertKey) return;
+        lastSpokenAlertId = alertKey;
+
         playChime('star');
         speakText(`Incoming Alert from ${alert.childName || 'Child'}: ${alert.label}`);
         setIncomingCaregiverMessage({
@@ -1259,6 +1266,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
     const unsubAck = onCaregiverAlertAck((ack) => {
       if (ack.responseMessage) {
+        const ackKey = `${ack.alertId || ''}:${ack.responseMessage || ''}:${ack.by || ''}`;
+        if (lastSpokenAckKey === ackKey) return;
+        lastSpokenAckKey = ackKey;
+
         setIncomingCaregiverMessage({
           id: 'ack-' + Date.now(),
           senderName: ack.by || 'Caregiver',

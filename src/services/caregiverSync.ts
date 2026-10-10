@@ -208,7 +208,10 @@ const seenEventIds = new Set<string>();
 
 function isEventAlreadyProcessed(envelope: any): boolean {
   if (!envelope) return true;
-  const id = envelope.eventId || (envelope.alert?.id ? `alert-${envelope.alert.id}` : null);
+  const id = envelope.eventId 
+    || (envelope.ack ? `ack-${envelope.ack.alertId || ''}-${envelope.ack.responseMessage || ''}` : null)
+    || (envelope.alert?.id ? `alert-${envelope.alert.id}-${envelope.alert.status || 'active'}` : null)
+    || (envelope.message?.id ? `msg-${envelope.message.id}` : null);
   if (!id) return false;
   if (seenEventIds.has(id)) return true;
   seenEventIds.add(id);
@@ -353,6 +356,7 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
 }
 
 let lastPollTimestamp = 0;
+let lastPolledAlertSignature = '';
 
 function isCurrentDeviceCaregiver(): boolean {
   if (typeof window === 'undefined') return false;
@@ -579,31 +583,38 @@ export function subscribeToCloudChannel(code: string): void {
           }
         }
 
-        // Check active alert from polled state
+        // Check active alert from polled state (dispatch ONLY on actual change)
         const activeAlert = data.state?.activeAlert || data.session?.activeAlert;
         if (activeAlert) {
-          const alertTime = parseTimestampMs(activeAlert.sentAt || activeAlert.acknowledgedAt || activeAlert.timestamp);
-          const now = Date.now();
-          const isRecentAlert = alertTime > 0 && (now - alertTime) < 300000;
+          const currentSignature = `${activeAlert.id || activeAlert.alertId || ''}:${activeAlert.status || ''}:${activeAlert.responseMessage || ''}:${activeAlert.acknowledgedAt || ''}`;
+          if (currentSignature !== lastPolledAlertSignature) {
+            lastPolledAlertSignature = currentSignature;
 
-          if (activeAlert.status === 'active' && (isRecentAlert || alertTime >= subscribeStartTime)) {
-            handleIncomingSyncEnvelope({
-              type: 'CAREGIVER_ALERT',
-              alert: activeAlert,
-              pairingCode: safeCode,
-            });
-          } else if (activeAlert.status === 'acknowledged' && (isRecentAlert || alertTime >= subscribeStartTime)) {
-            handleIncomingSyncEnvelope({
-              type: 'CAREGIVER_ALERT_ACK',
-              ack: {
-                alertId: activeAlert.id || activeAlert.alertId || safeCode,
-                responseMessage: activeAlert.responseMessage,
-                responseId: activeAlert.responseId,
-                by: activeAlert.acknowledgedBy || 'Caregiver',
-              },
-              pairingCode: safeCode,
-            });
+            const alertTime = parseTimestampMs(activeAlert.sentAt || activeAlert.acknowledgedAt || activeAlert.timestamp);
+            const now = Date.now();
+            const isRecentAlert = alertTime > 0 && (now - alertTime) < 300000;
+
+            if (activeAlert.status === 'active' && (isRecentAlert || alertTime >= subscribeStartTime)) {
+              handleIncomingSyncEnvelope({
+                type: 'CAREGIVER_ALERT',
+                alert: activeAlert,
+                pairingCode: safeCode,
+              });
+            } else if (activeAlert.status === 'acknowledged') {
+              handleIncomingSyncEnvelope({
+                type: 'CAREGIVER_ALERT_ACK',
+                ack: {
+                  alertId: activeAlert.id || activeAlert.alertId || safeCode,
+                  responseMessage: activeAlert.responseMessage,
+                  responseId: activeAlert.responseId,
+                  by: activeAlert.acknowledgedBy || 'Caregiver',
+                },
+                pairingCode: safeCode,
+              });
+            }
           }
+        } else {
+          lastPolledAlertSignature = '';
         }
 
         // Live peer presence detection from server session

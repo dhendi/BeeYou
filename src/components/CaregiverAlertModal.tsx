@@ -180,7 +180,12 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       });
     }, 4000);
 
+    let acknowledgedAlready = false;
+
     const unsubAck = onCaregiverAlertAck((ack) => {
+      if (acknowledgedAlready) return;
+      acknowledgedAlready = true;
+
       if (settings?.soundAlerts !== false) {
         playChime('star');
       }
@@ -267,6 +272,9 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   };
 
   const handleReset = () => {
+    try {
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+    } catch {}
     setSentAlert(null);
     setCaregiverResponse(null);
     setDeliveryStage('idle');
