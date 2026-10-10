@@ -177,7 +177,17 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
         lastKnownPeerPing = Date.now();
         lastKnownPeerRole = isCaregiver ? 'child_device' : 'caregiver';
         notifyPresence();
-        messageListeners.forEach((fn) => fn(msg));
+
+        const rawSender = msg?.senderName || 'Caregiver';
+        const rawText = msg?.text || '';
+        const isActuallyInverted =
+          (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+          rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+        const normalizedMsg: CaregiverMessage = isActuallyInverted
+          ? { ...msg, senderName: rawText, text: rawSender }
+          : msg;
+
+        messageListeners.forEach((fn) => fn(normalizedMsg));
       }
     });
   });
@@ -318,9 +328,18 @@ export async function resolveFirebaseAlert(code: string): Promise<void> {
 export async function sendFirebaseMessage(code: string, message: CaregiverMessage): Promise<void> {
   const c = cleanCode(code);
   try {
+    const rawSender = message?.senderName || 'Caregiver';
+    const rawText = message?.text || '';
+    const isActuallyInverted =
+      (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+      rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+    const normalizedMessage: CaregiverMessage = isActuallyInverted
+      ? { ...message, senderName: rawText, text: rawSender }
+      : message;
+
     const msgsRef = ref(db, `beeyou/sessions/${c}/messages`);
     const newMsgRef = push(msgsRef);
-    await set(newMsgRef, removeUndefined(message));
+    await set(newMsgRef, removeUndefined(normalizedMessage));
   } catch (err) {
     console.warn('Firebase send message error:', err);
   }

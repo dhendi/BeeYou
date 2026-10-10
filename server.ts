@@ -710,7 +710,18 @@ app.post('/api/caregiver/event', (req, res) => {
     allStates.set(pairingCode, familyState);
     saveAllFamilyStates(allStates);
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
-    session.messages.push(envelope.message);
+    let msg = { ...envelope.message };
+    const rawSender = String(msg.senderName || '');
+    const rawText = String(msg.text || '');
+    const isActuallyInverted =
+      (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+      rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+    if (isActuallyInverted) {
+      msg.senderName = rawText;
+      msg.text = rawSender;
+      envelope.message = msg;
+    }
+    session.messages.push(msg);
     if (session.messages.length > 30) session.messages = session.messages.slice(-30);
     session.lastCaregiverActiveTime = new Date().toISOString();
   } else if (envelope.type === 'CHILD_STATUS_UPDATE' && envelope.status) {
@@ -1285,8 +1296,20 @@ app.post('/api/caregiver/sync', (req, res) => {
 
 // Caregiver sends a predefined or custom message to child
 app.post('/api/caregiver/message', (req, res) => {
-  const { pairingCode, senderName, text, emoji, responseId } = req.body;
+  let { pairingCode, senderName, text, emoji, responseId } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
+
+  // Defensive auto-healing: if text is "Caregiver" and senderName is the message phrase, swap them
+  if (
+    typeof text === 'string' &&
+    typeof senderName === 'string' &&
+    (text.trim().toLowerCase() === 'caregiver' || text.trim().toLowerCase() === 'child') &&
+    senderName.trim().toLowerCase() !== text.trim().toLowerCase()
+  ) {
+    const temp = text;
+    text = senderName;
+    senderName = temp;
+  }
 
   if (!code || !text) {
     return res.status(400).json({ error: 'Pairing code and message text are required' });
@@ -1354,7 +1377,18 @@ app.get('/api/caregiver/messages/:code', (req, res) => {
     m.read = true;
   });
 
-  return res.json({ messages: session.messages, unreadCount });
+  const normalizedMessages = session.messages.map((m) => {
+    const rawSender = String(m.senderName || '');
+    const rawText = String(m.text || '');
+    const isActuallyInverted =
+      (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+      rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+    return isActuallyInverted
+      ? { ...m, senderName: rawText, text: rawSender }
+      : m;
+  });
+
+  return res.json({ messages: normalizedMessages, unreadCount });
 });
 
 // Child triggers an alert (predefined 5 options supported)

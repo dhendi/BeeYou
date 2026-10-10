@@ -1267,7 +1267,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       if (msg.responseId) return; // Alert acknowledgment already announced via onCaregiverAlertAck
       const rawSender = msg.senderName || 'Caregiver';
       const rawText = msg.text || '';
-      const isInverted = rawSender.length > 20 && rawText.length <= 20 && (rawText.toLowerCase() === 'caregiver' || rawText.toLowerCase() === 'child');
+      const isInverted =
+        (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+        rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
       const sender = isInverted ? rawText : rawSender;
       const text = isInverted ? rawSender : rawText;
       const normalizedMsg = { ...msg, senderName: sender, text };

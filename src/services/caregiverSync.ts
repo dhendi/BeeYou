@@ -796,9 +796,23 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     lastPeerRole = 'caregiver';
     notifyConnectionStatus();
 
-    messageListeners.forEach((fn) => fn(envelope.message));
-    triggerWebNotification(`Message from ${envelope.message.senderName || 'Caregiver'}`, {
-      body: envelope.message.text,
+    const m = envelope.message;
+    const rawSender = m.senderName || 'Caregiver';
+    const rawText = m.text || '';
+    const isActuallyInverted =
+      (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+      rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+    const finalSender = isActuallyInverted ? rawText : rawSender;
+    const finalText = isActuallyInverted ? rawSender : rawText;
+    const normalizedMessage: CaregiverMessage = {
+      ...m,
+      senderName: finalSender,
+      text: finalText,
+    };
+
+    messageListeners.forEach((fn) => fn(normalizedMessage));
+    triggerWebNotification(`Message from ${finalSender}`, {
+      body: finalText,
     });
     return;
   }
@@ -1220,10 +1234,23 @@ export async function sendCaregiverMessage(
   responseId?: PredefinedCaregiverResponseId
 ): Promise<CaregiverMessage> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+
+  // Defensive auto-healing: if caller passed swapped arguments
+  let finalSender = senderName;
+  let finalText = text;
+  const isActuallyInverted =
+    (finalText.trim().toLowerCase() === 'caregiver' || finalText.trim().toLowerCase() === 'child') &&
+    finalSender.trim().toLowerCase() !== finalText.trim().toLowerCase();
+  if (isActuallyInverted) {
+    const tmp = finalSender;
+    finalSender = finalText;
+    finalText = tmp;
+  }
+
   const newMsg: CaregiverMessage = {
     id: 'msg-' + Date.now(),
-    senderName,
-    text,
+    senderName: finalSender,
+    text: finalText,
     emoji,
     timestamp: new Date().toISOString(),
     read: false,
@@ -1237,8 +1264,8 @@ export async function sendCaregiverMessage(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pairingCode: safeCode,
-        senderName,
-        text,
+        senderName: finalSender,
+        text: finalText,
         emoji,
         responseId,
       }),
@@ -1264,7 +1291,16 @@ export async function pollCaregiverMessages(code: string): Promise<CaregiverMess
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data?.messages)) {
-        return data.messages;
+        return data.messages.map((m: any) => {
+          const rawSender = m.senderName || 'Caregiver';
+          const rawText = m.text || '';
+          const isActuallyInverted =
+            (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+            rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
+          return isActuallyInverted
+            ? { ...m, senderName: rawText, text: rawSender }
+            : m;
+        });
       }
     }
   } catch {}

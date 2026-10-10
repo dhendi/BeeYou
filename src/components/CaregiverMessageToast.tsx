@@ -14,10 +14,12 @@ export const CaregiverMessageToast: React.FC = () => {
 
   if (!incomingCaregiverMessage) return null;
 
-  // Defensive auto-healing: if senderName is a long phrase and text is "Caregiver", auto-correct them
+  // Defensive auto-healing: if text is "Caregiver" and senderName is not "Caregiver", auto-correct them
   const rawSender = incomingCaregiverMessage.senderName || 'Caregiver';
   const rawText = incomingCaregiverMessage.text || '';
-  const isInverted = rawSender.length > 20 && rawText.length <= 20 && (rawText.toLowerCase() === 'caregiver' || rawText.toLowerCase() === 'child');
+  const isInverted =
+    (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
+    rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
   const senderName = isInverted ? rawText : rawSender;
   const messageText = isInverted ? rawSender : rawText;
 

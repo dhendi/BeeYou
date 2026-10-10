@@ -11,6 +11,10 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       registration.update();
     }
   });
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 }
 
 createRoot(document.getElementById('root')!).render(
