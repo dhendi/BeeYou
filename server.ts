@@ -29,14 +29,18 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
 });
 
-// Lightweight On-Demand Translation Endpoint (Free Google Translate API fallback)
+// Lightweight On-Demand Translation Endpoint (Google Translate API fallback)
 app.get('/api/translate', async (req, res) => {
   const text = String(req.query.text || '').trim();
-  const to = String(req.query.to || 'fil').trim();
+  const to = String(req.query.to || 'es').trim();
   if (!text) return res.json({ translated: text });
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
-    const response = await fetch(url);
+    const url = `https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=en&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    });
     const data: any = await response.json();
     const translated = data?.[0]?.[0]?.[0] || text;
     res.json({ translated });
@@ -46,21 +50,19 @@ app.get('/api/translate', async (req, res) => {
 });
 
 // Authentic High-Fidelity Audio Streaming Endpoint (Google Neural TTS Stream)
-// Provides authentic native Filipino, Spanish, French, Japanese pronunciation
+// Provides authentic native Spanish, French, German, Greek, Russian, Vietnamese, Chinese, Japanese, Korean pronunciation
 const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
 
 app.get('/api/tts', async (req, res) => {
   const text = String(req.query.text || '').trim();
-  const lang = String(req.query.lang || 'fil').trim().toLowerCase();
+  const lang = String(req.query.lang || 'es').trim().toLowerCase();
   if (!text) {
     return res.status(400).send('Missing text parameter');
   }
 
-  // Normalize language codes (e.g., fil-PH -> fil, tl-PH -> fil, fr_ca -> fr-CA, zh -> zh-CN)
+  // Normalize language codes (e.g., fr_ca -> fr-CA, zh -> zh-CN)
   let normalizedLang = 'en';
-  if (lang.startsWith('fil') || lang.startsWith('tl')) {
-    normalizedLang = 'fil';
-  } else if (lang === 'fr_ca' || lang === 'fr-ca') {
+  if (lang === 'fr_ca' || lang === 'fr-ca') {
     normalizedLang = 'fr-CA';
   } else if (lang === 'zh' || lang.startsWith('zh')) {
     normalizedLang = 'zh-CN';

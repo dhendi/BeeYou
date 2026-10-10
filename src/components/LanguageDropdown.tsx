@@ -17,7 +17,6 @@ export interface LanguageOption {
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'en', label: 'EN', flag: '🇺🇸', name: 'English', nativeName: 'English' },
   { code: 'es', label: 'ES', flag: '🇪🇸', name: 'Spanish', nativeName: 'Español' },
-  { code: 'fil', label: 'FIL', flag: '🇵🇭', name: 'Filipino', nativeName: 'Filipino' },
   { code: 'fr', label: 'FR', flag: '🇫🇷', name: 'French (France)', nativeName: 'Français (France)' },
   { code: 'fr_ca', label: 'FR-CA', flag: '🇨🇦', name: 'French (Canada)', nativeName: 'Français (Canada)' },
   { code: 'de', label: 'DE', flag: '🇩🇪', name: 'German', nativeName: 'Deutsch' },

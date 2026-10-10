@@ -1874,14 +1874,10 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
   if (!voices || voices.length === 0) return null;
 
   const targetPrefix = (langPrefix || 'en').toLowerCase();
-  const isFilipino = targetPrefix === 'fil' || targetPrefix === 'tl' || targetPrefix === 'fi';
   const isCanadianFrench = targetPrefix === 'fr_ca' || targetPrefix === 'fr-ca';
 
   const matchingVoices = voices.filter((v) => {
     const l = v.lang.toLowerCase();
-    if (isFilipino) {
-      return l.startsWith('fil') || l.startsWith('tl');
-    }
     if (isCanadianFrench) {
       return l.startsWith('fr') && (l.includes('ca') || v.name.toLowerCase().includes('canada'));
     }
@@ -2082,12 +2078,10 @@ export async function speakText(
   }
 
   // Authentic Native Pronunciation Audio Stream:
-  // When speaking non-English languages (especially Filipino where Windows, macOS, and desktop browsers
-  // do not install a native fil-PH voice by default), stream high-fidelity native Google Neural audio
-  // so phrases are pronounced with genuine native inflection instead of a harsh robotic English accent.
+  // When speaking non-English languages where device browsers lack high-quality local voices,
+  // stream authentic Google Neural audio for genuine native inflection.
   const lang = (options?.lang || 'en').toLowerCase();
   const normalizedLang = 
-    lang.startsWith('fil') || lang.startsWith('tl') ? 'fil' :
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
@@ -2096,9 +2090,7 @@ export async function speakText(
     const voices = getAvailableVoices();
     const explicitVoice = options?.voiceURI ? voices.find(v => v.voiceURI === options.voiceURI) : null;
     const isExplicitVoiceAuthenticForLang = explicitVoice && (
-      normalizedLang === 'fil'
-        ? (explicitVoice.lang.toLowerCase().startsWith('fil') || explicitVoice.lang.toLowerCase().startsWith('tl'))
-        : normalizedLang === 'fr_ca'
+      normalizedLang === 'fr_ca'
         ? explicitVoice.lang.toLowerCase().startsWith('fr')
         : explicitVoice.lang.toLowerCase().startsWith(normalizedLang)
     );
@@ -2107,14 +2099,12 @@ export async function speakText(
     if (!isExplicitVoiceAuthenticForLang) {
       const localVoice = getBestSystemVoice(normalizedLang);
       const hasAuthenticLocalVoice = localVoice && (
-        normalizedLang === 'fil'
-          ? (localVoice.lang.toLowerCase().startsWith('fil') || localVoice.lang.toLowerCase().startsWith('tl'))
-          : normalizedLang === 'fr_ca'
+        normalizedLang === 'fr_ca'
           ? localVoice.lang.toLowerCase().startsWith('fr')
           : localVoice.lang.toLowerCase().startsWith(normalizedLang)
       );
 
-      // When device lacks native voice pack for this language (e.g. Windows Filipino), stream authentic neural audio
+      // When device lacks native voice pack for this language, stream authentic neural audio
       if (!hasAuthenticLocalVoice) {
         const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
         if (audioMemoryCache.has(cacheKey)) {
@@ -2261,7 +2251,6 @@ function speakWithBrowserSpeechSynthesis(
       const langMap: Record<string, string> = {
         en: 'en-US',
         es: 'es-ES',
-        fil: 'fil-PH',
         fr: 'fr-FR',
         fr_ca: 'fr-CA',
         de: 'de-DE',
@@ -2285,7 +2274,6 @@ function speakWithBrowserSpeechSynthesis(
           if (
             tPrefix === 'en' ||
             vLang.startsWith(tPrefix) ||
-            (tPrefix === 'fil' && (vLang.startsWith('fil') || vLang.startsWith('tl'))) ||
             (tPrefix === 'fr_ca' && vLang.startsWith('fr'))
           ) {
             utterance.voice = explicit;
@@ -2295,7 +2283,6 @@ function speakWithBrowserSpeechSynthesis(
 
       if (!utterance.voice && voices.length > 0) {
         const targetPrefix = 
-          options?.lang === 'fil' ? 'fil' :
           options?.lang === 'fr_ca' ? 'fr_ca' :
           targetLang.substring(0, 2);
         const bestVoice = getBestSystemVoice(targetPrefix);

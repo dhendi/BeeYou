@@ -25,6 +25,7 @@ import {
 } from '../services/symbolService';
 import { AACCategory, AACItem } from '../types';
 import { playChime, speakText } from '../utils/audio';
+import { t } from '../services/translator';
 
 interface AACSymbolPickerModalProps {
   isOpen: boolean;
@@ -185,7 +186,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     e?.stopPropagation();
 
     if (isSymbolAlreadyAdded(symbol)) {
-      setToastMessage(`"${symbol.label}" is already on your AAC board!`);
+      setToastMessage(`"${t(symbol.label)}" is already on your AAC board!`);
       playChime('tap');
       setTimeout(() => setToastMessage(null), 3000);
       return;
@@ -206,7 +207,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
     });
 
     setAddedIds((prev) => new Set(prev).add(String(symbol.id)));
-    setToastMessage(`Added "${symbol.label}" directly to your AAC board!`);
+    setToastMessage(`Added "${t(symbol.label)}" directly to your AAC board!`);
     playChime('star');
 
     // Auto clear toast after 3 seconds
@@ -589,8 +590,8 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                           />
                         </div>
 
-                        <span className="font-bold text-xs text-slate-800 line-clamp-1 w-full">
-                          {sym.label}
+                        <span className="font-bold text-xs text-slate-800 line-clamp-1 w-full" title={t(sym.label)}>
+                          {t(sym.label)}
                         </span>
 
                         <div className="w-full flex items-center justify-between pt-1 border-t border-slate-100">

@@ -13,6 +13,7 @@
 
 import { AACCategory } from '../types';
 import { ALL_MULBERRY_SYMBOLS } from './mulberrySymbolsData';
+import { t } from './translator';
 
 export interface AacSymbolItem {
   id: string | number;
@@ -404,9 +405,10 @@ export function resolveAacImageUrl(item: {
 
 /**
  * Searches the 3,400+ Mulberry Symbols library with instant offline matching & ranking.
+ * Supports multilingual searching in English, Spanish, French, German, Greek, Russian, Vietnamese, Chinese, Japanese, and Korean.
  */
 export async function searchMulberrySymbols(query: string): Promise<AacSymbolItem[]> {
-  const cleanQuery = query.trim().toLowerCase().replace(/[^a-z0-9]/g, ' ');
+  const cleanQuery = query.trim().toLowerCase().replace(/[^\p{L}\p{N}]/gu, ' ');
   if (!cleanQuery) return [];
 
   const searchTokens = cleanQuery.split(/\s+/).filter(Boolean);
@@ -416,17 +418,29 @@ export async function searchMulberrySymbols(query: string): Promise<AacSymbolIte
 
   for (const sym of ALL_MULBERRY_SYMBOLS) {
     const symLower = sym.toLowerCase().replace(/[,_-]+/g, ' ');
+    
+    // Format human label to test against localized dictionary
+    let labelCandidate = sym
+      .replace(/_,_to$/, '')
+      .replace(/_[0-9]+[a-z]?$/, '')
+      .replace(/_/g, ' ')
+      .trim();
+    if (labelCandidate) {
+      labelCandidate = labelCandidate.charAt(0).toUpperCase() + labelCandidate.slice(1);
+    }
+    const localizedLabel = t(labelCandidate).toLowerCase();
+
     let score = 0;
 
-    // Exact name match
-    if (symLower === cleanQuery || sym.toLowerCase() === cleanQuery) {
+    // Exact name match in English or translated language
+    if (symLower === cleanQuery || sym.toLowerCase() === cleanQuery || localizedLabel === cleanQuery) {
       score += 100;
-    } else if (symLower.startsWith(cleanQuery)) {
+    } else if (symLower.startsWith(cleanQuery) || localizedLabel.startsWith(cleanQuery)) {
       score += 50;
     } else {
       let allTokensMatch = true;
       for (const token of searchTokens) {
-        if (symLower.includes(token)) {
+        if (symLower.includes(token) || localizedLabel.includes(token)) {
           score += 10;
         } else {
           allTokensMatch = false;

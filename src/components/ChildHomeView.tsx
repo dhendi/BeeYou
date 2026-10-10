@@ -89,11 +89,11 @@ export const ChildHomeView: React.FC = () => {
   const nextStep = currentRoutine?.steps.find((s) => !s.completed);
   const todaysAdventure = adventures[0];
 
-  // 9 Core Tactile AAC Tiles for the Left Physical Board (Matching Graphic Mockup)
+  // 9 Core Tactile AAC Communication Phrases for the Home Board
   const TACTILE_AAC_TILES = [
     {
       id: 'tactile-food',
-      label: 'Food',
+      label: 'I want food',
       speechText: 'I want food to eat',
       emoji: '🍕',
       symbolId: 'food',
@@ -103,7 +103,7 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-drinks',
-      label: 'Drinks',
+      label: 'I want a drink',
       speechText: 'I want something to drink',
       emoji: '🧃',
       symbolId: 'drink',
@@ -113,7 +113,7 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-play',
-      label: 'Play',
+      label: 'I want to play',
       speechText: 'I want to play and have fun',
       emoji: '🎮',
       symbolId: 'play_,_to',
@@ -123,7 +123,7 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-places',
-      label: 'Places',
+      label: 'Go somewhere',
       speechText: 'I want to go somewhere',
       emoji: '🏠',
       symbolId: 'house',
@@ -133,7 +133,7 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-feelings',
-      label: 'Feelings',
+      label: 'How I feel',
       speechText: 'I want to share my feelings',
       emoji: '💛',
       symbolId: 'happy_man',
@@ -142,19 +142,19 @@ export const ChildHomeView: React.FC = () => {
       category: 'feelings' as const,
     },
     {
-      id: 'tactile-mine',
-      label: 'My',
-      speechText: 'My',
-      emoji: '🤲',
-      symbolId: 'personal_passport',
+      id: 'tactile-break',
+      label: 'I need a break',
+      speechText: 'I need a break please',
+      emoji: '🛋️',
+      symbolId: 'break_,_to',
       bgTone: 'bg-[#FCF9F2]',
       colorType: 'subject' as const,
       category: 'core' as const,
     },
     {
       id: 'tactile-want',
-      label: 'Want',
-      speechText: 'I want this',
+      label: 'I want this',
+      speechText: 'I want this please',
       emoji: '🤲',
       symbolId: 'want_,_to',
       bgTone: 'bg-[#FCF9F2]',
@@ -163,7 +163,7 @@ export const ChildHomeView: React.FC = () => {
     },
     {
       id: 'tactile-help',
-      label: 'Help',
+      label: 'I need help',
       speechText: 'Please help me',
       emoji: '🛟',
       symbolId: 'help_,_to',
@@ -172,11 +172,11 @@ export const ChildHomeView: React.FC = () => {
       category: 'core' as const,
     },
     {
-      id: 'tactile-more',
-      label: 'More',
-      speechText: 'More',
-      emoji: '➕',
-      symbolId: 'more',
+      id: 'tactile-stop',
+      label: 'Please stop',
+      speechText: 'Please stop',
+      emoji: '🛑',
+      symbolId: 'backstop',
       bgTone: 'bg-[#FCF9F2]',
       colorType: 'adjective' as const,
       category: 'core' as const,
@@ -185,7 +185,7 @@ export const ChildHomeView: React.FC = () => {
 
   const handleTactileTileClick = (tile: typeof TACTILE_AAC_TILES[0]) => {
     const label = t(tile.label);
-    const speech = t(tile.speechText) !== tile.speechText ? t(tile.speechText) : label;
+    const speech = t(tile.speechText || tile.label);
     playChime('tap');
     addToSentence({
       id: tile.id,
@@ -197,10 +197,8 @@ export const ChildHomeView: React.FC = () => {
       colorType: tile.colorType,
       motorIndex: 0,
     });
-    // Only speak here if autoSpeakSentence is disabled, avoiding double speech
-    if (!settings.autoSpeakSentence) {
-      speak(speech);
-    }
+    // Immediately speak the communicative phrase aloud
+    speak(speech);
   };
 
   const isWidgetEnabled = (id: string) => {

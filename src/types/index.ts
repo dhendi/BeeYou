@@ -598,7 +598,6 @@ export interface EarnedRoutineSticker {
 export type AppLanguage = 
   | 'en' 
   | 'es' 
-  | 'fil' 
   | 'fr' 
   | 'fr_ca' 
   | 'de' 

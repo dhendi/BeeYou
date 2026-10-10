@@ -83,7 +83,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
             {t("Active AAC Vocalizer")}
           </span>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
-            {settings.language === 'fil' && !settings.selectedVoiceURI ? t('Authentic Neural Accent') : t('Offline Ready')}
+            {t('Offline Ready')}
           </span>
         </div>
 
@@ -93,9 +93,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
               <span>
                 {settings.selectedVoiceURI
                   ? (offlineVoices.find(v => v.voiceURI === settings.selectedVoiceURI)?.name || settings.selectedVoiceURI)
-                  : (settings.language === 'fil'
-                      ? t('🇵🇭 Authentic Filipino Voice (Neural Stream)')
-                      : (settings.voicePersona ? `Neural Voice (${settings.voicePersona})` : t('Auto-Selected Best Natural Voice')))}
+                  : (settings.voicePersona ? `Neural Voice (${settings.voicePersona})` : t('Auto-Selected Best Natural Voice'))}
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
                 {t("Active")}
