@@ -149,6 +149,27 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   const activePhone = emergencyContact?.phone;
 
   useEffect(() => {
+    if (!isOpen) return;
+    try {
+      const activeRaw = localStorage.getItem('beeyou_active_caregiver_alert');
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        if (active && active.status === 'active') {
+          const timeStr = active.timestamp ? new Date(active.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+          setSentAlert({
+            alertId: active.alertId || active.id,
+            label: active.label || 'Needs Support',
+            emoji: active.emoji || '🚨',
+            time: timeStr,
+            location: active.location || 'school',
+          });
+          setDeliveryStage('delivered');
+        }
+      }
+    } catch {}
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!sentAlert) return;
 
     const interval = setInterval(() => {

@@ -7,7 +7,8 @@ import {
   getPairingCode, 
   acknowledgeCaregiverAlert,
   sendTestCaregiverAlert,
-  clearAlertHistory
+  clearAlertHistory,
+  resolveCaregiverAlert
 } from '../../services/caregiverSync';
 import { resolveEmergencyAlert } from '../../services/familySync';
 import { CaregiverAlert } from '../../types';
@@ -35,14 +36,15 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
 
   const handleResolveAlert = (alertId: string) => {
     resolveEmergencyAlert(alertId, getPairingCode());
-    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here');
+    resolveCaregiverAlert(getPairingCode(), alertId);
+    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here', alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     showNotification(t('Alert marked as resolved.'));
     playChime('tap');
   };
 
   const handleAcknowledgeAlert = (alertId: string, replyText: string, replyId?: any) => {
-    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId);
+    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId, alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     showNotification(`${t('Sent reassurance reply:')} "${replyText}"`);
     playChime('star');

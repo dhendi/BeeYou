@@ -45,7 +45,8 @@ import {
   extractPairingCodeFromScan,
   getAlertHistory,
   clearAlertHistory,
-  sendTestCaregiverAlert
+  sendTestCaregiverAlert,
+  resolveCaregiverAlert
 } from '../services/caregiverSync';
 import { resolveEmergencyAlert } from '../services/familySync';
 import { setActiveDeviceView } from '../services/authService';
@@ -245,7 +246,7 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleAcknowledgeAlert = async (alertId: string, responseMessage: string, responseId?: PredefinedCaregiverResponseId) => {
-    await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId);
+    await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId, alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     try {
       localStorage.removeItem('beeyou_active_caregiver_alert');
@@ -272,6 +273,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleResolveAlert = (alertId: string) => {
     resolveEmergencyAlert(alertId, getPairingCode());
+    resolveCaregiverAlert(getPairingCode(), alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     try {
       localStorage.removeItem('beeyou_active_caregiver_alert');
@@ -688,6 +690,58 @@ export const ParentDashboard: React.FC = () => {
 
         {/* Content Area */}
         <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 border-2 border-stone-200/80 shadow-xs">
+
+          {/* URGENT LIVE ALERT PERSISTENT BANNER (Visible on all tabs) */}
+          {activeAlerts.length > 0 && activeTab !== 'alerts' && (
+            <div className="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in ring-2 ring-rose-200">
+              <div className="flex items-center gap-3">
+                <span className="flex h-3.5 w-3.5 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600"></span>
+                </span>
+                <ShieldAlert className="w-6 h-6 text-rose-600 shrink-0" />
+                <div>
+                  <div className="font-black text-rose-950 text-sm flex items-center gap-2 flex-wrap">
+                    <span>🚨 {t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
+                    <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs">
+                      {activeAlerts[0].emoji || '🚨'} {activeAlerts[0].label}
+                    </span>
+                  </div>
+                  <div className="text-xs text-rose-700 font-medium mt-0.5">
+                    {activeAlerts[0].location ? `${t('Location:')} ${activeAlerts[0].location} • ` : ''}
+                    {activeAlerts[0].note || t('Child requested immediate support.')}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, "I'm on my way ❤️", 'coming')}
+                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition"
+                >
+                  {t("I'm on my way ❤️")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, "Take deep slow breaths. You are safe 🧘", 'breathe')}
+                  className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition"
+                >
+                  {t("Breathe 🧘")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('alerts');
+                    playChime('tap');
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs cursor-pointer transition"
+                >
+                  {t("Open Alerts Inbox")} →
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* TAB: CAREGIVER LIVE HUB HOMEPAGE */}
           {activeTab === 'home' && (

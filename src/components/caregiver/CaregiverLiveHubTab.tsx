@@ -25,7 +25,8 @@ import {
   sendCaregiverMessage, 
   acknowledgeCaregiverAlert,
   sendTestCaregiverAlert,
-  getAlertHistory
+  getAlertHistory,
+  resolveCaregiverAlert
 } from '../../services/caregiverSync';
 import { resolveEmergencyAlert } from '../../services/familySync';
 import { CaregiverAlert } from '../../types';
@@ -58,7 +59,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
 
   const handleResolveAlert = (alertId: string) => {
     resolveEmergencyAlert(alertId, getPairingCode());
-    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here');
+    resolveCaregiverAlert(getPairingCode(), alertId);
+    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here', alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     setAlertHistoryList(getAlertHistory());
     showNotification('Alert marked as resolved.');
@@ -66,7 +68,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   };
 
   const handleAcknowledgeAlert = (alertId: string, replyText: string, replyId?: any) => {
-    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId);
+    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId, alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     setAlertHistoryList(getAlertHistory());
     showNotification(`Sent reassurance reply: "${replyText}"`);

@@ -15,12 +15,14 @@ import {
   sendFirebaseHeartbeat,
   sendFirebaseAlert,
   acknowledgeFirebaseAlert,
+  resolveFirebaseAlert,
   sendFirebaseMessage,
   onFirebasePresence,
   onFirebaseAlert,
   onFirebaseAck,
   onFirebaseMessage,
-  onFirebaseStatus
+  onFirebaseStatus,
+  parseTimestampMs
 } from './firebaseSync';
 
 const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
@@ -364,6 +366,8 @@ function isCurrentDeviceCaregiver(): boolean {
   return localStorage.getItem('beeyou_user_role') === 'caregiver';
 }
 
+let firebaseUnsubs: Array<() => void> = [];
+
 /**
  * Subscribes to the live cloud channel (Firebase Realtime DB + WebRTC PeerJS + Server SSE stream + Short-polling backup)
  */
@@ -378,46 +382,62 @@ export function subscribeToCloudChannel(code: string): void {
     const isCaregiver = isCurrentDeviceCaregiver();
     initFirebaseLiveChannel(safeCode, isCaregiver);
 
-    onFirebasePresence((p) => {
-      if (p.isConnected) {
-        lastPeerPingTimestamp = Math.max(lastPeerPingTimestamp, Date.now() - (p.lastPingAgo * 1000));
-        lastPeerRole = p.peerRole;
-        lastPeerName = p.peerName;
-        notifyConnectionStatus();
-      }
+    // Clean up previous listeners if any
+    firebaseUnsubs.forEach((unsub) => {
+      try { unsub(); } catch {}
     });
+    firebaseUnsubs = [];
 
-    onFirebaseAlert((alert) => {
-      handleIncomingSyncEnvelope({
-        type: 'CAREGIVER_ALERT',
-        alert,
-        pairingCode: safeCode,
-      });
-    });
+    firebaseUnsubs.push(
+      onFirebasePresence((p) => {
+        if (p.isConnected) {
+          lastPeerPingTimestamp = Math.max(lastPeerPingTimestamp, Date.now() - (p.lastPingAgo * 1000));
+          lastPeerRole = p.peerRole;
+          lastPeerName = p.peerName;
+          notifyConnectionStatus();
+        }
+      })
+    );
 
-    onFirebaseAck((ack) => {
-      handleIncomingSyncEnvelope({
-        type: 'CAREGIVER_ALERT_ACK',
-        ack,
-        pairingCode: safeCode,
-      });
-    });
+    firebaseUnsubs.push(
+      onFirebaseAlert((alert) => {
+        handleIncomingSyncEnvelope({
+          type: 'CAREGIVER_ALERT',
+          alert,
+          pairingCode: safeCode,
+        });
+      })
+    );
 
-    onFirebaseMessage((msg) => {
-      handleIncomingSyncEnvelope({
-        type: 'CAREGIVER_MESSAGE',
-        message: msg,
-        pairingCode: safeCode,
-      });
-    });
+    firebaseUnsubs.push(
+      onFirebaseAck((ack) => {
+        handleIncomingSyncEnvelope({
+          type: 'CAREGIVER_ALERT_ACK',
+          ack,
+          pairingCode: safeCode,
+        });
+      })
+    );
 
-    onFirebaseStatus((status) => {
-      handleIncomingSyncEnvelope({
-        type: 'CHILD_STATUS_UPDATE',
-        status,
-        pairingCode: safeCode,
-      });
-    });
+    firebaseUnsubs.push(
+      onFirebaseMessage((msg) => {
+        handleIncomingSyncEnvelope({
+          type: 'CAREGIVER_MESSAGE',
+          message: msg,
+          pairingCode: safeCode,
+        });
+      })
+    );
+
+    firebaseUnsubs.push(
+      onFirebaseStatus((status) => {
+        handleIncomingSyncEnvelope({
+          type: 'CHILD_STATUS_UPDATE',
+          status,
+          pairingCode: safeCode,
+        });
+      })
+    );
   } catch (e) {
     console.warn('Firebase cloud channel setup error:', e);
   }
@@ -562,20 +582,21 @@ export function subscribeToCloudChannel(code: string): void {
         // Check active alert from polled state
         const activeAlert = data.state?.activeAlert || data.session?.activeAlert;
         if (activeAlert) {
-          const alertTime = activeAlert.acknowledgedAt || activeAlert.sentAt || activeAlert.timestamp || 0;
-          const isRecentAlert = (Date.now() - alertTime) < 15000;
+          const alertTime = parseTimestampMs(activeAlert.sentAt || activeAlert.acknowledgedAt || activeAlert.timestamp);
+          const now = Date.now();
+          const isRecentAlert = alertTime > 0 && (now - alertTime) < 300000;
 
-          if (activeAlert.status === 'active' && (isRecentAlert || alertTime > subscribeStartTime)) {
+          if (activeAlert.status === 'active' && (isRecentAlert || alertTime >= subscribeStartTime)) {
             handleIncomingSyncEnvelope({
               type: 'CAREGIVER_ALERT',
               alert: activeAlert,
               pairingCode: safeCode,
             });
-          } else if (activeAlert.status === 'acknowledged' && (isRecentAlert || alertTime > subscribeStartTime)) {
+          } else if (activeAlert.status === 'acknowledged' && (isRecentAlert || alertTime >= subscribeStartTime)) {
             handleIncomingSyncEnvelope({
               type: 'CAREGIVER_ALERT_ACK',
               ack: {
-                alertId: activeAlert.id || safeCode,
+                alertId: activeAlert.id || activeAlert.alertId || safeCode,
                 responseMessage: activeAlert.responseMessage,
                 responseId: activeAlert.responseId,
                 by: activeAlert.acknowledgedBy || 'Caregiver',
@@ -1271,12 +1292,14 @@ export async function acknowledgeCaregiverAlert(
   code: string,
   acknowledgedBy: string,
   responseMessage?: string,
-  responseId?: PredefinedCaregiverResponseId
+  responseId?: PredefinedCaregiverResponseId,
+  alertId?: string
 ): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  const targetAlertId = alertId || safeCode;
 
   const ackData = {
-    alertId: safeCode,
+    alertId: targetAlertId,
     responseMessage: responseMessage || "I'm on my way ❤️",
     responseId,
     by: acknowledgedBy || 'Caregiver',
@@ -1296,6 +1319,7 @@ export async function acknowledgeCaregiverAlert(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pairingCode: safeCode,
+        alertId: targetAlertId,
         acknowledgedBy,
         responseMessage,
         responseId,
@@ -1304,4 +1328,20 @@ export async function acknowledgeCaregiverAlert(
   } catch (err) {
     console.warn('Acknowledge alert error:', err);
   }
+}
+
+/**
+ * Caregiver resolves and clears an active alert
+ */
+export async function resolveCaregiverAlert(code: string, alertId?: string): Promise<void> {
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  await resolveFirebaseAlert(safeCode);
+  await publishCloudEvent(safeCode, {
+    type: 'ALERT_RESOLVED',
+    alertId,
+    pairingCode: safeCode,
+  });
+  try {
+    localStorage.removeItem(ACTIVE_ALERT_KEY);
+  } catch {}
 }

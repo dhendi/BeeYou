@@ -1210,6 +1210,19 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     };
   }, [settings.language]);
 
+  const liveChildStatusRef = useRef({
+    currentMood,
+    childView,
+    stars: worldState.stars,
+    childName: childProfile?.name || 'Leo',
+  });
+  liveChildStatusRef.current = {
+    currentMood,
+    childView,
+    stars: worldState.stars,
+    childName: childProfile?.name || 'Leo',
+  };
+
   // Listen for real-time messages, alert acks and connection updates from caregiver
   useEffect(() => {
     const unsubCaregiver = onCaregiverMessage((msg) => {
@@ -1219,10 +1232,20 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       speakText(`${msg.senderName} sent you a message: ${msg.text}`);
     });
 
+    const isCaregiver = 
+      userRole === 'caregiver' || 
+      isParentMode || 
+      (typeof window !== 'undefined' && (
+        window.location.port === '3001' || 
+        window.location.pathname.startsWith('/caregiver') || 
+        new URLSearchParams(window.location.search).get('role') === 'caregiver' ||
+        sessionStorage.getItem('beeyou_active_device_view') === 'caregiver'
+      ));
+
     const unsubAlert = onCaregiverAlert((alert) => {
-      if (userRole === 'caregiver' || isParentMode) {
+      if (isCaregiver) {
         playChime('star');
-        speakText(`Incoming Alert from ${alert.childName}: ${alert.label}`);
+        speakText(`Incoming Alert from ${alert.childName || 'Child'}: ${alert.label}`);
         setIncomingCaregiverMessage({
           id: 'alert-' + alert.id,
           senderName: alert.childName || 'Child',
@@ -1256,25 +1279,17 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     const code = getPairingCode();
     subscribeToCloudChannel(code);
 
-    const isCaregiver = 
-      userRole === 'caregiver' || 
-      isParentMode || 
-      (typeof window !== 'undefined' && (
-        window.location.port === '3001' || 
-        window.location.pathname.startsWith('/caregiver') || 
-        new URLSearchParams(window.location.search).get('role') === 'caregiver'
-      ));
-
     const sendPing = () => {
+      const snap = liveChildStatusRef.current;
       sendHeartbeat({
         role: isCaregiver ? 'caregiver' : 'child_device',
-        name: isCaregiver ? 'Sarah (Mom)' : (childProfile?.name || 'Leo'),
+        name: isCaregiver ? 'Sarah (Mom)' : (snap.childName || 'Leo'),
         pairingCode: code,
         childStatus: {
-          childName: childProfile?.name || 'Leo',
-          currentMood,
-          currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : childView === 'skills' ? 'Life Skills' : childView === 'adventures' ? 'Life Adventures' : childView === 'feelings' ? 'Feelings Check-in' : 'BeeYou'}`,
-          stars: worldState.stars,
+          childName: snap.childName || 'Leo',
+          currentMood: snap.currentMood,
+          currentActivity: `In ${snap.childView === 'my-day' ? 'Visual Schedule' : snap.childView === 'aac' ? 'AAC Speech Board' : snap.childView === 'skills' ? 'Life Skills' : snap.childView === 'adventures' ? 'Life Adventures' : snap.childView === 'feelings' ? 'Feelings Check-in' : 'BeeYou'}`,
+          stars: snap.stars,
         }
       });
     };
@@ -1289,7 +1304,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       unsubConnection();
       clearInterval(interval);
     };
-  }, [userRole, isParentMode, childProfile?.name, currentMood, childView, worldState.stars]);
+  }, [userRole, isParentMode, childProfile?.name]);
 
   const isSyncingFromRemoteRef = useRef(false);
 

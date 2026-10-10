@@ -835,19 +835,6 @@ app.post('/api/family/alert/:code', (req, res) => {
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
-  const now = Date.now();
-  const lastTime = lastAlertTimeByFamily.get(code) || 0;
-  if (now - lastTime < 5000 && current.activeAlert) {
-    return res.json({
-      success: true,
-      alert: current.activeAlert,
-      cooldown: true,
-      message: '5-second alert cooldown in effect',
-      state: current,
-    });
-  }
-  lastAlertTimeByFamily.set(code, now);
-
   const { id, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
 
   const alert = {
@@ -861,7 +848,6 @@ app.post('/api/family/alert/:code', (req, res) => {
     location: location || 'home',
     note: note || '',
     timestamp: new Date().toISOString(),
-    status: 'active',
   };
 
   current.activeAlert = alert;
@@ -895,18 +881,6 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
-
-  const now = Date.now();
-  const lastTime = lastAckTimeByFamily.get(code) || 0;
-  if (now - lastTime < 5000) {
-    return res.json({
-      success: true,
-      cooldown: true,
-      message: '5-second response cooldown in effect',
-      state: current,
-    });
-  }
-  lastAckTimeByFamily.set(code, now);
 
   const { acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
 
@@ -1384,18 +1358,6 @@ app.post('/api/caregiver/alert', (req, res) => {
     return res.status(403).json({ error: 'Alerts are disabled by user permissions.' });
   }
 
-  const now = Date.now();
-  const lastTime = lastAlertTimeByFamily.get(code) || 0;
-  if (now - lastTime < 5000 && session.activeAlert) {
-    return res.json({
-      success: true,
-      alert: session.activeAlert,
-      cooldown: true,
-      message: '5-second alert cooldown in effect',
-    });
-  }
-  lastAlertTimeByFamily.set(code, now);
-
   const alert = {
     id: id || ('alert-' + Date.now()),
     childName: childName || session.childName || 'Child',
@@ -1438,19 +1400,8 @@ app.post('/api/caregiver/alert', (req, res) => {
 
 // Caregiver acknowledges the alert and sends instant predefined reassurance response
 app.post('/api/caregiver/alert/acknowledge', (req, res) => {
-  const { pairingCode, acknowledgedBy, responseMessage, responseId } = req.body;
+  const { pairingCode, acknowledgedBy, responseMessage, responseId, alertId } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
-
-  const now = Date.now();
-  const lastTime = lastAckTimeByFamily.get(code) || 0;
-  if (now - lastTime < 5000) {
-    return res.json({
-      success: true,
-      cooldown: true,
-      message: '5-second response cooldown in effect',
-    });
-  }
-  lastAckTimeByFamily.set(code, now);
 
   const session = caregiverSessions.get(code);
 
@@ -1520,7 +1471,7 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
     eventId: `ev-ack-${Date.now()}`,
     type: 'CAREGIVER_ALERT_ACK',
     pairingCode: code,
-    ack: { alertId: code, responseMessage, responseId, by: acknowledgedBy || 'Caregiver' },
+    ack: { alertId: alertId || code, responseMessage, responseId, by: acknowledgedBy || 'Caregiver' },
     state: familyState,
     sentAt: Date.now(),
   });
@@ -1531,7 +1482,7 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
 async function startServer() {
   if (!isProd) {
     const vite = await createViteServer({
-      server: { middlewareMode: true, allowedHosts: true },
+      server: { middlewareMode: true, allowedHosts: true, host: '0.0.0.0' },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -1542,13 +1493,14 @@ async function startServer() {
     });
   }
 
-  app.listen(childPort, () => {
-    console.log(`🧒 Child Tablet App listening on http://localhost:${childPort}`);
+  const host = '0.0.0.0';
+  app.listen(childPort, host, () => {
+    console.log(`🧒 Child Tablet App listening on http://0.0.0.0:${childPort} (Local: http://localhost:${childPort})`);
   });
 
   if (childPort !== caregiverPort) {
-    app.listen(caregiverPort, () => {
-      console.log(`👑 Caregiver Controller Hub listening on http://localhost:${caregiverPort}`);
+    app.listen(caregiverPort, host, () => {
+      console.log(`👑 Caregiver Controller Hub listening on http://0.0.0.0:${caregiverPort} (Local: http://localhost:${caregiverPort})`);
     }).on('error', (err: any) => {
       console.warn(`Could not bind caregiver port ${caregiverPort}:`, err.message);
     });

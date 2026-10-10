@@ -53,6 +53,16 @@ let lastKnownPeerPing = 0;
 let lastKnownPeerRole: 'caregiver' | 'child_device' | null = null;
 let lastKnownPeerName = '';
 
+export function parseTimestampMs(val: any): number {
+  if (!val) return 0;
+  if (typeof val === 'number') return val;
+  if (typeof val === 'string') {
+    const parsed = Date.parse(val);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
 function cleanCode(code: string): string {
   return (code || 'BEE-DEMO').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
@@ -84,8 +94,10 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       return;
     }
 
-    const eventTime = data.acknowledgedAt || data.sentAt || data.timestamp || 0;
-    const isRecent = (Date.now() - eventTime) < 15000;
+    const eventTime = parseTimestampMs(data.sentAt || data.acknowledgedAt || data.timestamp);
+    const now = Date.now();
+    // Alert considered recent if sent within the last 5 minutes
+    const isRecent = eventTime > 0 && (now - eventTime) < 300000;
 
     if (data.status === 'active') {
       lastKnownPeerPing = Date.now();
@@ -93,8 +105,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       lastKnownPeerName = data.childName || 'Child';
       notifyPresence();
 
-      // Only fire alert listener if it's recent or occurred after subscribing
-      if (!initialAlertLoaded || isRecent || eventTime > subscriptionStartTime) {
+      // Fire alert if active and recent (<5m), or sent after connection established
+      if (isRecent || eventTime >= subscriptionStartTime || !initialAlertLoaded) {
         alertListeners.forEach((fn) => fn(data));
       }
     } else if (data.status === 'acknowledged') {
@@ -103,10 +115,13 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       lastKnownPeerName = data.acknowledgedBy || 'Caregiver';
       notifyPresence();
 
-      // Only notify acks that are recent or arrived after initial subscription
-      if (initialAlertLoaded && (isRecent || eventTime > subscriptionStartTime)) {
+      const ackTime = parseTimestampMs(data.acknowledgedAt || data.sentAt || data.timestamp);
+      const isRecentAck = ackTime > 0 && (now - ackTime) < 120000;
+
+      // Only notify acks that are recent (<2m) or arrived after initial subscription
+      if (isRecentAck || ackTime >= subscriptionStartTime || initialAlertLoaded) {
         ackListeners.forEach((fn) => fn({
-          alertId: data.id || code,
+          alertId: data.id || data.alertId || code,
           responseMessage: data.responseMessage,
           responseId: data.responseId,
           by: data.acknowledgedBy || 'Caregiver',
@@ -231,7 +246,8 @@ export async function sendFirebaseAlert(alert: CaregiverAlert): Promise<void> {
     await set(alertRef, {
       ...alert,
       status: 'active',
-      timestamp: new Date().toISOString(),
+      sentAt: Date.now(),
+      timestamp: alert.timestamp || new Date().toISOString(),
     });
   } catch (err) {
     console.warn('Firebase alert dispatch error:', err);
@@ -258,9 +274,23 @@ export async function acknowledgeFirebaseAlert(params: {
       responseMessage: params.responseMessage || "I'm on my way ❤️",
       responseId: params.responseId,
       acknowledgedAt: new Date().toISOString(),
+      sentAt: Date.now(),
     });
   } catch (err) {
     console.warn('Firebase alert ACK error:', err);
+  }
+}
+
+/**
+ * Resolve/Clear Alert from Firebase
+ */
+export async function resolveFirebaseAlert(code: string): Promise<void> {
+  const c = cleanCode(code);
+  try {
+    const alertRef = ref(db, `beeyou/sessions/${c}/activeAlert`);
+    await set(alertRef, null);
+  } catch (err) {
+    console.warn('Firebase alert resolve error:', err);
   }
 }
 
