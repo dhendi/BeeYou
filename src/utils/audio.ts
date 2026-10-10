@@ -1869,7 +1869,7 @@ export function getAvailableVoices(): SpeechSynthesisVoice[] {
  * Finds and returns the single highest-quality, most fluid system voice
  * available on the user's device for a given language.
  */
-export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | null {
+export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechSynthesisVoice | null {
   const voices = getAvailableVoices();
   if (!voices || voices.length === 0) return null;
 
@@ -1884,42 +1884,35 @@ export function getBestSystemVoice(langPrefix = 'en'): SpeechSynthesisVoice | nu
     return l.startsWith(targetPrefix);
   });
 
-  if (matchingVoices.length === 0) {
+  const candidates = matchingVoices.length > 0 ? matchingVoices : (targetPrefix === 'en' ? voices : []);
+  if (candidates.length === 0) return null;
+
+  // Persona gender orientation: Kore & Zephyr = Female; Puck & Fenrir = Male
+  const isPreferFemale = !persona || persona === 'Kore' || persona === 'Zephyr';
+  const isPreferMale = persona === 'Puck' || persona === 'Fenrir';
+
+  const femaleKeywords = ['female', 'zira', 'jenny', 'aria', 'samantha', 'ava', 'zoe', 'allison', 'karen', 'serena', 'victoria', 'moira', 'fiona', 'tessa', 'ana', 'hazel', 'susan', 'cathy', 'agnes'];
+  const maleKeywords = ['male', 'david', 'puck', 'guy', 'ryan', 'daniel', 'oliver', 'evan', 'tom', 'alex', 'george', 'mark', 'christopher', 'fred', 'bruce', 'ralph'];
+
+  const scoreVoice = (v: SpeechSynthesisVoice): number => {
+    let score = rateVoiceNaturalness(v);
+    const n = v.name.toLowerCase();
+
     if (isCanadianFrench) {
-      // Fallback to any French voice if no Canada-specific voice
-      const anyFr = voices.filter(v => v.lang.toLowerCase().startsWith('fr'));
-      if (anyFr.length > 0) {
-        const sortedFr = [...anyFr].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
-        return sortedFr[0] || null;
-      }
+      if (v.lang.toLowerCase().includes('ca') || n.includes('canada')) score += 100;
     }
-    if (targetPrefix === 'en') {
-      const sorted = [...voices].sort((a, b) => rateVoiceNaturalness(b) - rateVoiceNaturalness(a));
-      return sorted[0] || null;
-    }
-    // Return null when no matching voice is installed for non-English languages,
-    // allowing the browser/OS to use its native synthesizer for utterance.lang without forcing an English voice
-    return null;
-  }
 
-  // Sort descending by naturalness score
-  const sorted = [...matchingVoices].sort((a, b) => {
-    // For Canadian French, give priority to fr-CA voices
-    if (isCanadianFrench || targetPrefix === 'fr') {
-      const aIsCa = a.lang.toLowerCase().includes('ca') || a.name.toLowerCase().includes('canada');
-      const bIsCa = b.lang.toLowerCase().includes('ca') || b.name.toLowerCase().includes('canada');
-      if (isCanadianFrench) {
-        if (aIsCa && !bIsCa) return -1;
-        if (!aIsCa && bIsCa) return 1;
-      } else {
-        // France French: prefer non-Canadian FR voices (fr-FR)
-        if (!aIsCa && bIsCa) return -1;
-        if (aIsCa && !bIsCa) return 1;
-      }
+    if (isPreferFemale) {
+      if (femaleKeywords.some((k) => n.includes(k))) score += 80;
+      if (maleKeywords.some((k) => n.includes(k))) score -= 80;
+    } else if (isPreferMale) {
+      if (maleKeywords.some((k) => n.includes(k))) score += 80;
+      if (femaleKeywords.some((k) => n.includes(k))) score -= 80;
     }
-    return rateVoiceNaturalness(b) - rateVoiceNaturalness(a);
-  });
+    return score;
+  };
 
+  const sorted = [...candidates].sort((a, b) => scoreVoice(b) - scoreVoice(a));
   return sorted[0] || null;
 }
 
@@ -2056,12 +2049,13 @@ export async function speakText(
     voicePersona?: string; // 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir' | 'system'
     lang?: string;
     preferOfflineOnly?: boolean;
+    force?: boolean;
   }
 ): Promise<void> {
   const formattedText = formatForNaturalSpeech(text);
   if (!formattedText) return;
 
-  const selectedPersona = options?.voicePersona || 'system';
+  const selectedPersona = options?.voicePersona || 'Kore';
 
   // Check if we already have a cached audio blob for this phrase
   if (selectedPersona !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
@@ -2135,7 +2129,11 @@ export async function speakText(
   }
 
   // Speak immediately via on-device Web Speech API for 0ms latency and 100% Android user gesture reliability
-  await speakWithBrowserSpeechSynthesis(formattedText, options);
+  await speakWithBrowserSpeechSynthesis(formattedText, {
+    ...options,
+    voicePersona: selectedPersona,
+    force: options?.force,
+  });
 }
 
 /**
@@ -2208,6 +2206,8 @@ function speakWithBrowserSpeechSynthesis(
     pitch?: number;
     voiceURI?: string;
     lang?: string;
+    voicePersona?: string;
+    force?: boolean;
   }
 ): Promise<void> {
   return new Promise((resolve) => {
@@ -2223,10 +2223,10 @@ function speakWithBrowserSpeechSynthesis(
       return;
     }
 
-    // Strict 5-second announcement deduplication: prevent double announcements
+    // Strict announcement deduplication: prevent double announcements unless explicitly forced
     const normText = formattedText.trim().toLowerCase();
     const now = Date.now();
-    if (normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < 5000) {
+    if (!options?.force && normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < 4000) {
       resolve();
       return;
     }
@@ -2285,7 +2285,7 @@ function speakWithBrowserSpeechSynthesis(
         const targetPrefix = 
           options?.lang === 'fr_ca' ? 'fr_ca' :
           targetLang.substring(0, 2);
-        const bestVoice = getBestSystemVoice(targetPrefix);
+        const bestVoice = getBestSystemVoice(targetPrefix, options?.voicePersona || 'Kore');
         if (bestVoice) {
           utterance.voice = bestVoice;
         }

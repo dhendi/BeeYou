@@ -190,8 +190,8 @@ interface AppContextType {
   setShowAacGuideModal: (val: boolean) => void;
   showMyDayGuideModal: boolean;
   setShowMyDayGuideModal: (val: boolean) => void;
-  speak: (text: string) => Promise<void>;
-  announce: (text: string) => Promise<void>;
+  speak: (text: string, options?: { force?: boolean }) => Promise<void>;
+  announce: (text: string, options?: { force?: boolean }) => Promise<void>;
   addToSentence: (item: AACItem) => void;
   speakSentence: () => Promise<void>;
   clearSentence: () => void;
@@ -670,6 +670,29 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const [childProfile, setChildProfile] = useState<ChildProfile>(INITIAL_CHILD_PROFILE);
   const [settings, setSettings] = useState<AppSettings>(INITIAL_APP_SETTINGS);
 
+  // Core Speech & Announcement Helper (Persona-aware & force-override enabled)
+  const speak = async (text: string, options?: { force?: boolean }) => {
+    if (settings.soundEffects) playChime('speak');
+    const spoken = t(text);
+    await speakText(spoken, {
+      rate: settings.voiceRate,
+      pitch: settings.voicePitch,
+      voiceURI: settings.selectedVoiceURI,
+      voicePersona: settings.voicePersona || 'Kore',
+      lang: settings.language,
+      force: options?.force,
+    });
+  };
+
+  const announce = async (text: string, options?: { force?: boolean }) => {
+    if (!settings.spokenAnnouncements) return;
+    await speak(text, options);
+  };
+
+  const stopSpeaking = () => {
+    haltSpeaking();
+  };
+
   // Digital Routine Stickers earned through My Day completions
   const [earnedStickers, setEarnedStickers] = useState<EarnedRoutineSticker[]>(() => {
     try {
@@ -902,7 +925,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
     if (worldState.stars < target.costStars) {
       if (settings.soundEffects) playChime('tap');
-      speakText(`Need ${target.costStars - worldState.stars} more stars to unlock ${target.name}!`);
+      speak(`Need ${target.costStars - worldState.stars} more stars to unlock ${target.name}!`);
       return false;
     }
 
@@ -919,7 +942,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (settings.soundEffects) playChime('star');
     confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
     if (settings.spokenAnnouncements) {
-      speakText(`Hooray! You unlocked and equipped the ${target.name} theme!`);
+      speak(`Hooray! You unlocked and equipped the ${target.name} theme!`);
     }
     return true;
   };
@@ -941,7 +964,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (settings.soundEffects) playChime('complete');
     confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
     if (settings.spokenAnnouncements) {
-      speakText(`Awesome! Created your custom theme ${newTheme.name}!`);
+      speak(`Awesome! Created your custom theme ${newTheme.name}!`);
     }
     return newTheme;
   };
@@ -1160,7 +1183,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
               notifiedMedicationKeysRef.current.add(reminderKey);
               if (settings.soundEffects) playChime('star');
               if (settings.spokenAnnouncements) {
-                speakText(`Medication reminder: It is time for ${childProfile.name}'s ${med.name}. Please take ${med.dosage} ${med.unit}.`);
+                speak(`Medication reminder: It is time for ${childProfile.name}'s ${med.name}. Please take ${med.dosage} ${med.unit}.`);
               }
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                 try {
@@ -1229,13 +1252,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   // Listen for real-time messages, alert acks and connection updates from caregiver
   useEffect(() => {
-    const unsubCaregiver = onCaregiverMessage((msg) => {
-      if (msg.responseId) return; // Alert acknowledgment already announced via onCaregiverAlertAck
-      setIncomingCaregiverMessage(msg);
-      playChime('star');
-      speakText(`${msg.senderName} sent you a message: ${msg.text}`);
-    });
-
     const isCaregiver = 
       userRole === 'caregiver' || 
       isParentMode || 
@@ -1246,26 +1262,34 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         sessionStorage.getItem('beeyou_active_device_view') === 'caregiver'
       ));
 
-    const unsubAlert = onCaregiverAlert((alert) => {
-      if (isCaregiver) {
-        const alertKey = `${alert.id || alert.label}:${alert.status || 'active'}`;
-        if (spokenAlertKeys.has(alertKey)) return;
-        spokenAlertKeys.add(alertKey);
+    const unsubCaregiver = onCaregiverMessage((msg) => {
+      if (isCaregiver) return; // Caregiver device does not receive/speak its own outgoing messages
+      if (msg.responseId) return; // Alert acknowledgment already announced via onCaregiverAlertAck
+      setIncomingCaregiverMessage(msg);
+      playChime('star');
+      speak(`${msg.senderName} sent you a message: ${msg.text}`);
+    });
 
-        playChime('star');
-        speakText(`Incoming Alert from ${alert.childName || 'Child'}: ${alert.label}`);
-        setIncomingCaregiverMessage({
-          id: 'alert-' + alert.id,
-          senderName: alert.childName || 'Child',
-          text: `🚨 ALERT: ${alert.label} (${alert.location || 'Location shared'})`,
-          emoji: alert.emoji || '🚨',
-          timestamp: alert.timestamp || new Date().toISOString(),
-          read: false,
-        });
-      }
+    const unsubAlert = onCaregiverAlert((alert) => {
+      if (!isCaregiver) return; // Only caregiver device receives incoming child alerts
+      const alertKey = `${alert.id || alert.label}:${alert.status || 'active'}`;
+      if (spokenAlertKeys.has(alertKey)) return;
+      spokenAlertKeys.add(alertKey);
+
+      playChime('star');
+      speak(`Incoming Alert from ${alert.childName || 'Child'}: ${alert.label}`);
+      setIncomingCaregiverMessage({
+        id: 'alert-' + alert.id,
+        senderName: alert.childName || 'Child',
+        text: `🚨 ALERT: ${alert.label} (${alert.location || 'Location shared'})`,
+        emoji: alert.emoji || '🚨',
+        timestamp: alert.timestamp || new Date().toISOString(),
+        read: false,
+      });
     });
 
     const unsubAck = onCaregiverAlertAck((ack) => {
+      if (isCaregiver) return; // Caregiver device does not receive/speak its own outgoing acknowledgments
       if (ack.responseMessage) {
         const ackKey = `${ack.alertId || ''}:${ack.responseMessage || ''}:${ack.by || ''}`;
         if (spokenAckKeys.has(ackKey)) return;
@@ -1279,7 +1303,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
           read: false,
         });
         playChime('star');
-        speakText(`${ack.by || 'Caregiver'} says: ${ack.responseMessage}`);
+        speak(`${ack.by || 'Caregiver'} says: ${ack.responseMessage}`);
       }
     });
 
@@ -1364,7 +1388,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
           if (remoteState.plansChanged.active && !prev.active) {
             setShowPlansChangedModal(true);
             playChime('tap');
-            speakText(`Our plans have changed: ${remoteState.plansChanged.newPlanTitle || 'New Plan'}`);
+            speak(`Our plans have changed: ${remoteState.plansChanged.newPlanTitle || 'New Plan'}`);
           }
           return { ...prev, ...remoteState.plansChanged };
         });
@@ -1576,29 +1600,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     childView,
     isOffline,
   ]);
-
-  // Speech Helper
-  const speak = async (text: string) => {
-    if (settings.soundEffects) playChime('speak');
-    const spoken = t(text);
-    await speakText(spoken, {
-      rate: settings.voiceRate,
-      pitch: settings.voicePitch,
-      voiceURI: settings.selectedVoiceURI,
-      voicePersona: settings.voicePersona || 'Kore',
-      lang: settings.language,
-    });
-  };
-
-  // Spoken Interface Announcement Helper (strictly respects settings.spokenAnnouncements)
-  const announce = async (text: string) => {
-    if (!settings.spokenAnnouncements) return;
-    await speak(text);
-  };
-
-  const stopSpeaking = () => {
-    haltSpeaking();
-  };
 
   // AAC Methods
   const addToSentence = (item: AACItem) => {
@@ -1898,7 +1899,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       });
     } catch (e) {}
 
-    speakText(
+    speak(
       `Awesome job, ${childProfile.name}! You finished ${routine.title} and earned the ${stickerDef.stickerName} sticker!`
     );
 
@@ -2096,7 +2097,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
             try {
               confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 } });
             } catch (e) {}
-            speakText(`Great job! ${h.title}. ${h.encouragement}`);
+            speak(`Great job! ${h.title}. ${h.encouragement}`);
           } else {
             if (settings.soundEffects) playChime('tap');
           }
@@ -2131,9 +2132,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
             try {
               confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
             } catch (e) {}
-            speakText(`Super! Finished ${h.title} for today! ${h.encouragement}`);
+            speak(`Super! Finished ${h.title} for today! ${h.encouragement}`);
           } else {
-            speakText(`${h.title}: ${nextTimes} of ${target}`);
+            speak(`${h.title}: ${nextTimes} of ${target}`);
           }
 
           return {
@@ -2304,7 +2305,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       });
     } catch (e) {}
 
-    speakText(`Wonderful reflection, ${childProfile.name}! You earned ${newEntry.starsAwarded || 3} stars.`);
+    speak(`Wonderful reflection, ${childProfile.name}! You earned ${newEntry.starsAwarded || 3} stars.`);
   };
 
   const updateDailyRecollection = (id: string, updates: Partial<DailyRecollectionEntry>) => {

@@ -16,14 +16,14 @@ export const CaregiverMessageToast: React.FC = () => {
 
   const handleListen = () => {
     playChime('tap');
-    speak(`${incomingCaregiverMessage.senderName} says: ${incomingCaregiverMessage.text}`);
+    speak(`${incomingCaregiverMessage.senderName} says: ${incomingCaregiverMessage.text}`, { force: true });
   };
 
   const handleQuickReply = async (replyText: string, emoji: string) => {
     playChime('complete');
     const code = getPairingCode();
     await sendCaregiverMessage(code, replyText, childProfile.name || 'Child', emoji);
-    speak(`Sent reply: ${replyText}`);
+    speak(`Sent reply: ${replyText}`, { force: true });
     dismissIncomingCaregiverMessage();
   };
 
