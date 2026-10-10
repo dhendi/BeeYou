@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Send, 
@@ -25,6 +25,7 @@ import {
   sendCaregiverAlert, 
   sendCaregiverMessage,
   onCaregiverAlertAck,
+  onCaregiverAlertResolve,
   launchNativePhoneCall,
   launchNativeSms,
   getPairingCode
@@ -169,6 +170,16 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     } catch {}
   }, [isOpen]);
 
+  const acknowledgedAlertKeysRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const unsubResolve = onCaregiverAlertResolve(() => {
+      handleReset();
+      onClose();
+    });
+    return () => unsubResolve();
+  }, [onClose]);
+
   useEffect(() => {
     if (!sentAlert) return;
 
@@ -180,11 +191,10 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       });
     }, 4000);
 
-    let acknowledgedAlready = false;
-
     const unsubAck = onCaregiverAlertAck((ack) => {
-      if (acknowledgedAlready) return;
-      acknowledgedAlready = true;
+      const ackKey = `${ack.alertId || ''}:${ack.responseMessage || ''}`;
+      if (acknowledgedAlertKeysRef.current.has(ackKey)) return;
+      acknowledgedAlertKeysRef.current.add(ackKey);
 
       if (settings?.soundAlerts !== false) {
         playChime('star');

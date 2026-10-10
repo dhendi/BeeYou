@@ -671,12 +671,44 @@ app.post('/api/caregiver/event', (req, res) => {
     session.quickAlert = `ALERT: ${envelope.alert.label}`;
     session.lastActiveTime = new Date().toISOString();
     session.lastChildActiveTime = new Date().toISOString();
+    const familyState = getOrCreateFamilyState(pairingCode);
+    familyState.activeAlert = envelope.alert;
+    familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
+    const allStates = loadAllFamilyStates();
+    allStates.set(pairingCode, familyState);
+    saveAllFamilyStates(allStates);
   } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
     if (session.activeAlert) {
       session.activeAlert.status = 'acknowledged';
       session.activeAlert.acknowledgedBy = envelope.ack.by;
     }
+    const familyState = getOrCreateFamilyState(pairingCode);
+    if (familyState.activeAlert) {
+      familyState.activeAlert.status = 'acknowledged';
+      familyState.activeAlert.acknowledgedBy = envelope.ack.by;
+      familyState.activeAlert.responseMessage = envelope.ack.responseMessage;
+      familyState.activeAlert.responseId = envelope.ack.responseId;
+    }
     session.lastCaregiverActiveTime = new Date().toISOString();
+    const allStates = loadAllFamilyStates();
+    allStates.set(pairingCode, familyState);
+    saveAllFamilyStates(allStates);
+  } else if (envelope.type === 'ALERT_RESOLVED') {
+    session.activeAlert = null;
+    session.quickAlert = null;
+    const familyState = getOrCreateFamilyState(pairingCode);
+    familyState.activeAlert = null;
+    if (Array.isArray(familyState.alertHistory)) {
+      familyState.alertHistory = familyState.alertHistory.map((a: any) => {
+        if (!envelope.alertId || a.id === envelope.alertId) {
+          return { ...a, status: 'resolved' };
+        }
+        return a;
+      });
+    }
+    const allStates = loadAllFamilyStates();
+    allStates.set(pairingCode, familyState);
+    saveAllFamilyStates(allStates);
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
     session.messages.push(envelope.message);
     if (session.messages.length > 30) session.messages = session.messages.slice(-30);
@@ -1477,6 +1509,44 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   });
 
   return res.json({ success: true, alert: session?.activeAlert || familyState.activeAlert, state: familyState });
+});
+
+// Caregiver resolves and clears the active alert
+app.post('/api/caregiver/alert/resolve', (req, res) => {
+  const { pairingCode, alertId } = req.body || {};
+  const code = (pairingCode || '').trim().toUpperCase();
+
+  const session = caregiverSessions.get(code);
+  if (session) {
+    session.activeAlert = null;
+    session.quickAlert = null;
+  }
+
+  const allStates = loadAllFamilyStates();
+  const familyState = getOrCreateFamilyState(code);
+  familyState.activeAlert = null;
+  if (Array.isArray(familyState.alertHistory)) {
+    familyState.alertHistory = familyState.alertHistory.map((a: any) => {
+      if (!alertId || a.id === alertId) {
+        return { ...a, status: 'resolved' };
+      }
+      return a;
+    });
+  }
+  familyState.lastUpdated = Date.now();
+  allStates.set(code, familyState);
+  saveAllFamilyStates(allStates);
+
+  broadcastEvent(code, {
+    eventId: `ev-res-${Date.now()}`,
+    type: 'ALERT_RESOLVED',
+    pairingCode: code,
+    alertId,
+    state: familyState,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, message: 'Alert resolved successfully.', state: familyState });
 });
 
 async function startServer() {

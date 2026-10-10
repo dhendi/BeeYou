@@ -36,6 +36,7 @@ type AckCallback = (ack: { alertId: string; responseMessage?: string; responseId
 type MessageCallback = (msg: CaregiverMessage) => void;
 type StatusCallback = (status: CaregiverChildStatus) => void;
 type PresenceCallback = (info: { isConnected: boolean; peerName: string; peerRole: 'caregiver' | 'child_device' | null; lastPingAgo: number }) => void;
+type ResolveCallback = (info: { pairingCode: string }) => void;
 
 let activeAlertUnsub: Unsubscribe | null = null;
 let activeMessagesUnsub: Unsubscribe | null = null;
@@ -48,10 +49,16 @@ const ackListeners: Set<AckCallback> = new Set();
 const messageListeners: Set<MessageCallback> = new Set();
 const statusListeners: Set<StatusCallback> = new Set();
 const presenceListeners: Set<PresenceCallback> = new Set();
+const resolveListeners: Set<ResolveCallback> = new Set();
 
 let lastKnownPeerPing = 0;
 let lastKnownPeerRole: 'caregiver' | 'child_device' | null = null;
 let lastKnownPeerName = '';
+
+export function removeUndefined<T>(obj: T): T {
+  if (obj === null || obj === undefined) return null as any;
+  return JSON.parse(JSON.stringify(obj));
+}
 
 export function parseTimestampMs(val: any): number {
   if (!val) return 0;
@@ -91,6 +98,9 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
   activeAlertUnsub = onValue(alertRef, (snapshot) => {
     const data = snapshot.val();
     if (!data) {
+      if (lastProcessedAlertKey !== '') {
+        resolveListeners.forEach((fn) => fn({ pairingCode: code }));
+      }
       initialAlertLoaded = true;
       lastProcessedAlertKey = '';
       return;
@@ -226,18 +236,18 @@ export async function sendFirebaseHeartbeat(params: {
 
   try {
     const pingRef = ref(db, `beeyou/sessions/${code}/pings/${roleKey}`);
-    await set(pingRef, {
+    await set(pingRef, removeUndefined({
       role: params.role,
       name: params.name,
       timestamp: Date.now(),
-    });
+    }));
 
     if (params.childStatus) {
       const statusRef = ref(db, `beeyou/sessions/${code}/childStatus`);
-      await set(statusRef, {
+      await set(statusRef, removeUndefined({
         ...params.childStatus,
         lastActiveTime: new Date().toISOString(),
-      });
+      }));
     }
   } catch (err) {
     console.warn('Firebase heartbeat error:', err);
@@ -251,12 +261,12 @@ export async function sendFirebaseAlert(alert: CaregiverAlert): Promise<void> {
   const code = cleanCode(alert.pairingCode);
   try {
     const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
-    await set(alertRef, {
+    await set(alertRef, removeUndefined({
       ...alert,
       status: 'active',
       sentAt: Date.now(),
       timestamp: alert.timestamp || new Date().toISOString(),
-    });
+    }));
   } catch (err) {
     console.warn('Firebase alert dispatch error:', err);
   }
@@ -275,15 +285,15 @@ export async function acknowledgeFirebaseAlert(params: {
   const code = cleanCode(params.code);
   try {
     const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
-    await set(alertRef, {
+    await set(alertRef, removeUndefined({
       id: params.alertId,
       status: 'acknowledged',
       acknowledgedBy: params.acknowledgedBy,
       responseMessage: params.responseMessage || "I'm on my way ❤️",
-      responseId: params.responseId,
+      responseId: params.responseId || null,
       acknowledgedAt: new Date().toISOString(),
       sentAt: Date.now(),
-    });
+    }));
   } catch (err) {
     console.warn('Firebase alert ACK error:', err);
   }
@@ -310,7 +320,7 @@ export async function sendFirebaseMessage(code: string, message: CaregiverMessag
   try {
     const msgsRef = ref(db, `beeyou/sessions/${c}/messages`);
     const newMsgRef = push(msgsRef);
-    await set(newMsgRef, message);
+    await set(newMsgRef, removeUndefined(message));
   } catch (err) {
     console.warn('Firebase send message error:', err);
   }
@@ -331,6 +341,11 @@ export function onFirebaseAlert(listener: AlertCallback): () => void {
 export function onFirebaseAck(listener: AckCallback): () => void {
   ackListeners.add(listener);
   return () => ackListeners.delete(listener);
+}
+
+export function onFirebaseResolve(listener: ResolveCallback): () => void {
+  resolveListeners.add(listener);
+  return () => resolveListeners.delete(listener);
 }
 
 export function onFirebaseMessage(listener: MessageCallback): () => void {

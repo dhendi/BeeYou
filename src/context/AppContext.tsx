@@ -102,6 +102,7 @@ import {
   onCaregiverMessage, 
   onCaregiverAlert,
   onCaregiverAlertAck,
+  onCaregiverAlertResolve,
   getPairingCode,
   setPairingCode,
   onConnectionStatusChange,
@@ -471,6 +472,9 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'beeyou_app_state_v1';
+
+const spokenAlertKeys = new Set<string>();
+const spokenAckKeys = new Set<string>();
 
 export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiver' | 'child' }> = ({ children, initialRole }) => {
   // Navigation
@@ -1242,14 +1246,11 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         sessionStorage.getItem('beeyou_active_device_view') === 'caregiver'
       ));
 
-    let lastSpokenAlertId = '';
-    let lastSpokenAckKey = '';
-
     const unsubAlert = onCaregiverAlert((alert) => {
       if (isCaregiver) {
         const alertKey = `${alert.id || alert.label}:${alert.status || 'active'}`;
-        if (lastSpokenAlertId === alertKey) return;
-        lastSpokenAlertId = alertKey;
+        if (spokenAlertKeys.has(alertKey)) return;
+        spokenAlertKeys.add(alertKey);
 
         playChime('star');
         speakText(`Incoming Alert from ${alert.childName || 'Child'}: ${alert.label}`);
@@ -1267,8 +1268,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     const unsubAck = onCaregiverAlertAck((ack) => {
       if (ack.responseMessage) {
         const ackKey = `${ack.alertId || ''}:${ack.responseMessage || ''}:${ack.by || ''}`;
-        if (lastSpokenAckKey === ackKey) return;
-        lastSpokenAckKey = ackKey;
+        if (spokenAckKeys.has(ackKey)) return;
+        spokenAckKeys.add(ackKey);
 
         setIncomingCaregiverMessage({
           id: 'ack-' + Date.now(),
@@ -1280,6 +1281,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         playChime('star');
         speakText(`${ack.by || 'Caregiver'} says: ${ack.responseMessage}`);
       }
+    });
+
+    const unsubResolve = onCaregiverAlertResolve(() => {
+      setIncomingCaregiverMessage((prev) => {
+        if (prev?.text?.includes('ALERT:')) return null;
+        return prev;
+      });
     });
 
     const unsubConnection = onConnectionStatusChange((status) => {
@@ -1312,6 +1320,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       unsubCaregiver();
       unsubAlert();
       unsubAck();
+      unsubResolve();
       unsubConnection();
       clearInterval(interval);
     };

@@ -22,6 +22,7 @@ import {
   onFirebaseAck,
   onFirebaseMessage,
   onFirebaseStatus,
+  onFirebaseResolve,
   parseTimestampMs
 } from './firebaseSync';
 
@@ -208,10 +209,13 @@ const seenEventIds = new Set<string>();
 
 function isEventAlreadyProcessed(envelope: any): boolean {
   if (!envelope) return true;
-  const id = envelope.eventId 
+  // Give priority to entity semantic ID over arbitrary envelope.eventId
+  // This ensures identical alerts/acks arriving via Firebase, SSE, WebRTC, and polling match the same key!
+  const id = (envelope.type === 'ALERT_RESOLVED' ? `resolved-${envelope.alertId || envelope.pairingCode || 'active'}` : null)
     || (envelope.ack ? `ack-${envelope.ack.alertId || ''}-${envelope.ack.responseMessage || ''}` : null)
     || (envelope.alert?.id ? `alert-${envelope.alert.id}-${envelope.alert.status || 'active'}` : null)
-    || (envelope.message?.id ? `msg-${envelope.message.id}` : null);
+    || (envelope.message?.id ? `msg-${envelope.message.id}` : null)
+    || envelope.eventId;
   if (!id) return false;
   if (seenEventIds.has(id)) return true;
   seenEventIds.add(id);
@@ -442,6 +446,15 @@ export function subscribeToCloudChannel(code: string): void {
         });
       })
     );
+
+    firebaseUnsubs.push(
+      onFirebaseResolve((info) => {
+        handleIncomingSyncEnvelope({
+          type: 'ALERT_RESOLVED',
+          pairingCode: info.pairingCode,
+        });
+      })
+    );
   } catch (e) {
     console.warn('Firebase cloud channel setup error:', e);
   }
@@ -586,35 +599,52 @@ export function subscribeToCloudChannel(code: string): void {
         // Check active alert from polled state (dispatch ONLY on actual change)
         const activeAlert = data.state?.activeAlert || data.session?.activeAlert;
         if (activeAlert) {
-          const currentSignature = `${activeAlert.id || activeAlert.alertId || ''}:${activeAlert.status || ''}:${activeAlert.responseMessage || ''}:${activeAlert.acknowledgedAt || ''}`;
-          if (currentSignature !== lastPolledAlertSignature) {
-            lastPolledAlertSignature = currentSignature;
-
-            const alertTime = parseTimestampMs(activeAlert.sentAt || activeAlert.acknowledgedAt || activeAlert.timestamp);
-            const now = Date.now();
-            const isRecentAlert = alertTime > 0 && (now - alertTime) < 300000;
-
-            if (activeAlert.status === 'active' && (isRecentAlert || alertTime >= subscribeStartTime)) {
+          if (activeAlert.status === 'resolved') {
+            if (lastPolledAlertSignature !== '') {
+              lastPolledAlertSignature = '';
               handleIncomingSyncEnvelope({
-                type: 'CAREGIVER_ALERT',
-                alert: activeAlert,
-                pairingCode: safeCode,
-              });
-            } else if (activeAlert.status === 'acknowledged') {
-              handleIncomingSyncEnvelope({
-                type: 'CAREGIVER_ALERT_ACK',
-                ack: {
-                  alertId: activeAlert.id || activeAlert.alertId || safeCode,
-                  responseMessage: activeAlert.responseMessage,
-                  responseId: activeAlert.responseId,
-                  by: activeAlert.acknowledgedBy || 'Caregiver',
-                },
+                type: 'ALERT_RESOLVED',
+                alertId: activeAlert.id,
                 pairingCode: safeCode,
               });
             }
+          } else {
+            const currentSignature = `${activeAlert.id || activeAlert.alertId || ''}:${activeAlert.status || ''}:${activeAlert.responseMessage || ''}:${activeAlert.acknowledgedAt || ''}`;
+            if (currentSignature !== lastPolledAlertSignature) {
+              lastPolledAlertSignature = currentSignature;
+
+              const alertTime = parseTimestampMs(activeAlert.sentAt || activeAlert.acknowledgedAt || activeAlert.timestamp);
+              const now = Date.now();
+              const isRecentAlert = alertTime > 0 && (now - alertTime) < 300000;
+
+              if (activeAlert.status === 'active' && (isRecentAlert || alertTime >= subscribeStartTime)) {
+                handleIncomingSyncEnvelope({
+                  type: 'CAREGIVER_ALERT',
+                  alert: activeAlert,
+                  pairingCode: safeCode,
+                });
+              } else if (activeAlert.status === 'acknowledged') {
+                handleIncomingSyncEnvelope({
+                  type: 'CAREGIVER_ALERT_ACK',
+                  ack: {
+                    alertId: activeAlert.id || activeAlert.alertId || safeCode,
+                    responseMessage: activeAlert.responseMessage,
+                    responseId: activeAlert.responseId,
+                    by: activeAlert.acknowledgedBy || 'Caregiver',
+                  },
+                  pairingCode: safeCode,
+                });
+              }
+            }
           }
         } else {
-          lastPolledAlertSignature = '';
+          if (lastPolledAlertSignature !== '') {
+            lastPolledAlertSignature = '';
+            handleIncomingSyncEnvelope({
+              type: 'ALERT_RESOLVED',
+              pairingCode: safeCode,
+            });
+          }
         }
 
         // Live peer presence detection from server session
@@ -670,6 +700,14 @@ const alertAckListeners: Set<AlertAckListener> = new Set();
 export function onCaregiverAlertAck(listener: AlertAckListener): () => void {
   alertAckListeners.add(listener);
   return () => alertAckListeners.delete(listener);
+}
+
+export type AlertResolveListener = (alertId?: string) => void;
+const alertResolveListeners: Set<AlertResolveListener> = new Set();
+
+export function onCaregiverAlertResolve(listener: AlertResolveListener): () => void {
+  alertResolveListeners.add(listener);
+  return () => alertResolveListeners.delete(listener);
 }
 
 export type PairingListener = (event: { type: 'DEVICE_PAIRED' | 'DEVICE_UNLINKED'; pairingCode: string; session?: any }) => void;
@@ -803,6 +841,16 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     triggerWebNotification(`Caregiver Response: ${envelope.ack.by || 'Caregiver'}`, {
       body: envelope.ack.responseMessage || "I'm here for you ❤️",
     });
+    return;
+  }
+
+  // 5b. Caregiver Alert Resolved (All Clear)
+  if (type === 'ALERT_RESOLVED') {
+    try {
+      localStorage.removeItem(ACTIVE_ALERT_KEY);
+    } catch {}
+    lastPolledAlertSignature = '';
+    alertResolveListeners.forEach((fn) => fn(envelope.alertId));
     return;
   }
 
@@ -1346,6 +1394,7 @@ export async function acknowledgeCaregiverAlert(
  */
 export async function resolveCaregiverAlert(code: string, alertId?: string): Promise<void> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  lastPolledAlertSignature = '';
   await resolveFirebaseAlert(safeCode);
   await publishCloudEvent(safeCode, {
     type: 'ALERT_RESOLVED',
@@ -1353,6 +1402,19 @@ export async function resolveCaregiverAlert(code: string, alertId?: string): Pro
     pairingCode: safeCode,
   });
   try {
+    fetch('/api/caregiver/alert/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: safeCode, alertId }),
+    }).catch(() => {});
+    fetch(`/api/family/alert/${encodeURIComponent(safeCode)}/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alertId }),
+    }).catch(() => {});
+  } catch {}
+  try {
     localStorage.removeItem(ACTIVE_ALERT_KEY);
   } catch {}
+  alertResolveListeners.forEach((fn) => fn(alertId));
 }

@@ -46,7 +46,8 @@ import {
   getAlertHistory,
   clearAlertHistory,
   sendTestCaregiverAlert,
-  resolveCaregiverAlert
+  resolveCaregiverAlert,
+  onCaregiverAlertResolve
 } from '../services/caregiverSync';
 import { resolveEmergencyAlert } from '../services/familySync';
 import { setActiveDeviceView } from '../services/authService';
@@ -216,8 +217,14 @@ export const ParentDashboard: React.FC = () => {
     refreshSession();
     const pollInterval = setInterval(refreshSession, 1500);
 
+    const seenAlertChimes = new Set<string>();
+
     const unsubAlert = onCaregiverAlert((alert) => {
       if (alert) {
+        const alertKey = `${alert.id || alert.label}:${alert.status || 'active'}`;
+        if (seenAlertChimes.has(alertKey)) return;
+        seenAlertChimes.add(alertKey);
+
         const fullAlert: CaregiverAlert = {
           ...alert,
           status: alert.status || 'active',
@@ -225,15 +232,21 @@ export const ParentDashboard: React.FC = () => {
         };
         setActiveAlerts((prev) => deduplicateAlerts([fullAlert, ...prev]));
         setAlertHistoryList(getAlertHistory());
-        playChime('star');
         showNotification(`🚨 Incoming Alert from ${alert.childName || 'Leo'}: ${alert.label}`);
       }
     });
+
+    const unsubResolve = onCaregiverAlertResolve((alertId) => {
+      setActiveAlerts((prev) => prev.filter((a) => !alertId || a.id !== alertId));
+      setAlertHistoryList(getAlertHistory());
+    });
+
     const unsubStatus = onChildStatusUpdate((status) => {
       setLiveChildStatus(status);
     });
     return () => {
       unsubAlert();
+      unsubResolve();
       unsubStatus();
       clearInterval(pollInterval);
     };
