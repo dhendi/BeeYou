@@ -1265,9 +1265,16 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     const unsubCaregiver = onCaregiverMessage((msg) => {
       if (isCaregiver) return; // Caregiver device does not receive/speak its own outgoing messages
       if (msg.responseId) return; // Alert acknowledgment already announced via onCaregiverAlertAck
-      setIncomingCaregiverMessage(msg);
+      const rawSender = msg.senderName || 'Caregiver';
+      const rawText = msg.text || '';
+      const isInverted = rawSender.length > 20 && rawText.length <= 20 && (rawText.toLowerCase() === 'caregiver' || rawText.toLowerCase() === 'child');
+      const sender = isInverted ? rawText : rawSender;
+      const text = isInverted ? rawSender : rawText;
+      const normalizedMsg = { ...msg, senderName: sender, text };
+
+      setIncomingCaregiverMessage(normalizedMsg);
       playChime('star');
-      speak(`${msg.senderName} sent you a message: ${msg.text}`);
+      speak(`${sender} sent you a message: ${text}`);
     });
 
     const unsubAlert = onCaregiverAlert((alert) => {

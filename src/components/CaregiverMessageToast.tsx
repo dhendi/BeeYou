@@ -14,9 +14,16 @@ export const CaregiverMessageToast: React.FC = () => {
 
   if (!incomingCaregiverMessage) return null;
 
+  // Defensive auto-healing: if senderName is a long phrase and text is "Caregiver", auto-correct them
+  const rawSender = incomingCaregiverMessage.senderName || 'Caregiver';
+  const rawText = incomingCaregiverMessage.text || '';
+  const isInverted = rawSender.length > 20 && rawText.length <= 20 && (rawText.toLowerCase() === 'caregiver' || rawText.toLowerCase() === 'child');
+  const senderName = isInverted ? rawText : rawSender;
+  const messageText = isInverted ? rawSender : rawText;
+
   const handleListen = () => {
     playChime('tap');
-    speak(`${incomingCaregiverMessage.senderName} says: ${incomingCaregiverMessage.text}`, { force: true });
+    speak(`${senderName} says: ${messageText}`, { force: true });
   };
 
   const handleQuickReply = async (replyText: string, emoji: string) => {
@@ -42,7 +49,7 @@ export const CaregiverMessageToast: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-rose-600 uppercase tracking-wider flex items-center gap-1.5">
                 <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-                <span>Message from {incomingCaregiverMessage.senderName || 'Caregiver'}</span>
+                <span>Message from {senderName || 'Caregiver'}</span>
               </span>
               <button
                 onClick={dismissIncomingCaregiverMessage}
@@ -54,7 +61,7 @@ export const CaregiverMessageToast: React.FC = () => {
             </div>
 
             <p className="text-base sm:text-lg font-black text-slate-900 mt-1 leading-snug">
-              "{incomingCaregiverMessage.text}"
+              "{messageText}"
             </p>
 
             {/* Quick Actions & 1-Tap Fast Replies */}
