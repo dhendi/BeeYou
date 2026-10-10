@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DailyHabitsModule } from './DailyHabitsModule';
+import { t } from '../services/translator';
 
 export const SkillsView: React.FC = () => {
   const {
@@ -79,7 +80,7 @@ export const SkillsView: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>All Skills</span>
+            <span>{t('All Skills')}</span>
           </button>
 
           <button
@@ -87,7 +88,7 @@ export const SkillsView: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Start Over</span>
+            <span>{t('Start Over')}</span>
           </button>
         </div>
 
@@ -99,18 +100,18 @@ export const SkillsView: React.FC = () => {
           <div className="flex-1 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
-                Mission
+                {t('Mission')}
               </span>
               <span className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
                 <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                +{selectedSkill.starsReward} Stars
+                +{selectedSkill.starsReward} {t('Stars')}
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-800 mt-1">
-              {selectedSkill.title}
+              {t(selectedSkill.title)}
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              {completedCount} of {totalCount} steps finished
+              {completedCount} {t('of')} {totalCount} {t('steps finished')}
             </p>
 
             {/* Progress bar */}
@@ -127,9 +128,9 @@ export const SkillsView: React.FC = () => {
         {isAllDone && (
           <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 border-3 border-amber-300 rounded-3xl p-5 text-center shadow-md animate-in fade-in zoom-in-95">
             <span className="text-5xl">🏆</span>
-            <h3 className="text-xl font-black text-amber-950 mt-2">Mission Accomplished!</h3>
+            <h3 className="text-xl font-black text-amber-950 mt-2">{t('Mission Accomplished!')}</h3>
             <p className="text-xs sm:text-sm font-bold text-amber-800 mt-1">
-              You completed "{selectedSkill.title}" independently! You earned +{selectedSkill.starsReward} Stars.
+              {t('You completed')} "{t(selectedSkill.title)}" {t('independently!')} {t('You earned')} +{selectedSkill.starsReward} {t('Stars')}.
             </p>
           </div>
         )}
@@ -174,11 +175,11 @@ export const SkillsView: React.FC = () => {
                             step.completed ? 'line-through text-slate-400' : 'text-slate-800'
                           }`}
                         >
-                          {step.title}
+                          {t(step.title)}
                         </h4>
                       </div>
                       <p className="text-xs text-slate-500 font-medium mt-1 leading-snug">
-                        {step.instruction}
+                        {t(step.instruction)}
                       </p>
                     </div>
                   </div>
@@ -186,7 +187,7 @@ export const SkillsView: React.FC = () => {
                   <div className="flex items-center gap-1.5 shrink-0">
                     {/* Speak Button */}
                     <button
-                      onClick={() => speak(`${step.title}. ${step.instruction}`)}
+                      onClick={() => speak(`${t(step.title)}. ${t(step.instruction)}`)}
                       className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
                       title="Hear instruction"
                     >
@@ -236,11 +237,11 @@ export const SkillsView: React.FC = () => {
       <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-3xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
         <div>
           <span className="text-xs font-black uppercase tracking-wider text-purple-200">
-            Independence & Habits
+            {t('Independence & Habits')}
           </span>
-          <h2 className="text-xl sm:text-2xl font-black mt-1">My Daily Skills</h2>
+          <h2 className="text-xl sm:text-2xl font-black mt-1">{t('My Daily Skills')}</h2>
           <p className="text-xs sm:text-sm text-purple-100 font-medium mt-1 max-w-md">
-            Master everyday activities step-by-step and practice recurring daily habits at your own pace!
+            {t('Master everyday activities step-by-step and practice recurring daily habits at your own pace!')}
           </p>
         </div>
         <span className="text-5xl hidden sm:inline">⭐</span>
@@ -261,7 +262,7 @@ export const SkillsView: React.FC = () => {
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>Step-by-Step Missions ({skills.length})</span>
+          <span>{t('Step-by-Step Missions')} ({skills.length})</span>
         </button>
 
         <button
@@ -277,7 +278,7 @@ export const SkillsView: React.FC = () => {
           }`}
         >
           <Leaf className="w-4 h-4" />
-          <span>Daily Habits ({habitsDoneCount}/{habits.length})</span>
+          <span>{t('Daily Habits')} ({habitsDoneCount}/{habits.length})</span>
         </button>
       </div>
 
@@ -306,26 +307,26 @@ export const SkillsView: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
-                      {skill.category}
+                      {t(skill.category)}
                     </span>
                     <span className="flex items-center gap-1 text-[11px] font-bold text-amber-700">
-                      <Sparkles className="w-3 h-3 fill-amber-400 text-amber-500" />
-                      +{skill.starsReward} Stars
+                      <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                      +{skill.starsReward} {t('Stars')}
                     </span>
                   </div>
                   <h3 className="font-black text-slate-800 text-base sm:text-lg mt-1 leading-snug">
-                    {skill.title}
+                    {t(skill.title)}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-1">
-                    {totalCount} steps • ~{skill.estimatedMin} mins
+                    {totalCount} {t('steps')} • ~{skill.estimatedMin} {t('mins')}
                   </p>
 
                   <div className="mt-3 flex items-center justify-between text-xs font-bold">
                     <span className={isDone ? 'text-emerald-600 font-black' : 'text-slate-400'}>
-                      {isDone ? 'Completed! 🏆' : `${completedCount}/${totalCount} steps done`}
+                      {isDone ? t('Completed! 🏆') : `${completedCount}/${totalCount} ${t('steps done')}`}
                     </span>
                     {skill.completedTimes > 0 && (
-                      <span className="text-purple-600">Finished {skill.completedTimes}x</span>
+                      <span className="text-purple-600">{t('Finished')} {skill.completedTimes}x</span>
                     )}
                   </div>
                 </div>

@@ -28,6 +28,7 @@ import {
   SOUNDSCAPES_CATALOG 
 } from '../utils/audio';
 import { SoundscapeId } from '../types';
+import { t } from '../services/translator';
 
 export const CopingToolkitModal: React.FC = () => {
   const {
@@ -154,6 +155,14 @@ export const CopingToolkitModal: React.FC = () => {
     playChime('tap');
   };
 
+  const getBreathePhaseText = (phase: string) => {
+    if (phase.startsWith('Inhale')) return `${t('Inhale')} (${inhaleSec}s)`;
+    if (phase.startsWith('Hold')) return `${t('Hold gently')} (${holdSec}s)`;
+    if (phase.startsWith('Exhale')) return `${t('Exhale softly')} (${exhaleSec}s)`;
+    if (phase.startsWith('Rest')) return `${t('Rest')} (${pauseSec}s)`;
+    return t(phase);
+  };
+
   const groundingItems = [
     { title: 'Look Around: 5 things you can see', emoji: '👀', prompt: 'Notice colors, shapes, or lights in the room.' },
     { title: 'Touch Gently: 4 things you can feel', emoji: '🤲', prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.' },
@@ -176,8 +185,8 @@ export const CopingToolkitModal: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">🛋️</span>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-teal-950">Calm & Coping Toolkit</h2>
-              <p className="text-xs text-teal-700 font-medium">Safe space to pause, breathe, and reset</p>
+              <h2 className="text-lg sm:text-xl font-black text-teal-950">{t('Calm & Coping Toolkit')}</h2>
+              <p className="text-xs text-teal-700 font-medium">{t('Safe space to pause, breathe, and reset')}</p>
             </div>
           </div>
           <button
@@ -203,7 +212,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Wind className="w-4 h-4" />
-            <span>Deep Breathing</span>
+            <span>{t('Deep Breathing')}</span>
           </button>
           <button
             onClick={() => setActiveTab('strategies')}
@@ -214,7 +223,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Heart className="w-4 h-4" />
-            <span>Calm Tools</span>
+            <span>{t('Calm Tools')}</span>
           </button>
           <button
             onClick={() => setActiveTab('timer')}
@@ -225,7 +234,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Timer className="w-4 h-4" />
-            <span>Break Timer</span>
+            <span>{t('Break Timer')}</span>
           </button>
           <button
             onClick={() => setActiveTab('grounding')}
@@ -236,7 +245,7 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Eye className="w-4 h-4" />
-            <span>5-4-3-2-1</span>
+            <span>{t('5-4-3-2-1')}</span>
           </button>
           <button
             onClick={() => setActiveTab('sound')}
@@ -247,13 +256,13 @@ export const CopingToolkitModal: React.FC = () => {
             }`}
           >
             <Volume2 className="w-4 h-4" />
-            <span>Sounds</span>
+            <span>{t('Sounds')}</span>
           </button>
         </div>
 
         {/* Quick Tools Bar */}
         <div className="flex items-center gap-1.5 px-4 py-2 bg-teal-50/50 border-b border-teal-100 overflow-x-auto">
-          <span className="text-[10px] font-black uppercase text-teal-800 shrink-0">More Tools:</span>
+          <span className="text-[10px] font-black uppercase text-teal-800 shrink-0">{t('More Tools:')}</span>
           <button
             onClick={() => {
               setShowFidgetModal(true);
@@ -262,7 +271,7 @@ export const CopingToolkitModal: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
           >
             <span>🫧</span>
-            <span>Digital Fidgets</span>
+            <span>{t('Digital Fidgets')}</span>
           </button>
           <button
             onClick={() => {
@@ -272,7 +281,7 @@ export const CopingToolkitModal: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
           >
             <span>⏰</span>
-            <span>Pie Clock</span>
+            <span>{t('Pie Clock')}</span>
           </button>
           <button
             onClick={() => {
@@ -282,7 +291,7 @@ export const CopingToolkitModal: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
           >
             <span>🌡️</span>
-            <span>5-Point Scale</span>
+            <span>{t('5-Point Scale')}</span>
           </button>
           <button
             onClick={() => {
@@ -293,7 +302,7 @@ export const CopingToolkitModal: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs"
           >
             <span>🚨</span>
-            <span>Emergency Mode</span>
+            <span>{t('Emergency Mode')}</span>
           </button>
         </div>
 
@@ -309,12 +318,12 @@ export const CopingToolkitModal: React.FC = () => {
                 <div className="w-32 h-32 rounded-full bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-teal-900 shadow-inner">
                   <Wind className="w-8 h-8 text-teal-600 mb-1" />
                   <span className="font-black text-sm sm:text-base tracking-tight leading-tight">
-                    {breathePhase}
+                    {getBreathePhaseText(breathePhase)}
                   </span>
                 </div>
               </div>
               <p className="text-slate-600 font-medium text-xs sm:text-sm mt-6 max-w-xs">
-                Follow the gentle bubble. Breathe in slowly through your nose, hold, and breathe out like blowing a dandelion.
+                {t('Follow the gentle bubble. Breathe in slowly through your nose, hold, and breathe out like blowing a dandelion.')}
               </p>
               <div className="mt-4 flex items-center gap-2">
                 <button
@@ -323,7 +332,7 @@ export const CopingToolkitModal: React.FC = () => {
                   className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Sliders className="w-3.5 h-3.5" />
-                  <span>Customize Pace ({inhaleSec}s - {holdSec}s - {exhaleSec}s)</span>
+                  <span>{t('Customize Pace')} ({inhaleSec}s - {holdSec}s - {exhaleSec}s)</span>
                 </button>
               </div>
             </div>
@@ -334,8 +343,8 @@ export const CopingToolkitModal: React.FC = () => {
             <div className="w-full flex flex-col gap-3.5 text-left animate-in fade-in">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800">Calming Coping Strategies</h3>
-                  <p className="text-[11px] text-slate-500">Pick a comforting activity to regulate your nervous system</p>
+                  <h3 className="text-sm font-black text-slate-800">{t('Calming Coping Strategies')}</h3>
+                  <p className="text-[11px] text-slate-500">{t('Pick a comforting activity to regulate your nervous system')}</p>
                 </div>
                 <button
                   type="button"
@@ -343,7 +352,7 @@ export const CopingToolkitModal: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-bold border border-teal-200 flex items-center gap-1 cursor-pointer"
                 >
                   <Sliders className="w-3 h-3" />
-                  <span>Customize</span>
+                  <span>{t('Customize')}</span>
                 </button>
               </div>
 
@@ -359,7 +368,7 @@ export const CopingToolkitModal: React.FC = () => {
                       </span>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-black text-slate-800 truncate">{strat.title}</p>
+                          <p className="text-xs font-black text-slate-800 truncate">{t(strat.title)}</p>
                           {strat.durationMin && (
                             <span className="text-[9px] font-bold text-teal-700 bg-teal-100 px-1.5 py-0.2 rounded-md">
                               {strat.durationMin}m
@@ -367,7 +376,7 @@ export const CopingToolkitModal: React.FC = () => {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2 leading-tight">
-                          {strat.instruction}
+                          {t(strat.instruction)}
                         </p>
                       </div>
                     </div>
@@ -375,13 +384,13 @@ export const CopingToolkitModal: React.FC = () => {
                     <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-200/60">
                       <button
                         onClick={() => {
-                          speak(strat.instruction || strat.title);
+                          speak(strat.instruction ? t(strat.instruction) : t(strat.title));
                           playChime('tap');
                         }}
                         className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[10px] font-bold hover:bg-slate-100 flex items-center gap-1 cursor-pointer"
                       >
                         <Volume2 className="w-3 h-3 text-teal-600" />
-                        <span>Read</span>
+                        <span>{t('Read')}</span>
                       </button>
                       {strat.durationMin && (
                         <button
@@ -392,7 +401,7 @@ export const CopingToolkitModal: React.FC = () => {
                           className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <Timer className="w-3 h-3" />
-                          <span>Start {strat.durationMin}m Timer</span>
+                          <span>{t('Start')} {strat.durationMin}m {t('Timer')}</span>
                         </button>
                       )}
                     </div>
@@ -432,7 +441,7 @@ export const CopingToolkitModal: React.FC = () => {
                         : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
                     }`}
                   >
-                    {mins} min
+                    {mins} {t('min')}
                   </button>
                 ))}
               </div>
@@ -446,7 +455,7 @@ export const CopingToolkitModal: React.FC = () => {
                       : 'bg-teal-600 hover:bg-teal-700 text-white'
                   }`}
                 >
-                  {isTimerRunning ? 'Pause Timer' : 'Start Timer'}
+                  {isTimerRunning ? t('Pause Timer') : t('Start Timer')}
                 </button>
                 <button
                   onClick={() => {
@@ -455,7 +464,7 @@ export const CopingToolkitModal: React.FC = () => {
                   }}
                   className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer"
                 >
-                  Reset
+                  {t('Reset')}
                 </button>
               </div>
             </div>
@@ -466,10 +475,10 @@ export const CopingToolkitModal: React.FC = () => {
             <div className="w-full max-w-md flex flex-col items-center">
               <span className="text-5xl mb-2">{groundingItems[groundingStep].emoji}</span>
               <h3 className="text-lg font-black text-slate-800 mb-1">
-                {groundingItems[groundingStep].title}
+                {t(groundingItems[groundingStep].title)}
               </h3>
               <p className="text-slate-600 text-sm font-medium mb-6">
-                {groundingItems[groundingStep].prompt}
+                {t(groundingItems[groundingStep].prompt)}
               </p>
 
               <div className="flex items-center gap-2 mb-6">
@@ -501,7 +510,7 @@ export const CopingToolkitModal: React.FC = () => {
                 }}
                 className="px-6 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md cursor-pointer"
               >
-                {groundingStep < groundingItems.length - 1 ? 'Next Step' : 'All Finished!'}
+                {groundingStep < groundingItems.length - 1 ? t('Next Step') : t('All Finished!')}
               </button>
             </div>
           )}
@@ -513,19 +522,19 @@ export const CopingToolkitModal: React.FC = () => {
               <div className="w-full mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
-                    <span>Sensory Room Soundscapes</span>
+                    <span>{t('Sensory Room Soundscapes')}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-bold">
-                      {activeSoundId ? '1 Active' : 'Offline Audio'}
+                      {activeSoundId ? t('1 Active') : t('Offline Audio')}
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
-                    Procedural acoustic masking & soothing sensory frequencies. 100% offline.
+                    {t('Procedural acoustic masking & soothing sensory frequencies. 100% offline.')}
                   </p>
                 </div>
 
                 {activeSoundId && (
                   <div className="flex items-center gap-2 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
-                    <span className="text-xs font-bold text-teal-800">Vol: {Math.round(soundVolume * 100)}%</span>
+                    <span className="text-xs font-bold text-teal-800">{t('Vol')}: {Math.round(soundVolume * 100)}%</span>
                     <input
                       type="range"
                       min="0.05"
@@ -546,7 +555,7 @@ export const CopingToolkitModal: React.FC = () => {
                       }}
                       className="px-2 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-[11px] cursor-pointer"
                     >
-                      Stop
+                      {t('Stop')}
                     </button>
                   </div>
                 )}
@@ -558,7 +567,7 @@ export const CopingToolkitModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-amber-600 shrink-0" />
                     <span className="text-amber-900 font-medium">
-                      2 basic sounds included free. 15 specialized sensory soundscapes unlock with <strong>BeeYou Premium</strong>.
+                      {t('2 basic sounds included free. 15 specialized sensory soundscapes unlock with BeeYou Premium.')}
                     </span>
                   </div>
                   <button
@@ -566,7 +575,7 @@ export const CopingToolkitModal: React.FC = () => {
                     onClick={() => triggerUpgrade('Unlock All 17 Sensory Room Ambient Soundscapes')}
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
                   >
-                    30-Day Free Trial
+                    {t('30-Day Free Trial')}
                   </button>
                 </div>
               )}
@@ -595,7 +604,7 @@ export const CopingToolkitModal: React.FC = () => {
                     }`}
                   >
                     <span>{cat.emoji}</span>
-                    <span>{cat.label}</span>
+                    <span>{t(cat.label)}</span>
                   </button>
                 ))}
               </div>
@@ -638,21 +647,21 @@ export const CopingToolkitModal: React.FC = () => {
                           <div>
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <h4 className="font-black text-slate-800 text-xs sm:text-sm">
-                                {item.name}
+                                {t(item.name)}
                               </h4>
                               {item.isPremium ? (
                                 <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
                                   <Crown className="w-2.5 h-2.5" />
-                                  <span>Premium</span>
+                                  <span>{t('Premium')}</span>
                                 </span>
                               ) : (
                                 <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
-                                  Free
+                                  {t('Free')}
                                 </span>
                               )}
                             </div>
                             <span className="text-[11px] text-slate-500 block line-clamp-1">
-                              {item.tags.join(' • ')}
+                              {item.tags.map(tg => t(tg)).join(' • ')}
                             </span>
                           </div>
                         </div>
@@ -666,19 +675,19 @@ export const CopingToolkitModal: React.FC = () => {
                           ) : isPlaying ? (
                             <span className="px-2 py-1 rounded-xl bg-teal-600 text-white flex items-center gap-1 text-[11px] font-black animate-pulse">
                               <Volume2 className="w-3.5 h-3.5" />
-                              <span>Playing</span>
+                              <span>{t('Playing')}</span>
                             </span>
                           ) : (
                             <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold">
-                              <Play className="w-3 h-3 fill-current" />
-                              <span>Play</span>
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                              <span>{t('Play')}</span>
                             </span>
                           )}
                         </div>
                       </div>
 
                       <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-                        {item.description}
+                        {t(item.description)}
                       </p>
                     </div>
                   );
@@ -691,7 +700,7 @@ export const CopingToolkitModal: React.FC = () => {
         {/* Quick Communication Strip */}
         <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200">
           <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
-            Things you can ask for right now:
+            {t('Things you can ask for right now:')}
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[
@@ -703,11 +712,11 @@ export const CopingToolkitModal: React.FC = () => {
             ].map((need, idx) => (
               <button
                 key={idx}
-                onClick={() => speak(need.text)}
+                onClick={() => speak(t(need.text))}
                 className="px-3 py-1.5 rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-1.5"
               >
                 <span>{need.emoji}</span>
-                <span>{need.text}</span>
+                <span>{t(need.text)}</span>
               </button>
             ))}
           </div>

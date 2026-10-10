@@ -15,6 +15,7 @@ import {
   Palette
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const ToolsHubModal: React.FC = () => {
   const {
@@ -127,10 +128,10 @@ export const ToolsHubModal: React.FC = () => {
       category: 'wellness',
       title: 'Spoon Theory Budget',
       desc: todaySpoons
-        ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} spoons remaining today`
+        ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} ${t('spoons remaining today')}`
         : 'Morning check-in & stamina tracker',
       emoji: '🥄',
-      badge: todaySpoons ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} Spoons` : 'Energy',
+      badge: todaySpoons ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} ${t('Spoons')}` : 'Energy',
       bg: 'from-amber-50 to-yellow-100/70 border-amber-300 text-amber-950',
       action: () => openTool(() => setShowSpoonModal(true)),
     },
@@ -140,9 +141,9 @@ export const ToolsHubModal: React.FC = () => {
             id: 'meds',
             category: 'wellness',
             title: 'Medication Reminders',
-            desc: pendingMeds.length > 0 ? `${pendingMeds.length} pending doses` : 'All caught up for today!',
+            desc: pendingMeds.length > 0 ? `${pendingMeds.length} ${t('pending doses')}` : 'All caught up for today!',
             emoji: '💊',
-            badge: `${medications.length} Meds`,
+            badge: `${medications.length} ${t('Meds')}`,
             bg: 'from-teal-50 to-cyan-100/70 border-teal-300 text-teal-950',
             action: () => openTool(() => setShowMedicationModal(true)),
           },
@@ -259,10 +260,10 @@ export const ToolsHubModal: React.FC = () => {
             </span>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#2D241E] leading-tight">
-                BeeYou Tools Hub
+                {t('BeeYou Tools Hub')}
               </h2>
               <p className="text-xs text-[#7A6C60] font-medium">
-                Sensory regulation, executive function & wellness tools
+                {t('Sensory regulation, executive function & wellness tools')}
               </p>
             </div>
           </div>
@@ -295,21 +296,21 @@ export const ToolsHubModal: React.FC = () => {
               }`}
             >
               <span>{cat.emoji}</span>
-              <span>{cat.label}</span>
+              <span>{t(cat.label)}</span>
             </button>
           ))}
         </div>
 
         {/* Category description */}
         {activeCategory !== 'all' && (
-          <p className="px-5 pt-3 text-xs text-[#7A6C60] font-medium">{CATEGORY_BLURB[activeCategory]}</p>
+          <p className="px-5 pt-3 text-xs text-[#7A6C60] font-medium">{t(CATEGORY_BLURB[activeCategory])}</p>
         )}
 
         {/* Tools Grid - Tactile Bento Tiles */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredTools.length === 0 && (
             <p className="col-span-full text-center text-sm text-[#7A6C60] font-medium py-6">
-              Nothing here right now. You can turn tools on in Accessibility &amp; Sensory Hub.
+              {t('Nothing here right now. You can turn tools on in Accessibility & Sensory Hub.')}
             </p>
           )}
           {filteredTools.map((tool) => (
@@ -326,14 +327,14 @@ export const ToolsHubModal: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB]">
-                      {tool.badge}
+                      {t(tool.badge)}
                     </span>
                   </div>
                   <h4 className="font-black text-sm text-[#2D241E] leading-tight">
-                    {tool.title}
+                    {t(tool.title)}
                   </h4>
                   <p className="text-[11px] text-[#7A6C60] font-medium leading-snug">
-                    {tool.desc}
+                    {t(tool.desc)}
                   </p>
                 </div>
               </div>
@@ -345,7 +346,7 @@ export const ToolsHubModal: React.FC = () => {
         {/* Footer */}
         <div className="p-3 bg-[#FCF9F2] border-t-2 border-[#E0D8CB] text-center">
           <p className="text-[11px] text-[#8C7E72] font-semibold">
-            Tap any tool to open • You can also pin your favorites to the Home screen
+            {t('Tap any tool to open • You can also pin your favorites to the Home screen')}
           </p>
         </div>
       </div>
