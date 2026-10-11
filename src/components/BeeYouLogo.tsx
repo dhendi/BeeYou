@@ -198,82 +198,43 @@ interface BeeYouLogoProps {
 }
 
 /**
- * Official BeeYou Logo Wordmark:
- * - "Bee" in warm muted golden honey yellow
- * - "You" in deep navy / charcoal (or crisp off-white if dark mode)
+ * Official BeeYou Logo:
+ * Renders the brand logo artwork (script "BeeYou" wordmark + flying bee) from /logo.png.
+ * `showMascot` / `mascotPose` are kept for API compatibility — the bee is part of the artwork.
  */
 export const BeeYouLogo: React.FC<BeeYouLogoProps> = ({
   size = 'md',
-  showMascot = true,
-  mascotPose = 'cozy',
   showTagline = false,
   dark = false,
   className = '',
   onClick,
 }) => {
-  const getStyles = () => {
-    switch (size) {
-      case 'sm':
-        return {
-          text: 'text-base sm:text-lg',
-          mascotSize: 26,
-          tagline: 'text-[9px]',
-          gap: 'gap-1.5',
-        };
-      case 'lg':
-        return {
-          text: 'text-2xl sm:text-3xl',
-          mascotSize: 44,
-          tagline: 'text-xs',
-          gap: 'gap-3',
-        };
-      case 'xl':
-        return {
-          text: 'text-3xl sm:text-4xl',
-          mascotSize: 56,
-          tagline: 'text-xs sm:text-sm',
-          gap: 'gap-3.5',
-        };
-      case 'md':
-      default:
-        return {
-          text: 'text-xl sm:text-2xl',
-          mascotSize: 34,
-          tagline: 'text-[10px]',
-          gap: 'gap-2',
-        };
-    }
+  const heights: Record<NonNullable<BeeYouLogoProps['size']>, string> = {
+    sm: 'h-8',
+    md: 'h-11',
+    lg: 'h-16',
+    xl: 'h-24 sm:h-28',
   };
-
-  const s = getStyles();
+  const taglineSize = size === 'sm' ? 'text-[9px]' : size === 'md' ? 'text-[10px]' : 'text-xs sm:text-sm';
 
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center ${s.gap} select-none ${onClick ? 'cursor-pointer hover:opacity-95 transition-opacity' : ''} ${className}`}
+      className={`inline-flex flex-col items-center select-none ${onClick ? 'cursor-pointer hover:opacity-95 transition-opacity' : ''} ${className}`}
     >
-      {showMascot && (
-        <BeeMascot
-          size={s.mascotSize}
-          pose={mascotPose}
-          animate={!!onClick}
+      <span className={dark ? 'bg-white/95 rounded-2xl px-2.5 py-1 shadow-sm' : ''}>
+        <img
+          src="/logo.png"
+          alt="BeeYou"
+          draggable={false}
+          className={`${heights[size]} w-auto object-contain`}
         />
-      )}
-      <div className="flex flex-col leading-none">
-        <span className={`font-black tracking-tight ${s.text} inline-flex items-baseline`}>
-          <span className="text-[#D98A1B] dark:text-[#F3B33D] drop-shadow-2xs">
-            Bee
-          </span>
-          <span className={dark ? 'text-white' : 'text-[#1E293B] dark:text-slate-100'}>
-            You
-          </span>
+      </span>
+      {showTagline && (
+        <span className={`${taglineSize} font-medium tracking-wide text-slate-500 dark:text-slate-300 mt-1`}>
+          You can be yourself here.
         </span>
-        {showTagline && (
-          <span className={`${s.tagline} font-medium tracking-wide text-slate-500 dark:text-slate-300 mt-0.5`}>
-            You can be yourself here.
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 };

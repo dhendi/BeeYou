@@ -113,7 +113,7 @@ export function triggerWebNotification(title: string, options?: NotificationOpti
     title,
     body: (options?.body as string) || 'BeeYou Alert Received',
     tag: options?.tag,
-    icon: options?.icon || '/icon.svg',
+    icon: options?.icon || '/pwa-192x192.png',
     priority: 'emergency',
     data: options?.data,
   });

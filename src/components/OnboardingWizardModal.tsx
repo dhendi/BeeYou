@@ -379,8 +379,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             ══════════════════════════════════════════════════════ */}
             {step === 1 && (
               <div className="space-y-6 text-center py-3 animate-in fade-in">
-                <div className="w-24 h-24 mx-auto rounded-3xl bg-amber-100 dark:bg-amber-950/50 border-2 border-amber-300 flex items-center justify-center shadow-md">
-                  <BeeMascot size="lg" pose="waving" />
+                <div className="mx-auto w-fit rounded-3xl bg-white px-6 py-4 shadow-md border-2 border-amber-200">
+                  <img src="/logo.png" alt="BeeYou" className="h-24 sm:h-32 w-auto object-contain" draggable={false} />
                 </div>
 
                 <div className="space-y-2 max-w-lg mx-auto">

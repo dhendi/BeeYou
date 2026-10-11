@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['apple-touch-icon.png', 'icon.svg'],
+        includeAssets: ['apple-touch-icon.png', 'favicon-32x32.png', 'favicon-48x48.png', 'logo.png'],
         manifest: {
           id: '/',
           name: 'BeeYou: Everyday Companion',

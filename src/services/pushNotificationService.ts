@@ -67,8 +67,8 @@ class PushNotificationService {
 
     const notificationOptions: any = {
       body: payload.body,
-      icon: payload.icon || '/icon.svg',
-      badge: payload.badge || '/icon.svg',
+      icon: payload.icon || '/pwa-192x192.png',
+      badge: payload.badge || '/pwa-192x192.png',
       tag: payload.tag || 'beeyou-alert-' + Date.now(),
       vibrate: vibrationPattern as any,
       requireInteraction: isEmergency, // Stays on screen until caregiver interacts
