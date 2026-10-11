@@ -575,7 +575,7 @@ export const CopingToolkitModal: React.FC = () => {
                     onClick={() => triggerUpgrade('Unlock All 17 Sensory Room Ambient Soundscapes')}
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
                   >
-                    {t('30-Day Free Trial')}
+                    {t('15-Day Free Trial')}
                   </button>
                 </div>
               )}

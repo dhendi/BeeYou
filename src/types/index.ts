@@ -888,7 +888,7 @@ export {
 
 export type SubscriptionTier = 'basic' | 'premium';
 export type SubscriptionStatus = 'basic' | 'trial' | 'active' | 'expired';
-export type BillingCycle = 'monthly' | 'yearly';
+export type BillingCycle = 'weekly' | 'monthly' | 'yearly';
 
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
@@ -896,9 +896,10 @@ export interface SubscriptionInfo {
   billingCycle: BillingCycle;
   trialStartDate?: string;
   trialEndDate?: string;
-  monthlyPrice: number; // 12.99
-  yearlyPrice: number;  // 129.99 (Free 2 months)
-  trialDays: number; // 30
+  weeklyPrice: number;  // 2.99
+  monthlyPrice: number; // 8.99
+  yearlyPrice: number;  // 89.99
+  trialDays: number;    // 15
   autoRenew: boolean;
 }
 

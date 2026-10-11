@@ -20,7 +20,7 @@ export interface SubscriptionState {
   customerId?: string;
   subscriptionId?: string;
   status: SubscriptionStatus;
-  planId: 'monthly' | 'yearly';
+  planId: 'weekly' | 'monthly' | 'yearly';
   currentPeriodEnd: number; // UTC timestamp ms
   cancelAtPeriodEnd: boolean;
   gracePeriodEndsAt?: number;

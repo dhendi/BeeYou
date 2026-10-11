@@ -352,7 +352,7 @@ interface AppContextType {
     isPeriodToday: boolean;
   };
 
-  // Subscription & Membership Tiering ($12.99/mo or $129.99/yr, 30-day free trial, Day 1 Basic tier)
+  // Subscription & Membership Tiering ($8.99/mo, $89.99/yr, $2.99/wk, 15-day free trial, Day 1 Basic tier)
   subscription: SubscriptionInfo;
   isPremium: boolean;
   startFreeTrial: (cycle?: BillingCycle) => void;
@@ -504,7 +504,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
   const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
 
-  // Subscription state ($12.99/month, 30-day free trial, Day 1 Basic tier available)
+  // Subscription state ($8.99/month, $89.99/year, $2.99/week, 15-day free trial, Day 1 Basic tier available)
   const [subscription, setSubscription] = useState<SubscriptionInfo>(() => {
     try {
       const saved = localStorage.getItem('beeyou_subscription');
@@ -518,10 +518,20 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
                 ...parsed,
                 tier: 'basic',
                 status: 'expired',
+                weeklyPrice: 2.99,
+                monthlyPrice: 8.99,
+                yearlyPrice: 89.99,
+                trialDays: 15,
               };
             }
           }
-          return parsed;
+          return {
+            ...parsed,
+            weeklyPrice: 2.99,
+            monthlyPrice: 8.99,
+            yearlyPrice: 89.99,
+            trialDays: 15,
+          };
         }
       }
     } catch (e) {
@@ -531,9 +541,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       tier: 'basic',
       status: 'basic',
       billingCycle: 'monthly',
-      monthlyPrice: 12.99,
-      yearlyPrice: 129.99,
-      trialDays: 30,
+      weeklyPrice: 2.99,
+      monthlyPrice: 8.99,
+      yearlyPrice: 89.99,
+      trialDays: 15,
       autoRenew: true,
     };
   });
@@ -564,16 +575,17 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const startFreeTrial = (cycle?: BillingCycle) => {
     const chosenCycle = cycle || subscription.billingCycle || 'monthly';
     const startDate = new Date();
-    const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const endDate = new Date(startDate.getTime() + 15 * 24 * 60 * 60 * 1000);
     setSubscription({
       tier: 'premium',
       status: 'trial',
       billingCycle: chosenCycle,
       trialStartDate: startDate.toISOString(),
       trialEndDate: endDate.toISOString(),
-      monthlyPrice: 12.99,
-      yearlyPrice: 129.99,
-      trialDays: 30,
+      weeklyPrice: 2.99,
+      monthlyPrice: 8.99,
+      yearlyPrice: 89.99,
+      trialDays: 15,
       autoRenew: true,
     });
     setShowPaywallModal(false);
@@ -586,7 +598,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       tier: 'premium',
       status: 'active',
       billingCycle: cycle || prev.billingCycle || 'monthly',
-      yearlyPrice: 129.99,
+      weeklyPrice: 2.99,
+      monthlyPrice: 8.99,
+      yearlyPrice: 89.99,
+      trialDays: 15,
     }));
     setShowPaywallModal(false);
     confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
@@ -597,9 +612,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       tier: 'basic',
       status: 'basic',
       billingCycle: 'monthly',
-      monthlyPrice: 12.99,
-      yearlyPrice: 129.99,
-      trialDays: 30,
+      weeklyPrice: 2.99,
+      monthlyPrice: 8.99,
+      yearlyPrice: 89.99,
+      trialDays: 15,
       autoRenew: false,
     });
   };
@@ -627,7 +643,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const setShowAvatarCreator = (val: boolean) => {
     if (val && !isPremium) {
-      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 15-day free trial to customize hair, colors, and accessories.');
       return;
     }
     _setShowAvatarCreator(val);
@@ -903,7 +919,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const setTheme = (id: string) => {
     if (!isPremium && id !== 'theme-classic') {
-      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 30-day free trial to unlock all themes.');
+      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 15-day free trial to unlock all themes.');
       return;
     }
     const target = themes.find((t) => t.id === id);
@@ -914,7 +930,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const buyTheme = (themeId: string): boolean => {
     if (!isPremium) {
-      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 30-day free trial to unlock all themes.');
+      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 15-day free trial to unlock all themes.');
       return false;
     }
     const target = themes.find((t) => t.id === themeId);
@@ -949,7 +965,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
     if (!isPremium) {
-      triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 30-day free trial.');
+      triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 15-day free trial.');
       throw new Error('Premium required for custom themes');
     }
     const newTheme: AppTheme = {
@@ -2212,7 +2228,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // World & Avatar
   const updateAvatar = (partial: Partial<AvatarConfig>) => {
     if (!isPremium) {
-      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 30-day free trial to customize hair, colors, and accessories.');
+      triggerUpgrade('Avatar Customizer Studio is a BeeYou Premium feature! Start your 15-day free trial to customize hair, colors, and accessories.');
       return;
     }
     setAvatar((prev) => ({ ...prev, ...partial }));

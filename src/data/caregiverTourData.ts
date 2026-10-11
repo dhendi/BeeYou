@@ -418,26 +418,26 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
 
   subscription: {
     id: 'subscription',
-    title: 'Membership & 30-Day Free Trial',
+    title: 'Membership & 15-Day Free Trial',
     emoji: '👑',
-    description: 'Manage subscription plans, 30-day free trial, and billing cycles with $0 upfront.',
+    description: 'Manage subscription plans, 15-day free trial, and billing cycles with $0 upfront.',
     tabId: 'subscription',
     steps: [
       {
         targetSelector: '[data-tour="subscription-tier-card"]',
         title: 'Current Membership Plan',
-        instruction: 'Displays your current tier (Basic Free, 30-Day Trial, or Premium) with remaining trial days.',
+        instruction: 'Displays your current tier (Basic Free, 15-Day Trial, or Premium) with remaining trial days.',
         mascotHint: 'Shows your active plan & trial status! 👑',
       },
       {
         targetSelector: '[data-tour="subscription-billing-toggle"]',
-        title: 'Monthly vs. Yearly Billing',
-        instruction: 'Switch between monthly ($12.99/mo) and discounted annual billing ($129.99/yr, 2 months free).',
+        title: 'Weekly, Monthly & Yearly Billing',
+        instruction: 'Switch between weekly ($2.99/wk), monthly ($8.99/mo), and discounted annual billing ($89.99/yr, save 17%).',
         mascotHint: 'Annual plans save 17% every year! 💰',
       },
       {
         targetSelector: '[data-tour="subscription-trial-button"]',
-        title: 'Start 30-Day Free Trial',
+        title: 'Start 15-Day Free Trial',
         instruction: 'Unlock all 17 soundscapes, unlimited routines, and therapist clinical summaries with 1 tap.',
         mascotHint: 'Start with $0 today and cancel anytime! ✨',
       },

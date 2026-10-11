@@ -40,7 +40,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
     if (!newRoutineTitle.trim()) return;
 
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
 
@@ -71,7 +71,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
   const handleQuickImportTemplate = (template: RoutineTemplate) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     addRoutine({
@@ -103,7 +103,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
   const handleCustomizeTemplate = (template: RoutineTemplate) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     setCustomizingRoutine({
@@ -140,7 +140,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
   const handleDuplicateRoutine = (routine: Routine) => {
     if (!isPremium && routines.length >= 1) {
-      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+      triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!');
       return;
     }
     addRoutine({
@@ -232,7 +232,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
             <button
               onClick={() => {
                 if (!isPremium && routines.length >= 1) {
-                  triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!');
+                  triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!');
                   return;
                 }
                 setRoutinesSubView('create');
@@ -268,16 +268,16 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                 <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">{t("Free Tier")}</span>
               </div>
               <p className="text-xs text-amber-900 font-medium mt-0.5">
-                {t("The Basic plan includes 1 active visual routine (\"Routines 1 is good enough\"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines, templates, and First-Then boards.")}
+                {t("The Basic plan includes 1 active visual routine (\"Routines 1 is good enough\"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines, templates, and First-Then boards.")}
               </p>
             </div>
           </div>
           <button
-            onClick={() => triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited routines and First-Then boards!')}
+            onClick={() => triggerUpgrade('Routines: The Basic plan includes 1 routine ("Routines 1 is good enough"). Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited routines and First-Then boards!')}
             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
           >
             <Crown className="w-3.5 h-3.5 text-amber-200" />
-            <span>{t("Start 30-Day Free Trial")}</span>
+            <span>{t("Start 15-Day Free Trial")}</span>
           </button>
         </div>
       )}

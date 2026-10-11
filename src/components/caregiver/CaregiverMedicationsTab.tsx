@@ -183,7 +183,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">{t("Free Tier")}</span>
               </div>
               <p className="text-xs text-amber-900 font-medium mt-0.5">
-                {t("You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($12.99/mo with a 30-day free trial) for unlimited medications, stock tracking, and refill alerts.")}
+                {t("You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited medications, stock tracking, and refill alerts.")}
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
           >
             <Crown className="w-3.5 h-3.5 text-amber-200" />
-            <span>{t("Start 30-Day Free Trial")}</span>
+            <span>{t("Start 15-Day Free Trial")}</span>
           </button>
         </div>
       )}

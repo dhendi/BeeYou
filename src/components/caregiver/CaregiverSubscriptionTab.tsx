@@ -31,19 +31,19 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-2xl">👑</span>
             <h2 className="text-xl font-black text-slate-900">
-              {t("BeeYou Membership &amp; Plans")}
+              {t("BeeYou Membership & Plans")}
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-xs">
-              {subscription.billingCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
+              {subscription.billingCycle === 'yearly' ? '$89.99 / yr' : subscription.billingCycle === 'monthly' ? '$8.99 / mo' : '$2.99 / wk'}
             </span>
             {subscription.billingCycle === 'yearly' && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
-                2 Months Free (Save 17%)
+                Save 17% (Best Value)
               </span>
             )}
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            {t("Transparent, neurodiversity-affirming pricing with a 30-day free trial. Start with $0 today and cancel anytime.")}
+            {t("Transparent, neurodiversity-affirming pricing with a 15-day free trial. Start with $0 today and cancel anytime.")}
           </p>
         </div>
 
@@ -65,27 +65,41 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                 ? 'bg-amber-400 text-amber-950 shadow-xs' 
                 : 'bg-slate-300 text-slate-800'
             }`}>
-              {isPremium ? (subscription.status === 'trial' ? `30d Trial (${getTrialDaysRemaining()}d left)` : `Premium (${subscription.billingCycle})`) : 'BeeYou Basic (Free)'}
+              {isPremium ? (subscription.status === 'trial' ? `15d Trial (${getTrialDaysRemaining()}d left)` : `Premium (${subscription.billingCycle})`) : 'BeeYou Basic (Free)'}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Billing Switcher (Monthly vs Yearly) */}
-      <div data-tour="subscription-billing-toggle" className="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-md mx-auto border border-slate-200 shadow-inner">
+      {/* Billing Switcher (Weekly vs Monthly vs Yearly) */}
+      <div data-tour="subscription-billing-toggle" className="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-lg mx-auto border border-slate-200 shadow-inner gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            setBillingCycle('weekly');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
+            subscription.billingCycle === 'weekly'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <span>{t("Weekly • $2.99/wk")}</span>
+        </button>
         <button
           type="button"
           onClick={() => {
             setBillingCycle('monthly');
             playChime('tap');
           }}
-          className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
+          className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
             subscription.billingCycle === 'monthly'
               ? 'bg-white text-slate-900 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>{t("Monthly • >2.99/mo")}</span>
+          <span>{t("Monthly • $8.99/mo")}</span>
         </button>
         <button
           type="button"
@@ -93,17 +107,17 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
             setBillingCycle('yearly');
             playChime('tap');
           }}
-          className={`flex-1 py-2 px-3 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             subscription.billingCycle === 'yearly'
               ? 'bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>{t("Yearly • >29.99/yr")}</span>
+          <span>{t("Yearly • $89.99/yr")}</span>
           <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase ${
             subscription.billingCycle === 'yearly' ? 'bg-amber-300 text-amber-950' : 'bg-emerald-200 text-emerald-950'
           }`}>
-            2 Mo Free
+            Save 17%
           </span>
         </button>
       </div>
@@ -123,7 +137,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                   : 'bg-slate-800 text-white'
               }`}>
                 {isPremium 
-                  ? (subscription.status === 'trial' ? '✨ 30-Day Free Trial Active' : `👑 BeeYou Premium Member (${subscription.billingCycle})`)
+                  ? (subscription.status === 'trial' ? '✨ 15-Day Free Trial Active' : `👑 BeeYou Premium Member (${subscription.billingCycle})`)
                   : '🌱 BeeYou Basic (Free Plan)'
                 }
               </span>
@@ -144,7 +158,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
             <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
               {isPremium
                 ? 'Your family has full, unrestricted access to all 17 sensory soundscapes, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, avatar customizer, and cloud caregiver sync.'
-                : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$129.99/year (Free 2 months • $10.83/mo)' : '$12.99/month'} ($0 today with a 30-day free trial) to unlock the full clinical suite.`
+                : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$89.99/year (~$7.50/mo)' : subscription.billingCycle === 'monthly' ? '$8.99/month' : '$2.99/week'} ($0 today with a 15-day free trial) to unlock the full clinical suite.`
               }
             </p>
 
@@ -159,7 +173,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
               </span>
               <span className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-emerald-600" />
-                100% offline-ready &amp; private
+                100% offline-ready & private
               </span>
             </div>
           </div>
@@ -182,13 +196,13 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                 type="button"
                 onClick={() => {
                   startFreeTrial();
-                  showNotification('Started 30-Day Free Trial with BeeYou Premium!');
+                  showNotification('Started 15-Day Free Trial with BeeYou Premium!');
                   playChime('star');
                 }}
                 className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition"
               >
                 <Crown className="w-4 h-4 text-amber-200" />
-                <span>{t("Start 30-Day Free Trial ($0)")}</span>
+                <span>{t("Start 15-Day Free Trial ($0)")}</span>
               </button>
             )}
           </div>

@@ -367,7 +367,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             data-tour="themes-custom-studio-tab"
             onClick={() => {
               if (!isPremium) {
-                triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 30-day free trial.');
+                triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 15-day free trial.');
                 return;
               }
               setActiveTab('studio');
@@ -618,7 +618,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 <div className="text-left">
                   <p className="font-black text-amber-950 text-sm">Themes are a BeeYou Premium feature</p>
                   <p className="text-amber-800 text-[11px] mt-0.5">
-                    Basic tier uses the clean classic neutral theme. Start your 30-day free trial ($0 today) to unlock all 14+ themes and the custom studio!
+                    Basic tier uses the clean classic neutral theme. Start your 15-day free trial ($0 today) to unlock all 14+ themes and the custom studio!
                   </p>
                 </div>
               </div>
@@ -627,7 +627,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 onClick={() => triggerUpgrade('Unlock All 14+ Themes & Custom Theme Studio')}
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-xs shrink-0 cursor-pointer shadow-xs active:scale-95 transition-all"
               >
-                Start 30-Day Free Trial
+                Start 15-Day Free Trial
               </button>
             </div>
           )}

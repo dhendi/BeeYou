@@ -87,8 +87,23 @@ export const SubscriptionModal: React.FC = () => {
 
         {/* Modal Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
-          {/* Billing Switcher (Monthly vs Yearly) */}
-          <div className="flex items-center justify-center p-1.5 bg-stone-200/70 rounded-2xl max-w-md mx-auto border border-stone-300/60 shadow-inner">
+          {/* Billing Switcher (Weekly vs Monthly vs Yearly) */}
+          <div className="flex items-center justify-center p-1.5 bg-stone-200/70 rounded-2xl max-w-lg mx-auto border border-stone-300/60 shadow-inner gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCycle('weekly');
+                setBillingCycle('weekly');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer text-center ${
+                selectedCycle === 'weekly'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Weekly • $2.99/wk</span>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -96,13 +111,13 @@ export const SubscriptionModal: React.FC = () => {
                 setBillingCycle('monthly');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center ${
+              className={`flex-1 py-2 px-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer text-center ${
                 selectedCycle === 'monthly'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>Monthly • $12.99/mo</span>
+              <span>Monthly • $8.99/mo</span>
             </button>
             <button
               type="button"
@@ -111,22 +126,22 @@ export const SubscriptionModal: React.FC = () => {
                 setBillingCycle('yearly');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2 px-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 selectedCycle === 'yearly'
                   ? 'bg-amber-500 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>Yearly • $129.99/yr</span>
+              <span>Yearly • $89.99/yr</span>
               <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${
                 selectedCycle === 'yearly' ? 'bg-amber-100 text-amber-950' : 'bg-emerald-200 text-emerald-950'
               }`}>
-                2 Mo Free
+                Save 17%
               </span>
             </button>
           </div>
 
-          {/* 30-Day Free Trial Guarantee Box */}
+          {/* 15-Day Free Trial Guarantee Box */}
           <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3.5 text-left">
               <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
@@ -135,15 +150,15 @@ export const SubscriptionModal: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-lg font-bold text-slate-900">
-                    {selectedCycle === 'yearly' ? '$129.99 / year' : '$12.99 / month'}
+                    {selectedCycle === 'yearly' ? '$89.99 / year' : selectedCycle === 'monthly' ? '$8.99 / month' : '$2.99 / week'}
                   </span>
                   {selectedCycle === 'yearly' && (
                     <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                      $10.83/mo • 2 Months Free!
+                      ~$7.50/mo • Best Value
                     </span>
                   )}
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase">
-                    30-Day Free Trial
+                    15-Day Free Trial
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 font-medium mt-0.5">
@@ -164,7 +179,7 @@ export const SubscriptionModal: React.FC = () => {
                 onClick={handleStartTrial}
                 className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
               >
-                Start 30-Day Free Trial
+                Start 15-Day Free Trial
               </button>
             )}
           </div>
@@ -240,7 +255,7 @@ export const SubscriptionModal: React.FC = () => {
                     <span>BeeYou Plus</span>
                   </h3>
                   <span className="text-xs font-bold text-amber-800">
-                    {selectedCycle === 'yearly' ? '$129.99 / yr' : '$12.99 / mo'}
+                    {selectedCycle === 'yearly' ? '$89.99 / yr' : selectedCycle === 'monthly' ? '$8.99 / mo' : '$2.99 / wk'}
                   </span>
                 </div>
                 <p className="text-xs text-amber-900/80 font-medium mb-3">
@@ -293,7 +308,7 @@ export const SubscriptionModal: React.FC = () => {
                   onClick={handleStartTrial}
                   className="mt-4 w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95"
                 >
-                  Start 30-Day Free Trial
+                  Start 15-Day Free Trial
                 </button>
               )}
             </div>
@@ -303,7 +318,7 @@ export const SubscriptionModal: React.FC = () => {
           <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-stone-200">
             <div className="p-2">
               <ShieldCheck className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-              <span className="text-[11px] font-bold text-slate-700 block">30-Day Free Trial</span>
+              <span className="text-[11px] font-bold text-slate-700 block">15-Day Free Trial</span>
               <span className="text-[10px] text-slate-500">$0 due today</span>
             </div>
             <div className="p-2">
