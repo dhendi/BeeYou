@@ -19,7 +19,8 @@ import {
   Heart,
   Smile,
   ShieldCheck,
-  Smartphone
+  Smartphone,
+  Globe
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
@@ -27,6 +28,7 @@ import { getPersonaLabel, getPersonaTokens, personaToAgeGroup } from '../utils/p
 import { QRCodeView } from './QRCodeView';
 import { getPairingCode } from '../services/caregiverSync';
 import { playChime } from '../utils/audio';
+import { LanguageDropdown } from './LanguageDropdown';
 
 interface AdaptiveOnboardingFlowProps {
   isOpen: boolean;
@@ -132,7 +134,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
   const handleNext = () => {
     playChime('tap');
-    if (step < 4) {
+    if (step < 3) {
       setStep((s) => s + 1);
     } else {
       handleComplete();
@@ -161,7 +163,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     updateEnabledFeatures(featuresState);
 
     // 3. Set active theme
-    setTheme(selectedThemeId);
+    const tokens = getPersonaTokens(selectedPersona);
+    setTheme(selectedThemeId || tokens.suggestedThemeId);
 
     // 4. Set pairing code
     if (currentPairingCode) {
@@ -200,30 +203,33 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Step {step} of 4 • {step === 1 && 'Role & Persona'}
+                Step {step} of 3 • {step === 1 && 'Role & Persona'}
                 {step === 2 && 'Identity & Dynamic Profile'}
                 {step === 3 && 'Modular Toolkit Customization'}
-                {step === 4 && 'Space Personalization & Pairing'}
               </span>
             </div>
 
-            {canDismiss && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
-                aria-label="Dismiss setup"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              <LanguageDropdown />
+
+              {canDismiss && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  aria-label="Dismiss setup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Progress bar */}
           <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
             <div 
               className="bg-amber-500 h-full transition-all duration-300 rounded-full"
-              style={{ width: `${(step / 4) * 100}%` }}
+              style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
         </div>
@@ -240,6 +246,26 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
                   We adapt colors, language, and sensory tools to match your exact developmental needs.
                 </p>
+              </div>
+
+              {/* Language Selection Card */}
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border-2 border-amber-300 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 flex items-center justify-center text-xl shrink-0">
+                    <Globe className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                      Preferred Language / Idioma
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-tight">
+                      AAC tiles, spoken speech, and interactive tours will be in this language.
+                    </p>
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <LanguageDropdown />
+                </div>
               </div>
 
               {/* Age Bracket / Persona Selection */}
@@ -586,88 +612,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* ════════════════ STEP 4: SPACE PERSONALIZATION & INSTANT PAIRING ════════════════ */}
-          {step === 4 && (
-            <div className="space-y-6 animate-in fade-in">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Space Personalization & Instant Pairing
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-                  Select your sensory color theme and scan the real-time QR code to pair your device.
-                </p>
-              </div>
-
-              {/* Theme Selection */}
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
-                  Sensory Visual Theme
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { id: 'theme-turtle', name: 'Wise Turtle', emoji: '🐢', color: 'from-emerald-400 to-teal-500' },
-                    { id: 'theme-lofi', name: 'Lo-Fi Chill', emoji: '🎧', color: 'from-violet-500 to-indigo-600' },
-                    { id: 'theme-sage', name: 'Executive Sage', emoji: '🌿', color: 'from-slate-600 to-teal-700' },
-                  ].map((thm) => {
-                    const isSelected = selectedThemeId === thm.id;
-                    return (
-                      <button
-                        key={thm.id}
-                        type="button"
-                        onClick={() => {
-                          playChime('tap');
-                          setSelectedThemeId(thm.id);
-                        }}
-                        className={`p-3 rounded-2xl border-2 text-center flex flex-col items-center gap-1.5 transition cursor-pointer relative ${
-                          isSelected
-                            ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 ring-2 ring-amber-400/30'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
-                        }`}
-                      >
-                        <span className="text-2xl">{thm.emoji}</span>
-                        <span className="font-bold text-xs text-slate-900 dark:text-white">
-                          {thm.name}
-                        </span>
-                        <div className={`w-full h-1.5 rounded-full bg-gradient-to-r ${thm.color} mt-1`} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Real-Time QR Code Display for Instant Pairing */}
-              <div className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row items-center gap-5">
-                <div className="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200 shrink-0">
-                  <QRCodeView value={currentPairingCode} size={140} />
-                </div>
-                <div className="flex-1 text-center sm:text-left space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-bold">
-                    <QrCode className="w-3.5 h-3.5" />
-                    <span>Instant Camera Scan</span>
-                  </div>
-                  <h4 className="font-black text-base text-slate-900 dark:text-white">
-                    Scan with Caregiver Phone
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                    Open your phone camera to pair with the Caregiver Hub instantly. No passwords or email required.
-                  </p>
-                  <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-                    <span className="font-mono font-black text-sm px-3 py-1 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 tracking-wider">
-                      {currentPairingCode}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleCopyCode}
-                      className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
-                      title="Copy pairing code"
-                    >
-                      {copiedCode ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer Navigation Buttons */}
@@ -690,7 +634,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             onClick={handleNext}
             className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
           >
-            <span>{step === 4 ? 'Launch Dashboard 🚀' : 'Continue'}</span>
+            <span>{step === 3 ? 'Launch Dashboard 🚀' : 'Continue'}</span>
             <ArrowRight className="w-4 h-4 stroke-3" />
           </button>
         </div>
