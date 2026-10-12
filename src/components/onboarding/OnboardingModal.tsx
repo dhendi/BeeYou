@@ -20,6 +20,7 @@ import {
 import { GridStage, DwellMode, STORAGE_KEYS } from '../../types/aac';
 import { speakText, stopSpeaking, playChime } from '../../utils/audio';
 import { autocorrectAacGrammar, adjustSentenceTokensOnTheSpot } from '../../utils/aacGrammar';
+import { getMulberrySymbolUrl } from '../../services/symbolService';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -27,55 +28,55 @@ interface OnboardingModalProps {
   initialStage?: GridStage;
 }
 
-// 4-Tile Starter Core Words (Cause & Effect)
+// 4-Tile Starter Core Words (Cause & Effect) with Official Mulberry AAC Symbols
 const STAGE_1_TILES = [
-  { id: 'want', label: 'WANT', speech: 'I want', emoji: '🤲', color: 'verb', row: 0, col: 0 },
-  { id: 'more', label: 'MORE', speech: 'More, please', emoji: '➕', color: 'descriptor', row: 0, col: 1 },
-  { id: 'stop', label: 'STOP', speech: 'Stop, all done', emoji: '🛑', color: 'alert', row: 1, col: 0 },
-  { id: 'help', label: 'HELP', speech: 'I need help', emoji: '🆘', color: 'social', row: 1, col: 1 },
+  { id: 'want', label: 'WANT', speech: 'I want', symbolUrl: getMulberrySymbolUrl('want_,_to'), emoji: '🤲', color: 'verb', row: 0, col: 0 },
+  { id: 'more', label: 'MORE', speech: 'More, please', symbolUrl: getMulberrySymbolUrl('more'), emoji: '➕', color: 'descriptor', row: 0, col: 1 },
+  { id: 'stop', label: 'STOP', speech: 'Stop, all done', symbolUrl: getMulberrySymbolUrl('backstop'), emoji: '🛑', color: 'alert', row: 1, col: 0 },
+  { id: 'help', label: 'HELP', speech: 'I need help', symbolUrl: getMulberrySymbolUrl('help_,_to'), emoji: '🆘', color: 'social', row: 1, col: 1 },
 ];
 
-// 12-Tile Motor Expansion (First 4 words remain in exact same slots!)
+// 12-Tile Motor Expansion with Official Mulberry AAC Symbols (First 4 words remain in exact same slots!)
 const STAGE_2_TILES = [
   // Row 0
-  { id: 'want', label: 'WANT', speech: 'I want', emoji: '🤲', color: 'verb', row: 0, col: 0, isOriginal: true },
-  { id: 'more', label: 'MORE', speech: 'More, please', emoji: '➕', color: 'descriptor', row: 0, col: 1, isOriginal: true },
-  { id: 'go', label: 'GO', speech: 'Go', emoji: '🟢', color: 'verb', row: 0, col: 2, isNew: true },
-  { id: 'like', label: 'LIKE', speech: 'I like this', emoji: '👍', color: 'verb', row: 0, col: 3, isNew: true },
+  { id: 'want', label: 'WANT', speech: 'I want', symbolUrl: getMulberrySymbolUrl('want_,_to'), emoji: '🤲', color: 'verb', row: 0, col: 0, isOriginal: true },
+  { id: 'more', label: 'MORE', speech: 'More, please', symbolUrl: getMulberrySymbolUrl('more'), emoji: '➕', color: 'descriptor', row: 0, col: 1, isOriginal: true },
+  { id: 'go', label: 'GO', speech: 'Go', symbolUrl: getMulberrySymbolUrl('go_,_to'), emoji: '🟢', color: 'verb', row: 0, col: 2, isNew: true },
+  { id: 'like', label: 'LIKE', speech: 'I like this', symbolUrl: getMulberrySymbolUrl('good'), emoji: '👍', color: 'verb', row: 0, col: 3, isNew: true },
   
   // Row 1
-  { id: 'stop', label: 'STOP', speech: 'Stop, all done', emoji: '🛑', color: 'alert', row: 1, col: 0, isOriginal: true },
-  { id: 'help', label: 'HELP', speech: 'I need help', emoji: '🆘', color: 'social', row: 1, col: 1, isOriginal: true },
-  { id: 'yes', label: 'YES', speech: 'Yes', emoji: '✅', color: 'social', row: 1, col: 2, isNew: true },
-  { id: 'no', label: 'NO', speech: 'No thank you', emoji: '❌', color: 'social', row: 1, col: 3, isNew: true },
+  { id: 'stop', label: 'STOP', speech: 'Stop, all done', symbolUrl: getMulberrySymbolUrl('backstop'), emoji: '🛑', color: 'alert', row: 1, col: 0, isOriginal: true },
+  { id: 'help', label: 'HELP', speech: 'I need help', symbolUrl: getMulberrySymbolUrl('help_,_to'), emoji: '🆘', color: 'social', row: 1, col: 1, isOriginal: true },
+  { id: 'yes', label: 'YES', speech: 'Yes', symbolUrl: getMulberrySymbolUrl('good'), emoji: '✅', color: 'social', row: 1, col: 2, isNew: true },
+  { id: 'no', label: 'NO', speech: 'No thank you', symbolUrl: getMulberrySymbolUrl('mistake_no_wrong'), emoji: '❌', color: 'social', row: 1, col: 3, isNew: true },
   
   // Row 2
-  { id: 'me', label: 'ME', speech: 'Me', emoji: '👤', color: 'person', row: 2, col: 0, isNew: true },
-  { id: 'you', label: 'YOU', speech: 'You', emoji: '👥', color: 'person', row: 2, col: 1, isNew: true },
-  { id: 'eat', label: 'EAT', speech: 'I want to eat', emoji: '🥪', color: 'action', row: 2, col: 2, isNew: true },
-  { id: 'play', label: 'PLAY', speech: 'Let us play', emoji: '⚽', color: 'action', row: 2, col: 3, isNew: true },
+  { id: 'me', label: 'ME', speech: 'Me', symbolUrl: getMulberrySymbolUrl('good_person'), emoji: '👤', color: 'person', row: 2, col: 0, isNew: true },
+  { id: 'you', label: 'YOU', speech: 'You', symbolUrl: getMulberrySymbolUrl('good_person'), emoji: '👥', color: 'person', row: 2, col: 1, isNew: true },
+  { id: 'eat', label: 'EAT', speech: 'I want to eat', symbolUrl: getMulberrySymbolUrl('eat_,_to'), emoji: '🥪', color: 'action', row: 2, col: 2, isNew: true },
+  { id: 'play', label: 'PLAY', speech: 'Let us play', symbolUrl: getMulberrySymbolUrl('play_,_to'), emoji: '⚽', color: 'action', row: 2, col: 3, isNew: true },
 ];
 
-// Full Matrix Core Preview
+// Full Matrix Core Preview with Official Mulberry AAC Symbols
 const STAGE_3_TILES = [
-  { id: 'me', label: 'ME', emoji: '👤', color: 'person' },
-  { id: 'you', label: 'YOU', emoji: '👥', color: 'person' },
-  { id: 'want', label: 'WANT', emoji: '🤲', color: 'verb', isOriginal: true },
-  { id: 'like', label: 'LIKE', emoji: '❤️', color: 'verb' },
-  { id: 'go', label: 'GO', emoji: '🟢', color: 'verb' },
-  { id: 'look', label: 'LOOK', emoji: '👀', color: 'verb' },
-  { id: 'more', label: 'MORE', emoji: '➕', color: 'descriptor', isOriginal: true },
-  { id: 'good', label: 'GOOD', emoji: '🌟', color: 'descriptor' },
-  { id: 'big', label: 'BIG', emoji: '🐘', color: 'descriptor' },
-  { id: 'stop', label: 'STOP', emoji: '🛑', color: 'alert', isOriginal: true },
-  { id: 'help', label: 'HELP', emoji: '🆘', color: 'social', isOriginal: true },
-  { id: 'yes', label: 'YES', emoji: '✅', color: 'social' },
-  { id: 'no', label: 'NO', emoji: '❌', color: 'social' },
-  { id: 'eat', label: 'EAT', emoji: '🥪', color: 'action' },
-  { id: 'drink', label: 'DRINK', emoji: '🧃', color: 'action' },
-  { id: 'play', label: 'PLAY', emoji: '🎮', color: 'action' },
-  { id: 'happy', label: 'HAPPY', emoji: '😊', color: 'feeling' },
-  { id: 'tired', label: 'TIRED', emoji: '😴', color: 'feeling' },
+  { id: 'me', label: 'ME', symbolUrl: getMulberrySymbolUrl('good_person'), emoji: '👤', color: 'person' },
+  { id: 'you', label: 'YOU', symbolUrl: getMulberrySymbolUrl('good_person'), emoji: '👥', color: 'person' },
+  { id: 'want', label: 'WANT', symbolUrl: getMulberrySymbolUrl('want_,_to'), emoji: '🤲', color: 'verb', isOriginal: true },
+  { id: 'like', label: 'LIKE', symbolUrl: getMulberrySymbolUrl('good'), emoji: '❤️', color: 'verb' },
+  { id: 'go', label: 'GO', symbolUrl: getMulberrySymbolUrl('go_,_to'), emoji: '🟢', color: 'verb' },
+  { id: 'look', label: 'LOOK', symbolUrl: getMulberrySymbolUrl('look_,_to'), emoji: '👀', color: 'verb' },
+  { id: 'more', label: 'MORE', symbolUrl: getMulberrySymbolUrl('more'), emoji: '➕', color: 'descriptor', isOriginal: true },
+  { id: 'good', label: 'GOOD', symbolUrl: getMulberrySymbolUrl('good'), emoji: '🌟', color: 'descriptor' },
+  { id: 'big', label: 'BIG', symbolUrl: getMulberrySymbolUrl('big'), emoji: '🐘', color: 'descriptor' },
+  { id: 'stop', label: 'STOP', symbolUrl: getMulberrySymbolUrl('backstop'), emoji: '🛑', color: 'alert', isOriginal: true },
+  { id: 'help', label: 'HELP', symbolUrl: getMulberrySymbolUrl('help_,_to'), emoji: '🆘', color: 'social', isOriginal: true },
+  { id: 'yes', label: 'YES', symbolUrl: getMulberrySymbolUrl('good'), emoji: '✅', color: 'social' },
+  { id: 'no', label: 'NO', symbolUrl: getMulberrySymbolUrl('mistake_no_wrong'), emoji: '❌', color: 'social' },
+  { id: 'eat', label: 'EAT', symbolUrl: getMulberrySymbolUrl('eat_,_to'), emoji: '🥪', color: 'action' },
+  { id: 'drink', label: 'DRINK', symbolUrl: getMulberrySymbolUrl('drink'), emoji: '🧃', color: 'action' },
+  { id: 'play', label: 'PLAY', symbolUrl: getMulberrySymbolUrl('play_,_to'), emoji: '🎮', color: 'action' },
+  { id: 'happy', label: 'HAPPY', symbolUrl: getMulberrySymbolUrl('happy_man'), emoji: '😊', color: 'feeling' },
+  { id: 'tired', label: 'TIRED', symbolUrl: getMulberrySymbolUrl('sleep_male_,_to'), emoji: '😴', color: 'feeling' },
 ];
 
 // Fitzgerald Key Theme Helper
@@ -248,11 +249,29 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     key={tile.id}
                     type="button"
                     onClick={() => handleTileTap(tile.id, tile.speech)}
-                    className={`h-32 sm:h-36 rounded-3xl border-3 flex flex-col items-center justify-center gap-2 p-3 transition-all duration-150 cursor-pointer select-none ${getColorClasses(tile.color)} ${
+                    className={`h-32 sm:h-36 rounded-3xl border-3 flex flex-col items-center justify-center gap-1.5 p-3 transition-all duration-150 cursor-pointer select-none ${getColorClasses(tile.color)} ${
                       lastTappedId === tile.id ? 'translate-y-1 scale-95' : 'hover:-translate-y-0.5'
                     }`}
                   >
-                    <span className="text-4xl sm:text-5xl drop-shadow-xs">{tile.emoji}</span>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center pointer-events-none">
+                      <img
+                        src={tile.symbolUrl}
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLElement;
+                          target.style.display = 'none';
+                          if (target.nextElementSibling) {
+                            (target.nextElementSibling as HTMLElement).style.display = 'block';
+                          }
+                        }}
+                      />
+                      <span aria-hidden="true" className="hidden text-4xl sm:text-5xl drop-shadow-xs">
+                        {tile.emoji}
+                      </span>
+                    </div>
                     <span className="text-base sm:text-lg font-black tracking-wider uppercase">
                       {tile.label}
                     </span>
@@ -281,7 +300,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   Growing to 12 Words
                 </h2>
                 <p className="text-xs sm:text-sm font-semibold text-slate-600">
-                  Notice how the first 4 words didn't move? That's muscle memory!
+                  Notice how the first 4 words didn&apos;t move? That&apos;s muscle memory!
                 </p>
               </div>
 
@@ -302,8 +321,26 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                           <Lock className="w-2.5 h-2.5" />
                         </div>
                       )}
-                      <span className="text-2xl sm:text-3xl">{tile.emoji}</span>
-                      <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase">
+                      <div className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center pointer-events-none">
+                        <img
+                          src={tile.symbolUrl}
+                          alt=""
+                          aria-hidden="true"
+                          className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLElement;
+                            target.style.display = 'none';
+                            if (target.nextElementSibling) {
+                              (target.nextElementSibling as HTMLElement).style.display = 'block';
+                            }
+                          }}
+                        />
+                        <span aria-hidden="true" className="hidden text-2xl sm:text-3xl">
+                          {tile.emoji}
+                        </span>
+                      </div>
+                      <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase leading-none">
                         {tile.label}
                       </span>
                     </button>
@@ -409,8 +446,26 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         lastTappedId === tile.id ? 'translate-y-1 scale-95' : 'hover:-translate-y-0.5'
                       }`}
                     >
-                      <span className="text-xl">{tile.emoji}</span>
-                      <span className="text-[10px] font-black uppercase tracking-tight">{tile.label}</span>
+                      <div className="w-7 h-7 flex items-center justify-center pointer-events-none">
+                        <img
+                          src={tile.symbolUrl}
+                          alt=""
+                          aria-hidden="true"
+                          className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLElement;
+                            target.style.display = 'none';
+                            if (target.nextElementSibling) {
+                              (target.nextElementSibling as HTMLElement).style.display = 'block';
+                            }
+                          }}
+                        />
+                        <span aria-hidden="true" className="hidden text-xl">
+                          {tile.emoji}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-tight leading-none mt-0.5">{tile.label}</span>
                     </button>
                   ))}
                 </div>
@@ -457,7 +512,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     </button>
                     {currentFolder === 'snacks' && (
                       <span className="text-xs font-black text-amber-900 flex items-center gap-1">
-                        <span>/</span> <span>Snacks 🍎</span>
+                        <span>/</span> <span>Snacks</span>
                       </span>
                     )}
                   </div>
@@ -478,13 +533,29 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className="h-28 rounded-3xl border-3 border-amber-400 bg-amber-50 hover:bg-amber-100 flex flex-col items-center justify-center gap-1 shadow-[0_6px_0_0_#D97706,0_10px_20px_rgba(217,119,6,0.1)] active:translate-y-1 active:shadow-[0_2px_0_0_#D97706] cursor-pointer"
                     >
-                      <span className="text-3xl">🍎</span>
+                      <div className="w-12 h-12 flex items-center justify-center pointer-events-none">
+                        <img
+                          src={getMulberrySymbolUrl('apple')}
+                          alt=""
+                          aria-hidden="true"
+                          className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                          loading="lazy"
+                        />
+                      </div>
                       <span className="font-black text-sm text-amber-950">Snacks Folder</span>
                       <span className="text-[10px] font-bold text-amber-700">Tap to open ➜</span>
                     </button>
 
                     <div className="h-28 rounded-3xl border-2 border-stone-200 bg-stone-50 flex flex-col items-center justify-center gap-1 opacity-60">
-                      <span className="text-3xl">🧸</span>
+                      <div className="w-12 h-12 flex items-center justify-center pointer-events-none">
+                        <img
+                          src={getMulberrySymbolUrl('toy')}
+                          alt=""
+                          aria-hidden="true"
+                          className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                          loading="lazy"
+                        />
+                      </div>
                       <span className="font-bold text-sm text-stone-600">Toys Folder</span>
                       <span className="text-[10px] text-stone-400">Locked in demo</span>
                     </div>
@@ -492,10 +563,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 animate-in zoom-in-95">
                     {[
-                      { label: 'Apple', emoji: '🍏', speech: 'Apple' },
-                      { label: 'Cracker', emoji: '🍪', speech: 'Cracker' },
-                      { label: 'Pretzels', emoji: '🥨', speech: 'Pretzels' },
-                      { label: 'Juice', emoji: '🧃', speech: 'Juice' },
+                      { label: 'Apple', symbolUrl: getMulberrySymbolUrl('apple'), emoji: '🍏', speech: 'Apple' },
+                      { label: 'Cracker', symbolUrl: getMulberrySymbolUrl('cracker'), emoji: '🍪', speech: 'Cracker' },
+                      { label: 'Pretzels', symbolUrl: getMulberrySymbolUrl('biscuit_chocolate_chip'), emoji: '🥨', speech: 'Pretzels' },
+                      { label: 'Juice', symbolUrl: getMulberrySymbolUrl('apple_juice'), emoji: '🧃', speech: 'Juice' },
                     ].map((item) => (
                       <button
                         key={item.label}
@@ -503,8 +574,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         onClick={() => handleTileTap(item.label, item.speech)}
                         className="h-20 rounded-2xl border-2 border-orange-400 bg-orange-50 hover:bg-orange-100 text-orange-950 flex flex-col items-center justify-center p-1.5 shadow-[0_4px_0_0_#EA580C] active:translate-y-0.5 cursor-pointer"
                       >
-                        <span className="text-2xl">{item.emoji}</span>
-                        <span className="text-xs font-black">{item.label}</span>
+                        <div className="w-8 h-8 flex items-center justify-center pointer-events-none">
+                          <img
+                            src={item.symbolUrl}
+                            alt=""
+                            aria-hidden="true"
+                            className="w-full h-full object-contain filter drop-shadow-xs pointer-events-none"
+                            loading="lazy"
+                          />
+                        </div>
+                        <span className="text-xs font-black mt-0.5">{item.label}</span>
                       </button>
                     ))}
                   </div>
