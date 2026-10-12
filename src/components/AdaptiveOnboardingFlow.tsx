@@ -21,7 +21,9 @@ import {
   ShieldCheck,
   Smartphone,
   Globe,
-  Crown
+  Crown,
+  Headphones,
+  Briefcase
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge, BillingCycle } from '../types';
@@ -293,7 +295,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <span className="text-3xl">🐝</span>
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 flex items-center justify-center mb-2">
+                      <Smile className="w-6 h-6" />
+                    </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Child (Ages 3–11)')}
                     </h3>
@@ -322,7 +326,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <span className="text-3xl">🎧</span>
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-300 flex items-center justify-center mb-2">
+                      <Headphones className="w-6 h-6" />
+                    </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Teen (Ages 12–17)')}
                     </h3>
@@ -351,7 +357,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <span className="text-3xl">💼</span>
+                    <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/40 text-teal-600 dark:text-teal-300 flex items-center justify-center mb-2">
+                      <Briefcase className="w-6 h-6" />
+                    </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Adult (Ages 18+)')}
                     </h3>
@@ -628,8 +636,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           {step === 4 && (
             <div className="space-y-5 animate-in fade-in">
               <div className="text-center space-y-2">
-                <div className="w-14 h-14 rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
-                  👑
+                <div className="w-14 h-14 rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
+                  <Crown className="w-7 h-7" />
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   {t('Start Your 15-Day Free Trial')}
@@ -781,7 +789,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 onClick={() => handleComplete(true)}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
               >
-                <span>{t('Start 15-Day Free Trial 🚀')}</span>
+                <span>{t('Start 15-Day Free Trial')}</span>
                 <ArrowRight className="w-4 h-4 stroke-3" />
               </button>
             </div>

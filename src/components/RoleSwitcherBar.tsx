@@ -158,7 +158,9 @@ export const RoleSwitcherBar: React.FC = () => {
               connectionInfo?.isConnected ? 'bg-emerald-500' : 'bg-amber-500'
             }`}></span>
           </span>
-          <span className="text-base">{isCaregiverView ? '👑' : '🧒'}</span>
+          <span className="flex items-center">
+            {isCaregiverView ? <Crown className="w-3.5 h-3.5 text-amber-400" /> : <Smartphone className="w-3.5 h-3.5 text-amber-400" />}
+          </span>
           <span>{isCaregiverView ? 'Caregiver Hub' : 'Child Tablet'}</span>
           <span className="font-mono text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-sm">
             {pairingCode}
@@ -204,7 +206,9 @@ export const RoleSwitcherBar: React.FC = () => {
           {/* Current Role Banner */}
           <div className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xl">{isCaregiverView ? '👑' : '🧒'}</span>
+              <span className="p-1.5 rounded-lg bg-slate-800 text-amber-400">
+                {isCaregiverView ? <Crown className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+              </span>
               <div>
                 <div className="text-[11px] font-black text-amber-300 flex items-center gap-1">
                   <span>This Tab:</span>
@@ -247,7 +251,7 @@ export const RoleSwitcherBar: React.FC = () => {
             >
               <ExternalLink className="w-4 h-4" />
               <span>
-                {isCaregiverView ? '🚀 Open Child Tablet' : '🚀 Open Caregiver Hub'}
+                {isCaregiverView ? 'Open Child Tablet' : 'Open Caregiver Hub'}
               </span>
             </button>
 

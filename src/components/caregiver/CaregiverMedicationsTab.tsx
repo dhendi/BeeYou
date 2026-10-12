@@ -181,8 +181,8 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
       {!isPremium && medications.length >= 1 && (
         <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shrink-0 text-xl shadow-xs">
-              👑
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shrink-0 shadow-xs">
+              <Crown className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">

@@ -53,8 +53,8 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
 
         {/* Top Decorative Mascot / Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-amber-400 to-amber-500 text-white flex items-center justify-center text-3xl mx-auto shadow-[0_6px_0_0_#d97706,0_10px_20px_rgba(217,119,6,0.25)] ring-4 ring-amber-100">
-            🗣️
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-amber-400 to-amber-500 text-white flex items-center justify-center mx-auto shadow-[0_6px_0_0_#d97706,0_10px_20px_rgba(217,119,6,0.25)] ring-4 ring-amber-100">
+            <Volume2 className="w-8 h-8 text-white" />
           </div>
           <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-black text-xs uppercase tracking-wider">
             {t('AAC Speech Board')}
@@ -84,7 +84,7 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
           </div>
           <div className="space-y-0.5 leading-snug">
             <span className="font-black text-amber-900 block text-xs">
-              🐝 {t('Instructions Always Available')}
+              {t('Instructions Always Available')}
             </span>
             <p className="text-amber-900/90 text-[11px] sm:text-xs font-medium">
               {t('Instructions for using the AAC will always be available in the Caregiver App (tap the Help icon anytime in the top header).')}
@@ -146,7 +146,7 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-black shrink-0 hidden sm:inline">
-              {t('Full Board')} ⚡
+              {t('Full Board')}
             </span>
           </button>
         </div>
