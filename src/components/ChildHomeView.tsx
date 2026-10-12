@@ -33,6 +33,8 @@ import { resolveAacImageUrl } from '../services/symbolService';
 import { DashboardWidgetId, AACItem } from '../types';
 import { isWidgetAvailable } from '../data/navigation';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import { CaregiverLockShield } from './CaregiverLockShield';
+import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
 
 export const ChildHomeView: React.FC = () => {
@@ -57,6 +59,7 @@ export const ChildHomeView: React.FC = () => {
     setShowThemeModal,
     enabledFeatures,
     userAgeGroup,
+    userPersona,
     setShowAboutMeModal,
     medications,
     takeMedicationDose,
@@ -231,31 +234,37 @@ export const ChildHomeView: React.FC = () => {
               <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
                 {t('Hi')}, {childProfile.name}!
               </h2>
-              <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#F5B865]" />
-                {worldState.stars} {t('Coins')}
-              </span>
+              {userPersona === 'child' && (
+                <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#F5B865]" />
+                  {worldState.stars} {t('Coins')}
+                </span>
+              )}
             </div>
             <p className="text-xs text-[#7A6C60] font-semibold">
-              {t('You can be yourself here')} • {t("Today's Dashboard")}
+              {getPersonaLabel(userPersona, 'dashboardGreetingSubtitle')}
             </p>
           </div>
         </div>
 
         {/* Right: PROMINENT EDIT DASHBOARD & QUICK ACTION BUTTONS */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-          {/* 🌟 PROMINENT CUSTOMIZE DASHBOARD BUTTON */}
-          <button
-            onClick={() => {
+          {/* 🌟 PROMINENT CUSTOMIZE DASHBOARD BUTTON (Admin Clutter Shield Protected) */}
+          <CaregiverLockShield
+            title="Dashboard Customization"
+            onUnlocked={() => {
               setShowDashboardCustomizer(true);
-              playChime('tap');
             }}
-            className="px-4 py-2.5 rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0"
-            title="Customize and reorder dashboard widgets"
           >
-            <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" />
-            <span>{t('Customize Dashboard')} ✏️</span>
-          </button>
+            <button
+              type="button"
+              className="px-4 py-2.5 rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0"
+              title="Customize and reorder dashboard widgets (Protected)"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" />
+              <span>{t('Customize Dashboard')} ✏️</span>
+            </button>
+          </CaregiverLockShield>
 
           {/* Quick Tools Hub Button */}
           <button
@@ -776,16 +785,19 @@ export const ChildHomeView: React.FC = () => {
               <div className="lg:col-span-5 flex flex-col space-y-3.5">
                 {enabledWidgets.filter((w) => w.id !== 'quick_aac').map((w) => renderWidgetCard(w, false))}
 
-                <button
-                  onClick={() => {
-                    setShowDashboardCustomizer(true);
-                    playChime('tap');
-                  }}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-1"
+                <CaregiverLockShield
+                  title="Dashboard Customization"
+                  onUnlocked={() => setShowDashboardCustomizer(true)}
+                  className="w-full"
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
-                </button>
+                  <button
+                    type="button"
+                    className="w-full py-3 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-1"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
+                  </button>
+                </CaregiverLockShield>
               </div>
             </div>
           );
@@ -798,16 +810,19 @@ export const ChildHomeView: React.FC = () => {
               {enabledWidgets.map((w) => renderWidgetCard(w, true))}
             </div>
 
-            <button
-              onClick={() => {
-                setShowDashboardCustomizer(true);
-                playChime('tap');
-              }}
-              className="w-full py-3.5 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-2xs"
+            <CaregiverLockShield
+              title="Dashboard Customization"
+              onUnlocked={() => setShowDashboardCustomizer(true)}
+              className="w-full"
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>＋ Customize / Reorder Dashboard Widgets</span>
-            </button>
+              <button
+                type="button"
+                className="w-full py-3.5 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-2xs"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>＋ Customize / Reorder Dashboard Widgets</span>
+              </button>
+            </CaregiverLockShield>
           </div>
         );
       })()}

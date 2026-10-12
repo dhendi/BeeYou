@@ -280,22 +280,27 @@ export const AACView: React.FC = () => {
       return 'bg-white hover:bg-slate-100 text-slate-950 border-2 border-slate-900';
     }
 
-    // Default: Soft Low-Sensory Fitzgerald Key standard
+    // Standardized Modified Fitzgerald Key Styling:
+    // Nouns: Soft Orange (#FED7AA / border #F97316)
+    // Verbs: Soft Green (#BBF7D0 / border #22C55E)
+    // Descriptors/Adjectives: Soft Blue (#BAE6FD / border #0284C7)
+    // People/Pronouns: Soft Yellow (#FEF08A / border #EAB308)
+    // Social/Phrases: Soft Pink/Purple (#FBCFE8 / border #DB2777)
     switch (colorType) {
       case 'subject':
-        return 'bg-amber-50 hover:bg-amber-100/80 text-amber-950 border-amber-200/90 ring-amber-300';
+        return 'bg-[#FEF08A] hover:bg-[#FDE047] text-yellow-950 border-2 border-[#EAB308] ring-yellow-400 shadow-xs font-semibold';
       case 'verb':
-        return 'bg-emerald-50 hover:bg-emerald-100/80 text-emerald-950 border-emerald-200/90 ring-emerald-300';
+        return 'bg-[#BBF7D0] hover:bg-[#86EFAC] text-emerald-950 border-2 border-[#22C55E] ring-emerald-400 shadow-xs font-semibold';
       case 'noun':
-        return 'bg-orange-50 hover:bg-orange-100/80 text-orange-950 border-orange-200/90 ring-orange-300';
+        return 'bg-[#FED7AA] hover:bg-[#FDBA74] text-orange-950 border-2 border-[#F97316] ring-orange-400 shadow-xs font-semibold';
       case 'adjective':
-        return 'bg-sky-50 hover:bg-sky-100/80 text-sky-950 border-sky-200/90 ring-sky-300';
+        return 'bg-[#BAE6FD] hover:bg-[#7DD3FC] text-sky-950 border-2 border-[#0284C7] ring-sky-400 shadow-xs font-semibold';
       case 'social':
-        return 'bg-purple-50 hover:bg-purple-100/80 text-purple-950 border-purple-200/90 ring-purple-300';
+        return 'bg-[#FBCFE8] hover:bg-[#F472B6] text-pink-950 border-2 border-[#DB2777] ring-pink-400 shadow-xs font-semibold';
       case 'emergency':
-        return 'bg-rose-50 hover:bg-rose-100 text-rose-950 border-rose-300 ring-rose-400 font-black';
+        return 'bg-rose-100 hover:bg-rose-200 text-rose-950 border-2 border-rose-500 ring-rose-400 font-black shadow-xs';
       default:
-        return 'bg-slate-50 hover:bg-slate-100/80 text-slate-900 border-slate-200 ring-slate-300';
+        return 'bg-slate-50 hover:bg-slate-100 text-slate-900 border-2 border-slate-300 ring-slate-300 font-semibold';
     }
   };
 

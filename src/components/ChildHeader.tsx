@@ -14,6 +14,7 @@ import { setActiveDeviceView } from '../services/authService';
 import { t } from '../services/translator';
 
 import { LanguageDropdown } from './LanguageDropdown';
+import { CaregiverLockShield } from './CaregiverLockShield';
 
 export const ChildHeader: React.FC = () => {
   const {
@@ -78,37 +79,41 @@ export const ChildHeader: React.FC = () => {
       )}
 
       {/* Right: Streamlined Compact Actions */}
-      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        {/* Language Dropdown Choices */}
-        <LanguageDropdown />
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Admin Clutter Shield: Language Dropdown & Wi-Fi Sync Status */}
+        <CaregiverLockShield title="Language & Sync Controls" showLockBadge={false}>
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <LanguageDropdown />
 
-        {/* Compact Live Connection Indicator Pill */}
-        <button
-          type="button"
-          onClick={() => {
-            setShowCaregiverModal(true);
-            playChime('tap');
-          }}
-          className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] sm:text-xs font-black border transition-all cursor-pointer shadow-2xs active:scale-95 ${
-            isCaregiverConnected
-              ? 'bg-emerald-500 text-white border-emerald-400 shadow-xs'
-              : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
-          }`}
-          title={isCaregiverConnected ? `${t('Live')} (${connectionStatus.peerName || 'Caregiver'})` : t('Link')}
-        >
-          {isCaregiverConnected ? (
-            <>
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
-              <Wifi className="w-3 h-3 text-white shrink-0" />
-              <span className="hidden sm:inline">{t('Live')}</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="w-3 h-3 text-stone-400 shrink-0" />
-              <span className="hidden sm:inline">{t('Link')}</span>
-            </>
-          )}
-        </button>
+            {/* Compact Live Connection Indicator Pill */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowCaregiverModal(true);
+                playChime('tap');
+              }}
+              className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] sm:text-xs font-black border transition-all cursor-pointer shadow-2xs active:scale-95 ${
+                isCaregiverConnected
+                  ? 'bg-emerald-500 text-white border-emerald-400 shadow-xs'
+                  : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
+              }`}
+              title={isCaregiverConnected ? `${t('Live')} (${connectionStatus.peerName || 'Caregiver'})` : t('Link')}
+            >
+              {isCaregiverConnected ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+                  <Wifi className="w-3 h-3 text-white shrink-0" />
+                  <span className="hidden sm:inline">{t('Live')}</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3 text-stone-400 shrink-0" />
+                  <span className="hidden sm:inline">{t('Link')}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </CaregiverLockShield>
 
         {/* Compact PWA Install Button */}
         <PWAInstallButton variant="compact" />

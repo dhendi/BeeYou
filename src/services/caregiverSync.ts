@@ -1454,3 +1454,57 @@ export async function resolveCaregiverAlert(code: string, alertId?: string): Pro
   } catch {}
   alertResolveListeners.forEach((fn) => fn(alertId));
 }
+
+/**
+ * Fires silent real-time safe mode event to caregiver hub over cloud SSE/Firestore
+ */
+export async function sendEmergencySafeModeEvent(payload: {
+  childName: string;
+  activatedAt: string;
+  reason?: string;
+}): Promise<void> {
+  const code = getPairingCode();
+  const alertId = 'safemode-' + Date.now();
+  
+  // 1. Silent alert object for caregiver hub
+  const alert: CaregiverAlert = {
+    id: alertId,
+    pairingCode: code,
+    timestamp: payload.activatedAt,
+    status: 'active',
+    childName: payload.childName,
+    emotion: 'sensory_overload',
+    alertId: 'sensory_overload',
+    label: 'Sensory Safe Mode Triggered',
+    emoji: '🛑',
+    note: payload.reason || 'Child entered Emergency Sensory Safe Mode (Overload Protection).',
+    location: 'home',
+  };
+
+  try {
+    localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+    saveAlertToHistory(alert);
+  } catch {}
+
+  // 2. Dispatch silent event payload over Firestore and SSE channel
+  await publishCloudEvent(code, {
+    type: 'EMERGENCY_SAFE_MODE_TRIGGERED',
+    timestamp: payload.activatedAt,
+    payload: {
+      ...payload,
+      alertId,
+      pairingCode: code,
+    },
+    alert,
+    pairingCode: code,
+  });
+
+  // Direct server fallback
+  try {
+    fetch('/api/caregiver/alert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(alert),
+    }).catch(() => {});
+  } catch {}
+}

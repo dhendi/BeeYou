@@ -269,13 +269,13 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
   const getColorStyles = (color: typeof customColor) => {
     switch (color) {
-      case 'subject': return 'bg-amber-100 border-amber-400 text-amber-950 ring-amber-300';
-      case 'verb': return 'bg-emerald-100 border-emerald-400 text-emerald-950 ring-emerald-300';
-      case 'noun': return 'bg-orange-100 border-orange-400 text-orange-950 ring-orange-300';
-      case 'adjective': return 'bg-sky-100 border-sky-400 text-sky-950 ring-sky-300';
-      case 'social': return 'bg-purple-100 border-purple-400 text-purple-950 ring-purple-300';
-      case 'emergency': return 'bg-rose-100 border-rose-400 text-rose-950 ring-rose-300';
-      default: return 'bg-slate-100 border-slate-300 text-slate-800';
+      case 'subject': return 'bg-[#FEF08A] border-2 border-[#EAB308] text-yellow-950 ring-yellow-400';
+      case 'verb': return 'bg-[#BBF7D0] border-2 border-[#22C55E] text-emerald-950 ring-emerald-400';
+      case 'noun': return 'bg-[#FED7AA] border-2 border-[#F97316] text-orange-950 ring-orange-400';
+      case 'adjective': return 'bg-[#BAE6FD] border-2 border-[#0284C7] text-sky-950 ring-sky-400';
+      case 'social': return 'bg-[#FBCFE8] border-2 border-[#DB2777] text-pink-950 ring-pink-400';
+      case 'emergency': return 'bg-rose-100 border-2 border-rose-500 text-rose-950 ring-rose-400';
+      default: return 'bg-slate-100 border-2 border-slate-300 text-slate-800';
     }
   };
 

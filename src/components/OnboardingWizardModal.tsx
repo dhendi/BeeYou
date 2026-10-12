@@ -47,7 +47,7 @@ import {
   getDeterministicFamilyCode,
 } from '../services/authService';
 
-export type OnboardingPersona = 'kid' | 'teen' | 'adult' | 'caregiver';
+export type OnboardingPersona = 'kid' | 'child' | 'teen' | 'adult' | 'caregiver';
 
 interface OnboardingWizardModalProps {
   isOpen: boolean;

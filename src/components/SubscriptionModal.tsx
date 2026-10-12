@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
+import { getPersonaLabel } from '../utils/personaHelpers';
 
 export const SubscriptionModal: React.FC = () => {
   const {
@@ -20,6 +21,7 @@ export const SubscriptionModal: React.FC = () => {
     paywallTriggerReason,
     subscription,
     isPremium,
+    userPersona,
     startFreeTrial,
     cancelSubscription,
     setSubscriptionTier,
@@ -73,7 +75,7 @@ export const SubscriptionModal: React.FC = () => {
             Unlock Full Independence & Calming Tools
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm font-medium mt-1.5 max-w-lg mx-auto leading-relaxed">
-            Give your loved one or client the complete communication toolkit with unlimited routines, soundscapes, and customizable themes.
+            {getPersonaLabel(userPersona, 'paywallSubtitle')}
           </p>
 
           {/* Trigger Reason Highlight */}

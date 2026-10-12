@@ -28,12 +28,12 @@ const CATEGORY_OPTIONS: { id: AACCategory; label: string; emoji: string }[] = [
 ];
 
 const COLOR_TYPE_OPTIONS: { id: AACItem['colorType']; label: string; desc: string; bg: string }[] = [
-  { id: 'subject', label: 'Yellow (Subject / People)', desc: 'Who is speaking or acting', bg: 'bg-amber-100 border-amber-400 text-amber-950' },
-  { id: 'verb', label: 'Green (Verb / Action)', desc: 'Actions, wanting, doing', bg: 'bg-emerald-100 border-emerald-400 text-emerald-950' },
-  { id: 'noun', label: 'Orange (Noun / Object)', desc: 'Things, food, places, toys', bg: 'bg-orange-100 border-orange-400 text-orange-950' },
-  { id: 'adjective', label: 'Blue (Adjective / Describing)', desc: 'More, done, colors, sizes', bg: 'bg-sky-100 border-sky-400 text-sky-950' },
-  { id: 'social', label: 'Purple (Social / Phrases)', desc: 'Yes, please, thank you, greetings', bg: 'bg-purple-100 border-purple-400 text-purple-950' },
-  { id: 'emergency', label: 'Red (Emergency / Urgent)', desc: 'Stop, help, hurt, urgent needs', bg: 'bg-rose-100 border-rose-400 text-rose-950' },
+  { id: 'subject', label: 'Yellow (People / Pronouns)', desc: 'Who is speaking or acting', bg: 'bg-[#FEF08A] border-2 border-[#EAB308] text-yellow-950' },
+  { id: 'verb', label: 'Green (Verbs / Actions)', desc: 'Actions, wanting, doing', bg: 'bg-[#BBF7D0] border-2 border-[#22C55E] text-emerald-950' },
+  { id: 'noun', label: 'Orange (Nouns / Objects)', desc: 'Things, food, places, toys', bg: 'bg-[#FED7AA] border-2 border-[#F97316] text-orange-950' },
+  { id: 'adjective', label: 'Blue (Descriptors / Adjectives)', desc: 'More, done, colors, sizes', bg: 'bg-[#BAE6FD] border-2 border-[#0284C7] text-sky-950' },
+  { id: 'social', label: 'Pink / Purple (Social / Phrases)', desc: 'Yes, please, thank you, greetings', bg: 'bg-[#FBCFE8] border-2 border-[#DB2777] text-pink-950' },
+  { id: 'emergency', label: 'Red (Emergency / Urgent)', desc: 'Stop, help, hurt, urgent needs', bg: 'bg-rose-100 border-2 border-rose-500 text-rose-950' },
 ];
 
 const POPULAR_EMOJIS = [
@@ -223,12 +223,12 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
           {/* Live Button Preview Tile */}
           <div className="flex flex-col items-center justify-center py-2">
             <div className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between w-28 h-28 shadow-md transition-all relative overflow-hidden ${
-              colorType === 'subject' ? 'bg-amber-50 border-amber-400 text-amber-950' :
-              colorType === 'verb' ? 'bg-emerald-50 border-emerald-400 text-emerald-950' :
-              colorType === 'noun' ? 'bg-orange-50 border-orange-400 text-orange-950' :
-              colorType === 'adjective' ? 'bg-sky-50 border-sky-400 text-sky-950' :
-              colorType === 'social' ? 'bg-purple-50 border-purple-400 text-purple-950' :
-              'bg-rose-50 border-rose-400 text-rose-950'
+              colorType === 'subject' ? 'bg-[#FEF08A] border-2 border-[#EAB308] text-yellow-950' :
+              colorType === 'verb' ? 'bg-[#BBF7D0] border-2 border-[#22C55E] text-emerald-950' :
+              colorType === 'noun' ? 'bg-[#FED7AA] border-2 border-[#F97316] text-orange-950' :
+              colorType === 'adjective' ? 'bg-[#BAE6FD] border-2 border-[#0284C7] text-sky-950' :
+              colorType === 'social' ? 'bg-[#FBCFE8] border-2 border-[#DB2777] text-pink-950' :
+              'bg-rose-100 border-2 border-rose-500 text-rose-950'
             }`}>
               {/* Image or Emoji Display */}
               <div className="flex-1 w-full min-h-0 flex items-center justify-center">

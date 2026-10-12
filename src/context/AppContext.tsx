@@ -22,6 +22,7 @@ import {
   EarnedRoutineSticker,
   DailyRecollectionEntry,
   AppTheme,
+  UserPersona,
   UserAgeGroup,
   EnabledFeatures,
   getDefaultFeaturesForAge,
@@ -55,6 +56,7 @@ import {
   CalmCopingStrategy,
   BreathingPacerConfig,
 } from '../types';
+import { normalizePersona, personaToAgeGroup } from '../utils/personaHelpers';
 import { PRESET_THEMES } from '../data/themesData';
 import {
   DEFAULT_AAC_ITEMS,
@@ -109,6 +111,7 @@ import {
   getLiveConnectionStatus,
   sendHeartbeat,
   subscribeToCloudChannel,
+  sendEmergencySafeModeEvent,
   ConnectionStatusInfo
 } from '../services/caregiverSync';
 import {
@@ -297,6 +300,8 @@ interface AppContextType {
   setShowThemeModal: (val: boolean) => void;
 
   // Onboarding & Multi-Age Adaptability & Role
+  userPersona: UserPersona;
+  setUserPersona: (persona: UserPersona) => void;
   userAgeGroup: UserAgeGroup;
   setUserAgeGroup: (age: UserAgeGroup) => void;
   userRole: UserAccountRole;
@@ -313,6 +318,8 @@ interface AppContextType {
   showOnboardingModal: boolean;
   setShowOnboardingModal: (val: boolean) => void;
   reopenOnboarding: () => void;
+  showPostOnboardingSpotlight: boolean;
+  setShowPostOnboardingSpotlight: (val: boolean) => void;
   // Medication Reminders & Health Supply
   medications: MedicationReminder[];
   medicationLogs: MedicationDoseLog[];
@@ -368,13 +375,16 @@ interface AppContextType {
 
   // â”€â”€ 11 New Competitive Features â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  // Emergency Sensory Red Button
+  // Emergency Sensory Red Button & Safe Mode
   emergencyMode: EmergencySensorySettings;
   setEmergencyMode: (val: Partial<EmergencySensorySettings>) => void;
   showEmergencyModal: boolean;
   setShowEmergencyModal: (val: boolean) => void;
   activateEmergencyMode: () => void;
   deactivateEmergencyMode: () => void;
+  isSafeModeActive: boolean;
+  activateSafeMode: () => void;
+  deactivateSafeMode: () => void;
 
   // Incredible 5-Point Scale
   fivePointSettings: FivePointScaleSettings;
@@ -999,8 +1009,22 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   };
 
   // Onboarding & Multi-Age Adaptability
+  const [userPersona, setUserPersonaState] = useState<UserPersona>(() => {
+    try {
+      const savedPersona = localStorage.getItem('beeyou_user_persona');
+      if (savedPersona === 'child' || savedPersona === 'teen' || savedPersona === 'adult') {
+        return savedPersona;
+      }
+      const savedAge = localStorage.getItem('beeyou_user_age_group');
+      return normalizePersona(savedAge);
+    } catch (e) {}
+    return 'child';
+  });
+
   const [userAgeGroup, setUserAgeGroupState] = useState<UserAgeGroup>(() => {
     try {
+      const savedPersona = localStorage.getItem('beeyou_user_persona');
+      if (savedPersona) return personaToAgeGroup(normalizePersona(savedPersona));
       const saved = localStorage.getItem('beeyou_user_age_group');
       if (saved === 'kid' || saved === 'teen' || saved === 'adult') return saved;
     } catch (e) {}
@@ -1118,10 +1142,34 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     return true; // First time launch
   });
 
+  const [showPostOnboardingSpotlight, setShowPostOnboardingSpotlight] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('beeyou_spotlight_dismissed') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const setUserPersona = (persona: UserPersona) => {
+    setUserPersonaState(persona);
+    const mappedAge = personaToAgeGroup(persona);
+    setUserAgeGroupState(mappedAge);
+    try {
+      localStorage.setItem('beeyou_user_persona', persona);
+      localStorage.setItem('beeyou_user_age_group', mappedAge);
+      if (localStorage.getItem('beeyou_dashboard_customized') !== 'true') {
+        setDashboardWidgetsState(getDefaultDashboardWidgets(mappedAge));
+      }
+    } catch (e) {}
+  };
+
   const setUserAgeGroup = (age: UserAgeGroup) => {
     setUserAgeGroupState(age);
+    const mappedPersona = normalizePersona(age);
+    setUserPersonaState(mappedPersona);
     try {
       localStorage.setItem('beeyou_user_age_group', age);
+      localStorage.setItem('beeyou_user_persona', mappedPersona);
       // Re-apply age defaults to Home only if the user hasn't customised their dashboard.
       if (localStorage.getItem('beeyou_dashboard_customized') !== 'true') {
         setDashboardWidgetsState(getDefaultDashboardWidgets(age));
@@ -2611,6 +2659,40 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setEmergencyModeState((prev) => ({ ...prev, ...val }));
   };
 
+  // Sensory Safe Mode (Emergency Overload Architecture)
+  const [isSafeModeActive, setIsSafeModeActive] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('beeyou_safe_mode_active') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const activateSafeMode = () => {
+    const timestamp = new Date().toISOString();
+    setIsSafeModeActive(true);
+    try {
+      localStorage.setItem('beeyou_safe_mode_active', 'true');
+    } catch {}
+
+    // Silent Real-Time Dispatch over SSE/Firestore to Caregiver Hub
+    sendEmergencySafeModeEvent({
+      childName: childProfile.name || 'Leo',
+      activatedAt: timestamp,
+      reason: 'Sensory Safe Mode Activated (Overload Shield)',
+    }).catch((err) => {
+      console.warn('Failed to send silent safe mode event:', err);
+    });
+  };
+
+  const deactivateSafeMode = () => {
+    setIsSafeModeActive(false);
+    try {
+      localStorage.removeItem('beeyou_safe_mode_active');
+    } catch {}
+    if (settings.soundEffects) playChime('complete');
+  };
+
   const activateEmergencyMode = () => {
     setEmergencyModeState((prev) => ({ ...prev, isActive: true, activatedAt: new Date().toISOString() }));
     setShowEmergencyModal(true);
@@ -2925,13 +3007,14 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   /** Default layout for an age group: same widgets, different ones switched on. */
   const getDefaultDashboardWidgets = (age: UserAgeGroup): DashboardWidgetConfig[] => {
-    const on = new Set<string>(AGE_DEFAULT_WIDGETS[age] ?? AGE_DEFAULT_WIDGETS.kid);
+    const key: 'adult' | 'kid' | 'teen' = age === 'adult' ? 'adult' : age === 'teen' ? 'teen' : 'kid';
+    const on = new Set<string>(AGE_DEFAULT_WIDGETS[key] ?? AGE_DEFAULT_WIDGETS.kid);
     const base = DEFAULT_DASHBOARD_WIDGETS.map((w) => ({ ...w, enabled: on.has(w.id) }));
     // Enabled widgets first (in the order listed for the age group), the rest after.
-    const order = AGE_DEFAULT_WIDGETS[age] ?? AGE_DEFAULT_WIDGETS.kid;
+    const order = AGE_DEFAULT_WIDGETS[key] ?? AGE_DEFAULT_WIDGETS.kid;
     return [
-      ...order.map((id) => base.find((w) => w.id === id)).filter((w): w is DashboardWidgetConfig => !!w),
-      ...base.filter((w) => !on.has(w.id)),
+      ...order.map((id: DashboardWidgetId) => base.find((w: DashboardWidgetConfig) => w.id === id)).filter((w): w is DashboardWidgetConfig => !!w),
+      ...base.filter((w: DashboardWidgetConfig) => !on.has(w.id)),
     ];
   };
 
@@ -3413,6 +3496,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         showThemeModal,
         setShowThemeModal,
 
+        userPersona,
+        setUserPersona,
         userAgeGroup,
         setUserAgeGroup,
         userRole,
@@ -3429,6 +3514,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         showOnboardingModal,
         setShowOnboardingModal,
         reopenOnboarding,
+        showPostOnboardingSpotlight,
+        setShowPostOnboardingSpotlight,
 
         medications,
         medicationLogs,
@@ -3477,6 +3564,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         setShowEmergencyModal,
         activateEmergencyMode,
         deactivateEmergencyMode,
+        isSafeModeActive,
+        activateSafeMode,
+        deactivateSafeMode,
 
         fivePointSettings,
         updateFivePointSettings,

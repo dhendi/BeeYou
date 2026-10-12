@@ -28,6 +28,10 @@ import { ThemeWallpaperArt } from './ThemeWallpaperArt';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 import { setActiveDeviceView } from '../services/authService';
 import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '../services/caregiverSync';
+import { SensoryEmergencyButton } from './SensoryEmergencyButton';
+import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
+import { GuidedSpotlight } from './GuidedSpotlight';
+import { AdaptiveOnboardingFlow } from './AdaptiveOnboardingFlow';
 
 // Lazy-loaded child tools and modals
 const CopingToolkitModal = lazy(() => import('./CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
@@ -77,6 +81,7 @@ const ChildAppContent: React.FC = () => {
     setShowAboutMeModal,
     settings,
     isParentMode,
+    isSafeModeActive,
   } = useApp();
 
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
@@ -136,7 +141,7 @@ const ChildAppContent: React.FC = () => {
             onClose={() => setShowCaregiverModal(false)} 
             initialTab="enter_code"
           />
-          <OnboardingWizardModal
+          <AdaptiveOnboardingFlow
             isOpen={showOnboardingModal}
             onClose={() => setShowOnboardingModal(false)}
             canDismiss={true}
@@ -149,6 +154,14 @@ const ChildAppContent: React.FC = () => {
           <CaregiverMessageToast />
           <OfflineIndicator />
         </Suspense>
+      </div>
+    );
+  }
+
+  if (isSafeModeActive) {
+    return (
+      <div className="h-[100dvh] max-h-[100dvh] w-full bg-black overflow-hidden relative select-none touch-none">
+        <SensorySafeModeOverlay />
       </div>
     );
   }
@@ -184,23 +197,9 @@ const ChildAppContent: React.FC = () => {
         {childView === 'feelings' && <FeelingsView />}
       </main>
 
-      {/* Floating SOS / Alert Caregiver Button */}
+      {/* Persistent High-Contrast Sensory Emergency Button */}
       {enabledFeatures?.emergencyAlertSOS !== false && (
-        <div className="absolute bottom-20 right-3 sm:right-5 z-30 pointer-events-none">
-          <button
-            onClick={() => {
-              setShowCaregiverAlertModal(true);
-              playChime('tap');
-            }}
-            className="pointer-events-auto group flex items-center gap-2 pl-3.5 pr-4 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-400/50 border-2 border-white ring-4 ring-rose-400/40 hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
-            title="Easy Alert Button: Send emotions or ask caregiver for help at school or therapy"
-          >
-            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <ShieldAlert className="w-4 h-4 text-white" />
-            </div>
-            <span className="tracking-wide">{t('Alert Caregiver')} 🚨</span>
-          </button>
-        </div>
+        <SensoryEmergencyButton />
       )}
 
       {/* Navigation Footer */}
@@ -234,12 +233,15 @@ const ChildAppContent: React.FC = () => {
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
 
-        {/* Onboarding Setup Wizard */}
-        <OnboardingWizardModal
+        {/* 4-Step Adaptive Setup Onboarding Flow */}
+        <AdaptiveOnboardingFlow
           isOpen={showOnboardingModal}
           onClose={() => setShowOnboardingModal(false)}
           canDismiss={true}
         />
+
+        {/* Post-Onboarding Guided Spotlight */}
+        <GuidedSpotlight />
 
         {/* About Me & Emergency ID Card Modal */}
         <AboutMeIDModal

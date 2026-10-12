@@ -275,7 +275,8 @@ export interface MyWorldState {
   currentRoom: 'bedroom' | 'playroom' | 'yard';
 }
 
-export type UserAgeGroup = 'kid' | 'teen' | 'adult';
+export type UserPersona = 'child' | 'teen' | 'adult';
+export type UserAgeGroup = 'kid' | 'child' | 'teen' | 'adult';
 
 export type MedicationFrequency = 
   | 'daily'
@@ -1053,6 +1054,7 @@ export interface BeeYouBackupData {
   medications?: any[];
   cycleSettings?: any;
   userAgeGroup?: UserAgeGroup;
+  userPersona?: UserPersona;
   enabledFeatures?: EnabledFeatures;
   activeThemeId?: string;
   soundscapePreferences?: Record<string, number>;
