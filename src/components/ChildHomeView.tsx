@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   MessageSquare, 
@@ -82,7 +82,6 @@ export const ChildHomeView: React.FC = () => {
     getTodaySpoonEntry,
     dashboardWidgets,
     setShowDashboardCustomizer,
-    addToSentence,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -188,22 +187,14 @@ export const ChildHomeView: React.FC = () => {
     },
   ];
 
+  const [lastSpokenPhrase, setLastSpokenPhrase] = useState<string | null>(null);
+
   const handleTactileTileClick = (tile: typeof TACTILE_AAC_TILES[0]) => {
-    const label = t(tile.label);
     const speech = t(tile.speechText || tile.label);
+    setLastSpokenPhrase(speech);
     playChime('tap');
-    addToSentence({
-      id: tile.id,
-      label,
-      speechText: speech,
-      emoji: tile.emoji,
-      symbolId: tile.symbolId,
-      category: tile.category,
-      colorType: tile.colorType,
-      motorIndex: 0,
-    });
-    // Immediately speak the communicative phrase aloud
-    speak(speech);
+    // Immediately speak the communicative phrase aloud on the spot with force override
+    speak(speech, { force: true });
   };
 
   const isWidgetEnabled = (id: string) => {
@@ -798,12 +789,31 @@ export const ChildHomeView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Quick Speak Sentence Strip Preview */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-amber-600" />
-                    <span>{t('Instant Voice Output is active. Tap any tile above to speak aloud.')}</span>
+                {/* Quick Speak Feedback Strip */}
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold transition-all">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Zap className="w-4 h-4 text-amber-600 shrink-0" />
+                    {lastSpokenPhrase ? (
+                      <span className="text-amber-950 font-extrabold flex items-center gap-1.5 truncate">
+                        <span className="text-stone-500 font-semibold">{t('Spoke')}:</span> &ldquo;{lastSpokenPhrase}&rdquo;
+                      </span>
+                    ) : (
+                      <span>{t('Instant Voice Output is active. Tap any tile above to speak aloud.')}</span>
+                    )}
                   </div>
+                  {lastSpokenPhrase && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playChime('tap');
+                        speak(lastSpokenPhrase, { force: true });
+                      }}
+                      className="text-[11px] font-black text-amber-800 hover:text-amber-950 px-2.5 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 transition-all cursor-pointer shrink-0 ml-2"
+                      title={t('Repeat phrase')}
+                    >
+                      🔁 {t('Repeat')}
+                    </button>
+                  )}
                 </div>
               </div>
 
