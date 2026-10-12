@@ -822,7 +822,7 @@ export const AACView: React.FC = () => {
               <button 
                 type="button"
                 onClick={sentence.length > 0 ? speakSentence : undefined}
-                aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence)}` : 'Sentence builder. Tap words below to build sentence'}
+                aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence, settings.language)}` : 'Sentence builder. Tap words below to build sentence'}
                 className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                   sentence.length > 0 ? 'cursor-pointer hover:bg-[#EAE3D7]' : ''
                 }`}
@@ -867,7 +867,7 @@ export const AACView: React.FC = () => {
                     {sentence.length > 1 && (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-950 font-black text-xs shrink-0 animate-in fade-in select-none">
                         <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span>&quot;{autocorrectAacGrammar(sentence)}&quot;</span>
+                        <span>&quot;{autocorrectAacGrammar(sentence, settings.language)}&quot;</span>
                       </div>
                     )}
                   </>

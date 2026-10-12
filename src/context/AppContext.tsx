@@ -1776,7 +1776,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const speakSentence = async () => {
     if (sentence.length === 0) return;
-    const fullText = autocorrectAacGrammar(sentence);
+    const fullText = autocorrectAacGrammar(sentence, settings.language);
     recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
       childName: childProfile.name,
@@ -1798,7 +1798,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const saveSentenceAsQuickPhrase = () => {
     if (sentence.length === 0) return;
-    const phraseText = autocorrectAacGrammar(sentence);
+    const phraseText = autocorrectAacGrammar(sentence, settings.language);
     addFavoriteSentence({
       text: phraseText,
       speechText: phraseText,

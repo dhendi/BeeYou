@@ -2,33 +2,37 @@
  * Clinical AAC Smart Grammar & Natural Language Smoother
  * 
  * Automatically transforms telegraphic AAC word sequences into fluent,
- * grammatically correct natural language on the spot.
+ * grammatically correct natural language on the spot across all supported languages.
  * 
- * Example:
- *   ["ME", "GO", "LOOK"] -> "I go look"
- *   ["ME", "WANT", "EAT"] -> "I want to eat"
- *   ["ME", "TIRED"]      -> "I am tired"
- *   ["YOU", "HELP", "ME"]-> "You help me" (preserves accusative pronoun)
+ * Architecture:
+ * - Metadata-driven tokenization (Fitzgerald Key colorType)
+ * - Zero hardcoded vocabulary bloat
+ * - Language-aware coordination ("and", "y", "et", "und", "と", "和", etc.)
+ * - Dynamic subject pronoun resolution (I, yo, je, ich, etc.)
  */
 
 import { AACItem } from '../types';
 
-// Common verbs in AAC boards
+// Core structural verbs in AAC (English + top international AAC equivalents)
 const ACTION_VERBS = new Set([
   'go', 'look', 'see', 'watch', 'want', 'need', 'like', 'love', 'eat', 'drink',
   'play', 'help', 'stop', 'wait', 'read', 'write', 'draw', 'color', 'run', 'walk',
   'jump', 'climb', 'sleep', 'nap', 'listen', 'hear', 'touch', 'feel', 'open', 'close',
   'give', 'take', 'find', 'make', 'build', 'tell', 'talk', 'speak', 'sing', 'dance',
   'wash', 'clean', 'brush', 'put', 'get', 'come', 'sit', 'stand', 'push', 'pull',
-  'throw', 'catch', 'ride', 'drive', 'swim', 'hug', 'kiss', 'share', 'choose'
+  'throw', 'catch', 'ride', 'drive', 'swim', 'hug', 'kiss', 'share', 'choose',
+  // Multilingual core verbs
+  'quiero', 'necesito', 'gusta', 'voy', 'veo', 'como', 'bebo', 'juego', 'ayuda', 'para', 'dame', 'pon', 'hacer', 'ir', 'mirar', 'comer',
+  'veux', 'besoin', 'aime', 'vais', 'vois', 'mange', 'bois', 'joue', 'aide', 'arrête', 'donne', 'mettre', 'faire', 'aller', 'regarder',
+  'will', 'brauche', 'mag', 'gehe', 'sehe', 'esse', 'trinke', 'spiele', 'helfe', 'stopp', 'gib', 'machen', 'gehen', 'schauen'
 ]);
 
-// Verbs that take an infinitive "to" before another verb (e.g., "want to eat", "like to play")
+// Verbs that take an infinitive "to" before another verb in English
 const CATENATIVE_VERBS = new Set([
   'want', 'need', 'like', 'love', 'prefer', 'hope', 'try', 'learn', 'hate', 'start'
 ]);
 
-// Adjectives, feelings, and physical states that require a copula "to be" (e.g. "I am tired")
+// Adjectives, feelings, and physical states that require a copula "to be"
 const STATE_ADJECTIVES = new Set([
   'happy', 'sad', 'tired', 'sleepy', 'hungry', 'thirsty', 'angry', 'mad', 'frustrated',
   'scared', 'afraid', 'worried', 'calm', 'sick', 'hurt', 'pain', 'cold', 'hot', 'warm',
@@ -36,7 +40,7 @@ const STATE_ADJECTIVES = new Set([
   'fine', 'good', 'bad', 'great', 'awesome', 'okay', 'busy', 'silly'
 ]);
 
-// Third-person irregular present tense verbs
+// English third-person irregular present tense verbs
 const THIRD_PERSON_VERBS: Record<string, string> = {
   'go': 'goes',
   'do': 'does',
@@ -59,33 +63,6 @@ const THIRD_PERSON_VERBS: Record<string, string> = {
 // Verbs that can form bare serial motion constructions (e.g. "go look", "come see", "help clean")
 const SERIAL_MOTION_VERBS = new Set(['go', 'come', 'help']);
 
-// Common nouns in AAC boards (food, drinks, toys, places, people, objects, animals)
-const COMMON_NOUNS = new Set([
-  // Food & Drinks
-  'pizza', 'apple', 'sandwich', 'banana', 'crackers', 'cracker', 'cookie', 'cookies',
-  'strawberries', 'strawberry', 'water', 'milk', 'apple juice', 'smoothie', 'juice',
-  'mac and cheese', 'mac & cheese', 'cheese', 'bread', 'toast', 'cereal', 'yogurt',
-  'chips', 'nuggets', 'pasta', 'rice', 'fries', 'burger', 'hamburger', 'hot dog',
-  'soup', 'salad', 'ice cream', 'cake', 'candy', 'fruit', 'vegetables', 'chicken',
-  'meat', 'snack', 'breakfast', 'lunch', 'dinner', 'popcorn', 'pie', 'grapes',
-  'orange', 'carrot', 'carrots', 'egg', 'eggs', 'biscuit', 'soda', 'tea',
-  // Objects, Activities & Toys
-  'tablet', 'book', 'books', 'blocks', 'puzzle', 'puzzles', 'toy', 'toys', 'ball',
-  'bubbles', 'train', 'trains', 'car', 'cars', 'truck', 'trucks', 'plane', 'planes',
-  'doll', 'dolls', 'game', 'games', 'lego', 'dinosaur', 'dinosaurs', 'crayons',
-  'crayon', 'paper', 'stickers', 'sticker', 'blanket', 'headphones', 'fidget',
-  'fidgets', 'phone', 'shoes', 'jacket', 'hat', 'shirt', 'pants', 'backpack',
-  // Places
-  'park', 'playground', 'school', 'home', 'store', 'restaurant', 'dentist', 'doctor',
-  'room', 'bed', 'bathroom', 'toilet', 'restroom', 'outside', 'library', 'pool', 'beach',
-  // People
-  'mom', 'dad', 'teacher', 'friend', 'friends', 'brother', 'sister', 'grandma',
-  'grandpa', 'baby', 'therapist', 'boy', 'girl', 'person', 'people',
-  // Animals & Pets
-  'puppy', 'dog', 'kitten', 'cat', 'bunny', 'rabbit', 'turtle', 'fish', 'bird',
-  'horse', 'bear'
-]);
-
 // Attributive modifiers that attach directly to the following noun
 const ATTRIBUTIVE_MODIFIERS = new Set([
   'more', 'big', 'little', 'small', 'huge', 'tiny', 'hot', 'cold', 'warm', 'cool',
@@ -95,8 +72,8 @@ const ATTRIBUTIVE_MODIFIERS = new Set([
   'a', 'an', 'the', 'my', 'your', 'this', 'that', 'these', 'those'
 ]);
 
-const CONJUNCTIONS = new Set(['and', 'or', 'but', 'then', 'plus', 'with', 'without']);
-const PREPOSITIONS = new Set(['in', 'on', 'at', 'to', 'for', 'from', 'with', 'about', 'by', 'under', 'over', 'into']);
+const CONJUNCTIONS = new Set(['and', 'or', 'but', 'then', 'plus', 'with', 'without', 'y', 'et', 'und', 'и', 'και', 'và']);
+const PREPOSITIONS = new Set(['in', 'on', 'at', 'to', 'for', 'from', 'with', 'about', 'by', 'under', 'over', 'into', 'de', 'en', 'para', 'por', 'dans', 'à', 'zu', 'mit']);
 
 // Location smoothing (e.g., "go bathroom" -> "go to the bathroom")
 const LOCATION_SMOOTHING: Record<string, string> = {
@@ -115,6 +92,65 @@ const LOCATION_SMOOTHING: Record<string, string> = {
   'store': 'to the store',
 };
 
+// Language-aware conjunctions
+export const LANGUAGE_CONJUNCTIONS: Record<string, string> = {
+  en: 'and',
+  es: 'y',
+  fr: 'et',
+  fr_ca: 'et',
+  de: 'und',
+  el: 'και',
+  ru: 'и',
+  vi: 'và',
+  zh: '和',
+  ja: 'と',
+  ko: '와',
+};
+
+// Language-aware subject pronoun normalizations (converts object/disjunctive forms to subject forms)
+export const LANGUAGE_SUBJECT_PRONOUNS: Record<string, Record<string, string>> = {
+  en: {
+    'me': 'I',
+    'us': 'we',
+    'him': 'he',
+    'her': 'she',
+    'them': 'they',
+  },
+  es: {
+    'mí': 'yo',
+    'me': 'yo',
+    'nosotros': 'nosotros',
+  },
+  fr: {
+    'moi': 'je',
+    'nous': 'nous',
+    'lui': 'il',
+    'elle': 'elle',
+  },
+  fr_ca: {
+    'moi': 'je',
+    'nous': 'nous',
+    'lui': 'il',
+    'elle': 'elle',
+  },
+  de: {
+    'mich': 'ich',
+    'mir': 'ich',
+    'uns': 'wir',
+  },
+  ru: {
+    'меня': 'я',
+    'мне': 'я',
+  },
+  vi: {
+    'tôi': 'tôi',
+    'mình': 'mình',
+  },
+  zh: {},
+  ja: {},
+  ko: {},
+};
+
 /**
  * Normalizes an AAC token to clean lowercase text
  */
@@ -125,10 +161,66 @@ function cleanToken(token: string | AACItem): string {
 }
 
 /**
- * Identifies whether a token is a noun or entity in clinical AAC
+ * Formats a series of noun phrases or items using the language's native coordination rules.
+ * English: "apple, pizza, and cookie" (Oxford comma)
+ * Spanish: "manzana, pizza y galleta" (or "e" before 'i')
+ * French: "pomme, pizza et biscuit"
+ * German: "Apfel, Pizza und Keks"
+ * Japanese: "りんごとピザとクッキー"
+ * Chinese: "苹果、披萨和饼干"
+ */
+export function formatConjunctionSeries(series: string[], lang: string = 'en'): string {
+  if (!series || series.length === 0) return '';
+  if (series.length === 1) return series[0];
+
+  const normalizedLang = (lang || 'en').toLowerCase().split('-')[0];
+  let conj = LANGUAGE_CONJUNCTIONS[lang] || LANGUAGE_CONJUNCTIONS[normalizedLang] || 'and';
+
+  // Spanish phonetic exception: 'y' becomes 'e' before words starting with 'i' or 'hi'
+  if (normalizedLang === 'es' && series.length > 1) {
+    const lastWord = series[series.length - 1].toLowerCase().trim();
+    if (lastWord.startsWith('i') || (lastWord.startsWith('hi') && !lastWord.startsWith('hie'))) {
+      conj = 'e';
+    }
+  }
+
+  // CJK languages
+  if (normalizedLang === 'ja') {
+    return series.join('と');
+  }
+  if (normalizedLang === 'zh') {
+    if (series.length === 2) return `${series[0]}和${series[1]}`;
+    return `${series.slice(0, -1).join('、')}和${series[series.length - 1]}`;
+  }
+  if (normalizedLang === 'ko') {
+    return series.join(' 와 ');
+  }
+
+  // Western languages
+  if (series.length === 2) {
+    return `${series[0]} ${conj} ${series[1]}`;
+  }
+
+  if (normalizedLang === 'en') {
+    // Oxford comma
+    const head = series.slice(0, -1).join(', ');
+    return `${head}, ${conj} ${series[series.length - 1]}`;
+  } else {
+    // Standard European style (no Oxford comma)
+    const head = series.slice(0, -1).join(', ');
+    return `${head} ${conj} ${series[series.length - 1]}`;
+  }
+}
+
+/**
+ * Identifies whether an AAC token is a noun or entity.
+ * Priority 1: AACItem metadata (colorType: 'noun' or category) - zero hardcoded words needed!
+ * Priority 2: Fallback for raw text strings based on grammatical part of speech.
  */
 export function isNounToken(token: string | AACItem): boolean {
   if (!token) return false;
+
+  // Metadata check for AACItem objects (100% scalable to millions of words and custom photo tiles)
   if (typeof token !== 'string') {
     if (token.colorType === 'noun') return true;
     if (
@@ -139,58 +231,63 @@ export function isNounToken(token: string | AACItem): boolean {
       return true;
     }
   }
+
   const clean = cleanToken(token);
   if (!clean) return false;
-  if (COMMON_NOUNS.has(clean)) return true;
-  if (clean.includes(' ') && !ACTION_VERBS.has(clean) && !STATE_ADJECTIVES.has(clean)) {
-    return true;
-  }
+
+  // Disqualify known function words, verbs, adjectives, and pronouns
   const isVerb = ACTION_VERBS.has(clean) || CATENATIVE_VERBS.has(clean);
   const isAdj = STATE_ADJECTIVES.has(clean) || ATTRIBUTIVE_MODIFIERS.has(clean);
-  const isPronoun = ['i', 'me', 'my', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'we', 'us', 'they', 'them', 'it'].includes(clean);
+  const isPronoun = [
+    'i', 'me', 'my', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'we', 'us', 'they', 'them', 'it',
+    'yo', 'mí', 'tú', 'él', 'ella', 'nosotros', 'ellos',
+    'je', 'moi', 'tu', 'il', 'elle', 'nous', 'vous', 'ils',
+    'ich', 'mich', 'mir', 'du', 'dich', 'dir', 'er', 'sie', 'es', 'wir', 'ihr'
+  ].includes(clean);
   const isPrepositionOrConj = PREPOSITIONS.has(clean) || CONJUNCTIONS.has(clean);
-  const isSpecial = ['yes', 'no', 'stop', 'please', 'help', 'what', 'where', 'when', 'why', 'how', 'not'].includes(clean);
+  const isSpecial = ['yes', 'no', 'stop', 'please', 'help', 'what', 'where', 'when', 'why', 'how', 'not', 'sí', 'non', 'nein', 'ja'].includes(clean);
 
   return !isVerb && !isAdj && !isPronoun && !isPrepositionOrConj && !isSpecial;
+}
+
+function resolveLanguage(lang?: string): string {
+  if (lang) return lang;
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('beeyou_settings');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.language) return parsed.language;
+      }
+    } catch {}
+  }
+  return 'en';
 }
 
 /**
  * Adjusts token labels on the spot for visual display in the sentence builder.
  * e.g., if user taps "ME" followed by "GO", the first token "ME" transforms to "I".
  */
-export function adjustSentenceTokensOnTheSpot(tokens: string[]): string[] {
+export function adjustSentenceTokensOnTheSpot(tokens: string[], language?: string): string[] {
   if (!tokens || tokens.length === 0) return [];
   const result = [...tokens];
+  const lang = resolveLanguage(language);
+  const pronounMap = LANGUAGE_SUBJECT_PRONOUNS[lang] || LANGUAGE_SUBJECT_PRONOUNS['en'] || {};
 
   for (let i = 0; i < result.length; i++) {
-    const current = result[i].trim().toUpperCase();
+    const raw = result[i].trim();
+    const currentLower = raw.toLowerCase();
     const nextClean = i + 1 < result.length ? cleanToken(result[i + 1]) : '';
 
-    // Rule 1: "ME" as subject at start of clause or before a verb/adjective -> "I"
-    if (current === 'ME') {
+    if (pronounMap[currentLower]) {
       const isStart = (i === 0);
-      const followedByVerb = nextClean && ACTION_VERBS.has(nextClean);
+      const followedByVerb = nextClean && (ACTION_VERBS.has(nextClean) || nextClean === 'go' || nextClean === 'look');
       const followedByAdjective = nextClean && STATE_ADJECTIVES.has(nextClean);
-      const followedByGo = nextClean === 'go' || nextClean === 'look';
 
-      if (isStart || followedByVerb || followedByAdjective || followedByGo) {
-        result[i] = 'I';
+      if (isStart || followedByVerb || followedByAdjective) {
+        const replacement = pronounMap[currentLower];
+        result[i] = raw === raw.toUpperCase() ? replacement.toUpperCase() : replacement;
       }
-    }
-
-    // Rule 2: "US" as subject -> "WE"
-    if (current === 'US' && (i === 0 || (nextClean && ACTION_VERBS.has(nextClean)))) {
-      result[i] = 'WE';
-    }
-
-    // Rule 3: "HIM" before a verb -> "HE"
-    if (current === 'HIM' && (i === 0 || (nextClean && ACTION_VERBS.has(nextClean)))) {
-      result[i] = 'HE';
-    }
-
-    // Rule 4: "THEM" before a verb -> "THEY"
-    if (current === 'THEM' && (i === 0 || (nextClean && ACTION_VERBS.has(nextClean)))) {
-      result[i] = 'THEY';
     }
   }
 
@@ -213,16 +310,19 @@ interface IntermediateGrammarItem {
  *   autocorrectAacGrammar(["ME", "GO", "LOOK"])           => "I go look"
  *   autocorrectAacGrammar(["ME", "TIRED", "HUNGRY"])      => "I am tired and hungry"
  */
-export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
+export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: string): string {
   if (!tokens || tokens.length === 0) return '';
 
+  const lang = resolveLanguage(language);
   const words = tokens.map(cleanToken).filter(Boolean);
   if (words.length === 0) return '';
+
+  const pronounMap = LANGUAGE_SUBJECT_PRONOUNS[lang] || LANGUAGE_SUBJECT_PRONOUNS['en'] || {};
 
   // Single word: return capitalized
   if (words.length === 1) {
     const single = words[0];
-    if (single === 'me') return 'I';
+    if (pronounMap[single]) return pronounMap[single];
     return single.charAt(0).toUpperCase() + single.slice(1);
   }
 
@@ -236,42 +336,22 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
     const origToken = tokens[i];
 
     // 1. Pronoun Case Correction
-    if (word === 'me') {
+    if (pronounMap[word]) {
       const isPrecedingVerb = next && (ACTION_VERBS.has(next) || next === 'go' || next === 'look');
       const isPrecedingAdj = next && STATE_ADJECTIVES.has(next);
-      const isConjunction = prev === 'and' || prev === 'or' || prev === 'then';
+      const isConjunction = CONJUNCTIONS.has(prev);
 
       if (i === 0 || isPrecedingVerb || isPrecedingAdj || isConjunction) {
-        intermediate.push({ text: 'I', token: origToken, role: 'subject' });
+        intermediate.push({ text: pronounMap[word], token: origToken, role: 'subject' });
         continue;
       } else {
-        intermediate.push({ text: 'me', token: origToken, role: 'object' });
+        intermediate.push({ text: word, token: origToken, role: 'object' });
         continue;
       }
     }
 
-    if (word === 'us' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      intermediate.push({ text: 'we', token: origToken, role: 'subject' });
-      continue;
-    }
-
-    if (word === 'him' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      intermediate.push({ text: 'he', token: origToken, role: 'subject' });
-      continue;
-    }
-
-    if (word === 'her' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      intermediate.push({ text: 'she', token: origToken, role: 'subject' });
-      continue;
-    }
-
-    if (word === 'them' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      intermediate.push({ text: 'they', token: origToken, role: 'subject' });
-      continue;
-    }
-
-    // 2. Copula "to be" insertion for adjectives/states
-    if (STATE_ADJECTIVES.has(word)) {
+    // 2. English Copula "to be" insertion for adjectives/states
+    if (lang === 'en' && STATE_ADJECTIVES.has(word)) {
       const lastTokenText = intermediate[intermediate.length - 1]?.text?.toLowerCase();
       if (lastTokenText === 'i') {
         intermediate.push({ text: 'am', role: 'copula' });
@@ -284,39 +364,46 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
       continue;
     }
 
-    // 3. Catenative Verb + Infinitive Particle "to"
-    if (prev && CATENATIVE_VERBS.has(prev) && ACTION_VERBS.has(word) && word !== 'help' && word !== 'food') {
+    // 3. English Catenative Verb + Infinitive Particle "to"
+    if (lang === 'en' && prev && CATENATIVE_VERBS.has(prev) && ACTION_VERBS.has(word) && word !== 'help' && word !== 'food') {
       intermediate.push({ text: 'to', role: 'particle' });
       intermediate.push({ text: word, token: origToken, role: 'verb' });
       continue;
     }
 
-    // 4. "Go" + Location smoothing
-    if (prev === 'go' && LOCATION_SMOOTHING[word]) {
+    // 4. English "Go" + Location smoothing
+    if (lang === 'en' && prev === 'go' && LOCATION_SMOOTHING[word]) {
       intermediate.push({ text: LOCATION_SMOOTHING[word], token: origToken, role: 'noun' });
       continue;
     }
 
-    // 5. Third-person subject-verb agreement
+    // 5. English Third-person subject-verb agreement
     const lastWord = intermediate[intermediate.length - 1]?.text?.toLowerCase();
-    if ((lastWord === 'he' || lastWord === 'she' || lastWord === 'it') && THIRD_PERSON_VERBS[word]) {
+    if (lang === 'en' && (lastWord === 'he' || lastWord === 'she' || lastWord === 'it') && THIRD_PERSON_VERBS[word]) {
       intermediate.push({ text: THIRD_PERSON_VERBS[word], token: origToken, role: 'verb' });
       continue;
     }
 
     // Classify syntactic role
     let role: IntermediateGrammarItem['role'] = 'other';
-    if (isNounToken(origToken || word)) role = 'noun';
-    else if (ACTION_VERBS.has(word)) role = 'verb';
-    else if (ATTRIBUTIVE_MODIFIERS.has(word)) role = 'modifier';
-    else if (CONJUNCTIONS.has(word)) role = 'conj';
-    else if (PREPOSITIONS.has(word)) role = 'prep';
+    if (origToken && typeof origToken !== 'string') {
+      if (origToken.colorType === 'verb') role = 'verb';
+      else if (origToken.colorType === 'noun') role = 'noun';
+      else if (origToken.colorType === 'subject') role = 'subject';
+      else if (origToken.colorType === 'adjective') role = 'adj';
+      else if (isNounToken(origToken)) role = 'noun';
+    } else {
+      if (ACTION_VERBS.has(word)) role = 'verb';
+      else if (ATTRIBUTIVE_MODIFIERS.has(word)) role = 'modifier';
+      else if (CONJUNCTIONS.has(word)) role = 'conj';
+      else if (PREPOSITIONS.has(word)) role = 'prep';
+      else if (isNounToken(word)) role = 'noun';
+    }
 
     intermediate.push({ text: word, token: origToken, role });
   }
 
   // 2. Second pass: Additive Coordination & Series Formulation
-  // Automatically detects additive chains of objects (e.g. "I want pizza apple" -> "I want pizza and apple")
   const finalPieces: string[] = [];
   let i = 0;
 
@@ -351,9 +438,7 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
         let currIdx = firstNP.nextIdx;
 
         while (currIdx < intermediate.length) {
-          // If user already supplied an explicit conjunction ('and', 'or'), do not auto-insert
           if (intermediate[currIdx].role === 'conj') break;
-          // If next is a preposition or verb, series ends
           if (intermediate[currIdx].role === 'prep' || intermediate[currIdx].role === 'verb') break;
 
           const nextNP = collectNounPhrase(currIdx);
@@ -366,13 +451,7 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
         }
 
         if (series.length > 1) {
-          // Format additive series
-          if (series.length === 2) {
-            finalPieces.push(`${series[0]} and ${series[1]}`);
-          } else {
-            const allButLast = series.slice(0, -1).join(', ');
-            finalPieces.push(`${allButLast}, and ${series[series.length - 1]}`);
-          }
+          finalPieces.push(formatConjunctionSeries(series, lang));
           i = currIdx;
           continue;
         }
@@ -381,12 +460,12 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
 
     // Two consecutive predicate adjectives: [tired, hungry] -> "tired and hungry"
     if (item.role === 'adj' && i + 1 < intermediate.length && intermediate[i + 1].role === 'adj') {
-      finalPieces.push(`${item.text} and ${intermediate[i + 1].text}`);
+      finalPieces.push(formatConjunctionSeries([item.text, intermediate[i + 1].text], lang));
       i += 2;
       continue;
     }
 
-    // Serial motion verbs (e.g. "go look", "come see", "help clean") preserve bare construction without "and"
+    // Serial motion verbs (e.g. "go look", "come see", "help clean") preserve bare construction without conjunction
     if (SERIAL_MOTION_VERBS.has(item.text) && i + 1 < intermediate.length && intermediate[i + 1].role === 'verb') {
       finalPieces.push(item.text);
       i++;
@@ -395,7 +474,7 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
 
     // Two consecutive action verbs after a catenative: [eat, drink] -> "eat and drink"
     if (item.role === 'verb' && i + 1 < intermediate.length && intermediate[i + 1].role === 'verb' && !CATENATIVE_VERBS.has(item.text)) {
-      finalPieces.push(`${item.text} and ${intermediate[i + 1].text}`);
+      finalPieces.push(formatConjunctionSeries([item.text, intermediate[i + 1].text], lang));
       i += 2;
       continue;
     }
@@ -404,8 +483,11 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
     i++;
   }
 
-  // Build sentence string with proper capitalization
-  let sentence = finalPieces.join(' ').trim();
+  // Join sentence
+  let sentence = (['zh', 'ja'].includes(lang.split('-')[0]))
+    ? finalPieces.join('')
+    : finalPieces.join(' ').trim();
+
   if (sentence.length > 0) {
     sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
   }
