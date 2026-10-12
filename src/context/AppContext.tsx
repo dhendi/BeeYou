@@ -96,6 +96,7 @@ import {
   getOfflineCapableVoices,
   getBestSystemVoice
 } from '../utils/audio';
+import { autocorrectAacGrammar } from '../utils/aacGrammar';
 import { indexOfflineData } from '../utils/offlineStorage';
 import { 
   syncChildStatusToCaregiver, 
@@ -1666,7 +1667,25 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // AAC Methods
   const addToSentence = (item: AACItem) => {
     if (settings.soundEffects) playChime('tap');
-    setSentence((prev) => [...prev, item]);
+    setSentence((prev) => {
+      const updated = [...prev, item];
+      // On the spot: if first token is "ME" and followed by an action verb or state, transform "ME" -> "I"
+      if (updated.length >= 2 && updated[0].label.trim().toUpperCase() === 'ME') {
+        const nextWord = (updated[1].speechText || updated[1].label).trim().toLowerCase();
+        const actionVerbs = [
+          'go', 'look', 'see', 'watch', 'want', 'need', 'like', 'love', 'eat', 'drink',
+          'play', 'feel', 'help', 'sleep', 'read', 'draw', 'tired', 'happy', 'ready', 'sick', 'hurt'
+        ];
+        if (actionVerbs.includes(nextWord)) {
+          updated[0] = {
+            ...updated[0],
+            label: 'I',
+            speechText: 'I',
+          };
+        }
+      }
+      return updated;
+    });
     if (settings.autoSpeakSentence) {
       // Speak the tapped item immediately for motor reinforcement
       speak(item.speechText || item.label);
@@ -1757,15 +1776,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const speakSentence = async () => {
     if (sentence.length === 0) return;
-    const fullText = sentence
-      .map((item) => {
-        if (item.speechText) {
-          const tr = t(item.speechText);
-          if (tr !== item.speechText) return tr;
-        }
-        return t(item.label) || item.label;
-      })
-      .join(' ');
+    const fullText = autocorrectAacGrammar(sentence);
     recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
       childName: childProfile.name,
@@ -1787,7 +1798,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const saveSentenceAsQuickPhrase = () => {
     if (sentence.length === 0) return;
-    const phraseText = sentence.map((item) => item.speechText || item.label).join(' ');
+    const phraseText = autocorrectAacGrammar(sentence);
     addFavoriteSentence({
       text: phraseText,
       speechText: phraseText,

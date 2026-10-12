@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { GridStage, DwellMode, STORAGE_KEYS } from '../../types/aac';
 import { speakText, playChime } from '../../utils/audio';
+import { autocorrectAacGrammar, adjustSentenceTokensOnTheSpot } from '../../utils/aacGrammar';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -351,14 +352,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       Tap tiles below to build a sentence...
                     </span>
                   ) : (
-                    builtSentence.map((word, idx) => (
-                      <span 
-                        key={idx}
-                        className="px-2.5 py-1 rounded-xl bg-amber-100 border border-amber-300 text-amber-950 font-black text-xs"
-                      >
-                        {word}
-                      </span>
-                    ))
+                    <>
+                      {builtSentence.map((word, idx) => (
+                        <span 
+                          key={idx}
+                          className="px-2.5 py-1 rounded-xl bg-amber-100 border border-amber-300 text-amber-950 font-black text-xs"
+                        >
+                          {word}
+                        </span>
+                      ))}
+                      {builtSentence.length > 1 && (
+                        <span className="ml-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 flex items-center gap-1 shrink-0 animate-in fade-in">
+                          <Sparkles className="w-3 h-3 text-emerald-600" />
+                          <span>&quot;{autocorrectAacGrammar(builtSentence)}&quot;</span>
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -380,7 +389,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     type="button"
                     onClick={() => {
                       if (builtSentence.length === 0) return;
-                      const phrase = builtSentence.join(' ');
+                      const phrase = autocorrectAacGrammar(builtSentence);
                       handleTileTap('strip', phrase);
                     }}
                     className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs shadow-xs hover:from-emerald-600 hover:to-teal-600 active:scale-95 cursor-pointer flex items-center gap-1"
@@ -400,7 +409,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       type="button"
                       onClick={() => {
                         handleTileTap(tile.id, tile.label);
-                        setBuiltSentence((prev) => [...prev, tile.label]);
+                        setBuiltSentence((prev) => adjustSentenceTokensOnTheSpot([...prev, tile.label]));
                       }}
                       className={`h-16 rounded-2xl border-2 flex flex-col items-center justify-center p-1 cursor-pointer transition-all ${getColorClasses(tile.color)} ${
                         lastTappedId === tile.id ? 'translate-y-1 scale-95' : 'hover:-translate-y-0.5'

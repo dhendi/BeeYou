@@ -9,6 +9,7 @@ import { AACWordEditorModal } from './AACWordEditorModal';
 import { AACGuideModal } from './AACGuideModal';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
+import { autocorrectAacGrammar } from '../utils/aacGrammar';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
@@ -821,7 +822,7 @@ export const AACView: React.FC = () => {
               <button 
                 type="button"
                 onClick={sentence.length > 0 ? speakSentence : undefined}
-                aria-label={sentence.length > 0 ? `Speak sentence: ${sentence.map(s => s.label).join(' ')}` : 'Sentence builder. Tap words below to build sentence'}
+                aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence)}` : 'Sentence builder. Tap words below to build sentence'}
                 className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                   sentence.length > 0 ? 'cursor-pointer hover:bg-[#EAE3D7]' : ''
                 }`}
@@ -838,30 +839,38 @@ export const AACView: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  sentence.map((item, idx) => (
-                    <div
-                      key={`${item.id}-${idx}`}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
-                        item.colorType
-                      )}`}
-                    >
-                      <img
-                        src={resolveAacImageUrl(item)}
-                        alt=""
-                        aria-hidden="true"
-                        className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
-                        onError={(e) => {
-                          const target = e.currentTarget as HTMLElement;
-                          target.style.display = 'none';
-                          if (target.nextElementSibling) {
-                            (target.nextElementSibling as HTMLElement).style.display = 'inline';
-                          }
-                        }}
-                      />
-                      <span aria-hidden="true" className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
-                      <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
-                    </div>
-                  ))
+                  <>
+                    {sentence.map((item, idx) => (
+                      <div
+                        key={`${item.id}-${idx}`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
+                          item.colorType
+                        )}`}
+                      >
+                        <img
+                          src={resolveAacImageUrl(item)}
+                          alt=""
+                          aria-hidden="true"
+                          className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLElement;
+                            target.style.display = 'none';
+                            if (target.nextElementSibling) {
+                              (target.nextElementSibling as HTMLElement).style.display = 'inline';
+                            }
+                          }}
+                        />
+                        <span aria-hidden="true" className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
+                        <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
+                      </div>
+                    ))}
+                    {sentence.length > 1 && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-950 font-black text-xs shrink-0 animate-in fade-in select-none">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>&quot;{autocorrectAacGrammar(sentence)}&quot;</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </button>
 
