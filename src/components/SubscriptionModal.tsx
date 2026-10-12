@@ -31,6 +31,10 @@ export const SubscriptionModal: React.FC = () => {
 
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>(subscription.billingCycle || 'yearly');
 
+  // Deactivated: The user requested removal of this duplicate paywall modal
+  // since subscription & trial options are integrated into the onboarding flow and Caregiver Plans.
+  return null;
+
   if (!showPaywallModal) return null;
 
   const trialDaysLeft = getTrialDaysRemaining();
