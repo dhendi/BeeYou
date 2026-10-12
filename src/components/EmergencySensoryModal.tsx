@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, ShieldAlert, Volume2, VolumeX, Heart } from 'lucide-react';
 import { playSoundscape, stopSoundscape, setSoundscapeVolume } from '../utils/audio';
 import { SoundscapeId } from '../types';
+import { AccessibleTile } from './common/AccessibleTile';
 
 const EMERGENCY_AAC_CARDS = [
   { text: 'I cannot speak right now.', emoji: '🤐', color: '#1e40af' },
@@ -90,10 +91,12 @@ export const EmergencySensoryModal: React.FC = () => {
           </div>
         </div>
         <button
+          type="button"
           onClick={handleClose}
-          className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition-all cursor-pointer"
+          aria-label="Close emergency sensory mode"
+          className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition-all cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -105,8 +108,10 @@ export const EmergencySensoryModal: React.FC = () => {
       {/* 4 Large Emergency AAC Cards */}
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg mb-6">
         {EMERGENCY_AAC_CARDS.map((card) => (
-          <button
+          <AccessibleTile
             key={card.text}
+            variant="emergency"
+            label={card.text}
             onClick={() => handleCard(card.text)}
             className="relative rounded-3xl p-5 sm:p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all active:scale-95 border-2 border-white/10 hover:border-white/30"
             style={{ backgroundColor: card.color + '33', borderColor: spokenCard === card.text ? '#ffffff80' : undefined }}
@@ -114,11 +119,11 @@ export const EmergencySensoryModal: React.FC = () => {
             {spokenCard === card.text && (
               <div className="absolute inset-0 rounded-3xl bg-white/10 animate-pulse pointer-events-none" />
             )}
-            <span className="text-5xl sm:text-6xl">{card.emoji}</span>
+            <span aria-hidden="true" className="text-5xl sm:text-6xl">{card.emoji}</span>
             <p className="text-white font-black text-sm sm:text-base text-center leading-tight">
               {card.text}
             </p>
-          </button>
+          </AccessibleTile>
         ))}
       </div>
 

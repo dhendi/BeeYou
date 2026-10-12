@@ -354,25 +354,28 @@ export const CameraQRScannerModal: React.FC<CameraQRScannerModalProps> = ({
               {hasTorchSupport && (
                 <button
                   type="button"
+                  aria-label={torchEnabled ? 'Turn Off Flashlight' : 'Turn On Flashlight'}
+                  aria-pressed={torchEnabled}
                   onClick={toggleTorch}
-                  className={`p-2.5 rounded-2xl backdrop-blur-md border transition cursor-pointer ${
+                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl backdrop-blur-md border transition cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-400 focus-visible:outline-none ${
                     torchEnabled 
                       ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md' 
                       : 'bg-slate-900/70 text-slate-300 border-slate-700 hover:bg-slate-800'
                   }`}
                   title={torchEnabled ? 'Turn Off Flash' : 'Turn On Flash'}
                 >
-                  <Flashlight className="w-4 h-4" />
+                  <Flashlight className="w-4 h-4" aria-hidden="true" />
                 </button>
               )}
 
               <button
                 type="button"
+                aria-label="Switch between front and rear cameras"
                 onClick={handleFlipCamera}
-                className="p-2.5 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-700 hover:bg-slate-800 text-slate-300 transition cursor-pointer"
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-700 hover:bg-slate-800 text-slate-300 transition cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-400 focus-visible:outline-none"
                 title="Switch between front and rear cameras"
               >
-                <FlipHorizontal className="w-4 h-4" />
+                <FlipHorizontal className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           )}

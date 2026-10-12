@@ -544,55 +544,64 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     return (
                       <div
                         key={sym.id}
-                        onClick={() => {
-                          if (isAdded) {
-                            setToastMessage(`"${sym.label}" is already on your AAC board!`);
-                            playChime('tap');
-                            setTimeout(() => setToastMessage(null), 3000);
-                            return;
-                          }
-                          if (quickAddMode) {
-                            handleQuickAdd(sym);
-                          } else {
-                            handleSelect(sym);
-                          }
-                        }}
                         className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between gap-1.5 bg-white transition-all text-center relative group select-none ${
                           isAdded
                             ? 'opacity-85 border-emerald-400 bg-emerald-50/40 ring-2 ring-emerald-300'
                             : isSelected
                             ? 'border-indigo-600 ring-2 ring-indigo-400 shadow-md scale-[1.02]'
-                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs cursor-pointer active:scale-95'
+                            : 'border-slate-200 hover:border-indigo-400 hover:shadow-xs'
                         }`}
                       >
                         {/* Status Badges */}
                         {isAdded ? (
-                          <div className="absolute top-1.5 right-1.5 bg-emerald-600 text-white rounded-full p-0.5 shadow-xs">
-                            <Check className="w-3 h-3 stroke-[3]" />
+                          <div className="absolute top-1.5 right-1.5 bg-emerald-600 text-white rounded-full p-0.5 shadow-xs" aria-label="Already added">
+                            <Check className="w-3 h-3 stroke-[3]" aria-hidden="true" />
                           </div>
                         ) : (
                           <button
                             type="button"
+                            aria-label={`Quick add ${sym.label} directly to AAC board`}
                             onClick={(e) => handleQuickAdd(sym, e)}
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer z-10 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-400"
                             title="Add directly to AAC board"
                           >
-                            <Sparkles className="w-3 h-3" />
+                            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         )}
 
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1 bg-slate-50 rounded-xl">
-                          <img
-                            src={sym.imageUrl}
-                            alt={sym.label}
-                            className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-2xs"
-                            loading="lazy"
-                          />
-                        </div>
+                        {/* Main Select Button */}
+                        <button
+                          type="button"
+                          aria-label={`Select symbol ${sym.label} (${sym.colorType})`}
+                          onClick={() => {
+                            if (isAdded) {
+                              setToastMessage(`"${sym.label}" is already on your AAC board!`);
+                              playChime('tap');
+                              setTimeout(() => setToastMessage(null), 3000);
+                              return;
+                            }
+                            if (quickAddMode) {
+                              handleQuickAdd(sym);
+                            } else {
+                              handleSelect(sym);
+                            }
+                          }}
+                          className="w-full flex flex-col items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none rounded-xl"
+                        >
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center p-1 bg-slate-50 rounded-xl">
+                            <img
+                              src={sym.imageUrl}
+                              alt=""
+                              aria-hidden="true"
+                              className="max-w-full max-h-full object-contain pointer-events-none drop-shadow-2xs"
+                              loading="lazy"
+                            />
+                          </div>
 
-                        <span className="font-bold text-xs text-slate-800 line-clamp-1 w-full" title={t(sym.label)}>
-                          {t(sym.label)}
-                        </span>
+                          <span className="font-bold text-xs text-slate-800 line-clamp-1 w-full" title={t(sym.label)}>
+                            {t(sym.label)}
+                          </span>
+                        </button>
 
                         <div className="w-full flex items-center justify-between pt-1 border-t border-slate-100">
                           <span
@@ -613,11 +622,9 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
 
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelect(sym);
-                            }}
-                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                            aria-label={`Edit ${sym.label} title or color`}
+                            onClick={() => handleSelect(sym)}
+                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer p-1"
                             title="Customize title or color"
                           >
                             Edit

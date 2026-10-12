@@ -36,11 +36,13 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
 
         {/* Close X */}
         <button
+          type="button"
+          aria-label="Close routine celebration modal"
           onClick={dismissStickerCelebration}
-          className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
           title="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Celebration Header */}

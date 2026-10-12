@@ -3,7 +3,7 @@ import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { UserAgeGroup, DEFAULT_KID_FEATURES, DEFAULT_TEEN_FEATURES, DEFAULT_ADULT_FEATURES } from '../../types';
 import { playChime } from '../../utils/audio';
-import { Palette, FileJson, Download, Upload } from 'lucide-react';
+import { Palette, FileJson, Download, Upload, Check } from 'lucide-react';
 
 interface CaregiverSettingsTabProps {
   onShowNotification: (msg: string) => void;
@@ -188,30 +188,36 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           ].map((feat) => {
             const isChecked = enabledFeatures ? (enabledFeatures as any)[feat.key] !== false : true;
             return (
-              <div
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isChecked}
+                aria-label={`${feat.label}: ${isChecked ? 'Enabled' : 'Disabled'}. ${feat.desc}`}
                 key={feat.key}
                 onClick={() => {
                   toggleFeature(feat.key as any);
                   playChime('tap');
                 }}
-                className={`p-3 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
+                className={`w-full text-left p-3 min-h-[48px] rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                   isChecked ? 'border-amber-400 bg-white shadow-2xs' : 'border-slate-200 bg-slate-100/70 opacity-60'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">{feat.emoji}</span>
+                  <span className="text-xl" aria-hidden="true">{feat.emoji}</span>
                   <div>
                     <h4 className="text-xs font-black text-slate-800">{feat.label}</h4>
                     <p className="text-[11px] text-slate-500 font-medium">{feat.desc}</p>
                   </div>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={() => {}}
-                  className="w-4 h-4 text-amber-500 rounded cursor-pointer pointer-events-none"
-                />
-              </div>
+                <div
+                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
+                    isChecked ? 'bg-amber-500 border-amber-600 text-white' : 'bg-white border-slate-300'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </button>
             );
           })}
         </div>

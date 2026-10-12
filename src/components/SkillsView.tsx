@@ -151,23 +151,26 @@ export const SkillsView: React.FC = () => {
                 }`}
               >
                 <div className="flex items-start sm:items-center justify-between gap-3">
-                  <div
+                  <button
+                    type="button"
+                    aria-label={`Skill step ${idx + 1}: ${t(step.title)}. ${step.completed ? 'Completed' : 'Not completed'}`}
+                    aria-pressed={step.completed}
                     onClick={() => toggleSkillStep(selectedSkill.id, step.id)}
-                    className="flex items-start sm:items-center gap-3 flex-1 cursor-pointer select-none"
+                    className="flex items-start sm:items-center gap-3 flex-1 cursor-pointer select-none text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px]"
                   >
-                    <button className="text-purple-600 transition-transform hover:scale-110 mt-0.5 sm:mt-0">
+                    <span className="text-purple-600 transition-transform hover:scale-110 mt-0.5 sm:mt-0 shrink-0 pointer-events-none" aria-hidden="true">
                       {step.completed ? (
                         <CheckCircle2 className="w-7 h-7 fill-purple-500 text-white" />
                       ) : (
                         <Circle className="w-7 h-7 text-slate-300" />
                       )}
-                    </button>
+                    </span>
 
-                    <span className="text-3xl shrink-0">{step.emoji}</span>
+                    <span className="text-3xl shrink-0" aria-hidden="true">{step.emoji}</span>
 
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0" aria-hidden="true">
                           {idx + 1}
                         </span>
                         <h4
@@ -182,7 +185,7 @@ export const SkillsView: React.FC = () => {
                         {t(step.instruction)}
                       </p>
                     </div>
-                  </div>
+                  </button>
 
                   <div className="flex items-center gap-1.5 shrink-0">
                     {/* Speak Button */}
@@ -293,15 +296,17 @@ export const SkillsView: React.FC = () => {
             const isDone = totalCount > 0 && completedCount === totalCount;
 
             return (
-              <div
+              <button
+                type="button"
                 key={skill.id}
+                aria-label={`Skill: ${t(skill.title)}. ${totalCount} steps. ${isDone ? 'Completed' : `${completedCount} of ${totalCount} steps done`}`}
                 onClick={() => {
                   setActiveSkillId(skill.id);
                   playChime('tap');
                 }}
-                className="bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5"
+                className="w-full text-left bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               >
-                <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-4xl shrink-0 shadow-xs">
+                <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
                   {skill.emoji}
                 </div>
                 <div className="flex-1">
@@ -310,7 +315,7 @@ export const SkillsView: React.FC = () => {
                       {t(skill.category)}
                     </span>
                     <span className="flex items-center gap-1 text-[11px] font-bold text-amber-700">
-                      <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                      <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" aria-hidden="true" />
                       +{skill.starsReward} {t('Stars')}
                     </span>
                   </div>
@@ -330,7 +335,7 @@ export const SkillsView: React.FC = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

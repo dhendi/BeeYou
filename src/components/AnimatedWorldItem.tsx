@@ -960,17 +960,8 @@ export const AnimatedWorldItem: React.FC<AnimatedWorldItemProps> = ({
     }
   };
 
-  return (
-    <div
-      onClick={handleClick}
-      className={`relative inline-flex flex-col items-center justify-center select-none ${
-        sizeDimensions.wrapper
-      } ${interactive ? 'cursor-pointer active:scale-95 transition-transform' : ''} ${className}`}
-      style={{
-        transform: isReacting ? 'scale(1.12) translateY(-6px)' : undefined,
-        transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-      }}
-    >
+  const innerContent = (
+    <>
       {/* Floating Interactive Reaction Particles */}
       {particles.map((p) => (
         <span
@@ -986,7 +977,7 @@ export const AnimatedWorldItem: React.FC<AnimatedWorldItemProps> = ({
       ))}
 
       {/* Main Animated Vector Entity */}
-      <div className="w-full h-full relative z-10">{renderEntitySvg()}</div>
+      <div className="w-full h-full relative z-10 pointer-events-none">{renderEntitySvg()}</div>
 
       {/* Optional Soft Floor Shadow */}
       {showFloorShadow && (
@@ -998,6 +989,39 @@ export const AnimatedWorldItem: React.FC<AnimatedWorldItemProps> = ({
           }}
         />
       )}
+    </>
+  );
+
+  if (interactive) {
+    return (
+      <button
+        type="button"
+        aria-label={`Interactive item: ${itemId}`}
+        onClick={handleClick}
+        className={`relative inline-flex flex-col items-center justify-center select-none cursor-pointer active:scale-95 transition-transform bg-transparent border-0 p-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-2xl ${
+          sizeDimensions.wrapper
+        } ${className}`}
+        style={{
+          transform: isReacting ? 'scale(1.12) translateY(-6px)' : undefined,
+          transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
+      >
+        {innerContent}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={`relative inline-flex flex-col items-center justify-center select-none ${
+        sizeDimensions.wrapper
+      } ${className}`}
+      style={{
+        transform: isReacting ? 'scale(1.12) translateY(-6px)' : undefined,
+        transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      }}
+    >
+      {innerContent}
     </div>
   );
 };

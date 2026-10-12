@@ -66,17 +66,19 @@ export const OfflineIndicator: React.FC = () => {
     <>
       {/* Offline banner at bottom left */}
       {!isOnline && (
-        <div 
+        <button 
+          type="button"
+          aria-label="Offline Mode active. All AAC, Schedules, and Stories ready. Tap to inspect offline storage status."
           onClick={() => setShowModal(true)}
-          className="fixed bottom-4 left-4 z-50 flex items-center gap-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 text-xs font-bold shadow-xl transition-all active:scale-95 cursor-pointer border border-amber-400/40"
+          className="fixed bottom-4 left-4 z-50 flex items-center gap-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 min-h-[48px] text-xs font-bold shadow-xl transition-all active:scale-95 cursor-pointer border border-amber-400/40 focus-visible:ring-4 focus-visible:ring-amber-300 focus-visible:outline-none text-left"
         >
-          <span className="relative flex h-2.5 w-2.5">
+          <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
           </span>
-          <WifiOff className="w-4 h-4" />
+          <WifiOff className="w-4 h-4" aria-hidden="true" />
           <span>Offline Mode — All AAC, Schedules & Stories Ready</span>
-        </div>
+        </button>
       )}
 
       {/* Offline Status & Storage Inspection Modal */}

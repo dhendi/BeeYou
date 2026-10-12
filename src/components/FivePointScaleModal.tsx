@@ -72,28 +72,35 @@ export const FivePointScaleModal: React.FC = () => {
           <h2 className="text-xl font-black text-slate-800 dark:text-white">How do I feel right now?</h2>
         </div>
         <button
+          type="button"
+          aria-label="Close emotional scale modal"
           onClick={() => setShowFivePointModal(false)}
-          className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-all"
+          className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
-          <X className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+          <X className="w-5 h-5 text-slate-600 dark:text-slate-300" aria-hidden="true" />
         </button>
       </div>
 
       <div className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-3">
         {/* Thermometer bar */}
-        <div className="flex justify-between gap-1.5 mb-2">
+        <div className="flex justify-between gap-1.5 mb-2" role="group" aria-label="5-Point scale level selector">
           {fivePointSettings.levels.map((l) => {
             const emoji = getCleanLevelEmoji(l.level, l.emoji);
             return (
               <button
                 key={l.level}
+                type="button"
+                aria-label={`Level ${l.level}: ${l.label}`}
+                aria-pressed={selectedLevel === l.level}
                 onClick={() => handleSelect(l.level)}
-                className={`flex-1 h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-3 font-black text-lg ${l.color} ${
-                  selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-85 hover:opacity-100'
+                className={`flex-1 min-w-[48px] min-h-[56px] py-1 px-0.5 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-2 font-black focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${l.color} ${
+                  selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-90 hover:opacity-100'
                 }`}
               >
-                <span className="text-xl leading-none">{emoji}</span>
-                <span className={`text-[10px] font-black ${l.textColor} mt-0.5`}>{l.level}</span>
+                <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
+                <span className={`text-[10px] font-black ${l.textColor} mt-0.5 tracking-tight text-center leading-tight line-clamp-1`}>
+                  L{l.level} {l.label}
+                </span>
               </button>
             );
           })}
@@ -105,27 +112,30 @@ export const FivePointScaleModal: React.FC = () => {
           return (
             <button
               key={l.level}
+              type="button"
+              aria-label={`Level ${l.level}: ${l.label}. ${l.bodyFeelings}`}
+              aria-pressed={selectedLevel === l.level}
               onClick={() => handleSelect(l.level)}
-              className={`w-full text-left rounded-3xl p-4 border-2 transition-all cursor-pointer ${
+              className={`w-full min-h-[48px] text-left rounded-3xl p-4 border-2 transition-all cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                 selectedLevel === l.level
                   ? `${l.color} border-transparent shadow-md`
                   : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-slate-300'
               }`}
             >
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center text-3xl shadow-xs shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center text-3xl shadow-xs shrink-0" aria-hidden="true">
                   {emoji}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${l.color} ${l.textColor}`}>
-                      Level {l.level}
+                      Level {l.level}: {l.label}
                     </span>
                     <span className="font-black text-sm text-slate-800 dark:text-white">{l.label}</span>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-snug">{l.bodyFeelings}</p>
                 </div>
-                {selectedLevel === l.level && <CheckCircle2 className="w-5 h-5 text-white shrink-0 mt-0.5" />}
+                {selectedLevel === l.level && <CheckCircle2 className="w-5 h-5 text-white shrink-0 mt-0.5" aria-hidden="true" />}
               </div>
             </button>
           );
@@ -133,21 +143,23 @@ export const FivePointScaleModal: React.FC = () => {
 
         {/* Coping actions for selected level */}
         {selectedCfg && (
-          <div className="rounded-3xl bg-slate-900 p-5 space-y-3 animate-in fade-in">
+          <div className="rounded-3xl bg-slate-900 p-5 space-y-3 animate-in fade-in" role="region" aria-label={`Coping strategies for Level ${selectedCfg.level}`}>
             <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-              Helpful right now at Level {selectedCfg.level}:
+              Helpful right now at Level {selectedCfg.level} ({selectedCfg.label}):
             </p>
             {selectedCfg.actions.map((action, idx) => {
               const actEmoji = getCleanActionEmoji(action.emoji, idx === 0 ? '⭐' : '💡');
               return (
                 <button
                   key={idx}
+                  type="button"
+                  aria-label={`Strategy: ${action.label}`}
                   onClick={() => handleAction(action, selectedCfg.level)}
-                  className="w-full text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98"
+                  className="w-full min-h-[48px] text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
-                  <span className="text-2xl">{actEmoji}</span>
+                  <span className="text-2xl" aria-hidden="true">{actEmoji}</span>
                   <span className="font-bold text-white text-sm flex-1">{action.label}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                 </button>
               );
             })}

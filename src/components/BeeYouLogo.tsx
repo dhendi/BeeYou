@@ -217,10 +217,34 @@ export const BeeYouLogo: React.FC<BeeYouLogoProps> = ({
   };
   const taglineSize = size === 'sm' ? 'text-[9px]' : size === 'md' ? 'text-[10px]' : 'text-xs sm:text-sm';
 
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label="BeeYou home logo"
+        className={`inline-flex flex-col items-center select-none cursor-pointer hover:opacity-95 transition-opacity focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-2xl bg-transparent border-0 p-0 ${className}`}
+      >
+        <span className={dark ? 'bg-white/95 rounded-2xl px-2.5 py-1 shadow-sm' : ''}>
+          <img
+            src="/logo.png"
+            alt="BeeYou"
+            draggable={false}
+            className={`${heights[size]} w-auto object-contain`}
+          />
+        </span>
+        {showTagline && (
+          <span className={`${taglineSize} font-medium tracking-wide text-slate-500 dark:text-slate-300 mt-1`}>
+            You can be yourself here.
+          </span>
+        )}
+      </button>
+    );
+  }
+
   return (
     <div
-      onClick={onClick}
-      className={`inline-flex flex-col items-center select-none ${onClick ? 'cursor-pointer hover:opacity-95 transition-opacity' : ''} ${className}`}
+      className={`inline-flex flex-col items-center select-none ${className}`}
     >
       <span className={dark ? 'bg-white/95 rounded-2xl px-2.5 py-1 shadow-sm' : ''}>
         <img

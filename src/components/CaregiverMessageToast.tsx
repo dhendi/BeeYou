@@ -54,11 +54,13 @@ export const CaregiverMessageToast: React.FC = () => {
                 <span>Message from {senderName || 'Caregiver'}</span>
               </span>
               <button
+                type="button"
+                aria-label="Dismiss caregiver message"
                 onClick={dismissIncomingCaregiverMessage}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-2 min-w-[40px] min-h-[40px] rounded-xl hover:bg-slate-100 transition cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-rose-400 focus-visible:outline-none"
                 title="Dismiss"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 

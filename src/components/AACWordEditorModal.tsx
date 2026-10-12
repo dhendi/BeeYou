@@ -209,11 +209,13 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Close word editor modal"
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+            className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 

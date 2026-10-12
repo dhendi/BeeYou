@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ShieldAlert, Volume2, Lock, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
+import { AccessibleTile } from './common/AccessibleTile';
 
 export const SensorySafeModeOverlay: React.FC = () => {
   const { isSafeModeActive, deactivateSafeMode, speak } = useApp();
@@ -151,18 +152,18 @@ export const SensorySafeModeOverlay: React.FC = () => {
         {SURVIVAL_TILES.map((tile) => {
           const isSpoken = activeSpokenId === tile.id;
           return (
-            <button
-              type="button"
+            <AccessibleTile
               key={tile.id}
+              variant="emergency"
+              label={tile.text}
               onClick={() => handleTileTouch(tile)}
-              className={`w-full h-full rounded-3xl ${tile.colorBg} border-4 ${tile.colorBorder} ${tile.textColor} flex flex-col items-center justify-center p-4 sm:p-6 gap-2 sm:gap-4 transition-transform active:scale-95 cursor-pointer relative overflow-hidden shadow-2xl focus:outline-none focus:ring-4 focus:ring-white`}
+              className={`w-full h-full rounded-3xl ${tile.colorBg} border-4 ${tile.colorBorder} ${tile.textColor} flex flex-col items-center justify-center p-4 sm:p-6 gap-2 sm:gap-4 transition-transform active:scale-95 cursor-pointer relative overflow-hidden shadow-2xl focus-visible:ring-4 focus-visible:ring-white`}
               style={{ minHeight: '35vh' }}
-              aria-label={tile.text}
             >
               {isSpoken && (
                 <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none" />
               )}
-              <span className="text-6xl sm:text-7xl md:text-8xl select-none filter drop-shadow-md">
+              <span aria-hidden="true" className="text-6xl sm:text-7xl md:text-8xl select-none filter drop-shadow-md">
                 {tile.emoji}
               </span>
               <span className="text-xl sm:text-2xl md:text-4xl font-black text-center tracking-tight leading-snug drop-shadow-sm px-2">
@@ -170,11 +171,11 @@ export const SensorySafeModeOverlay: React.FC = () => {
               </span>
               {isSpoken && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-bold border border-white/30 animate-in fade-in">
-                  <Volume2 className="w-3.5 h-3.5" />
+                  <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Spoken</span>
                 </span>
               )}
-            </button>
+            </AccessibleTile>
           );
         })}
       </div>

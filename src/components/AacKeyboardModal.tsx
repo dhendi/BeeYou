@@ -100,13 +100,23 @@ export const AacKeyboardModal: React.FC = () => {
         </p>
         <div className="flex flex-col gap-1 shrink-0">
           {text && (
-            <button onClick={handleBackspace} className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 cursor-pointer">
-              <Delete className="w-4 h-4 text-slate-600" />
+            <button
+              type="button"
+              aria-label="Backspace delete character"
+              onClick={handleBackspace}
+              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none"
+            >
+              <Delete className="w-4 h-4 text-slate-600" aria-hidden="true" />
             </button>
           )}
           {text && (
-            <button onClick={handleClear} className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 cursor-pointer">
-              <Trash2 className="w-4 h-4 text-rose-500" />
+            <button
+              type="button"
+              aria-label="Clear all typed text"
+              onClick={handleClear}
+              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-rose-50 hover:bg-rose-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:outline-none"
+            >
+              <Trash2 className="w-4 h-4 text-rose-500" aria-hidden="true" />
             </button>
           )}
         </div>

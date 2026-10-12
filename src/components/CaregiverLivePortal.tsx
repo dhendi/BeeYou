@@ -215,11 +215,13 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
           <div className="flex items-center gap-3">
             {onBackToApp && !isCaregiverOnly && (
               <button
+                type="button"
+                aria-label="Back to main app dashboard"
                 onClick={onBackToApp}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
+                className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 title="Back to App"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" aria-hidden="true" />
               </button>
             )}
             <div>

@@ -23,6 +23,7 @@ import {
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
 import { t } from '../services/translator';
+import { AccessibleTile } from './common/AccessibleTile';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { VisualScheduleStep } from '../types';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -208,12 +209,14 @@ export const MyDayView: React.FC = () => {
       
       {/* 1. PLANS CHANGED ALERT BANNER (If Active) */}
       {plansChanged.active && (
-        <div
+        <button
+          type="button"
+          aria-label={`Important Plan Change. New Plan: ${plansChanged.newPlanTitle}. Tap to see new calm plan.`}
           onClick={() => setShowPlansChangedModal(true)}
-          className="bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in"
+          className="w-full text-left bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3">
-            <span className="text-3xl sm:text-4xl animate-bounce">🔄</span>
+            <span className="text-3xl sm:text-4xl animate-bounce" aria-hidden="true">🔄</span>
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
@@ -226,8 +229,8 @@ export const MyDayView: React.FC = () => {
               </h2>
             </div>
           </div>
-          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" />
-        </div>
+          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" aria-hidden="true" />
+        </button>
       )}
 
       {/* 2. TOP CONTROLS: CATEGORY FILTER & HELP */}
@@ -378,7 +381,10 @@ export const MyDayView: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
             {/* FIRST */}
-            <button
+            <AccessibleTile
+              variant="routine"
+              label={`First: ${t(currentRoutine.firstThen.first)}`}
+              completed={currentRoutine.firstThen.completedFirst}
               onClick={() => toggleFirstThen(currentRoutine.id, 'first')}
               className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedFirst
@@ -386,12 +392,12 @@ export const MyDayView: React.FC = () => {
                   : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
               }`}
             >
-              <div className="w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+              <div aria-hidden="true" className="w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0">
                 1
               </div>
-              <span className="text-3xl">{currentRoutine.firstThen.firstEmoji}</span>
+              <span aria-hidden="true" className="text-3xl">{currentRoutine.firstThen.firstEmoji}</span>
               <div className="flex-1">
-                <span className="text-[10px] font-black text-sky-700 uppercase tracking-wider block">
+                <span aria-hidden="true" className="text-[10px] font-black text-sky-700 uppercase tracking-wider block">
                   {t('First')}
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
@@ -399,14 +405,17 @@ export const MyDayView: React.FC = () => {
                 </span>
               </div>
               {currentRoutine.firstThen.completedFirst ? (
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 fill-emerald-200" />
+                <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 fill-emerald-200" />
               ) : (
-                <Circle className="w-6 h-6 text-stone-300" />
+                <Circle aria-hidden="true" className="w-6 h-6 text-stone-300" />
               )}
-            </button>
+            </AccessibleTile>
 
             {/* THEN */}
-            <button
+            <AccessibleTile
+              variant="routine"
+              label={`Then: ${t(currentRoutine.firstThen.then)}`}
+              completed={currentRoutine.firstThen.completedThen}
               onClick={() => toggleFirstThen(currentRoutine.id, 'then')}
               className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
                 currentRoutine.firstThen.completedThen
@@ -414,12 +423,12 @@ export const MyDayView: React.FC = () => {
                   : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
               }`}
             >
-              <div className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+              <div aria-hidden="true" className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
                 2
               </div>
-              <span className="text-3xl">{currentRoutine.firstThen.thenEmoji}</span>
+              <span aria-hidden="true" className="text-3xl">{currentRoutine.firstThen.thenEmoji}</span>
               <div className="flex-1">
-                <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider block">
+                <span aria-hidden="true" className="text-[10px] font-black text-purple-700 uppercase tracking-wider block">
                   {t('Then')}
                 </span>
                 <span className="font-black text-sm sm:text-base leading-tight">
@@ -427,11 +436,11 @@ export const MyDayView: React.FC = () => {
                 </span>
               </div>
               {currentRoutine.firstThen.completedThen ? (
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 fill-emerald-200" />
+                <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 fill-emerald-200" />
               ) : (
-                <Circle className="w-6 h-6 text-stone-300" />
+                <Circle aria-hidden="true" className="w-6 h-6 text-stone-300" />
               )}
-            </button>
+            </AccessibleTile>
           </div>
         </section>
       )}
@@ -646,161 +655,166 @@ export const MyDayView: React.FC = () => {
           {currentRoutine.steps.map((step, idx) => (
             <div
               key={step.id}
-              onClick={() => toggleRoutineStep(currentRoutine.id, step.id)}
-              className={`flex items-start sm:items-center justify-between p-3.5 sm:p-4 rounded-3xl border-2 transition-all active:scale-98 cursor-pointer select-none ${
+              className={`p-3.5 sm:p-4 rounded-3xl border-2 transition-all select-none ${
                 step.completed
                   ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 opacity-90'
-                  : 'bg-white dark:bg-slate-850 hover:bg-slate-50 border-slate-200 dark:border-slate-700 shadow-2xs'
+                  : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 shadow-2xs'
               }`}
             >
-              <div className="flex items-start sm:items-center gap-3 flex-1">
-                {/* Checkbox button */}
-                <button
-                  className="mt-0.5 sm:mt-0 text-emerald-600 transition-transform hover:scale-110"
-                  aria-label={step.completed ? 'Mark incomplete' : 'Mark complete'}
+              <div className="flex items-start sm:items-center justify-between gap-3">
+                <AccessibleTile
+                  variant="routine"
+                  label={t(step.title)}
+                  completed={step.completed}
+                  onClick={() => toggleRoutineStep(currentRoutine.id, step.id)}
+                  className="flex items-start sm:items-center gap-3 flex-1 text-left bg-transparent border-0 p-0 shadow-none hover:opacity-90 cursor-pointer min-h-[48px]"
                 >
-                  {step.completed ? (
-                    <CheckCircle2 className="w-7 h-7 fill-emerald-500 text-white" />
-                  ) : (
-                    <Circle className="w-7 h-7 text-slate-300" />
-                  )}
-                </button>
+                  {/* Checkbox indicator */}
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 sm:mt-0 text-emerald-600 transition-transform shrink-0"
+                  >
+                    {step.completed ? (
+                      <CheckCircle2 className="w-7 h-7 fill-emerald-500 text-white" />
+                    ) : (
+                      <Circle className="w-7 h-7 text-slate-300" />
+                    )}
+                  </span>
 
-                <span className="text-3xl shrink-0">{step.emoji}</span>
+                  <span aria-hidden="true" className="text-3xl shrink-0">{step.emoji}</span>
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] flex items-center justify-center shrink-0">
-                      {idx + 1}
-                    </span>
-                    <h3
-                      className={`font-black text-sm sm:text-base leading-tight ${
-                        step.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'
-                      }`}
-                    >
-                      {t(step.title)}
-                    </h3>
-                    {step.durationMin && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                        {step.durationMin}m
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span aria-hidden="true" className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {idx + 1}
                       </span>
+                      <h3
+                        className={`font-black text-sm sm:text-base leading-tight ${
+                          step.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'
+                        }`}
+                      >
+                        {t(step.title)}
+                      </h3>
+                      {step.durationMin && (
+                        <span aria-hidden="true" className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {step.durationMin}m
+                        </span>
+                      )}
+                    </div>
+
+                    {step.instruction && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-snug">
+                        {t(step.instruction)}
+                      </p>
+                    )}
+
+                    {step.sensoryNote && (
+                      <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md mt-1.5 w-fit">
+                        <Info aria-hidden="true" className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span>{t('Sensory tip:')} {t(step.sensoryNote)}</span>
+                      </div>
                     )}
                   </div>
+                </AccessibleTile>
 
-                  {step.instruction && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-snug">
-                      {t(step.instruction)}
-                    </p>
-                  )}
-
-                  {step.sensoryNote && (
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md mt-1.5 w-fit">
-                      <Info className="w-3 h-3 text-amber-600 shrink-0" />
-                      <span>{t('Sensory tip:')} {t(step.sensoryNote)}</span>
-                    </div>
-                  )}
-
-                  {/* Micro-Steps Breakdown */}
-                  {step.microSteps && step.microSteps.length > 0 && (
-                    <div 
-                      className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 space-y-1.5"
-                      onClick={(e) => e.stopPropagation()}
+                {/* Action buttons */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {step.audioDataUrl && (
+                    <button
+                      type="button"
+                      onClick={() => playParentVoice(step)}
+                      aria-label={`Listen to parent voice for ${step.title}`}
+                      className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
+                        playingAudioStepId === step.id
+                          ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
+                          : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
+                      }`}
+                      title="Listen to voice recording for this step"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1">
-                          <Wand2 className="w-3 h-3 text-purple-600" />
-                          <span>{t('Micro-Steps')} ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-purple-700 dark:text-purple-400">{t('Tap to check off')}</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                        {step.microSteps.map((ms) => {
-                          const isDone = completedMicroSteps[ms.id];
-                          return (
-                            <div
-                              key={ms.id}
-                              onClick={() => {
-                                setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
-                                playChime('tap');
-                              }}
-                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                                isDone
-                                  ? 'bg-purple-100/90 dark:bg-purple-900/60 border-purple-300 text-purple-900 line-through opacity-75'
-                                  : 'bg-white dark:bg-slate-900 hover:bg-purple-100/50 border-purple-200 dark:border-purple-700 text-purple-950 dark:text-purple-200'
-                              }`}
-                            >
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
-                                <span className="text-sm shrink-0">{ms.emoji}</span>
-                                <span className="truncate">{t(ms.title)}</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
-                                }}
-                                className="p-1 rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer"
-                                title="2-min micro-step timer"
-                              >
-                                <Timer className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                      <Mic aria-hidden="true" className="w-4 h-4 text-rose-600" />
+                      <span className="hidden sm:inline">{playingAudioStepId === step.id ? t('Playing...') : t('Voice')}</span>
+                    </button>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => startTimerForStep(step, true)}
+                    aria-label={`Start countdown timer for ${step.title}`}
+                    className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-800 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
+                    title={`Start countdown timer for ${step.title}`}
+                  >
+                    <Timer aria-hidden="true" className="w-4 h-4 text-sky-600" />
+                    <span className="hidden sm:inline">{t('Start Timer')}</span>
+                    <span className="sm:hidden">{t('Timer')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => speak(`${t(step.title)}. ${step.instruction ? t(step.instruction) : ''}`)}
+                    aria-label={`Speak step instructions for ${step.title}`}
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70"
+                    title="Hear step instructions"
+                  >
+                    <Volume2 aria-hidden="true" className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              {/* Action buttons */}
-              <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                {step.audioDataUrl && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playParentVoice(step);
-                    }}
-                    className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
-                      playingAudioStepId === step.id
-                        ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
-                        : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
-                    }`}
-                    title="Listen to voice recording for this step"
-                  >
-                    <Mic className="w-4 h-4 text-rose-600" />
-                    <span className="hidden sm:inline">{playingAudioStepId === step.id ? t('Playing...') : t('Voice')}</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startTimerForStep(step, true);
-                  }}
-                  className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-800 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
-                  title={`Start countdown timer for ${step.title}`}
+              {/* Micro-Steps Breakdown */}
+              {step.microSteps && step.microSteps.length > 0 && (
+                <div 
+                  className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 space-y-1.5"
                 >
-                  <Timer className="w-4 h-4 text-sky-600" />
-                  <span className="hidden sm:inline">{t('Start Timer')}</span>
-                  <span className="sm:hidden">{t('Timer')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    speak(`${t(step.title)}. ${step.instruction ? t(step.instruction) : ''}`);
-                  }}
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
-                  title="Hear step instructions"
-                >
-                  <Volume2 className="w-4 h-4" />
-                </button>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1">
+                      <Wand2 aria-hidden="true" className="w-3 h-3 text-purple-600" />
+                      <span>{t('Micro-Steps')} ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-purple-700 dark:text-purple-400">{t('Tap to check off')}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {step.microSteps.map((ms) => {
+                      const isDone = completedMicroSteps[ms.id];
+                      return (
+                        <div
+                          key={ms.id}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all min-h-[44px] ${
+                            isDone
+                              ? 'bg-purple-100/90 dark:bg-purple-900/60 border-purple-300 text-purple-900 line-through opacity-75'
+                              : 'bg-white dark:bg-slate-900 hover:bg-purple-100/50 border-purple-200 dark:border-purple-700 text-purple-950 dark:text-purple-200'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
+                              playChime('tap');
+                            }}
+                            aria-label={`Micro-step: ${ms.title}.${isDone ? 'Completed' : 'Not completed'}`}
+                            aria-pressed={isDone}
+                            className="flex items-center gap-1.5 min-w-0 flex-1 text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none"
+                          >
+                            <span aria-hidden="true" className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
+                            <span aria-hidden="true" className="text-sm shrink-0">{ms.emoji}</span>
+                            <span className="truncate">{t(ms.title)}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
+                            }}
+                            aria-label={`Start 2-min timer for micro-step ${ms.title}`}
+                            className="p-1 min-w-[32px] min-h-[32px] rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none"
+                            title="2-min micro-step timer"
+                          >
+                            <Timer aria-hidden="true" className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

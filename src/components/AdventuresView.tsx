@@ -532,17 +532,19 @@ export const AdventuresView: React.FC = () => {
       {activeTab === 'adventures' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {adventures.map((adventure) => (
-            <div
+            <button
+              type="button"
               key={adventure.id}
+              aria-label={`Adventure: ${t(adventure.title)}. ${adventure.steps.length} steps. ${t(adventure.summary)}`}
               onClick={() => {
                 setActiveAdventureId(adventure.id);
                 setAdventureSubTab('steps');
                 setCurrentStepIndex(0);
                 playChime('tap');
               }}
-              className="bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5"
+              className="w-full text-left bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
-              <div className="w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-4xl shrink-0 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
                 {adventure.emoji}
               </div>
               <div className="flex-1">
@@ -569,22 +571,24 @@ export const AdventuresView: React.FC = () => {
                   ) : null}
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {socialStories.map((story) => (
-            <div
+            <button
+              type="button"
               key={story.id}
+              aria-label={`Social Story: ${t(story.title)}. ${story.pages.length} pages.`}
               onClick={() => {
                 setActiveStoryId(story.id);
                 setCurrentPageIndex(0);
                 playChime('tap');
               }}
-              className="bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5"
+              className="w-full text-left bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
-              <div className="w-16 h-16 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-4xl shrink-0 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
                 {story.emoji}
               </div>
               <div className="flex-1">
@@ -599,10 +603,10 @@ export const AdventuresView: React.FC = () => {
                 </p>
                 <div className="mt-3 text-xs font-bold text-indigo-700 flex items-center gap-1">
                   <span>{t('Read story')}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}

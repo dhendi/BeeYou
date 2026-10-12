@@ -822,17 +822,20 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                     Sample Schedule Steps (Tap to check off)
                   </span>
                   {sampleSteps.map((step) => (
-                    <div
+                    <button
+                      type="button"
                       key={step.id}
+                      aria-label={`Sample step: ${step.title}, ${step.duration} minutes. ${step.completed ? 'Completed' : 'Not completed'}`}
+                      aria-pressed={step.completed}
                       onClick={() => handleToggleSampleStep(step.id)}
-                      className={`flex items-center justify-between p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`w-full flex items-center justify-between p-3 min-h-[48px] rounded-2xl border-2 transition-all cursor-pointer text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                         step.completed
                           ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 line-through opacity-80'
                           : 'bg-slate-50 dark:bg-slate-800 hover:bg-white border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{step.emoji}</span>
+                        <span className="text-2xl" aria-hidden="true">{step.emoji}</span>
                         <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                           {step.title}
                         </span>
@@ -841,11 +844,11 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                         <span className="text-[11px] font-bold text-slate-500 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700">
                           {step.duration}m
                         </span>
-                        <span className="text-sm">
+                        <span className="text-sm" aria-hidden="true">
                           {step.completed ? '✅' : '⬜'}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 

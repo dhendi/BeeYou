@@ -246,10 +246,12 @@ export const DecisionWheelModal: React.FC = () => {
                 onKeyDown={(e) => e.key === 'Enter' && addOption()}
               />
               <button
+                type="button"
+                aria-label="Add option to decision wheel"
                 onClick={addOption}
-                className="px-3 py-2 rounded-xl bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-all"
+                className="px-3.5 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-all focus-visible:ring-4 focus-visible:ring-indigo-400 focus-visible:outline-none"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>

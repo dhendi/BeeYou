@@ -36,6 +36,8 @@ import { ContextualHelpButton } from './ContextualHelpButton';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
+import { AccessibleTile } from './common/AccessibleTile';
+import { getGrammaticalCategoryLabel } from './AACView';
 
 export const ChildHomeView: React.FC = () => {
   const {
@@ -219,16 +221,18 @@ export const ChildHomeView: React.FC = () => {
       <div className="bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-3xl p-3 sm:p-4 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Friendly Greeting & Status */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div 
+          <button 
+            type="button"
+            aria-label="Open About Me ID card"
             onClick={() => {
               setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="w-11 h-11 rounded-2xl bg-[#F5EFE6] border-2 border-[#E0D8CB] text-2xl flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0"
+            className="w-11 h-11 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] border-2 border-[#E0D8CB] text-2xl flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="About Me ID Card"
           >
-            🐝
-          </div>
+            <span aria-hidden="true">🐝</span>
+          </button>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
@@ -236,7 +240,7 @@ export const ChildHomeView: React.FC = () => {
               </h2>
               {userPersona === 'child' && (
                 <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#F5B865]" />
+                  <Sparkles className="w-3 h-3 text-[#F5B865]" aria-hidden="true" />
                   {worldState.stars} {t('Coins')}
                 </span>
               )}
@@ -258,62 +262,71 @@ export const ChildHomeView: React.FC = () => {
           >
             <button
               type="button"
-              className="px-4 py-2.5 rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0"
+              aria-label="Customize and reorder dashboard widgets"
+              className="px-4 py-2.5 min-h-[48px] rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               title="Customize and reorder dashboard widgets (Protected)"
             >
-              <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" />
+              <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" aria-hidden="true" />
               <span>{t('Customize Dashboard')} ✏️</span>
             </button>
           </CaregiverLockShield>
 
           {/* Quick Tools Hub Button */}
           <button
+            type="button"
+            aria-label="Open Tools Hub"
             onClick={() => {
               setShowToolsHubModal(true);
               playChime('tap');
             }}
-            className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+            className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Open Tools Hub"
           >
-            <span className="text-base">🧰</span>
+            <span className="text-base" aria-hidden="true">🧰</span>
           </button>
 
           {/* Morning Brief (if enabled) */}
           {enabledFeatures?.morningBrief !== false && (
             <button
+              type="button"
+              aria-label="Open Morning Brief"
               onClick={() => {
                 setShowMorningBrief(true);
                 playChime('tap');
               }}
-              className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+              className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               title="Open Morning Brief"
             >
-              <Sun className="w-4 h-4 text-[#E2A44E]" />
+              <Sun className="w-4 h-4 text-[#E2A44E]" aria-hidden="true" />
             </button>
           )}
 
           {/* Caregiver Alert / Connect */}
           <button
+            type="button"
+            aria-label="Caregiver Pairing and Connect"
             onClick={() => {
               setShowCaregiverModal(true);
               playChime('tap');
             }}
-            className="p-2.5 rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0"
+            className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Caregiver Pairing & Connect"
           >
-            <Heart className="w-4 h-4 text-[#D57B7B]" />
+            <Heart className="w-4 h-4 text-[#D57B7B]" aria-hidden="true" />
           </button>
         </div>
       </div>
 
       {/* 1. PLANS CHANGED BANNER (If Active) */}
       {plansChanged.active && (
-        <div
+        <button
+          type="button"
+          aria-label={`Plans changed. New Plan: ${t(plansChanged.newPlanTitle)}. Tap to see calm plan.`}
           onClick={() => setShowPlansChangedModal(true)}
-          className="bg-amber-100/95 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in"
+          className="w-full text-left bg-amber-100/95 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3">
-            <span className="text-3xl sm:text-4xl animate-bounce">🔄</span>
+            <span className="text-3xl sm:text-4xl animate-bounce" aria-hidden="true">🔄</span>
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
@@ -326,8 +339,8 @@ export const ChildHomeView: React.FC = () => {
               </h2>
             </div>
           </div>
-          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" />
-        </div>
+          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" aria-hidden="true" />
+        </button>
       )}
 
       {/* 2. MAIN WORKSPACE: 2-Column with Silicone AAC Tray OR Full-Width Bento Grid */}
@@ -345,16 +358,18 @@ export const ChildHomeView: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
-                    <div 
+                    <button 
+                      type="button"
+                      aria-label="Open About Me profile card"
                       onClick={() => {
                         setShowAboutMeModal(true);
                         playChime('tap');
                       }}
-                      className="w-12 h-12 rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] font-black text-xl flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0"
+                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] font-black text-xl flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                       title="About Me ID Card"
                     >
-                      🐝
-                    </div>
+                      <span aria-hidden="true">🐝</span>
+                    </button>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none">
                         {t('Hi')}, {childProfile.name}! 🐝
@@ -366,11 +381,13 @@ export const ChildHomeView: React.FC = () => {
                   </div>
 
                   <button
+                    type="button"
+                    aria-label="Edit and customize dashboard layout"
                     onClick={() => {
                       setShowDashboardCustomizer(true);
                       playChime('tap');
                     }}
-                    className="p-2.5 rounded-2xl bg-[#F5EFE6] hover:bg-white text-[#4A2F0F] transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-[#E0D8CB] shrink-0 active:scale-95"
+                    className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] hover:bg-white text-[#4A2F0F] transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-[#E0D8CB] shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                     title="Edit & customize dashboard layout"
                   >
                     <SlidersHorizontal className="w-4 h-4" />
@@ -658,13 +675,15 @@ export const ChildHomeView: React.FC = () => {
 
             case 'adventure_spotlight':
               return todaysAdventure ? (
-                <div
+                <button
+                  type="button"
                   key={widget.id}
+                  aria-label={`Life adventure prep: ${t(todaysAdventure.title)}`}
                   onClick={() => setChildView('adventures')}
-                  className="p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3 cursor-pointer active:scale-98 transition-all col-span-1"
+                  className="w-full text-left p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3 cursor-pointer active:scale-98 transition-all col-span-1 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl p-2 bg-[#F5EFE6] border border-[#E0D8CB] rounded-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                    <span className="text-3xl p-2 bg-[#F5EFE6] border border-[#E0D8CB] rounded-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
                       {todaysAdventure.emoji}
                     </span>
                     <div>
@@ -679,8 +698,8 @@ export const ChildHomeView: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-[#8C7E72] shrink-0" />
-                </div>
+                  <ArrowRight className="w-5 h-5 text-[#8C7E72] shrink-0" aria-hidden="true" />
+                </button>
               ) : null;
 
             case 'evening_reflection':
@@ -739,16 +758,20 @@ export const ChildHomeView: React.FC = () => {
                         key={tile.id}
                         className="aspect-square rounded-[24px] bg-[#E4DDD0] p-1 shadow-[inset_0_2px_5px_rgba(0,0,0,0.12)] flex items-center justify-center"
                       >
-                        <button
-                          type="button"
+                        <AccessibleTile
+                          variant="aac"
+                          label={t(tile.label)}
+                          speechText={t(tile.speechText || tile.label)}
+                          category={getGrammaticalCategoryLabel(tile.colorType)}
                           onClick={() => handleTactileTileClick(tile)}
                           className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
                           title={t(tile.speechText || tile.label)}
                         >
-                          <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform relative">
+                          <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform relative pointer-events-none">
                             <img
                               src={resolveAacImageUrl(tile)}
                               alt=""
+                              aria-hidden="true"
                               className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
                               loading="lazy"
                               onError={(e) => {
@@ -759,14 +782,17 @@ export const ChildHomeView: React.FC = () => {
                                 }
                               }}
                             />
-                            <span className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
+                            <span aria-hidden="true" className="hidden text-3xl sm:text-4xl items-center justify-center select-none pointer-events-none">
                               {tile.emoji}
                             </span>
                           </div>
                           <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
                             {t(tile.label)}
                           </span>
-                        </button>
+                          <span aria-hidden="true" className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-black/5 text-stone-600 mt-0.5">
+                            {getGrammaticalCategoryLabel(tile.colorType)}
+                          </span>
+                        </AccessibleTile>
                       </div>
                     ))}
                   </div>

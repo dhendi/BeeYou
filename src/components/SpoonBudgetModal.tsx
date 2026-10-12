@@ -95,10 +95,12 @@ export const SpoonBudgetModal: React.FC = () => {
           <h2 className="text-xl font-black text-slate-800">Daily Energy Budget 🥄</h2>
         </div>
         <button
+          type="button"
+          aria-label="Close daily energy budget modal"
           onClick={() => setShowSpoonModal(false)}
-          className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+          className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
-          <X className="w-4 h-4 text-slate-600" />
+          <X className="w-5 h-5 text-slate-600" aria-hidden="true" />
         </button>
       </div>
 
@@ -114,12 +116,15 @@ export const SpoonBudgetModal: React.FC = () => {
             </div>
 
             {/* Spoon picker */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center" role="group" aria-label="Initial daily spoon count selector">
               {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
                 <button
                   key={n}
+                  type="button"
+                  aria-label={`${n} spoons`}
+                  aria-pressed={selectedSpoons === n}
                   onClick={() => setSelectedSpoons(n)}
-                  className={`w-12 h-12 rounded-2xl text-lg font-black border-2 transition-all cursor-pointer ${
+                  className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl text-lg font-black border-2 transition-all cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                     selectedSpoons === n
                       ? 'bg-amber-400 border-amber-500 text-white shadow-md scale-110'
                       : 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
@@ -131,7 +136,7 @@ export const SpoonBudgetModal: React.FC = () => {
             </div>
 
             <div className="text-center space-y-2">
-              <div className="text-5xl">{'🥄'.repeat(Math.min(selectedSpoons, 8))}{selectedSpoons > 8 ? '...' : ''}</div>
+              <div className="text-5xl" aria-hidden="true">{'🥄'.repeat(Math.min(selectedSpoons, 8))}{selectedSpoons > 8 ? '...' : ''}</div>
               <p className="text-sm font-bold text-slate-600">
                 {selectedSpoons <= 3 ? '😔 Low day — be gentle with yourself.' :
                  selectedSpoons <= 6 ? '😐 Moderate — pick activities carefully.' :
@@ -141,8 +146,9 @@ export const SpoonBudgetModal: React.FC = () => {
             </div>
 
             <button
+              type="button"
               onClick={handleStartDay}
-              className="w-full py-4 rounded-3xl bg-amber-500 hover:bg-amber-600 text-white font-black text-lg shadow-md cursor-pointer active:scale-95 transition-all"
+              className="w-full min-h-[52px] py-4 rounded-3xl bg-amber-500 hover:bg-amber-600 text-white font-black text-lg shadow-md cursor-pointer active:scale-95 transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
               Start My Day with {selectedSpoons} Spoons 🥄
             </button>
@@ -152,14 +158,24 @@ export const SpoonBudgetModal: React.FC = () => {
         {(phase === 'tracker' || todayEntry) && current && (
           <div className="space-y-5">
             {/* Energy Bar */}
-            <div className="rounded-3xl border-2 border-slate-200 p-4 bg-slate-50">
+            <div className="rounded-3xl border-2 border-slate-200 p-4 bg-slate-50" role="region" aria-label="Energy budget summary">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-500">Energy Remaining</span>
-                <span className={`font-black text-2xl ${getBatteryColor(remaining, current.totalSpoons)}`}>
-                  {remaining}/{current.totalSpoons} 🥄
-                </span>
+                <div>
+                  <span className="text-xs font-black uppercase tracking-widest text-slate-500 block">Energy Remaining</span>
+                  <span className="text-xs font-bold text-slate-600">
+                    {pct > 60 ? '🟢 High Energy' : pct > 30 ? '🟡 Moderate Energy' : remaining > 0 ? '🔴 Low Energy' : '⚠️ Empty / Rest Needed'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className={`font-black text-2xl ${getBatteryColor(remaining, current.totalSpoons)}`}>
+                    {remaining} / {current.totalSpoons} 🥄
+                  </span>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    {remaining} Spoons Remaining
+                  </p>
+                </div>
               </div>
-              <div className="h-4 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-4 bg-slate-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={remaining} aria-valuemin={0} aria-valuemax={current.totalSpoons} aria-label={`${remaining} spoons out of ${current.totalSpoons} remaining`}>
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     pct > 60 ? 'bg-green-400' : pct > 30 ? 'bg-amber-400' : 'bg-red-500'
@@ -181,15 +197,17 @@ export const SpoonBudgetModal: React.FC = () => {
                 {TASK_PRESETS.map((task) => (
                   <button
                     key={task.label}
+                    type="button"
+                    aria-label={`Add activity: ${task.label}, cost ${task.cost} spoon${task.cost > 1 ? 's' : ''}`}
                     onClick={() => handleAddTask(task)}
                     disabled={remaining === 0}
-                    className="flex items-center gap-2 p-2.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-left cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-98"
+                    className="flex items-center gap-2 p-2.5 min-h-[48px] rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-left cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-98 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                   >
-                    <span className="text-xl">{task.emoji}</span>
+                    <span className="text-xl" aria-hidden="true">{task.emoji}</span>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-700 leading-tight truncate">{task.label}</p>
                       <p className="text-[10px] font-bold text-slate-400">
-                        {'🥄'.repeat(task.cost)} {task.cost} spoon{task.cost > 1 ? 's' : ''}
+                        <span aria-hidden="true">{'🥄'.repeat(task.cost)}</span> {task.cost} spoon{task.cost > 1 ? 's' : ''}
                       </p>
                     </div>
                   </button>
@@ -204,14 +222,18 @@ export const SpoonBudgetModal: React.FC = () => {
                 <div className="space-y-2">
                   {current.activityLog.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-slate-200">
-                      <span className="text-xl">{item.emoji}</span>
+                      <span className="text-xl" aria-hidden="true">{item.emoji}</span>
                       <span className="flex-1 text-sm font-bold text-slate-700">{item.label}</span>
-                      <span className="text-xs font-bold text-slate-400">{'🥄'.repeat(item.cost)}</span>
+                      <span className="text-xs font-bold text-slate-400" aria-label={`Cost: ${item.cost} spoons`}>
+                        <span aria-hidden="true">{'🥄'.repeat(item.cost)}</span> ({item.cost})
+                      </span>
                       <button
+                        type="button"
+                        aria-label={`Remove activity ${item.label}`}
                         onClick={() => handleRemoveTask(idx)}
-                        className="text-slate-300 hover:text-red-400 transition-colors cursor-pointer ml-1"
+                        className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors cursor-pointer ml-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -221,8 +243,9 @@ export const SpoonBudgetModal: React.FC = () => {
 
             {/* Reset for tomorrow */}
             <button
+              type="button"
               onClick={() => { setPhase('checkin'); }}
-              className="w-full py-3 rounded-2xl border border-slate-200 text-slate-500 font-bold text-sm cursor-pointer hover:bg-slate-50 transition-all"
+              className="w-full min-h-[48px] py-3 rounded-2xl border border-slate-200 text-slate-500 font-bold text-sm cursor-pointer hover:bg-slate-50 transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
               🔄 Reset & Start a New Check-in
             </button>

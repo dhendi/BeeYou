@@ -365,10 +365,12 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
           <div className="flex items-center gap-2">
             <ContextualHelpButton topic="device_connection" label="How pairing works" variant="pill" />
             <button
+              type="button"
+              aria-label="Close caregiver connect modal"
               onClick={onClose}
-              className="p-2 rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+              className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-2xl hover:bg-stone-200/70 text-slate-400 hover:text-slate-700 transition cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -817,11 +819,12 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                   {emergencyContact && (
                     <button
                       type="button"
+                      aria-label="Remove support contact"
                       onClick={handleRemoveSupportContact}
-                      className="px-3 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs cursor-pointer"
+                      className="px-3 py-2.5 min-w-[48px] min-h-[44px] flex items-center justify-center rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs cursor-pointer focus-visible:ring-4 focus-visible:ring-rose-400 focus-visible:outline-none"
                       title="Remove contact"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                   )}
                 </div>

@@ -331,10 +331,12 @@ export const Rewards: React.FC = () => {
               const progressFraction = Math.min(1, badge.currentCount / badge.targetCount);
 
               return (
-                <div
+                <button
+                  type="button"
                   key={badge.id}
+                  aria-label={`Badge: ${badge.title}. ${badge.description}. ${badge.isUnlocked ? 'Earned' : `In progress: ${badge.currentCount} of ${badge.targetCount}`}`}
                   onClick={() => handleInspectBadge(badge)}
-                  className={`p-4 rounded-3xl border-2 transition-all cursor-pointer active:scale-98 relative overflow-hidden flex flex-col justify-between ${
+                  className={`w-full text-left p-4 rounded-3xl border-2 transition-all cursor-pointer active:scale-98 relative overflow-hidden flex flex-col justify-between focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px] ${
                     badge.isUnlocked
                       ? isSelected
                         ? 'bg-amber-50/90 border-amber-500 ring-3 ring-amber-300 shadow-md'
@@ -352,6 +354,7 @@ export const Rewards: React.FC = () => {
                           ? 'bg-gradient-to-br from-amber-100 to-yellow-200 border border-amber-300'
                           : 'bg-slate-100 border border-slate-200 grayscale'
                       }`}
+                      aria-hidden="true"
                     >
                       {badge.emoji}
                     </div>
@@ -359,18 +362,18 @@ export const Rewards: React.FC = () => {
                     <div className="flex flex-col items-end">
                       {badge.isUnlocked ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-2xs">
-                          <Check className="w-3 h-3 text-emerald-600 stroke-3" />
+                          <Check className="w-3 h-3 text-emerald-600 stroke-3" aria-hidden="true" />
                           <span>Earned</span>
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-500 bg-slate-100 flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-slate-400" />
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-500 bg-slate-100 flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-slate-400" aria-hidden="true" />
                           <span>In Progress</span>
                         </span>
                       )}
 
                       <span className="text-[10px] font-bold text-amber-700 flex items-center gap-0.5 mt-1">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" aria-hidden="true" />
                         <span>+{badge.rewardStars} Stars</span>
                       </span>
                     </div>
@@ -393,7 +396,7 @@ export const Rewards: React.FC = () => {
                         {badge.currentCount} / {badge.targetCount}
                       </span>
                     </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden" role="progressbar" aria-valuenow={badge.currentCount} aria-valuemin={0} aria-valuemax={badge.targetCount} aria-label={`Badge progress: ${badge.currentCount} of ${badge.targetCount}`}>
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           badge.isUnlocked ? 'bg-emerald-500' : 'bg-amber-400'
@@ -402,7 +405,7 @@ export const Rewards: React.FC = () => {
                       />
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -496,15 +499,18 @@ export const Rewards: React.FC = () => {
                   const isEquipped = childProfile.activeSticker === sticker.emoji;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={sticker.id}
+                      aria-label={`Sticker: ${sticker.stickerName}. Routine: ${sticker.routineTitle}. ${isEquipped ? 'Currently wearing on profile.' : 'Tap to wear on profile.'}`}
+                      aria-pressed={isEquipped}
                       onClick={() => handleEquipSticker({
                         id: sticker.id,
                         name: sticker.stickerName,
                         emoji: sticker.emoji,
                         description: sticker.description,
                       })}
-                      className={`p-4 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative ${
+                      className={`w-full p-4 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px] ${
                         isEquipped
                           ? 'bg-white border-indigo-500 ring-4 ring-indigo-200 shadow-md'
                           : 'bg-white hover:bg-indigo-50/50 border-indigo-200/80 shadow-xs'
@@ -516,7 +522,7 @@ export const Rewards: React.FC = () => {
                         </span>
                       )}
 
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-100 to-indigo-100 border border-indigo-100 flex items-center justify-center text-4xl shadow-xs my-2">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-100 to-indigo-100 border border-indigo-100 flex items-center justify-center text-4xl shadow-xs my-2" aria-hidden="true">
                         {sticker.emoji}
                       </div>
 
@@ -536,18 +542,17 @@ export const Rewards: React.FC = () => {
                         <span className="text-[10px] font-semibold text-amber-700 block">
                           ⭐ +{sticker.starsAwarded} Stars • {sticker.earnedAt}
                         </span>
-                        <button
-                          type="button"
-                          className={`w-full py-1.5 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
+                        <span
+                          className={`block w-full py-1.5 rounded-xl font-black text-[11px] transition-all ${
                             isEquipped
                               ? 'bg-emerald-600 text-white'
                               : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-900'
                           }`}
                         >
                           {isEquipped ? '✓ Wearing' : 'Wear on Profile'}
-                        </button>
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -580,12 +585,14 @@ export const Rewards: React.FC = () => {
               {ROUTINE_STICKER_REWARDS.filter(
                 (def) => !earnedStickers.some((es) => es.stickerName === def.stickerName)
               ).map((lockedDef) => (
-                <div
+                <button
+                  type="button"
                   key={lockedDef.routineId}
+                  aria-label={`Locked sticker: ${lockedDef.stickerName}. Finish ${lockedDef.routineTitlePattern} routine to earn.`}
                   onClick={() => setChildView('my-day')}
-                  className="p-3 bg-slate-50 hover:bg-sky-50/60 rounded-2xl border-2 border-dashed border-slate-300 hover:border-sky-300 flex items-center gap-3 transition-all cursor-pointer"
+                  className="w-full text-left p-3 min-h-[48px] bg-slate-50 hover:bg-sky-50/60 rounded-2xl border-2 border-dashed border-slate-300 hover:border-sky-300 flex items-center gap-3 transition-all cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-slate-200/80 text-2xl flex items-center justify-center shrink-0 grayscale opacity-75">
+                  <div className="w-12 h-12 rounded-xl bg-slate-200/80 text-2xl flex items-center justify-center shrink-0 grayscale opacity-75" aria-hidden="true">
                     {lockedDef.emoji}
                   </div>
                   <div className="flex-1 overflow-hidden">
@@ -599,8 +606,8 @@ export const Rewards: React.FC = () => {
                       Rewards: +{lockedDef.starsAward} Stars 🌟
                     </span>
                   </div>
-                  <Lock className="w-4 h-4 text-slate-400 shrink-0" />
-                </div>
+                  <Lock className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
+                </button>
               ))}
             </div>
           </div>
@@ -609,7 +616,7 @@ export const Rewards: React.FC = () => {
           <div className="space-y-3">
             <div className="border-b border-slate-100 pb-2">
               <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
+                <Sparkles className="w-4 h-4 text-indigo-600" aria-hidden="true" />
                 <span>General Flair & Collectible Stickers</span>
               </h4>
               <p className="text-xs text-slate-500 font-medium">
@@ -623,10 +630,14 @@ export const Rewards: React.FC = () => {
                 const isEquipped = childProfile.activeSticker === sticker.emoji;
 
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={sticker.id}
+                    disabled={!unlocked}
+                    aria-label={`Flair sticker: ${sticker.name}. ${sticker.description}. ${!unlocked ? 'Locked' : isEquipped ? 'Currently wearing.' : 'Tap to wear.'}`}
+                    aria-pressed={isEquipped}
                     onClick={() => handleEquipSticker(sticker)}
-                    className={`p-3.5 rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative ${
+                    className={`w-full p-3.5 min-h-[48px] rounded-3xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 relative focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none disabled:cursor-not-allowed ${
                       isEquipped
                         ? 'bg-indigo-50 border-indigo-500 ring-3 ring-indigo-300 shadow-sm'
                         : unlocked
@@ -640,7 +651,7 @@ export const Rewards: React.FC = () => {
                       </span>
                     )}
 
-                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-4xl shadow-xs my-2">
+                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-4xl shadow-xs my-2" aria-hidden="true">
                       {sticker.emoji}
                     </div>
 
@@ -655,24 +666,23 @@ export const Rewards: React.FC = () => {
 
                     <div className="mt-2.5 w-full">
                       {unlocked ? (
-                        <button
-                          type="button"
-                          className={`w-full py-1.5 rounded-xl font-black text-[11px] transition-all cursor-pointer ${
+                        <span
+                          className={`block w-full py-1.5 rounded-xl font-black text-[11px] transition-all ${
                             isEquipped
                               ? 'bg-emerald-600 text-white'
                               : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-900'
                           }`}
                         >
                           {isEquipped ? 'Equipped' : 'Wear on Profile'}
-                        </button>
+                        </span>
                       ) : (
                         <span className="w-full py-1.5 rounded-xl font-bold text-[10px] text-slate-400 bg-slate-100 flex items-center justify-center gap-1">
-                          <Lock className="w-3 h-3" />
+                          <Lock className="w-3 h-3" aria-hidden="true" />
                           <span>Locked</span>
                         </span>
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

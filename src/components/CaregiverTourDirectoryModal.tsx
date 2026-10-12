@@ -122,13 +122,15 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {filteredTours.map((sec) => (
-                <div
+                <button
+                  type="button"
                   key={sec.id}
+                  aria-label={`Guide: ${sec.title}. ${sec.description}. ${sec.steps.length} interactive steps.`}
                   onClick={() => handlePick(sec.id)}
-                  className="p-3.5 sm:p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-white dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-start justify-between gap-3 group shadow-2xs"
+                  className="w-full text-left p-3.5 sm:p-4 min-h-[48px] rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-white dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-start justify-between gap-3 group shadow-2xs focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 flex items-center justify-center text-xl shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 flex items-center justify-center text-xl shrink-0" aria-hidden="true">
                       {sec.emoji}
                     </div>
                     <div className="space-y-0.5">
@@ -144,10 +146,10 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                     </div>
                   </div>
 
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-amber-500 group-hover:text-white transition shrink-0 mt-1">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-amber-500 group-hover:text-white transition shrink-0 mt-1" aria-hidden="true">
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>

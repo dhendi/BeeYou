@@ -190,14 +190,15 @@ export const CopingToolkitModal: React.FC = () => {
             </div>
           </div>
           <button
+            type="button"
             onClick={() => {
               stopSoundscape();
               setShowCopingToolkit(false);
             }}
-            className="p-2 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 active:scale-95 transition-all cursor-pointer"
-            aria-label="Close toolkit"
+            className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 active:scale-95 transition-all cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            aria-label="Close calm and coping toolkit"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -618,8 +619,11 @@ export const CopingToolkitModal: React.FC = () => {
                   const isLocked = item.isPremium && !isPremium;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={item.id}
+                      aria-label={`Soundscape: ${item.name}. ${item.description}. ${isPlaying ? 'Currently playing. Tap to stop.' : isLocked ? 'Premium sound. Tap to unlock.' : 'Tap to play.'}`}
+                      aria-pressed={isPlaying}
                       onClick={() => {
                         if (isLocked) {
                           triggerUpgrade(`Unlock ${item.name} & Full Sensory Room Library`);
@@ -631,7 +635,7 @@ export const CopingToolkitModal: React.FC = () => {
                           playSoundscape(item.id, soundVolume);
                         }
                       }}
-                      className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                      className={`w-full text-left p-3 min-h-[48px] rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                         isPlaying
                           ? 'border-teal-500 bg-teal-50/80 shadow-md ring-2 ring-teal-300'
                           : isLocked
@@ -639,9 +643,9 @@ export const CopingToolkitModal: React.FC = () => {
                           : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-xs'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-start justify-between gap-2 mb-1.5 w-full">
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0">
+                          <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0" aria-hidden="true">
                             {item.emoji}
                           </span>
                           <div>
@@ -651,7 +655,7 @@ export const CopingToolkitModal: React.FC = () => {
                               </h4>
                               {item.isPremium ? (
                                 <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
-                                  <Crown className="w-2.5 h-2.5" />
+                                  <Crown className="w-2.5 h-2.5" aria-hidden="true" />
                                   <span>{t('Premium')}</span>
                                 </span>
                               ) : (
@@ -670,16 +674,16 @@ export const CopingToolkitModal: React.FC = () => {
                         <div>
                           {isLocked ? (
                             <span className="p-1.5 rounded-xl bg-amber-100 text-amber-800 flex items-center gap-1 text-[11px] font-bold">
-                              <Lock className="w-3.5 h-3.5" />
+                              <Lock className="w-3.5 h-3.5" aria-hidden="true" />
                             </span>
                           ) : isPlaying ? (
                             <span className="px-2 py-1 rounded-xl bg-teal-600 text-white flex items-center gap-1 text-[11px] font-black animate-pulse">
-                              <Volume2 className="w-3.5 h-3.5" />
+                              <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                               <span>{t('Playing')}</span>
                             </span>
                           ) : (
                             <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold">
-                              <Play className="w-3.5 h-3.5 fill-current" />
+                              <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
                               <span>{t('Play')}</span>
                             </span>
                           )}
@@ -689,7 +693,7 @@ export const CopingToolkitModal: React.FC = () => {
                       <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
                         {t(item.description)}
                       </p>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -712,10 +716,12 @@ export const CopingToolkitModal: React.FC = () => {
             ].map((need, idx) => (
               <button
                 key={idx}
+                type="button"
+                aria-label={`Speak phrase: ${need.text}`}
                 onClick={() => speak(t(need.text))}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               >
-                <span>{need.emoji}</span>
+                <span aria-hidden="true">{need.emoji}</span>
                 <span>{t(need.text)}</span>
               </button>
             ))}

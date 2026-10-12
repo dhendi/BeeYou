@@ -299,10 +299,12 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Close routine customizer modal"
             onClick={onClose}
-            className="p-2 rounded-2xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
+            className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-2xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -483,22 +485,27 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       </button>
                       {/* ✨ Magic Breakdown */}
                       <button type="button"
+                        aria-label={st.microSteps ? 'Remove micro-steps' : 'Break step into micro-steps'}
                         onClick={() => st.microSteps ? handleRemoveMicroSteps(idx) : handleBreakdown(idx)}
-                        className={`p-1 rounded-md cursor-pointer transition-colors ${st.microSteps ? 'text-purple-600 hover:text-red-500' : 'text-slate-400 hover:text-purple-600'}`}
+                        className={`p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-md cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none ${st.microSteps ? 'text-purple-600 hover:text-red-500' : 'text-slate-400 hover:text-purple-600'}`}
                         title={st.microSteps ? 'Remove micro-steps' : '✨ Break this into micro-steps'}>
-                        <Wand2 className="w-4 h-4" />
+                        <Wand2 className="w-4 h-4" aria-hidden="true" />
                       </button>
                       {/* 🎤 Voice Recording */}
                       {!st.audioDataUrl ? (
                         recordingStepIdx === idx ? (
-                          <button type="button" onClick={handleStopRecord}
-                            className="p-1 rounded-md text-red-500 animate-pulse cursor-pointer" title="Stop recording">
-                            <Square className="w-4 h-4" />
+                          <button type="button"
+                            aria-label="Stop recording voice clip"
+                            onClick={handleStopRecord}
+                            className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-md text-red-500 animate-pulse cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none" title="Stop recording">
+                            <Square className="w-4 h-4" aria-hidden="true" />
                           </button>
                         ) : (
-                          <button type="button" onClick={() => handleStartRecord(idx)}
-                            className="p-1 rounded-md text-slate-400 hover:text-rose-500 cursor-pointer" title="Record voice clip for this step">
-                            <Mic className="w-4 h-4" />
+                          <button type="button"
+                            aria-label="Record voice clip for this step"
+                            onClick={() => handleStartRecord(idx)}
+                            className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-md text-slate-400 hover:text-rose-500 cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none" title="Record voice clip for this step">
+                            <Mic className="w-4 h-4" aria-hidden="true" />
                           </button>
                         )
                       ) : (

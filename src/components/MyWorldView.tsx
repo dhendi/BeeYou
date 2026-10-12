@@ -273,23 +273,25 @@ export const MyWorldView: React.FC = () => {
                     )}
 
                     {/* Real Animated Entity Component */}
-                    <div
+                    <button
+                      type="button"
+                      aria-label={`Interact with ${item.name}`}
                       onClick={() => {
                         setSelectedPlacedId(isSelected ? null : placed.id);
                         handleInteractWithItem(item.id, item.name);
                       }}
-                      className="cursor-pointer active:scale-95 transition-all group-hover:scale-105"
+                      className="cursor-pointer active:scale-95 transition-all group-hover:scale-105 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-2xl bg-transparent border-0 p-0"
                       title={`Tap ${item.name} to interact`}
                     >
                       <AnimatedWorldItem
                         itemId={item.id}
                         size="lg"
-                        interactive={true}
+                        interactive={false}
                         showFloorShadow={true}
                         reduceMotion={settings.reduceMotion}
                         onInteract={() => handleInteractWithItem(item.id, item.name)}
                       />
-                    </div>
+                    </button>
 
                     {/* Interactive Name Pill */}
                     <button
@@ -363,17 +365,20 @@ export const MyWorldView: React.FC = () => {
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <div
-                        className="w-20 h-20 bg-gradient-to-b from-slate-50 to-slate-100 rounded-2xl p-1.5 flex items-center justify-center border border-slate-200/80 shadow-inner group hover:border-teal-300 transition-colors cursor-pointer"
+                      <button
+                        type="button"
+                        aria-label={`Preview animation for ${item.name}`}
+                        onClick={() => handleInteractWithItem(item.id, item.name)}
+                        className="w-20 h-20 bg-gradient-to-b from-slate-50 to-slate-100 rounded-2xl p-1.5 flex items-center justify-center border border-slate-200/80 shadow-inner group hover:border-teal-300 transition-colors cursor-pointer focus-visible:ring-4 focus-visible:ring-teal-400 focus-visible:outline-none"
                         title="Tap to preview animation and sounds"
                       >
                         <AnimatedWorldItem
                           itemId={item.id}
                           size="md"
-                          interactive={true}
+                          interactive={false}
                           reduceMotion={settings.reduceMotion}
                         />
-                      </div>
+                      </button>
                       <div className="flex flex-col items-end gap-1.5">
                         <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                           {item.category}

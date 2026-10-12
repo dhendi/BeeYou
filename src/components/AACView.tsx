@@ -10,6 +10,19 @@ import { AACGuideModal } from './AACGuideModal';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { t } from '../services/translator';
+import { AccessibleTile } from './common/AccessibleTile';
+
+export const getGrammaticalCategoryLabel = (colorType: AACItem['colorType']): string => {
+  switch (colorType) {
+    case 'subject': return 'Person';
+    case 'verb': return 'Verb';
+    case 'noun': return 'Noun';
+    case 'adjective': return 'Descriptor';
+    case 'social': return 'Social';
+    case 'emergency': return 'Alert';
+    default: return 'Word';
+  }
+};
 
 const AAC_COACH_STEPS: CoachMarkStep[] = [
   {
@@ -701,9 +714,11 @@ export const AACView: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               {/* Sentence Display Area (Debossed Silicone Slot) */}
-              <div 
+              <button 
+                type="button"
                 onClick={sentence.length > 0 ? speakSentence : undefined}
-                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors ${
+                aria-label={sentence.length > 0 ? `Speak sentence: ${sentence.map(s => s.label).join(' ')}` : 'Sentence builder. Tap words below to build sentence'}
+                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                   sentence.length > 0 ? 'cursor-pointer hover:bg-[#EAE3D7]' : ''
                 }`}
                 title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
@@ -729,6 +744,7 @@ export const AACView: React.FC = () => {
                       <img
                         src={resolveAacImageUrl(item)}
                         alt=""
+                        aria-hidden="true"
                         className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
                         onError={(e) => {
                           const target = e.currentTarget as HTMLElement;
@@ -738,12 +754,12 @@ export const AACView: React.FC = () => {
                           }
                         }}
                       />
-                      <span className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
+                      <span aria-hidden="true" className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
                       <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
                     </div>
                   ))
                 )}
-              </div>
+              </button>
 
               {/* Controls: Backspace, Clear, Speak, Save, Collapse */}
               <div className="flex items-center gap-1.5 shrink-0">
@@ -766,11 +782,13 @@ export const AACView: React.FC = () => {
                       <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button
+                      type="button"
                       onClick={saveSentenceAsQuickPhrase}
-                      className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block"
+                      className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                       title="Save to quick phrases"
+                      aria-label="Save current sentence to quick phrases"
                     >
-                      <BookmarkPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <BookmarkPlus className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
                     </button>
                   </>
                 )}
@@ -1235,7 +1253,8 @@ export const AACView: React.FC = () => {
                       fav.isParentPinned ? 'border-amber-300/90 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700'
                     }`}
                   >
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         const spoken = t(fav.speechText || fav.text);
                         speak(spoken);
@@ -1251,8 +1270,9 @@ export const AACView: React.FC = () => {
                           motorIndex: 0,
                         });
                       }}
-                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-xl"
                       title="Tap to speak sentence aloud"
+                      aria-label={`Speak favorite phrase: ${t(fav.speechText || fav.text)}`}
                     >
                       <span className="text-3xl sm:text-4xl p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform">
                         {fav.emoji || '💬'}
@@ -1276,7 +1296,7 @@ export const AACView: React.FC = () => {
                           <span className="text-slate-400">{t('Tap to speak')}</span>
                         </div>
                       </div>
-                    </div>
+                    </button>
 
                     <div className="flex items-center gap-1 shrink-0">
                       <button
@@ -1401,8 +1421,11 @@ export const AACView: React.FC = () => {
                 onTouchStart={() => handleLongPressStart(item)}
                 onTouchEnd={handleLongPressEnd}
               >
-                <button
-                  type="button"
+                <AccessibleTile
+                  variant="aac"
+                  label={t(item.label)}
+                  speechText={item.speechText ? t(item.speechText) : undefined}
+                  category={getGrammaticalCategoryLabel(item.colorType)}
                   onClick={() => handleTileClick(item)}
                   className={`w-full h-full flex flex-col items-center p-2 ${
                     activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
@@ -1426,6 +1449,7 @@ export const AACView: React.FC = () => {
                     <img
                       src={resolveAacImageUrl(item)}
                       alt=""
+                      aria-hidden="true"
                       className="w-full h-full object-contain rounded-lg pointer-events-none"
                       loading="lazy"
                       onError={(e) => {
@@ -1436,7 +1460,7 @@ export const AACView: React.FC = () => {
                         }
                       }}
                     />
-                    <span className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
+                    <span aria-hidden="true" className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
                       {item.emoji || '💬'}
                     </span>
                   </div>
@@ -1451,7 +1475,15 @@ export const AACView: React.FC = () => {
                   >
                     {t(item.label)}
                   </span>
-                </button>
+
+                  {/* Fitzgerald Key Category Tag (Differentiate Without Color Alone) */}
+                  <span
+                    aria-hidden="true"
+                    className="relative z-10 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-black/10 text-slate-800 pointer-events-none mt-0.5"
+                  >
+                    {getGrammaticalCategoryLabel(item.colorType)}
+                  </span>
+                </AccessibleTile>
 
                 {/* Grammar Inflections Trigger Button (Proloquo2Go grammar popup indicator) */}
                 {hasInflections && !isMaskingMode && !isEditMode && (
