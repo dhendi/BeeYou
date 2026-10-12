@@ -37,7 +37,7 @@ export function getPersonaLabel(
       return persona === 'child' ? "CHILD'S NAME" : 'YOUR NAME';
 
     case 'namePlaceholder':
-      return persona === 'child' ? "Enter child's name (e.g. Leo)" : 'Enter your name (e.g. Alex)';
+      return persona === 'child' ? "Enter child's name" : 'Enter your name';
 
     case 'paywallSubtitle':
       if (persona === 'adult') {

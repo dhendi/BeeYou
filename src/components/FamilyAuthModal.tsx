@@ -72,9 +72,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
   // Register form state
   const [regEmail, setRegEmail] = useState('');
-  const [regCaregiverName, setRegCaregiverName] = useState('Mom');
+  const [regCaregiverName, setRegCaregiverName] = useState('');
   const [regCaregiverRole, setRegCaregiverRole] = useState('Parent');
-  const [regChildName, setRegChildName] = useState('Leo');
+  const [regChildName, setRegChildName] = useState('');
   const [regChildAgeGroup, setRegChildAgeGroup] = useState<'kid' | 'teen' | 'adult'>('kid');
   const [regPin, setRegPin] = useState('1234');
   const [regLoading, setRegLoading] = useState(false);
@@ -616,7 +616,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       type="text"
                       value={regCaregiverName}
                       onChange={(e) => setRegCaregiverName(e.target.value)}
-                      placeholder="e.g. Sarah"
+                      placeholder=""
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                       required
                     />
@@ -632,7 +632,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       type="text"
                       value={regChildName}
                       onChange={(e) => setRegChildName(e.target.value)}
-                      placeholder="e.g. Leo"
+                      placeholder=""
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                       required
                     />

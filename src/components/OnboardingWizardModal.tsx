@@ -88,12 +88,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
 
   // User Profile Form State
-  const [name, setName] = useState<string>(childProfile.name || (selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'caregiver' ? 'Sarah (Mom)' : 'Leo'));
+  const [name, setName] = useState<string>(childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name) ? childProfile.name : '');
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
 
   // Caregiver Registration Form State
   const [caregiverEmail, setCaregiverEmail] = useState<string>('demo@beeyou.app');
-  const [caregiverChildName, setCaregiverChildName] = useState<string>('Leo');
+  const [caregiverChildName, setCaregiverChildName] = useState<string>('');
   const [caregiverRoleTitle, setCaregiverRoleTitle] = useState<string>('Parent');
   
   // Features state
@@ -135,11 +135,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       emotions: base.dailyMoodRecollection !== false && base.emotions !== false,
       dailyMoodRecollection: base.dailyMoodRecollection !== false && base.emotions !== false,
     });
-    if (persona === 'adult' && (name === 'Leo' || !name)) {
-      setName('Alex');
-    } else if (persona === 'caregiver' && (name === 'Leo' || !name)) {
-      setName('Caregiver');
-    }
     if (persona === 'caregiver' && step > 4) {
       setStep(4);
     }
@@ -181,8 +176,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     // Caregiver Registration Flow
     if (selectedPersona === 'caregiver' || actionAfter === 'caregiver_setup') {
       const emailToUse = caregiverEmail.trim().toLowerCase() || 'demo@beeyou.app';
-      const cName = name.trim() || 'Sarah (Mom)';
-      const chName = caregiverChildName.trim() || 'Leo';
+      const cName = name.trim();
+      const chName = caregiverChildName.trim();
       let familyCode = getDeterministicFamilyCode(emailToUse);
 
       try {
@@ -251,7 +246,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
     // 2. Save profile
     updateChildProfile({
-      name: name.trim() || (selectedPersona === 'adult' ? 'Alex' : 'Leo'),
+      name: name.trim(),
       pronouns: pronouns.trim(),
       ageGroup: calculatedAge,
       userRole: 'self',
@@ -1123,7 +1118,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g. Sarah (Mom)"
+                        placeholder=""
                         className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
                         required
                       />
@@ -1153,7 +1148,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         type="text"
                         value={caregiverChildName}
                         onChange={(e) => setCaregiverChildName(e.target.value)}
-                        placeholder="e.g. Leo"
+                        placeholder=""
                         className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs focus:border-amber-500 outline-none"
                         required
                       />
@@ -1205,7 +1200,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder={selectedPersona === 'adult' ? 'Alex' : 'Leo'}
+                      placeholder=""
                       className="w-full px-4 py-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-base focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
                     />
                   </div>

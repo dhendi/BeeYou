@@ -62,8 +62,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   
   // Step 2 Form State
   const [name, setName] = useState<string>(() => {
-    if (childProfile.name) return childProfile.name;
-    return selectedPersona === 'adult' ? 'Alex' : selectedPersona === 'teen' ? 'Jordan' : 'Leo';
+    if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) return childProfile.name;
+    return '';
   });
   const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
   const [customPronoun, setCustomPronoun] = useState<string>('');
@@ -112,9 +112,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       firstThenSchedules: true,
     }));
 
-    if (!name || name === 'Leo' || name === 'Alex' || name === 'Jordan') {
-      setName(persona === 'adult' ? 'Alex' : persona === 'teen' ? 'Jordan' : 'Leo');
-    }
   };
 
   const toggleFeature = (key: keyof EnabledFeatures) => {
@@ -164,7 +161,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     // 1. Commit persona & profile to state
     setUserPersona(selectedPersona);
     updateChildProfile({
-      name: name.trim() || (selectedPersona === 'adult' ? 'Alex' : 'Leo'),
+      name: name.trim(),
       pronouns: customPronoun.trim() || pronouns,
       ageGroup: personaToAgeGroup(selectedPersona),
     });
