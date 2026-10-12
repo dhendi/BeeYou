@@ -110,6 +110,21 @@ export const ChildHeader: React.FC = () => {
               </>
             )}
           </button>
+
+          {/* Persistent Caregiver Help Hub Trigger (Subtle Bee Button) */}
+          <button
+            type="button"
+            onClick={() => {
+              playChime('tap');
+              window.dispatchEvent(new CustomEvent('beeyou_open_caregiver_help_hub'));
+            }}
+            className="flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs active:scale-95 transition-all cursor-pointer"
+            title="Caregiver Help Hub (Quick Guides & Ergonomics)"
+            aria-label="Caregiver Help Hub"
+          >
+            <span className="text-sm">🐝</span>
+            <span className="hidden sm:inline font-bold text-amber-800">{t('Help')}</span>
+          </button>
         </div>
 
         {/* Compact PWA Install Button */}

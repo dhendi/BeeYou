@@ -31,6 +31,8 @@ import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '.
 import { SensoryEmergencyButton } from './SensoryEmergencyButton';
 import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
 import { AdaptiveOnboardingFlow } from './AdaptiveOnboardingFlow';
+import { OnboardingModal } from './onboarding/OnboardingModal';
+import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
 
 // Lazy-loaded child tools and modals
 const CopingToolkitModal = lazy(() => import('./CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
@@ -85,6 +87,30 @@ const ChildAppContent: React.FC = () => {
 
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
+
+  // 6-Step Gradual Interactive AAC Onboarding Tour State
+  const [showInteractiveOnboarding, setShowInteractiveOnboarding] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('beeyou_onboarding_completed') !== 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Companion Caregiver Help Hub Modal State
+  const [showCaregiverHelpHub, setShowCaregiverHelpHub] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleOpenHelpHub = () => setShowCaregiverHelpHub(true);
+    const handleReplayTour = () => setShowInteractiveOnboarding(true);
+
+    window.addEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
+    window.addEventListener('beeyou_replay_onboarding_tour', handleReplayTour);
+    return () => {
+      window.removeEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
+      window.removeEventListener('beeyou_replay_onboarding_tour', handleReplayTour);
+    };
+  }, []);
 
   useEffect(() => {
     if (sessionStorage.getItem('beeyou_active_device_view') !== 'caregiver') {
@@ -231,6 +257,19 @@ const ChildAppContent: React.FC = () => {
         <RoutineStickerCelebrationModal />
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
+
+        {/* 6-Step Gradual Interactive AAC Onboarding Tour */}
+        <OnboardingModal
+          isOpen={showInteractiveOnboarding}
+          onClose={() => setShowInteractiveOnboarding(false)}
+        />
+
+        {/* Companion Caregiver Help Hub Drawer / Modal */}
+        <CaregiverHelpHub
+          isOpen={showCaregiverHelpHub}
+          onClose={() => setShowCaregiverHelpHub(false)}
+          onReplayTour={() => setShowInteractiveOnboarding(true)}
+        />
 
         {/* 4-Step Adaptive Setup Onboarding Flow */}
         <AdaptiveOnboardingFlow

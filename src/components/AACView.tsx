@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem, FavoriteSentence } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
@@ -11,6 +11,7 @@ import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
+import { GridStage, DwellMode, STORAGE_KEYS } from '../types/aac';
 
 export const getGrammaticalCategoryLabel = (colorType: AACItem['colorType']): string => {
   switch (colorType) {
@@ -198,6 +199,39 @@ export const AACView: React.FC = () => {
   const [instantSpeakMode, setInstantSpeakMode] = useState(false);
   const [isSentenceBarCollapsed, setIsSentenceBarCollapsed] = useState(false);
   const [isCoachMarksActive, setIsCoachMarksActive] = useState(false);
+
+  // Gradual Onboarding Grid Stage State (1 = 4 tiles, 2 = 12 tiles, 3 = full grid)
+  const [gridStage, setGridStage] = useState<GridStage>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.GRID_STAGE);
+      if (saved === '1' || saved === '2' || saved === '3') return Number(saved) as GridStage;
+    } catch {}
+    return 3;
+  });
+
+  // Touch Ergonomics Dwell Mode
+  const [dwellMode, setDwellMode] = useState<DwellMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.DWELL_MODE);
+      if (saved === 'dwell' || saved === 'release' || saved === 'direct') return saved;
+    } catch {}
+    return 'direct';
+  });
+
+  useEffect(() => {
+    const handleStageChange = (e: any) => {
+      if (e?.detail?.stage) setGridStage(e.detail.stage);
+    };
+    const handleDwellChange = (e: any) => {
+      if (e?.detail?.mode) setDwellMode(e.detail.mode);
+    };
+    window.addEventListener('beeyou_grid_stage_change', handleStageChange);
+    window.addEventListener('beeyou_dwell_mode_change', handleDwellChange);
+    return () => {
+      window.removeEventListener('beeyou_grid_stage_change', handleStageChange);
+      window.removeEventListener('beeyou_dwell_mode_change', handleDwellChange);
+    };
+  }, []);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
@@ -597,9 +631,33 @@ export const AACView: React.FC = () => {
             (item.speechText || '').toLowerCase().includes(searchQuery.toLowerCase())
           )
         : activeSceneData.items)
-    : filteredItems;
+    : (() => {
+        if (activeCategory === 'core' && !searchQuery.trim()) {
+          if (gridStage === 1) {
+            // Stage 1: 4 oversized Cause & Effect tiles (WANT, MORE, STOP, HELP)
+            const stage1Ids = ['want', 'more', 'stop', 'help'];
+            const stage1Items = filteredItems.filter((i) => stage1Ids.includes(i.id.toLowerCase()));
+            return stage1Items.length >= 4 ? stage1Items : filteredItems.slice(0, 4);
+          }
+          if (gridStage === 2) {
+            // Stage 2: 12 motor planning expansion words
+            const stage2Ids = ['want', 'more', 'go', 'like', 'stop', 'help', 'yes', 'no', 'me', 'you', 'eat', 'play'];
+            const stage2Items = filteredItems.filter((i) => stage2Ids.includes(i.id.toLowerCase()));
+            return stage2Items.length >= 8 ? stage2Items : filteredItems.slice(0, 12);
+          }
+        }
+        return filteredItems;
+      })();
 
   const gridColsClass = (() => {
+    if (activeCategory === 'core' && !searchQuery.trim() && !activeSceneData) {
+      if (gridStage === 1) {
+        return 'grid-cols-2 max-w-xl mx-auto';
+      }
+      if (gridStage === 2) {
+        return 'grid-cols-3 sm:grid-cols-4 max-w-3xl mx-auto';
+      }
+    }
     const cols = settings.gridColumns || 4;
     if (cols === 2) {
       return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3';
@@ -1052,12 +1110,46 @@ export const AACView: React.FC = () => {
                 setIsCoachMarksActive(true);
                 playChime('tap');
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              className="px-2.5 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
               title="Open Interactive AAC Coach Marks Guide"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span>{t('AAC Guide')} 💡</span>
             </button>
+
+            {/* Stage Selector Pills (4 Tiles, 12 Tiles, Full Matrix) */}
+            {activeCategory === 'core' && !searchQuery.trim() && (
+              <div data-tour="aac-grid-stages" className="flex items-center gap-1 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB] shadow-2xs">
+                <span className="text-[10px] font-black uppercase text-stone-500 px-1 hidden md:inline">
+                  Stage:
+                </span>
+                {[
+                  { stage: 1 as GridStage, label: '4' },
+                  { stage: 2 as GridStage, label: '12' },
+                  { stage: 3 as GridStage, label: 'Full' },
+                ].map((s) => (
+                  <button
+                    key={s.stage}
+                    type="button"
+                    onClick={() => {
+                      setGridStage(s.stage);
+                      try {
+                        localStorage.setItem(STORAGE_KEYS.GRID_STAGE, s.stage.toString());
+                      } catch {}
+                      playChime('tap');
+                    }}
+                    className={`px-2 py-0.5 rounded-xl text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
+                      gridStage === s.stage
+                        ? 'bg-amber-500 text-white shadow-xs'
+                        : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
+                    }`}
+                    title={`Switch to Stage ${s.stage} (${s.label})`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
           </div>
         </div>
