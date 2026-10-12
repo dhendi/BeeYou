@@ -6,7 +6,6 @@ import {
   UserAgeGroup 
 } from '../types';
 import { playChime, speakText } from '../utils/audio';
-import confetti from 'canvas-confetti';
 import { 
   X, 
   Volume2, 
@@ -138,7 +137,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
     });
     setIsEditing(false);
     playChime('complete');
-    confetti({ particleCount: 40, spread: 60, origin: { y: 0.5 } });
     speakText('About Me ID card updated successfully!');
   };
 

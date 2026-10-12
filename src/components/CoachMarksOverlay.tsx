@@ -38,11 +38,14 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
   const [cardPosition, setCardPosition] = useState<{ top: number; left: number; arrowDir: 'up' | 'down' | 'none' }>({
-    top: 0,
-    left: 0,
+    top: 16,
+    left: 16,
     arrowDir: 'up',
   });
   const [hasClickedTarget, setHasClickedTarget] = useState(false);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
 
   const currentStep = steps[currentStepIndex];
 
@@ -54,7 +57,12 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     const cardWidth = Math.min(360, windowWidth - 24);
-    const estimatedCardHeight = 250;
+
+    // Measure actual rendered wrapper height if available
+    const wrapperEl = wrapperRef.current;
+    const measuredHeight = wrapperEl ? wrapperEl.offsetHeight : 340;
+    const arrowHeight = 40; // Arrow circle + spacing
+    const totalHeightNeeded = measuredHeight + arrowHeight;
 
     if (el) {
       const rect = el.getBoundingClientRect();
@@ -77,46 +85,66 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
       const spaceBelow = windowHeight - targetBox.bottom;
       const spaceAbove = targetBox.top;
 
-      let top = 12;
-      let arrowDir: 'up' | 'down' | 'none' = 'up';
+      let top = 16;
+      let arrowDir: 'up' | 'down' | 'none' = 'none';
 
-      if (spaceBelow >= estimatedCardHeight + 30) {
-        // Place below target, arrow points UP
-        top = targetBox.bottom + 14;
+      // 1. If ample space below target: place below, arrow points UP
+      if (spaceBelow >= totalHeightNeeded + 20) {
+        top = targetBox.bottom + 12;
         arrowDir = 'up';
-      } else if (spaceAbove >= estimatedCardHeight + 30) {
-        // Place above target, arrow points DOWN
-        top = targetBox.top - estimatedCardHeight - 14;
+      }
+      // 2. If ample space above target: place above, arrow points DOWN
+      else if (spaceAbove >= totalHeightNeeded + 20) {
+        top = targetBox.top - measuredHeight - arrowHeight - 12;
         arrowDir = 'down';
+      }
+      // 3. Constrained viewport (e.g. mobile or centered element): pick side with most space
+      else if (spaceBelow >= spaceAbove) {
+        const canFitArrow = spaceBelow >= measuredHeight + arrowHeight + 16;
+        arrowDir = canFitArrow ? 'up' : 'none';
+        top = targetBox.bottom + 8;
+        top = Math.min(top, windowHeight - measuredHeight - (arrowDir === 'up' ? arrowHeight : 0) - 16);
+        top = Math.max(12, top);
       } else {
-        // If tight on both sides, pick side with most space and clamp
-        if (spaceBelow >= spaceAbove) {
-          top = targetBox.bottom + 10;
-          arrowDir = 'up';
-        } else {
-          top = targetBox.top - estimatedCardHeight - 10;
-          arrowDir = 'down';
-        }
+        const canFitArrow = spaceAbove >= measuredHeight + arrowHeight + 16;
+        arrowDir = canFitArrow ? 'down' : 'none';
+        top = targetBox.top - measuredHeight - (arrowDir === 'down' ? arrowHeight + 8 : 8);
+        top = Math.max(12, top);
+        top = Math.min(top, windowHeight - measuredHeight - 16);
       }
 
-      // Hard clamp top so card NEVER falls off-screen (minimum 10px, max windowHeight - estimatedCardHeight - 12px)
-      top = Math.max(10, Math.min(top, windowHeight - estimatedCardHeight - 12));
+      // Hard clamp top so card NEVER falls off-screen
+      const effectiveCardTotalHeight = measuredHeight + (arrowDir !== 'none' ? arrowHeight : 0);
+      top = Math.max(12, Math.min(top, windowHeight - effectiveCardTotalHeight - 16));
+
+      // If card ends up overlapping target, hide arrow to avoid visual clutter
+      if (top < targetBox.bottom && top + effectiveCardTotalHeight > targetBox.top) {
+        arrowDir = 'none';
+      }
 
       setCardPosition({ top, left, arrowDir });
     } else {
       // Graceful centered fallback if target is not currently in DOM
       setTargetRect(null);
       setCardPosition({
-        top: Math.max(12, windowHeight / 2 - 125),
-        left: Math.max(12, windowWidth / 2 - cardWidth / 2),
+        top: Math.max(16, (windowHeight - measuredHeight) / 2),
+        left: Math.max(12, (windowWidth - cardWidth) / 2),
         arrowDir: 'none',
       });
     }
   }, [isActive, currentStep]);
 
-  const rafRef = useRef<number | null>(null);
+  // Observe card resize to re-clamp accurately if content changes height
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+    const observer = new ResizeObserver(() => {
+      updateTargetRect();
+    });
+    observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, [updateTargetRect, currentStepIndex]);
 
-  // Smoothly scroll target into center view once when step changes
+  // Smoothly scroll target into view smartly once when step changes
   useEffect(() => {
     if (!isActive || !currentStep) return;
 
@@ -125,8 +153,27 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
     const scrollToElement = () => {
       const el = document.querySelector(currentStep.targetSelector) as HTMLElement | null;
       if (el) {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const neededHeight = 360;
+
+        const spaceBelowNow = windowHeight - rect.bottom;
+        const spaceAboveNow = rect.top;
+
+        // If already visible with ample space above or below, avoid scrolling
+        if (rect.top >= 20 && rect.bottom <= windowHeight - 20 && (spaceBelowNow >= neededHeight || spaceAboveNow >= neededHeight)) {
+          updateTargetRect();
+          return;
+        }
+
+        // Align element to maximize remaining space for the coach mark card
+        const isLowerHalf = rect.top > windowHeight / 2;
         try {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+          el.scrollIntoView({
+            behavior: 'smooth',
+            block: isLowerHalf ? 'end' : 'start',
+            inline: 'nearest',
+          });
         } catch {
           el.scrollIntoView();
         }
@@ -273,36 +320,38 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
 
       {/* 3. FLOATING INSTRUCTION CARD & POINTER ARROW */}
       <div
+        ref={wrapperRef}
         style={{
           position: 'absolute',
           top: cardPosition.top,
           left: cardPosition.left,
-          width: Math.min(360, window.innerWidth - 32),
+          width: Math.min(360, typeof window !== 'undefined' ? window.innerWidth - 24 : 336),
+          maxHeight: `calc(100dvh - ${Math.max(12, cardPosition.top)}px - 16px)`,
         }}
         className="z-[10000] flex flex-col items-center animate-in zoom-in-95 duration-200"
       >
         {/* Animated Arrow pointing UP towards target */}
         {cardPosition.arrowDir === 'up' && (
-          <div className="flex flex-col items-center mb-1 animate-bounce">
-            <div className="w-9 h-9 rounded-full bg-amber-400 border-2 border-white text-amber-950 flex items-center justify-center shadow-lg">
-              <ArrowUp className="w-5 h-5 stroke-[3]" />
+          <div className="flex flex-col items-center mb-1 shrink-0 animate-bounce">
+            <div className="w-8 h-8 rounded-full bg-amber-400 border-2 border-white text-amber-950 flex items-center justify-center shadow-lg">
+              <ArrowUp className="w-4 h-4 stroke-[3]" />
             </div>
           </div>
         )}
 
         {/* Coach Mark Card Content */}
-        <div className="w-full max-h-[calc(100dvh-32px)] overflow-y-auto bg-white dark:bg-slate-900 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3">
-          {/* Header with Mascot & Step Counter */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+        <div className="w-full max-h-full flex flex-col bg-white dark:bg-slate-900 border-3 border-amber-400 rounded-3xl shadow-2xl relative overflow-hidden">
+          {/* Header with Mascot & Step Counter (Pinned shrink-0) */}
+          <div className="shrink-0 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 p-3.5 sm:p-4 bg-white dark:bg-slate-900">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-xl shadow-xs shrink-0 font-black">
+              <div className="w-9 h-9 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-lg shadow-xs shrink-0 font-black">
                 🐝
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                   {tourName} • Step {currentStepIndex + 1} of {steps.length}
                 </span>
-                <h3 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+                <h3 className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-tight">
                   {currentStep.title}
                 </h3>
               </div>
@@ -316,34 +365,35 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
               }}
               className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 transition cursor-pointer"
               title="Close Tutorial"
+              aria-label="Close tutorial"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Action Instruction */}
-          <div className="space-y-2">
+          {/* Action Instruction (Scrollable body if viewport is constrained) */}
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 min-h-0 bg-white dark:bg-slate-900">
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
               {currentStep.instruction}
             </p>
 
             {/* Mascot Tip / Speech Bubble */}
             <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2">
-              <span className="text-lg shrink-0">👉</span>
+              <span className="text-base shrink-0">👉</span>
               <span className="text-xs font-black text-amber-900 dark:text-amber-200">
                 {currentStep.mascotHint || 'Click the highlighted button on screen or tap Next!'}
               </span>
             </div>
           </div>
 
-          {/* Navigation Controls: Back, Next, Skip */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-1">
+          {/* Navigation Controls: Back, Next, Skip (Pinned shrink-0 Footer) */}
+          <div className="shrink-0 flex items-center justify-between p-3 sm:p-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-850/90">
+            <div className="flex items-center gap-1.5">
               {currentStepIndex > 0 && (
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                  className="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1 cursor-pointer transition active:scale-95 shadow-xs"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back</span>
@@ -356,7 +406,7 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
                   playChime('tap');
                   onSkip();
                 }}
-                className="px-2.5 py-2 rounded-xl text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer"
+                className="px-2.5 py-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-bold text-xs cursor-pointer"
               >
                 Skip
               </button>
@@ -367,7 +417,7 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
               onClick={handleNext}
               className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
             >
-              <span>{currentStepIndex === steps.length - 1 ? 'Finish Guide 🎉' : 'Next Step 👉'}</span>
+              <span>{currentStepIndex === steps.length - 1 ? 'Finish Guide' : 'Next Step 👉'}</span>
               {currentStepIndex === steps.length - 1 ? (
                 <Check className="w-4 h-4" />
               ) : (
@@ -379,9 +429,9 @@ export const CoachMarksOverlay: React.FC<CoachMarksOverlayProps> = ({
 
         {/* Animated Arrow pointing DOWN towards target */}
         {cardPosition.arrowDir === 'down' && (
-          <div className="flex flex-col items-center mt-1 animate-bounce">
-            <div className="w-9 h-9 rounded-full bg-amber-400 border-2 border-white text-amber-950 flex items-center justify-center shadow-lg">
-              <ArrowDown className="w-5 h-5 stroke-[3]" />
+          <div className="flex flex-col items-center mt-1 shrink-0 animate-bounce">
+            <div className="w-8 h-8 rounded-full bg-amber-400 border-2 border-white text-amber-950 flex items-center justify-center shadow-lg">
+              <ArrowDown className="w-4 h-4 stroke-[3]" />
             </div>
           </div>
         )}

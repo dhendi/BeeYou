@@ -11,7 +11,6 @@ import {
   Wifi,
   Smartphone
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
 
@@ -44,7 +43,6 @@ export const ConnectionFeedbackModal: React.FC<ConnectionFeedbackModalProps> = (
 
   useEffect(() => {
     if (isSuccess) {
-      confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
       playChime('complete');
     } else {
       playChime('tap');

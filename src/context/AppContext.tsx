@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { t, setLanguage } from '../services/translator';
-import confetti from 'canvas-confetti';
 import {
   AACItem,
   QuickPhrase,
@@ -599,7 +598,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       autoRenew: true,
     });
     setShowPaywallModal(false);
-    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
   };
 
   const activateSubscription = (cycle?: BillingCycle) => {
@@ -614,7 +612,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       trialDays: 15,
     }));
     setShowPaywallModal(false);
-    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
   };
 
   const cancelSubscription = () => {
@@ -966,7 +963,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
     setActiveThemeId(themeId);
     if (settings.soundEffects) playChime('star');
-    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
     if (settings.spokenAnnouncements) {
       speak(`Hooray! You unlocked and equipped the ${target.name} theme!`);
     }
@@ -988,7 +984,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setThemes((prev) => [...prev, newTheme]);
     setActiveThemeId(newTheme.id);
     if (settings.soundEffects) playChime('complete');
-    confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
     if (settings.spokenAnnouncements) {
       speak(`Awesome! Created your custom theme ${newTheme.name}!`);
     }
@@ -1957,15 +1952,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       setTimeout(() => playChime('star'), 400);
     }
 
-    try {
-      confetti({
-        particleCount: 75,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#f59e0b', '#38bdf8', '#8b5cf6', '#10b981', '#ec4899'],
-      });
-    } catch (e) {}
-
     speak(
       `Awesome job, ${childProfile.name}! You finished ${routine.title} and earned the ${stickerDef.stickerName} sticker!`
     );
@@ -2042,7 +2028,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         if (part === 'then') updated.completedThen = !updated.completedThen;
         if (updated.completedFirst && updated.completedThen) {
           if (settings.soundEffects) playChime('complete');
-          confetti({ particleCount: 35, spread: 50 });
           awardStars(1);
         }
         return { ...r, firstThen: updated };
@@ -2083,7 +2068,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const completeAdventure = (id: string) => {
     if (settings.soundEffects) playChime('complete');
-    confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
     awardStars(3);
     setAdventures((prev) =>
       prev.map((a) =>
@@ -2112,7 +2096,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     const target = skills.find((s) => s.id === skillId);
     const reward = target?.starsReward || 2;
     if (settings.soundEffects) playChime('star');
-    confetti({ particleCount: 60, spread: 80, origin: { y: 0.55 } });
     awardStars(reward);
     setSkills((prev) =>
       prev.map((sk) =>
@@ -2161,9 +2144,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
           if (nextCompleted) {
             if (settings.soundEffects) playChime('star');
             awardStars(1);
-            try {
-              confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 } });
-            } catch (e) {}
             speak(`Great job! ${h.title}. ${h.encouragement}`);
           } else {
             if (settings.soundEffects) playChime('tap');
@@ -2196,9 +2176,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
           if (nowCompleted && !h.completedToday) {
             awardStars(1);
-            try {
-              confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-            } catch (e) {}
             speak(`Super! Finished ${h.title} for today! ${h.encouragement}`);
           } else {
             speak(`${h.title}: ${nextTimes} of ${target}`);
@@ -2293,7 +2270,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       unlockedItemIds: [...prev.unlockedItemIds, itemId],
     }));
     if (settings.soundEffects) playChime('star');
-    confetti({ particleCount: 30, spread: 60 });
     return true;
   };
 
@@ -2363,14 +2339,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       playChime('star');
       setTimeout(() => playChime('complete'), 350);
     }
-
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 75,
-        origin: { y: 0.6 },
-      });
-    } catch (e) {}
 
     speak(`Wonderful reflection, ${childProfile.name}! You earned ${newEntry.starsAwarded || 3} stars.`);
   };
@@ -2453,14 +2421,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
     awardStars(1);
     if (settings.soundEffects) playChime('star');
-    try {
-      confetti({
-        particleCount: 35,
-        spread: 55,
-        origin: { y: 0.7 },
-        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
-      });
-    } catch (e) {}
     announce(`Great job taking your ${targetMed.name}! You earned 1 star!`);
   };
 

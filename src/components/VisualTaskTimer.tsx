@@ -14,7 +14,6 @@ import {
   ChevronUp,
   Heart
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
 import { t } from '../services/translator';
 
@@ -192,17 +191,6 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
       setTimeout(() => {
         playChime('star');
       }, 350);
-    }
-
-    try {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.6 },
-        colors: ['#38bdf8', '#818cf8', '#34d399', '#f472b6', '#fbbf24'],
-      });
-    } catch (e) {
-      // Confetti fallback
     }
 
     if (soundEnabled) {

@@ -21,7 +21,6 @@ import {
   Palette
 } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
-import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
 
 export const Rewards: React.FC = () => {
@@ -122,16 +121,6 @@ export const Rewards: React.FC = () => {
     });
 
     playChime('star');
-    try {
-      confetti({
-        particleCount: 40,
-        spread: 50,
-        origin: { y: 0.6 },
-        colors: ['#fbbf24', '#38bdf8', '#a855f7'],
-      });
-    } catch (e) {
-      // fallback
-    }
 
     speakText(`Equipped ${sticker.name} to your profile!`);
   };

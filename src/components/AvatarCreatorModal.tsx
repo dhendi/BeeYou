@@ -3,9 +3,8 @@ import { useApp } from '../context/AppContext';
 import { AvatarConfig } from '../types';
 import { ChildAvatar } from './ChildAvatar';
 import { playChime, speakText } from '../utils/audio';
-import confetti from 'canvas-confetti';
 import { 
-  X, 
+  X,
   Sparkles, 
   Dices, 
   Volume2, 
@@ -110,7 +109,6 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
 
     setSavedSuccess(true);
     playChime('complete');
-    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
     speakText('Avatar saved successfully! Looking great!');
 
     setTimeout(() => {

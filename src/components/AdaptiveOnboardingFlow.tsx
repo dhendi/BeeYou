@@ -27,7 +27,6 @@ import { getPersonaLabel, getPersonaTokens, personaToAgeGroup } from '../utils/p
 import { QRCodeView } from './QRCodeView';
 import { getPairingCode } from '../services/caregiverSync';
 import { playChime } from '../utils/audio';
-import confetti from 'canvas-confetti';
 
 interface AdaptiveOnboardingFlowProps {
   isOpen: boolean;
@@ -149,14 +148,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
   const handleComplete = () => {
     playChime('star');
-    try {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.6 },
-        disableForReducedMotion: true,
-      });
-    } catch {}
 
     // 1. Commit persona & profile to state
     setUserPersona(selectedPersona);

@@ -16,7 +16,6 @@ import {
   Compass,
   RefreshCw
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { playChime, speakText } from '../utils/audio';
 import { EmotionType } from '../types';
 import { fetchLiveWeather, LiveWeatherData, DEFAULT_WEATHER_DATA } from '../utils/weather';
@@ -111,16 +110,6 @@ export const MorningBriefModal: React.FC = () => {
 
   const handleStartDay = () => {
     playChime('complete');
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#fbbf24', '#38bdf8', '#34d399', '#f472b6'],
-      });
-    } catch (e) {
-      // fallback
-    }
 
     // Award +1 morning login star!
     awardStars(1);

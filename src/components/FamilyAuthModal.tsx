@@ -18,7 +18,6 @@ import {
   Share2,
   Check
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { playChime } from '../utils/audio';
 import { useApp } from '../context/AppContext';
 import { 
@@ -141,9 +140,6 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         });
       }
 
-      try {
-        confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
-      } catch {}
       try {
         playChime('complete');
       } catch {}

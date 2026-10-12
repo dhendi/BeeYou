@@ -7,7 +7,6 @@ import {
   UserAccountRole
 } from '../types';
 import { playChime } from '../utils/audio';
-import confetti from 'canvas-confetti';
 import { 
   ArrowRight, 
   ArrowLeft, 
@@ -222,8 +221,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
       if (setIsParentMode) setIsParentMode(true);
       if (setLinkedDeviceCode) setLinkedDeviceCode(familyCode);
       setTheme('theme-classic');
-
-      confetti({ particleCount: 80, spread: 75, origin: { y: 0.5 } });
       playChime('complete');
       onClose();
       return;
@@ -281,7 +278,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     setTheme(defaultThemeId);
 
     // 6. Celebration & Routing
-    confetti({ particleCount: 80, spread: 75, origin: { y: 0.5 } });
     playChime('complete');
 
     onClose();

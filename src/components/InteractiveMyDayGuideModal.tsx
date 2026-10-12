@@ -180,7 +180,7 @@ export const InteractiveMyDayGuideModal: React.FC<InteractiveMyDayGuideModalProp
                     <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">Completion Rewards</h4>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    Finishing all steps unlocks a collectible mascot sticker and celebratory confetti!
+                    Finishing all steps unlocks a collectible mascot sticker and special celebration!
                   </p>
                 </div>
               </div>
