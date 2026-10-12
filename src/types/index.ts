@@ -921,7 +921,19 @@ export type SoundscapeId =
   | 'beach'
   | 'forest'
   | 'fireplace'
-  | 'medieval_tavern';
+  | 'medieval_tavern'
+  | 'thunderstorm'
+  | 'pink_noise'
+  | 'green_noise'
+  | 'cat_purr'
+  | 'cafe'
+  | 'library'
+  | 'morning_birds'
+  | 'underwater'
+  | 'box_fan'
+  | 'tibetan_bowl'
+  | 'campfire'
+  | 'clock_tick';
 
 export interface SoundscapeItem {
   id: SoundscapeId;

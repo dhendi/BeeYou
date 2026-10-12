@@ -366,6 +366,42 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     tags: ['Sensory Deep', 'Premium'],
   },
   {
+    id: 'pink_noise',
+    name: 'Balanced Pink Noise',
+    description: 'Gentle, balanced natural noise curve. Softer than white noise, ideal for sensory focus.',
+    emoji: '🌸',
+    isPremium: true,
+    category: 'noise',
+    tags: ['Sensory Focus', 'Balanced', 'Premium'],
+  },
+  {
+    id: 'green_noise',
+    name: 'Soothing Green Noise',
+    description: 'Centering 500Hz nature-frequency spectrum proven to calm sensory overstimulation and promote rest.',
+    emoji: '🍃',
+    isPremium: true,
+    category: 'noise',
+    tags: ['Nervous System', 'Nature Tone', 'Premium'],
+  },
+  {
+    id: 'thunderstorm',
+    name: 'Rolling Thunder & Rain',
+    description: 'Deep, distant rolling thunder rumbles and peaceful sheets of soothing summer rainfall.',
+    emoji: '⛈️',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Thunder', 'Deep Rain', 'Premium'],
+  },
+  {
+    id: 'cat_purr',
+    name: 'Cozy Purring Cat',
+    description: 'Deep, rhythmic chest vibrations and gentle breathing cadence of a contented sleeping kitten.',
+    emoji: '🐱',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Cat Purr', 'Vibration', 'Cozy', 'Premium'],
+  },
+  {
     id: 'stream',
     name: 'Babbling Forest Stream',
     description: 'Tranquil moving brook flowing over smooth river stones.',
@@ -384,6 +420,15 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     tags: ['Sleep', 'Evening', 'Premium'],
   },
   {
+    id: 'morning_birds',
+    name: 'Morning Songbirds & Meadow',
+    description: 'Sweet dawn robin melodies, soft canopy breeze, and gentle morning prairie stillness.',
+    emoji: '🐦',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Songbirds', 'Morning Meadow', 'Premium'],
+  },
+  {
     id: 'space_drone',
     name: 'Cosmic Ambient Drone',
     description: 'Dreamy harmonic deep space resonance. Ideal for hyperfocus and calming.',
@@ -398,8 +443,17 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     description: 'Gentle breeze carrying resonant melodic chimes and singing bowls.',
     emoji: '🎐',
     isPremium: true,
-    category: 'nature',
+    category: 'ambient',
     tags: ['Centering', 'Meditation', 'Premium'],
+  },
+  {
+    id: 'tibetan_bowl',
+    name: '432Hz Tibetan Singing Bowl',
+    description: 'Pure 432Hz harmonic acoustic resonance and warm bronze bell envelope for deep grounding.',
+    emoji: '🥣',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['Singing Bowl', '432Hz', 'Meditation', 'Premium'],
   },
   {
     id: 'train_chug',
@@ -427,6 +481,42 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     isPremium: true,
     category: 'focus',
     tags: ['Car Ride', 'Cabin Rumble', 'Premium'],
+  },
+  {
+    id: 'box_fan',
+    name: 'Rhythmic Box Fan',
+    description: 'Steady, comforting mechanical motor hum and continuous airflow for full acoustic masking.',
+    emoji: '💨',
+    isPremium: true,
+    category: 'noise',
+    tags: ['Box Fan', 'Sleep Masking', 'Premium'],
+  },
+  {
+    id: 'clock_tick',
+    name: 'Gentle Wooden Clock',
+    description: 'Predictable, grounding rhythmic pendulum tick-tock cadence providing calm temporal focus.',
+    emoji: '🕰️',
+    isPremium: true,
+    category: 'focus',
+    tags: ['Clock Tick', 'Rhythmic', 'Grounding', 'Premium'],
+  },
+  {
+    id: 'library',
+    name: 'Sanctuary Quiet Library',
+    description: 'Peaceful sanctuary room tone, soft gentle page turns, and warm oak study stillness.',
+    emoji: '📚',
+    isPremium: true,
+    category: 'focus',
+    tags: ['Library', 'Quiet Study', 'Premium'],
+  },
+  {
+    id: 'cafe',
+    name: 'Cozy Raindrop Cafe',
+    description: 'Quiet coffee shop corner, muffled comforting room murmur, gentle porcelain clink, and rain.',
+    emoji: '☕',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['Cozy Cafe', 'Coffee Shop', 'Premium'],
   },
   {
     id: 'city',
@@ -483,6 +573,24 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     tags: ['Cozy Hearth', 'Wood Crackle', 'Sleep Aid', 'Premium'],
   },
   {
+    id: 'campfire',
+    name: 'Night Pine Campfire',
+    description: 'Outdoor campfire crackle, gentle glowing embers, evening breeze, and forest night sky.',
+    emoji: '⛺',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Campfire', 'Embers', 'Night Sky', 'Premium'],
+  },
+  {
+    id: 'underwater',
+    name: 'Deep Ocean Sanctuary',
+    description: 'Submerged tranquil acoustic isolation, soothing pressure resonance, and gentle bubble flow.',
+    emoji: '🫧',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Underwater', 'Deep Ocean', 'Premium'],
+  },
+  {
     id: 'medieval_tavern',
     name: 'Medieval Castle & Bard Hall',
     description: 'Atmospheric medieval stone hall with gentle Celtic harp, wooden flute melodies, ancient bourdon drone, and peaceful fantasy calm.',
@@ -494,7 +602,7 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
 ];
 
 // Audio file mappings for authentic, high-quality ambient recordings (100% offline & seamless looping)
-export const SOUNDSCAPE_AUDIO_FILES: Record<SoundscapeId, string> = {
+export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   rain: '/sounds/rain.mp3',
   ocean: '/sounds/ocean.mp3',
   brown_noise: '/sounds/brown_noise.wav',
@@ -512,119 +620,77 @@ export const SOUNDSCAPE_AUDIO_FILES: Record<SoundscapeId, string> = {
   forest: '/sounds/forest.mp3',
   fireplace: '/sounds/fireplace.mp3',
   medieval_tavern: '/sounds/medieval_tavern.mp3',
+  cat_purr: '/sounds/kitten.mp3',
 };
 
-let activeSoundscapeId: SoundscapeId | null = null;
-let activeSoundscapeAudioElement: HTMLAudioElement | null = null;
-let activeSoundscapeFadeTimer: any = null;
-let activeSoundscapeGain: GainNode | null = null;
-let activeSoundscapeNodes: AudioNode[] = [];
-let activeSoundscapeTimers: any[] = [];
-const soundscapeChangeListeners: Set<(id: SoundscapeId | null) => void> = new Set();
+export interface ActiveSoundTrack {
+  id: SoundscapeId;
+  audioElement: HTMLAudioElement | null;
+  gainNode: GainNode | null;
+  nodes: AudioNode[];
+  timers: any[];
+  fadeTimer: any;
+  volume: number; // 0.0 to 1.0 (as low or as loud as user wants)
+}
+
+const activeSoundTracks: Map<SoundscapeId, ActiveSoundTrack> = new Map();
+const soundscapeChangeListeners: Set<(ids: SoundscapeId[]) => void> = new Set();
 
 function normalizeSoundscapeVolume(vol: number): number {
-  if (vol <= 0.001) return 0;
-  // If volume was passed in the legacy 0.01 - 0.25 range, scale to a pleasant 0.1 - 0.85
-  if (vol <= 0.3) {
-    return Math.min(1.0, Math.max(0.04, vol * 3.4));
-  }
-  return Math.min(1.0, Math.max(0.04, vol));
+  if (vol <= 0.0001) return 0;
+  return Math.max(0.0, Math.min(1.0, vol));
 }
 
-export function subscribeToSoundscape(listener: (id: SoundscapeId | null) => void) {
-  soundscapeChangeListeners.add(listener);
-  listener(activeSoundscapeId);
-  return () => {
-    soundscapeChangeListeners.delete(listener);
-  };
-}
-
-function notifySoundscapeChange(id: SoundscapeId | null) {
+function notifySoundscapeChange(): void {
+  const activeIds = Array.from(activeSoundTracks.keys());
   soundscapeChangeListeners.forEach((l) => {
     try {
-      l(id);
+      l(activeIds);
     } catch (e) {
       console.error(e);
     }
   });
 }
 
-export function getActiveSoundscape(): SoundscapeId | null {
-  return activeSoundscapeId;
+export function subscribeToSoundscapes(listener: (ids: SoundscapeId[]) => void) {
+  soundscapeChangeListeners.add(listener);
+  listener(Array.from(activeSoundTracks.keys()));
+  return () => {
+    soundscapeChangeListeners.delete(listener);
+  };
 }
 
-export function stopSoundscape(): void {
-  try {
-    if (activeSoundscapeFadeTimer) {
-      clearInterval(activeSoundscapeFadeTimer);
-      activeSoundscapeFadeTimer = null;
-    }
+export function subscribeToSoundscape(listener: (id: SoundscapeId | null) => void) {
+  const legacyWrapper = (activeIds: SoundscapeId[]) => {
+    listener(activeIds.length > 0 ? activeIds[0] : null);
+  };
+  soundscapeChangeListeners.add(legacyWrapper);
+  listener(getActiveSoundscape());
+  return () => {
+    soundscapeChangeListeners.delete(legacyWrapper);
+  };
+}
 
-    if (activeSoundscapeAudioElement) {
-      const audioToStop = activeSoundscapeAudioElement;
-      activeSoundscapeAudioElement = null;
-      // Gentle fade out over 200ms
-      const initialVol = audioToStop.volume;
-      const step = initialVol / 5;
-      let cur = initialVol;
-      const fadeOutTimer = setInterval(() => {
-        cur = Math.max(0, cur - step);
-        try {
-          audioToStop.volume = cur;
-        } catch (e) {}
-        if (cur <= 0.01) {
-          clearInterval(fadeOutTimer);
-          audioToStop.pause();
-          audioToStop.currentTime = 0;
-        }
-      }, 40);
-    }
+export function getActiveSoundscape(): SoundscapeId | null {
+  const keys = Array.from(activeSoundTracks.keys());
+  return keys.length > 0 ? keys[0] : null;
+}
 
-    // Stop procedural synthesizer nodes
-    activeSoundscapeTimers.forEach((t) => clearInterval(t));
-    activeSoundscapeTimers = [];
+export function getActiveSoundscapes(): SoundscapeId[] {
+  return Array.from(activeSoundTracks.keys());
+}
 
-    const ctx = getAudioContext();
-    if (activeSoundscapeGain && ctx) {
-      const now = ctx.currentTime;
-      activeSoundscapeGain.gain.cancelScheduledValues(now);
-      activeSoundscapeGain.gain.setValueAtTime(activeSoundscapeGain.gain.value, now);
-      activeSoundscapeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
-
-      const nodesToClean = [...activeSoundscapeNodes];
-      setTimeout(() => {
-        nodesToClean.forEach((n) => {
-          try {
-            (n as any).stop?.();
-            n.disconnect();
-          } catch (e) {}
-        });
-      }, 350);
-    } else {
-      activeSoundscapeNodes.forEach((n) => {
-        try {
-          (n as any).stop?.();
-          n.disconnect();
-        } catch (e) {}
-      });
-    }
-
-    activeSoundscapeGain = null;
-    activeSoundscapeNodes = [];
-    activeSoundscapeId = null;
-    notifySoundscapeChange(null);
-  } catch (e) {
-    console.error('Error stopping soundscape:', e);
-  }
+export function isSoundscapeActive(id: SoundscapeId): boolean {
+  return activeSoundTracks.has(id);
 }
 
 const SOUNDSCAPE_VOLUME_STORAGE_KEY = 'beeyou_soundscape_volumes';
 
 export function getSavedSoundscapeVolume(id?: SoundscapeId | null): number {
-  if (typeof window === 'undefined') return 0.40;
+  if (typeof window === 'undefined') return 0.50;
   try {
     const raw = localStorage.getItem(SOUNDSCAPE_VOLUME_STORAGE_KEY);
-    if (!raw) return 0.40;
+    if (!raw) return 0.50;
     const map = JSON.parse(raw);
     if (id && typeof map[id] === 'number') {
       return map[id];
@@ -633,7 +699,7 @@ export function getSavedSoundscapeVolume(id?: SoundscapeId | null): number {
       return map.global;
     }
   } catch (e) {}
-  return 0.40;
+  return 0.50;
 }
 
 export function saveSoundscapeVolume(vol: number, id?: SoundscapeId | null): void {
@@ -651,32 +717,130 @@ export function saveSoundscapeVolume(vol: number, id?: SoundscapeId | null): voi
 
 export function setSoundscapeVolume(vol: number, soundId?: SoundscapeId | null): void {
   try {
-    saveSoundscapeVolume(vol, soundId || activeSoundscapeId);
-    const normalized = normalizeSoundscapeVolume(vol);
-    if (activeSoundscapeAudioElement) {
-      activeSoundscapeAudioElement.volume = normalized;
+    const clamped = Math.max(0.0, Math.min(1.0, vol));
+    saveSoundscapeVolume(clamped, soundId);
+
+    if (soundId) {
+      const track = activeSoundTracks.get(soundId);
+      if (track) {
+        track.volume = clamped;
+        if (track.audioElement) {
+          track.audioElement.volume = clamped;
+        }
+        if (track.gainNode) {
+          const ctx = getAudioContext();
+          if (ctx) {
+            track.gainNode.gain.cancelScheduledValues(ctx.currentTime);
+            track.gainNode.gain.linearRampToValueAtTime(Math.max(0.0001, clamped), ctx.currentTime + 0.05);
+          }
+        }
+      }
+    } else {
+      activeSoundTracks.forEach((_, id) => {
+        setSoundscapeVolume(clamped, id);
+      });
     }
-    const ctx = getAudioContext();
-    if (!ctx || !activeSoundscapeGain) return;
-    const clamped = Math.max(0.001, Math.min(0.5, vol));
-    activeSoundscapeGain.gain.cancelScheduledValues(ctx.currentTime);
-    activeSoundscapeGain.gain.linearRampToValueAtTime(clamped, ctx.currentTime + 0.1);
   } catch (e) {}
 }
 
-export function playSoundscape(id: SoundscapeId, volume?: number): void {
+function cleanupTrack(track: ActiveSoundTrack): void {
+  if (track.fadeTimer) {
+    clearInterval(track.fadeTimer);
+    track.fadeTimer = null;
+  }
+  if (track.audioElement) {
+    const audioToStop = track.audioElement;
+    track.audioElement = null;
+    const initialVol = audioToStop.volume;
+    const step = initialVol / 4;
+    let cur = initialVol;
+    const fadeOutTimer = setInterval(() => {
+      cur = Math.max(0, cur - step);
+      try {
+        audioToStop.volume = cur;
+      } catch (e) {}
+      if (cur <= 0.01) {
+        clearInterval(fadeOutTimer);
+        audioToStop.pause();
+        audioToStop.currentTime = 0;
+      }
+    }, 30);
+  }
+  track.timers.forEach((t) => clearInterval(t));
+  track.timers = [];
+
+  const ctx = getAudioContext();
+  if (track.gainNode && ctx) {
+    const now = ctx.currentTime;
+    try {
+      track.gainNode.gain.cancelScheduledValues(now);
+      track.gainNode.gain.setValueAtTime(track.gainNode.gain.value, now);
+      track.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+    } catch (e) {}
+    const nodesToClean = [...track.nodes];
+    setTimeout(() => {
+      nodesToClean.forEach((n) => {
+        try {
+          (n as any).stop?.();
+          n.disconnect();
+        } catch (e) {}
+      });
+    }, 250);
+  } else {
+    track.nodes.forEach((n) => {
+      try {
+        (n as any).stop?.();
+        n.disconnect();
+      } catch (e) {}
+    });
+  }
+}
+
+export function stopSoundscape(id?: SoundscapeId | null): void {
+  try {
+    if (id) {
+      const track = activeSoundTracks.get(id);
+      if (track) {
+        cleanupTrack(track);
+        activeSoundTracks.delete(id);
+        notifySoundscapeChange();
+      }
+    } else {
+      activeSoundTracks.forEach((track) => cleanupTrack(track));
+      activeSoundTracks.clear();
+      notifySoundscapeChange();
+    }
+  } catch (e) {
+    console.error('Error stopping soundscape:', e);
+  }
+}
+
+export function playSoundscape(id: SoundscapeId, volume?: number, isPremiumUser = false): void {
   try {
     const targetVolume = volume !== undefined ? volume : getSavedSoundscapeVolume(id);
 
-    if (activeSoundscapeId === id && activeSoundscapeAudioElement && !activeSoundscapeAudioElement.paused) {
+    // If already playing, just update volume
+    if (activeSoundTracks.has(id)) {
       setSoundscapeVolume(targetVolume, id);
       return;
     }
 
-    stopSoundscape();
+    // Free users: single active sound only
+    if (!isPremiumUser) {
+      stopSoundscape();
+    }
 
-    activeSoundscapeId = id;
-    notifySoundscapeChange(id);
+    const track: ActiveSoundTrack = {
+      id,
+      audioElement: null,
+      gainNode: null,
+      nodes: [],
+      timers: [],
+      fadeTimer: null,
+      volume: targetVolume,
+    };
+    activeSoundTracks.set(id, track);
+    notifySoundscapeChange();
 
     const soundFile = SOUNDSCAPE_AUDIO_FILES[id];
     const targetVol = normalizeSoundscapeVolume(targetVolume);
@@ -686,19 +850,18 @@ export function playSoundscape(id: SoundscapeId, volume?: number): void {
         const audio = new Audio(soundFile);
         audio.loop = true;
         audio.volume = 0.01;
-        activeSoundscapeAudioElement = audio;
+        track.audioElement = audio;
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              if (activeSoundscapeAudioElement !== audio) return;
-              // Smooth fade-in over 450ms
+              if (!activeSoundTracks.has(id) || track.audioElement !== audio) return;
               let cur = 0.01;
-              const step = Math.max(0.02, targetVol / 11);
-              activeSoundscapeFadeTimer = setInterval(() => {
-                if (activeSoundscapeAudioElement !== audio) {
-                  clearInterval(activeSoundscapeFadeTimer);
+              const step = Math.max(0.02, targetVol / 10);
+              track.fadeTimer = setInterval(() => {
+                if (!activeSoundTracks.has(id) || track.audioElement !== audio) {
+                  clearInterval(track.fadeTimer);
                   return;
                 }
                 cur = Math.min(targetVol, cur + step);
@@ -706,41 +869,54 @@ export function playSoundscape(id: SoundscapeId, volume?: number): void {
                   audio.volume = cur;
                 } catch (e) {}
                 if (cur >= targetVol) {
-                  clearInterval(activeSoundscapeFadeTimer);
-                  activeSoundscapeFadeTimer = null;
+                  clearInterval(track.fadeTimer);
+                  track.fadeTimer = null;
                 }
               }, 40);
             })
             .catch((err) => {
-              console.warn(`[BeeYou Audio] Audio file playback blocked or failed for ${id}, using procedural fallback:`, err);
-              playProceduralSoundscape(id, volume);
+              console.warn(`[BeeYou Audio] Audio file playback failed for ${id}, using procedural fallback:`, err);
+              startProceduralTrack(id, targetVolume, track);
             });
         }
         return;
       } catch (err) {
-        console.warn(`[BeeYou Audio] Could not instantiate audio file for ${id}:`, err);
+        console.warn(`[BeeYou Audio] Audio file init failed for ${id}:`, err);
       }
     }
 
     // Procedural synthesis fallback
-    playProceduralSoundscape(id, volume);
+    startProceduralTrack(id, targetVolume, track);
   } catch (e) {
     console.error('Error playing soundscape:', e);
   }
 }
 
-export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void {
+export function toggleSoundscape(id: SoundscapeId, volume?: number, isPremiumUser = false): boolean {
+  if (activeSoundTracks.has(id)) {
+    stopSoundscape(id);
+    return false;
+  } else {
+    playSoundscape(id, volume, isPremiumUser);
+    return true;
+  }
+}
+
+// Procedural Web Audio Engine supporting all 29 soundscapes
+export function startProceduralTrack(id: SoundscapeId, volume: number, track: ActiveSoundTrack): void {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
+    const targetVol = Math.max(0.0001, volume);
     masterGain.gain.setValueAtTime(0.0001, now);
-    masterGain.gain.linearRampToValueAtTime(volume, now + 0.8);
+    masterGain.gain.linearRampToValueAtTime(targetVol, now + 0.6);
     masterGain.connect(ctx.destination);
 
-    activeSoundscapeGain = masterGain;
+    track.gainNode = masterGain;
+    track.nodes.push(masterGain);
 
     if (id === 'rain') {
       const bufferSize = ctx.sampleRate * 3;
@@ -753,32 +929,28 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         last = data[i];
         data[i] *= 2.2;
       }
-
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
-
       const hp = ctx.createBiquadFilter();
       hp.type = 'highpass';
       hp.frequency.setValueAtTime(350, now);
-
       const lp = ctx.createBiquadFilter();
       lp.type = 'lowpass';
       lp.frequency.setValueAtTime(3200, now);
-
       noise.connect(hp);
       hp.connect(lp);
       lp.connect(masterGain);
       noise.start();
-      activeSoundscapeNodes.push(noise, hp, lp, masterGain);
+      track.nodes.push(noise, hp, lp);
 
       const dripTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'rain') return;
-        const dripCtx = getAudioContext();
-        if (!dripCtx || !activeSoundscapeGain) return;
-        const dNow = dripCtx.currentTime;
-        const osc = dripCtx.createOscillator();
-        const g = dripCtx.createGain();
+        if (!activeSoundTracks.has('rain')) return;
+        const dCtx = getAudioContext();
+        if (!dCtx || !track.gainNode) return;
+        const dNow = dCtx.currentTime;
+        const osc = dCtx.createOscillator();
+        const g = dCtx.createGain();
         osc.type = 'sine';
         const freq = 1200 + Math.random() * 1200;
         osc.frequency.setValueAtTime(freq, dNow);
@@ -790,7 +962,383 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         osc.start(dNow);
         osc.stop(dNow + 0.05);
       }, 240);
-      activeSoundscapeTimers.push(dripTimer);
+      track.timers.push(dripTimer);
+
+    } else if (id === 'thunderstorm') {
+      // 1. Heavy rain bed
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.035 * white) / 1.035;
+        last = data[i];
+        data[i] *= 2.5;
+      }
+      const rainNoise = ctx.createBufferSource();
+      rainNoise.buffer = buffer;
+      rainNoise.loop = true;
+      const rainFilter = ctx.createBiquadFilter();
+      rainFilter.type = 'lowpass';
+      rainFilter.frequency.setValueAtTime(2600, now);
+      rainNoise.connect(rainFilter);
+      rainFilter.connect(masterGain);
+      rainNoise.start(now);
+      track.nodes.push(rainNoise, rainFilter);
+
+      // 2. Rolling thunder rumbles every 7-9 seconds
+      const thunderTimer = setInterval(() => {
+        if (!activeSoundTracks.has('thunderstorm')) return;
+        const tCtx = getAudioContext();
+        if (!tCtx || !track.gainNode) return;
+        const tNow = tCtx.currentTime;
+
+        const subOsc = tCtx.createOscillator();
+        const subGain = tCtx.createGain();
+        subOsc.type = 'triangle';
+        subOsc.frequency.setValueAtTime(42, tNow);
+        subOsc.frequency.exponentialRampToValueAtTime(30, tNow + 3.2);
+
+        subGain.gain.setValueAtTime(0.0001, tNow);
+        subGain.gain.linearRampToValueAtTime(volume * 0.6, tNow + 0.8);
+        subGain.gain.exponentialRampToValueAtTime(0.0001, tNow + 3.5);
+
+        subOsc.connect(subGain);
+        subGain.connect(masterGain);
+        subOsc.start(tNow);
+        subOsc.stop(tNow + 3.6);
+      }, 7500);
+      track.timers.push(thunderTimer);
+
+    } else if (id === 'pink_noise') {
+      // Balanced Pink Noise (-3dB/octave slope)
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        b6 = white * 0.115926;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(3600, now);
+      noise.connect(filter);
+      filter.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(noise, filter);
+
+    } else if (id === 'green_noise') {
+      // Centered 500Hz nature-frequency spectrum
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.5;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      const bp1 = ctx.createBiquadFilter();
+      bp1.type = 'bandpass';
+      bp1.frequency.setValueAtTime(500, now);
+      bp1.Q.setValueAtTime(1.1, now);
+      const bp2 = ctx.createBiquadFilter();
+      bp2.type = 'bandpass';
+      bp2.frequency.setValueAtTime(500, now);
+      bp2.Q.setValueAtTime(1.1, now);
+      noise.connect(bp1);
+      bp1.connect(bp2);
+      bp2.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(noise, bp1, bp2);
+
+    } else if (id === 'cat_purr') {
+      // Warm rhythmic sleeping cat purr
+      const purrOsc = ctx.createOscillator();
+      const purrHarmonic = ctx.createOscillator();
+      const purrFilter = ctx.createBiquadFilter();
+      const purrGain = ctx.createGain();
+
+      purrOsc.type = 'triangle';
+      purrOsc.frequency.setValueAtTime(26, now);
+      purrHarmonic.type = 'sine';
+      purrHarmonic.frequency.setValueAtTime(52, now);
+
+      purrFilter.type = 'lowpass';
+      purrFilter.frequency.setValueAtTime(130, now);
+
+      // Tremolo flutter
+      const tremolo = ctx.createOscillator();
+      tremolo.frequency.setValueAtTime(24, now);
+      const tremGain = ctx.createGain();
+      tremGain.gain.setValueAtTime(volume * 0.25, now);
+      tremolo.connect(tremGain);
+      tremGain.connect(purrGain.gain);
+
+      purrOsc.connect(purrFilter);
+      purrHarmonic.connect(purrFilter);
+      purrFilter.connect(purrGain);
+      purrGain.connect(masterGain);
+
+      purrOsc.start(now);
+      purrHarmonic.start(now);
+      tremolo.start(now);
+      track.nodes.push(purrOsc, purrHarmonic, purrFilter, purrGain, tremolo, tremGain);
+
+    } else if (id === 'box_fan') {
+      // Motor hum + steady air turbulence
+      const motorOsc = ctx.createOscillator();
+      motorOsc.type = 'triangle';
+      motorOsc.frequency.setValueAtTime(60, now);
+      const motorGain = ctx.createGain();
+      motorGain.gain.setValueAtTime(volume * 0.35, now);
+      motorOsc.connect(motorGain);
+      motorGain.connect(masterGain);
+      motorOsc.start(now);
+
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.45;
+      }
+      const airNoise = ctx.createBufferSource();
+      airNoise.buffer = buffer;
+      airNoise.loop = true;
+      const airFilter = ctx.createBiquadFilter();
+      airFilter.type = 'bandpass';
+      airFilter.frequency.setValueAtTime(320, now);
+      airFilter.Q.setValueAtTime(0.9, now);
+      airNoise.connect(airFilter);
+      airFilter.connect(masterGain);
+      airNoise.start(now);
+      track.nodes.push(motorOsc, motorGain, airNoise, airFilter);
+
+    } else if (id === 'tibetan_bowl') {
+      // 432Hz calming meditation singing bowl
+      const bowlTimer = setInterval(() => {
+        if (!activeSoundTracks.has('tibetan_bowl')) return;
+        const bCtx = getAudioContext();
+        if (!bCtx || !track.gainNode) return;
+        const bNow = bCtx.currentTime;
+
+        const fundamental = bCtx.createOscillator();
+        const overtone = bCtx.createOscillator();
+        const bGain = bCtx.createGain();
+
+        fundamental.type = 'sine';
+        fundamental.frequency.setValueAtTime(432, bNow);
+        overtone.type = 'sine';
+        overtone.frequency.setValueAtTime(864.5, bNow);
+
+        bGain.gain.setValueAtTime(0.0001, bNow);
+        bGain.gain.linearRampToValueAtTime(volume * 0.5, bNow + 0.15);
+        bGain.gain.exponentialRampToValueAtTime(0.0001, bNow + 4.8);
+
+        fundamental.connect(bGain);
+        overtone.connect(bGain);
+        bGain.connect(masterGain);
+
+        fundamental.start(bNow);
+        overtone.start(bNow);
+        fundamental.stop(bNow + 5.0);
+        overtone.stop(bNow + 5.0);
+      }, 5200);
+      track.timers.push(bowlTimer);
+
+    } else if (id === 'clock_tick') {
+      // Grounding wooden clock cadence
+      let isTick = true;
+      const clockTimer = setInterval(() => {
+        if (!activeSoundTracks.has('clock_tick')) return;
+        const cCtx = getAudioContext();
+        if (!cCtx || !track.gainNode) return;
+        const cNow = cCtx.currentTime;
+
+        const osc = cCtx.createOscillator();
+        const g = cCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(isTick ? 780 : 640, cNow);
+        osc.frequency.exponentialRampToValueAtTime(140, cNow + 0.025);
+
+        g.gain.setValueAtTime(volume * 0.45, cNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, cNow + 0.03);
+
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(cNow);
+        osc.stop(cNow + 0.035);
+        isTick = !isTick;
+      }, 500);
+      track.timers.push(clockTimer);
+
+    } else if (id === 'morning_birds') {
+      // Gentle meadow air + periodic morning birdsong
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.02 * white) / 1.02;
+        last = data[i];
+      }
+      const wind = ctx.createBufferSource();
+      wind.buffer = buffer;
+      wind.loop = true;
+      const windFilter = ctx.createBiquadFilter();
+      windFilter.type = 'lowpass';
+      windFilter.frequency.setValueAtTime(380, now);
+      wind.connect(windFilter);
+      windFilter.connect(masterGain);
+      wind.start(now);
+      track.nodes.push(wind, windFilter);
+
+      const birdTimer = setInterval(() => {
+        if (!activeSoundTracks.has('morning_birds')) return;
+        const mCtx = getAudioContext();
+        if (!mCtx || !track.gainNode) return;
+        const mNow = mCtx.currentTime;
+        const baseFreq = 2400 + Math.random() * 600;
+
+        [0, 0.12, 0.24].forEach((offset) => {
+          const osc = mCtx.createOscillator();
+          const g = mCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(baseFreq, mNow + offset);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.2, mNow + offset + 0.06);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.95, mNow + offset + 0.1);
+          g.gain.setValueAtTime(volume * 0.22, mNow + offset);
+          g.gain.exponentialRampToValueAtTime(0.0001, mNow + offset + 0.11);
+          osc.connect(g);
+          g.connect(masterGain);
+          osc.start(mNow + offset);
+          osc.stop(mNow + offset + 0.12);
+        });
+      }, 3400);
+      track.timers.push(birdTimer);
+
+    } else if (id === 'underwater') {
+      // Deep submerged resonance
+      const subOsc = ctx.createOscillator();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(58, now);
+      const subGain = ctx.createGain();
+      subGain.gain.setValueAtTime(volume * 0.35, now);
+      subOsc.connect(subGain);
+      subGain.connect(masterGain);
+      subOsc.start(now);
+
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.5;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(160, now);
+      noise.connect(filter);
+      filter.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(subOsc, subGain, noise, filter);
+
+    } else if (id === 'cafe') {
+      // Cozy Raindrop Cafe
+      const bufferSize = ctx.sampleRate * 3;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.02 * white) / 1.02;
+        last = data[i];
+      }
+      const room = ctx.createBufferSource();
+      room.buffer = buffer;
+      room.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(300, now);
+      room.connect(filter);
+      filter.connect(masterGain);
+      room.start(now);
+      track.nodes.push(room, filter);
+
+    } else if (id === 'library') {
+      // Sanctuary Quiet Library
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.15;
+      }
+      const room = ctx.createBufferSource();
+      room.buffer = buffer;
+      room.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(600, now);
+      room.connect(filter);
+      filter.connect(masterGain);
+      room.start(now);
+      track.nodes.push(room, filter);
+
+    } else if (id === 'campfire') {
+      // Night Pine Campfire
+      const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
+      const fireData = fireBuffer.getChannelData(0);
+      let lastFire = 0;
+      for (let i = 0; i < ctx.sampleRate * 3; i++) {
+        const white = Math.random() * 2 - 1;
+        fireData[i] = (lastFire + 0.025 * white) / 1.025;
+        lastFire = fireData[i];
+      }
+      const fireSrc = ctx.createBufferSource();
+      fireSrc.buffer = fireBuffer;
+      fireSrc.loop = true;
+      const fireFilter = ctx.createBiquadFilter();
+      fireFilter.type = 'lowpass';
+      fireFilter.frequency.setValueAtTime(240, now);
+      fireSrc.connect(fireFilter);
+      fireFilter.connect(masterGain);
+      fireSrc.start(now);
+      track.nodes.push(fireSrc, fireFilter);
+
+      const crackleTimer = setInterval(() => {
+        if (!activeSoundTracks.has('campfire')) return;
+        const cCtx = getAudioContext();
+        if (!cCtx || !track.gainNode) return;
+        const cNow = cCtx.currentTime;
+        if (Math.random() > 0.35) {
+          const pop = cCtx.createOscillator();
+          const g = cCtx.createGain();
+          pop.type = 'triangle';
+          pop.frequency.setValueAtTime(1400 + Math.random() * 1200, cNow);
+          g.gain.setValueAtTime(volume * 0.35, cNow);
+          g.gain.exponentialRampToValueAtTime(0.0001, cNow + 0.03);
+          pop.connect(g);
+          g.connect(masterGain);
+          pop.start(cNow);
+          pop.stop(cNow + 0.035);
+        }
+      }, 250);
+      track.timers.push(crackleTimer);
 
     } else if (id === 'ocean') {
       const bufferSize = ctx.sampleRate * 4;
@@ -804,31 +1352,24 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         b2 = 0.96900 * b2 + white * 0.1538520;
         data[i] = (b0 + b1 + b2) * 0.35;
       }
-
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
-
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(450, now);
-
       const lfo = ctx.createOscillator();
       lfo.type = 'sine';
       lfo.frequency.setValueAtTime(0.12, now);
-
       const lfoGain = ctx.createGain();
       lfoGain.gain.setValueAtTime(320, now);
-
       lfo.connect(lfoGain);
       lfoGain.connect(filter.frequency);
-
       noise.connect(filter);
       filter.connect(masterGain);
-
       noise.start();
       lfo.start();
-      activeSoundscapeNodes.push(noise, filter, lfo, lfoGain, masterGain);
+      track.nodes.push(noise, filter, lfo, lfoGain);
 
     } else if (id === 'brown_noise') {
       const bufferSize = ctx.sampleRate * 3;
@@ -841,20 +1382,17 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         lastOut = data[i];
         data[i] *= 3.8;
       }
-
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
-
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(200, now);
       filter.Q.setValueAtTime(0.7, now);
-
       noise.connect(filter);
       filter.connect(masterGain);
       noise.start();
-      activeSoundscapeNodes.push(noise, filter, masterGain);
+      track.nodes.push(noise, filter);
 
     } else if (id === 'stream') {
       const bufferSize = ctx.sampleRate * 2;
@@ -863,47 +1401,21 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       for (let i = 0; i < bufferSize; i++) {
         data[i] = (Math.random() * 2 - 1) * 0.4;
       }
-
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
-
       const bp1 = ctx.createBiquadFilter();
       bp1.type = 'bandpass';
       bp1.frequency.setValueAtTime(750, now);
-      bp1.Q.setValueAtTime(1.2, now);
-
       const bp2 = ctx.createBiquadFilter();
       bp2.type = 'bandpass';
       bp2.frequency.setValueAtTime(1600, now);
-      bp2.Q.setValueAtTime(1.8, now);
-
       noise.connect(bp1);
       noise.connect(bp2);
       bp1.connect(masterGain);
       bp2.connect(masterGain);
       noise.start();
-      activeSoundscapeNodes.push(noise, bp1, bp2, masterGain);
-
-      const bubbleTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'stream') return;
-        const sCtx = getAudioContext();
-        if (!sCtx || !activeSoundscapeGain) return;
-        const bNow = sCtx.currentTime;
-        const osc = sCtx.createOscillator();
-        const g = sCtx.createGain();
-        osc.type = 'sine';
-        const startFreq = 400 + Math.random() * 450;
-        osc.frequency.setValueAtTime(startFreq, bNow);
-        osc.frequency.exponentialRampToValueAtTime(startFreq * 1.5, bNow + 0.05);
-        g.gain.setValueAtTime(volume * 0.2, bNow);
-        g.gain.exponentialRampToValueAtTime(0.0001, bNow + 0.06);
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start(bNow);
-        osc.stop(bNow + 0.07);
-      }, 280);
-      activeSoundscapeTimers.push(bubbleTimer);
+      track.nodes.push(noise, bp1, bp2);
 
     } else if (id === 'crickets') {
       const bufferSize = ctx.sampleRate * 2;
@@ -924,12 +1436,12 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       breeze.connect(breezeFilter);
       breezeFilter.connect(masterGain);
       breeze.start();
-      activeSoundscapeNodes.push(breeze, breezeFilter, masterGain);
+      track.nodes.push(breeze, breezeFilter);
 
       const cricketTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'crickets') return;
+        if (!activeSoundTracks.has('crickets')) return;
         const cCtx = getAudioContext();
-        if (!cCtx || !activeSoundscapeGain) return;
+        if (!cCtx || !track.gainNode) return;
         const cNow = cCtx.currentTime;
         [0, 0.04, 0.08].forEach((offset) => {
           const osc = cCtx.createOscillator();
@@ -944,7 +1456,7 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
           osc.stop(cNow + offset + 0.03);
         });
       }, 1400);
-      activeSoundscapeTimers.push(cricketTimer);
+      track.timers.push(cricketTimer);
 
     } else if (id === 'space_drone') {
       const freqs = [55, 110, 164.81, 220];
@@ -957,53 +1469,54 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         osc.connect(g);
         g.connect(masterGain);
         osc.start(now);
-        activeSoundscapeNodes.push(osc, g);
+        track.nodes.push(osc, g);
       });
-      activeSoundscapeNodes.push(masterGain);
 
     } else if (id === 'wind_chimes') {
-      const chimePitches = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+      const chimePitches = [523.25, 659.25, 783.99, 880.0, 1046.5];
       const chimeTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'wind_chimes') return;
+        if (!activeSoundTracks.has('wind_chimes')) return;
         const wCtx = getAudioContext();
-        if (!wCtx || !activeSoundscapeGain) return;
+        if (!wCtx || !track.gainNode) return;
         const wNow = wCtx.currentTime;
-        const count = Math.random() > 0.5 ? 2 : 1;
-        for (let i = 0; i < count; i++) {
-          const delay = i * 0.15;
-          const pitch = chimePitches[Math.floor(Math.random() * chimePitches.length)];
-          const osc = wCtx.createOscillator();
-          const overtone = wCtx.createOscillator();
-          const g = wCtx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(pitch, wNow + delay);
-
-          overtone.type = 'sine';
-          overtone.frequency.setValueAtTime(pitch * 2.76, wNow + delay);
-
-          g.gain.setValueAtTime(volume * 0.35, wNow + delay);
-          g.gain.exponentialRampToValueAtTime(0.0001, wNow + delay + 2.5);
-
-          osc.connect(g);
-          overtone.connect(g);
-          g.connect(masterGain);
-
-          osc.start(wNow + delay);
-          overtone.start(wNow + delay);
-          osc.stop(wNow + delay + 2.6);
-          overtone.stop(wNow + delay + 2.6);
-        }
+        const pitch = chimePitches[Math.floor(Math.random() * chimePitches.length)];
+        const osc = wCtx.createOscillator();
+        const g = wCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pitch, wNow);
+        g.gain.setValueAtTime(volume * 0.35, wNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, wNow + 2.4);
+        osc.connect(g);
+        g.connect(masterGain);
+        osc.start(wNow);
+        osc.stop(wNow + 2.5);
       }, 1900);
-      activeSoundscapeTimers.push(chimeTimer);
-      activeSoundscapeNodes.push(masterGain);
+      track.timers.push(chimeTimer);
+
+    } else if (id === 'white_noise') {
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.55;
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(7000, now);
+      source.connect(filter);
+      filter.connect(masterGain);
+      source.start(now);
+      track.nodes.push(source, filter);
 
     } else if (id === 'train_chug') {
       let beat = 0;
       const trainTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'train_chug') return;
+        if (!activeSoundTracks.has('train_chug')) return;
         const tCtx = getAudioContext();
-        if (!tCtx || !activeSoundscapeGain) return;
+        if (!tCtx || !track.gainNode) return;
         const tNow = tCtx.currentTime;
 
         const bufferSize = Math.floor(tCtx.sampleRate * 0.12);
@@ -1047,11 +1560,9 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
 
         beat = (beat + 1) % 4;
       }, 260);
-      activeSoundscapeTimers.push(trainTimer);
-      activeSoundscapeNodes.push(masterGain);
+      track.timers.push(trainTimer);
 
     } else if (id === 'train_tracks') {
-      // 1. Continuous rail resonance hum
       const humBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
       const humData = humBuffer.getChannelData(0);
       let lastHum = 0;
@@ -1069,21 +1580,18 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       humSrc.connect(humFilter);
       humFilter.connect(masterGain);
       humSrc.start(now);
-      activeSoundscapeNodes.push(humSrc, humFilter, masterGain);
+      track.nodes.push(humSrc, humFilter);
 
-      // 2. Double click-clack rail cadence (wheels crossing track joints)
-      let railStep = 0;
       const railTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'train_tracks') return;
+        if (!activeSoundTracks.has('train_tracks')) return;
         const rCtx = getAudioContext();
-        if (!rCtx || !activeSoundscapeGain) return;
+        if (!rCtx || !track.gainNode) return;
         const rNow = rCtx.currentTime;
 
         [0, 0.11].forEach((offset, idx) => {
           const osc = rCtx.createOscillator();
           const g = rCtx.createGain();
           const filter = rCtx.createBiquadFilter();
-          
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(idx === 0 ? 520 : 410, rNow + offset);
           osc.frequency.exponentialRampToValueAtTime(110, rNow + offset + 0.05);
@@ -1102,13 +1610,10 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
           osc.start(rNow + offset);
           osc.stop(rNow + offset + 0.07);
         });
-
-        railStep++;
       }, 540);
-      activeSoundscapeTimers.push(railTimer);
+      track.timers.push(railTimer);
 
     } else if (id === 'driving') {
-      // 1. Engine low cabin drone
       const osc1 = ctx.createOscillator();
       const osc2 = ctx.createOscillator();
       const oscGain = ctx.createGain();
@@ -1130,9 +1635,8 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
 
       osc1.start(now);
       osc2.start(now);
-      activeSoundscapeNodes.push(osc1, osc2, engineFilter, oscGain);
+      track.nodes.push(osc1, osc2, engineFilter, oscGain);
 
-      // 2. Cabin road texture & highway air stream
       const bufferSize = ctx.sampleRate * 2;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1154,10 +1658,9 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       roadNoise.connect(roadFilter);
       roadFilter.connect(masterGain);
       roadNoise.start(now);
-      activeSoundscapeNodes.push(roadNoise, roadFilter, masterGain);
+      track.nodes.push(roadNoise, roadFilter);
 
     } else if (id === 'city') {
-      // 1. Distant city muffled low murmur
       const bufferSize = ctx.sampleRate * 3;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1178,28 +1681,9 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       cityNoise.connect(cityFilter);
       cityFilter.connect(masterGain);
       cityNoise.start(now);
-      activeSoundscapeNodes.push(cityNoise, cityFilter);
-
-      // 2. Soft rain on street pavement
-      const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-      const rainData = rainBuffer.getChannelData(0);
-      for (let i = 0; i < ctx.sampleRate * 2; i++) {
-        rainData[i] = (Math.random() * 2 - 1) * 0.25;
-      }
-      const rainSource = ctx.createBufferSource();
-      rainSource.buffer = rainBuffer;
-      rainSource.loop = true;
-      const rainBandpass = ctx.createBiquadFilter();
-      rainBandpass.type = 'bandpass';
-      rainBandpass.frequency.setValueAtTime(1400, now);
-      rainBandpass.Q.setValueAtTime(1.1, now);
-      rainSource.connect(rainBandpass);
-      rainBandpass.connect(masterGain);
-      rainSource.start(now);
-      activeSoundscapeNodes.push(rainSource, rainBandpass, masterGain);
+      track.nodes.push(cityNoise, cityFilter);
 
     } else if (id === 'night_time') {
-      // 1. Soft dreamy nighttime harmonic pad (F3, C4, A4)
       const chord = [174.61, 261.63, 440.0];
       chord.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -1210,54 +1694,10 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
         osc.connect(g);
         g.connect(masterGain);
         osc.start(now);
-        activeSoundscapeNodes.push(osc, g);
+        track.nodes.push(osc, g);
       });
 
-      // 2. Summer night crickets with soft rhythm
-      const nightTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'night_time') return;
-        const nCtx = getAudioContext();
-        if (!nCtx || !activeSoundscapeGain) return;
-        const nNow = nCtx.currentTime;
-        [0, 0.05, 0.1].forEach((off) => {
-          const osc = nCtx.createOscillator();
-          const g = nCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(5100 + Math.random() * 180, nNow + off);
-          g.gain.setValueAtTime(volume * 0.18, nNow + off);
-          g.gain.exponentialRampToValueAtTime(0.0001, nNow + off + 0.035);
-          osc.connect(g);
-          g.connect(masterGain);
-          osc.start(nNow + off);
-          osc.stop(nNow + off + 0.04);
-        });
-      }, 1600);
-      activeSoundscapeTimers.push(nightTimer);
-      activeSoundscapeNodes.push(masterGain);
-
-    } else if (id === 'white_noise') {
-      const bufferSize = ctx.sampleRate * 2;
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * 0.55;
-      }
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.loop = true;
-
-      // Soft lowpass filter to prevent harshness on sensory sensitive ears
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(7000, now);
-
-      source.connect(filter);
-      filter.connect(masterGain);
-      source.start(now);
-      activeSoundscapeNodes.push(source, filter, masterGain);
-
     } else if (id === 'beach') {
-      // 1. Shoreline wave swells with ocean wash
       const bufferSize = ctx.sampleRate * 3;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1267,53 +1707,16 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
-
       const filter = ctx.createBiquadFilter();
       filter.type = 'bandpass';
       filter.frequency.setValueAtTime(450, now);
       filter.Q.setValueAtTime(0.7, now);
-
-      // Slow 6-second wave cycle
-      const lfo = ctx.createOscillator();
-      lfo.type = 'sine';
-      lfo.frequency.setValueAtTime(0.16, now);
-
-      const lfoGain = ctx.createGain();
-      lfoGain.gain.setValueAtTime(320, now);
-
-      lfo.connect(lfoGain);
-      lfoGain.connect(filter.frequency);
-
       noise.connect(filter);
       filter.connect(masterGain);
-
       noise.start(now);
-      lfo.start(now);
-      activeSoundscapeNodes.push(noise, filter, lfo, lfoGain, masterGain);
-
-      // 2. Faint distant seagull call every ~8 seconds
-      const gullTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'beach') return;
-        const bCtx = getAudioContext();
-        if (!bCtx || !activeSoundscapeGain) return;
-        const bNow = bCtx.currentTime;
-        const osc = bCtx.createOscillator();
-        const g = bCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1800, bNow);
-        osc.frequency.exponentialRampToValueAtTime(2400, bNow + 0.18);
-        osc.frequency.exponentialRampToValueAtTime(1900, bNow + 0.45);
-        g.gain.setValueAtTime(volume * 0.08, bNow);
-        g.gain.exponentialRampToValueAtTime(0.0001, bNow + 0.5);
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start(bNow);
-        osc.stop(bNow + 0.52);
-      }, 7800);
-      activeSoundscapeTimers.push(gullTimer);
+      track.nodes.push(noise, filter);
 
     } else if (id === 'forest') {
-      // 1. Wind through canopy pine needles
       const bufferSize = ctx.sampleRate * 3;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1326,50 +1729,15 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       const wind = ctx.createBufferSource();
       wind.buffer = buffer;
       wind.loop = true;
-
       const windFilter = ctx.createBiquadFilter();
       windFilter.type = 'lowpass';
       windFilter.frequency.setValueAtTime(420, now);
-      windFilter.Q.setValueAtTime(1.0, now);
-
-      const windLfo = ctx.createOscillator();
-      windLfo.type = 'sine';
-      windLfo.frequency.setValueAtTime(0.2, now);
-      const windLfoGain = ctx.createGain();
-      windLfoGain.gain.setValueAtTime(180, now);
-      windLfo.connect(windLfoGain);
-      windLfoGain.connect(windFilter.frequency);
-
       wind.connect(windFilter);
       windFilter.connect(masterGain);
       wind.start(now);
-      windLfo.start(now);
-      activeSoundscapeNodes.push(wind, windFilter, windLfo, windLfoGain, masterGain);
-
-      // 2. Occasional sweet woodland bird whistle
-      const birdTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'forest') return;
-        const fCtx = getAudioContext();
-        if (!fCtx || !activeSoundscapeGain) return;
-        const fNow = fCtx.currentTime;
-        const startPitch = 2100 + Math.random() * 500;
-        const osc = fCtx.createOscillator();
-        const g = fCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(startPitch, fNow);
-        osc.frequency.exponentialRampToValueAtTime(startPitch * 1.25, fNow + 0.12);
-        osc.frequency.exponentialRampToValueAtTime(startPitch * 0.9, fNow + 0.28);
-        g.gain.setValueAtTime(volume * 0.14, fNow);
-        g.gain.exponentialRampToValueAtTime(0.0001, fNow + 0.32);
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start(fNow);
-        osc.stop(fNow + 0.35);
-      }, 4200);
-      activeSoundscapeTimers.push(birdTimer);
+      track.nodes.push(wind, windFilter);
 
     } else if (id === 'fireplace') {
-      // 1. Warm low hearth flame rumble (pink-brown noise with gentle undulating breath)
       const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
       const fireData = fireBuffer.getChannelData(0);
       let lastFire = 0;
@@ -1381,250 +1749,75 @@ export function playProceduralSoundscape(id: SoundscapeId, volume = 0.08): void 
       const fireSrc = ctx.createBufferSource();
       fireSrc.buffer = fireBuffer;
       fireSrc.loop = true;
-
       const fireFilter = ctx.createBiquadFilter();
       fireFilter.type = 'lowpass';
       fireFilter.frequency.setValueAtTime(220, now);
-
-      // Flame flicker LFO
-      const flameLfo = ctx.createOscillator();
-      flameLfo.type = 'sine';
-      flameLfo.frequency.setValueAtTime(0.35, now);
-      const flameLfoGain = ctx.createGain();
-      flameLfoGain.gain.setValueAtTime(60, now);
-      flameLfo.connect(flameLfoGain);
-      flameLfoGain.connect(fireFilter.frequency);
-
       fireSrc.connect(fireFilter);
       fireFilter.connect(masterGain);
       fireSrc.start(now);
-      flameLfo.start(now);
-      activeSoundscapeNodes.push(fireSrc, fireFilter, flameLfo, flameLfoGain);
+      track.nodes.push(fireSrc, fireFilter);
 
-      // 2. Soft glowing ember hiss (air and warmth)
-      const hissBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-      const hissData = hissBuffer.getChannelData(0);
-      for (let i = 0; i < ctx.sampleRate * 2; i++) {
-        hissData[i] = (Math.random() * 2 - 1) * 0.12;
-      }
-      const hissSrc = ctx.createBufferSource();
-      hissSrc.buffer = hissBuffer;
-      hissSrc.loop = true;
-      const hissFilter = ctx.createBiquadFilter();
-      hissFilter.type = 'bandpass';
-      hissFilter.frequency.setValueAtTime(1400, now);
-      hissFilter.Q.setValueAtTime(0.8, now);
-      const hissGain = ctx.createGain();
-      hissGain.gain.setValueAtTime(volume * 0.25, now);
-      hissSrc.connect(hissFilter);
-      hissFilter.connect(hissGain);
-      hissGain.connect(masterGain);
-      hissSrc.start(now);
-      activeSoundscapeNodes.push(hissSrc, hissFilter, hissGain);
-
-      // 3. Authentic natural wood crackles, ember snaps & resin pops
       const crackleTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'fireplace') return;
+        if (!activeSoundTracks.has('fireplace')) return;
         const mCtx = getAudioContext();
-        if (!mCtx || !activeSoundscapeGain) return;
+        if (!mCtx || !track.gainNode) return;
         const mNow = mCtx.currentTime;
-
-        // Random chance of crackle snap
         if (Math.random() > 0.3) {
-          const isDeepPop = Math.random() < 0.25; // 25% deep wood pop, 75% light snap
-          const dur = isDeepPop ? 0.06 : 0.025;
-          const pop = mCtx.createBufferSource();
-          const popBuf = mCtx.createBuffer(1, Math.floor(mCtx.sampleRate * dur), mCtx.sampleRate);
-          const pData = popBuf.getChannelData(0);
-          const decay = isDeepPop ? 80 : 180;
-          for (let p = 0; p < pData.length; p++) {
-            pData[p] = (Math.random() * 2 - 1) * Math.exp(-p / decay);
-          }
-          pop.buffer = popBuf;
-
-          const popFilter = mCtx.createBiquadFilter();
-          popFilter.type = isDeepPop ? 'bandpass' : 'highpass';
-          popFilter.frequency.setValueAtTime(isDeepPop ? 450 + Math.random() * 250 : 1600 + Math.random() * 800, mNow);
-          if (isDeepPop) popFilter.Q.setValueAtTime(3.0, mNow);
-
-          const popGain = mCtx.createGain();
-          const popVol = volume * (isDeepPop ? 0.6 : 0.4) * (0.6 + Math.random() * 0.8);
-          popGain.gain.setValueAtTime(popVol, mNow);
-          popGain.gain.exponentialRampToValueAtTime(0.0001, mNow + dur);
-
-          pop.connect(popFilter);
-          popFilter.connect(popGain);
-          popGain.connect(masterGain);
-          pop.start(mNow);
+          const osc = mCtx.createOscillator();
+          const g = mCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1400 + Math.random() * 1200, mNow);
+          g.gain.setValueAtTime(volume * 0.4, mNow);
+          g.gain.exponentialRampToValueAtTime(0.0001, mNow + 0.03);
+          osc.connect(g);
+          g.connect(masterGain);
+          osc.start(mNow);
+          osc.stop(mNow + 0.035);
         }
       }, 220);
-      activeSoundscapeTimers.push(crackleTimer);
-      activeSoundscapeNodes.push(masterGain);
+      track.timers.push(crackleTimer);
 
     } else if (id === 'medieval_tavern') {
-      // 1. Ancient Bourdon & Bowed Vielle Open-Fifth Drone (D2, A2, D3)
       const dronePitches = [73.42, 110.00, 146.83];
       dronePitches.forEach((dPitch, dIdx) => {
         const dOsc = ctx.createOscillator();
         const dGain = ctx.createGain();
         const dFilter = ctx.createBiquadFilter();
-
         dOsc.type = dIdx === 0 ? 'sawtooth' : 'triangle';
-        dOsc.frequency.setValueAtTime(dPitch + (dIdx === 1 ? 0.25 : -0.2), now);
-
+        dOsc.frequency.setValueAtTime(dPitch, now);
         dFilter.type = 'lowpass';
         dFilter.frequency.setValueAtTime(360, now);
-
-        dGain.gain.setValueAtTime(volume * (dIdx === 0 ? 0.16 : 0.2), now);
-
-        // Organic slow drone undulation
-        const dLfo = ctx.createOscillator();
-        dLfo.type = 'sine';
-        dLfo.frequency.setValueAtTime(0.14 + dIdx * 0.03, now);
-        const dLfoGain = ctx.createGain();
-        dLfoGain.gain.setValueAtTime(volume * 0.04, now);
-        dLfo.connect(dLfoGain);
-        dLfoGain.connect(dGain.gain);
-
+        dGain.gain.setValueAtTime(volume * 0.18, now);
         dOsc.connect(dFilter);
         dFilter.connect(dGain);
         dGain.connect(masterGain);
-
         dOsc.start(now);
-        dLfo.start(now);
-        activeSoundscapeNodes.push(dOsc, dFilter, dGain, dLfo, dLfoGain);
+        track.nodes.push(dOsc, dFilter, dGain);
       });
 
-      // 2. Celtic Harp & Plucked Dulcimer Arpeggios (Modal Chords in D Dorian)
-      const harpChords = [
-        [146.83, 220.00, 293.66, 349.23, 440.00], // D3, A3, D4, F4, A4 (D min)
-        [130.81, 196.00, 261.63, 329.63, 392.00], // C3, G3, C4, E4, G4 (C maj)
-        [98.00, 146.83, 246.94, 293.66, 392.00],  // G2, D3, B3, D4, G4 (G maj)
-        [146.83, 174.61, 220.00, 293.66, 349.23], // D3, F3, A3, D4, F4 (D min)
-      ];
-      let chordIndex = 0;
-      const harpTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'medieval_tavern') return;
-        const hCtx = getAudioContext();
-        if (!hCtx || !activeSoundscapeGain) return;
-        const hNow = hCtx.currentTime;
-
-        const chord = harpChords[chordIndex % harpChords.length];
-        chordIndex++;
-
-        chord.forEach((notePitch, pIdx) => {
-          const pluckTime = hNow + pIdx * 0.22;
-          const osc1 = hCtx.createOscillator();
-          const osc2 = hCtx.createOscillator();
-          const pFilter = hCtx.createBiquadFilter();
-          const pGain = hCtx.createGain();
-
-          osc1.type = 'triangle';
-          osc1.frequency.setValueAtTime(notePitch, pluckTime);
-
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(notePitch * 2.01, pluckTime); // string harmonic
-
-          pFilter.type = 'lowpass';
-          pFilter.frequency.setValueAtTime(1900, pluckTime);
-          pFilter.frequency.exponentialRampToValueAtTime(340, pluckTime + 1.2);
-
-          pGain.gain.setValueAtTime(volume * 0.26, pluckTime);
-          pGain.gain.exponentialRampToValueAtTime(0.0001, pluckTime + 1.7);
-
-          osc1.connect(pFilter);
-          osc2.connect(pFilter);
-          pFilter.connect(pGain);
-          pGain.connect(masterGain);
-
-          osc1.start(pluckTime);
-          osc2.start(pluckTime);
-          osc1.stop(pluckTime + 1.75);
-          osc2.stop(pluckTime + 1.75);
-        });
-      }, 2600);
-      activeSoundscapeTimers.push(harpTimer);
-
-      // 3. Wandering Renaissance Wooden Flute / Whistle Melodies
-      const fluteMelodies = [
-        [440.00, 523.25, 493.88, 440.00, 392.00, 440.00], // A4, C5, B4, A4, G4, A4
-        [293.66, 349.23, 392.00, 440.00, 349.23, 293.66], // D4, F4, G4, A4, F4, D4
-        [329.63, 349.23, 329.63, 293.66, 261.63, 293.66], // E4, F4, E4, D4, C4, D4
-        [440.00, 392.00, 349.23, 392.00, 440.00, 523.25, 440.00], // A4, G4, F4, G4, A4, C5, A4
-      ];
-      let flutePhraseIndex = 0;
-      const fluteTimer = setInterval(() => {
-        if (activeSoundscapeId !== 'medieval_tavern') return;
-        const flCtx = getAudioContext();
-        if (!flCtx || !activeSoundscapeGain) return;
-        const flNow = flCtx.currentTime;
-
-        const phrase = fluteMelodies[flutePhraseIndex % fluteMelodies.length];
-        flutePhraseIndex++;
-
-        phrase.forEach((notePitch, nIdx) => {
-          const noteTime = flNow + nIdx * 0.44;
-          const noteDur = 0.40;
-
-          // Warm flute core
-          const fOsc = flCtx.createOscillator();
-          fOsc.type = 'sine';
-          fOsc.frequency.setValueAtTime(notePitch, noteTime);
-
-          // Gentle vibrato (after breath onset)
-          const vibOsc = flCtx.createOscillator();
-          vibOsc.frequency.setValueAtTime(4.8, noteTime);
-          const vibGain = flCtx.createGain();
-          vibGain.gain.setValueAtTime(0, noteTime);
-          vibGain.gain.setValueAtTime(0, noteTime + 0.12);
-          vibGain.gain.linearRampToValueAtTime(3.2, noteTime + 0.35);
-          vibOsc.connect(vibGain);
-          vibGain.connect(fOsc.frequency);
-
-          // Woodwind breath noise
-          const bBuffer = flCtx.createBuffer(1, Math.floor(flCtx.sampleRate * noteDur), flCtx.sampleRate);
-          const bData = bBuffer.getChannelData(0);
-          for (let b = 0; b < bData.length; b++) {
-            bData[b] = (Math.random() * 2 - 1) * 0.07;
-          }
-          const bSrc = flCtx.createBufferSource();
-          bSrc.buffer = bBuffer;
-          const bFilter = flCtx.createBiquadFilter();
-          bFilter.type = 'bandpass';
-          bFilter.frequency.setValueAtTime(notePitch * 2.2, noteTime);
-          bFilter.Q.setValueAtTime(2.0, noteTime);
-          bSrc.connect(bFilter);
-
-          // Soft expressive note envelope
-          const fGain = flCtx.createGain();
-          fGain.gain.setValueAtTime(0.0001, noteTime);
-          fGain.gain.linearRampToValueAtTime(volume * 0.30, noteTime + 0.06);
-          fGain.gain.setValueAtTime(volume * 0.26, noteTime + noteDur - 0.08);
-          fGain.gain.exponentialRampToValueAtTime(0.0001, noteTime + noteDur);
-
-          fOsc.connect(fGain);
-          bFilter.connect(fGain);
-          fGain.connect(masterGain);
-
-          fOsc.start(noteTime);
-          vibOsc.start(noteTime);
-          bSrc.start(noteTime);
-
-          fOsc.stop(noteTime + noteDur + 0.05);
-          vibOsc.stop(noteTime + noteDur + 0.05);
-          bSrc.stop(noteTime + noteDur + 0.05);
-        });
-      }, 5200);
-      activeSoundscapeTimers.push(fluteTimer);
-      activeSoundscapeNodes.push(masterGain);
+    } else {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, now);
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(250, now);
+      osc.connect(filter);
+      filter.connect(masterGain);
+      osc.start(now);
+      track.nodes.push(osc, filter);
     }
   } catch (e) {
-    console.error('BeeYou Soundscape playback error:', e);
+    console.error('Error starting procedural track:', e);
   }
 }
 
+export function playProceduralSoundscape(id: SoundscapeId, volume = 0.50): void {
+  playSoundscape(id, volume);
+}
+
 // Backward-compatible toggle for calming toolkit
-export function toggleSoothingNoise(enable: boolean, volume = 0.06) {
+export function toggleSoothingNoise(enable: boolean, volume = 0.50) {
   if (enable) {
     playSoundscape('ocean', volume);
   } else {

@@ -15,7 +15,10 @@ import {
   Crown,
   Play,
   Square,
-  Sliders
+  Sliders,
+  Layers,
+  Trash2,
+  Plus
 } from 'lucide-react';
 import { 
   playChime, 
@@ -23,8 +26,9 @@ import {
   stopSoundscape, 
   setSoundscapeVolume, 
   getSavedSoundscapeVolume,
-  subscribeToSoundscape, 
-  getActiveSoundscape, 
+  subscribeToSoundscapes, 
+  getActiveSoundscapes, 
+  isSoundscapeActive,
   SOUNDSCAPES_CATALOG 
 } from '../utils/audio';
 import { SoundscapeId } from '../types';
@@ -59,9 +63,15 @@ export const CopingToolkitModal: React.FC = () => {
   const [timerSecondsLeft, setTimerSecondsLeft] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // Soundscape state with persistent volume memory
-  const [activeSoundId, setActiveSoundId] = useState<SoundscapeId | null>(() => getActiveSoundscape());
-  const [soundVolume, setSoundVolume] = useState<number>(() => getSavedSoundscapeVolume(getActiveSoundscape()));
+  // Multi-track combinable soundscape state with persistent volume memory
+  const [activeSoundIds, setActiveSoundIds] = useState<SoundscapeId[]>(() => getActiveSoundscapes());
+  const [soundVolumes, setSoundVolumes] = useState<Record<string, number>>(() => {
+    const map: Record<string, number> = {};
+    SOUNDSCAPES_CATALOG.forEach((s) => {
+      map[s.id] = getSavedSoundscapeVolume(s.id);
+    });
+    return map;
+  });
   const [soundFilter, setSoundFilter] = useState<'all' | 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient'>('all');
 
   // Grounding state
@@ -70,13 +80,17 @@ export const CopingToolkitModal: React.FC = () => {
   // Strategy category filter
   const [strategyFilter, setStrategyFilter] = useState<string>('all');
 
-  // Subscribe to live soundscape changes
+  // Subscribe to live multi-track soundscape changes
   useEffect(() => {
-    const unsub = subscribeToSoundscape((id) => {
-      setActiveSoundId(id);
-      if (id) {
-        setSoundVolume(getSavedSoundscapeVolume(id));
-      }
+    const unsub = subscribeToSoundscapes((ids) => {
+      setActiveSoundIds(ids);
+      setSoundVolumes((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => {
+          next[id] = getSavedSoundscapeVolume(id);
+        });
+        return next;
+      });
     });
     return () => unsub();
   }, []);
@@ -525,7 +539,11 @@ export const CopingToolkitModal: React.FC = () => {
                   <h3 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
                     <span>{t('Sensory Room Soundscapes')}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-bold">
-                      {activeSoundId ? t('1 Active') : t('Offline Audio')}
+                      {activeSoundIds.length === 0 
+                        ? t('Offline Audio') 
+                        : activeSoundIds.length === 1 
+                        ? t('1 Active Sound') 
+                        : `${activeSoundIds.length} ${t('Active Sounds Combined')}`}
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
@@ -533,63 +551,116 @@ export const CopingToolkitModal: React.FC = () => {
                   </p>
                 </div>
 
-                {activeSoundId && (
-                  <div className="flex items-center gap-2 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200">
-                    <span className="text-xs font-bold text-teal-800">{t('Vol')}: {Math.round(soundVolume * 100)}%</span>
-                    <input
-                      type="range"
-                      min="0.05"
-                      max="1.0"
-                      step="0.05"
-                      value={soundVolume}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setSoundVolume(val);
-                        setSoundscapeVolume(val);
-                      }}
-                      className="w-20 accent-teal-600 cursor-pointer"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        stopSoundscape();
-                      }}
-                      className="px-2 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-black text-[11px] cursor-pointer"
-                    >
-                      {t('Stop')}
-                    </button>
-                  </div>
+                {activeSoundIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => stopSoundscape()}
+                    aria-label={t('Stop All Sounds')}
+                    className="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs cursor-pointer shadow-xs transition-colors flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+                    <span>{t('Stop All')}</span>
+                  </button>
                 )}
               </div>
 
               {/* Free vs Premium Notice if Basic */}
               {!isPremium && (
-                <div className="w-full p-2.5 rounded-xl bg-amber-50 border border-amber-200 mb-3 flex items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="w-full p-3 rounded-2xl bg-amber-50 border border-amber-200 mb-3 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Crown className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
                     <span className="text-amber-900 font-medium">
-                      {t('2 basic sounds included free. 15 specialized sensory soundscapes unlock with BeeYou Premium.')}
+                      {t('2 basic sounds included free. 27 specialized sensory soundscapes and combinable sound mixing unlock with BeeYou Premium.')}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => triggerUpgrade('Unlock All 17 Sensory Room Ambient Soundscapes')}
-                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shrink-0 cursor-pointer shadow-xs"
+                    onClick={() => triggerUpgrade('Unlock All 29 Soundscapes & Layered Sound Mixing')}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shrink-0 cursor-pointer shadow-xs transition-colors"
                   >
                     {t('15-Day Free Trial')}
                   </button>
                 </div>
               )}
 
+              {/* Combinable Multi-Track Sound Mixer Drawer */}
+              {activeSoundIds.length > 0 && (
+                <div className="w-full p-3 sm:p-3.5 rounded-2xl bg-teal-50/90 border border-teal-200 mb-3.5 flex flex-col gap-2.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-teal-700" aria-hidden="true" />
+                      <h4 className="text-xs sm:text-sm font-black text-teal-950">
+                        {t('Active Sound Mix')}
+                      </h4>
+                      <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-teal-200 text-teal-900">
+                        {activeSoundIds.length}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-teal-700 font-medium hidden sm:inline">
+                      {t('Adjust volumes individually or combine multiple layers')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {activeSoundIds.map((id) => {
+                      const item = SOUNDSCAPES_CATALOG.find((s) => s.id === id);
+                      if (!item) return null;
+                      const vol = soundVolumes[id] ?? 0.5;
+                      return (
+                        <div
+                          key={id}
+                          className="flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-teal-100 shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-lg shrink-0" aria-hidden="true">{item.emoji}</span>
+                            <div className="min-w-0">
+                              <p className="text-xs font-black text-slate-800 truncate">{t(item.name)}</p>
+                              <span className="text-[10px] font-bold text-teal-700">
+                                {t('Vol')}: {Math.round(vol * 100)}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <input
+                              type="range"
+                              min="0.01"
+                              max="1.0"
+                              step="0.01"
+                              value={vol}
+                              aria-label={`${t(item.name)} ${t('Volume')}`}
+                              onChange={(e) => {
+                                const val = parseFloat(e.target.value);
+                                setSoundVolumes((prev) => ({ ...prev, [id]: val }));
+                                setSoundscapeVolume(val, id);
+                              }}
+                              className="w-18 sm:w-24 accent-teal-600 cursor-pointer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => stopSoundscape(id)}
+                              aria-label={`${t('Stop')} ${t(item.name)}`}
+                              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-500 flex items-center justify-center cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-rose-500"
+                            >
+                              <X className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Soundscape Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-2.5 w-full shrink-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 w-full shrink-0">
                 {[
-                  { id: 'all', label: 'All Sounds (16)', emoji: '✨' },
+                  { id: 'all', label: 'All Sounds (29)', emoji: '✨' },
                   { id: 'nature', label: 'Nature', emoji: '🌿' },
                   { id: 'noise', label: 'Noise & Masking', emoji: '📻' },
-                  { id: 'focus', label: 'Focus & Travel', emoji: '🚗' },
+                  { id: 'focus', label: 'Focus & Study', emoji: '📚' },
+                  { id: 'ambient', label: 'Ambience & Zen', emoji: '☕' },
                   { id: 'special_interest', label: 'Trains & Fantasy', emoji: '🚂' },
-                  { id: 'ambient', label: 'Ambience', emoji: '🏙️' },
                 ].map((cat) => (
                   <button
                     key={cat.id}
@@ -598,7 +669,7 @@ export const CopingToolkitModal: React.FC = () => {
                       setSoundFilter(cat.id as any);
                       playChime('tap');
                     }}
-                    className={`px-2.5 py-1 rounded-xl font-black text-[11px] transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
                       soundFilter === cat.id
                         ? 'bg-teal-600 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -615,42 +686,113 @@ export const CopingToolkitModal: React.FC = () => {
                 {SOUNDSCAPES_CATALOG.filter(
                   (item) => soundFilter === 'all' || item.category === soundFilter
                 ).map((item) => {
-                  const isPlaying = activeSoundId === item.id;
+                  const isPlaying = activeSoundIds.includes(item.id);
                   const isLocked = item.isPremium && !isPremium;
+                  const vol = soundVolumes[item.id] ?? 0.5;
+
+                  if (isPlaying) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="w-full text-left p-3.5 rounded-2xl border-2 transition-all border-teal-500 bg-teal-50/80 shadow-md ring-2 ring-teal-300 flex flex-col justify-between gap-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-2 w-full">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0" aria-hidden="true">
+                              {item.emoji}
+                            </span>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <h4 className="font-black text-slate-800 text-xs sm:text-sm truncate">
+                                  {t(item.name)}
+                                </h4>
+                                {item.isPremium ? (
+                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
+                                    <Crown className="w-2.5 h-2.5" aria-hidden="true" />
+                                    <span>{t('Premium')}</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
+                                    {t('Free')}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-slate-500 block truncate">
+                                {item.tags.map(tg => t(tg)).join(' • ')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => stopSoundscape(item.id)}
+                            aria-label={`${t('Stop')} ${t(item.name)}`}
+                            className="px-2.5 py-1 rounded-xl bg-teal-600 hover:bg-rose-600 text-white flex items-center gap-1 text-[11px] font-black shadow-xs transition-colors cursor-pointer"
+                          >
+                            <Volume2 className="w-3.5 h-3.5 animate-pulse" aria-hidden="true" />
+                            <span>{t('Playing')}</span>
+                          </button>
+                        </div>
+
+                        {/* Direct adjustable volume slider on card */}
+                        <div className="flex items-center justify-between gap-2 bg-white/90 px-3 py-1.5 rounded-xl border border-teal-200">
+                          <span className="text-xs font-bold text-teal-900 flex items-center gap-1 shrink-0">
+                            <Sliders className="w-3 h-3 text-teal-600" aria-hidden="true" />
+                            <span>{t('Vol')}: {Math.round(vol * 100)}%</span>
+                          </span>
+                          <input
+                            type="range"
+                            min="0.01"
+                            max="1.0"
+                            step="0.01"
+                            value={vol}
+                            aria-label={`${t(item.name)} ${t('Volume')}`}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              setSoundVolumes((prev) => ({ ...prev, [item.id]: val }));
+                              setSoundscapeVolume(val, item.id);
+                            }}
+                            className="w-full max-w-[140px] accent-teal-600 cursor-pointer"
+                          />
+                        </div>
+
+                        <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                          {t(item.description)}
+                        </p>
+                      </div>
+                    );
+                  }
 
                   return (
                     <button
                       type="button"
                       key={item.id}
-                      aria-label={`Soundscape: ${item.name}. ${item.description}. ${isPlaying ? 'Currently playing. Tap to stop.' : isLocked ? 'Premium sound. Tap to unlock.' : 'Tap to play.'}`}
-                      aria-pressed={isPlaying}
+                      aria-label={`Soundscape: ${item.name}. ${item.description}. ${isLocked ? 'Premium sound. Tap to unlock.' : activeSoundIds.length > 0 && isPremium ? 'Tap to combine into active mix.' : 'Tap to play.'}`}
                       onClick={() => {
                         if (isLocked) {
                           triggerUpgrade(`Unlock ${item.name} & Full Sensory Room Library`);
                           return;
                         }
-                        if (isPlaying) {
-                          stopSoundscape();
-                        } else {
-                          playSoundscape(item.id, soundVolume);
+                        if (!isPremium && activeSoundIds.length > 0 && !activeSoundIds.includes(item.id)) {
+                          playSoundscape(item.id, vol, false);
+                          return;
                         }
+                        playSoundscape(item.id, vol, isPremium);
                       }}
-                      className={`w-full text-left p-3 min-h-[48px] rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
-                        isPlaying
-                          ? 'border-teal-500 bg-teal-50/80 shadow-md ring-2 ring-teal-300'
-                          : isLocked
+                      className={`w-full text-left p-3.5 min-h-[48px] rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
+                        isLocked
                           ? 'border-slate-200 bg-slate-50/60 opacity-85 hover:border-amber-300'
                           : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-xs'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-1.5 w-full">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-start justify-between gap-2 w-full">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0" aria-hidden="true">
                             {item.emoji}
                           </span>
-                          <div>
+                          <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <h4 className="font-black text-slate-800 text-xs sm:text-sm">
+                              <h4 className="font-black text-slate-800 text-xs sm:text-sm truncate">
                                 {t(item.name)}
                               </h4>
                               {item.isPremium ? (
@@ -664,25 +806,24 @@ export const CopingToolkitModal: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-slate-500 block line-clamp-1">
+                            <span className="text-[11px] text-slate-500 block truncate">
                               {item.tags.map(tg => t(tg)).join(' • ')}
                             </span>
                           </div>
                         </div>
 
-                        {/* Action status pill */}
                         <div>
                           {isLocked ? (
                             <span className="p-1.5 rounded-xl bg-amber-100 text-amber-800 flex items-center gap-1 text-[11px] font-bold">
                               <Lock className="w-3.5 h-3.5" aria-hidden="true" />
                             </span>
-                          ) : isPlaying ? (
-                            <span className="px-2 py-1 rounded-xl bg-teal-600 text-white flex items-center gap-1 text-[11px] font-black animate-pulse">
-                              <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
-                              <span>{t('Playing')}</span>
+                          ) : isPremium && activeSoundIds.length > 0 ? (
+                            <span className="px-2 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 flex items-center gap-1 text-[11px] font-bold transition-colors">
+                              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                              <span>{t('Add to Mix')}</span>
                             </span>
                           ) : (
-                            <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold">
+                            <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold transition-colors">
                               <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
                               <span>{t('Play')}</span>
                             </span>
