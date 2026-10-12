@@ -20,6 +20,7 @@ import {
   CircleDot
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 // ── Web Audio Synthesizer for Realistic Tactile Feedback ───────────────────────
 class FidgetAudioEngine {
@@ -277,14 +278,14 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                <span>{s.label}</span>
+                <span>{t(s.label)}</span>
               </button>
             );
           })}
         </div>
 
         <div className="text-right">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pops</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('Pops')}</p>
           <p className="text-sm font-black text-indigo-600">{popped.size} / {totalBubbles}</p>
         </div>
       </div>
@@ -333,14 +334,14 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
           className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>Flip & Reset</span>
+          <span>{t('Flip & Reset')}</span>
         </button>
         <button
           onClick={handlePopAll}
           className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Pop All</span>
+          <span>{t('Pop All')}</span>
         </button>
       </div>
     </div>
@@ -358,10 +359,10 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
   const [activeKey, setActiveKey] = useState<string | null>(null);
 
   const keys = [
-    { id: 'blue-1', label: 'Blue Clicky', switchType: 'blue' as const, sub: 'Loud & Crisp 🔊', color: 'border-blue-400 bg-blue-50 text-blue-900', led: 'bg-blue-400' },
-    { id: 'brown-1', label: 'Brown Tactile', switchType: 'brown' as const, sub: 'Soft Bump 🎧', color: 'border-amber-500 bg-amber-50 text-amber-900', led: 'bg-amber-400' },
-    { id: 'red-1', label: 'Red Linear', switchType: 'red' as const, sub: 'Smooth Bounce ☁️', color: 'border-rose-400 bg-rose-50 text-rose-900', led: 'bg-rose-400' },
-    { id: 'relay-1', label: 'Relay Clicker', switchType: 'relay' as const, sub: 'Industrial Snap ⚡', color: 'border-emerald-500 bg-emerald-50 text-emerald-900', led: 'bg-emerald-400' },
+    { id: 'blue-1', label: 'Blue Clicky', switchType: 'blue' as const, sub: 'Loud & Crisp', emoji: '🔊', color: 'border-blue-400 bg-blue-50 text-blue-900', led: 'bg-blue-400' },
+    { id: 'brown-1', label: 'Brown Tactile', switchType: 'brown' as const, sub: 'Soft Bump', emoji: '🎧', color: 'border-amber-500 bg-amber-50 text-amber-900', led: 'bg-amber-400' },
+    { id: 'red-1', label: 'Red Linear', switchType: 'red' as const, sub: 'Smooth Bounce', emoji: '☁️', color: 'border-rose-400 bg-rose-50 text-rose-900', led: 'bg-rose-400' },
+    { id: 'relay-1', label: 'Relay Clicker', switchType: 'relay' as const, sub: 'Industrial Snap', emoji: '⚡', color: 'border-emerald-500 bg-emerald-50 text-emerald-900', led: 'bg-emerald-400' },
   ];
 
   const handleClick = (k: typeof keys[0]) => {
@@ -375,8 +376,8 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex items-center justify-between w-full px-2">
-        <p className="text-xs font-bold text-slate-500">Press mechanical key switches</p>
-        <p className="text-xs font-black text-indigo-600">{clickCount} clicks</p>
+        <p className="text-xs font-bold text-slate-500">{t('Press mechanical key switches')}</p>
+        <p className="text-xs font-black text-indigo-600">{clickCount} {t('clicks')}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3.5 w-full max-w-sm">
@@ -396,8 +397,8 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
               }}
             >
               <div className={`w-2 h-2 rounded-full mb-2 transition-all ${k.led} ${isPressed ? 'ring-4 ring-white/80 scale-125' : 'opacity-60'}`} />
-              <span className="font-black text-sm">{k.label}</span>
-              <span className="text-[11px] font-medium opacity-75 mt-0.5">{k.sub}</span>
+              <span className="font-black text-sm">{t(k.label)}</span>
+              <span className="text-[11px] font-medium opacity-75 mt-0.5">{t(k.sub)} {k.emoji}</span>
             </button>
           );
         })}
@@ -421,7 +422,7 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
             : '0 8px 0 rgba(99,102,241,0.3), 0 10px 14px rgba(0,0,0,0.08)',
         }}
       >
-        <span>⌨️ Big Spacebar Clicker</span>
+        <span>⌨️ {t('Big Spacebar Clicker')}</span>
       </button>
     </div>
   );
@@ -532,9 +533,9 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
       <div className="flex items-center justify-between w-full px-2">
         <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
           {[
-            { id: 'bee' as const, label: 'Bee 🐝' },
-            { id: 'rainbow' as const, label: 'Neon 🌈' },
-            { id: 'midnight' as const, label: 'Galaxy 🌌' },
+            { id: 'bee' as const, label: 'Bee', emoji: '🐝' },
+            { id: 'rainbow' as const, label: 'Neon', emoji: '🌈' },
+            { id: 'midnight' as const, label: 'Galaxy', emoji: '🌌' },
           ].map((s) => (
             <button
               key={s.id}
@@ -543,14 +544,14 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
                 spinnerSkin === s.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'
               }`}
             >
-              {s.label}
+              {t(s.label)} {s.emoji}
             </button>
           ))}
         </div>
 
         <div className="text-right">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Speed</p>
-          <p className="text-sm font-black text-amber-500">{rpm} RPM <span className="text-[10px] text-slate-400">(Max: {maxRpm})</span></p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('Speed')}</p>
+          <p className="text-sm font-black text-amber-500">{rpm} RPM <span className="text-[10px] text-slate-400">({t('Max')}: {maxRpm})</span></p>
         </div>
       </div>
 
@@ -603,19 +604,19 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
           onClick={() => flickSpeed(-35)}
           className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
         >
-          ↺ Flick Left
+          ↺ {t('Flick Left')}
         </button>
         <button
           onClick={() => { velocityRef.current = 0; }}
           className="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all cursor-pointer"
         >
-          Stop
+          {t('Stop')}
         </button>
         <button
           onClick={() => flickSpeed(35)}
           className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
         >
-          Flick Right ↻
+          {t('Flick Right')} ↻
         </button>
       </div>
     </div>
@@ -650,9 +651,9 @@ const ToggleSwitchBoardToy: React.FC<ToggleBoardProps> = ({ soundEnabled, haptic
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex items-center justify-between w-full px-2">
-        <p className="text-xs font-bold text-slate-500">Satisfying switches, latches & relays</p>
+        <p className="text-xs font-bold text-slate-500">{t('Satisfying switches, latches & relays')}</p>
         <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-          <Zap className="w-3 h-3" /> Relay active
+          <Zap className="w-3 h-3" /> {t('Relay active')}
         </span>
       </div>
 
@@ -660,8 +661,8 @@ const ToggleSwitchBoardToy: React.FC<ToggleBoardProps> = ({ soundEnabled, haptic
         {/* Master Rocker Switch with Glow */}
         <div className="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-700">
           <div>
-            <p className="text-xs font-black uppercase tracking-wider text-slate-300">Master Circuit</p>
-            <p className="text-[10px] text-slate-400">Main illuminated rocker</p>
+            <p className="text-xs font-black uppercase tracking-wider text-slate-300">{t('Master Circuit')}</p>
+            <p className="text-[10px] text-slate-400">{t('Main illuminated rocker')}</p>
           </div>
           <button
             onClick={() => toggleSwitch('mainPower')}
@@ -674,7 +675,7 @@ const ToggleSwitchBoardToy: React.FC<ToggleBoardProps> = ({ soundEnabled, haptic
             <div className={`w-6 h-7 rounded-lg bg-white shadow-md flex items-center justify-center font-bold text-[9px] ${
               switches.mainPower ? 'text-emerald-700' : 'text-slate-500'
             }`}>
-              {switches.mainPower ? 'ON' : 'OFF'}
+              {switches.mainPower ? t('ON') : t('OFF')}
             </div>
           </button>
         </div>
@@ -706,7 +707,7 @@ const ToggleSwitchBoardToy: React.FC<ToggleBoardProps> = ({ soundEnabled, haptic
         {/* Smooth Stepless Slider */}
         <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-700 flex flex-col gap-1.5">
           <div className="flex justify-between text-[11px] font-bold text-slate-300">
-            <span>Sensory Frequency Slider</span>
+            <span>{t('Sensory Frequency Slider')}</span>
             <span className="text-amber-400 font-mono">{switches.sliderVal}%</span>
           </div>
           <input
@@ -823,7 +824,7 @@ const SquishySlimeToy: React.FC<SlimeProps> = ({ soundEnabled, hapticEnabled }) 
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
-      <p className="text-xs font-bold text-slate-500">Touch, drag & squish the stress blob</p>
+      <p className="text-xs font-bold text-slate-500">{t('Touch, drag & squish the stress blob')}</p>
       <canvas
         ref={canvasRef}
         width={280}
@@ -929,7 +930,7 @@ const CalmingStarlightToy: React.FC<StarlightProps> = ({ soundEnabled, hapticEna
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
-      <p className="text-xs font-bold text-slate-500">Touch and guide calming cosmic starlight particles</p>
+      <p className="text-xs font-bold text-slate-500">{t('Touch and guide calming cosmic starlight particles')}</p>
       <canvas
         ref={canvasRef}
         width={280}
@@ -974,14 +975,14 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex items-center justify-between w-full px-2">
-        <p className="text-xs font-bold text-slate-500">Tactile pad & soothing worry stone</p>
-        <span className="text-xs font-bold text-indigo-600">{rubCount} smooth strokes</span>
+        <p className="text-xs font-bold text-slate-500">{t('Tactile pad & soothing worry stone')}</p>
+        <span className="text-xs font-bold text-indigo-600">{rubCount} {t('smooth strokes')}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
         {/* 5-Button Die Pad */}
         <div className="p-3.5 rounded-2xl bg-slate-100 border-2 border-slate-200 flex flex-col items-center gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">5-Click Die</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('5-Click Die')}</p>
           <div className="grid grid-cols-3 gap-2 w-full p-2 bg-slate-200/60 rounded-xl">
             {[0, 1, 2, 3, 4].map((idx) => {
               const isSilent = idx >= 3; // 2 silent, 3 clicky
@@ -1003,7 +1004,7 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
               );
             })}
           </div>
-          <span className="text-[10px] text-slate-500">3 clicky, 2 silent</span>
+          <span className="text-[10px] text-slate-500">{t('3 clicky, 2 silent')}</span>
         </div>
 
         {/* Smooth Worry Stone Groove */}
@@ -1012,11 +1013,11 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
           onPointerMove={(e) => { if (e.buttons === 1) handleRub(); }}
           className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 border-2 border-slate-600 text-white flex flex-col items-center justify-center cursor-pointer shadow-lg active:scale-95 transition-all select-none touch-none"
         >
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Worry Stone</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">{t('Worry Stone')}</p>
           <div className="w-16 h-12 rounded-full bg-slate-800 border-2 border-slate-600 shadow-inner flex items-center justify-center">
             <div className="w-8 h-6 rounded-full bg-slate-700/60 shadow-inner" />
           </div>
-          <span className="text-[10px] text-slate-300 mt-2">Rub thumb gently</span>
+          <span className="text-[10px] text-slate-300 mt-2">{t('Rub thumb gently')}</span>
         </div>
       </div>
     </div>
@@ -1031,6 +1032,13 @@ export const DigitalFidgetModal: React.FC = () => {
   const [activeFidget, setActiveFidget] = useState<FidgetCategory>('pop');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [hapticEnabled, setHapticEnabled] = useState<boolean>(true);
+
+  const [, setLangVersion] = useState(0);
+  useEffect(() => {
+    const handleLangChanged = () => setLangVersion((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChanged);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChanged);
+  }, []);
 
   if (!showFidgetModal) return null;
 
@@ -1050,8 +1058,8 @@ export const DigitalFidgetModal: React.FC = () => {
         {/* Top Header */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Tappy-Style Sensory Hub</p>
-            <h2 className="text-xl font-black text-slate-800">Tactile Fidget Toys 🧸</h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('Tappy-Style Sensory Hub')}</p>
+            <h2 className="text-xl font-black text-slate-800">{t('Tactile Fidget Toys')} 🧸</h2>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -1064,7 +1072,8 @@ export const DigitalFidgetModal: React.FC = () => {
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 soundEnabled ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
               }`}
-              title={soundEnabled ? 'Mute sound' : 'Unmute sound'}
+              title={soundEnabled ? t('Mute sound') : t('Unmute sound')}
+              aria-label={soundEnabled ? t('Mute sound') : t('Unmute sound')}
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
@@ -1078,7 +1087,8 @@ export const DigitalFidgetModal: React.FC = () => {
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 hapticEnabled ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
               }`}
-              title={hapticEnabled ? 'Disable vibration' : 'Enable vibration'}
+              title={hapticEnabled ? t('Disable vibration') : t('Enable vibration')}
+              aria-label={hapticEnabled ? t('Disable vibration') : t('Enable vibration')}
             >
               <Smartphone className="w-4 h-4" />
             </button>
@@ -1086,6 +1096,7 @@ export const DigitalFidgetModal: React.FC = () => {
             {/* Close */}
             <button
               onClick={() => setShowFidgetModal(false)}
+              aria-label={t('Close')}
               className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer ml-1"
             >
               <X className="w-4 h-4" />
@@ -1103,6 +1114,7 @@ export const DigitalFidgetModal: React.FC = () => {
                 audioEngine.playSwitch('red', soundEnabled);
                 triggerHaptic(15, hapticEnabled);
               }}
+              title={t(c.desc)}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 activeFidget === c.id
                   ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
@@ -1110,7 +1122,7 @@ export const DigitalFidgetModal: React.FC = () => {
               }`}
             >
               <span>{c.emoji}</span>
-              <span>{c.label}</span>
+              <span>{t(c.label)}</span>
             </button>
           ))}
         </div>

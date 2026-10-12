@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DecisionWheelOption } from '../types';
+import { t } from '../services/translator';
 
 const SPIN_SOUNDS = ['🎉', '✨', '🎊', '🌟'];
 
@@ -22,6 +23,13 @@ export const DecisionWheelModal: React.FC = () => {
     speak,
     announce,
   } = useApp();
+
+  const [, setLangVersion] = useState(0);
+  useEffect(() => {
+    const handleLangChanged = () => setLangVersion((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChanged);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChanged);
+  }, []);
 
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -71,7 +79,7 @@ export const DecisionWheelModal: React.FC = () => {
         const winnerIdx = Math.floor(normalizedAngle / slice) % count;
         const winnerOption = options[winnerIdx];
         setWinner(winnerOption);
-        announce(`The wheel chose: ${winnerOption.label}!`);
+        announce(`${t('The wheel chose!')} ${t(winnerOption.label)}`);
         playChime('complete');
       }
     };
@@ -109,8 +117,8 @@ export const DecisionWheelModal: React.FC = () => {
     <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 backdrop-blur-sm overflow-y-auto">
       <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white border-b border-slate-100 z-10">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Choice Paralysis Helper</p>
-          <h2 className="text-xl font-black text-slate-800">Decision Wheel 🎡</h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('Choice Paralysis Helper')}</p>
+          <h2 className="text-xl font-black text-slate-800">{t('Decision Wheel')} 🎡</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -119,10 +127,11 @@ export const DecisionWheelModal: React.FC = () => {
               editMode ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 text-slate-700 border-slate-200'
             }`}
           >
-            {editMode ? 'Done' : 'Edit'}
+            {editMode ? t('Done') : t('Edit')}
           </button>
           <button
             onClick={() => setShowDecisionWheelModal(false)}
+            aria-label={t('Close')}
             className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
           >
             <X className="w-4 h-4 text-slate-600" />
@@ -186,9 +195,9 @@ export const DecisionWheelModal: React.FC = () => {
         {/* Winner reveal */}
         {winner && !spinning && (
           <div className="text-center px-5 py-4 rounded-3xl bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 w-full">
-            <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-1">The wheel chose!</p>
+            <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-1">{t('The wheel chose!')}</p>
             <p className="text-4xl mb-1">{winner.emoji}</p>
-            <h3 className="text-2xl font-black text-slate-800">{winner.label}</h3>
+            <h3 className="text-2xl font-black text-slate-800">{t(winner.label)}</h3>
           </div>
         )}
 
@@ -198,7 +207,7 @@ export const DecisionWheelModal: React.FC = () => {
           disabled={spinning || count < 2}
           className="w-full py-4 rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl shadow-lg shadow-indigo-300/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all"
         >
-          {spinning ? '🌀 Spinning...' : '🎡 Spin the Wheel!'}
+          {spinning ? `🌀 ${t('Spinning...')}` : `🎡 ${t('Spin the Wheel!')}`}
         </button>
 
         {/* Reset winner */}
@@ -208,18 +217,18 @@ export const DecisionWheelModal: React.FC = () => {
             className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-700 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Spin again</span>
+            <span>{t('Spin again')}</span>
           </button>
         )}
 
         {/* Edit mode */}
         {editMode && (
           <div className="w-full space-y-3">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500">Edit Options</p>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500">{t('Edit Options')}</p>
             {options.map((opt) => (
               <div key={opt.id} className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200">
                 <span className="text-xl">{opt.emoji}</span>
-                <span className="flex-1 font-bold text-sm text-slate-700">{opt.label}</span>
+                <span className="flex-1 font-bold text-sm text-slate-700">{t(opt.label)}</span>
                 <button
                   onClick={() => removeOption(opt.id)}
                   disabled={options.length <= 2}
@@ -241,13 +250,13 @@ export const DecisionWheelModal: React.FC = () => {
                 type="text"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Add option..."
+                placeholder={t('Add option...')}
                 className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium"
                 onKeyDown={(e) => e.key === 'Enter' && addOption()}
               />
               <button
                 type="button"
-                aria-label="Add option to decision wheel"
+                aria-label={t('Add option to decision wheel')}
                 onClick={addOption}
                 className="px-3.5 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700 transition-all focus-visible:ring-4 focus-visible:ring-indigo-400 focus-visible:outline-none"
               >

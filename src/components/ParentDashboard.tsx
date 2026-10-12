@@ -131,6 +131,13 @@ export const ParentDashboard: React.FC = () => {
   const [currentTourName, setCurrentTourName] = useState<string>('Caregiver App Overview');
   const dashboardScrollRef = useRef<HTMLDivElement>(null);
 
+  const [, setLangVersion] = useState(0);
+  useEffect(() => {
+    const handleLangChanged = () => setLangVersion((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChanged);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChanged);
+  }, []);
+
   const handleOpenTourDirectory = () => {
     setShowTourDirectoryModal(true);
     playChime('tap');
@@ -362,25 +369,25 @@ export const ParentDashboard: React.FC = () => {
           id: 'home',
           label: 'Caregiver Live Hub',
           icon: LayoutDashboard,
-          badge: connectionStatus.isConnected ? 'Live' : (activeAlerts.length > 0 ? `${activeAlerts.length} Alert` : undefined),
+          badge: connectionStatus.isConnected ? t('Live') : (activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Alert')}` : undefined),
         },
         {
           id: 'alerts',
           label: 'Live Alerts & SOS Inbox',
           icon: ShieldAlert,
-          badge: activeAlerts.length > 0 ? `${activeAlerts.length} Active` : undefined,
+          badge: activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Active')}` : undefined,
         },
         {
           id: 'caregiver',
           label: 'Live Caregiver Link',
           icon: Heart,
-          badge: connectionStatus.isConnected ? 'Paired' : 'Pair',
+          badge: connectionStatus.isConnected ? t('Paired') : t('Pair'),
         },
         {
           id: 'plans-changed',
           label: 'Plans Changed Mode',
           icon: AlertTriangle,
-          badge: plansChanged.active ? 'Active' : undefined,
+          badge: plansChanged.active ? t('Active') : undefined,
         },
       ],
     },
@@ -393,31 +400,31 @@ export const ParentDashboard: React.FC = () => {
           id: 'routines',
           label: 'Routine Library',
           icon: Calendar,
-          badge: 'Library',
+          badge: t('Library'),
         },
         {
           id: 'medications',
           label: 'Medication Reminders',
           icon: Pill,
-          badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? 'Low Stock' : undefined,
+          badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? t('Low Stock') : undefined,
         },
         {
           id: 'recollection',
           label: 'Daily Mood Summary',
           icon: BarChart3,
-          badge: 'Therapy',
+          badge: t('Therapy'),
         },
         {
           id: 'mood-journal',
           label: 'Mood & Reflection Journal',
           icon: BookOpen,
-          badge: `${moodJournalEntries.length} Entries`,
+          badge: `${moodJournalEntries.length} ${t('Entries')}`,
         },
         {
           id: 'cycle-tracker',
           label: 'Cycle & Hormonal Rhythm',
           icon: HeartPulse,
-          badge: `Day ${cyclePhaseInfo.currentCycleDay}`,
+          badge: `${t('Day')} ${cyclePhaseInfo.currentCycleDay}`,
         },
       ],
     },
@@ -462,7 +469,7 @@ export const ParentDashboard: React.FC = () => {
           id: 'themes',
           label: 'Themes & Studio',
           icon: Palette,
-          badge: 'Studio',
+          badge: t('Studio'),
         },
         {
           id: 'offline',
@@ -708,27 +715,27 @@ export const ParentDashboard: React.FC = () => {
           {/* URGENT LIVE ALERT PERSISTENT BANNER (Visible on all tabs) */}
           {activeAlerts.length > 0 && activeTab !== 'alerts' && (
             <div className="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in ring-2 ring-rose-200">
-              <div className="flex items-center gap-3">
-                <span className="flex h-3.5 w-3.5 relative shrink-0">
+              <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                <span className="flex h-3.5 w-3.5 relative shrink-0 mt-0.5 sm:mt-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600"></span>
                 </span>
                 <ShieldAlert className="w-6 h-6 text-rose-600 shrink-0" />
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="font-black text-rose-950 text-sm flex items-center gap-2 flex-wrap">
                     <span>🚨 {t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
                     <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs">
-                      {activeAlerts[0].emoji || '🚨'} {activeAlerts[0].label}
+                      {activeAlerts[0].emoji || '🚨'} {t(activeAlerts[0].label)}
                     </span>
                   </div>
-                  <div className="text-xs text-rose-700 font-medium mt-0.5">
-                    {activeAlerts[0].location ? `${t('Location:')} ${activeAlerts[0].location} • ` : ''}
-                    {activeAlerts[0].note || t('Child requested immediate support.')}
+                  <div className="text-xs text-rose-700 font-medium mt-0.5 break-words">
+                    {activeAlerts[0].location ? `${t('Location:')} ${t(activeAlerts[0].location)} • ` : ''}
+                    {t(activeAlerts[0].note || 'Child requested immediate support.')}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+              <div className="flex items-center gap-2 w-full md:w-auto flex-wrap shrink-0">
                 {getQuickRepliesForAlert(activeAlerts[0], t).slice(0, 2).map((reply) => (
                   <button
                     key={reply.id}
@@ -745,7 +752,7 @@ export const ParentDashboard: React.FC = () => {
                     setActiveTab('alerts');
                     playChime('tap');
                   }}
-                  className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs cursor-pointer transition"
+                  className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs cursor-pointer transition whitespace-nowrap"
                 >
                   {t("Open Alerts Inbox")} →
                 </button>

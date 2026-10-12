@@ -6,12 +6,24 @@
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
 
-// Load cached dictionary from localStorage on start
+// Load cached dictionary from localStorage on start, and revalidate in background
 if (typeof window !== 'undefined' && currentLang !== 'en') {
   try {
     const cached = localStorage.getItem(`beeyou_dict_${currentLang}`);
     if (cached) dictionary = JSON.parse(cached);
   } catch {}
+  fetch(`/locales/${currentLang}.json?v=${Date.now()}`, { cache: 'no-cache' })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => {
+      if (data) {
+        dictionary = { ...dictionary, ...data };
+        try {
+          localStorage.setItem(`beeyou_dict_${currentLang}`, JSON.stringify(dictionary));
+        } catch {}
+        window.dispatchEvent(new CustomEvent('beeyou_lang_changed', { detail: { lang: currentLang } }));
+      }
+    })
+    .catch(() => {});
 }
 
 export function getLanguage(): string {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { MedicationReminder, MedicationFrequency } from '../../types';
@@ -32,6 +32,13 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
     isPremium,
     triggerUpgrade,
   } = useApp();
+
+  const [, setLangVersion] = useState(0);
+  useEffect(() => {
+    const handleLangChanged = () => setLangVersion((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChanged);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChanged);
+  }, []);
 
   const [showMedForm, setShowMedForm] = useState(false);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
@@ -119,18 +126,18 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <span className="text-2xl">💊</span>
-            <span>{t("Medication Reminders & Supply Hub")}</span>
+      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 flex-wrap">
+            <span className="text-2xl shrink-0">💊</span>
+            <span className="break-words">{t("Medication Reminders & Supply Hub")}</span>
           </h2>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Configure medications, scheduled dose times, dosages, and keep track of remaining pill supply for {childProfile.name}.
+          <p className="text-xs text-slate-500 font-medium mt-0.5 break-words">
+            {t("Configure medications, scheduled dose times, dosages, and keep track of remaining pill supply for")} {childProfile.name}.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <div className="flex items-center gap-2 flex-wrap shrink-0 max-w-full">
           {onStartTour && (
             <button
               type="button"
@@ -172,24 +179,24 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
 
       {/* 1-Medication Basic Plan Limit Banner */}
       {!isPremium && medications.length >= 1 && (
-        <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-3">
+        <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black shrink-0 text-xl shadow-xs">
               👑
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-black text-amber-950 uppercase tracking-wide">{t("Basic Plan Limit (1/1 Medication)")}</span>
                 <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black">{t("Free Tier")}</span>
               </div>
-              <p className="text-xs text-amber-900 font-medium mt-0.5">
+              <p className="text-xs text-amber-900 font-medium mt-0.5 break-words">
                 {t("You are using your 1 included medication reminder. Upgrade to BeeYou Premium ($8.99/mo with a 15-day free trial) for unlimited medications, stock tracking, and refill alerts.")}
               </p>
             </div>
           </div>
           <button
             onClick={() => triggerUpgrade('Medication Reminders: The Basic plan includes 1 medication reminder. Upgrade to BeeYou Premium for unlimited medications, stock tracking, and refill alerts!')}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shrink-0 self-stretch sm:self-auto flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all whitespace-nowrap"
           >
             <Crown className="w-3.5 h-3.5 text-amber-200" />
             <span>{t("Start 15-Day Free Trial")}</span>
@@ -203,7 +210,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
           <div className="flex items-center justify-between border-b border-indigo-200/60 pb-3">
             <h3 className="font-black text-sm sm:text-base text-indigo-950 flex items-center gap-2">
               <span className="text-xl">{medEmoji}</span>
-              <span>{editingMedId ? 'Edit Medication Reminder' : 'Add New Medication Reminder'}</span>
+              <span>{editingMedId ? t('Edit Medication Reminder') : t('Add New Medication Reminder')}</span>
             </h3>
             <button
               type="button"
@@ -219,7 +226,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div className="sm:col-span-3">
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  1. Medication Name *
+                  1. {t("Medication Name")} *
                 </label>
                 <input
                   type="text"
@@ -258,7 +265,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  2. How Many They Have (Total Quantity in Stock) *
+                  2. {t("How Many They Have (Total Quantity in Stock)")} *
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -271,7 +278,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <span className="text-xs font-bold text-slate-500 shrink-0">
-                    {medUnit || 'units'}
+                    {t(medUnit || 'units')}
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 mt-1 block">
@@ -305,7 +312,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
             {/* 3. Frequency */}
             <div>
               <label className="block text-xs font-black text-slate-700 mb-1">
-                3. How Often Should They Take It (Frequency) *
+                3. {t("How Often Should They Take It (Frequency)")} *
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
@@ -329,7 +336,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                         : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                     }`}
                   >
-                    {freq.label}
+                    {t(freq.label)}
                   </button>
                 ))}
               </div>
@@ -451,7 +458,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm shadow-sm cursor-pointer flex items-center gap-1.5"
               >
                 <Save className="w-4 h-4" />
-                <span>{editingMedId ? 'Update Medication' : 'Save Medication'}</span>
+                <span>{editingMedId ? t('Update Medication') : t('Save Medication')}</span>
               </button>
             </div>
           </form>
@@ -462,7 +469,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
       <div data-tour="meds-list-card" className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-            Configured Medications ({medications.length})
+            {t("Configured Medications")} ({medications.length})
           </h3>
         </div>
 
@@ -510,11 +517,11 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                     {/* Details Row: Dosage, Frequency, Times */}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-slate-600">
                       <span className="font-bold text-indigo-700">
-                        Dose: {med.dosage} {med.unit}
+                        {t("Dose")}: {med.dosage} {t(med.unit)}
                       </span>
                       <span>•</span>
                       <span className="font-medium capitalize">
-                        Frequency: {med.frequency.replace('_', ' ')}
+                        {t("Frequency")}: {t(med.frequency.replace('_', ' '))}
                       </span>
                       {med.times.length > 0 && (
                         <>
@@ -550,7 +557,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                         />
                       </div>
                       <span className="text-xs font-black text-slate-800">
-                        {med.totalQuantity} {med.unit} remaining
+                        {med.totalQuantity} {t(med.unit)} {t("remaining")}
                       </span>
                     </div>
                   </div>
@@ -629,7 +636,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
         <div className="p-4 bg-indigo-50 border-2 border-indigo-300 rounded-2xl animate-in fade-in">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <span className="text-xs font-black text-indigo-900 shrink-0">
-              Add supply to {medications.find((m) => m.id === quickRestockId)?.name}:
+              {t("Add supply to")} {medications.find((m) => m.id === quickRestockId)?.name}:
             </span>
             <input
               type="number"
