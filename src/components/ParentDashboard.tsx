@@ -630,14 +630,10 @@ export const ParentDashboard: React.FC = () => {
               }}
               className="w-full pl-11 pr-9 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
             >
-              {navGroups.map((group) => (
-                <optgroup key={group.id} label={`${group.emoji} ${t(group.title)}`}>
-                  {group.items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {t(item.label)} {item.badge ? `(${t(item.badge)})` : ''}
-                    </option>
-                  ))}
-                </optgroup>
+              {currentNavGroup.items.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {t(item.label)} {item.badge ? `(${t(item.badge)})` : ''}
+                </option>
               ))}
             </select>
             <div className="absolute right-3 pointer-events-none text-slate-400">
