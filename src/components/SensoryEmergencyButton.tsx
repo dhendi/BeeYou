@@ -10,9 +10,9 @@ interface SensoryEmergencyButtonProps {
 export const SensoryEmergencyButton: React.FC<SensoryEmergencyButtonProps> = ({
   className = '',
 }) => {
-  const { activateSafeMode, isSafeModeActive } = useApp();
+  const { activateSafeMode, isSafeModeActive, enabledFeatures } = useApp();
 
-  if (isSafeModeActive) return null;
+  if (isSafeModeActive || enabledFeatures?.emergencyAlertSOS !== true) return null;
 
   return (
     <div

@@ -1142,13 +1142,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     return true; // First time launch
   });
 
-  const [showPostOnboardingSpotlight, setShowPostOnboardingSpotlight] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('beeyou_spotlight_dismissed') !== 'true';
-    } catch {
-      return true;
-    }
-  });
+  const [showPostOnboardingSpotlight, setShowPostOnboardingSpotlight] = useState<boolean>(false);
 
   const setUserPersona = (persona: UserPersona) => {
     setUserPersonaState(persona);

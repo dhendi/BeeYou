@@ -30,7 +30,6 @@ import { setActiveDeviceView } from '../services/authService';
 import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '../services/caregiverSync';
 import { SensoryEmergencyButton } from './SensoryEmergencyButton';
 import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
-import { GuidedSpotlight } from './GuidedSpotlight';
 import { AdaptiveOnboardingFlow } from './AdaptiveOnboardingFlow';
 
 // Lazy-loaded child tools and modals
@@ -197,8 +196,8 @@ const ChildAppContent: React.FC = () => {
         {childView === 'feelings' && <FeelingsView />}
       </main>
 
-      {/* Persistent High-Contrast Sensory Emergency Button */}
-      {enabledFeatures?.emergencyAlertSOS !== false && (
+      {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}
+      {enabledFeatures?.emergencyAlertSOS === true && (
         <SensoryEmergencyButton />
       )}
 
@@ -239,9 +238,6 @@ const ChildAppContent: React.FC = () => {
           onClose={() => setShowOnboardingModal(false)}
           canDismiss={true}
         />
-
-        {/* Post-Onboarding Guided Spotlight */}
-        <GuidedSpotlight />
 
         {/* About Me & Emergency ID Card Modal */}
         <AboutMeIDModal

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Lock, Shield, KeyRound, X, Check, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
@@ -149,16 +150,16 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
       </div>
 
       {/* 4-Digit PIN Modal */}
-      {showPinModal && (
+      {showPinModal && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => {
             setShowPinModal(false);
             setPinInput('');
           }}
         >
           <div
-            className="bg-white rounded-3xl max-w-xs w-full p-6 text-slate-800 shadow-2xl border-2 border-amber-200 text-center relative"
+            className="bg-white rounded-3xl max-w-xs w-full p-6 text-slate-800 shadow-2xl border-2 border-amber-200 text-center relative my-auto animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -237,7 +238,8 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
               </span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

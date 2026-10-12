@@ -19,7 +19,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
     {
       id: 'break',
       text: 'I need a break',
-      speech: 'I need a break right now.',
+      speech: 'I need a break',
       emoji: '🛑',
       colorBg: 'bg-[#991B1B]', // high contrast crimson red
       colorBorder: 'border-[#F87171]',
@@ -28,7 +28,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
     {
       id: 'loud',
       text: 'Too loud',
-      speech: 'It is too loud. Please help reduce the noise.',
+      speech: 'Too loud',
       emoji: '🔊',
       colorBg: 'bg-[#1E3A8A]', // high contrast deep navy blue
       colorBorder: 'border-[#60A5FA]',
@@ -37,7 +37,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
     {
       id: 'help',
       text: 'I need help',
-      speech: 'I need help right now.',
+      speech: 'I need help',
       emoji: '🆘',
       colorBg: 'bg-[#701A75]', // high contrast deep fuchsia/purple
       colorBorder: 'border-[#E879F9]',
@@ -46,7 +46,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
     {
       id: 'home',
       text: 'Take me home',
-      speech: 'I want to go home now please.',
+      speech: 'Take me home',
       emoji: '🏠',
       colorBg: 'bg-[#064E3B]', // high contrast deep forest emerald
       colorBorder: 'border-[#34D399]',

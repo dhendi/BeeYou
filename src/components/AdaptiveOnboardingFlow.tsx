@@ -72,6 +72,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   const [featuresState, setFeaturesState] = useState<EnabledFeatures>(() => ({
     ...getDefaultFeaturesForAge(personaToAgeGroup(userPersona || 'child')),
     ...enabledFeatures,
+    emergencyAlertSOS: enabledFeatures?.emergencyAlertSOS === true,
   }));
 
   // Step 4 Theme Selection State
@@ -106,7 +107,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       ...defaultFeats,
       ...prev,
       spoonBudget: persona === 'adult' || persona === 'teen' ? true : prev.spoonBudget,
-      emergencyAlertSOS: true,
+      emergencyAlertSOS: prev.emergencyAlertSOS === true,
       aacCommunication: true,
       firstThenSchedules: true,
     }));
@@ -185,9 +186,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       localStorage.setItem('beeyou_user_persona', selectedPersona);
       localStorage.setItem('beeyou_pairing_mode', pairingMode);
     } catch {}
-
-    // 6. Trigger Post-Onboarding Guided Spotlight
-    setShowPostOnboardingSpotlight(true);
 
     onClose();
   };
@@ -586,12 +584,12 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     type="button"
                     onClick={() => toggleFeature('emergencyAlertSOS')}
                     className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                      featuresState.emergencyAlertSOS !== false ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+                      featuresState.emergencyAlertSOS === true ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                   >
                     <span 
                       className={`block w-4 h-4 rounded-full bg-white transition-transform transform absolute top-1 ${
-                        featuresState.emergencyAlertSOS !== false ? 'right-1' : 'left-1'
+                        featuresState.emergencyAlertSOS === true ? 'right-1' : 'left-1'
                       }`}
                     />
                   </button>
