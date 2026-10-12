@@ -56,6 +56,48 @@ const THIRD_PERSON_VERBS: Record<string, string> = {
   'run': 'runs',
 };
 
+// Verbs that can form bare serial motion constructions (e.g. "go look", "come see", "help clean")
+const SERIAL_MOTION_VERBS = new Set(['go', 'come', 'help']);
+
+// Common nouns in AAC boards (food, drinks, toys, places, people, objects, animals)
+const COMMON_NOUNS = new Set([
+  // Food & Drinks
+  'pizza', 'apple', 'sandwich', 'banana', 'crackers', 'cracker', 'cookie', 'cookies',
+  'strawberries', 'strawberry', 'water', 'milk', 'apple juice', 'smoothie', 'juice',
+  'mac and cheese', 'mac & cheese', 'cheese', 'bread', 'toast', 'cereal', 'yogurt',
+  'chips', 'nuggets', 'pasta', 'rice', 'fries', 'burger', 'hamburger', 'hot dog',
+  'soup', 'salad', 'ice cream', 'cake', 'candy', 'fruit', 'vegetables', 'chicken',
+  'meat', 'snack', 'breakfast', 'lunch', 'dinner', 'popcorn', 'pie', 'grapes',
+  'orange', 'carrot', 'carrots', 'egg', 'eggs', 'biscuit', 'soda', 'tea',
+  // Objects, Activities & Toys
+  'tablet', 'book', 'books', 'blocks', 'puzzle', 'puzzles', 'toy', 'toys', 'ball',
+  'bubbles', 'train', 'trains', 'car', 'cars', 'truck', 'trucks', 'plane', 'planes',
+  'doll', 'dolls', 'game', 'games', 'lego', 'dinosaur', 'dinosaurs', 'crayons',
+  'crayon', 'paper', 'stickers', 'sticker', 'blanket', 'headphones', 'fidget',
+  'fidgets', 'phone', 'shoes', 'jacket', 'hat', 'shirt', 'pants', 'backpack',
+  // Places
+  'park', 'playground', 'school', 'home', 'store', 'restaurant', 'dentist', 'doctor',
+  'room', 'bed', 'bathroom', 'toilet', 'restroom', 'outside', 'library', 'pool', 'beach',
+  // People
+  'mom', 'dad', 'teacher', 'friend', 'friends', 'brother', 'sister', 'grandma',
+  'grandpa', 'baby', 'therapist', 'boy', 'girl', 'person', 'people',
+  // Animals & Pets
+  'puppy', 'dog', 'kitten', 'cat', 'bunny', 'rabbit', 'turtle', 'fish', 'bird',
+  'horse', 'bear'
+]);
+
+// Attributive modifiers that attach directly to the following noun
+const ATTRIBUTIVE_MODIFIERS = new Set([
+  'more', 'big', 'little', 'small', 'huge', 'tiny', 'hot', 'cold', 'warm', 'cool',
+  'good', 'bad', 'new', 'old', 'red', 'blue', 'green', 'yellow', 'orange', 'purple',
+  'pink', 'black', 'white', 'brown', 'sweet', 'sour', 'yummy', 'spicy', 'clean',
+  'dirty', 'soft', 'hard', 'one', 'two', 'three', 'four', 'five', 'some', 'any',
+  'a', 'an', 'the', 'my', 'your', 'this', 'that', 'these', 'those'
+]);
+
+const CONJUNCTIONS = new Set(['and', 'or', 'but', 'then', 'plus', 'with', 'without']);
+const PREPOSITIONS = new Set(['in', 'on', 'at', 'to', 'for', 'from', 'with', 'about', 'by', 'under', 'over', 'into']);
+
 // Location smoothing (e.g., "go bathroom" -> "go to the bathroom")
 const LOCATION_SMOOTHING: Record<string, string> = {
   'bathroom': 'to the bathroom',
@@ -80,6 +122,36 @@ function cleanToken(token: string | AACItem): string {
   if (!token) return '';
   if (typeof token === 'string') return token.trim().toLowerCase();
   return (token.speechText || token.label || '').trim().toLowerCase();
+}
+
+/**
+ * Identifies whether a token is a noun or entity in clinical AAC
+ */
+export function isNounToken(token: string | AACItem): boolean {
+  if (!token) return false;
+  if (typeof token !== 'string') {
+    if (token.colorType === 'noun') return true;
+    if (
+      ['food', 'drinks', 'activities', 'places', 'people', 'personal'].includes(token.category) &&
+      token.colorType !== 'verb' &&
+      token.colorType !== 'adjective'
+    ) {
+      return true;
+    }
+  }
+  const clean = cleanToken(token);
+  if (!clean) return false;
+  if (COMMON_NOUNS.has(clean)) return true;
+  if (clean.includes(' ') && !ACTION_VERBS.has(clean) && !STATE_ADJECTIVES.has(clean)) {
+    return true;
+  }
+  const isVerb = ACTION_VERBS.has(clean) || CATENATIVE_VERBS.has(clean);
+  const isAdj = STATE_ADJECTIVES.has(clean) || ATTRIBUTIVE_MODIFIERS.has(clean);
+  const isPronoun = ['i', 'me', 'my', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'we', 'us', 'they', 'them', 'it'].includes(clean);
+  const isPrepositionOrConj = PREPOSITIONS.has(clean) || CONJUNCTIONS.has(clean);
+  const isSpecial = ['yes', 'no', 'stop', 'please', 'help', 'what', 'where', 'when', 'why', 'how', 'not'].includes(clean);
+
+  return !isVerb && !isAdj && !isPronoun && !isPrepositionOrConj && !isSpecial;
 }
 
 /**
@@ -125,14 +197,21 @@ export function adjustSentenceTokensOnTheSpot(tokens: string[]): string[] {
   return result;
 }
 
+interface IntermediateGrammarItem {
+  text: string;
+  token?: string | AACItem;
+  role: 'subject' | 'object' | 'copula' | 'adj' | 'verb' | 'particle' | 'noun' | 'modifier' | 'conj' | 'prep' | 'other';
+}
+
 /**
  * Generates a grammatically fluent, natural spoken sentence from an array of AAC tokens.
+ * Automatically inserts additive coordinators ("and", lists) for consecutive objects/foods/actions.
  * 
  * Example:
- *   autocorrectAacGrammar(["ME", "GO", "LOOK"]) => "I go look."
- *   autocorrectAacGrammar(["ME", "WANT", "EAT"]) => "I want to eat."
- *   autocorrectAacGrammar(["ME", "TIRED"]) => "I am tired."
- *   autocorrectAacGrammar(["YOU", "HELP", "ME"]) => "You help me."
+ *   autocorrectAacGrammar(["I", "WANT", "PIZZA", "APPLE"]) => "I want pizza and apple"
+ *   autocorrectAacGrammar(["PIZZA", "APPLE", "COOKIE"])   => "Pizza, apple, and cookie"
+ *   autocorrectAacGrammar(["ME", "GO", "LOOK"])           => "I go look"
+ *   autocorrectAacGrammar(["ME", "TIRED", "HUNGRY"])      => "I am tired and hungry"
  */
 export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
   if (!tokens || tokens.length === 0) return '';
@@ -147,99 +226,186 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[]): string {
     return single.charAt(0).toUpperCase() + single.slice(1);
   }
 
-  const output: string[] = [];
-  let isSubject = true;
+  // 1. First pass: Apply pronoun corrections, copula to-be, catenative "to", and location smoothing
+  const intermediate: IntermediateGrammarItem[] = [];
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
     const prev = i > 0 ? words[i - 1] : '';
     const next = i + 1 < words.length ? words[i + 1] : '';
+    const origToken = tokens[i];
 
     // 1. Pronoun Case Correction
     if (word === 'me') {
-      // If at start, or followed by an action verb / adjective, or prev was a coordinating conjunction
       const isPrecedingVerb = next && (ACTION_VERBS.has(next) || next === 'go' || next === 'look');
       const isPrecedingAdj = next && STATE_ADJECTIVES.has(next);
       const isConjunction = prev === 'and' || prev === 'or' || prev === 'then';
 
       if (i === 0 || isPrecedingVerb || isPrecedingAdj || isConjunction) {
-        output.push('I');
-        isSubject = false;
+        intermediate.push({ text: 'I', token: origToken, role: 'subject' });
         continue;
       } else {
-        // Object position: "You help me", "Look at me"
-        output.push('me');
+        intermediate.push({ text: 'me', token: origToken, role: 'object' });
         continue;
       }
     }
 
     if (word === 'us' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      output.push('we');
+      intermediate.push({ text: 'we', token: origToken, role: 'subject' });
       continue;
     }
 
     if (word === 'him' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      output.push('he');
+      intermediate.push({ text: 'he', token: origToken, role: 'subject' });
       continue;
     }
 
     if (word === 'her' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      output.push('she');
+      intermediate.push({ text: 'she', token: origToken, role: 'subject' });
       continue;
     }
 
     if (word === 'them' && (i === 0 || (next && ACTION_VERBS.has(next)))) {
-      output.push('they');
+      intermediate.push({ text: 'they', token: origToken, role: 'subject' });
       continue;
     }
 
     // 2. Copula "to be" insertion for adjectives/states
-    // e.g. "I" + "tired" -> "I am tired"
-    // e.g. "You" + "happy" -> "You are happy"
     if (STATE_ADJECTIVES.has(word)) {
-      const lastToken = output[output.length - 1]?.toLowerCase();
-      if (lastToken === 'i') {
-        output.push('am');
-      } else if (lastToken === 'you' || lastToken === 'we' || lastToken === 'they') {
-        output.push('are');
-      } else if (lastToken === 'he' || lastToken === 'she' || lastToken === 'it') {
-        output.push('is');
+      const lastTokenText = intermediate[intermediate.length - 1]?.text?.toLowerCase();
+      if (lastTokenText === 'i') {
+        intermediate.push({ text: 'am', role: 'copula' });
+      } else if (lastTokenText === 'you' || lastTokenText === 'we' || lastTokenText === 'they') {
+        intermediate.push({ text: 'are', role: 'copula' });
+      } else if (lastTokenText === 'he' || lastTokenText === 'she' || lastTokenText === 'it') {
+        intermediate.push({ text: 'is', role: 'copula' });
       }
-      output.push(word);
+      intermediate.push({ text: word, token: origToken, role: 'adj' });
       continue;
     }
 
     // 3. Catenative Verb + Infinitive Particle "to"
-    // e.g., "want" + "eat" -> "want to eat"
-    // e.g., "like" + "play" -> "like to play"
     if (prev && CATENATIVE_VERBS.has(prev) && ACTION_VERBS.has(word) && word !== 'help' && word !== 'food') {
-      output.push('to');
-      output.push(word);
+      intermediate.push({ text: 'to', role: 'particle' });
+      intermediate.push({ text: word, token: origToken, role: 'verb' });
       continue;
     }
 
     // 4. "Go" + Location smoothing
-    // e.g. "go" + "bathroom" -> "go to the bathroom"
     if (prev === 'go' && LOCATION_SMOOTHING[word]) {
-      // replace the default with smooth location phrase
-      output.push(LOCATION_SMOOTHING[word]);
+      intermediate.push({ text: LOCATION_SMOOTHING[word], token: origToken, role: 'noun' });
       continue;
     }
 
     // 5. Third-person subject-verb agreement
-    // e.g. "he" + "go" -> "he goes"
-    const lastWord = output[output.length - 1]?.toLowerCase();
+    const lastWord = intermediate[intermediate.length - 1]?.text?.toLowerCase();
     if ((lastWord === 'he' || lastWord === 'she' || lastWord === 'it') && THIRD_PERSON_VERBS[word]) {
-      output.push(THIRD_PERSON_VERBS[word]);
+      intermediate.push({ text: THIRD_PERSON_VERBS[word], token: origToken, role: 'verb' });
       continue;
     }
 
-    // Standard word pass-through
-    output.push(word);
+    // Classify syntactic role
+    let role: IntermediateGrammarItem['role'] = 'other';
+    if (isNounToken(origToken || word)) role = 'noun';
+    else if (ACTION_VERBS.has(word)) role = 'verb';
+    else if (ATTRIBUTIVE_MODIFIERS.has(word)) role = 'modifier';
+    else if (CONJUNCTIONS.has(word)) role = 'conj';
+    else if (PREPOSITIONS.has(word)) role = 'prep';
+
+    intermediate.push({ text: word, token: origToken, role });
+  }
+
+  // 2. Second pass: Additive Coordination & Series Formulation
+  // Automatically detects additive chains of objects (e.g. "I want pizza apple" -> "I want pizza and apple")
+  const finalPieces: string[] = [];
+  let i = 0;
+
+  while (i < intermediate.length) {
+    const item = intermediate[i];
+
+    // Check if this starts a noun phrase (either a noun, or an attributive modifier followed by a noun)
+    const isModifierBeforeNoun = item.role === 'modifier' && (i + 1 < intermediate.length && intermediate[i + 1].role === 'noun');
+    const isStartOfNounPhrase = item.role === 'noun' || isModifierBeforeNoun;
+
+    // Check if this noun phrase is part of an additive series of 2+ noun phrases
+    if (isStartOfNounPhrase) {
+      const collectNounPhrase = (idx: number): { text: string; nextIdx: number } | null => {
+        if (idx >= intermediate.length) return null;
+        if (intermediate[idx].role === 'modifier' && idx + 1 < intermediate.length && intermediate[idx + 1].role === 'noun') {
+          return {
+            text: `${intermediate[idx].text} ${intermediate[idx + 1].text}`,
+            nextIdx: idx + 2,
+          };
+        } else if (intermediate[idx].role === 'noun') {
+          return {
+            text: intermediate[idx].text,
+            nextIdx: idx + 1,
+          };
+        }
+        return null;
+      };
+
+      const firstNP = collectNounPhrase(i);
+      if (firstNP) {
+        const series: string[] = [firstNP.text];
+        let currIdx = firstNP.nextIdx;
+
+        while (currIdx < intermediate.length) {
+          // If user already supplied an explicit conjunction ('and', 'or'), do not auto-insert
+          if (intermediate[currIdx].role === 'conj') break;
+          // If next is a preposition or verb, series ends
+          if (intermediate[currIdx].role === 'prep' || intermediate[currIdx].role === 'verb') break;
+
+          const nextNP = collectNounPhrase(currIdx);
+          if (nextNP) {
+            series.push(nextNP.text);
+            currIdx = nextNP.nextIdx;
+          } else {
+            break;
+          }
+        }
+
+        if (series.length > 1) {
+          // Format additive series
+          if (series.length === 2) {
+            finalPieces.push(`${series[0]} and ${series[1]}`);
+          } else {
+            const allButLast = series.slice(0, -1).join(', ');
+            finalPieces.push(`${allButLast}, and ${series[series.length - 1]}`);
+          }
+          i = currIdx;
+          continue;
+        }
+      }
+    }
+
+    // Two consecutive predicate adjectives: [tired, hungry] -> "tired and hungry"
+    if (item.role === 'adj' && i + 1 < intermediate.length && intermediate[i + 1].role === 'adj') {
+      finalPieces.push(`${item.text} and ${intermediate[i + 1].text}`);
+      i += 2;
+      continue;
+    }
+
+    // Serial motion verbs (e.g. "go look", "come see", "help clean") preserve bare construction without "and"
+    if (SERIAL_MOTION_VERBS.has(item.text) && i + 1 < intermediate.length && intermediate[i + 1].role === 'verb') {
+      finalPieces.push(item.text);
+      i++;
+      continue;
+    }
+
+    // Two consecutive action verbs after a catenative: [eat, drink] -> "eat and drink"
+    if (item.role === 'verb' && i + 1 < intermediate.length && intermediate[i + 1].role === 'verb' && !CATENATIVE_VERBS.has(item.text)) {
+      finalPieces.push(`${item.text} and ${intermediate[i + 1].text}`);
+      i += 2;
+      continue;
+    }
+
+    finalPieces.push(item.text);
+    i++;
   }
 
   // Build sentence string with proper capitalization
-  let sentence = output.join(' ').trim();
+  let sentence = finalPieces.join(' ').trim();
   if (sentence.length > 0) {
     sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
   }
