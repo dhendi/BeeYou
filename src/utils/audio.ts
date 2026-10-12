@@ -2173,6 +2173,7 @@ function formatForNaturalSpeech(text: string): string {
 
 // Active utterance retain set to prevent Android Chrome V8 Garbage Collector from cutting speech
 const activeUtterancesSet = new Set<SpeechSynthesisUtterance>();
+let pendingSpeakTimeout: any = null;
 if (typeof window !== 'undefined') {
   (window as any).__beeyouUtterances = activeUtterancesSet;
 }
@@ -2181,6 +2182,10 @@ if (typeof window !== 'undefined') {
  * Stop any current vocalization immediately
  */
 export function stopSpeaking() {
+  if (pendingSpeakTimeout) {
+    clearTimeout(pendingSpeakTimeout);
+    pendingSpeakTimeout = null;
+  }
   if (activeAudioElement) {
     try {
       activeAudioElement.pause();
@@ -2189,6 +2194,14 @@ export function stopSpeaking() {
     activeAudioElement = null;
   }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    activeUtterancesSet.forEach((u) => {
+      try {
+        (u as any).__beeyouCancelled = true;
+      } catch (e) {}
+    });
+    if (activeUtterance) {
+      (activeUtterance as any).__beeyouCancelled = true;
+    }
     try {
       window.speechSynthesis.cancel();
     } catch (e) {}
@@ -2218,6 +2231,9 @@ export async function speakText(
 ): Promise<void> {
   const formattedText = formatForNaturalSpeech(text);
   if (!formattedText) return;
+
+  // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
+  stopSpeaking();
 
   const selectedPersona = options?.voicePersona || 'Kore';
 
@@ -2387,10 +2403,12 @@ function speakWithBrowserSpeechSynthesis(
       return;
     }
 
-    // Strict announcement deduplication: prevent double announcements unless explicitly forced
+    // Double-tap bounce protection: ignore rapid duplicate clicks on the exact same word within 200ms,
+    // but allow different words immediately and allow repeat words after 200ms (or when force is true).
     const normText = formattedText.trim().toLowerCase();
     const now = Date.now();
-    if (!options?.force && normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < 4000) {
+    const debounceWindow = options?.force ? 0 : 200;
+    if (normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < debounceWindow) {
       resolve();
       return;
     }
@@ -2468,6 +2486,7 @@ function speakWithBrowserSpeechSynthesis(
       };
 
       utterance.onstart = () => {
+        if ((utterance as any).__beeyouCancelled) return;
         notifySpeechState(true, formattedText);
       };
 
@@ -2476,8 +2495,19 @@ function speakWithBrowserSpeechSynthesis(
       };
 
       utterance.onerror = (err) => {
-        // If voice failed on Android, retry with default system voice
-        if (utterance.voice) {
+        const errorType = (err as any)?.error;
+        // If cancelled, interrupted, or superseded by a newer tap, exit cleanly without retrying
+        if (
+          (utterance as any).__beeyouCancelled ||
+          errorType === 'interrupted' ||
+          errorType === 'canceled'
+        ) {
+          cleanup();
+          return;
+        }
+
+        // If voice genuinely failed on Android (synthesis-failed, voice-unavailable), retry once with default system voice
+        if (utterance.voice && !finished) {
           try {
             const fallbackUtterance = new SpeechSynthesisUtterance(formattedText);
             fallbackUtterance.lang = targetLang;
@@ -2488,17 +2518,26 @@ function speakWithBrowserSpeechSynthesis(
               activeUtterancesSet.delete(fallbackUtterance);
               cleanup();
             };
-            fallbackUtterance.onerror = () => {
+            fallbackUtterance.onerror = (fallbackErr) => {
               activeUtterancesSet.delete(fallbackUtterance);
               cleanup();
-              playChime('speak');
+              const fbErrorType = (fallbackErr as any)?.error;
+              if (
+                fbErrorType !== 'interrupted' &&
+                fbErrorType !== 'canceled' &&
+                !(fallbackUtterance as any).__beeyouCancelled
+              ) {
+                playChime('speak');
+              }
             };
             window.speechSynthesis.speak(fallbackUtterance);
             return;
           } catch (e) {}
         }
         cleanup();
-        playChime('speak');
+        if (errorType !== 'interrupted' && errorType !== 'canceled') {
+          playChime('speak');
+        }
       };
 
       // Watchdog timeout in case onend never fires on buggy Android Chrome versions
@@ -2509,26 +2548,35 @@ function speakWithBrowserSpeechSynthesis(
         }
       }, approxDurationMs);
 
-      // Safe dispatch for Android: if currently speaking, cancel with micro-pause
-      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-        window.speechSynthesis.cancel();
-        setTimeout(() => {
-          try {
-            if (window.speechSynthesis.paused) {
-              window.speechSynthesis.resume();
-            }
-            window.speechSynthesis.speak(utterance);
-          } catch (err) {
-            console.error('Android speech dispatch error:', err);
-            cleanup();
-          }
-        }, 30);
-      } else {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-        window.speechSynthesis.speak(utterance);
+      // Safe dispatch: ensure cancel has flushed before speaking
+      if (pendingSpeakTimeout) {
+        clearTimeout(pendingSpeakTimeout);
+        pendingSpeakTimeout = null;
       }
+
+      const dispatchSpeech = () => {
+        if (finished || (utterance as any).__beeyouCancelled) {
+          cleanup();
+          return;
+        }
+        try {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          window.speechSynthesis.speak(utterance);
+        } catch (err) {
+          console.error('Speech dispatch error:', err);
+          cleanup();
+        }
+      };
+
+      // In Chromium / Android Chrome, executing cancel() and immediately calling speak()
+      // in the same microtask can cause cancel() to kill the newly dispatched utterance.
+      // A small micro-delay (25ms) ensures cancel() finishes flushing before speak().
+      pendingSpeakTimeout = setTimeout(() => {
+        pendingSpeakTimeout = null;
+        dispatchSpeech();
+      }, 25);
     } catch (e) {
       console.error('SpeechSynthesis error:', e);
       playChime('speak');

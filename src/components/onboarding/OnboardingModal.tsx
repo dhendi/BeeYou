@@ -18,7 +18,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { GridStage, DwellMode, STORAGE_KEYS } from '../../types/aac';
-import { speakText, playChime } from '../../utils/audio';
+import { speakText, stopSpeaking, playChime } from '../../utils/audio';
 import { autocorrectAacGrammar, adjustSentenceTokensOnTheSpot } from '../../utils/aacGrammar';
 
 interface OnboardingModalProps {
@@ -140,14 +140,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     setLastTappedId(id);
     setActiveSpeechText(speech);
     playChime('tap');
-    try {
-      speakText(speech);
-    } catch {
-      if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(speech);
-        window.speechSynthesis.speak(u);
-      }
-    }
+    stopSpeaking();
+    speakText(speech, { force: true });
     setTimeout(() => setLastTappedId(null), 300);
   };
 
