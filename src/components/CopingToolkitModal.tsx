@@ -322,7 +322,9 @@ export const CopingToolkitModal: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center text-center">
+        <div className={`p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col ${
+          activeTab === 'breathing' ? 'items-center justify-center text-center' : 'items-stretch justify-start text-left'
+        }`}>
           {/* TAB 1: BREATHING */}
           {activeTab === 'breathing' && (
             <div className="flex flex-col items-center justify-center py-4 w-full">
@@ -532,7 +534,7 @@ export const CopingToolkitModal: React.FC = () => {
 
           {/* TAB 4: SENSORY ROOM SOUNDSCAPES */}
           {activeTab === 'sound' && (
-            <div className="w-full flex flex-col items-center py-1 text-left">
+            <div className="w-full flex flex-col items-stretch py-1 text-left">
               {/* Header Info */}
               <div className="w-full mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div>
@@ -681,7 +683,7 @@ export const CopingToolkitModal: React.FC = () => {
               </div>
 
               {/* Soundscape Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-h-[50vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full pb-4">
                 {SOUNDSCAPES_CATALOG.filter(
                   (item) => soundFilter === 'all' || item.category === soundFilter
                 ).map((item) => {
@@ -693,7 +695,7 @@ export const CopingToolkitModal: React.FC = () => {
                     return (
                       <div
                         key={item.id}
-                        className="w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 transition-all border-teal-500 bg-teal-50/90 shadow-md ring-2 ring-teal-300 flex flex-col justify-between gap-3"
+                        className="w-full text-left p-4 rounded-2xl border-2 transition-all border-teal-500 bg-teal-50/90 shadow-md ring-2 ring-teal-300 flex flex-col justify-between gap-3"
                       >
                         <div className="space-y-1.5">
                           <div className="flex items-start justify-between gap-2">
@@ -755,7 +757,7 @@ export const CopingToolkitModal: React.FC = () => {
                               aria-label={`${t('Stop')} ${t(item.name)}`}
                               className="px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white flex items-center gap-1.5 text-xs font-black shadow-xs transition-colors cursor-pointer whitespace-nowrap"
                             >
-                              <Square className="w-3 h-3 fill-current" aria-hidden="true" />
+                              <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
                               <span>{t('Stop')}</span>
                             </button>
                           </div>
@@ -767,7 +769,7 @@ export const CopingToolkitModal: React.FC = () => {
                   return (
                     <div
                       key={item.id}
-                      className={`w-full text-left p-3.5 sm:p-4 min-h-[48px] rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${
+                      className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${
                         isLocked
                           ? 'border-slate-200 bg-slate-50/70 hover:border-amber-300'
                           : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-xs'
