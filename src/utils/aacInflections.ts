@@ -2,8 +2,11 @@
  * AAC Grammar Inflections & Morphology Utility (Proloquo2Go Style)
  * 
  * Provides robust grammatical inflections (verb tenses, noun plurals, comparative adjectives)
- * for clinical AAC boards, with support for multi-word verb phrases (e.g., "Wash vegetables", "Clean window").
+ * for clinical AAC boards in English, Spanish, French, German, and multilingual modes.
+ * Supports multi-word verb phrases (e.g. "Wash vegetables", "Clean window", "Lavar verduras", "Fenster putzen").
  */
+
+import { getLanguage, t } from '../services/translator';
 
 export interface WordInflection {
   label: string;
@@ -12,8 +15,11 @@ export interface WordInflection {
   badge: string;
 }
 
-// Irregular verb conjugations for base verbs
-const VERB_IRREGULARS: Record<string, { present_s: string; past: string; continuous: string }> = {
+// ─────────────────────────────────────────────────────────────────────────────
+// ENGLISH CONJUGATION & MORPHOLOGY
+// ─────────────────────────────────────────────────────────────────────────────
+
+const EN_VERB_IRREGULARS: Record<string, { present_s: string; past: string; continuous: string }> = {
   'be': { present_s: 'is', past: 'was', continuous: 'being' },
   'have': { present_s: 'has', past: 'had', continuous: 'having' },
   'do': { present_s: 'does', past: 'did', continuous: 'doing' },
@@ -89,20 +95,16 @@ const VERB_IRREGULARS: Record<string, { present_s: string; past: string; continu
   'understand': { present_s: 'understands', past: 'understood', continuous: 'understanding' },
 };
 
-/**
- * Accurately conjugates a single English verb according to morphology rules.
- */
-function conjugateSingleVerb(verb: string): { present_s: string; past: string; continuous: string } {
+function conjugateEnglishSingleVerb(verb: string): { present_s: string; past: string; continuous: string } {
   const v = verb.toLowerCase();
-  if (VERB_IRREGULARS[v]) {
-    return VERB_IRREGULARS[v];
+  if (EN_VERB_IRREGULARS[v]) {
+    return EN_VERB_IRREGULARS[v];
   }
 
   let present_s = '';
   let past = '';
   let continuous = '';
 
-  // 1. Third person singular -s form
   if (/(?:s|x|z|ch|sh)$/i.test(v)) {
     present_s = `${v}es`;
   } else if (/[^aeiou]y$/i.test(v)) {
@@ -111,27 +113,22 @@ function conjugateSingleVerb(verb: string): { present_s: string; past: string; c
     present_s = `${v}s`;
   }
 
-  // 2. Past tense -ed form
   if (/e$/i.test(v)) {
     past = `${v}d`;
   } else if (/[^aeiou]y$/i.test(v)) {
     past = `${v.slice(0, -1)}ied`;
   } else if (/[aeiou][^aeiouwxy]$/i.test(v) && v.length <= 4) {
-    // CVC doubling (e.g. stop -> stopped, clap -> clapped, hug -> hugged)
     const lastChar = v.slice(-1);
     past = `${v}${lastChar}ed`;
   } else {
     past = `${v}ed`;
   }
 
-  // 3. Continuous -ing form
   if (/ie$/i.test(v)) {
     continuous = `${v.slice(0, -2)}ying`;
   } else if (/e$/i.test(v) && !/(?:ee|oe|ye)$/i.test(v)) {
-    // dance -> dancing, bake -> baking, smile -> smiling, ride -> riding
     continuous = `${v.slice(0, -1)}ing`;
   } else if (/[aeiou][^aeiouwxy]$/i.test(v) && v.length <= 4) {
-    // CVC doubling (e.g. stop -> stopping, run -> running, sit -> sitting)
     const lastChar = v.slice(-1);
     continuous = `${v}${lastChar}ing`;
   } else {
@@ -141,27 +138,19 @@ function conjugateSingleVerb(verb: string): { present_s: string; past: string; c
   return { present_s, past, continuous };
 }
 
-/**
- * Conjugates an entire verb phrase (e.g. "Wash vegetables", "Clean window", "Brush teeth", "Take off shoes").
- * Modifies the HEAD verb rather than appending suffixes to the tail noun!
- */
-function conjugateVerbPhrase(phrase: string): { present_s: string; past: string; continuous: string } {
+function conjugateEnglishPhrase(phrase: string): { present_s: string; past: string; continuous: string } {
   const parts = phrase.trim().split(/\s+/);
-  if (parts.length === 0) {
-    return { present_s: phrase, past: phrase, continuous: phrase };
-  }
+  if (parts.length === 0) return { present_s: phrase, past: phrase, continuous: phrase };
 
   const firstWord = parts[0];
   const rest = parts.slice(1).join(' ');
 
-  const conj = conjugateSingleVerb(firstWord);
+  const conj = conjugateEnglishSingleVerb(firstWord);
 
   const formatWithRest = (conjugatedHead: string): string => {
-    // Preserve initial capitalization style of the head
     const formattedHead = phrase.charAt(0) === phrase.charAt(0).toUpperCase()
       ? conjugatedHead.charAt(0).toUpperCase() + conjugatedHead.slice(1)
       : conjugatedHead;
-
     return rest ? `${formattedHead} ${rest}` : formattedHead;
   };
 
@@ -172,7 +161,137 @@ function conjugateVerbPhrase(phrase: string): { present_s: string; past: string;
   };
 }
 
-// Common noun plurals
+// ─────────────────────────────────────────────────────────────────────────────
+// SPANISH CONJUGATION & MORPHOLOGY
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ES_VERB_IRREGULARS: Record<string, { present_s: string; past: string; continuous: string }> = {
+  'ir': { present_s: 'va', past: 'fue', continuous: 'yendo' },
+  'ser': { present_s: 'es', past: 'fue', continuous: 'siendo' },
+  'estar': { present_s: 'está', past: 'estuvo', continuous: 'estando' },
+  'hacer': { present_s: 'hace', past: 'hizo', continuous: 'haciendo' },
+  'tener': { present_s: 'tiene', past: 'tuvo', continuous: 'teniendo' },
+  'poner': { present_s: 'pone', past: 'puso', continuous: 'poniendo' },
+  'querer': { present_s: 'quiere', past: 'quiso', continuous: 'queriendo' },
+  'decir': { present_s: 'dice', past: 'dijo', continuous: 'diciendo' },
+  'ver': { present_s: 've', past: 'vio', continuous: 'viendo' },
+  'dar': { present_s: 'da', past: 'dio', continuous: 'dando' },
+  'saber': { present_s: 'sabe', past: 'supo', continuous: 'sabiendo' },
+  'poder': { present_s: 'puede', past: 'pudo', continuous: 'pudiendo' },
+  'comer': { present_s: 'come', past: 'comió', continuous: 'comiendo' },
+  'beber': { present_s: 'bebe', past: 'bebió', continuous: 'bebiendo' },
+  'dormir': { present_s: 'duerme', past: 'durmió', continuous: 'durmiendo' },
+  'jugar': { present_s: 'juega', past: 'jugó', continuous: 'jugando' },
+  'lavarse': { present_s: 'se lava', past: 'se lavó', continuous: 'lavándose' },
+  'cepillarse': { present_s: 'se cepilla', past: 'se cepilló', continuous: 'cepillándose' },
+};
+
+function conjugateSpanishPhrase(phrase: string): { present_s: string; past: string; continuous: string } {
+  const parts = phrase.trim().split(/\s+/);
+  if (parts.length === 0) return { present_s: phrase, past: phrase, continuous: phrase };
+
+  const head = parts[0].toLowerCase();
+  const rest = parts.slice(1).join(' ');
+
+  let conj: { present_s: string; past: string; continuous: string };
+  if (ES_VERB_IRREGULARS[head]) {
+    conj = ES_VERB_IRREGULARS[head];
+  } else if (head.endsWith('ar')) {
+    const stem = head.slice(0, -2);
+    conj = { present_s: stem + 'a', past: stem + 'ó', continuous: stem + 'ando' };
+  } else if (head.endsWith('er') || head.endsWith('ir')) {
+    const stem = head.slice(0, -2);
+    conj = { present_s: stem + 'e', past: stem + 'ió', continuous: stem + 'iendo' };
+  } else {
+    conj = { present_s: head, past: head, continuous: head };
+  }
+
+  const cap = (s: string) => phrase.charAt(0) === phrase.charAt(0).toUpperCase() ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const join = (s: string) => rest ? `${cap(s)} ${rest}` : cap(s);
+
+  return {
+    present_s: join(conj.present_s),
+    past: join(conj.past),
+    continuous: join(conj.continuous),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FRENCH CONJUGATION & MORPHOLOGY
+// ─────────────────────────────────────────────────────────────────────────────
+
+function conjugateFrenchPhrase(phrase: string): { present_s: string; past: string; continuous: string } {
+  const parts = phrase.trim().split(/\s+/);
+  if (parts.length === 0) return { present_s: phrase, past: phrase, continuous: phrase };
+
+  const head = parts[0].toLowerCase();
+  const rest = parts.slice(1).join(' ');
+
+  let conj: { present_s: string; past: string; continuous: string };
+  if (head === 'aller') conj = { present_s: 'va', past: 'est allé', continuous: 'en allant' };
+  else if (head === 'être') conj = { present_s: 'est', past: 'a été', continuous: 'en étant' };
+  else if (head === 'avoir') conj = { present_s: 'a', past: 'a eu', continuous: 'en ayant' };
+  else if (head === 'faire') conj = { present_s: 'fait', past: 'a fait', continuous: 'en faisant' };
+  else if (head === 'manger') conj = { present_s: 'mange', past: 'a mangé', continuous: 'en mangeant' };
+  else if (head === 'boire') conj = { present_s: 'boit', past: 'a bu', continuous: 'en buvant' };
+  else if (head === 'prendre') conj = { present_s: 'prend', past: 'a pris', continuous: 'en prenant' };
+  else if (head === 'vouloir') conj = { present_s: 'veut', past: 'a voulu', continuous: 'en voulant' };
+  else if (head.endsWith('er')) {
+    const stem = head.slice(0, -2);
+    conj = { present_s: stem + 'e', past: 'a ' + stem + 'é', continuous: 'en ' + stem + 'ant' };
+  } else if (head.endsWith('ir')) {
+    const stem = head.slice(0, -2);
+    conj = { present_s: stem + 'it', past: 'a ' + stem + 'i', continuous: 'en ' + stem + 'issant' };
+  } else {
+    conj = { present_s: head, past: head, continuous: head };
+  }
+
+  const cap = (s: string) => phrase.charAt(0) === phrase.charAt(0).toUpperCase() ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const join = (s: string) => rest ? `${cap(s)} ${rest}` : cap(s);
+
+  return {
+    present_s: join(conj.present_s),
+    past: join(conj.past),
+    continuous: join(conj.continuous),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GERMAN CONJUGATION & MORPHOLOGY
+// ─────────────────────────────────────────────────────────────────────────────
+
+function conjugateGermanPhrase(phrase: string): { present_s: string; past: string; continuous: string } {
+  const parts = phrase.trim().split(/\s+/);
+  if (parts.length === 0) return { present_s: phrase, past: phrase, continuous: phrase };
+
+  // In German verb phrases (e.g. "Fenster putzen", "Gemüse waschen"), the verb is typically at the end
+  let verbIndex = parts.findIndex(p => p.toLowerCase().endsWith('en') || p.toLowerCase().endsWith('ern') || p.toLowerCase().endsWith('eln'));
+  if (verbIndex === -1) verbIndex = parts.length - 1;
+
+  const verb = parts[verbIndex].toLowerCase();
+  const stem = verb.replace(/en$|n$/, '');
+
+  const present_s = stem + 't';
+  const past = 'hat ge' + stem + 't';
+  const continuous = 'beim ' + verb.charAt(0).toUpperCase() + verb.slice(1);
+
+  const rebuild = (conjugated: string) => {
+    const copy = [...parts];
+    copy[verbIndex] = conjugated;
+    return copy.join(' ');
+  };
+
+  return {
+    present_s: rebuild(present_s),
+    past: rebuild(past),
+    continuous: rebuild(continuous),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOUN PLURALS & ADJECTIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
 const NOUN_PLURALS: Record<string, string> = {
   'apple': 'apples',
   'cookie': 'cookies',
@@ -204,7 +323,6 @@ const NOUN_PLURALS: Record<string, string> = {
   'foot': 'feet',
 };
 
-// Common adjective forms
 const ADJECTIVE_FORMS: Record<string, { comparative: string; superlative: string }> = {
   'happy': { comparative: 'happier', superlative: 'happiest' },
   'sad': { comparative: 'sadder', superlative: 'saddest' },
@@ -221,24 +339,35 @@ const ADJECTIVE_FORMS: Record<string, { comparative: string; superlative: string
 
 /**
  * Returns grammatical inflections for an AAC word or phrase (Verbs, Nouns, Adjectives).
+ * Automatically adapts conjugation and badges to the active language!
  */
 export function getWordInflections(label: string, colorType: string): WordInflection[] {
+  const currentLang = getLanguage ? getLanguage() : 'en';
   const cleanLabel = label.trim().toLowerCase();
   const baseLabel = label.trim();
 
   // 1. Verbs (Tenses & Phrasal Verbs)
-  // Check if labeled as verb or matches common verb dictionary/head verb
   const firstWord = cleanLabel.split(/\s+/)[0];
-  const isVerb = colorType === 'verb' || Boolean(VERB_IRREGULARS[cleanLabel]) || Boolean(VERB_IRREGULARS[firstWord]);
+  const isVerb = colorType === 'verb' || Boolean(EN_VERB_IRREGULARS[cleanLabel]) || Boolean(EN_VERB_IRREGULARS[firstWord]) || Boolean(ES_VERB_IRREGULARS[cleanLabel]) || cleanLabel.endsWith('ar') || cleanLabel.endsWith('er') || cleanLabel.endsWith('ir');
 
   if (isVerb) {
-    const conj = conjugateVerbPhrase(baseLabel);
+    let conj: { present_s: string; past: string; continuous: string };
+
+    if (currentLang === 'es') {
+      conj = conjugateSpanishPhrase(baseLabel);
+    } else if (currentLang === 'fr' || currentLang === 'fr_ca') {
+      conj = conjugateFrenchPhrase(baseLabel);
+    } else if (currentLang === 'de') {
+      conj = conjugateGermanPhrase(baseLabel);
+    } else {
+      conj = conjugateEnglishPhrase(baseLabel);
+    }
 
     return [
-      { label: baseLabel, speechText: baseLabel, form: 'base', badge: 'BASE' },
-      { label: conj.present_s, speechText: conj.present_s, form: 'present_s', badge: '-S / HE/SHE' },
-      { label: conj.past, speechText: conj.past, form: 'past', badge: 'PAST (-ED)' },
-      { label: conj.continuous, speechText: conj.continuous, form: 'continuous', badge: 'NOW (-ING)' },
+      { label: baseLabel, speechText: baseLabel, form: 'base', badge: t('BASE') },
+      { label: conj.present_s, speechText: conj.present_s, form: 'present_s', badge: t('-S / HE/SHE') },
+      { label: conj.past, speechText: conj.past, form: 'past', badge: t('PAST (-ED)') },
+      { label: conj.continuous, speechText: conj.continuous, form: 'continuous', badge: t('NOW (-ING)') },
     ];
   }
 
@@ -246,12 +375,20 @@ export function getWordInflections(label: string, colorType: string): WordInflec
   if (colorType === 'noun' || NOUN_PLURALS[cleanLabel]) {
     let plural = NOUN_PLURALS[cleanLabel];
     if (!plural) {
-      if (/(?:s|x|z|ch|sh)$/i.test(cleanLabel)) {
-        plural = `${cleanLabel}es`;
-      } else if (/[^aeiou]y$/i.test(cleanLabel)) {
-        plural = `${cleanLabel.slice(0, -1)}ies`;
+      if (currentLang === 'es') {
+        plural = cleanLabel.endsWith('s') ? cleanLabel : (/[aeiouáéíóú]$/i.test(cleanLabel) ? `${cleanLabel}s` : `${cleanLabel}es`);
+      } else if (currentLang === 'fr' || currentLang === 'fr_ca') {
+        plural = cleanLabel.endsWith('s') || cleanLabel.endsWith('x') ? cleanLabel : `${cleanLabel}s`;
+      } else if (currentLang === 'de') {
+        plural = cleanLabel.endsWith('e') ? `${cleanLabel}n` : `${cleanLabel}e`;
       } else {
-        plural = `${cleanLabel}s`;
+        if (/(?:s|x|z|ch|sh)$/i.test(cleanLabel)) {
+          plural = `${cleanLabel}es`;
+        } else if (/[^aeiou]y$/i.test(cleanLabel)) {
+          plural = `${cleanLabel.slice(0, -1)}ies`;
+        } else {
+          plural = `${cleanLabel}s`;
+        }
       }
     }
     const formattedPlural = baseLabel.charAt(0) === baseLabel.charAt(0).toUpperCase()
@@ -259,20 +396,23 @@ export function getWordInflections(label: string, colorType: string): WordInflec
       : plural;
 
     return [
-      { label: baseLabel, speechText: baseLabel, form: 'base', badge: 'SINGLE' },
-      { label: formattedPlural, speechText: plural, form: 'plural', badge: 'MANY (PLURAL)' },
+      { label: baseLabel, speechText: baseLabel, form: 'base', badge: t('SINGLE') },
+      { label: formattedPlural, speechText: plural, form: 'plural', badge: t('MANY (PLURAL)') },
     ];
   }
 
   // 3. Adjectives (Comparatives)
-  if (colorType === 'adjective' && ADJECTIVE_FORMS[cleanLabel]) {
-    const forms = ADJECTIVE_FORMS[cleanLabel];
+  if (colorType === 'adjective' && (ADJECTIVE_FORMS[cleanLabel] || currentLang === 'es' || currentLang === 'fr')) {
+    const forms = ADJECTIVE_FORMS[cleanLabel] || {
+      comparative: currentLang === 'es' ? `más ${baseLabel}` : (currentLang === 'fr' ? `plus ${baseLabel}` : `more ${baseLabel}`),
+      superlative: currentLang === 'es' ? `el más ${baseLabel}` : (currentLang === 'fr' ? `le plus ${baseLabel}` : `most ${baseLabel}`)
+    };
     const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
     return [
-      { label: baseLabel, speechText: baseLabel, form: 'base', badge: 'BASE' },
-      { label: capitalize(forms.comparative), speechText: forms.comparative, form: 'comparative', badge: 'MORE (-ER)' },
-      { label: capitalize(forms.superlative), speechText: forms.superlative, form: 'superlative', badge: 'MOST (-EST)' },
+      { label: baseLabel, speechText: baseLabel, form: 'base', badge: t('BASE') },
+      { label: capitalize(forms.comparative), speechText: forms.comparative, form: 'comparative', badge: t('MORE (-ER)') },
+      { label: capitalize(forms.superlative), speechText: forms.superlative, form: 'superlative', badge: t('MOST (-EST)') },
     ];
   }
 

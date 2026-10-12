@@ -1733,10 +1733,10 @@ export const AACView: React.FC = () => {
                 />
                 <div>
                   <h3 className="font-black text-slate-900 text-base">
-                    Grammar Forms: {inflectionTarget.item.label}
+                    {t('Grammar Forms')}: {t(inflectionTarget.item.label)}
                   </h3>
                   <span className="text-[11px] font-bold text-slate-400">
-                    Pick a variation to speak or insert
+                    {t('Pick a variation to speak or insert')}
                   </span>
                 </div>
               </div>
