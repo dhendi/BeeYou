@@ -16,10 +16,13 @@ import {
   Layers,
   Crown,
   Share2,
-  Check
+  Check,
+  Globe
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { useApp } from '../context/AppContext';
+import { SUPPORTED_LANGUAGES } from './LanguageDropdown';
+import { AppLanguage } from '../types';
 import { 
   loginWithSharedEmail, 
   registerSharedFamilyAccount, 
@@ -56,6 +59,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     setLinkedDeviceCode,
     setShowCaregiverModal,
     speak,
+    settings,
+    updateSettings,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register'>(initialTab);
@@ -75,6 +80,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [regCaregiverRole, setRegCaregiverRole] = useState('Parent');
   const [regChildName, setRegChildName] = useState('');
   const [regChildAgeGroup, setRegChildAgeGroup] = useState<'kid' | 'teen' | 'adult'>('kid');
+  const [regLanguage, setRegLanguage] = useState<AppLanguage>(() => settings?.language || 'en');
   const [regPin, setRegPin] = useState('1234');
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
@@ -207,6 +213,10 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     try {
       setRegLoading(true);
       setRegError(null);
+
+      if (updateSettings) {
+        updateSettings({ language: regLanguage });
+      }
 
       const res = await registerSharedFamilyAccount({
         email: regEmail,
@@ -648,6 +658,34 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       <option value="adult">Adult (18+)</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Preferred Language Picker */}
+                <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-slate-700/50 border border-amber-200 dark:border-slate-600">
+                  <label className="text-xs font-black uppercase tracking-wider text-amber-950 dark:text-amber-200 flex items-center gap-1.5 mb-1.5">
+                    <Globe className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>App &amp; AAC Language / Idioma / Langue *</span>
+                  </label>
+                  <select
+                    value={regLanguage}
+                    onChange={(e) => {
+                      const newLang = e.target.value as AppLanguage;
+                      setRegLanguage(newLang);
+                      if (updateSettings) {
+                        updateSettings({ language: newLang });
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 dark:border-slate-500 bg-white dark:bg-slate-900 font-bold text-xs cursor-pointer shadow-xs"
+                  >
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.flag} {lang.name} — {lang.nativeName}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    Sets the voice, AAC tiles, and app navigation to your family's language.
+                  </p>
                 </div>
 
                 <div>

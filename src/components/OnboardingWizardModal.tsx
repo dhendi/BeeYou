@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { BeeMascot } from './BeeYouLogo';
 import { CaregiverHowItWorksModal } from './CaregiverHowItWorksModal';
+import { LanguageDropdown } from './LanguageDropdown';
 import {
   registerSharedFamilyAccount,
   setActiveDeviceView,
@@ -327,6 +328,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              <LanguageDropdown />
+
               <button
                 type="button"
                 onClick={() => setShowGuideModal(true)}
@@ -381,10 +384,14 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                     BeeYou is an all-in-one supportive space for neurodivergent minds—bringing together visual routines, AAC picture communication, gentle sensory regulation, and flexible tools tailored to you.
                   </p>
-                  <div className="pt-2">
+                  <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
                     <span className="inline-block px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 font-bold text-xs">
                       🐝 "You can be yourself here."
                     </span>
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Language:</span>
+                      <LanguageDropdown />
+                    </div>
                   </div>
                 </div>
 
