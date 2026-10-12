@@ -684,13 +684,13 @@ export const AACView: React.FC = () => {
     }
     // Standard AAC Button Density (TouchChat, Proloquo2Go, TD Snap, LAMP)
     if (buttonSize === 'large') {
-      return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-4xl mx-auto';
+      return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full';
     }
     if (buttonSize === 'small') {
-      return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8';
+      return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 w-full';
     }
     // 'medium' (default balanced AAC standard)
-    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6';
+    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 w-full';
   })();
 
   const buttonSizeStyles = (() => {
@@ -705,11 +705,11 @@ export const AACView: React.FC = () => {
         };
       case 'large':
         return {
-          tilePadding: 'p-3 sm:p-4',
-          folderPadding: 'p-3 sm:p-4',
-          labelFont: 'text-sm sm:text-base md:text-lg',
-          folderFont: 'text-xs sm:text-base',
-          categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5',
+          tilePadding: 'p-3 sm:p-4 md:p-5',
+          folderPadding: 'p-3 sm:p-4 md:p-5',
+          labelFont: 'text-sm sm:text-base md:text-lg lg:text-xl font-black',
+          folderFont: 'text-xs sm:text-base md:text-lg font-black',
+          categoryTag: 'text-[9px] sm:text-[10px] md:text-xs px-2 py-0.5 font-black',
         };
       case 'medium':
       default:
