@@ -387,10 +387,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   key={preset.cols}
                   type="button"
                   onClick={() => {
+                    const mappedSize = preset.cols <= 3 ? 'large' : preset.cols >= 6 ? 'small' : 'medium';
                     updateSettings({
                       gridColumns: preset.cols,
                       largeButtonMode: preset.cols <= 3,
                     });
+                    try {
+                      localStorage.setItem('beeyou_aac_button_size', mappedSize);
+                      window.dispatchEvent(new CustomEvent('beeyou_aac_button_size_change', { detail: { size: mappedSize } }));
+                    } catch {}
                     playChime('tap');
                   }}
                   className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${

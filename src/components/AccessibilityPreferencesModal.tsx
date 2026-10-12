@@ -336,10 +336,15 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         key={preset.cols}
                         type="button"
                         onClick={() => {
+                          const mappedSize = preset.cols <= 3 ? 'large' : preset.cols >= 6 ? 'small' : 'medium';
                           updateSettings({
                             gridColumns: preset.cols as 2 | 3 | 4 | 6 | 8,
                             largeButtonMode: preset.cols <= 3,
                           });
+                          try {
+                            localStorage.setItem('beeyou_aac_button_size', mappedSize);
+                            window.dispatchEvent(new CustomEvent('beeyou_aac_button_size_change', { detail: { size: mappedSize } }));
+                          } catch {}
                           playChime('tap');
                         }}
                         className={`p-3 rounded-2xl border-2 text-left flex flex-col justify-between transition-all cursor-pointer ${

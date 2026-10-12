@@ -88,27 +88,23 @@ const ChildAppContent: React.FC = () => {
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
 
-  // 6-Step Gradual Interactive AAC Onboarding Tour State
-  const [showInteractiveOnboarding, setShowInteractiveOnboarding] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('beeyou_onboarding_completed') !== 'true';
-    } catch {
-      return false;
-    }
-  });
+  // 6-Step Gradual Interactive AAC Onboarding Tour State (Only triggered when clicking AAC / requested, never automatically upon signup)
+  const [showInteractiveOnboarding, setShowInteractiveOnboarding] = useState<boolean>(false);
 
   // Companion Caregiver Help Hub Modal State
   const [showCaregiverHelpHub, setShowCaregiverHelpHub] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOpenHelpHub = () => setShowCaregiverHelpHub(true);
-    const handleReplayTour = () => setShowInteractiveOnboarding(true);
+    const handleStartTour = () => setShowInteractiveOnboarding(true);
 
     window.addEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
-    window.addEventListener('beeyou_replay_onboarding_tour', handleReplayTour);
+    window.addEventListener('beeyou_replay_onboarding_tour', handleStartTour);
+    window.addEventListener('beeyou_start_onboarding_tour', handleStartTour);
     return () => {
       window.removeEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
-      window.removeEventListener('beeyou_replay_onboarding_tour', handleReplayTour);
+      window.removeEventListener('beeyou_replay_onboarding_tour', handleStartTour);
+      window.removeEventListener('beeyou_start_onboarding_tour', handleStartTour);
     };
   }, []);
 

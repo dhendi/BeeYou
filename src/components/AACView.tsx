@@ -11,7 +11,8 @@ import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
-import { GridStage, DwellMode, STORAGE_KEYS } from '../types/aac';
+import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
+import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 
 export const getGrammaticalCategoryLabel = (colorType: AACItem['colorType']): string => {
   switch (colorType) {
@@ -218,6 +219,60 @@ export const AACView: React.FC = () => {
     return 'direct';
   });
 
+  // Standard AAC Button Density / Size (small | medium | large)
+  const [buttonSize, setButtonSize] = useState<AACButtonSize>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.BUTTON_SIZE);
+      if (saved === 'small' || saved === 'medium' || saved === 'large') return saved as AACButtonSize;
+    } catch {}
+    return 'medium';
+  });
+
+  // First-Time AAC Experience Knowledge Prompt Modal State
+  const [showAacExperiencePrompt, setShowAacExperiencePrompt] = useState<boolean>(() => {
+    try {
+      const promptCompleted = localStorage.getItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED);
+      const tourCompleted = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+      if (promptCompleted === 'true' || tourCompleted === 'true') {
+        return false;
+      }
+      return true; // Show on first visit to AAC section
+    } catch {
+      return false;
+    }
+  });
+
+  const handlePromptSelectNewToAAC = () => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED, 'true');
+      localStorage.setItem(STORAGE_KEYS.AAC_EXPERIENCE_KNOWN, 'no');
+    } catch {}
+    setShowAacExperiencePrompt(false);
+    // Launch the 6-step gradual interactive tour
+    window.dispatchEvent(new CustomEvent('beeyou_start_onboarding_tour'));
+  };
+
+  const handlePromptSelectKnowledgeable = () => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED, 'true');
+      localStorage.setItem(STORAGE_KEYS.AAC_EXPERIENCE_KNOWN, 'yes');
+      localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
+      localStorage.setItem(STORAGE_KEYS.GRID_STAGE, '3');
+      window.dispatchEvent(new CustomEvent('beeyou_grid_stage_change', { detail: { stage: 3 } }));
+    } catch {}
+    setGridStage(3);
+    setShowAacExperiencePrompt(false);
+  };
+
+  const handleSetButtonSize = (size: AACButtonSize) => {
+    setButtonSize(size);
+    try {
+      localStorage.setItem(STORAGE_KEYS.BUTTON_SIZE, size);
+      window.dispatchEvent(new CustomEvent('beeyou_aac_button_size_change', { detail: { size } }));
+    } catch {}
+    playChime('tap');
+  };
+
   useEffect(() => {
     const handleStageChange = (e: any) => {
       if (e?.detail?.stage) setGridStage(e.detail.stage);
@@ -225,11 +280,20 @@ export const AACView: React.FC = () => {
     const handleDwellChange = (e: any) => {
       if (e?.detail?.mode) setDwellMode(e.detail.mode);
     };
+    const handleButtonSizeChange = (e: any) => {
+      if (e?.detail?.size) setButtonSize(e.detail.size);
+    };
+    const handleOpenPrompt = () => setShowAacExperiencePrompt(true);
+
     window.addEventListener('beeyou_grid_stage_change', handleStageChange);
     window.addEventListener('beeyou_dwell_mode_change', handleDwellChange);
+    window.addEventListener('beeyou_aac_button_size_change', handleButtonSizeChange);
+    window.addEventListener('beeyou_open_aac_prompt', handleOpenPrompt);
     return () => {
       window.removeEventListener('beeyou_grid_stage_change', handleStageChange);
       window.removeEventListener('beeyou_dwell_mode_change', handleDwellChange);
+      window.removeEventListener('beeyou_aac_button_size_change', handleButtonSizeChange);
+      window.removeEventListener('beeyou_open_aac_prompt', handleOpenPrompt);
     };
   }, []);
 
@@ -658,23 +722,45 @@ export const AACView: React.FC = () => {
         return 'grid-cols-3 sm:grid-cols-4 max-w-3xl mx-auto';
       }
     }
-    const cols = settings.gridColumns || 4;
-    if (cols === 2) {
-      return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3';
+    // Standard AAC Button Density (TouchChat, Proloquo2Go, TD Snap, LAMP)
+    if (buttonSize === 'large') {
+      return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-4xl mx-auto';
     }
-    if (cols === 3) {
-      return 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4';
-    }
-    if (cols === 6) {
+    if (buttonSize === 'small') {
       return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8';
     }
-    if (cols === 8) {
-      return 'grid-cols-5 sm:grid-cols-7 md:grid-cols-8 lg:grid-cols-10';
+    // 'medium' (default balanced AAC standard)
+    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6';
+  })();
+
+  const buttonSizeStyles = (() => {
+    switch (buttonSize) {
+      case 'small':
+        return {
+          tilePadding: 'p-1 sm:p-1.5',
+          folderPadding: 'p-1 sm:p-1.5',
+          labelFont: 'text-[9px] sm:text-[10px] md:text-[11px]',
+          folderFont: 'text-[9px] sm:text-[10px]',
+          categoryTag: 'text-[7px] px-1 py-0.2',
+        };
+      case 'large':
+        return {
+          tilePadding: 'p-3 sm:p-4',
+          folderPadding: 'p-3 sm:p-4',
+          labelFont: 'text-sm sm:text-base md:text-lg',
+          folderFont: 'text-xs sm:text-base',
+          categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5',
+        };
+      case 'medium':
+      default:
+        return {
+          tilePadding: 'p-2',
+          folderPadding: 'p-2',
+          labelFont: 'text-[10px] sm:text-xs',
+          folderFont: 'text-[11px] sm:text-xs',
+          categoryTag: 'text-[8px] px-1.5 py-0.5',
+        };
     }
-    // Default: 4 columns standard
-    return settings.largeButtonMode
-      ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'
-      : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6';
   })();
 
   const handleTileClick = (item: AACItem) => {
@@ -1117,6 +1203,40 @@ export const AACView: React.FC = () => {
               <span>{t('AAC Guide')} 💡</span>
             </button>
 
+            {/* Standard Clinical AAC Button Size Selector (Small, Medium, Large) */}
+            <div
+              data-tour="aac-button-size"
+              className="flex items-center gap-1 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB] shadow-2xs"
+              role="group"
+              aria-label="AAC Button Size Selection"
+            >
+              <span className="text-[10px] font-black uppercase text-stone-500 px-1 hidden md:inline">
+                Size:
+              </span>
+              {[
+                { size: 'small' as AACButtonSize, label: 'Small', short: 'S', title: 'Small buttons (High density: 6–8 cols, TouchChat / Proloquo standard)' },
+                { size: 'medium' as AACButtonSize, label: 'Medium', short: 'M', title: 'Medium buttons (Standard balanced grid: 4–6 cols)' },
+                { size: 'large' as AACButtonSize, label: 'Large', short: 'L', title: 'Large buttons (Oversized touch targets: 2–4 cols, LAMP / Big keys)' },
+              ].map((s) => (
+                <button
+                  key={s.size}
+                  type="button"
+                  onClick={() => handleSetButtonSize(s.size)}
+                  className={`px-2 py-0.5 rounded-xl text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
+                    buttonSize === s.size
+                      ? 'bg-amber-500 text-white shadow-xs'
+                      : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
+                  }`}
+                  title={s.title}
+                  aria-label={`${s.label} button size`}
+                  aria-pressed={buttonSize === s.size}
+                >
+                  <span className="hidden sm:inline">{s.label}</span>
+                  <span className="sm:hidden">{s.short}</span>
+                </button>
+              ))}
+            </div>
+
             {/* Stage Selector Pills (4 Tiles, 12 Tiles, Full Matrix) */}
             {activeCategory === 'core' && !searchQuery.trim() && (
               <div data-tour="aac-grid-stages" className="flex items-center gap-1 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB] shadow-2xs">
@@ -1443,7 +1563,11 @@ export const AACView: React.FC = () => {
           </div>
         ) : (
         <main
-          className={`grid ${gridColsClass} gap-2 pb-10 bg-[#EFE9DF] p-3 sm:p-4 rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)]`}
+          className={`grid ${gridColsClass} ${
+            buttonSize === 'small' ? 'gap-1.5 sm:gap-2' : buttonSize === 'large' ? 'gap-3 sm:gap-4' : 'gap-2'
+          } pb-10 bg-[#EFE9DF] ${
+            buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3 sm:p-5' : 'p-3 sm:p-4'
+          } rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)]`}
           aria-label="Vocabulary grid"
         >
           {/* FOLDER TILES (Rendered at top of Core View for Proloquo2Go architecture) */}
@@ -1455,7 +1579,7 @@ export const AACView: React.FC = () => {
                   setActiveCategory(folder.category);
                   playChime('tap');
                 }}
-                className={`w-full h-full flex flex-col items-center p-2 rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]`}
+                className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]`}
               >
                 {/* Folder Top-Right Corner Tab / Badge */}
                 <div className="absolute top-1.5 right-1.5 z-10 bg-[#4A3E34] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
@@ -1474,12 +1598,7 @@ export const AACView: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${
-                  settings.gridColumns === 2 ? 'text-sm sm:text-base' :
-                  settings.gridColumns === 3 ? 'text-xs sm:text-sm' :
-                  settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' :
-                  'text-[11px] sm:text-xs'
-                }`}>
+                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${buttonSizeStyles.folderFont}`}>
                   {t(folder.label)}
                 </span>
               </button>
@@ -1519,7 +1638,7 @@ export const AACView: React.FC = () => {
                   speechText={item.speechText ? t(item.speechText) : undefined}
                   category={getGrammaticalCategoryLabel(item.colorType)}
                   onClick={() => handleTileClick(item)}
-                  className={`w-full h-full flex flex-col items-center p-2 ${
+                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.tilePadding} ${
                     activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
                   } ${
                     activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
@@ -1559,11 +1678,7 @@ export const AACView: React.FC = () => {
 
                   {/* Label */}
                   <span
-                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${
-                      settings.largeButtonMode
-                        ? (settings.gridColumns === 2 ? 'text-base sm:text-lg' : settings.gridColumns === 3 ? 'text-sm sm:text-base' : 'text-xs sm:text-sm')
-                        : (settings.gridColumns === 2 ? 'text-sm sm:text-base' : settings.gridColumns === 3 ? 'text-xs sm:text-sm' : settings.gridColumns === 6 || settings.gridColumns === 8 ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-xs')
-                    }`}
+                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${buttonSizeStyles.labelFont}`}
                   >
                     {t(item.label)}
                   </span>
@@ -1571,7 +1686,7 @@ export const AACView: React.FC = () => {
                   {/* Fitzgerald Key Category Tag (Differentiate Without Color Alone) */}
                   <span
                     aria-hidden="true"
-                    className="relative z-10 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-black/10 text-slate-800 pointer-events-none mt-0.5"
+                    className={`relative z-10 ${buttonSizeStyles.categoryTag} font-black uppercase tracking-wider rounded-md bg-black/10 text-slate-800 pointer-events-none mt-0.5`}
                   >
                     {getGrammaticalCategoryLabel(item.colorType)}
                   </span>
@@ -1877,6 +1992,14 @@ export const AACView: React.FC = () => {
       <AACGuideModal
         isOpen={showAacGuideModal}
         onClose={() => setShowAacGuideModal(false)}
+      />
+
+      {/* First-Time AAC Experience Knowledge Prompt Modal */}
+      <AACExperiencePromptModal
+        isOpen={showAacExperiencePrompt}
+        onSelectKnowledgeable={handlePromptSelectKnowledgeable}
+        onSelectNewToAAC={handlePromptSelectNewToAAC}
+        onClose={() => setShowAacExperiencePrompt(false)}
       />
     </div>
   );
