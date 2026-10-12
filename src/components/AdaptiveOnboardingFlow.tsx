@@ -20,15 +20,17 @@ import {
   Smile,
   ShieldCheck,
   Smartphone,
-  Globe
+  Globe,
+  Crown
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
+import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge, BillingCycle } from '../types';
 import { getPersonaLabel, getPersonaTokens, personaToAgeGroup } from '../utils/personaHelpers';
 import { QRCodeView } from './QRCodeView';
 import { getPairingCode } from '../services/caregiverSync';
 import { playChime } from '../utils/audio';
 import { LanguageDropdown } from './LanguageDropdown';
+import { t } from '../services/translator';
 
 interface AdaptiveOnboardingFlowProps {
   isOpen: boolean;
@@ -54,13 +56,24 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     setTheme,
     linkedDeviceCode,
     setLinkedDeviceCode,
-    setShowPostOnboardingSpotlight,
+    settings,
+    startFreeTrial,
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
+  const totalSteps = 4;
   const [selectedPersona, setSelectedPersona] = useState<UserPersona>(userPersona || 'child');
   const [pairingMode, setPairingMode] = useState<PairingMode>('caregiver_hub');
+  const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('yearly');
   
+  // Real-time re-render listener when language is changed
+  const [, setForceUpdate] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setForceUpdate((v) => v + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
   // Step 2 Form State
   const [name, setName] = useState<string>(() => {
     if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) return childProfile.name;
@@ -82,7 +95,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     return activeThemeId || tokens.suggestedThemeId;
   });
 
-  const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [currentPairingCode, setCurrentPairingCode] = useState<string>(() => {
     return linkedDeviceCode || getPairingCode() || 'BEE-101';
   });
@@ -112,7 +124,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       aacCommunication: true,
       firstThenSchedules: true,
     }));
-
   };
 
   const toggleFeature = (key: keyof EnabledFeatures) => {
@@ -123,21 +134,12 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     }));
   };
 
-  const handleCopyCode = () => {
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(currentPairingCode);
-      setCopiedCode(true);
-      playChime('tap');
-      setTimeout(() => setCopiedCode(false), 2000);
-    }
-  };
-
   const handleNext = () => {
     playChime('tap');
-    if (step < 3) {
+    if (step < totalSteps) {
       setStep((s) => s + 1);
     } else {
-      handleComplete();
+      handleComplete(false);
     }
   };
 
@@ -148,8 +150,12 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = (withTrial = false) => {
     playChime('star');
+
+    if (withTrial) {
+      startFreeTrial(selectedCycle);
+    }
 
     // 1. Commit persona & profile to state
     setUserPersona(selectedPersona);
@@ -203,9 +209,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Step {step} of 3 • {step === 1 && 'Role & Persona'}
-                {step === 2 && 'Identity & Dynamic Profile'}
-                {step === 3 && 'Modular Toolkit Customization'}
+                {t('Step')} {step} {t('of')} {totalSteps} • {step === 1 && t('Role & Persona')}
+                {step === 2 && t('Identity & Dynamic Profile')}
+                {step === 3 && t('Modular Toolkit Customization')}
+                {step === 4 && t('BeeYou Plus & Free Trial')}
               </span>
             </div>
 
@@ -216,7 +223,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
                   aria-label="Dismiss setup"
                 >
                   <X className="w-5 h-5" />
@@ -229,7 +236,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
             <div 
               className="bg-amber-500 h-full transition-all duration-300 rounded-full"
-              style={{ width: `${(step / 3) * 100}%` }}
+              style={{ width: `${(step / totalSteps) * 100}%` }}
             />
           </div>
         </div>
@@ -241,10 +248,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="space-y-6 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Who will be using BeeYou?
+                  {t('Who will be using BeeYou?')}
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-                  We adapt colors, language, and sensory tools to match your exact developmental needs.
+                  {t('We adapt colors, language, and sensory tools to match your exact developmental needs.')}
                 </p>
               </div>
 
@@ -256,10 +263,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                      Preferred Language / Idioma
+                      {t('Preferred Language / Idioma')}
                     </h4>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-tight">
-                      AAC tiles, spoken speech, and interactive tours will be in this language.
+                      {t('AAC tiles, spoken speech, and interactive tours will be in this language.')}
                     </p>
                   </div>
                 </div>
@@ -288,14 +295,14 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   <div>
                     <span className="text-3xl">🐝</span>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
-                      Child (Ages 3–11)
+                      {t('Child (Ages 3–11)')}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      Warm honey palette, claymorphism cards, friendly bee mascot avatar, playful icons.
+                      {t('Warm honey palette, claymorphism cards, friendly bee mascot avatar, playful icons.')}
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-3 uppercase tracking-wider">
-                    Playful & Gentle
+                    {t('Playful & Gentle')}
                   </span>
                 </button>
 
@@ -317,14 +324,14 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   <div>
                     <span className="text-3xl">🎧</span>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
-                      Teen (Ages 12–17)
+                      {t('Teen (Ages 12–17)')}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      Lo-fi muted aesthetic, minimal shadows, quick sensory resets, zero juvenile illustrations.
+                      {t('Lo-fi muted aesthetic, minimal shadows, quick sensory resets, zero juvenile illustrations.')}
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-3 uppercase tracking-wider">
-                    Lo-Fi & Discreet
+                    {t('Lo-Fi & Discreet')}
                   </span>
                 </button>
 
@@ -346,14 +353,14 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   <div>
                     <span className="text-3xl">💼</span>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
-                      Adult (Ages 18+)
+                      {t('Adult (Ages 18+)')}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      High-efficiency Executive Minimal UI, Spoon Theory energy budget, medication tracker, passport.
+                      {t('High-efficiency Executive Minimal UI, Spoon Theory energy budget, medication tracker, passport.')}
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 mt-3 uppercase tracking-wider">
-                    Executive Minimal
+                    {t('Executive Minimal')}
                   </span>
                 </button>
               </div>
@@ -361,7 +368,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               {/* Pairing Mode Selection */}
               <div className="pt-2">
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  Device Pairing Mode
+                  {t('Device Pairing Mode')}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
@@ -375,9 +382,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   >
                     <Smartphone className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-bold text-sm">Pair with Caregiver Hub</div>
+                      <div className="font-bold text-sm">{t('Pair with Caregiver Hub')}</div>
                       <div className="text-xs opacity-75 mt-0.5">
-                        Sync routines, live location, and receive silent SOS alerts remotely.
+                        {t('Sync routines, live location, and receive silent SOS alerts remotely.')}
                       </div>
                     </div>
                   </button>
@@ -393,9 +400,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   >
                     <Heart className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-bold text-sm">Standalone Mode</div>
+                      <div className="font-bold text-sm">{t('Standalone Mode')}</div>
                       <div className="text-xs opacity-75 mt-0.5">
-                        Self-directed autonomous use directly on this tablet device.
+                        {t('Self-directed autonomous use directly on this tablet device.')}
                       </div>
                     </div>
                   </button>
@@ -409,19 +416,19 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="space-y-6 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {selectedPersona === 'child' ? "Tell us about your child" : "What is your identity?"}
+                  {selectedPersona === 'child' ? t('Tell us about your child') : t('What is your identity?')}
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
                   {selectedPersona === 'child' 
-                    ? "We will customize voice, greeting tags, and communication tiles."
-                    : "Personalize your greetings, voice tags, and communication passport."}
+                    ? t('We will customize voice, greeting tags, and communication tiles.')
+                    : t('Personalize your greetings, voice tags, and communication passport.')}
                 </p>
               </div>
 
               {/* Persona-Aware Dynamic Name Field */}
               <div className="space-y-2">
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  {nameLabel}
+                  {t(nameLabel)}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -429,7 +436,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={namePlaceholder}
+                    placeholder={t(namePlaceholder)}
                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-base focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition"
                   />
                 </div>
@@ -438,26 +445,31 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               {/* Pronoun Preferences */}
               <div className="space-y-2">
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Pronouns Preference
+                  {t('Pronouns Preference')}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {['they/them', 'she/her', 'he/him', 'other'].map((p) => {
-                    const isSelected = pronouns === p;
+                  {[
+                    { key: 'they/them', label: t('They/Them') },
+                    { key: 'she/her', label: t('She/Her') },
+                    { key: 'he/him', label: t('He/Him') },
+                    { key: 'other', label: t('Other') },
+                  ].map((p) => {
+                    const isSelected = pronouns === p.key;
                     return (
                       <button
-                        key={p}
+                        key={p.key}
                         type="button"
                         onClick={() => {
                           playChime('tap');
-                          setPronouns(p);
+                          setPronouns(p.key);
                         }}
-                        className={`py-2.5 px-3 rounded-xl font-bold text-sm border-2 transition cursor-pointer capitalize ${
+                        className={`py-2.5 px-3 rounded-xl font-bold text-sm border-2 transition cursor-pointer ${
                           isSelected
                             ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200'
                             : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
                         }`}
                       >
-                        {p}
+                        {p.label}
                       </button>
                     );
                   })}
@@ -468,7 +480,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     type="text"
                     value={customPronoun}
                     onChange={(e) => setCustomPronoun(e.target.value)}
-                    placeholder="Enter custom pronouns (e.g. ze/zir)"
+                    placeholder={t('Enter custom pronouns (e.g. ze/zir)')}
                     className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium text-sm focus:border-amber-500 focus:outline-none mt-2"
                   />
                 )}
@@ -481,10 +493,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="space-y-5 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Modular Toolkit Customization
+                  {t('Modular Toolkit Customization')}
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-                  Toggle on only what you need to prevent sensory clutter and cognitive overload.
+                  {t('Toggle on only what you need to prevent sensory clutter and cognitive overload.')}
                 </p>
               </div>
 
@@ -497,10 +509,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        AAC Communication Grid
+                        {t('AAC Communication Grid')}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        High-contrast speech tiles categorized with the Fitzgerald Key.
+                        {t('High-contrast speech tiles categorized with the Fitzgerald Key.')}
                       </p>
                     </div>
                   </div>
@@ -527,10 +539,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        Visual Schedules & First-Then
+                        {t('Visual Schedules & First-Then')}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Step-by-step visual routines and pie timer transitions.
+                        {t('Step-by-step visual routines and pie timer transitions.')}
                       </p>
                     </div>
                   </div>
@@ -557,10 +569,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        Spoon Theory Energy Budget
+                        {t('Spoon Theory Energy Budget')}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        1–5 scale daily energy pacing for executive task management.
+                        {t('1–5 scale daily energy pacing for executive task management.')}
                       </p>
                     </div>
                   </div>
@@ -587,10 +599,10 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        Sensory Safe Mode & Overload Shield
+                        {t('Sensory Safe Mode & Overload Shield')}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        High-contrast red emergency button with 4 survival tactile tiles.
+                        {t('High-contrast red emergency button with 4 survival tactile tiles.')}
                       </p>
                     </div>
                   </div>
@@ -612,6 +624,123 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
+          {/* ════════════════ STEP 4: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
+          {step === 4 && (
+            <div className="space-y-5 animate-in fade-in">
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
+                  👑
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {t('Start Your 15-Day Free Trial')}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium max-w-lg mx-auto leading-relaxed">
+                  {t('Unlock full independence tools, authentic voice output, unlimited visual routines, and clinical reports.')}
+                </p>
+              </div>
+
+              {/* Plan Choice Cards (Weekly / Monthly / Yearly) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Weekly */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('tap');
+                    setSelectedCycle('weekly');
+                  }}
+                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                    selectedCycle === 'weekly'
+                      ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
+                  }`}
+                >
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                      {t('Weekly')}
+                    </span>
+                    <div className="text-xl font-black text-slate-900 dark:text-white">$2.99</div>
+                    <span className="text-[11px] text-slate-500 font-medium">/{t('week')}</span>
+                  </div>
+                  <div className="mt-3 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                    {t('15 days free trial')}
+                  </div>
+                </button>
+
+                {/* Monthly */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('tap');
+                    setSelectedCycle('monthly');
+                  }}
+                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                    selectedCycle === 'monthly'
+                      ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
+                  }`}
+                >
+                  <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    {t('Popular')}
+                  </div>
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                      {t('Monthly')}
+                    </span>
+                    <div className="text-xl font-black text-slate-900 dark:text-white">$8.99</div>
+                    <span className="text-[11px] text-slate-500 font-medium">/{t('month')}</span>
+                  </div>
+                  <div className="mt-3 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                    {t('15 days free trial')}
+                  </div>
+                </button>
+
+                {/* Yearly */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('tap');
+                    setSelectedCycle('yearly');
+                  }}
+                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                    selectedCycle === 'yearly'
+                      ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 ring-2 ring-emerald-400/40 shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
+                  }`}
+                >
+                  <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    {t('Save 17%')}
+                  </div>
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                      {t('Yearly')}
+                    </span>
+                    <div className="text-xl font-black text-slate-900 dark:text-white">$89.99</div>
+                    <span className="text-[11px] text-slate-500 font-medium">$7.49/{t('month')}</span>
+                  </div>
+                  <div className="mt-3 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                    {t('15 days free trial')}
+                  </div>
+                </button>
+              </div>
+
+              {/* Guarantees / Features included */}
+              <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-2 font-bold">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{t('Zero charge today • 15 days 100% free trial')}</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{t('Unlimited AAC symbols, offline natural voice, & full visual schedule toolkit')}</span>
+                </div>
+                <div className="flex items-center gap-2 font-bold">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{t('Cancel anytime in settings with 1 tap before trial ends')}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Footer Navigation Buttons */}
@@ -623,20 +752,40 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm flex items-center gap-2 cursor-pointer transition active:scale-95"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
+              <span>{t('Back')}</span>
             </button>
           ) : (
             <div />
           )}
 
-          <button
-            type="button"
-            onClick={handleNext}
-            className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
-          >
-            <span>{step === 3 ? 'Launch Dashboard 🚀' : 'Continue'}</span>
-            <ArrowRight className="w-4 h-4 stroke-3" />
-          </button>
+          {step < totalSteps ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
+            >
+              <span>{t('Continue')}</span>
+              <ArrowRight className="w-4 h-4 stroke-3" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleComplete(false)}
+                className="px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 text-xs font-bold cursor-pointer transition"
+              >
+                {t('Continue with Free Plan')}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleComplete(true)}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
+              >
+                <span>{t('Start 15-Day Free Trial 🚀')}</span>
+                <ArrowRight className="w-4 h-4 stroke-3" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

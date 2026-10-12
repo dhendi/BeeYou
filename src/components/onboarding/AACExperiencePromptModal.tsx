@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   HelpCircle, 
@@ -10,6 +10,8 @@ import {
   Volume2
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
+import { t } from '../../services/translator';
+import { LanguageDropdown } from '../LanguageDropdown';
 
 interface AACExperiencePromptModalProps {
   isOpen: boolean;
@@ -24,6 +26,14 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
   onSelectNewToAAC,
   onClose,
 }) => {
+  const [, setLangTick] = useState(0);
+
+  useEffect(() => {
+    const handleLangChange = () => setLangTick(prev => prev + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
   if (!isOpen) return null;
 
   return (
@@ -36,25 +46,30 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
     >
       <div className="relative w-full max-w-lg bg-[#FAF8F5] border-3 border-amber-300 rounded-3xl shadow-[0_20px_50px_rgba(217,119,6,0.22)] p-5 sm:p-7 space-y-5 animate-in zoom-in-95">
         
+        {/* Language selector in top corner */}
+        <div className="flex justify-end items-center mb-1">
+          <LanguageDropdown />
+        </div>
+
         {/* Top Decorative Mascot / Header */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-amber-400 to-amber-500 text-white flex items-center justify-center text-3xl mx-auto shadow-[0_6px_0_0_#d97706,0_10px_20px_rgba(217,119,6,0.25)] ring-4 ring-amber-100">
             🗣️
           </div>
           <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-black text-xs uppercase tracking-wider">
-            AAC Speech Board
+            {t('AAC Speech Board')}
           </span>
           <h2
             id="aac-prompt-title"
             className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight"
           >
-            Do you already know how AAC works?
+            {t('Do you already know how AAC works?')}
           </h2>
           <p
             id="aac-prompt-description"
             className="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto leading-relaxed"
           >
-            BeeYou provides a clinical visual speech matrix. Tell us your experience level so we can give you the best start:
+            {t('BeeYou provides a clinical visual speech matrix. Tell us your experience level so we can give you the best start:')}
           </p>
         </div>
 
@@ -69,10 +84,10 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
           </div>
           <div className="space-y-0.5 leading-snug">
             <span className="font-black text-amber-900 block text-xs">
-              🐝 Instructions Always Available
+              🐝 {t('Instructions Always Available')}
             </span>
             <p className="text-amber-900/90 text-[11px] sm:text-xs font-medium">
-              Instructions for using the AAC will always be available in the Caregiver App (tap the <strong>🐝 Help</strong> icon anytime in the top header).
+              {t('Instructions for using the AAC will always be available in the Caregiver App (tap the Help icon anytime in the top header).')}
             </p>
           </div>
         </div>
@@ -95,15 +110,15 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
               </div>
               <div>
                 <span className="block font-black text-sm sm:text-base text-white tracking-tight">
-                  No, I'm New — Show Me How It Works
+                  {t("No, I'm New — Show Me How It Works")}
                 </span>
                 <span className="block text-[11px] sm:text-xs text-amber-100 font-medium">
-                  Takes 45s • Interactive 6-step cause &amp; effect tour
+                  {t('Takes 45s • Interactive 6-step cause & effect tour')}
                 </span>
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-xl bg-white/20 text-white text-xs font-black shrink-0 hidden sm:inline">
-              Start Tour ➜
+              {t('Start Tour')} ➜
             </span>
           </button>
 
@@ -123,15 +138,15 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
               </div>
               <div>
                 <span className="block font-black text-sm sm:text-base text-stone-900 tracking-tight">
-                  Yes, I Know — Open Full AAC Board
+                  {t('Yes, I Know — Open Full AAC Board')}
                 </span>
                 <span className="block text-[11px] sm:text-xs text-stone-500 font-medium">
-                  Skip the tour • Jump straight into the full vocabulary matrix
+                  {t('Skip the tour • Jump straight into the full vocabulary matrix')}
                 </span>
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-black shrink-0 hidden sm:inline">
-              Full Board ⚡
+              {t('Full Board')} ⚡
             </span>
           </button>
         </div>
@@ -144,7 +159,7 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
               onClick={onClose}
               className="text-xs text-stone-400 hover:text-stone-600 font-bold underline transition-colors cursor-pointer"
             >
-              Remind me later
+              {t('Remind me later')}
             </button>
           </div>
         )}
