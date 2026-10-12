@@ -731,15 +731,101 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 </button>
               </div>
 
+              {/* Side-by-side Plan Comparison: Free vs Premium */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                {/* Free Plan Card */}
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border-2 border-slate-200 dark:border-slate-700/80 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h4 className="font-black text-slate-800 dark:text-slate-200 text-sm">
+                        {t('BeeYou Basic')}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase">
+                        {t('Free Forever')}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mb-3">
+                      {t('Basic starter tools with strict limits:')}
+                    </p>
+                    <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{t('Standard core AAC board (36 words)')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{t('1 routine & 1 medication reminder only')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{t('2 basic soundscapes (Rain & Ocean)')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                        <span className="text-slate-400 dark:text-slate-500 line-through">{t('Custom photos & voice recordings')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                        <span className="text-slate-400 dark:text-slate-500 line-through">{t('Clinical therapist IEP reports')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                        <span className="text-slate-400 dark:text-slate-500 line-through">{t('Caregiver live sync & remote alerts')}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Premium Plan Card (High Value Highlight) */}
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-amber-50 to-amber-100/60 dark:from-amber-950/40 dark:to-slate-800/80 border-2 border-amber-400 dark:border-amber-600/80 ring-2 ring-amber-300/40 shadow-sm relative flex flex-col justify-between">
+                  <div className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    {t('Everything Included')}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <h4 className="font-black text-amber-950 dark:text-amber-100 text-sm">
+                        {t('BeeYou Plus (Trial)')}
+                      </h4>
+                    </div>
+                    <p className="text-[11px] text-amber-900/80 dark:text-amber-300/80 font-medium mb-3">
+                      {t('Full freedom, zero limits & clinical superpowers:')}
+                    </p>
+                    <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('Unlimited AAC')}</strong>: {t('Photos, voice clips, grammar')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('Unlimited Visual Routines')}</strong> {t('& First-Then')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('All 17 Soundscapes')}</strong> {t('& Custom Theme Studio')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('Therapist IEP PDF')}</strong> {t('progress reports')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('Caregiver Portal')}</strong>: {t('Live sync & silent SOS')}</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                        <span><strong>{t('Priority Offline Mode')}</strong> &amp; {t('family profiles')}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               {/* Guarantees / Features included */}
               <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 space-y-2 text-xs text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-2 font-bold">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>{t('Zero charge today • 15 days 100% free trial')}</span>
-                </div>
-                <div className="flex items-center gap-2 font-bold">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{t('Unlimited AAC symbols, offline natural voice, & full visual schedule toolkit')}</span>
                 </div>
                 <div className="flex items-center gap-2 font-bold">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
