@@ -33,6 +33,7 @@ import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
 import { AdaptiveOnboardingFlow } from './AdaptiveOnboardingFlow';
 import { OnboardingModal } from './onboarding/OnboardingModal';
 import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
+import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 
 // Lazy-loaded child tools and modals
 const CopingToolkitModal = lazy(() => import('./CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
@@ -91,22 +92,40 @@ const ChildAppContent: React.FC = () => {
   // 6-Step Gradual Interactive AAC Onboarding Tour State (Only triggered when clicking AAC / requested, never automatically upon signup)
   const [showInteractiveOnboarding, setShowInteractiveOnboarding] = useState<boolean>(false);
 
+  // First-Time AAC Experience Knowledge Prompt Modal State ("Do you know how AAC works?")
+  const [showAacExperiencePrompt, setShowAacExperiencePrompt] = useState<boolean>(false);
+
   // Companion Caregiver Help Hub Modal State
   const [showCaregiverHelpHub, setShowCaregiverHelpHub] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOpenHelpHub = () => setShowCaregiverHelpHub(true);
     const handleStartTour = () => setShowInteractiveOnboarding(true);
+    const handleOpenAacPrompt = () => setShowAacExperiencePrompt(true);
 
     window.addEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
     window.addEventListener('beeyou_replay_onboarding_tour', handleStartTour);
     window.addEventListener('beeyou_start_onboarding_tour', handleStartTour);
+    window.addEventListener('beeyou_open_aac_prompt', handleOpenAacPrompt);
     return () => {
       window.removeEventListener('beeyou_open_caregiver_help_hub', handleOpenHelpHub);
       window.removeEventListener('beeyou_replay_onboarding_tour', handleStartTour);
       window.removeEventListener('beeyou_start_onboarding_tour', handleStartTour);
+      window.removeEventListener('beeyou_open_aac_prompt', handleOpenAacPrompt);
     };
   }, []);
+
+  // When navigating to the AAC view for the very first time, show the "Do you know how AAC works?" prompt
+  useEffect(() => {
+    if (childView === 'aac') {
+      try {
+        const promptDone = localStorage.getItem('beeyou_aac_prompt_completed');
+        if (promptDone !== 'true') {
+          setShowAacExperiencePrompt(true);
+        }
+      } catch {}
+    }
+  }, [childView]);
 
   useEffect(() => {
     if (sessionStorage.getItem('beeyou_active_device_view') !== 'caregiver') {
@@ -253,6 +272,29 @@ const ChildAppContent: React.FC = () => {
         <RoutineStickerCelebrationModal />
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
+
+        {/* First-Time AAC Experience Knowledge Prompt Modal ("Do you know how AAC works?") */}
+        <AACExperiencePromptModal
+          isOpen={showAacExperiencePrompt}
+          onSelectKnowledgeable={() => {
+            try {
+              localStorage.setItem('beeyou_aac_prompt_completed', 'true');
+              localStorage.setItem('beeyou_aac_experience_known', 'yes');
+              localStorage.setItem('beeyou_grid_stage', '3');
+              window.dispatchEvent(new CustomEvent('beeyou_grid_stage_change', { detail: { stage: 3 } }));
+            } catch {}
+            setShowAacExperiencePrompt(false);
+          }}
+          onSelectNewToAAC={() => {
+            try {
+              localStorage.setItem('beeyou_aac_prompt_completed', 'true');
+              localStorage.setItem('beeyou_aac_experience_known', 'no');
+            } catch {}
+            setShowAacExperiencePrompt(false);
+            setShowInteractiveOnboarding(true);
+          }}
+          onClose={() => setShowAacExperiencePrompt(false)}
+        />
 
         {/* 6-Step Gradual Interactive AAC Onboarding Tour */}
         <OnboardingModal

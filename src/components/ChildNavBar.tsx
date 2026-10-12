@@ -89,6 +89,15 @@ export const ChildNavBar: React.FC = () => {
     setActiveStoryId(null);
     setChildView(item.id);
     playChime('tap');
+
+    if (item.id === 'aac') {
+      try {
+        const promptDone = localStorage.getItem('beeyou_aac_prompt_completed');
+        if (promptDone !== 'true') {
+          window.dispatchEvent(new CustomEvent('beeyou_open_aac_prompt'));
+        }
+      } catch {}
+    }
   };
 
   const isItemActive = (itemId: string) => {

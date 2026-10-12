@@ -12,7 +12,6 @@ import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
-import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 
 export const getGrammaticalCategoryLabel = (colorType: AACItem['colorType']): string => {
   switch (colorType) {
@@ -228,42 +227,6 @@ export const AACView: React.FC = () => {
     return 'medium';
   });
 
-  // First-Time AAC Experience Knowledge Prompt Modal State
-  const [showAacExperiencePrompt, setShowAacExperiencePrompt] = useState<boolean>(() => {
-    try {
-      const promptCompleted = localStorage.getItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED);
-      const tourCompleted = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
-      if (promptCompleted === 'true' || tourCompleted === 'true') {
-        return false;
-      }
-      return true; // Show on first visit to AAC section
-    } catch {
-      return false;
-    }
-  });
-
-  const handlePromptSelectNewToAAC = () => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED, 'true');
-      localStorage.setItem(STORAGE_KEYS.AAC_EXPERIENCE_KNOWN, 'no');
-    } catch {}
-    setShowAacExperiencePrompt(false);
-    // Launch the 6-step gradual interactive tour
-    window.dispatchEvent(new CustomEvent('beeyou_start_onboarding_tour'));
-  };
-
-  const handlePromptSelectKnowledgeable = () => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.AAC_PROMPT_COMPLETED, 'true');
-      localStorage.setItem(STORAGE_KEYS.AAC_EXPERIENCE_KNOWN, 'yes');
-      localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
-      localStorage.setItem(STORAGE_KEYS.GRID_STAGE, '3');
-      window.dispatchEvent(new CustomEvent('beeyou_grid_stage_change', { detail: { stage: 3 } }));
-    } catch {}
-    setGridStage(3);
-    setShowAacExperiencePrompt(false);
-  };
-
   const handleSetButtonSize = (size: AACButtonSize) => {
     setButtonSize(size);
     try {
@@ -283,17 +246,14 @@ export const AACView: React.FC = () => {
     const handleButtonSizeChange = (e: any) => {
       if (e?.detail?.size) setButtonSize(e.detail.size);
     };
-    const handleOpenPrompt = () => setShowAacExperiencePrompt(true);
 
     window.addEventListener('beeyou_grid_stage_change', handleStageChange);
     window.addEventListener('beeyou_dwell_mode_change', handleDwellChange);
     window.addEventListener('beeyou_aac_button_size_change', handleButtonSizeChange);
-    window.addEventListener('beeyou_open_aac_prompt', handleOpenPrompt);
     return () => {
       window.removeEventListener('beeyou_grid_stage_change', handleStageChange);
       window.removeEventListener('beeyou_dwell_mode_change', handleDwellChange);
       window.removeEventListener('beeyou_aac_button_size_change', handleButtonSizeChange);
-      window.removeEventListener('beeyou_open_aac_prompt', handleOpenPrompt);
     };
   }, []);
 
@@ -1992,14 +1952,6 @@ export const AACView: React.FC = () => {
       <AACGuideModal
         isOpen={showAacGuideModal}
         onClose={() => setShowAacGuideModal(false)}
-      />
-
-      {/* First-Time AAC Experience Knowledge Prompt Modal */}
-      <AACExperiencePromptModal
-        isOpen={showAacExperiencePrompt}
-        onSelectKnowledgeable={handlePromptSelectKnowledgeable}
-        onSelectNewToAAC={handlePromptSelectNewToAAC}
-        onClose={() => setShowAacExperiencePrompt(false)}
       />
     </div>
   );
