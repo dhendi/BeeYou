@@ -12,13 +12,13 @@ const EMERGENCY_AAC_CARDS = [
   { text: 'Call my caregiver.', emoji: '📞', color: '#991b1b' },
 ];
 
-const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string; emoji: string }[] = [
-  { id: 'brown_noise', label: 'Brown Noise', emoji: '🌫️' },
-  { id: 'rain', label: 'Rain', emoji: '🌧️' },
-  { id: 'ocean', label: 'Ocean', emoji: '🌊' },
-  { id: 'fireplace', label: 'Cozy Fireplace', emoji: '🔥' },
-  { id: 'white_noise', label: 'White Noise', emoji: '📻' },
-  { id: 'forest', label: 'Forest', emoji: '🌲' },
+const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string }[] = [
+  { id: 'brown_noise', label: 'Brown Noise' },
+  { id: 'rain', label: 'Rain' },
+  { id: 'ocean', label: 'Ocean' },
+  { id: 'fireplace', label: 'Cozy Fireplace' },
+  { id: 'white_noise', label: 'White Noise' },
+  { id: 'forest', label: 'Forest' },
 ];
 
 export const EmergencySensoryModal: React.FC = () => {
@@ -155,7 +155,7 @@ export const EmergencySensoryModal: React.FC = () => {
           className="bg-gray-800 border border-gray-600 text-gray-200 text-sm rounded-2xl px-3 py-2.5 font-bold cursor-pointer"
         >
           {SOUNDSCAPE_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.emoji} {s.label}</option>
+            <option key={s.id} value={s.id}>{s.label}</option>
           ))}
         </select>
 

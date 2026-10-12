@@ -612,7 +612,7 @@ export const CopingToolkitModal: React.FC = () => {
                           className="flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-teal-100 shadow-2xs"
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-lg shrink-0" aria-hidden="true">{item.emoji}</span>
+                            <Volume2 className="w-4 h-4 text-teal-600 shrink-0" aria-hidden="true" />
                             <div className="min-w-0">
                               <p className="text-xs font-black text-slate-800 truncate">{t(item.name)}</p>
                               <span className="text-[10px] font-bold text-teal-700">
@@ -655,12 +655,12 @@ export const CopingToolkitModal: React.FC = () => {
               {/* Soundscape Category Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 w-full shrink-0">
                 {[
-                  { id: 'all', label: 'All Sounds (29)', emoji: '✨' },
-                  { id: 'nature', label: 'Nature', emoji: '🌿' },
-                  { id: 'noise', label: 'Noise & Masking', emoji: '📻' },
-                  { id: 'focus', label: 'Focus & Study', emoji: '📚' },
-                  { id: 'ambient', label: 'Ambience & Zen', emoji: '☕' },
-                  { id: 'special_interest', label: 'Trains & Fantasy', emoji: '🚂' },
+                  { id: 'all', label: 'All Sounds (29)' },
+                  { id: 'nature', label: 'Nature' },
+                  { id: 'noise', label: 'Noise & Masking' },
+                  { id: 'focus', label: 'Focus & Study' },
+                  { id: 'ambient', label: 'Ambience & Zen' },
+                  { id: 'special_interest', label: 'Trains & Fantasy' },
                 ].map((cat) => (
                   <button
                     key={cat.id}
@@ -669,20 +669,19 @@ export const CopingToolkitModal: React.FC = () => {
                       setSoundFilter(cat.id as any);
                       playChime('tap');
                     }}
-                    className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer shrink-0 flex items-center ${
                       soundFilter === cat.id
                         ? 'bg-teal-600 text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    <span>{cat.emoji}</span>
                     <span>{t(cat.label)}</span>
                   </button>
                 ))}
               </div>
 
               {/* Soundscape Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-h-[50vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-h-[50vh] overflow-y-auto pr-1">
                 {SOUNDSCAPES_CATALOG.filter(
                   (item) => soundFilter === 'all' || item.category === soundFilter
                 ).map((item) => {
@@ -694,147 +693,144 @@ export const CopingToolkitModal: React.FC = () => {
                     return (
                       <div
                         key={item.id}
-                        className="w-full text-left p-3.5 rounded-2xl border-2 transition-all border-teal-500 bg-teal-50/80 shadow-md ring-2 ring-teal-300 flex flex-col justify-between gap-2.5"
+                        className="w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 transition-all border-teal-500 bg-teal-50/90 shadow-md ring-2 ring-teal-300 flex flex-col justify-between gap-3"
                       >
-                        <div className="flex items-start justify-between gap-2 w-full">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0" aria-hidden="true">
-                              {item.emoji}
+                        <div className="space-y-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-black text-slate-800 text-sm leading-snug">
+                              {t(item.name)}
+                            </h4>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-teal-600 text-white shrink-0 flex items-center gap-1">
+                              <Volume2 className="w-3 h-3 animate-pulse" aria-hidden="true" />
+                              <span>{t('Playing')}</span>
                             </span>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <h4 className="font-black text-slate-800 text-xs sm:text-sm truncate">
-                                  {t(item.name)}
-                                </h4>
-                                {item.isPremium ? (
-                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
-                                    <Crown className="w-2.5 h-2.5" aria-hidden="true" />
-                                    <span>{t('Premium')}</span>
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
-                                    {t('Free')}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[11px] text-slate-500 block truncate">
-                                {item.tags.map(tg => t(tg)).join(' • ')}
-                              </span>
-                            </div>
                           </div>
-
-                          <button
-                            type="button"
-                            onClick={() => stopSoundscape(item.id)}
-                            aria-label={`${t('Stop')} ${t(item.name)}`}
-                            className="px-2.5 py-1 rounded-xl bg-teal-600 hover:bg-rose-600 text-white flex items-center gap-1 text-[11px] font-black shadow-xs transition-colors cursor-pointer"
-                          >
-                            <Volume2 className="w-3.5 h-3.5 animate-pulse" aria-hidden="true" />
-                            <span>{t('Playing')}</span>
-                          </button>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {item.isPremium ? (
+                              <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5 shrink-0">
+                                <Crown className="w-2.5 h-2.5" aria-hidden="true" />
+                                <span>{t('Premium')}</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 shrink-0">
+                                {t('Free')}
+                              </span>
+                            )}
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              {item.tags.map((tg) => t(tg)).join(' • ')}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
+                            {t(item.description)}
+                          </p>
                         </div>
 
                         {/* Direct adjustable volume slider on card */}
-                        <div className="flex items-center justify-between gap-2 bg-white/90 px-3 py-1.5 rounded-xl border border-teal-200">
-                          <span className="text-xs font-bold text-teal-900 flex items-center gap-1 shrink-0">
-                            <Sliders className="w-3 h-3 text-teal-600" aria-hidden="true" />
-                            <span>{t('Vol')}: {Math.round(vol * 100)}%</span>
-                          </span>
-                          <input
-                            type="range"
-                            min="0.01"
-                            max="1.0"
-                            step="0.01"
-                            value={vol}
-                            aria-label={`${t(item.name)} ${t('Volume')}`}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value);
-                              setSoundVolumes((prev) => ({ ...prev, [item.id]: val }));
-                              setSoundscapeVolume(val, item.id);
-                            }}
-                            className="w-full max-w-[140px] accent-teal-600 cursor-pointer"
-                          />
-                        </div>
+                        <div className="space-y-2 pt-2 border-t border-teal-200">
+                          <div className="flex items-center justify-between gap-2 bg-white/95 px-3 py-1.5 rounded-xl border border-teal-200">
+                            <span className="text-xs font-bold text-teal-900 flex items-center gap-1 shrink-0">
+                              <Sliders className="w-3.5 h-3.5 text-teal-600" aria-hidden="true" />
+                              <span>{t('Vol')}: {Math.round(vol * 100)}%</span>
+                            </span>
+                            <input
+                              type="range"
+                              min="0.01"
+                              max="1.0"
+                              step="0.01"
+                              value={vol}
+                              aria-label={`${t(item.name)} ${t('Volume')}`}
+                              onChange={(e) => {
+                                const val = parseFloat(e.target.value);
+                                setSoundVolumes((prev) => ({ ...prev, [item.id]: val }));
+                                setSoundscapeVolume(val, item.id);
+                              }}
+                              className="w-full max-w-[130px] accent-teal-600 cursor-pointer"
+                            />
+                          </div>
 
-                        <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-                          {t(item.description)}
-                        </p>
+                          <div className="flex items-center justify-end">
+                            <button
+                              type="button"
+                              onClick={() => stopSoundscape(item.id)}
+                              aria-label={`${t('Stop')} ${t(item.name)}`}
+                              className="px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white flex items-center gap-1.5 text-xs font-black shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+                            >
+                              <Square className="w-3 h-3 fill-current" aria-hidden="true" />
+                              <span>{t('Stop')}</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
                   }
 
                   return (
-                    <button
-                      type="button"
+                    <div
                       key={item.id}
-                      aria-label={`Soundscape: ${item.name}. ${item.description}. ${isLocked ? 'Premium sound. Tap to unlock.' : activeSoundIds.length > 0 && isPremium ? 'Tap to combine into active mix.' : 'Tap to play.'}`}
-                      onClick={() => {
-                        if (isLocked) {
-                          triggerUpgrade(`Unlock ${item.name} & Full Sensory Room Library`);
-                          return;
-                        }
-                        if (!isPremium && activeSoundIds.length > 0 && !activeSoundIds.includes(item.id)) {
-                          playSoundscape(item.id, vol, false);
-                          return;
-                        }
-                        playSoundscape(item.id, vol, isPremium);
-                      }}
-                      className={`w-full text-left p-3.5 min-h-[48px] rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
+                      className={`w-full text-left p-3.5 sm:p-4 min-h-[48px] rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${
                         isLocked
-                          ? 'border-slate-200 bg-slate-50/60 opacity-85 hover:border-amber-300'
+                          ? 'border-slate-200 bg-slate-50/70 hover:border-amber-300'
                           : 'border-slate-200 bg-white hover:border-teal-300 hover:shadow-xs'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 w-full">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-2xl p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs shrink-0" aria-hidden="true">
-                            {item.emoji}
-                          </span>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h4 className="font-black text-slate-800 text-xs sm:text-sm truncate">
-                                {t(item.name)}
-                              </h4>
-                              {item.isPremium ? (
-                                <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5">
-                                  <Crown className="w-2.5 h-2.5" aria-hidden="true" />
-                                  <span>{t('Premium')}</span>
-                                </span>
-                              ) : (
-                                <span className="text-[10px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800">
-                                  {t('Free')}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-slate-500 block truncate">
-                              {item.tags.map(tg => t(tg)).join(' • ')}
-                            </span>
-                          </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-black text-slate-800 text-sm leading-snug">
+                            {t(item.name)}
+                          </h4>
                         </div>
-
-                        <div>
-                          {isLocked ? (
-                            <span className="p-1.5 rounded-xl bg-amber-100 text-amber-800 flex items-center gap-1 text-[11px] font-bold">
-                              <Lock className="w-3.5 h-3.5" aria-hidden="true" />
-                            </span>
-                          ) : isPremium && activeSoundIds.length > 0 ? (
-                            <span className="px-2 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 flex items-center gap-1 text-[11px] font-bold transition-colors">
-                              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                              <span>{t('Add to Mix')}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {item.isPremium ? (
+                            <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-800 flex items-center gap-0.5 shrink-0">
+                              <Crown className="w-2.5 h-2.5" aria-hidden="true" />
+                              <span>{t('Premium')}</span>
                             </span>
                           ) : (
-                            <span className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 text-[11px] font-bold transition-colors">
-                              <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-                              <span>{t('Play')}</span>
+                            <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 shrink-0">
+                              {t('Free')}
                             </span>
                           )}
+                          <span className="text-[11px] text-slate-500 font-medium">
+                            {item.tags.map((tg) => t(tg)).join(' • ')}
+                          </span>
                         </div>
+                        <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
+                          {t(item.description)}
+                        </p>
                       </div>
 
-                      <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-                        {t(item.description)}
-                      </p>
-                    </button>
+                      {/* Card Footer Action Button */}
+                      <div className="flex items-center justify-end pt-2 border-t border-slate-100">
+                        {isLocked ? (
+                          <button
+                            type="button"
+                            onClick={() => triggerUpgrade(`Unlock ${item.name} & Full Sensory Room Library`)}
+                            className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 flex items-center gap-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>{t('Unlock')}</span>
+                          </button>
+                        ) : isPremium && activeSoundIds.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => playSoundscape(item.id, vol, true)}
+                            className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-1.5 text-xs font-black shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>{t('Add to Mix')}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => playSoundscape(item.id, vol, isPremium)}
+                            className="px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 flex items-center gap-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+                            <span>{t('Play')}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   );
                 })}
               </div>

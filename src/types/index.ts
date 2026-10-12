@@ -939,7 +939,7 @@ export interface SoundscapeItem {
   id: SoundscapeId;
   name: string;
   description: string;
-  emoji: string;
+  emoji?: string;
   isPremium: boolean;
   category: 'nature' | 'noise' | 'focus' | 'special_interest' | 'ambient';
   tags: string[];
