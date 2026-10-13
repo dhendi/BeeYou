@@ -18,7 +18,16 @@ import {
   Loader2,
   Check,
   Smartphone,
-  MessageSquare
+  MessageSquare,
+  Bell,
+  Home,
+  LifeBuoy,
+  Coffee,
+  Car,
+  Utensils,
+  DoorClosed,
+  ThumbsUp,
+  Zap
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -44,7 +53,9 @@ interface PredefinedAlertChoice {
   id: PredefinedAlertId;
   label: string;
   sublabel: string;
-  emoji: string;
+  icon: React.ElementType;
+  iconBgClass: string;
+  iconColorClass: string;
   colorClass: string;
   borderClass: string;
   ttsAnnouncement: string;
@@ -55,7 +66,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'need_help',
     label: 'I Need Help',
     sublabel: 'I need adult assistance right now',
-    emoji: '🆘',
+    icon: LifeBuoy,
+    iconBgClass: 'bg-rose-100',
+    iconColorClass: 'text-rose-600',
     colorClass: 'text-rose-900',
     borderClass: 'border-rose-300 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
     ttsAnnouncement: 'I sent an alert asking for help right now.',
@@ -64,7 +77,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'overwhelmed',
     label: "I'm Overwhelmed",
     sublabel: 'Sensory overload, too loud or bright',
-    emoji: '😣',
+    icon: Zap,
+    iconBgClass: 'bg-amber-100',
+    iconColorClass: 'text-amber-600',
     colorClass: 'text-amber-900',
     borderClass: 'border-amber-300 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
     ttsAnnouncement: 'I sent an alert that I feel overwhelmed.',
@@ -73,7 +88,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'need_break',
     label: 'I Need a Break',
     sublabel: 'Pause from activity or noise',
-    emoji: '🧘',
+    icon: Coffee,
+    iconBgClass: 'bg-teal-100',
+    iconColorClass: 'text-teal-600',
     colorClass: 'text-teal-900',
     borderClass: 'border-teal-300 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
     ttsAnnouncement: 'I sent an alert that I need a calm break.',
@@ -82,7 +99,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'love_hug',
     label: 'Send Love / Hug',
     sublabel: 'Thinking of you and safe',
-    emoji: '❤️',
+    icon: Heart,
+    iconBgClass: 'bg-emerald-100',
+    iconColorClass: 'text-emerald-600',
     colorClass: 'text-emerald-900',
     borderClass: 'border-emerald-300 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
     ttsAnnouncement: 'I sent a loving check-in to my caregiver.',
@@ -91,7 +110,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'pickup_ready',
     label: 'Ready for Pickup / Home',
     sublabel: 'Ready to be picked up or go home',
-    emoji: '🚗',
+    icon: Car,
+    iconBgClass: 'bg-indigo-100',
+    iconColorClass: 'text-indigo-600',
     colorClass: 'text-indigo-900',
     borderClass: 'border-indigo-300 hover:border-indigo-500 bg-indigo-50 hover:bg-indigo-100',
     ttsAnnouncement: 'I sent an alert that I am ready to go home.',
@@ -100,7 +121,9 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'hungry_thirsty',
     label: 'Hungry / Thirsty',
     sublabel: 'Need snack, meal or water',
-    emoji: '🥪',
+    icon: Utensils,
+    iconBgClass: 'bg-orange-100',
+    iconColorClass: 'text-orange-600',
     colorClass: 'text-orange-900',
     borderClass: 'border-orange-300 hover:border-orange-500 bg-orange-50 hover:bg-orange-100',
     ttsAnnouncement: 'I sent an alert that I need food or water.',
@@ -109,16 +132,20 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     id: 'restroom',
     label: 'Need Restroom',
     sublabel: 'Need to use the bathroom',
-    emoji: '🚽',
+    icon: DoorClosed,
+    iconBgClass: 'bg-sky-100',
+    iconColorClass: 'text-sky-600',
     colorClass: 'text-sky-900',
     borderClass: 'border-sky-300 hover:border-sky-500 bg-sky-50 hover:bg-sky-100',
     ttsAnnouncement: 'I sent an alert that I need the restroom.',
   },
   {
     id: 'task_done',
-    label: 'Finished My Task! ⭐',
+    label: 'Finished My Task!',
     sublabel: 'Done with my routine or schedule',
-    emoji: '✅',
+    icon: CheckCircle2,
+    iconBgClass: 'bg-purple-100',
+    iconColorClass: 'text-purple-600',
     colorClass: 'text-purple-900',
     borderClass: 'border-purple-300 hover:border-purple-500 bg-purple-50 hover:bg-purple-100',
     ttsAnnouncement: 'I sent an alert that I completed my task.',
@@ -132,7 +159,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   const [sentAlert, setSentAlert] = useState<{
     alertId: string;
     label: string;
-    emoji: string;
+    icon?: React.ElementType;
     time: string;
     location: string;
   } | null>(null);
@@ -160,7 +187,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
           setSentAlert({
             alertId: active.alertId || active.id,
             label: active.label || 'Needs Support',
-            emoji: active.emoji || '🚨',
+            icon: Bell,
             time: timeStr,
             location: active.location || 'school',
           });
@@ -232,7 +259,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     setSentAlert({
       alertId: choice.id,
       label: choice.label,
-      emoji: choice.emoji,
+      icon: choice.icon,
       time: timeStr,
       location: selectedLocation,
     });
@@ -244,7 +271,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       emotion: choice.id as any,
       alertId: choice.id,
       label: choice.label,
-      emoji: choice.emoji,
+      emoji: '',
       location: selectedLocation,
       note: '',
     });
@@ -267,12 +294,12 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     setSentAlert({
       alertId: 'custom-note',
       label: customText.trim(),
-      emoji: '💬',
+      icon: MessageSquare,
       time: timeStr,
       location: selectedLocation,
     });
 
-    await sendCaregiverMessage(code, customText.trim(), childProfile.name || 'Child', '💬');
+    await sendCaregiverMessage(code, customText.trim(), childProfile.name || 'Child', '');
     setDeliveryStage('delivered');
     setCustomText('');
 
@@ -297,14 +324,15 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-stone-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-md shadow-rose-300 animate-pulse text-2xl">
-              🚨
+            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-md shadow-rose-300 animate-pulse">
+              <Bell className="w-6 h-6 text-white" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
                 <span>{isAdult ? 'Support Alert & Quick Check-in' : 'Alert / Message Caregiver'}</span>
-                <span className="text-[10px] font-black text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  Live Sync 🟢
+                <span className="text-[10px] font-black text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Live Sync</span>
                 </span>
               </h2>
               <p className="text-xs text-slate-600 font-medium">
@@ -336,14 +364,14 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   <span className="text-slate-500 uppercase tracking-wider">
                     📡 Live Delivery Status:
                   </span>
-                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1 ${
+                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1.5 ${
                     deliveryStage === 'sending' ? 'bg-amber-100 text-amber-900 animate-pulse' :
                     deliveryStage === 'delivered' ? 'bg-blue-100 text-blue-900' :
                     'bg-emerald-100 text-emerald-900'
                   }`}>
-                    {deliveryStage === 'sending' && <><span>⏳</span><span>1. Sending to Cloud...</span></>}
-                    {deliveryStage === 'delivered' && <><span>📱</span><span>2. Delivered to Caregiver</span></>}
-                    {deliveryStage === 'acknowledged' && <><span>❤️</span><span>3. Acknowledged by Caregiver!</span></>}
+                    {deliveryStage === 'sending' && <><span><Clock className="w-3.5 h-3.5 inline" /></span><span>1. Sending to Cloud...</span></>}
+                    {deliveryStage === 'delivered' && <><span><Smartphone className="w-3.5 h-3.5 inline" /></span><span>2. Delivered to Caregiver</span></>}
+                    {deliveryStage === 'acknowledged' && <><span><Heart className="w-3.5 h-3.5 inline text-rose-600 fill-rose-600" /></span><span>3. Acknowledged by Caregiver!</span></>}
                   </span>
                 </div>
 
@@ -380,9 +408,12 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
                       deliveryStage === 'acknowledged' ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md scale-110' : 'bg-slate-200 text-slate-400'
                     }`}>
-                      <Heart className="w-3.5 h-3.5" />
+                      <Heart className="w-3.5 h-3.5 fill-current" />
                     </div>
-                    <span className="text-[10px] font-bold text-slate-700">Replied ❤️</span>
+                    <span className="text-[10px] font-bold text-slate-700 flex items-center gap-1">
+                      <span>Replied</span>
+                      <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -390,8 +421,8 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               {/* Delivery Banner */}
               <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0 text-2xl">
-                    {sentAlert.emoji}
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                    {sentAlert.icon ? <sentAlert.icon className="w-6 h-6 text-white" /> : <CheckCircle2 className="w-6 h-6 text-white" />}
                   </div>
                   <div>
                     <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
@@ -415,8 +446,14 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               {/* Caregiver Response Banner */}
               {caregiverResponse ? (
                 <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-rose-50 border-2 border-amber-300 text-slate-900 flex items-start gap-3.5 animate-in slide-in-from-top-2 shadow-md">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-xs">
-                    {caregiverResponse.responseId === 'coming' ? '🚗' : caregiverResponse.responseId === 'im_here' ? '❤️' : '👍'}
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    {caregiverResponse.responseId === 'coming' ? (
+                      <Car className="w-6 h-6 text-white" />
+                    ) : caregiverResponse.responseId === 'im_here' ? (
+                      <Heart className="w-6 h-6 text-white fill-white" />
+                    ) : (
+                      <ThumbsUp className="w-6 h-6 text-white" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <span className="text-xs font-black text-amber-800 uppercase tracking-wider block">
@@ -497,28 +534,31 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[
-                    { id: 'school', label: 'School', emoji: '🏫' },
-                    { id: 'therapy', label: 'Therapy', emoji: '🩺' },
-                    { id: 'bus', label: 'Transit', emoji: '🚌' },
-                    { id: 'home', label: 'Home', emoji: '🏡' },
-                  ].map((loc) => (
-                    <button
-                      key={loc.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedLocation(loc.id as any);
-                        playChime('tap');
-                      }}
-                      className={`p-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border ${
-                        selectedLocation === loc.id
-                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                          : 'bg-stone-50 text-slate-700 border-stone-200 hover:bg-stone-100'
-                      }`}
-                    >
-                      <span className="text-sm">{loc.emoji}</span>
-                      <span>{loc.label}</span>
-                    </button>
-                  ))}
+                    { id: 'school', label: 'School', icon: School },
+                    { id: 'therapy', label: 'Therapy', icon: Activity },
+                    { id: 'bus', label: 'Transit', icon: Bus },
+                    { id: 'home', label: 'Home', icon: Home },
+                  ].map((loc) => {
+                    const LocIcon = loc.icon;
+                    return (
+                      <button
+                        key={loc.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedLocation(loc.id as any);
+                          playChime('tap');
+                        }}
+                        className={`p-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border ${
+                          selectedLocation === loc.id
+                            ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                            : 'bg-stone-50 text-slate-700 border-stone-200 hover:bg-stone-100'
+                        }`}
+                      >
+                        <LocIcon className="w-4 h-4 shrink-0" />
+                        <span>{loc.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -529,29 +569,32 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {DEFAULT_QUICK_ALERTS.map((choice, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSendAlert(choice)}
-                      className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-center gap-3.5`}
-                    >
-                      <div className="text-3xl group-hover:scale-110 transition shrink-0">
-                        {choice.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-black ${choice.colorClass}`}>
-                          {choice.label}
+                  {DEFAULT_QUICK_ALERTS.map((choice, idx) => {
+                    const Icon = choice.icon;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSendAlert(choice)}
+                        className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-center gap-3.5`}
+                      >
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-all ${choice.iconBgClass}`}>
+                          <Icon className={`w-5 h-5 ${choice.iconColorClass}`} />
                         </div>
-                        <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug truncate">
-                          {choice.sublabel}
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm font-black ${choice.colorClass}`}>
+                            {choice.label}
+                          </div>
+                          <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug truncate">
+                            {choice.sublabel}
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-white/90 border border-stone-200 flex items-center justify-center text-slate-400 group-hover:text-amber-600 shrink-0 shadow-2xs">
-                        <Send className="w-3.5 h-3.5" />
-                      </div>
-                    </button>
-                  ))}
+                        <div className="w-8 h-8 rounded-full bg-white/90 border border-stone-200 flex items-center justify-center text-slate-400 group-hover:text-amber-600 shrink-0 shadow-2xs">
+                          <Send className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
