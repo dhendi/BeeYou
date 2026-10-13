@@ -387,11 +387,11 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                   </button>
 
                                   {/* Custom Hand-Drawn Sticker Icon / Emoji */}
-                                  <div className="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8">
+                                  <div className="shrink-0 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9">
                                     <RoutineStickerIcon
                                       emoji={step.emoji}
                                       title={step.title}
-                                      className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                                      className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
                                     />
                                   </div>
 

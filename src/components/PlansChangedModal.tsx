@@ -11,6 +11,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const PlansChangedModal: React.FC = () => {
   const {
@@ -110,7 +111,7 @@ export const PlansChangedModal: React.FC = () => {
                   <span className="w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
-                  <span className="text-2xl">{step.emoji}</span>
+                  <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 object-contain shrink-0" />
                   <div className="flex-1">
                     <span className="font-black text-slate-800 text-sm sm:text-base block">
                       {step.title}
