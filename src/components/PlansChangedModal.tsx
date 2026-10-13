@@ -7,7 +7,8 @@ import {
   Heart, 
   CheckCircle2, 
   HelpCircle,
-  Volume2
+  Volume2,
+  RotateCcw
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
@@ -35,7 +36,9 @@ export const PlansChangedModal: React.FC = () => {
         {/* Header */}
         <div className="bg-amber-100 px-5 py-4 border-b border-amber-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="text-3xl">🔄</span>
+            <div className="w-10 h-10 rounded-2xl bg-amber-200/80 flex items-center justify-center shrink-0 text-amber-900">
+              <RotateCcw className="w-6 h-6" />
+            </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-amber-950">Plans Changed</h2>
               <p className="text-xs sm:text-sm text-amber-800 font-semibold">

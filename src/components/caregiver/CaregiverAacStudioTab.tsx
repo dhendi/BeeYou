@@ -14,7 +14,13 @@ import {
   Upload,
   Layers,
   Trash2,
-  Volume2
+  Volume2,
+  Globe,
+  Eye,
+  Heart,
+  Sun,
+  Wind,
+  Smartphone
 } from 'lucide-react';
 
 interface CaregiverAacStudioTabProps {
@@ -39,7 +45,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
   const [newWordLabel, setNewWordLabel] = useState('');
   const [newWordSpeech, setNewWordSpeech] = useState('');
   const [newWordCategory, setNewWordCategory] = useState<AACCategory>('food');
-  const [newWordEmoji, setNewWordEmoji] = useState('🍗');
+  const [newWordEmoji, setNewWordEmoji] = useState('');
   const [newWordPhotoUrl, setNewWordPhotoUrl] = useState('');
   const [newWordColorType, setNewWordColorType] = useState<any>('noun');
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
@@ -97,7 +103,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       label: newWordLabel.trim(),
       speechText: newWordSpeech.trim() || newWordLabel.trim(),
       category: newWordCategory,
-      emoji: newWordEmoji || '✨',
+      emoji: newWordEmoji || '',
       photoUrl: newWordPhotoUrl.trim() || undefined,
       colorType: newWordColorType,
     });
@@ -113,7 +119,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       label: 'Chicken Nuggets',
       speechText: 'Chicken nuggets',
       category: 'food',
-      emoji: '🍗',
+      emoji: '',
       colorType: 'noun',
     });
     onShowNotification('"Chicken Nuggets" added to Food vocabulary!');
@@ -151,7 +157,8 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             onClick={handleQuickAddChickenNuggets}
             className="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs flex items-center gap-1.5 border border-orange-300 shadow-xs cursor-pointer"
           >
-            <span>{t("🍗 1-Tap Add \"Chicken Nuggets\"")}</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>{t("1-Tap Add \"Chicken Nuggets\"")}</span>
           </button>
         </div>
       </div>
@@ -159,8 +166,8 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       {/* ONLINE AAC SYMBOL STUDIO HERO BANNER */}
       <div data-tour="aac-studio-search" className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-            🌐
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner text-white">
+            <Globe className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -220,27 +227,31 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
 
         <div className="flex items-center gap-1.5 flex-wrap">
           {[
-            { id: 'fitzgerald', label: '🌈 Clinical Colors (Default)', title: 'Fitzgerald Key: yellow, green, orange, blue, purple' },
-            { id: 'theme', label: '🎭 Theme Colors', title: 'Matches the active theme palette' },
-            { id: 'high_contrast_white', label: '⚪ White High-Contrast', title: 'Pure white with bold borders' },
-          ].map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => {
-                updateSettings({ aacButtonColorMode: m.id as any });
-                playChime('tap');
-              }}
-              className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
-                (settings.aacButtonColorMode || 'fitzgerald') === m.id
-                  ? 'bg-indigo-600 text-white shadow-xs font-black'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-              title={m.title}
-            >
-              {m.label}
-            </button>
-          ))}
+            { id: 'fitzgerald', label: 'Clinical Colors (Default)', icon: Palette, title: 'Fitzgerald Key: yellow, green, orange, blue, purple' },
+            { id: 'theme', label: 'Theme Colors', icon: Sparkles, title: 'Matches the active theme palette' },
+            { id: 'high_contrast_white', label: 'White High-Contrast', icon: Eye, title: 'Pure white with bold borders' },
+          ].map((m) => {
+            const ModeIcon = m.icon;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => {
+                  updateSettings({ aacButtonColorMode: m.id as any });
+                  playChime('tap');
+                }}
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                  (settings.aacButtonColorMode || 'fitzgerald') === m.id
+                    ? 'bg-indigo-600 text-white shadow-xs font-black'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+                title={m.title}
+              >
+                <ModeIcon className="w-3.5 h-3.5" />
+                <span>{m.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -317,22 +328,22 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               onChange={(e) => setNewWordCategory(e.target.value as any)}
               className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs"
             >
-              <option value="food">{t("Food 🍕")}</option>
-              <option value="drinks">{t("Drinks 🧃")}</option>
-              <option value="activities">{t("Play & Fun 🎮")}</option>
-              <option value="places">{t("Places 🏠")}</option>
-              <option value="people">{t("People 👥")}</option>
-              <option value="feelings">{t("Feelings 💛")}</option>
-              <option value="sensory">{t("Sensory 🎧")}</option>
-              <option value="actions">{t("Actions 🏃")}</option>
-              <option value="core">{t("Core Words ⭐")}</option>
+              <option value="food">{t("Food")}</option>
+              <option value="drinks">{t("Drinks")}</option>
+              <option value="activities">{t("Play & Fun")}</option>
+              <option value="places">{t("Places")}</option>
+              <option value="people">{t("People")}</option>
+              <option value="feelings">{t("Feelings")}</option>
+              <option value="sensory">{t("Sensory")}</option>
+              <option value="actions">{t("Actions")}</option>
+              <option value="core">{t("Core Words")}</option>
             </select>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Emoji Icon (Fallback):")}</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">{t("Symbol Icon (Fallback):")}</label>
             <input
               type="text"
               value={newWordEmoji}
@@ -531,12 +542,13 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
-              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', emoji: '🌸', badge: 'Recommended' },
-              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', emoji: '☀️' },
-              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', emoji: '🍃' },
-              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', emoji: '📱' },
+              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', icon: Heart, badge: 'Recommended' },
+              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', icon: Sun },
+              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', icon: Wind },
+              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', icon: Smartphone },
             ].map((persona) => {
               const isSelected = (settings.voicePersona || 'Kore') === persona.id;
+              const PersonaIcon = persona.icon;
               return (
                 <button
                   key={persona.id}
@@ -552,7 +564,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xl">{persona.emoji}</span>
+                    <PersonaIcon className="w-5 h-5 text-indigo-600" />
                     {persona.badge && (
                       <span className="text-[9px] font-black uppercase text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">
                         {persona.badge}
@@ -668,8 +680,9 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                           {voice.name}
                         </span>
                         {isFluid && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0">
-                            {t("🌟 Fluid Human Voice")}
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0 inline-flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5 text-emerald-700" />
+                            <span>{t("Fluid Human Voice")}</span>
                           </span>
                         )}
                         {voice.localService && (

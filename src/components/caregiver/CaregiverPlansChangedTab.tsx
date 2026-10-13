@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { Eye, Save, Trash2, Plus, Sparkles } from 'lucide-react';
+import { Eye, Save, Trash2, Plus, Sparkles, Stethoscope, CloudRain, School, MessageSquare } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 
 interface CaregiverPlansChangedTabProps {
@@ -25,7 +25,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [pcSteps, setPcSteps] = useState(plansChanged.newSteps);
   const [pcPhrases, setPcPhrases] = useState(plansChanged.relevantPhrases);
   const [newStepTitle, setNewStepTitle] = useState('');
-  const [newStepEmoji, setNewStepEmoji] = useState('⭐');
+  const [newStepEmoji, setNewStepEmoji] = useState('');
   const [newStepTime, setNewStepTime] = useState('');
   const [newPhraseInput, setNewPhraseInput] = useState('');
 
@@ -49,9 +49,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Picnic Lunch & Park Swings');
       setPcCalming('It is completely normal to feel surprised or upset when plans change. Take a slow breath. You are safe, and here is our new calm plan.');
       setPcSteps([
-        { title: 'Favorite pizza or mac & cheese at home', emoji: '🍕', time: '12:30 PM' },
-        { title: 'Play on the swings at the sunny park', emoji: '🛝', time: '1:30 PM' },
-        { title: 'Drawing and cozy world building', emoji: '🎨', time: '3:00 PM' },
+        { title: 'Favorite pizza or mac & cheese at home', emoji: '', time: '12:30 PM' },
+        { title: 'Play on the swings at the sunny park', emoji: '', time: '1:30 PM' },
+        { title: 'Drawing and cozy world building', emoji: '', time: '3:00 PM' },
       ]);
       setPcPhrases([
         'Why did it change?',
@@ -68,9 +68,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Indoor Blanket Fort & Movie Afternoon');
       setPcCalming('Rainy days can be frustrating when we wanted to go outside. We will build a super cozy indoor fort and have warm cocoa!');
       setPcSteps([
-        { title: 'Build living room blanket fort with pillows', emoji: '⛺', time: '11:00 AM' },
-        { title: 'Warm cocoa and crackers snack', emoji: '☕', time: '12:00 PM' },
-        { title: 'Watch favorite animal movie inside the fort', emoji: '🎬', time: '1:00 PM' },
+        { title: 'Build living room blanket fort with pillows', emoji: '', time: '11:00 AM' },
+        { title: 'Warm cocoa and crackers snack', emoji: '', time: '12:00 PM' },
+        { title: 'Watch favorite animal movie inside the fort', emoji: '', time: '1:00 PM' },
       ]);
       setPcPhrases([
         'I wanted to see the animals.',
@@ -84,9 +84,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Early Afternoon at Home');
       setPcCalming('School finished early today. Mom/Dad picked you up and we have extra cozy time at home.');
       setPcSteps([
-        { title: 'Ride car home and unpack backpack', emoji: '🚗', time: '12:30 PM' },
-        { title: 'Quiet sensory break with favorite toy', emoji: '🛋️', time: '1:00 PM' },
-        { title: 'Free tablet and train play', emoji: '🚂', time: '2:00 PM' },
+        { title: 'Ride car home and unpack backpack', emoji: '', time: '12:30 PM' },
+        { title: 'Quiet sensory break with favorite toy', emoji: '', time: '1:00 PM' },
+        { title: 'Free tablet and train play', emoji: '', time: '2:00 PM' },
       ]);
       setPcPhrases([
         'Why did school finish early?',
@@ -180,7 +180,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             onClick={() => handleApplyPreset('dentist')}
             className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer"
           >
-            <span className="text-2xl mb-1 block">🦷</span>
+            <Stethoscope className="w-6 h-6 text-amber-600 mb-1" />
             <span className="font-black text-xs text-slate-800 block">{t("Dentist/Doctor Closed")}</span>
             <span className="text-[11px] text-slate-500">{t("Pizza lunch & playground instead")}</span>
           </button>
@@ -188,7 +188,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             onClick={() => handleApplyPreset('rain')}
             className="p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all cursor-pointer"
           >
-            <span className="text-2xl mb-1 block">🌧️</span>
+            <CloudRain className="w-6 h-6 text-sky-600 mb-1" />
             <span className="font-black text-xs text-slate-800 block">{t("Rainy Day / Trip Cancelled")}</span>
             <span className="text-[11px] text-slate-500">{t("Blanket fort & cozy movie")}</span>
           </button>
@@ -196,7 +196,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             onClick={() => handleApplyPreset('school')}
             className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition-all cursor-pointer"
           >
-            <span className="text-2xl mb-1 block">🏫</span>
+            <School className="w-6 h-6 text-emerald-600 mb-1" />
             <span className="font-black text-xs text-slate-800 block">{t("School Early Dismissal")}</span>
             <span className="text-[11px] text-slate-500">{t("Pick up early & quiet afternoon")}</span>
           </button>
@@ -272,7 +272,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
-                <span className="text-2xl">{step.emoji}</span>
+                {step.emoji ? (
+                  <span className="text-xl">{step.emoji}</span>
+                ) : (
+                  <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
+                )}
                 <span className="flex-1 font-bold text-xs sm:text-sm text-slate-800">
                   {step.title}
                 </span>
@@ -304,7 +308,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               type="text"
               value={newStepEmoji}
               onChange={(e) => setNewStepEmoji(e.target.value)}
-              placeholder={t("Emoji")}
+              placeholder={t("Icon")}
               className="w-16 px-2 py-2 text-center rounded-xl bg-white border border-slate-300 text-sm"
             />
             <input
@@ -319,7 +323,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 if (newStepTitle.trim()) {
                   setPcSteps([
                     ...pcSteps,
-                    { title: newStepTitle.trim(), emoji: newStepEmoji || '⭐', time: newStepTime.trim() || undefined },
+                    { title: newStepTitle.trim(), emoji: newStepEmoji || '', time: newStepTime.trim() || undefined },
                   ]);
                   setNewStepTitle('');
                   setNewStepTime('');
@@ -344,7 +348,10 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 key={idx}
                 className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs flex items-center gap-2"
               >
-                <span>💬 {phrase}</span>
+                <span className="flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span>{phrase}</span>
+                </span>
                 <button
                   onClick={() => setPcPhrases(pcPhrases.filter((_, i) => i !== idx))}
                   className="text-amber-700 hover:text-rose-600 cursor-pointer"

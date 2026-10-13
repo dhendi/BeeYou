@@ -16,7 +16,8 @@ import {
   Sliders,
   Shield,
   MousePointer,
-  Timer
+  Timer,
+  Lightbulb
 } from 'lucide-react';
 import { DwellMode, STORAGE_KEYS, CaregiverHelpTopicId } from '../../types/aac';
 import { playChime, speakText } from '../../utils/audio';
@@ -31,7 +32,7 @@ interface CaregiverHelpHubProps {
 interface TopicDetail {
   id: CaregiverHelpTopicId;
   title: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   badge: string;
   summary: string;
   steps: string[];
@@ -42,21 +43,21 @@ const TOPICS: TopicDetail[] = [
   {
     id: 'create_folder',
     title: 'How to Create a Folder',
-    icon: '📁',
+    icon: FolderPlus,
     badge: 'Organization',
     summary: 'Organize related vocabulary (e.g. Lunch, Playground, Sensory) to keep grids uncluttered.',
     steps: [
       'Navigate to the category or screen where you want the new folder.',
-      'Tap the Caregiver Shield 🛡️ or long-press the edit button to unlock editing.',
-      'Tap "+ Add Folder", choose a friendly emoji or symbol icon, and name it.',
-      'The folder creates a sub-grid while keeping the "Home 🏠" breadcrumb pinned on top.',
+      'Tap the Caregiver Shield icon or long-press the edit button to unlock editing.',
+      'Tap "+ Add Folder", choose a friendly icon, and name it.',
+      'The folder creates a sub-grid while keeping the "Home" breadcrumb pinned on top.',
     ],
     targetSelector: '[data-tour="aac-categories"]',
   },
   {
     id: 'add_photo_tile',
     title: 'How to Add a Photo Tile',
-    icon: '📸',
+    icon: Camera,
     badge: 'Personalization',
     summary: 'Snap real photos of your child\'s favorite comfort items, family members, or snacks.',
     steps: [
@@ -70,13 +71,13 @@ const TOPICS: TopicDetail[] = [
   {
     id: 'custom_words_tts',
     title: 'Custom Words & Phonetic TTS',
-    icon: '🗣️',
+    icon: Volume2,
     badge: 'Voice Tuning',
     summary: 'Fine-tune phonetic spellings so unique family nicknames or non-English words sound authentic.',
     steps: [
       'In the Tile Editor, look for the "Phonetic Pronunciation" field under the word label.',
       'Type how the word sounds phonetically (e.g., label: "Reyansh", phonetic: "Ray-ahn-sh").',
-      'Tap the speaker icon 🔊 to preview the pronunciation in real-time.',
+      'Tap the speaker icon to preview the pronunciation in real-time.',
       'Optionally record your own family member\'s voice for personal emotional comfort.',
     ],
     targetSelector: '[data-tour="aac-word-editor"]',
@@ -84,7 +85,7 @@ const TOPICS: TopicDetail[] = [
   {
     id: 'grammar_forms',
     title: 'Grammar Forms (Hold-to-Conjugate)',
-    icon: '🔤',
+    icon: Type,
     badge: 'Language Growth',
     summary: 'Teach tense agreement and natural morphology without adding dozens of duplicate buttons.',
     steps: [
@@ -98,7 +99,7 @@ const TOPICS: TopicDetail[] = [
   {
     id: 'mask_dim_tiles',
     title: 'How to Mask / Dim Tiles',
-    icon: '🔒',
+    icon: EyeOff,
     badge: 'Sensory Pacing',
     summary: 'Temporarily hide advanced words to reduce cognitive load while preserving motor memory positions.',
     steps: [
@@ -112,7 +113,7 @@ const TOPICS: TopicDetail[] = [
   {
     id: 'touch_ergonomics',
     title: 'Touch Ergonomics (Dwell & Release)',
-    icon: '🖐️',
+    icon: Hand,
     badge: 'Motor Accommodations',
     summary: 'Accommodate tremors, involuntary spasms, or resting hands with specialized touch modes.',
     steps: [
@@ -226,8 +227,8 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
         {/* HEADER */}
         <div className="shrink-0 px-4 sm:px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-xl font-black shadow-xs">
-              🐝
+            <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-amber-100 shadow-xs">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -266,6 +267,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
 
             {TOPICS.map((topic) => {
               const isSelected = topic.id === selectedTopicId;
+              const TopicIcon = topic.icon;
               return (
                 <button
                   key={topic.id}
@@ -281,7 +283,9 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl shrink-0">{topic.icon}</span>
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center shrink-0">
+                      <TopicIcon className="w-4 h-4" />
+                    </div>
                     <div className="min-w-0">
                       <div className="text-xs sm:text-sm truncate leading-tight">
                         {topic.title}
@@ -304,7 +308,9 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{currentTopic.icon}</span>
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                    <currentTopic.icon className="w-5 h-5" />
+                  </div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                     {currentTopic.title}
                   </h3>
@@ -413,7 +419,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
 
             {/* Pro-Tip Box */}
             <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2.5 text-xs text-emerald-950 font-bold">
-              <span className="text-base shrink-0">💡</span>
+              <Lightbulb className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>
                 All configurations are saved immediately to your browser and sync to connected caregiver tablets.
               </span>

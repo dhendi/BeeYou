@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft, Sparkles } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Sparkles, Radio } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
@@ -79,7 +79,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 ? 'bg-rose-500 text-white animate-pulse' 
                 : 'bg-emerald-100 text-emerald-800'
             }`}>
-              {activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Active Alert')}` : `🟢 ${t('Safe & Clear')}`}
+              {activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Active Alert')}` : t('Safe & Clear')}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
@@ -109,7 +109,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
           >
             <ShieldAlert className="w-4 h-4 text-amber-300" />
-            <span>{t('Send Test Alert 🚨')}</span>
+            <span>{t('Send Test Alert')}</span>
           </button>
           <button
             type="button"
@@ -128,8 +128,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
       {/* Real-Time Connectivity Banner */}
       <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg font-bold shrink-0">
-            📡
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+            <Radio className="w-5 h-5 text-white" />
           </div>
           <div>
             <span className="font-black text-slate-900 block">
@@ -175,7 +175,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 onClick={handleTriggerTestAlert}
                 className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
               >
-                <span>{t('Test Alert Simulation 🚨')}</span>
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-300" />
+                <span>{t('Test Alert Simulation')}</span>
               </button>
             </div>
           </div>
@@ -185,8 +186,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               <div key={alert.id} className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-3xl shrink-0">
-                      {alert.emoji || '🚨'}
+                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                      <ShieldAlert className="w-7 h-7 text-rose-600" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -274,7 +275,9 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             {alertHistoryList.map((item, idx) => (
               <div key={item.id || idx} className="p-4 flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{item.emoji || '🚨'}</span>
+                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                    <ShieldAlert className="w-4 h-4" />
+                  </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-black text-slate-900">{item.label}</span>

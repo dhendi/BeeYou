@@ -23,7 +23,8 @@ import {
   Palette,
   Settings as SettingsIcon,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  Radio
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -240,7 +241,7 @@ export const ParentDashboard: React.FC = () => {
         };
         setActiveAlerts((prev) => deduplicateAlerts([fullAlert, ...prev]));
         setAlertHistoryList(getAlertHistory());
-        showNotification(`🚨 Incoming Alert from ${alert.childName || 'Leo'}: ${alert.label}`);
+        showNotification(`Incoming Alert from ${alert.childName || 'Leo'}: ${alert.label}`);
       }
     });
 
@@ -282,7 +283,7 @@ export const ParentDashboard: React.FC = () => {
     setActiveAlerts((prev) => [testAlert, ...prev.filter((a) => a.id !== testAlert.id)]);
     setAlertHistoryList(getAlertHistory());
     playChime('complete');
-    showNotification(`🚨 Test alert triggered successfully for ${childProfile.name}!`);
+    showNotification(`Test alert triggered successfully for ${childProfile.name}!`);
   };
 
   const handleClearAlertHistory = () => {
@@ -328,7 +329,7 @@ export const ParentDashboard: React.FC = () => {
         peerName: childProfile.name || 'Child',
         pairingCode: cleanCode,
       });
-      showNotification(`🎉 Successfully connected to ${childProfile.name}'s device!`);
+      showNotification(`Successfully connected to ${childProfile.name}'s device!`);
     } else {
       setFeedbackState({
         isOpen: true,
@@ -352,7 +353,7 @@ export const ParentDashboard: React.FC = () => {
   const navGroups: {
     id: string;
     title: string;
-    emoji: string;
+    icon: React.ComponentType<{ className?: string }>;
     items: Array<{
       id: TabType;
       label: string;
@@ -363,7 +364,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'live',
       title: 'Live & Safety',
-      emoji: '📡',
+      icon: Radio,
       items: [
         {
           id: 'home',
@@ -394,7 +395,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'routines',
       title: 'Routines & Health',
-      emoji: '📅',
+      icon: Calendar,
       items: [
         {
           id: 'routines',
@@ -431,7 +432,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'skills',
       title: 'Speech & Skills',
-      emoji: '🗣️',
+      icon: MessageSquare,
       items: [
         {
           id: 'aac',
@@ -458,7 +459,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'system',
       title: 'Setup & System',
-      emoji: '⚙️',
+      icon: SettingsIcon,
       items: [
         {
           id: 'profile',
@@ -586,6 +587,7 @@ export const ParentDashboard: React.FC = () => {
           <div className="grid grid-cols-4 gap-1.5">
             {navGroups.map((group) => {
               const isGroupActive = currentNavGroup.id === group.id;
+              const GroupIcon = group.icon;
               return (
                 <button
                   key={group.id}
@@ -602,7 +604,7 @@ export const ParentDashboard: React.FC = () => {
                       : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                   }`}
                 >
-                  <span className="text-base leading-tight">{group.emoji}</span>
+                  <GroupIcon className="w-4 h-4 mb-0.5" />
                   <span className="text-[10px] leading-tight truncate max-w-full font-bold mt-0.5">
                     {group.id === 'live' ? t('Live') : group.id === 'routines' ? t('Routines') : group.id === 'skills' ? t('Skills') : t('Setup')}
                   </span>
@@ -644,12 +646,14 @@ export const ParentDashboard: React.FC = () => {
 
         {/* Desktop Categorized Sidebar */}
         <aside className="hidden md:flex md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-3 border-2 border-stone-200/80 shadow-xs flex-col gap-4 shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
-          {navGroups.map((group) => (
-            <div key={group.id} className="flex flex-col gap-1">
-              <div className="px-2 py-1 flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
-                <span>{group.emoji}</span>
-                <span>{t(group.title)}</span>
-              </div>
+          {navGroups.map((group) => {
+            const GroupIcon = group.icon;
+            return (
+              <div key={group.id} className="flex flex-col gap-1">
+                <div className="px-2 py-1 flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
+                  <GroupIcon className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{t(group.title)}</span>
+                </div>
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
@@ -702,8 +706,9 @@ export const ParentDashboard: React.FC = () => {
                 })}
               </div>
             </div>
-          ))}
-        </aside>
+          );
+        })}
+      </aside>
 
         {/* Content Area */}
         <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 border-2 border-stone-200/80 shadow-xs">
@@ -719,9 +724,10 @@ export const ParentDashboard: React.FC = () => {
                 <ShieldAlert className="w-6 h-6 text-rose-600 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="font-black text-rose-950 text-sm flex items-center gap-2 flex-wrap">
-                    <span>🚨 {t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
-                    <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs">
-                      {activeAlerts[0].emoji || '🚨'} {t(activeAlerts[0].label)}
+                    <span>{t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
+                    <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs flex items-center gap-1">
+                      <ShieldAlert className="w-3.5 h-3.5 text-rose-700" />
+                      <span>{t(activeAlerts[0].label)}</span>
                     </span>
                   </div>
                   <div className="text-xs text-rose-700 font-medium mt-0.5 break-words">

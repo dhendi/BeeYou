@@ -16,7 +16,9 @@ import {
   Sparkles, 
   RotateCcw, 
   MessageCircle,
-  Bell
+  Bell,
+  Star,
+  Smile
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
@@ -76,8 +78,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
     playChime('star');
   };
 
-  const handleSendQuickNudge = (title: string, text: string, emoji: string) => {
-    sendCaregiverMessage(getPairingCode(), text, 'Caregiver', emoji || '❤️');
+  const handleSendQuickNudge = (title: string, text: string, _emoji?: string) => {
+    sendCaregiverMessage(getPairingCode(), text, 'Caregiver', '');
     showNotification(`Sent nudge to child: "${title}"`);
     playChime('tap');
   };
@@ -85,7 +87,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   const handleSendCustomMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customMsgText.trim()) return;
-    sendCaregiverMessage(getPairingCode(), customMsgText.trim(), 'Caregiver', '💬');
+    sendCaregiverMessage(getPairingCode(), customMsgText.trim(), 'Caregiver', '');
     showNotification(`Sent message: "${customMsgText.trim()}"`);
     setCustomMsgText('');
     playChime('tap');
@@ -106,8 +108,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
       >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 flex items-center justify-center text-3xl shadow-inner shrink-0">
-              🐝
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 flex items-center justify-center shadow-inner shrink-0 text-amber-700">
+              <Sparkles className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -197,8 +199,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-amber-200/60 text-xs">
           <div data-tour="status-mood-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Current Mood")}</span>
-            <span className="text-sm font-black text-slate-900 flex items-center gap-1 mt-0.5 capitalize">
-              <span>{currentMood === 'happy' ? '😊' : currentMood === 'calm' ? '😌' : currentMood === 'overwhelmed' ? '😫' : currentMood === 'sad' ? '😢' : '✨'}</span>
+            <span className="text-sm font-black text-slate-900 flex items-center gap-1.5 mt-0.5 capitalize">
+              <Smile className="w-4 h-4 text-amber-500" />
               <span>{currentMood ? t(currentMood) : t("Happy")}</span>
             </span>
           </div>
@@ -212,8 +214,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
 
           <div data-tour="status-habits-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
             <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Habits Done")}</span>
-            <span className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1">
-              <span>⭐</span>
+            <span className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1.5">
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
               <span>{habits.filter(h => h.completedToday).length} / {habits.length} {t("Done")}</span>
             </span>
           </div>
@@ -238,7 +240,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
                 </span>
                 <ShieldAlert className="w-5 h-5 text-rose-600" />
-                <span>{t("🚨 Live Emergency Alert from")} {childProfile.name}</span>
+                <span>{t("Live Emergency Alert from")} {childProfile.name}</span>
               </div>
               <div className="flex items-center gap-2">
                 {activeAlerts.length > 1 && (
@@ -270,8 +272,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
               <div key={alert.id} className="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl shrink-0 font-bold">
-                      {alert.emoji || '🚨'}
+                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                      <ShieldAlert className="w-6 h-6 text-rose-600" />
                     </div>
                     <div>
                       <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
@@ -355,7 +357,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 title={t("Simulate receiving an alert immediately")}
               >
                 <ShieldAlert className="w-4 h-4 text-amber-300" />
-                <span>{t("Send Test Alert 🚨")}</span>
+                <span>{t("Send Test Alert")}</span>
               </button>
               <button
                 type="button"
@@ -390,19 +392,19 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         {/* 1-Tap Quick Nudges Grid */}
         <div data-tour="nudges-grid-buttons" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
-            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), emoji: '⏰', icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
-            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), emoji: '🍎', icon: Utensils, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
-            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), emoji: '💊', icon: Pill, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', bg: 'hover:bg-rose-50/70 border-rose-200' },
-            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), emoji: '🚗', icon: Car, iconColor: 'text-indigo-700', iconBg: 'bg-indigo-100 border-indigo-200', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
-            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), emoji: '🫁', icon: Wind, iconColor: 'text-sky-700', iconBg: 'bg-sky-100 border-sky-200', bg: 'hover:bg-sky-50/70 border-sky-200' },
-            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), emoji: '🌟', icon: Sparkles, iconColor: 'text-purple-700', iconBg: 'bg-purple-100 border-purple-200', bg: 'hover:bg-purple-50/70 border-purple-200' },
-            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), emoji: '🔄', icon: RotateCcw, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
-            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), emoji: '💬', icon: MessageCircle, iconColor: 'text-blue-700', iconBg: 'bg-blue-100 border-blue-200', bg: 'hover:bg-blue-50/70 border-blue-200' },
+            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
+            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), icon: Utensils, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
+            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), icon: Pill, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', bg: 'hover:bg-rose-50/70 border-rose-200' },
+            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), icon: Car, iconColor: 'text-indigo-700', iconBg: 'bg-indigo-100 border-indigo-200', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
+            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), icon: Wind, iconColor: 'text-sky-700', iconBg: 'bg-sky-100 border-sky-200', bg: 'hover:bg-sky-50/70 border-sky-200' },
+            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), icon: Sparkles, iconColor: 'text-purple-700', iconBg: 'bg-purple-100 border-purple-200', bg: 'hover:bg-purple-50/70 border-purple-200' },
+            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), icon: RotateCcw, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
+            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), icon: MessageCircle, iconColor: 'text-blue-700', iconBg: 'bg-blue-100 border-blue-200', bg: 'hover:bg-blue-50/70 border-blue-200' },
           ].map((nudge, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => handleSendQuickNudge(nudge.title, nudge.text, nudge.emoji || '❤️')}
+              onClick={() => handleSendQuickNudge(nudge.title, nudge.text)}
               className={`p-3.5 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-2 shadow-2xs ${nudge.bg}`}
             >
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${nudge.iconBg} ${nudge.iconColor} shadow-2xs`}>

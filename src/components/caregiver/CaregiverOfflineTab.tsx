@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { verifyOfflineIntegrity, indexOfflineData } from '../../utils/offlineStorage';
 import { PWAInstallButton } from '../PWAInstallButton';
-import { Database, ShieldCheck, Download } from 'lucide-react';
+import { Database, ShieldCheck, Download, Lightbulb } from 'lucide-react';
 
 interface CaregiverOfflineTabProps {
   onShowNotification: (msg: string) => void;
@@ -67,7 +67,8 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({
               onClick={onStartTour}
               className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>{t("💡 How This Works")}</span>
+              <Lightbulb className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{t("How This Works")}</span>
             </button>
           )}
           <button

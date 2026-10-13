@@ -1,4 +1,5 @@
 import React from 'react';
+import { Lightbulb, CreditCard } from 'lucide-react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
@@ -33,7 +34,8 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({
             onClick={onStartTour}
             className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
           >
-            <span>{t("💡 How This Works")}</span>
+            <Lightbulb className="w-3.5 h-3.5" />
+            <span>{t("How This Works")}</span>
           </button>
         )}
       </div>
@@ -41,8 +43,8 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({
       {/* ABOUT ME & EMERGENCY ID BADGE CARD */}
       <div data-tour="profile-digital-id-card" className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 rounded-3xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-3xl shadow-inner border border-white/30">
-            🪪
+          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center shadow-inner border border-white/30 text-white">
+            <CreditCard className="w-6 h-6" />
           </div>
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/30 text-white inline-block mb-1">
@@ -65,7 +67,8 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({
           }}
           className="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-900 font-black text-xs sm:text-sm shadow-md cursor-pointer transition-all active:scale-95 shrink-0 flex items-center gap-2"
         >
-          <span>{t("🪪 Open Digital ID Card")}</span>
+          <CreditCard className="w-4 h-4 text-slate-800" />
+          <span>{t("Open Digital ID Card")}</span>
         </button>
       </div>
 

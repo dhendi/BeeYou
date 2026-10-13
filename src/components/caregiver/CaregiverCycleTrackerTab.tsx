@@ -2,7 +2,7 @@ import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
-import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, Leaf, HeartPulse, Lightbulb } from 'lucide-react';
 
 interface CaregiverCycleTrackerTabProps {
   onStartTour?: () => void;
@@ -27,7 +27,11 @@ export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> =
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <span className="text-2xl">{cycleSettings.discreetMode ? '🌿' : '🌸'}</span>
+            {cycleSettings.discreetMode ? (
+              <Leaf className="w-5 h-5 text-emerald-600 shrink-0" />
+            ) : (
+              <HeartPulse className="w-5 h-5 text-rose-500 shrink-0" />
+            )}
             <span>{cycleSettings.discreetMode ? 'Wellness & Hormonal Rhythm Hub' : 'Menstrual Cycle & Sensory Wellness Hub'}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -41,7 +45,8 @@ export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> =
               onClick={onStartTour}
               className="px-3.5 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>{t("💡 How This Works")}</span>
+              <Lightbulb className="w-4 h-4 text-rose-600" />
+              <span>{t("How This Works")}</span>
             </button>
           )}
           <button
@@ -149,9 +154,13 @@ export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> =
       {/* Status Banner */}
       <div data-tour="cycle-phase-card" className="p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-pink-50 to-amber-50 border-2 border-rose-200 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <span className="text-4xl p-2.5 rounded-2xl bg-white shadow-2xs">
-            {cycleSettings.discreetMode ? '🌿' : '🌸'}
-          </span>
+          <div className="w-12 h-12 rounded-2xl bg-white shadow-2xs flex items-center justify-center shrink-0">
+            {cycleSettings.discreetMode ? (
+              <Leaf className="w-6 h-6 text-emerald-600" />
+            ) : (
+              <HeartPulse className="w-6 h-6 text-rose-500" />
+            )}
+          </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-black uppercase tracking-wider text-rose-800 bg-rose-200/80 px-2 py-0.5 rounded-md">
@@ -180,7 +189,7 @@ export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> =
 
         {cycleLogs.length === 0 ? (
           <div className="p-8 border-2 border-dashed border-slate-200 rounded-3xl text-center space-y-2">
-            <span className="text-3xl block">🌸</span>
+            <HeartPulse className="w-8 h-8 text-rose-300 mx-auto block" />
             <p className="text-xs font-bold text-slate-600">{t("No cycle logs recorded yet")}</p>
             <p className="text-[11px] text-slate-400">
               {t("When symptoms or flow are logged, history will appear here.")}

@@ -5,7 +5,7 @@ import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
-import { Heart, ExternalLink, Camera, Copy } from 'lucide-react';
+import { Heart, ExternalLink, Camera, Copy, Lightbulb } from 'lucide-react';
 
 interface CaregiverDeviceLinkTabProps {
   onShowNotification: (msg: string) => void;
@@ -43,7 +43,8 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               onClick={onStartTour}
               className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <span>{t("💡 How This Works")}</span>
+              <Lightbulb className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{t("How This Works")}</span>
             </button>
           )}
           <a
@@ -65,10 +66,13 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             <span className="text-xs font-black text-rose-700 uppercase tracking-wider block">
               {t("Child's Remote Pairing Code")}
             </span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-              connectionStatus.isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1.5 ${
+              connectionStatus.isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'
             }`}>
-              {connectionStatus.isConnected ? '🟢 Live Connected' : '⚪ Ready to Pair'}
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                connectionStatus.isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+              }`} />
+              {connectionStatus.isConnected ? t('Live Connected') : t('Ready to Pair')}
             </span>
           </div>
 

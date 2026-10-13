@@ -11,7 +11,12 @@ import {
   Crown,
   Edit3,
   X,
-  Sparkles
+  Sparkles,
+  Pill,
+  Droplets,
+  Wind,
+  Shield,
+  Heart
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 
@@ -43,7 +48,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
   const [showMedForm, setShowMedForm] = useState(false);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
   const [medName, setMedName] = useState('');
-  const [medEmoji, setMedEmoji] = useState('💊');
+  const [medEmoji, setMedEmoji] = useState('pill');
   const [medDosage, setMedDosage] = useState<number>(1);
   const [medUnit, setMedUnit] = useState('pill');
   const [medFrequency, setMedFrequency] = useState<MedicationFrequency>('daily');
@@ -61,7 +66,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
     }
     setEditingMedId(null);
     setMedName('');
-    setMedEmoji('💊');
+    setMedEmoji('pill');
     setMedDosage(1);
     setMedUnit('pill');
     setMedFrequency('daily');
@@ -75,7 +80,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
   const handleOpenEditMed = (med: MedicationReminder) => {
     setEditingMedId(med.id);
     setMedName(med.name);
-    setMedEmoji(med.emoji || '💊');
+    setMedEmoji(med.emoji || 'pill');
     setMedDosage(med.dosage);
     setMedUnit(med.unit);
     setMedFrequency(med.frequency);
@@ -123,13 +128,35 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
     setEditingMedId(null);
   };
 
+  const renderMedIcon = (emojiOrId?: string) => {
+    switch (emojiOrId) {
+      case 'droplets':
+      case '💧':
+        return <Droplets className="w-5 h-5 text-sky-600" />;
+      case 'wind':
+      case '🫁':
+        return <Wind className="w-5 h-5 text-teal-600" />;
+      case 'sparkles':
+      case '🍬':
+        return <Sparkles className="w-5 h-5 text-amber-600" />;
+      case 'shield':
+      case '🧴':
+        return <Shield className="w-5 h-5 text-indigo-600" />;
+      case 'heart':
+      case '🩹':
+        return <Heart className="w-5 h-5 text-rose-600" />;
+      default:
+        return <Pill className="w-5 h-5 text-indigo-600" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div className="min-w-0 flex-1">
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 flex-wrap">
-            <span className="text-2xl shrink-0">💊</span>
+            <Pill className="w-6 h-6 text-indigo-600 shrink-0" />
             <span className="break-words">{t("Medication Reminders & Supply Hub")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5 break-words">
@@ -240,23 +267,35 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
 
               <div>
                 <label className="block text-xs font-black text-slate-700 mb-1">
-                  {t("Icon / Emoji")}
+                  {t("Icon / Type")}
                 </label>
                 <div className="flex items-center gap-1.5 overflow-x-auto">
-                  {['💊', '🍬', '🫁', '💧', '🧴', '🩹'].map((em) => (
-                    <button
-                      type="button"
-                      key={em}
-                      onClick={() => setMedEmoji(em)}
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg cursor-pointer transition-all ${
-                        medEmoji === em
-                          ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
-                          : 'bg-white hover:bg-slate-100 border border-slate-200'
-                      }`}
-                    >
-                      {em}
-                    </button>
-                  ))}
+                  {[
+                    { id: 'pill', label: 'Pill', icon: Pill },
+                    { id: 'droplets', label: 'Liquid', icon: Droplets },
+                    { id: 'wind', label: 'Inhaler', icon: Wind },
+                    { id: 'sparkles', label: 'Gummy', icon: Sparkles },
+                    { id: 'shield', label: 'Topical', icon: Shield },
+                    { id: 'heart', label: 'Health', icon: Heart },
+                  ].map((item) => {
+                    const IconComp = item.icon;
+                    const isSelected = medEmoji === item.id || (item.id === 'pill' && (!medEmoji || medEmoji === 'pill'));
+                    return (
+                      <button
+                        type="button"
+                        key={item.id}
+                        onClick={() => setMedEmoji(item.id)}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
+                            : 'bg-white hover:bg-slate-100 border border-slate-200 text-slate-600'
+                        }`}
+                        title={item.label}
+                      >
+                        <IconComp className="w-4 h-4" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -492,8 +531,8 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
               >
                 {/* Left: Info */}
                 <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-                    {med.emoji || '💊'}
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 shadow-2xs">
+                    {renderMedIcon(med.emoji)}
                   </div>
 
                   <div className="min-w-0 flex-1">

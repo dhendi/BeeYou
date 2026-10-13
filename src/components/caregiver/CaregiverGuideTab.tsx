@@ -1,6 +1,6 @@
 import React from 'react';
 import { t } from '../../services/translator';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2, Lightbulb, Info } from 'lucide-react';
 import { CaregiverFeatureWalkthrough } from '../CaregiverFeatureWalkthrough';
 
 interface CaregiverGuideTabProps {
@@ -14,8 +14,8 @@ export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigate
       {/* Header */}
       <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-2xl shadow-inner">
-            💡
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-600 shadow-inner">
+            <Lightbulb className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -119,8 +119,11 @@ export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigate
           ))}
         </div>
 
-        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs leading-relaxed font-medium">
-          ℹ️ <strong>{t("Support Tool Note:")}</strong> {t("BeeYou is a daily support tool designed to foster calm, structure, and independence. It does not replace professional therapy, medical care, or individualized education services.")}
+        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs leading-relaxed font-medium flex items-start gap-2">
+          <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div>
+            <strong>{t("Support Tool Note:")}</strong> {t("BeeYou is a daily support tool designed to foster calm, structure, and independence. It does not replace professional therapy, medical care, or individualized education services.")}
+          </div>
         </div>
       </div>
 

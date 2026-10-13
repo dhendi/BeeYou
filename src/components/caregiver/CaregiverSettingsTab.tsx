@@ -3,7 +3,39 @@ import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { UserAgeGroup, DEFAULT_KID_FEATURES, DEFAULT_TEEN_FEATURES, DEFAULT_ADULT_FEATURES } from '../../types';
 import { playChime } from '../../utils/audio';
-import { Palette, FileJson, Download, Upload, Check } from 'lucide-react';
+import { 
+  Palette, 
+  FileJson, 
+  Download, 
+  Upload, 
+  Check,
+  Lightbulb,
+  Sparkles,
+  Smile,
+  Headphones,
+  Briefcase,
+  MessageSquare,
+  Timer,
+  ListOrdered,
+  Award,
+  Moon,
+  Pill,
+  BookOpen,
+  HeartPulse,
+  Wind,
+  Bell,
+  Book,
+  Wrench,
+  EyeOff,
+  Eye,
+  ZoomIn,
+  Maximize2,
+  LayoutGrid,
+  Smartphone,
+  Type,
+  Clock,
+  Settings as SettingsIcon
+} from 'lucide-react';
 
 interface CaregiverSettingsTabProps {
   onShowNotification: (msg: string) => void;
@@ -70,7 +102,8 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             onClick={onStartTour}
             className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
           >
-            <span>{t("💡 How This Works")}</span>
+            <Lightbulb className="w-3.5 h-3.5" />
+            <span>{t("How This Works")}</span>
           </button>
         )}
       </div>
@@ -92,36 +125,42 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             }}
             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <span>{t("✨ Relaunch Onboarding Setup Wizard")}</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{t("Relaunch Onboarding Setup Wizard")}</span>
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
-            { id: 'kid', label: 'Kids (3–11)', emoji: '🧒', desc: 'Mascots, stars, stickers, First/Then' },
-            { id: 'teen', label: 'Teens (12–17)', emoji: '🎧', desc: 'Modern lofi/cyber, countdowns, independence' },
-            { id: 'adult', label: 'Adults (18+)', emoji: '💼', desc: 'Executive function, discreet AAC, zero clutter' },
-          ].map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => {
-                setUserAgeGroup(a.id as UserAgeGroup);
-                playChime('tap');
-              }}
-              className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
-                userAgeGroup === a.id
-                  ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-300'
-                  : 'border-slate-200 hover:bg-white bg-white/70'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{a.emoji}</span>
-                <span className="text-xs font-black text-slate-800">{a.label}</span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1 font-medium">{a.desc}</p>
-            </button>
-          ))}
+            { id: 'kid', label: 'Kids (3–11)', icon: Smile, desc: 'Mascots, stars, stickers, First/Then' },
+            { id: 'teen', label: 'Teens (12–17)', icon: Headphones, desc: 'Modern lofi/cyber, countdowns, independence' },
+            { id: 'adult', label: 'Adults (18+)', icon: Briefcase, desc: 'Executive function, discreet AAC, zero clutter' },
+          ].map((a) => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => {
+                  setUserAgeGroup(a.id as UserAgeGroup);
+                  playChime('tap');
+                }}
+                className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
+                  userAgeGroup === a.id
+                    ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-300'
+                    : 'border-slate-200 hover:bg-white bg-white/70'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-100/70 text-indigo-700 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-black text-slate-800">{a.label}</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1 font-medium">{a.desc}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -171,22 +210,23 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
-            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', emoji: '🗣️', desc: 'Motor-planned AAC tiles with voice' },
-            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', emoji: '⏱️', desc: 'Activity countdown ring for routines' },
-            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', emoji: '📋', desc: 'Clear step-by-step guidance' },
-            { key: 'starsAndRewards', label: 'Stars & Digital Routine Stickers', emoji: '⭐', desc: 'Gamification reward coins & badges' },
-            { key: 'mascotCompanion', label: 'Playful Mascot Companion', emoji: '🦕', desc: 'Rex/Hopper cheer greetings & banner' },
-            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', emoji: '🌙', desc: 'Evening reflection & therapist chart' },
-            { key: 'medicationReminders', label: 'Medication & Health Reminders', emoji: '💊', desc: 'Schedule doses, inventory & refill alerts' },
-            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', emoji: '📖', desc: 'Nuanced emotions, sensory load & coping strategies' },
-            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', emoji: '🌸', desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
-            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', emoji: '🫁', desc: 'Coping toolkit & breath circle' },
-            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', emoji: '🚨', desc: 'One-tap emergency & emotion broadcast' },
-            { key: 'socialStories', label: 'Social Stories Preparation', emoji: '📖', desc: 'Scenarios for outings and changes' },
-            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', emoji: '🛠️', desc: 'Task analysis breakdowns for independence' },
-            { key: 'discreetMode', label: 'Discreet Minimal Mode', emoji: '🕶️', desc: 'Text-focused layout, minimal clutter' },
+            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', icon: MessageSquare, desc: 'Motor-planned AAC tiles with voice' },
+            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', icon: Timer, desc: 'Activity countdown ring for routines' },
+            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', icon: ListOrdered, desc: 'Clear step-by-step guidance' },
+            { key: 'starsAndRewards', label: 'Stars & Digital Routine Stickers', icon: Award, desc: 'Gamification reward coins & badges' },
+            { key: 'mascotCompanion', label: 'Playful Mascot Companion', icon: Sparkles, desc: 'Rex/Hopper cheer greetings & banner' },
+            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', icon: Moon, desc: 'Evening reflection & therapist chart' },
+            { key: 'medicationReminders', label: 'Medication & Health Reminders', icon: Pill, desc: 'Schedule doses, inventory & refill alerts' },
+            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', icon: BookOpen, desc: 'Nuanced emotions, sensory load & coping strategies' },
+            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', icon: HeartPulse, desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
+            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', icon: Wind, desc: 'Coping toolkit & breath circle' },
+            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', icon: Bell, desc: 'One-tap emergency & emotion broadcast' },
+            { key: 'socialStories', label: 'Social Stories Preparation', icon: Book, desc: 'Scenarios for outings and changes' },
+            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', icon: Wrench, desc: 'Task analysis breakdowns for independence' },
+            { key: 'discreetMode', label: 'Discreet Minimal Mode', icon: EyeOff, desc: 'Text-focused layout, minimal clutter' },
           ].map((feat) => {
             const isChecked = enabledFeatures ? (enabledFeatures as any)[feat.key] !== false : true;
+            const FeatIcon = feat.icon;
             return (
               <button
                 type="button"
@@ -203,7 +243,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl" aria-hidden="true">{feat.emoji}</span>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isChecked ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'}`} aria-hidden="true">
+                    <FeatIcon className="w-4 h-4" />
+                  </div>
                   <div>
                     <h4 className="text-xs font-black text-slate-800">{feat.label}</h4>
                     <p className="text-[11px] text-slate-500 font-medium">{feat.desc}</p>
@@ -261,7 +303,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl">🌈</span>
+                  <Palette className="w-5 h-5 text-indigo-600" />
                   {(settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                       {t("Active (Default)")}
@@ -300,7 +342,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl">🎭</span>
+                  <Sparkles className="w-5 h-5 text-indigo-600" />
                   {settings.aacButtonColorMode === 'theme' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                       {t("Active")}
@@ -338,7 +380,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl">⚪</span>
+                  <Eye className="w-5 h-5 text-indigo-600" />
                   {settings.aacButtonColorMode === 'high_contrast_white' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                       {t("Active")}
@@ -376,12 +418,13 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: '🔍' },
-              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: '📐' },
-              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', icon: '⚖️' },
-              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', icon: '📱' },
+              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: ZoomIn },
+              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: Maximize2 },
+              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', icon: LayoutGrid },
+              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', icon: Smartphone },
             ].map((preset) => {
               const isSelected = (settings.gridColumns || 4) === preset.cols;
+              const PresetIcon = preset.icon;
               return (
                 <button
                   key={preset.cols}
@@ -405,7 +448,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xl">{preset.icon}</span>
+                    <PresetIcon className="w-5 h-5 text-indigo-600" />
                     {isSelected && (
                       <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700">
                         {t("Active")}
@@ -426,7 +469,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
           <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer">
             <div className="flex items-center gap-2.5">
-              <span className="text-lg">🔲</span>
+              <Type className="w-5 h-5 text-indigo-600 shrink-0" />
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Extra-Large Label Text")}</h4>
                 <p className="text-[11px] text-slate-500 font-medium">{t("Enlarge text under AAC pictograms.")}</p>
@@ -442,7 +485,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
           <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
             <div className="flex items-center gap-2.5">
-              <span className="text-lg">⏱️</span>
+              <Clock className="w-5 h-5 text-indigo-600 shrink-0" />
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Touch Hold Delay")}</h4>
                 <p className="text-[11px] text-slate-500 font-medium">{t("Accidental touch / tremor protection.")}</p>
@@ -511,7 +554,8 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               onClick={() => setShowEditAlertsModal(true)}
               className="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <span>{t("⚙️ Edit Alert Buttons & Replies")}</span>
+              <SettingsIcon className="w-3.5 h-3.5" />
+              <span>{t("Edit Alert Buttons & Replies")}</span>
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -572,7 +616,8 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             onClick={() => setShowEditCalmModal(true)}
             className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
           >
-            <span>{t("🫁 Edit Calm Tools")}</span>
+            <Wind className="w-3.5 h-3.5" />
+            <span>{t("Edit Calm Tools")}</span>
           </button>
         </div>
       </div>

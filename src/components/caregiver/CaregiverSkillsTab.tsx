@@ -1,6 +1,7 @@
 import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
+import { Lightbulb } from 'lucide-react';
 
 interface CaregiverSkillsTabProps {
   onStartTour?: () => void;
@@ -24,7 +25,8 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
             onClick={onStartTour}
             className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
           >
-            <span>{t("💡 How This Works")}</span>
+            <Lightbulb className="w-3.5 h-3.5 text-purple-600" />
+            <span>{t("How This Works")}</span>
           </button>
         )}
       </div>

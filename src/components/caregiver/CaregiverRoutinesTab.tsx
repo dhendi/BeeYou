@@ -5,7 +5,7 @@ import { Routine, RoutineTemplate } from '../../types';
 import { RoutineTemplatesLibrary } from '../RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from '../RoutineCustomizerModal';
 import { playChime } from '../../utils/audio';
-import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Sparkles } from 'lucide-react';
+import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Sparkles, ClipboardList, Calendar } from 'lucide-react';
 
 interface CaregiverRoutinesTabProps {
   onShowNotification: (msg: string) => void;
@@ -30,7 +30,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
   // New routine state
   const [newRoutineTitle, setNewRoutineTitle] = useState('');
   const [newRoutineCategory] = useState<'morning' | 'bedtime' | 'school' | 'hygiene' | 'chores' | 'flexible'>('morning');
-  const [newRoutineEmoji, setNewRoutineEmoji] = useState('☀️');
+  const [newRoutineEmoji, setNewRoutineEmoji] = useState('');
   const [newRoutineTime, setNewRoutineTime] = useState('08:00 AM');
   const [newFirstTask, setNewFirstTask] = useState('Brush teeth & wash face');
   const [newThenTask, setNewThenTask] = useState('Watch favorite show (15m)');
@@ -51,17 +51,17 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
       time: newRoutineTime,
       firstThen: {
         first: newFirstTask,
-        firstEmoji: '🪥',
+        firstEmoji: '',
         then: newThenTask,
-        thenEmoji: '📱',
+        thenEmoji: '',
         completedFirst: false,
         completedThen: false,
       },
       steps: [
-        { id: `st-${Date.now()}-1`, title: 'Get ready', instruction: 'Start calmly', durationMin: 5, completed: false, emoji: '✨' },
-        { id: `st-${Date.now()}-2`, title: newFirstTask, instruction: 'Complete first task', durationMin: 5, completed: false, emoji: '🪥' },
-        { id: `st-${Date.now()}-3`, title: 'Check in with caregiver', instruction: 'Show completed work', durationMin: 2, completed: false, emoji: '👍' },
-        { id: `st-${Date.now()}-4`, title: newThenTask, instruction: 'Enjoy reward activity', durationMin: 15, completed: false, emoji: '📱' },
+        { id: `st-${Date.now()}-1`, title: 'Get ready', instruction: 'Start calmly', durationMin: 5, completed: false, emoji: '' },
+        { id: `st-${Date.now()}-2`, title: newFirstTask, instruction: 'Complete first task', durationMin: 5, completed: false, emoji: '' },
+        { id: `st-${Date.now()}-3`, title: 'Check in with caregiver', instruction: 'Show completed work', durationMin: 2, completed: false, emoji: '' },
+        { id: `st-${Date.now()}-4`, title: newThenTask, instruction: 'Enjoy reward activity', durationMin: 15, completed: false, emoji: '' },
       ],
     });
 
@@ -293,8 +293,8 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
           {/* Quick Shortcut to Active Routines */}
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">📋</span>
+            <div className="flex items-center gap-2.5">
+              <ClipboardList className="w-5 h-5 text-indigo-600 shrink-0" />
               <div>
                 <span className="text-xs font-black text-slate-800 block">
                   {t("Looking for active child routines?")}
@@ -337,9 +337,13 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                 className="p-4 sm:p-5 bg-white border-2 border-slate-200 hover:border-sky-300 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-xs"
               >
                 <div className="flex items-start sm:items-center gap-3.5">
-                  <span className="text-3xl sm:text-4xl p-2 bg-sky-50 rounded-2xl border border-sky-100 shrink-0">
-                    {r.emoji}
-                  </span>
+                  <div className="w-12 h-12 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-center shrink-0">
+                    {r.emoji ? (
+                      <span className="text-2xl">{r.emoji}</span>
+                    ) : (
+                      <ClipboardList className="w-6 h-6 text-sky-600" />
+                    )}
+                  </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-black text-slate-900 text-sm sm:text-base">
@@ -405,7 +409,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
             {routines.length === 0 && (
               <div className="p-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 space-y-3">
-                <span className="text-3xl">📅</span>
+                <Calendar className="w-8 h-8 text-slate-400 mx-auto block" />
                 <h4 className="font-black text-slate-800 text-sm">{t("No active routines yet")}</h4>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
                   {t("Import from our pre-built library of Morning, School Day, and Bedtime templates to get started quickly.")}
