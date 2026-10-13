@@ -12,19 +12,16 @@
  */
 
 import { AACItem } from '../types';
+import { conjugateEnglishSingleVerb } from './aacInflections';
 
-// Core structural verbs in AAC (English + top international AAC equivalents)
-const ACTION_VERBS = new Set([
+// Base English core action verbs for raw string input fallback (AACItem tiles use metadata: colorType === 'verb')
+const CORE_ACTION_VERBS = new Set([
   'go', 'look', 'see', 'watch', 'want', 'need', 'like', 'love', 'eat', 'drink',
   'play', 'help', 'stop', 'wait', 'read', 'write', 'draw', 'color', 'run', 'walk',
-  'jump', 'climb', 'sleep', 'nap', 'listen', 'hear', 'touch', 'feel', 'open', 'close',
+  'jump', 'climb', 'sleep', 'listen', 'hear', 'touch', 'feel', 'open', 'close',
   'give', 'take', 'find', 'make', 'build', 'tell', 'talk', 'speak', 'sing', 'dance',
   'wash', 'clean', 'brush', 'put', 'get', 'come', 'sit', 'stand', 'push', 'pull',
-  'throw', 'catch', 'ride', 'drive', 'swim', 'hug', 'kiss', 'share', 'choose',
-  // Multilingual core verbs
-  'quiero', 'necesito', 'gusta', 'voy', 'veo', 'como', 'bebo', 'juego', 'ayuda', 'para', 'dame', 'pon', 'hacer', 'ir', 'mirar', 'comer',
-  'veux', 'besoin', 'aime', 'vais', 'vois', 'mange', 'bois', 'joue', 'aide', 'arrête', 'donne', 'mettre', 'faire', 'aller', 'regarder',
-  'will', 'brauche', 'mag', 'gehe', 'sehe', 'esse', 'trinke', 'spiele', 'helfe', 'stopp', 'gib', 'machen', 'gehen', 'schauen'
+  'throw', 'catch', 'ride', 'drive', 'swim', 'hug', 'kiss', 'share', 'choose'
 ]);
 
 // Verbs that take an infinitive "to" before another verb in English
@@ -40,25 +37,21 @@ const STATE_ADJECTIVES = new Set([
   'fine', 'good', 'bad', 'great', 'awesome', 'okay', 'busy', 'silly'
 ]);
 
-// English third-person irregular present tense verbs
-const THIRD_PERSON_VERBS: Record<string, string> = {
-  'go': 'goes',
-  'do': 'does',
-  'have': 'has',
-  'want': 'wants',
-  'need': 'needs',
-  'like': 'likes',
-  'see': 'sees',
-  'look': 'looks',
-  'eat': 'eats',
-  'drink': 'drinks',
-  'play': 'plays',
-  'help': 'helps',
-  'stop': 'stops',
-  'feel': 'feels',
-  'sleep': 'sleeps',
-  'run': 'runs',
-};
+/**
+ * Identifies whether an AAC token is a verb or action.
+ * Priority 1: Metadata from AACItem (colorType: 'verb' or 'action', category: 'actions')
+ * Priority 2: Algorithmic / core set fallback for raw string tokens
+ */
+export function isVerbToken(token?: string | AACItem): boolean {
+  if (!token) return false;
+  if (typeof token !== 'string') {
+    if (token.colorType === 'verb') return true;
+    if (token.category === 'actions') return true;
+  }
+  const clean = cleanToken(token);
+  if (!clean) return false;
+  return CORE_ACTION_VERBS.has(clean) || CATENATIVE_VERBS.has(clean);
+}
 
 // Verbs that can form bare serial motion constructions (e.g. "go look", "come see", "help clean")
 const SERIAL_MOTION_VERBS = new Set(['go', 'come', 'help']);
@@ -236,7 +229,7 @@ export function isNounToken(token: string | AACItem): boolean {
   if (!clean) return false;
 
   // Disqualify known function words, verbs, adjectives, and pronouns
-  const isVerb = ACTION_VERBS.has(clean) || CATENATIVE_VERBS.has(clean);
+  const isVerb = isVerbToken(token);
   const isAdj = STATE_ADJECTIVES.has(clean) || ATTRIBUTIVE_MODIFIERS.has(clean);
   const isPronoun = [
     'i', 'me', 'my', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'we', 'us', 'they', 'them', 'it',
@@ -281,7 +274,7 @@ export function adjustSentenceTokensOnTheSpot(tokens: string[], language?: strin
 
     if (pronounMap[currentLower]) {
       const isStart = (i === 0);
-      const followedByVerb = nextClean && (ACTION_VERBS.has(nextClean) || nextClean === 'go' || nextClean === 'look');
+      const followedByVerb = nextClean && (isVerbToken(result[i + 1]) || nextClean === 'go' || nextClean === 'look');
       const followedByAdjective = nextClean && STATE_ADJECTIVES.has(nextClean);
 
       if (isStart || followedByVerb || followedByAdjective) {
@@ -337,7 +330,8 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: s
 
     // 1. Pronoun Case Correction
     if (pronounMap[word]) {
-      const isPrecedingVerb = next && (ACTION_VERBS.has(next) || next === 'go' || next === 'look');
+      const nextToken = i + 1 < tokens.length ? tokens[i + 1] : undefined;
+      const isPrecedingVerb = nextToken && (isVerbToken(nextToken) || next === 'go' || next === 'look');
       const isPrecedingAdj = next && STATE_ADJECTIVES.has(next);
       const isConjunction = CONJUNCTIONS.has(prev);
 
@@ -365,7 +359,7 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: s
     }
 
     // 3. English Catenative Verb + Infinitive Particle "to"
-    if (lang === 'en' && prev && CATENATIVE_VERBS.has(prev) && ACTION_VERBS.has(word) && word !== 'help' && word !== 'food') {
+    if (lang === 'en' && prev && CATENATIVE_VERBS.has(prev) && isVerbToken(origToken || word) && word !== 'help' && word !== 'food') {
       intermediate.push({ text: 'to', role: 'particle' });
       intermediate.push({ text: word, token: origToken, role: 'verb' });
       continue;
@@ -377,11 +371,14 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: s
       continue;
     }
 
-    // 5. English Third-person subject-verb agreement
+    // 5. English Third-person subject-verb agreement (dynamic morphology)
     const lastWord = intermediate[intermediate.length - 1]?.text?.toLowerCase();
-    if (lang === 'en' && (lastWord === 'he' || lastWord === 'she' || lastWord === 'it') && THIRD_PERSON_VERBS[word]) {
-      intermediate.push({ text: THIRD_PERSON_VERBS[word], token: origToken, role: 'verb' });
-      continue;
+    if (lang === 'en' && (lastWord === 'he' || lastWord === 'she' || lastWord === 'it') && isVerbToken(origToken || word)) {
+      const conjugated = conjugateEnglishSingleVerb(word);
+      if (conjugated?.present_s) {
+        intermediate.push({ text: conjugated.present_s, token: origToken, role: 'verb' });
+        continue;
+      }
     }
 
     // Classify syntactic role
@@ -393,7 +390,7 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: s
       else if (origToken.colorType === 'adjective') role = 'adj';
       else if (isNounToken(origToken)) role = 'noun';
     } else {
-      if (ACTION_VERBS.has(word)) role = 'verb';
+      if (isVerbToken(word)) role = 'verb';
       else if (ATTRIBUTIVE_MODIFIERS.has(word)) role = 'modifier';
       else if (CONJUNCTIONS.has(word)) role = 'conj';
       else if (PREPOSITIONS.has(word)) role = 'prep';

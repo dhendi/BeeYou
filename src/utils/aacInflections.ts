@@ -95,7 +95,7 @@ const EN_VERB_IRREGULARS: Record<string, { present_s: string; past: string; cont
   'understand': { present_s: 'understands', past: 'understood', continuous: 'understanding' },
 };
 
-function conjugateEnglishSingleVerb(verb: string): { present_s: string; past: string; continuous: string } {
+export function conjugateEnglishSingleVerb(verb: string): { present_s: string; past: string; continuous: string } {
   const v = verb.toLowerCase();
   if (EN_VERB_IRREGULARS[v]) {
     return EN_VERB_IRREGULARS[v];
