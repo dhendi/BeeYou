@@ -16,6 +16,20 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import {
+  FidgetBubblesSticker,
+  CountdownTimerSticker,
+  BreathingCloudSticker,
+  DecisionWheelSticker,
+  SpoonSticker,
+  MedicationSticker,
+  MoodJournalSticker,
+  ShieldSosSticker,
+  IdCardSticker,
+  ThermometerSticker,
+  ConnectHeartSticker,
+  EveningMoonSticker,
+} from './icons/JournalStickers';
 
 export const ToolsHubModal: React.FC = () => {
   const {
@@ -313,34 +327,60 @@ export const ToolsHubModal: React.FC = () => {
               {t('Nothing here right now. You can turn tools on in Accessibility & Sensory Hub.')}
             </p>
           )}
-          {filteredTools.map((tool) => (
-            <button
-              type="button"
-              key={tool.id}
-              onClick={tool.action}
-              className="min-h-[64px] text-left p-3.5 sm:p-4 rounded-3xl border-2 border-[#E0D8CB] bg-[#FCF9F2] hover:bg-white shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] cursor-pointer transition-all active:scale-98 flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="w-11 h-11 rounded-2xl bg-[#F5EFE6] text-2xl flex items-center justify-center border border-[#E0D8CB] shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
-                  {tool.emoji}
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB]">
+          {filteredTools.map((tool) => {
+            const Sticker =
+              tool.id === 'wheel'
+                ? DecisionWheelSticker
+                : tool.id === 'fidgets'
+                ? FidgetBubblesSticker
+                : tool.id === 'coping'
+                ? BreathingCloudSticker
+                : tool.id === 'emergency'
+                ? ShieldSosSticker
+                : tool.id === 'spoons'
+                ? SpoonSticker
+                : tool.id === 'meds'
+                ? MedicationSticker
+                : tool.id === 'journal'
+                ? MoodJournalSticker
+                : tool.id === 'scale'
+                ? ThermometerSticker
+                : tool.id === 'timer' || tool.id === 'pie-timer'
+                ? CountdownTimerSticker
+                : tool.id === 'cycle'
+                ? ConnectHeartSticker
+                : tool.id === 'passport'
+                ? IdCardSticker
+                : tool.id === 'recollection'
+                ? EveningMoonSticker
+                : FidgetBubblesSticker;
+
+            return (
+              <button
+                type="button"
+                key={tool.id}
+                onClick={tool.action}
+                className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 bg-gradient-to-br shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all active:scale-[0.98] flex items-center justify-between gap-3 group ${tool.bg}`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/80 border border-current opacity-85">
                       {t(tool.badge)}
                     </span>
                   </div>
-                  <h4 className="font-black text-sm text-[#2D241E] leading-tight">
+                  <h4 className="font-bold text-sm sm:text-base leading-snug truncate">
                     {t(tool.title)}
                   </h4>
-                  <p className="text-[11px] text-[#7A6C60] font-medium leading-snug">
+                  <p className="text-[11px] sm:text-xs opacity-75 font-medium leading-snug mt-0.5 line-clamp-1">
                     {t(tool.desc)}
                   </p>
                 </div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[#A89C8F] shrink-0" aria-hidden="true" />
-            </button>
-          ))}
+                <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                  <Sticker className="w-full h-full object-contain" />
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Footer */}

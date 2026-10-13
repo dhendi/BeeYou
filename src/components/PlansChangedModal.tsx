@@ -18,6 +18,7 @@ export const PlansChangedModal: React.FC = () => {
     setShowPlansChangedModal,
     plansChanged,
     dismissPlansChanged,
+    applyPlansChangedToRoutine,
     speak,
     setShowCopingToolkit,
   } = useApp();
@@ -158,8 +159,9 @@ export const PlansChangedModal: React.FC = () => {
 
           <button
             onClick={() => {
+              applyPlansChangedToRoutine();
               setShowPlansChangedModal(false);
-              playChime('tap');
+              playChime('complete');
             }}
             className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
           >

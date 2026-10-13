@@ -533,4 +533,66 @@ export const PREBUILT_ROUTINE_TEMPLATES: RoutineTemplate[] = [
       },
     ],
   },
+  // --- ADULT & WORK TEMPLATES ---
+  {
+    id: 'template-work-focus',
+    title: 'Workday Focus & Flow',
+    category: 'work',
+    emoji: '💼',
+    time: '9:00 AM',
+    description: 'Structured workday flow with calibrated deep work sprints, posture resets, and mindful shutdown.',
+    recommendedFor: 'Adults seeking neurodivergent-friendly executive functioning flow and anti-burnout pacing.',
+    assignedDays: [1, 2, 3, 4, 5],
+    firstThen: {
+      first: 'Top priority deep work sprint',
+      firstEmoji: '🎯',
+      then: 'Coffee walk & fresh air stretch',
+      thenEmoji: '☕',
+    },
+    steps: [
+      {
+        title: 'Morning workspace calibration',
+        instruction: 'Fill water, adjust lighting, review top 3 priorities for today.',
+        durationMin: 10,
+        emoji: '☕',
+        sensoryNote: 'Clear desk visual clutter before opening laptop.',
+      },
+      {
+        title: 'Deep work focus sprint #1',
+        instruction: 'Distraction-free high-impact project execution with noise-canceling audio.',
+        durationMin: 60,
+        emoji: '🎯',
+      },
+      {
+        title: 'Hydrate & posture reset',
+        instruction: 'Look 20 feet away, stretch shoulders, drink a full glass of water.',
+        durationMin: 5,
+        emoji: '🧘',
+      },
+      {
+        title: 'Team sync & async communication',
+        instruction: 'Process key messages, update project status, unblock teammates.',
+        durationMin: 30,
+        emoji: '💬',
+      },
+      {
+        title: 'Nourishing lunch & screen-free walk',
+        instruction: 'Step away from desk, eat mindful lunch, get fresh outdoor air.',
+        durationMin: 45,
+        emoji: '🥗',
+      },
+      {
+        title: 'Afternoon execution sprint #2',
+        instruction: 'Secondary deliverables, documentation, code review or designs.',
+        durationMin: 60,
+        emoji: '💻',
+      },
+      {
+        title: 'Daily shutdown & tomorrow prep',
+        instruction: 'Inbox zero, write tomorrow top 3 goals, close work tabs completely.',
+        durationMin: 15,
+        emoji: '📋',
+      },
+    ],
+  },
 ];

@@ -89,9 +89,10 @@ export interface VisualScheduleStep {
 export interface Routine {
   id: string;
   title: string;
-  category: 'morning' | 'school' | 'after-school' | 'bedtime' | 'appointment' | 'custom';
+  category: 'morning' | 'school' | 'after-school' | 'work' | 'study' | 'evening' | 'bedtime' | 'appointment' | 'special' | 'custom';
   emoji: string;
   time?: string;
+  assignedDays?: number[]; // [0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat]. If omitted/empty, applies to all days.
   steps: VisualScheduleStep[];
   firstThen?: {
     first: string;
@@ -106,11 +107,12 @@ export interface Routine {
 export interface RoutineTemplate {
   id: string;
   title: string;
-  category: 'morning' | 'school' | 'after-school' | 'bedtime' | 'appointment' | 'custom';
+  category: 'morning' | 'school' | 'after-school' | 'work' | 'study' | 'evening' | 'bedtime' | 'appointment' | 'special' | 'custom';
   emoji: string;
   time?: string;
   description: string;
   recommendedFor?: string;
+  assignedDays?: number[];
   firstThen?: {
     first: string;
     firstEmoji: string;

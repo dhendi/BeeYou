@@ -33,6 +33,20 @@ import { resolveAacImageUrl } from '../services/symbolService';
 import { DashboardWidgetId, AACItem } from '../types';
 import { isWidgetAvailable } from '../data/navigation';
 import { ContextualHelpButton } from './ContextualHelpButton';
+import {
+  FidgetBubblesSticker,
+  CountdownTimerSticker,
+  ToothbrushSticker,
+  ReadingBookSticker,
+  SpoonSticker,
+  MedicationSticker,
+  IdCardSticker,
+  ThermometerSticker,
+  DecisionWheelSticker,
+  MoodJournalSticker,
+  ConnectHeartSticker,
+  EveningMoonSticker,
+} from './icons/JournalStickers';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
@@ -209,7 +223,7 @@ export const ChildHomeView: React.FC = () => {
     <div className="flex flex-col flex-1 pb-24 max-w-7xl mx-auto w-full px-2 sm:px-4 py-2 space-y-4 select-none">
       
       {/* ── TOP PROMINENT HEADER & DASHBOARD CONTROL BAR ── */}
-      <div className="bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-3xl p-3 sm:p-4 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-[#FAF8F5] border-2 border-[#E7DFD5] rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Friendly Greeting & Status */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button 
@@ -219,10 +233,10 @@ export const ChildHomeView: React.FC = () => {
               setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="w-11 h-11 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] border-2 border-[#E0D8CB] text-2xl flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="w-12 h-12 rounded-2xl bg-white border-2 border-[#E2D8CB] flex items-center justify-center p-1.5 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="About Me ID Card"
           >
-            <span aria-hidden="true">🐝</span>
+            <IdCardSticker className="w-full h-full object-contain" />
           </button>
           <div>
             <div className="flex items-center gap-2">
@@ -230,8 +244,8 @@ export const ChildHomeView: React.FC = () => {
                 {t('Hi')}, {childProfile.name}!
               </h2>
               {userPersona === 'child' && (
-                <span className="text-[10px] font-black uppercase tracking-wider bg-[#EFE9DF] text-[#6B5E52] border border-[#E0D8CB] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#F5B865]" aria-hidden="true" />
+                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100/80 text-amber-900 border border-amber-200/90 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-600" aria-hidden="true" />
                   {worldState.stars} {t('Coins')}
                 </span>
               )}
@@ -254,11 +268,11 @@ export const ChildHomeView: React.FC = () => {
             <button
               type="button"
               aria-label="Customize and reorder dashboard widgets"
-              className="px-4 py-2.5 min-h-[48px] rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_3px_10px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+              className="px-4 py-2.5 min-h-[44px] rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 border border-amber-500/80 font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               title="Customize and reorder dashboard widgets (Protected)"
             >
-              <SlidersHorizontal className="w-4 h-4 text-[#4A2F0F]" aria-hidden="true" />
-              <span>{t('Customize Dashboard')} ✏️</span>
+              <SlidersHorizontal className="w-4 h-4 text-amber-950" aria-hidden="true" />
+              <span>{t('Customize Dashboard')}</span>
             </button>
           </CaregiverLockShield>
 
@@ -270,10 +284,10 @@ export const ChildHomeView: React.FC = () => {
               setShowToolsHubModal(true);
               playChime('tap');
             }}
-            className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Open Tools Hub"
           >
-            <span className="text-base" aria-hidden="true">🧰</span>
+            <LayoutGrid className="w-4 h-4 text-stone-600" aria-hidden="true" />
           </button>
 
           {/* Morning Brief (if enabled) */}
@@ -285,10 +299,10 @@ export const ChildHomeView: React.FC = () => {
                 setShowMorningBrief(true);
                 playChime('tap');
               }}
-              className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+              className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               title="Open Morning Brief"
             >
-              <Sun className="w-4 h-4 text-[#E2A44E]" aria-hidden="true" />
+              <Sun className="w-4 h-4 text-amber-500" aria-hidden="true" />
             </button>
           )}
 
@@ -300,10 +314,10 @@ export const ChildHomeView: React.FC = () => {
               setShowCaregiverModal(true);
               playChime('tap');
             }}
-            className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#2D241E] border-2 border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.03),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-rose-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Caregiver Pairing & Connect"
           >
-            <Heart className="w-4 h-4 text-[#D57B7B]" aria-hidden="true" />
+            <Heart className="w-4 h-4 text-rose-500" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -426,17 +440,17 @@ export const ChildHomeView: React.FC = () => {
               return currentRoutine ? (
                 <div 
                   key={widget.id} 
-                  className={`p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] space-y-3 ${
+                  className={`p-4 sm:p-5 rounded-2xl bg-white border border-stone-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3 ${
                     isFullWidth ? 'md:col-span-2' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-wider text-[#8C7E72]">
+                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
                       {t("Today's Schedule")} • {t(currentRoutine.title)}
                     </span>
                     <button
                       onClick={() => setChildView('my-day')}
-                      className="text-xs font-black text-[#4A2F0F] hover:text-[#2D241E] flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-bold text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
                     >
                       <span>{t('Open Schedule')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -444,28 +458,36 @@ export const ChildHomeView: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-xl">🪥</span>
-                        <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
+                    <div className="p-3 rounded-xl bg-sky-50/50 border border-sky-200/70 flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-bold text-xs sm:text-sm text-sky-950 truncate block">
                           {currentRoutine.firstThen?.first ? `${t('First')}: ${t(currentRoutine.firstThen.first)}` : `${t('First')}: ${t('Brush teeth')}`}
                         </span>
                       </div>
-                      <span className="w-6 h-6 rounded-full bg-[#C4E7D4] text-[#1C3E25] font-black text-xs flex items-center justify-center shrink-0 border border-[#99C2A2]">
-                        ✓
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-6 h-6 rounded-lg bg-white border border-sky-200 p-0.5 shadow-2xs">
+                          <ToothbrushSticker className="w-full h-full" />
+                        </div>
+                        <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-300">
+                          ✓
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-xl">📱</span>
-                        <span className="font-black text-xs sm:text-sm text-[#2D241E] truncate">
+                    <div className="p-3 rounded-xl bg-purple-50/50 border border-purple-200/70 flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-bold text-xs sm:text-sm text-purple-950 truncate block">
                           {currentRoutine.firstThen?.then ? `${t('Then')}: ${t(currentRoutine.firstThen.then)}` : `${t('Then')}: ${t('Tablet time (15 min)')}`}
                         </span>
                       </div>
-                      <span className="w-6 h-6 rounded-full bg-[#EAE2D5] text-[#8C7E72] font-black text-xs flex items-center justify-center shrink-0 border border-[#D8CEBA]">
-                        ○
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-6 h-6 rounded-lg bg-white border border-purple-200 p-0.5 shadow-2xs">
+                          <ReadingBookSticker className="w-full h-full" />
+                        </div>
+                        <span className="w-6 h-6 rounded-full bg-stone-200/80 text-stone-500 font-bold text-xs flex items-center justify-center border border-stone-300">
+                          ○
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -479,16 +501,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowPieTimerModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FDE293] hover:bg-[#FCD876] border-2 border-[#E2A44E] text-[#4A2F0F] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(253,226,147,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#E2A44E] shrink-0">⏰</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Visual Pie Clock')}</div>
-                      <div className="text-[11px] font-semibold text-[#8B571A]">{t('Time Timer analog visual countdown disk')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Visual Pie Clock')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('Time Timer analog visual countdown disk')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8B571A] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <CountdownTimerSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -500,16 +525,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowFivePointModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#C4E7D4] hover:bg-[#B2DEC5] border-2 border-[#85AE8E] text-[#1C3E25] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(196,231,212,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#85AE8E] shrink-0">🌡️</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('5-Point Emotional Scale')}</div>
-                      <div className="text-[11px] font-semibold text-[#2C5A37]">{t('Thermometer & calming regulation tools')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('5-Point Emotional Scale')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('Thermometer & calming regulation tools')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#2C5A37] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <ThermometerSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -521,16 +549,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowFidgetModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#F6C0C0] hover:bg-[#EEADAD] border-2 border-[#D57B7B] text-[#4A1616] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(246,192,192,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#D57B7B] shrink-0">🫧</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Fidget Corner & Stimming')}</div>
-                      <div className="text-[11px] font-semibold text-[#8B3434]">{t('Bubble pop, sand ripple & marble')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Fidget Corner & Stimming')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('Bubble pop, sand ripple & marble')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8B3434] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <FidgetBubblesSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -542,16 +573,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowDecisionWheelModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#D7D4F0] hover:bg-[#CBC8E8] border-2 border-[#B8B4DC] text-[#2C2954] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(215,212,240,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#FCF9F2] rounded-2xl border border-[#B8B4DC] shrink-0">🎡</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Decision Wheel')}</div>
-                      <div className="text-[11px] font-semibold text-[#51488C]">{t('Spin to break choice paralysis')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Decision Wheel')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('Spin to break choice paralysis')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#51488C] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <DecisionWheelSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -563,16 +597,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowMedicationModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 hover:bg-sky-50/80 text-sky-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💊</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Medication Reminders')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{medications.length} {t('active prescriptions')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Medication Reminders')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {medications.length} {t('active prescriptions')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <MedicationSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -584,18 +621,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowSpoonModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🥄</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Spoon Energy Budget')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">
-                        {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} ${t('spoons left today')}` : t('Track energy & prevent burnout')}
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Spoon Energy Budget')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {todaySpoonEntry ? `${todaySpoonEntry.totalSpoons - todaySpoonEntry.usedSpoons} ${t('spoons left today')}` : t('Track energy & prevent burnout')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <SpoonSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -607,16 +645,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowMoodJournalModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">📖</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Mood Journal & Triggers')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{moodJournalEntries.length} {t('reflections recorded')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Mood Journal & Triggers')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {moodJournalEntries.length} {t('reflections recorded')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <MoodJournalSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -628,18 +669,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowCycleTrackerModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-pink-300/80 bg-pink-50/40 hover:bg-pink-50/80 text-pink-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">💗</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Cycle & Rhythm Tracker')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">
-                        {cycleSettings.discreetMode ? t('Body rhythm tracking') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Cycle & Rhythm Tracker')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {cycleSettings.discreetMode ? t('Body rhythm tracking') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <ConnectHeartSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               ) : null;
 
@@ -651,16 +693,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowPassportModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🪪</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Communication Passport')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{t('1-page summary for teachers & dentists')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Communication Passport')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('1-page summary for teachers & dentists')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <IdCardSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -671,25 +716,22 @@ export const ChildHomeView: React.FC = () => {
                   key={widget.id}
                   aria-label={`Life adventure prep: ${t(todaysAdventure.title)}`}
                   onClick={() => setChildView('adventures')}
-                  className="w-full text-left p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] shadow-[0_4px_12px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3 cursor-pointer active:scale-98 transition-all col-span-1 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] transition-all col-span-1 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl p-2 bg-[#F5EFE6] border border-[#E0D8CB] rounded-2xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
-                      {todaysAdventure.emoji}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-md inline-block mb-1">
+                      {t('Life Adventure Prep')}
                     </span>
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#A76318] bg-[#FDE293] border border-[#E2A44E] px-2 py-0.5 rounded-lg">
-                        {t('Life Adventure Prep')}
-                      </span>
-                      <h4 className="font-black text-sm sm:text-base text-[#2D241E] mt-0.5">
-                        {t(todaysAdventure.title)}
-                      </h4>
-                      <p className="text-xs text-[#7A6C60] font-semibold">
-                        {t('Walkthrough, sensory guide & confidence tips.')}
-                      </p>
-                    </div>
+                    <h4 className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t(todaysAdventure.title)}
+                    </h4>
+                    <p className="text-xs opacity-75 font-medium truncate mt-0.5">
+                      {t('Walkthrough, sensory guide & confidence tips.')}
+                    </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-[#8C7E72] shrink-0" aria-hidden="true" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 text-2xl group-hover:scale-110 transition-transform">
+                    <span aria-hidden="true">{todaysAdventure.emoji}</span>
+                  </div>
                 </button>
               ) : null;
 
@@ -701,16 +743,19 @@ export const ChildHomeView: React.FC = () => {
                     setShowRecollectionModal(true);
                     playChime('tap');
                   }}
-                  className="w-full p-3.5 sm:p-4 rounded-[26px] bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-[#2D241E] font-black text-xs sm:text-sm flex items-center justify-between gap-3 shadow-[0_3px_10px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:scale-95 cursor-pointer transition-all col-span-1"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-indigo-300/80 bg-indigo-50/40 hover:bg-indigo-50/80 text-indigo-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl p-1.5 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shrink-0">🌙</span>
-                    <div className="text-left">
-                      <div className="leading-tight font-black text-sm">{t('Evening Reflection & Journal')}</div>
-                      <div className="text-[11px] font-semibold text-[#7A6C60]">{t('Reflect on your day & celebrate wins')}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
+                      {t('Evening Reflection & Journal')}
+                    </div>
+                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
+                      {t('Reflect on your day & celebrate wins')}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8C7E72] shrink-0" />
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                    <EveningMoonSticker className="w-full h-full object-contain" />
+                  </div>
                 </button>
               );
 
@@ -828,7 +873,7 @@ export const ChildHomeView: React.FC = () => {
                 >
                   <button
                     type="button"
-                    className="w-full py-3 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-1"
+                    className="w-full py-3 px-4 rounded-2xl bg-white/80 hover:bg-white text-stone-600 hover:text-stone-900 border border-dashed border-stone-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs mt-1"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
@@ -853,7 +898,7 @@ export const ChildHomeView: React.FC = () => {
             >
               <button
                 type="button"
-                className="w-full py-3.5 px-4 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#6B5E52] hover:text-[#2D241E] border-2 border-dashed border-[#D8CEBA] font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                className="w-full py-3.5 px-4 rounded-2xl bg-white/80 hover:bg-white text-stone-600 hover:text-stone-900 border border-dashed border-stone-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>＋ Customize / Reorder Dashboard Widgets</span>

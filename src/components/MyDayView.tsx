@@ -18,17 +18,27 @@ import {
   ListFilter,
   Eye,
   Layers,
-  Sparkle
+  Sparkle,
+  Pencil,
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  Check,
+  Lock,
+  Briefcase,
+  GraduationCap
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { VisualTaskTimer } from './VisualTaskTimer';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { getStickerForRoutine } from '../data/rewardsData';
-import { VisualScheduleStep } from '../types';
+import { VisualScheduleStep, Routine } from '../types';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { InteractiveMyDayGuideModal } from './InteractiveMyDayGuideModal';
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
+import { CaregiverLockShield } from './CaregiverLockShield';
 
 const MY_DAY_COACH_STEPS: CoachMarkStep[] = [
   {
@@ -69,11 +79,22 @@ const MY_DAY_COACH_STEPS: CoachMarkStep[] = [
   },
 ];
 
-export const MyDayView: React.FC = () => {
+interface MyDayViewProps {
+  selectedCalendarDate?: Date;
+  onOpenTemplatesLibrary?: () => void;
+  onOpenCustomizer?: (initial?: Partial<Routine>) => void;
+}
+
+export const MyDayView: React.FC<MyDayViewProps> = ({
+  selectedCalendarDate,
+  onOpenTemplatesLibrary,
+  onOpenCustomizer,
+}) => {
   const {
     routines,
     toggleRoutineStep,
     resetRoutine,
+    updateRoutine,
     toggleFirstThen,
     plansChanged,
     setShowPlansChangedModal,
@@ -83,7 +104,15 @@ export const MyDayView: React.FC = () => {
     earnedStickers,
     showMyDayGuideModal,
     setShowMyDayGuideModal,
+    userAgeGroup,
   } = useApp();
+
+  const isAdult = userAgeGroup === 'adult';
+  const [isEditingRoutine, setIsEditingRoutine] = useState(false);
+  const [newStepTitle, setNewStepTitle] = useState('');
+  const [newStepDuration, setNewStepDuration] = useState(10);
+  const [newStepEmoji, setNewStepEmoji] = useState('⭐');
+  const [newStepInstruction, setNewStepInstruction] = useState('');
 
   const [isCoachMarksActive, setIsCoachMarksActive] = useState(false);
 
@@ -94,12 +123,19 @@ export const MyDayView: React.FC = () => {
   // View Mode: 'focus_mode' (One Step at a Time) vs 'list_mode' (Full Schedule)
   const [scheduleViewMode, setScheduleViewMode] = useState<'focus_mode' | 'list_mode'>('focus_mode');
   
-  // Category Filter: 'all' | 'morning' | 'evening' | 'other'
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'morning' | 'evening' | 'other'>('all');
+  // Category Filter: 'all' | 'morning' | 'school' | 'work' | 'evening'
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'morning' | 'school' | 'work' | 'evening'>('all');
 
   const timerSectionRef = React.useRef<HTMLDivElement | null>(null);
   const [playingAudioStepId, setPlayingAudioStepId] = useState<string | null>(null);
   const [completedMicroSteps, setCompletedMicroSteps] = useState<Record<string, boolean>>({});
+
+  // Auto-switch to updated plan routine when plansChanged is triggered
+  React.useEffect(() => {
+    if (plansChanged.active && routines.some((r) => r.id === 'routine-plans-changed')) {
+      setSelectedRoutineId('routine-plans-changed');
+    }
+  }, [plansChanged.active, routines]);
 
   const playParentVoice = (step: VisualScheduleStep) => {
     if (!step.audioDataUrl) return;
@@ -114,15 +150,34 @@ export const MyDayView: React.FC = () => {
     }
   };
 
-  // Filtered routines based on category filter
+  const isRoutineOnDay = (routine: Routine, dayIndex: number) => {
+    if (!routine.assignedDays || routine.assignedDays.length === 0) return true;
+    return routine.assignedDays.includes(dayIndex);
+  };
+
+  const calendarDayIndex = selectedCalendarDate ? selectedCalendarDate.getDay() : null;
+
+  // Filtered routines based on category filter AND calendar day
   const filteredRoutines = routines.filter((r) => {
+    if (calendarDayIndex !== null && !isRoutineOnDay(r, calendarDayIndex)) {
+      return false;
+    }
     if (categoryFilter === 'morning') return r.category === 'morning';
-    if (categoryFilter === 'evening') return r.category === 'bedtime' || r.category === 'after-school';
-    if (categoryFilter === 'other') return r.category !== 'morning' && r.category !== 'bedtime' && r.category !== 'after-school';
+    if (categoryFilter === 'school') return r.category === 'school' || r.category === 'study' || r.category === 'after-school';
+    if (categoryFilter === 'work') return r.category === 'work';
+    if (categoryFilter === 'evening') return r.category === 'bedtime' || r.category === 'evening';
     return true;
   });
 
-  const currentRoutine = routines.find((r) => r.id === selectedRoutineId) || filteredRoutines[0] || routines[0];
+  const dayRoutines = calendarDayIndex !== null
+    ? routines.filter((r) => isRoutineOnDay(r, calendarDayIndex))
+    : routines;
+
+  const currentRoutine =
+    routines.find((r) => r.id === selectedRoutineId) ||
+    filteredRoutines[0] ||
+    dayRoutines[0] ||
+    routines[0];
 
   // Find next uncompleted step (Active Step)
   const activeStep = currentRoutine?.steps.find((s) => !s.completed);
@@ -272,6 +327,38 @@ export const MyDayView: React.FC = () => {
           <button
             type="button"
             onClick={() => {
+              setCategoryFilter('school');
+              playChime('tap');
+            }}
+            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+              categoryFilter === 'school'
+                ? 'bg-[#E5D4ED] text-stone-950 shadow-xs border border-[#CDB4DB]'
+                : 'bg-purple-50/80 text-purple-900 hover:bg-purple-100 border border-purple-200'
+            }`}
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>{t('School & Study')} 🎒</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('work');
+              playChime('tap');
+            }}
+            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
+              categoryFilter === 'work'
+                ? 'bg-[#A3C4BC] text-stone-950 shadow-xs border border-[#8AAFA6]'
+                : 'bg-teal-50/80 text-teal-900 hover:bg-teal-100 border border-teal-200'
+            }`}
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            <span>{t('Workday')} 💼</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
               setCategoryFilter('evening');
               playChime('tap');
             }}
@@ -365,6 +452,37 @@ export const MyDayView: React.FC = () => {
             </button>
           );
         })}
+
+        {/* Quick buttons to add routine or browse templates library */}
+        {onOpenTemplatesLibrary && (
+          <button
+            type="button"
+            onClick={() => {
+              onOpenTemplatesLibrary();
+              playChime('tap');
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-850 border border-sky-200 text-xs font-black transition-all shrink-0 cursor-pointer shadow-2xs"
+            title="Browse pre-built routine templates library"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+            <span>{t('Templates Library')}</span>
+          </button>
+        )}
+
+        {onOpenCustomizer && (
+          <button
+            type="button"
+            onClick={() => {
+              onOpenCustomizer();
+              playChime('tap');
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black transition-all shrink-0 cursor-pointer shadow-2xs"
+            title="Create a new routine"
+          >
+            <Plus className="w-3.5 h-3.5 text-amber-700" />
+            <span>{t('New Routine')}</span>
+          </button>
+        )}
       </div>
 
       {/* 4. FIRST -> THEN CARD (Core Predictability Principle) */}
@@ -477,14 +595,66 @@ export const MyDayView: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => resetRoutine(currentRoutine.id)}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-700 font-black text-xs flex items-center gap-1 transition-all cursor-pointer border border-[#E8DFC2]"
-            title="Reset routine"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('Reset')}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Edit Routine Button: direct for adults, caregiver 4-digit PIN for kids/teens */}
+            {isAdult ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingRoutine(!isEditingRoutine);
+                  playChime('tap');
+                }}
+                className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer border ${
+                  isEditingRoutine
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'
+                    : 'bg-[#F5EFE6] hover:bg-white text-stone-800 border-[#E8DFC2]'
+                }`}
+                title={isEditingRoutine ? t('Done Editing') : t('Edit Routine')}
+              >
+                {isEditingRoutine ? <Check className="w-4 h-4" /> : <Pencil className="w-3.5 h-3.5 text-stone-500" />}
+                <span>{isEditingRoutine ? t('Done Editing') : t('Edit Routine')}</span>
+              </button>
+            ) : isEditingRoutine ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingRoutine(false);
+                  playChime('tap');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>{t('Done Editing')}</span>
+              </button>
+            ) : (
+              <CaregiverLockShield
+                title={t('Caregiver PIN: Edit Routine')}
+                onUnlocked={() => {
+                  setIsEditingRoutine(true);
+                  playChime('tap');
+                }}
+              >
+                <button
+                  type="button"
+                  className="px-3 py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-800 border border-[#E8DFC2] font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                  title="Caregiver PIN required to edit this routine"
+                >
+                  <Lock className="w-3.5 h-3.5 text-stone-500" />
+                  <Pencil className="w-3.5 h-3.5 text-stone-500" />
+                  <span>{t('Edit Routine')}</span>
+                </button>
+              </CaregiverLockShield>
+            )}
+
+            <button
+              onClick={() => resetRoutine(currentRoutine.id)}
+              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-700 font-black text-xs flex items-center gap-1 transition-all cursor-pointer border border-[#E8DFC2]"
+              title="Reset routine"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('Reset')}</span>
+            </button>
+          </div>
         </div>
 
         {/* Visual Progress Bar */}
@@ -529,6 +699,253 @@ export const MyDayView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ── INLINE ROUTINE EDITOR (Unlocked for Adults or via Caregiver PIN) ── */}
+      {isEditingRoutine && (
+        <div className="bg-[#FFFDF9] border-2 border-[#E2A44E] rounded-[28px] p-4 sm:p-6 shadow-md space-y-4 animate-in fade-in">
+          <div className="flex items-center justify-between pb-3 border-b border-[#EBE3D5] flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">✏️</span>
+              <div>
+                <h3 className="font-black text-stone-900 text-base sm:text-lg">
+                  {t('Editing Routine')}: {currentRoutine.title}
+                </h3>
+                <p className="text-xs font-semibold text-stone-500">
+                  {isAdult ? t('Adult self-edit mode enabled') : t('Caregiver unlocked edit mode')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditingRoutine(false);
+                playChime('complete');
+              }}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Check className="w-4 h-4" />
+              <span>{t('Save & Close')}</span>
+            </button>
+          </div>
+
+          {/* Routine Metadata: Title & Time */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-black text-stone-700 uppercase tracking-wider mb-1">
+                {t('Routine Name')}
+              </label>
+              <input
+                type="text"
+                value={currentRoutine.title}
+                onChange={(e) => {
+                  updateRoutine({ ...currentRoutine, title: e.target.value });
+                }}
+                className="w-full px-3.5 py-2 rounded-xl border border-[#D5C9B3] bg-white font-bold text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                placeholder="e.g. Workday Focus & Flow"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black text-stone-700 uppercase tracking-wider mb-1">
+                {t('Time / Schedule')}
+              </label>
+              <input
+                type="text"
+                value={currentRoutine.time || ''}
+                onChange={(e) => {
+                  updateRoutine({ ...currentRoutine, time: e.target.value });
+                }}
+                className="w-full px-3.5 py-2 rounded-xl border border-[#D5C9B3] bg-white font-bold text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                placeholder="e.g. 8:30 AM - 4:30 PM"
+              />
+            </div>
+          </div>
+
+          {/* Routine Steps List */}
+          <div className="space-y-2.5">
+            <label className="block text-xs font-black text-stone-700 uppercase tracking-wider">
+              {t('Schedule Steps')} ({currentRoutine.steps.length})
+            </label>
+            {currentRoutine.steps.map((step, idx) => (
+              <div
+                key={step.id}
+                className="flex items-center gap-2 p-2.5 sm:p-3 rounded-2xl bg-[#F5EFE6] border border-[#E8DFC2] hover:border-amber-300 transition-all"
+              >
+                {/* Step index badge */}
+                <div className="w-6 h-6 rounded-lg bg-stone-300 text-stone-800 font-black text-xs flex items-center justify-center shrink-0">
+                  {idx + 1}
+                </div>
+
+                {/* Emoji input */}
+                <input
+                  type="text"
+                  value={step.emoji}
+                  onChange={(e) => {
+                    const newSteps = [...currentRoutine.steps];
+                    newSteps[idx] = { ...step, emoji: e.target.value };
+                    updateRoutine({ ...currentRoutine, steps: newSteps });
+                  }}
+                  className="w-10 text-center py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-lg font-bold shrink-0 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                  title="Step icon / emoji"
+                />
+
+                {/* Title input */}
+                <input
+                  type="text"
+                  value={step.title}
+                  onChange={(e) => {
+                    const newSteps = [...currentRoutine.steps];
+                    newSteps[idx] = { ...step, title: e.target.value };
+                    updateRoutine({ ...currentRoutine, steps: newSteps });
+                  }}
+                  className="flex-1 min-w-[120px] px-2.5 py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-xs sm:text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                  placeholder="Step title"
+                />
+
+                {/* Duration input */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <input
+                    type="number"
+                    min="1"
+                    max="180"
+                    value={step.durationMin || 5}
+                    onChange={(e) => {
+                      const newSteps = [...currentRoutine.steps];
+                      newSteps[idx] = { ...step, durationMin: Number(e.target.value) || 5 };
+                      updateRoutine({ ...currentRoutine, steps: newSteps });
+                    }}
+                    className="w-14 px-2 py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-xs font-bold text-stone-900 text-center focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                  />
+                  <span className="text-[11px] font-bold text-stone-500">m</span>
+                </div>
+
+                {/* Move Up */}
+                <button
+                  type="button"
+                  disabled={idx === 0}
+                  onClick={() => {
+                    if (idx === 0) return;
+                    const newSteps = [...currentRoutine.steps];
+                    const temp = newSteps[idx - 1];
+                    newSteps[idx - 1] = newSteps[idx];
+                    newSteps[idx] = temp;
+                    updateRoutine({ ...currentRoutine, steps: newSteps });
+                    playChime('tap');
+                  }}
+                  className="p-1.5 rounded-lg bg-white hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed border border-[#D5C9B3] text-stone-700 cursor-pointer"
+                  title="Move step up"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Move Down */}
+                <button
+                  type="button"
+                  disabled={idx === currentRoutine.steps.length - 1}
+                  onClick={() => {
+                    if (idx === currentRoutine.steps.length - 1) return;
+                    const newSteps = [...currentRoutine.steps];
+                    const temp = newSteps[idx + 1];
+                    newSteps[idx + 1] = newSteps[idx];
+                    newSteps[idx] = temp;
+                    updateRoutine({ ...currentRoutine, steps: newSteps });
+                    playChime('tap');
+                  }}
+                  className="p-1.5 rounded-lg bg-white hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed border border-[#D5C9B3] text-stone-700 cursor-pointer"
+                  title="Move step down"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Delete Step */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSteps = currentRoutine.steps.filter((_, i) => i !== idx);
+                    updateRoutine({ ...currentRoutine, steps: newSteps });
+                    playChime('tap');
+                  }}
+                  className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 cursor-pointer"
+                  title="Delete step"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Add New Step Form */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+            <div className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5 text-amber-700" />
+              <span>{t('Add New Step')}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Quick emoji selection */}
+              <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200">
+                {['🎒', '📚', '💻', '🧘', '☕', '🥪', '🧼', '⭐'].map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setNewStepEmoji(emoji)}
+                    className={`text-base p-1 rounded-lg transition-transform hover:scale-125 cursor-pointer ${
+                      newStepEmoji === emoji ? 'bg-amber-100 ring-2 ring-amber-400' : ''
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                value={newStepTitle}
+                onChange={(e) => setNewStepTitle(e.target.value)}
+                placeholder="e.g. Science Class / Coffee Break / Check Emails"
+                className="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-amber-200 bg-white font-bold text-xs sm:text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+              />
+
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="1"
+                  max="180"
+                  value={newStepDuration}
+                  onChange={(e) => setNewStepDuration(Number(e.target.value) || 10)}
+                  className="w-14 px-2 py-2 rounded-xl border border-amber-200 bg-white font-bold text-xs text-stone-900 text-center focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
+                />
+                <span className="text-xs font-bold text-amber-900">min</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newStepTitle.trim()) return;
+                  const newStep: VisualScheduleStep = {
+                    id: `step-${Date.now()}`,
+                    title: newStepTitle.trim(),
+                    emoji: newStepEmoji || '⭐',
+                    durationMin: newStepDuration || 10,
+                    completed: false,
+                    instruction: newStepInstruction.trim() || undefined,
+                  };
+                  updateRoutine({
+                    ...currentRoutine,
+                    steps: [...currentRoutine.steps, newStep],
+                  });
+                  setNewStepTitle('');
+                  setNewStepInstruction('');
+                  playChime('star');
+                }}
+                disabled={!newStepTitle.trim()}
+                className="px-4 py-2 rounded-xl bg-[#F5B865] hover:bg-[#EEAC53] disabled:opacity-40 text-stone-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer border border-[#E2A44E]"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{t('Add Step')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ════════════════════════════════════════════════════════════════
           7A. FOCUS MODE: ONE STEP AT A TIME (Current Activity Experience)

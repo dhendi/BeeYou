@@ -36,7 +36,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   onSave,
 }) => {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<'morning' | 'school' | 'after-school' | 'bedtime' | 'appointment' | 'custom'>('morning');
+  const [category, setCategory] = useState<Routine['category']>('morning');
   const [emoji, setEmoji] = useState('🌅');
   const [time, setTime] = useState('8:00 AM');
   
@@ -333,9 +333,13 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
               >
                 <option value="morning">Morning</option>
                 <option value="school">School Day</option>
+                <option value="study">Study & Class</option>
+                <option value="work">Workday</option>
                 <option value="after-school">After-School</option>
+                <option value="evening">Evening</option>
                 <option value="bedtime">Bedtime</option>
                 <option value="appointment">Appointment</option>
+                <option value="special">Special / Plan Changed</option>
                 <option value="custom">Custom</option>
               </select>
             </div>

@@ -40,6 +40,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
     { id: 'bedtime', label: 'Bedtime', emoji: '🌙' },
     { id: 'after-school', label: 'After-School', emoji: '🎒' },
     { id: 'appointment', label: 'Appointments & Therapy', emoji: '🦷' },
+    { id: 'work', label: 'Work & Focus', emoji: '💼' },
     { id: 'custom', label: 'Outings & Weekends', emoji: '🛒' },
   ];
 

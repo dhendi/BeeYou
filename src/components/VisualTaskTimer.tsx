@@ -16,6 +16,15 @@ import {
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { t } from '../services/translator';
+import {
+  ToothbrushSticker,
+  QuietTimeSticker,
+  ToyBoxSticker,
+  GetDressedSticker,
+  WashHandsSticker,
+  ReadingBookSticker,
+  TabletIpadSticker,
+} from './icons/JournalStickers';
 
 export interface TaskTimerPreset {
   id: string;
@@ -74,6 +83,14 @@ export const DEFAULT_TASK_PRESETS: TaskTimerPreset[] = [
     durationSeconds: 600, // 10 minutes
     color: '#ec4899', // Pink 500
     calmMessage: 'Enjoy pictures, stories, and cozy imagination.',
+  },
+  {
+    id: 'ipad',
+    title: 'iPad Time',
+    emoji: '📱',
+    durationSeconds: 900, // 15 minutes
+    color: '#6366f1', // Indigo 500
+    calmMessage: 'Fun screen time. Take deep breaths and have fun!',
   },
 ];
 
@@ -357,25 +374,67 @@ export const VisualTaskTimer: React.FC<VisualTaskTimerProps> = ({
               </span>
               <span className="text-[11px] text-slate-400">{t('Tap to switch')}</span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {DEFAULT_TASK_PRESETS.map((preset) => {
                 const isCurrent = selectedPreset.id === preset.id;
+                const Sticker =
+                  preset.id === 'teeth'
+                    ? ToothbrushSticker
+                    : preset.id === 'quiet'
+                    ? QuietTimeSticker
+                    : preset.id === 'cleanup'
+                    ? ToyBoxSticker
+                    : preset.id === 'dressed'
+                    ? GetDressedSticker
+                    : preset.id === 'hands'
+                    ? WashHandsSticker
+                    : preset.id === 'ipad'
+                    ? TabletIpadSticker
+                    : ReadingBookSticker;
+
+                const colorClass =
+                  preset.id === 'teeth'
+                    ? isCurrent
+                      ? 'bg-sky-50 border-2 border-sky-500 text-sky-950 shadow-xs ring-2 ring-sky-200'
+                      : 'bg-white hover:bg-sky-50/50 border-2 border-sky-200 text-sky-950'
+                    : preset.id === 'quiet'
+                    ? isCurrent
+                      ? 'bg-purple-50 border-2 border-purple-500 text-purple-950 shadow-xs ring-2 ring-purple-200'
+                      : 'bg-white hover:bg-purple-50/50 border-2 border-purple-200 text-purple-950'
+                    : preset.id === 'cleanup'
+                    ? isCurrent
+                      ? 'bg-emerald-50 border-2 border-emerald-500 text-emerald-950 shadow-xs ring-2 ring-emerald-200'
+                      : 'bg-white hover:bg-emerald-50/50 border-2 border-emerald-200 text-emerald-950'
+                    : preset.id === 'dressed'
+                    ? isCurrent
+                      ? 'bg-amber-50 border-2 border-amber-500 text-amber-950 shadow-xs ring-2 ring-amber-200'
+                      : 'bg-white hover:bg-amber-50/50 border-2 border-amber-200 text-amber-950'
+                    : preset.id === 'hands'
+                    ? isCurrent
+                      ? 'bg-cyan-50 border-2 border-cyan-500 text-cyan-950 shadow-xs ring-2 ring-cyan-200'
+                      : 'bg-white hover:bg-cyan-50/50 border-2 border-cyan-200 text-cyan-950'
+                    : preset.id === 'ipad'
+                    ? isCurrent
+                      ? 'bg-indigo-50 border-2 border-indigo-500 text-indigo-950 shadow-xs ring-2 ring-indigo-200'
+                      : 'bg-white hover:bg-indigo-50/50 border-2 border-indigo-200 text-indigo-950'
+                    : isCurrent
+                    ? 'bg-pink-50 border-2 border-pink-500 text-pink-950 shadow-xs ring-2 ring-pink-200'
+                    : 'bg-white hover:bg-pink-50/50 border-2 border-pink-200 text-pink-950';
+
                 return (
                   <button
                     key={preset.id}
                     type="button"
                     onClick={() => handleSelectPreset(preset)}
-                    className={`p-2 rounded-2xl border-2 text-center transition-all cursor-pointer active:scale-95 flex flex-col items-center justify-center ${
-                      isCurrent
-                        ? 'bg-sky-50 border-sky-500 text-sky-950 shadow-xs ring-2 ring-sky-200'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-                    }`}
+                    className={`p-2.5 rounded-2xl text-center transition-all cursor-pointer active:scale-95 flex flex-col items-center justify-center ${colorClass}`}
                   >
-                    <span className="text-xl sm:text-2xl mb-0.5 block">{preset.emoji}</span>
+                    <div className="w-9 h-9 flex items-center justify-center mb-1">
+                      <Sticker className="w-full h-full object-contain" />
+                    </div>
                     <span className="font-bold text-[11px] leading-tight truncate w-full block">
                       {t(preset.title)}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
+                    <span className="text-[10px] opacity-75 font-semibold block mt-0.5">
                       {Math.round(preset.durationSeconds / 60)}m
                     </span>
                   </button>

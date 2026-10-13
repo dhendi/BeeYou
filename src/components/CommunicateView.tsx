@@ -1,26 +1,20 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  ShieldAlert, 
-  Heart, 
-  User, 
-  FileText, 
-  MessageSquare, 
-  Keyboard, 
-  Volume2, 
-  Send,
-  Sparkles,
-  Wifi,
-  WifiOff,
-  CheckCircle2,
-  ExternalLink
-} from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import {
+  ShieldSosSticker,
+  ConnectHeartSticker,
+  IdCardSticker,
+  ReadingBookSticker,
+  QuickPhrasesSticker,
+  KeyboardSticker,
+} from './icons/JournalStickers';
 
 export const CommunicateView: React.FC = () => {
   const {
-    childProfile,
+    childProfile: _childProfile,
     isCaregiverConnected,
     connectionStatus,
     setShowCaregiverModal,
@@ -31,7 +25,7 @@ export const CommunicateView: React.FC = () => {
     setShowAacKeyboardModal,
     speak,
     quickPhrases,
-    activeTheme,
+    activeTheme: _activeTheme,
   } = useApp();
 
   const [customText, setCustomText] = useState('');
@@ -48,11 +42,11 @@ export const CommunicateView: React.FC = () => {
       id: 'help-alert',
       title: 'Ask for Help (SOS)',
       desc: '1-Tap emergency or need-help alerts sent directly to your caregiver or helper.',
-      emoji: '🚨',
-      icon: ShieldAlert,
       badge: 'Emergency SOS',
-      color: 'border-rose-300 bg-rose-50/70 hover:bg-rose-100/70 text-rose-950',
-      iconColor: 'bg-rose-500 text-white',
+      badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
+      color: 'border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950',
+      stickerBox: 'bg-white border-rose-200/90 shadow-2xs',
+      Sticker: ShieldSosSticker,
       action: () => {
         setShowCaregiverAlertModal(true);
         playChime('tap');
@@ -64,13 +58,17 @@ export const CommunicateView: React.FC = () => {
       desc: isCaregiverConnected 
         ? `Connected live with ${connectionStatus.peerName || 'Caregiver'}. Tap to manage link.`
         : 'Link to a parent, teacher, or helper device with a QR scan or 6-digit code.',
-      emoji: '🔗',
-      icon: Heart,
       badge: isCaregiverConnected ? 'Connected Live' : 'Link Device',
+      badgeClass: isCaregiverConnected 
+        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+        : 'bg-amber-100 text-amber-800 border-amber-200',
       color: isCaregiverConnected 
-        ? 'border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-950'
-        : 'border-amber-300 bg-amber-50/70 hover:bg-amber-100/70 text-amber-950',
-      iconColor: isCaregiverConnected ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white',
+        ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
+        : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
+      stickerBox: isCaregiverConnected
+        ? 'bg-white border-emerald-200/90 shadow-2xs'
+        : 'bg-white border-amber-200/90 shadow-2xs',
+      Sticker: ConnectHeartSticker,
       action: () => {
         setShowCaregiverModal(true);
         playChime('tap');
@@ -80,11 +78,11 @@ export const CommunicateView: React.FC = () => {
       id: 'about-me',
       title: 'About Me ID Card',
       desc: 'Your emergency information, sensory sensitivities, communication tips, and emergency contacts.',
-      emoji: '🪪',
-      icon: User,
       badge: 'ID Card',
-      color: 'border-blue-300 bg-blue-50/70 hover:bg-blue-100/70 text-blue-950',
-      iconColor: 'bg-blue-500 text-white',
+      badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
+      color: 'border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950',
+      stickerBox: 'bg-white border-blue-200/90 shadow-2xs',
+      Sticker: IdCardSticker,
       action: () => {
         setShowAboutMeModal(true);
         playChime('tap');
@@ -94,11 +92,11 @@ export const CommunicateView: React.FC = () => {
       id: 'passport',
       title: 'Communication Passport',
       desc: '1-Page summary for teachers, doctors, and therapists explaining your communication style.',
-      emoji: '📋',
-      icon: FileText,
       badge: 'Support Passport',
-      color: 'border-purple-300 bg-purple-50/70 hover:bg-purple-100/70 text-purple-950',
-      iconColor: 'bg-purple-500 text-white',
+      badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
+      color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
+      stickerBox: 'bg-white border-purple-200/90 shadow-2xs',
+      Sticker: ReadingBookSticker,
       action: () => {
         setShowPassportModal(true);
         playChime('tap');
@@ -108,11 +106,11 @@ export const CommunicateView: React.FC = () => {
       id: 'quick-phrases',
       title: 'Quick Phrases & Cards',
       desc: 'Instant pre-made phrases for quick responses, asking for breaks, and daily social interactions.',
-      emoji: '💬',
-      icon: MessageSquare,
       badge: `${quickPhrases.length} Phrases`,
-      color: 'border-teal-300 bg-teal-50/70 hover:bg-teal-100/70 text-teal-950',
-      iconColor: 'bg-teal-500 text-white',
+      badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
+      color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
+      stickerBox: 'bg-white border-teal-200/90 shadow-2xs',
+      Sticker: QuickPhrasesSticker,
       action: () => {
         setShowQuickPhrasesDrawer(true);
         playChime('tap');
@@ -122,11 +120,11 @@ export const CommunicateView: React.FC = () => {
       id: 'keyboard',
       title: 'Type to Speak Keyboard',
       desc: 'High-contrast on-screen typing keyboard with instant text-to-speech engine.',
-      emoji: '⌨️',
-      icon: Keyboard,
       badge: 'Spell & Speak',
-      color: 'border-stone-300 bg-stone-50/70 hover:bg-stone-100/70 text-stone-900',
-      iconColor: 'bg-stone-700 text-white',
+      badgeClass: 'bg-stone-200 text-stone-800 border-stone-300',
+      color: 'border-2 border-stone-300/80 bg-stone-50/50 hover:bg-stone-100/70 text-stone-900',
+      stickerBox: 'bg-white border-stone-200/90 shadow-2xs',
+      Sticker: KeyboardSticker,
       action: () => {
         setShowAacKeyboardModal(true);
         playChime('tap');
@@ -181,30 +179,27 @@ export const CommunicateView: React.FC = () => {
       {/* Communication Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         {commCards.map((card) => {
-          const Icon = card.icon;
+          const Sticker = card.Sticker;
           return (
             <button
               key={card.id}
               onClick={card.action}
-              className={`p-4 rounded-3xl border-2 text-left transition-all active:scale-98 cursor-pointer shadow-xs flex flex-col justify-between ${card.color}`}
+              className={`w-full text-left p-4 sm:p-5 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${card.color}`}
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${card.iconColor}`}>
-                    <Icon className="w-5 h-5 stroke-[2.4]" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-black leading-tight">{t(card.title)}</h3>
-                    <span className="text-[10px] font-black uppercase tracking-wider opacity-75">
-                      {t(card.badge)}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xl" aria-hidden="true">{card.emoji}</span>
+              <div className="min-w-0 flex-1">
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border inline-block mb-1 ${card.badgeClass}`}>
+                  {t(card.badge)}
+                </span>
+                <h3 className="font-bold text-sm sm:text-base leading-snug truncate">
+                  {t(card.title)}
+                </h3>
+                <p className="text-xs opacity-75 font-medium leading-snug mt-0.5 line-clamp-1">
+                  {t(card.desc)}
+                </p>
               </div>
-              <p className="text-xs font-medium leading-relaxed opacity-90">
-                {t(card.desc)}
-              </p>
+              <div className="w-13 h-13 sm:w-15 sm:h-15 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
+                <Sticker className="w-full h-full object-contain" />
+              </div>
             </button>
           );
         })}

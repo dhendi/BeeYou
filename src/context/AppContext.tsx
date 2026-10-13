@@ -225,6 +225,7 @@ interface AppContextType {
   // Plans Changed
   plansChanged: PlansChangedState;
   activatePlansChanged: (data: Partial<PlansChangedState>) => void;
+  applyPlansChangedToRoutine: (data?: Partial<PlansChangedState>) => void;
   dismissPlansChanged: () => void;
 
   // Adventures
@@ -2047,12 +2048,57 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   };
 
   // Plans Changed
+  const applyPlansChangedToRoutine = (data?: Partial<PlansChangedState>) => {
+    const target = data ? { ...plansChanged, ...data } : plansChanged;
+    if (!target.newSteps || target.newSteps.length === 0) return;
+
+    const newRoutineId = 'routine-plans-changed';
+    const updatedPlanRoutine: Routine = {
+      id: newRoutineId,
+      title: `✨ New Plan: ${target.newPlanTitle || 'Updated Schedule'}`,
+      category: 'special',
+      emoji: '✨',
+      time: target.newSteps[0]?.time || 'Now',
+      firstThen: {
+        first: target.newSteps[0]?.title || 'First step',
+        firstEmoji: target.newSteps[0]?.emoji || '✨',
+        then: target.newSteps[1]?.title || 'Next step',
+        thenEmoji: target.newSteps[1]?.emoji || '✨',
+        completedFirst: false,
+        completedThen: false,
+      },
+      steps: target.newSteps.map((step, idx) => ({
+        id: `pc-step-${idx}-${Date.now()}`,
+        title: step.title,
+        instruction: `Step ${idx + 1} of our updated plan`,
+        durationMin: 15,
+        completed: false,
+        emoji: step.emoji || '✨',
+        time: step.time,
+      })),
+    };
+
+    setRoutines((prev) => {
+      const idx = prev.findIndex((r) => r.id === newRoutineId);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = updatedPlanRoutine;
+        return copy;
+      }
+      return [updatedPlanRoutine, ...prev];
+    });
+
+    if (settings.soundEffects) playChime('complete');
+  };
+
   const activatePlansChanged = (data: Partial<PlansChangedState>) => {
-    setPlansChanged((prev) => ({
-      ...prev,
+    const nextState = {
+      ...plansChanged,
       ...data,
       active: true,
-    }));
+    };
+    setPlansChanged(nextState);
+    applyPlansChangedToRoutine(nextState);
     setShowPlansChangedModal(true);
     if (settings.soundEffects) playChime('tap');
   };
@@ -3397,6 +3443,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
         plansChanged,
         activatePlansChanged,
+        applyPlansChangedToRoutine,
         dismissPlansChanged,
 
         adventures,
