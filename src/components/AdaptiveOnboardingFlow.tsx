@@ -219,8 +219,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <LanguageDropdown />
-
               {canDismiss && (
                 <button
                   type="button"
@@ -634,12 +632,12 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
           {/* ════════════════ STEP 4: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
           {step === 4 && (
-            <div className="space-y-5 animate-in fade-in">
-              <div className="text-center space-y-2">
-                <div className="w-14 h-14 rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
-                  <Crown className="w-7 h-7" />
+            <div className="space-y-4 sm:space-y-5 animate-in fade-in">
+              <div className="text-center space-y-1.5 sm:space-y-2">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
+                  <Crown className="w-5 h-5 sm:w-7 sm:h-7" />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   {t('Start Your 15-Day Free Trial')}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium max-w-lg mx-auto leading-relaxed">
@@ -647,8 +645,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 </p>
               </div>
 
-              {/* Plan Choice Cards (Weekly / Monthly / Yearly) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Plan Choice Cards (Weekly / Monthly / Yearly) - 3 columns on both mobile & tablet */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {/* Weekly */}
                 <button
                   type="button"
@@ -656,20 +654,20 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     playChime('tap');
                     setSelectedCycle('weekly');
                   }}
-                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
                     selectedCycle === 'weekly'
                       ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                   }`}
                 >
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
                       {t('Weekly')}
                     </span>
-                    <div className="text-xl font-black text-slate-900 dark:text-white">$2.99</div>
-                    <span className="text-[11px] text-slate-500 font-medium">/{t('week')}</span>
+                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$2.99</div>
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">/{t('week')}</span>
                   </div>
-                  <div className="mt-3 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 leading-tight">
                     {t('15 days free trial')}
                   </div>
                 </button>
@@ -681,23 +679,23 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     playChime('tap');
                     setSelectedCycle('monthly');
                   }}
-                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
                     selectedCycle === 'monthly'
                       ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                   }`}
                 >
-                  <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                  <div className="absolute -top-2.5 right-1.5 sm:right-3 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider shadow-xs">
                     {t('Popular')}
                   </div>
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
                       {t('Monthly')}
                     </span>
-                    <div className="text-xl font-black text-slate-900 dark:text-white">$8.99</div>
-                    <span className="text-[11px] text-slate-500 font-medium">/{t('month')}</span>
+                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$8.99</div>
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">/{t('month')}</span>
                   </div>
-                  <div className="mt-3 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 leading-tight">
                     {t('15 days free trial')}
                   </div>
                 </button>
@@ -709,67 +707,67 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     playChime('tap');
                     setSelectedCycle('yearly');
                   }}
-                  className={`p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
                     selectedCycle === 'yearly'
                       ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 ring-2 ring-emerald-400/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                   }`}
                 >
-                  <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                  <div className="absolute -top-2.5 right-1.5 sm:right-3 px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider shadow-xs">
                     {t('Save 17%')}
                   </div>
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
                       {t('Yearly')}
                     </span>
-                    <div className="text-xl font-black text-slate-900 dark:text-white">$89.99</div>
-                    <span className="text-[11px] text-slate-500 font-medium">$7.49/{t('month')}</span>
+                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$89.99</div>
+                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">$7.49/{t('month')}</span>
                   </div>
-                  <div className="mt-3 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:text-emerald-400 leading-tight">
                     {t('15 days free trial')}
                   </div>
                 </button>
               </div>
 
-              {/* Side-by-side Plan Comparison: Free vs Premium */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+              {/* Side-by-side Plan Comparison: Free vs Premium - 2 columns on both mobile & tablet */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3.5 pt-0.5 sm:pt-1">
                 {/* Free Plan Card */}
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border-2 border-slate-200 dark:border-slate-700/80 flex flex-col justify-between">
+                <div className="p-2.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border-2 border-slate-200 dark:border-slate-700/80 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <h4 className="font-black text-slate-800 dark:text-slate-200 text-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1 sm:mb-1.5">
+                      <h4 className="font-black text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                         {t('BeeYou Basic')}
                       </h4>
-                      <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase">
+                      <span className="self-start sm:self-auto px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[8px] sm:text-[10px] font-black uppercase tracking-wider">
                         {t('Free Forever')}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mb-3">
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium mb-2 sm:mb-3 leading-snug">
                       {t('Basic starter tools with strict limits:')}
                     </p>
-                    <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-600 dark:text-slate-300">
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
                         <span>{t('Standard core AAC board (36 words)')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
                         <span>{t('1 routine & 1 medication reminder only')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
                         <span>{t('2 basic soundscapes (Rain & Ocean)')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
                         <span className="text-slate-400 dark:text-slate-500 line-through">{t('Custom photos & voice recordings')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
                         <span className="text-slate-400 dark:text-slate-500 line-through">{t('Clinical therapist IEP reports')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <X className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
                         <span className="text-slate-400 dark:text-slate-500 line-through">{t('Caregiver live sync & remote alerts')}</span>
                       </li>
                     </ul>
@@ -777,43 +775,43 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 </div>
 
                 {/* Premium Plan Card (High Value Highlight) */}
-                <div className="p-4 rounded-2xl bg-gradient-to-b from-amber-50 to-amber-100/60 dark:from-amber-950/40 dark:to-slate-800/80 border-2 border-amber-400 dark:border-amber-600/80 ring-2 ring-amber-300/40 shadow-sm relative flex flex-col justify-between">
-                  <div className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                <div className="p-2.5 sm:p-4 rounded-2xl bg-gradient-to-b from-amber-50 to-amber-100/60 dark:from-amber-950/40 dark:to-slate-800/80 border-2 border-amber-400 dark:border-amber-600/80 ring-2 ring-amber-300/40 shadow-sm relative flex flex-col justify-between">
+                  <div className="absolute -top-2.5 right-1.5 sm:right-3 px-1.5 sm:px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider shadow-xs">
                     {t('Everything Included')}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                      <h4 className="font-black text-amber-950 dark:text-amber-100 text-sm">
+                    <div className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
+                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <h4 className="font-black text-amber-950 dark:text-amber-100 text-xs sm:text-sm">
                         {t('BeeYou Plus (Trial)')}
                       </h4>
                     </div>
-                    <p className="text-[11px] text-amber-900/80 dark:text-amber-300/80 font-medium mb-3">
+                    <p className="text-[10px] sm:text-[11px] text-amber-900/80 dark:text-amber-300/80 font-medium mb-2 sm:mb-3 leading-snug">
                       {t('Full freedom, zero limits & clinical superpowers:')}
                     </p>
-                    <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                    <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-800 dark:text-slate-200">
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('Unlimited AAC')}</strong>: {t('Photos, voice clips, grammar')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('Unlimited Visual Routines')}</strong> {t('& First-Then')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('All 17 Soundscapes')}</strong> {t('& Custom Theme Studio')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('Therapist IEP PDF')}</strong> {t('progress reports')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('Caregiver Portal')}</strong>: {t('Live sync & silent SOS')}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
                         <span><strong>{t('Priority Offline Mode')}</strong> &amp; {t('family profiles')}</span>
                       </li>
                     </ul>
@@ -822,13 +820,13 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               </div>
 
               {/* Guarantees / Features included */}
-              <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 space-y-2 text-xs text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2 font-bold">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="p-2.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 space-y-1 sm:space-y-2 text-[10px] sm:text-xs text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-1.5 sm:gap-2 font-bold">
+                  <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
                   <span>{t('Zero charge today • 15 days 100% free trial')}</span>
                 </div>
-                <div className="flex items-center gap-2 font-bold">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 sm:gap-2 font-bold">
+                  <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
                   <span>{t('Cancel anytime in settings with 1 tap before trial ends')}</span>
                 </div>
               </div>
