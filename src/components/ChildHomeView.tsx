@@ -243,12 +243,6 @@ export const ChildHomeView: React.FC = () => {
               <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
                 {t('Hi')}, {childProfile.name}!
               </h2>
-              {userPersona === 'child' && (
-                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100/80 text-amber-900 border border-amber-200/90 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-600" aria-hidden="true" />
-                  {worldState.stars} {t('Coins')}
-                </span>
-              )}
             </div>
             <p className="text-xs text-[#7A6C60] font-semibold">
               {getPersonaLabel(userPersona, 'dashboardGreetingSubtitle')}

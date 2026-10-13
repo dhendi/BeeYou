@@ -56,6 +56,13 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   const [newStepEmoji, setNewStepEmoji] = useState('✨');
   const [newStepSensoryNote, setNewStepSensoryNote] = useState('');
 
+  // Voice Recording per step (all hooks must be declared at the top level)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const [recordingStepIdx, setRecordingStepIdx] = useState<number | null>(null);
+  const [playingStepIdx, setPlayingStepIdx] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     if (initialRoutine) {
       setTitle(initialRoutine.title || '');
@@ -83,10 +90,25 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
           { id: `step-${Date.now()}-2`, title: 'Complete first task', instruction: 'Finish current step', durationMin: 10, completed: false, emoji: '👍' },
         ]);
       }
+    } else {
+      // Default template when creating a brand new routine from scratch
+      setTitle('');
+      setCategory('school');
+      setEmoji('🎒');
+      setTime('8:30 AM');
+      setFirstTask('Unpack backpack');
+      setFirstEmoji('🎒');
+      setThenTask('Free play & break');
+      setThenEmoji('🛝');
+      setSteps([
+        { id: `step-${Date.now()}-1`, title: 'Arrive & unpack cubby', instruction: 'Hang up jacket and put lunchbox in bin', durationMin: 5, completed: false, emoji: '🎒' },
+        { id: `step-${Date.now()}-2`, title: 'Morning circle & greeting', instruction: 'Sit calmly with classmates', durationMin: 15, completed: false, emoji: '⭕' },
+        { id: `step-${Date.now()}-3`, title: 'Learning activity', instruction: 'Focus on today tasks step by step', durationMin: 25, completed: false, emoji: '📖' },
+        { id: `step-${Date.now()}-4`, title: 'Recess & snack time', instruction: 'Take a break, move around, and enjoy a healthy snack', durationMin: 20, completed: false, emoji: '🛝' },
+        { id: `step-${Date.now()}-5`, title: 'Pack bag & celebrate all done', instruction: 'Zip backpack, line up calmly', durationMin: 5, completed: false, emoji: '👟' },
+      ]);
     }
-  }, [initialRoutine]);
-
-  if (!isOpen) return null;
+  }, [initialRoutine, isOpen]);
 
   const handleAddStep = () => {
     if (!newStepTitle.trim()) return;
@@ -195,12 +217,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
     playChime('clear');
   };
 
-  // ─── Voice Recording per step ───────────────────────────────────────────────
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const [recordingStepIdx, setRecordingStepIdx] = useState<number | null>(null);
-  const [playingStepIdx, setPlayingStepIdx] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // ─── Voice Recording per step handlers ─────────────────────────────────────
 
   const handleStartRecord = async (stepIdx: number) => {
     try {
@@ -264,6 +281,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
       category,
       emoji,
       time: time.trim() || undefined,
+      assignedDays: initialRoutine?.assignedDays || [0, 1, 2, 3, 4, 5, 6],
       firstThen: firstTask.trim() && thenTask.trim() ? {
         first: firstTask.trim(),
         firstEmoji,
@@ -281,6 +299,8 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
     playChime('star');
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 backdrop-blur-xs p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] animate-in fade-in">

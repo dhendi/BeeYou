@@ -52,6 +52,13 @@ export const MyRoutineView: React.FC = () => {
   // Calendar selected date (defaults to today)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
   
+  // Currently active selected routine ID
+  const [selectedRoutineId, setSelectedRoutineId] = useState<string>(() => {
+    const today = new Date().getDay();
+    if (today >= 1 && today <= 5) return 'routine-school-prep';
+    return 'routine-morning';
+  });
+
   // Parent edit mode unlocked state
   const [isParentMode, setIsParentMode] = useState<boolean>(false);
 
@@ -71,7 +78,7 @@ export const MyRoutineView: React.FC = () => {
 
   // Quick 1-Tap Import from Pre-Built Templates Library
   const handleQuickImportTemplate = (template: RoutineTemplate) => {
-    const newRoutine: Omit<Routine, 'id'> = {
+    const newRoutine = addRoutine({
       title: template.title,
       category: template.category,
       emoji: template.emoji,
@@ -95,9 +102,9 @@ export const MyRoutineView: React.FC = () => {
         sensoryNote: st.sensoryNote,
         communicationShortcutPhrases: st.communicationShortcutPhrases,
       })),
-    };
+    });
 
-    addRoutine(newRoutine);
+    setSelectedRoutineId(newRoutine.id);
     playChime('complete');
     showToast(`✨ ${t('Imported')} "${template.title}" ${t('into your routines!')}`);
     setActiveSubTab('schedules');
@@ -140,9 +147,11 @@ export const MyRoutineView: React.FC = () => {
         ...routineData,
         id: existingId,
       });
+      setSelectedRoutineId(existingId);
       showToast(`✅ ${t('Updated')} "${routineData.title}"!`);
     } else {
-      addRoutine(routineData);
+      const created = addRoutine(routineData);
+      setSelectedRoutineId(created.id);
       showToast(`🎉 ${t('Created')} "${routineData.title}"!`);
     }
     setCustomizerOpen(false);
@@ -321,6 +330,8 @@ export const MyRoutineView: React.FC = () => {
             {/* 2. ACTIVE SCHEDULE & STEPS VIEW */}
             <MyDayView
               selectedCalendarDate={selectedCalendarDate}
+              selectedRoutineId={selectedRoutineId}
+              onSelectRoutineId={setSelectedRoutineId}
               onOpenTemplatesLibrary={() => setActiveSubTab('templates')}
               onOpenCustomizer={(initial) => {
                 setCustomizingRoutine(initial || null);

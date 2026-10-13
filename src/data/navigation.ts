@@ -1,4 +1,4 @@
-import { DashboardWidgetId, EnabledFeatures } from '../types';
+import { DashboardWidgetId, EnabledFeatures, DashboardWidgetConfig } from '../types';
 
 /**
  * Shared information-architecture helpers for BeeYou.
@@ -11,6 +11,122 @@ import { DashboardWidgetId, EnabledFeatures } from '../types';
 export const MORE_VIEWS = ['more', 'adventures', 'skills', 'feelings', 'rewards', 'my-world'] as const;
 
 export const isMoreView = (view: string): boolean => (MORE_VIEWS as readonly string[]).includes(view);
+
+/** All customizable dashboard widgets */
+export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
+  {
+    id: 'routine_schedule',
+    title: 'Visual Schedule & Routine',
+    emoji: '📅',
+    description: 'Step-by-step routine progress, timers, and sticker unlocks',
+    category: 'core',
+    enabled: true,
+  },
+  {
+    id: 'quick_aac',
+    title: 'Quick Communication Phrases',
+    emoji: '💬',
+    description: 'Instant speech tiles for fast, motor-friendly expression',
+    category: 'core',
+    enabled: true,
+  },
+  {
+    id: 'mascot_companion',
+    title: 'Themed Companion & Motivation',
+    emoji: '🐝',
+    description: 'Daily greeting, mascot companion, and star motivation',
+    category: 'core',
+    enabled: false,
+  },
+  {
+    id: 'five_point_scale',
+    title: 'Incredible 5-Point Scale',
+    emoji: '🌡️',
+    description: 'Visual regulation thermometer with coping actions',
+    category: 'sensory',
+    enabled: false,
+  },
+  {
+    id: 'spoon_budget',
+    title: 'Spoon Theory Energy Budget',
+    emoji: '🥄',
+    description: 'Morning energy check-in and stamina cost tracker',
+    category: 'wellness',
+    enabled: false,
+  },
+  {
+    id: 'pie_timer',
+    title: 'Visual Pie Clock',
+    emoji: '⏱️',
+    description: 'Time Timer visual countdown disk with color warnings',
+    category: 'sensory',
+    enabled: false,
+  },
+  {
+    id: 'decision_wheel',
+    title: 'Decision Wheel Spinner',
+    emoji: '🎡',
+    description: 'Break choice paralysis with an animated spin wheel',
+    category: 'sensory',
+    enabled: false,
+  },
+  {
+    id: 'fidget_toys',
+    title: 'Digital Fidget Corner',
+    emoji: '🧸',
+    description: 'Bubble pop with haptics, sand ripples, and marble roll',
+    category: 'sensory',
+    enabled: false,
+  },
+  {
+    id: 'medication_tracker',
+    title: 'Medication Reminders',
+    emoji: '💊',
+    description: 'Upcoming scheduled doses, supply tracking, and logged doses',
+    category: 'wellness',
+    enabled: false,
+  },
+  {
+    id: 'mood_journal',
+    title: 'Mood Reflection Journal',
+    emoji: '📖',
+    description: 'Deep feelings, sensory overload triggers, and body logs',
+    category: 'wellness',
+    enabled: false,
+  },
+  {
+    id: 'cycle_tracker',
+    title: 'Cycle & Sensory Rhythm',
+    emoji: '🌸',
+    description: 'Hormonal wellness, sensory sensitivity, and period predictor',
+    category: 'wellness',
+    enabled: false,
+  },
+  {
+    id: 'communication_passport',
+    title: 'Communication Support Passport',
+    emoji: '📋',
+    description: '1-page printable summary for teachers, doctors & dentists',
+    category: 'support',
+    enabled: false,
+  },
+  {
+    id: 'adventure_spotlight',
+    title: "Today's Adventure Spotlight",
+    emoji: '🚀',
+    description: 'Social story and life skills preparation walkthrough',
+    category: 'core',
+    enabled: false,
+  },
+  {
+    id: 'evening_reflection',
+    title: 'Evening Mood Recollection',
+    emoji: '🌙',
+    description: 'End-of-day recollection chart and mood tracker',
+    category: 'wellness',
+    enabled: false,
+  },
+];
 
 /**
  * Dashboard widgets that depend on a feature toggle. When the feature is

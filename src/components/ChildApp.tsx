@@ -269,7 +269,7 @@ const ChildAppContent: React.FC = () => {
           isOpen={showCaregiverAlertModal}
           onClose={() => setShowCaregiverAlertModal(false)}
         />
-        <RoutineStickerCelebrationModal />
+        {/* RoutineStickerCelebrationModal removed for peaceful distraction-free experience */}
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
 

@@ -1,92 +1,34 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  CheckCircle2, 
-  Circle, 
-  Clock, 
-  Sparkles, 
-  ArrowRight, 
+  ChevronUp, 
+  ChevronDown, 
+  Play, 
+  Check, 
+  Plus, 
   RotateCcw, 
-  Volume2, 
-  Info, 
-  Timer, 
-  Mic, 
-  Wand2, 
-  Play,
-  Sun,
-  Moon,
-  ListFilter,
-  Eye,
-  Layers,
-  Sparkle,
-  Pencil,
-  Plus,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  Check,
-  Lock,
-  Briefcase,
-  GraduationCap
+  Clock, 
+  X,
+  BookOpen,
+  Pause
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { VisualTaskTimer } from './VisualTaskTimer';
 import { t } from '../services/translator';
-import { AccessibleTile } from './common/AccessibleTile';
-import { getStickerForRoutine } from '../data/rewardsData';
-import { VisualScheduleStep, Routine } from '../types';
-import { ContextualHelpButton } from './ContextualHelpButton';
-import { InteractiveMyDayGuideModal } from './InteractiveMyDayGuideModal';
-import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
-import { CaregiverLockShield } from './CaregiverLockShield';
-
-const MY_DAY_COACH_STEPS: CoachMarkStep[] = [
-  {
-    targetSelector: '[data-tour="myday-routines"]',
-    title: '1. Select Your Routine',
-    instruction: 'Click on any routine tab (Morning ☀️, Evening 🌙, or custom routines) to view its schedule.',
-    mascotHint: 'Click a routine above or tap Next! 👇',
-  },
-  {
-    targetSelector: '[data-tour="myday-viewmode"]',
-    title: '2. Choose Your Focus View',
-    instruction: 'Click "One at a Time" to focus without distraction, or "Full List" to see your complete schedule checklist.',
-    mascotHint: 'Click to switch focus views! 👉',
-  },
-  {
-    targetSelector: '[data-tour="myday-activetask"]',
-    title: '3. Current Activity in Progress',
-    instruction: 'This card shows what you are doing right now, complete with step duration and calm instructions.',
-    mascotHint: 'This is the active task happening now! 🌟',
-  },
-  {
-    targetSelector: '[data-tour="myday-starttimer"]',
-    title: '4. Start Countdown Timer',
-    instruction: 'Click "Start Timer" to begin a visual countdown so you always know how much time is left.',
-    mascotHint: 'Click this blue timer button! ⏱️',
-  },
-  {
-    targetSelector: '[data-tour="myday-markdone"]',
-    title: '5. Mark Done & Collect Rewards',
-    instruction: 'When you complete your activity, click "Mark as Done!" to check it off and unlock sticker rewards!',
-    mascotHint: 'Click this green button to finish! ✨',
-  },
-  {
-    targetSelector: '[data-tour="myday-firstthen"]',
-    title: '6. First ➔ Then Board',
-    instruction: 'Need extra motivation? The First / Then board shows what fun reward comes right after your work.',
-    mascotHint: 'You finished the tour! Bee proud of yourself! 🐝',
-  },
-];
+import { Routine, VisualScheduleStep } from '../types';
+import { DEFAULT_ROUTINES } from '../data/defaultData';
 
 interface MyDayViewProps {
   selectedCalendarDate?: Date;
+  selectedRoutineId?: string;
+  onSelectRoutineId?: (id: string) => void;
   onOpenTemplatesLibrary?: () => void;
   onOpenCustomizer?: (initial?: Partial<Routine>) => void;
 }
 
 export const MyDayView: React.FC<MyDayViewProps> = ({
   selectedCalendarDate,
+  selectedRoutineId: selectedRoutineIdProp,
+  onSelectRoutineId,
   onOpenTemplatesLibrary,
   onOpenCustomizer,
 }) => {
@@ -95,1162 +37,417 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     toggleRoutineStep,
     resetRoutine,
     updateRoutine,
-    toggleFirstThen,
-    plansChanged,
-    setShowPlansChangedModal,
-    speak,
-    announce,
-    setChildView,
-    earnedStickers,
-    showMyDayGuideModal,
-    setShowMyDayGuideModal,
-    userAgeGroup,
   } = useApp();
 
-  const isAdult = userAgeGroup === 'adult';
-  const [isEditingRoutine, setIsEditingRoutine] = useState(false);
-  const [newStepTitle, setNewStepTitle] = useState('');
-  const [newStepDuration, setNewStepDuration] = useState(10);
-  const [newStepEmoji, setNewStepEmoji] = useState('⭐');
-  const [newStepInstruction, setNewStepInstruction] = useState('');
-
-  const [isCoachMarksActive, setIsCoachMarksActive] = useState(false);
-
-  const [selectedRoutineId, setSelectedRoutineId] = useState<string>(
-    routines[0]?.id || 'routine-morning'
+  // Filter out any legacy 20-step routines
+  const validRoutines = routines.filter(
+    (r) => r.id !== 'routine-school-full' && (r.steps?.length || 0) < 18
   );
 
-  // View Mode: 'focus_mode' (One Step at a Time) vs 'list_mode' (Full Schedule)
-  const [scheduleViewMode, setScheduleViewMode] = useState<'focus_mode' | 'list_mode'>('focus_mode');
-  
-  // Category Filter: 'all' | 'morning' | 'school' | 'work' | 'evening'
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'morning' | 'school' | 'work' | 'evening'>('all');
-
-  const timerSectionRef = React.useRef<HTMLDivElement | null>(null);
-  const [playingAudioStepId, setPlayingAudioStepId] = useState<string | null>(null);
-  const [completedMicroSteps, setCompletedMicroSteps] = useState<Record<string, boolean>>({});
-
-  // Auto-switch to updated plan routine when plansChanged is triggered
-  React.useEffect(() => {
-    if (plansChanged.active && routines.some((r) => r.id === 'routine-plans-changed')) {
-      setSelectedRoutineId('routine-plans-changed');
+  // Set of expanded routine card IDs
+  const [expandedRoutineIds, setExpandedRoutineIds] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    // Default: expand the selected routine or the first routine
+    if (selectedRoutineIdProp) {
+      initial.add(selectedRoutineIdProp);
+    } else if (validRoutines.length > 0) {
+      initial.add(validRoutines[0].id);
     }
-  }, [plansChanged.active, routines]);
-
-  const playParentVoice = (step: VisualScheduleStep) => {
-    if (!step.audioDataUrl) return;
-    try {
-      const audio = new Audio(step.audioDataUrl);
-      setPlayingAudioStepId(step.id);
-      audio.play().catch(() => setPlayingAudioStepId(null));
-      audio.onended = () => setPlayingAudioStepId(null);
-      audio.onerror = () => setPlayingAudioStepId(null);
-    } catch (e) {
-      setPlayingAudioStepId(null);
-    }
-  };
-
-  const isRoutineOnDay = (routine: Routine, dayIndex: number) => {
-    if (!routine.assignedDays || routine.assignedDays.length === 0) return true;
-    return routine.assignedDays.includes(dayIndex);
-  };
-
-  const calendarDayIndex = selectedCalendarDate ? selectedCalendarDate.getDay() : null;
-
-  // Filtered routines based on category filter AND calendar day
-  const filteredRoutines = routines.filter((r) => {
-    if (calendarDayIndex !== null && !isRoutineOnDay(r, calendarDayIndex)) {
-      return false;
-    }
-    if (categoryFilter === 'morning') return r.category === 'morning';
-    if (categoryFilter === 'school') return r.category === 'school' || r.category === 'study' || r.category === 'after-school';
-    if (categoryFilter === 'work') return r.category === 'work';
-    if (categoryFilter === 'evening') return r.category === 'bedtime' || r.category === 'evening';
-    return true;
+    return initial;
   });
 
-  const dayRoutines = calendarDayIndex !== null
-    ? routines.filter((r) => isRoutineOnDay(r, calendarDayIndex))
-    : routines;
+  // Set of collapsed category sections
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
-  const currentRoutine =
-    routines.find((r) => r.id === selectedRoutineId) ||
-    filteredRoutines[0] ||
-    dayRoutines[0] ||
-    routines[0];
+  // Active Timer routine state (when Play ▶ is tapped)
+  const [timerRoutine, setTimerRoutine] = useState<Routine | null>(null);
+  const [timerStepIndex, setTimerStepIndex] = useState<number>(0);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState<number>(300);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
-  // Find next uncompleted step (Active Step)
-  const activeStep = currentRoutine?.steps.find((s) => !s.completed);
-  const activeStepIndex = currentRoutine?.steps.findIndex((s) => !s.completed) ?? -1;
-  const subsequentStep = activeStepIndex >= 0 && activeStepIndex + 1 < (currentRoutine?.steps.length || 0)
-    ? currentRoutine.steps[activeStepIndex + 1]
-    : undefined;
-
-  const [activeTimerTask, setActiveTimerTask] = useState<{
-    title: string;
-    emoji?: string;
-    durationSeconds?: number;
-    stepId?: string;
-    autoStart?: boolean;
-  } | undefined>(() => {
-    if (activeStep) {
-      return {
-        title: activeStep.title,
-        emoji: activeStep.emoji,
-        durationSeconds: (activeStep.durationMin || 2) * 60,
-        stepId: activeStep.id,
-        autoStart: false,
-      };
-    }
-    return undefined;
-  });
-
-  // When selected routine changes or step finishes, sync timer to current activity
+  // Sync expanded routine when parent prop changes
   React.useEffect(() => {
-    if (activeStep) {
-      setActiveTimerTask({
-        title: activeStep.title,
-        emoji: activeStep.emoji,
-        durationSeconds: (activeStep.durationMin || 2) * 60,
-        stepId: activeStep.id,
-        autoStart: false,
+    if (selectedRoutineIdProp) {
+      setExpandedRoutineIds((prev) => {
+        const next = new Set(prev);
+        next.add(selectedRoutineIdProp);
+        return next;
       });
     }
-  }, [selectedRoutineId, activeStep?.id]);
+  }, [selectedRoutineIdProp]);
 
-  if (!currentRoutine) {
-    return (
-      <div className="p-8 text-center text-slate-500">
-        No routines available. Create one in Parent Dashboard!
-      </div>
-    );
-  }
+  // Timer interval countdown
+  React.useEffect(() => {
+    if (!isTimerRunning || !timerRoutine) return;
+    const interval = setInterval(() => {
+      setTimerSecondsLeft((prev) => {
+        if (prev <= 1) {
+          playChime('complete');
+          setIsTimerRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timerRoutine]);
 
-  const completedStepsCount = currentRoutine.steps.filter((s) => s.completed).length;
-  const totalStepsCount = currentRoutine.steps.length;
-  const progressPercent = totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
-  const isRoutineCompleted = totalStepsCount > 0 && completedStepsCount === totalStepsCount;
-  const routineStickerDef = getStickerForRoutine(currentRoutine);
+  // Recurrence text helper matching mockup format: "46m · 🔄 Daily"
+  const getRecurrenceText = (assignedDays?: number[]) => {
+    if (!assignedDays || assignedDays.length === 0 || assignedDays.length === 7) {
+      return 'Daily';
+    }
+    const isWeekdays =
+      assignedDays.length === 5 && [1, 2, 3, 4, 5].every((d) => assignedDays.includes(d));
+    if (isWeekdays) return 'Mon - Fri';
 
-  const startTimerForStep = (
-    step: { title: string; emoji: string; durationMin?: number; id: string },
-    autoStart = true
-  ) => {
-    setActiveTimerTask({
-      title: step.title,
-      emoji: step.emoji,
-      durationSeconds: (step.durationMin || 2) * 60,
-      stepId: step.id,
-      autoStart,
-    });
-    playChime('tap');
-    announce(`Timer ready for ${step.title}. ${(step.durationMin || 2)} minutes.`);
-    setTimeout(() => {
-      timerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 50);
+    const isWeekends =
+      assignedDays.length === 2 && [0, 6].every((d) => assignedDays.includes(d));
+    if (isWeekends) return 'Weekends';
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return assignedDays.map((d) => dayNames[d]).join(', ');
   };
 
-  const handleTimerCompleteStep = (stepId?: string) => {
-    if (stepId && currentRoutine) {
-      const step = currentRoutine.steps.find((s) => s.id === stepId);
-      if (step && !step.completed) {
-        toggleRoutineStep(currentRoutine.id, stepId);
+  // Total routine duration in minutes
+  const getTotalMinutes = (steps: VisualScheduleStep[]) => {
+    if (!steps || steps.length === 0) return 15;
+    return steps.reduce((acc, s) => acc + (s.durationMin || 5), 0);
+  };
+
+  // Toggle dropdown expansion of a routine card
+  const toggleRoutineExpanded = (id: string) => {
+    setExpandedRoutineIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
+      return next;
+    });
+    if (onSelectRoutineId) {
+      onSelectRoutineId(id);
     }
   };
 
+  // Toggle category section collapse
+  const toggleCategory = (catKey: string) => {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(catKey)) {
+        next.delete(catKey);
+      } else {
+        next.add(catKey);
+      }
+      return next;
+    });
+  };
+
+  // Toggle step completion cleanly
+  const handleToggleStep = (routineId: string, stepId: string) => {
+    toggleRoutineStep(routineId, stepId);
+  };
+
+  // Start visual countdown timer for a routine
+  const handleStartTimer = (routine: Routine) => {
+    const firstIncompleteIdx = routine.steps.findIndex((s) => !s.completed);
+    const stepIdx = firstIncompleteIdx >= 0 ? firstIncompleteIdx : 0;
+    const step = routine.steps[stepIdx];
+    const duration = step ? (step.durationMin || 5) * 60 : 300;
+
+    setTimerRoutine(routine);
+    setTimerStepIndex(stepIdx);
+    setTimerSecondsLeft(duration);
+    setIsTimerRunning(true);
+    playChime('tap');
+  };
+
+  // Check if routine applies to calendar date
+  const isRoutineActiveOnDate = (routine: Routine) => {
+    if (!selectedCalendarDate) return true;
+    const day = selectedCalendarDate.getDay();
+    if (!routine.assignedDays || routine.assignedDays.length === 0) return true;
+    return routine.assignedDays.includes(day);
+  };
+
+  // Group routines into clean categories matching mockup style
+  const categoryConfigs = [
+    { id: 'morning', label: 'Morning', emoji: '🔆', matcher: (r: Routine) => r.category === 'morning' || r.id.includes('morning') || r.id.includes('prep') },
+    { id: 'school', label: 'School & Daytime', emoji: '🏫', matcher: (r: Routine) => r.category === 'school' || r.id.includes('school') },
+    { id: 'after-school', label: 'Afternoon & Evening', emoji: '🏡', matcher: (r: Routine) => r.category === 'after-school' || r.category === 'evening' || r.id.includes('evening') || r.id.includes('home') },
+    { id: 'bedtime', label: 'Bedtime', emoji: '🌙', matcher: (r: Routine) => r.category === 'bedtime' || r.id.includes('bed') },
+    { id: 'custom', label: 'Other Routines', emoji: '⭐', matcher: () => true },
+  ];
+
+  // Map routines to categories without duplicating
+  const placedRoutineIds = new Set<string>();
+  const categorizedGroups = categoryConfigs.map((cfg) => {
+    const groupRoutines = validRoutines.filter((r) => {
+      if (placedRoutineIds.has(r.id)) return false;
+      if (cfg.matcher(r)) {
+        placedRoutineIds.add(r.id);
+        return true;
+      }
+      return false;
+    });
+
+    return {
+      id: cfg.id,
+      label: cfg.label,
+      emoji: cfg.emoji,
+      routines: groupRoutines,
+    };
+  }).filter((group) => group.routines.length > 0);
+
   return (
-    <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
-      
-      {/* 1. PLANS CHANGED ALERT BANNER (If Active) */}
-      {plansChanged.active && (
-        <button
-          type="button"
-          aria-label={`Important Plan Change. New Plan: ${plansChanged.newPlanTitle}. Tap to see new calm plan.`}
-          onClick={() => setShowPlansChangedModal(true)}
-          className="w-full text-left bg-amber-100 hover:bg-amber-200 border-3 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-3xl sm:text-4xl animate-bounce" aria-hidden="true">🔄</span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
-                  Important Change
-                </span>
-                <span className="text-xs font-bold text-amber-900">Tap to see new calm plan</span>
-              </div>
-              <h2 className="text-base sm:text-lg font-black text-amber-950 mt-0.5">
-                New Plan: {plansChanged.newPlanTitle}
-              </h2>
+    <div className="w-full max-w-3xl mx-auto space-y-6 pb-20 select-none">
+      {/* Visual Timer Banner Modal (if activated via Play ▶ button) */}
+      {timerRoutine && (
+        <div className="bg-[#1E232A] text-white p-5 rounded-[2.5rem] shadow-xl border border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-full bg-amber-400 text-stone-950 font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+              {Math.floor(timerSecondsLeft / 60)}:
+              {String(timerSecondsLeft % 60).padStart(2, '0')}
             </div>
-          </div>
-          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" aria-hidden="true" />
-        </button>
-      )}
-
-      {/* 2. TOP CONTROLS: CATEGORY FILTER & HELP */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#FCF9F2] p-3 sm:p-4 rounded-[28px] border border-[#EBE3D5] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]">
-        
-        {/* Category Filter Chips */}
-        <div data-tour="myday-categoryfilter" className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('all');
-              playChime('tap');
-            }}
-            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 ${
-              categoryFilter === 'all'
-                ? 'bg-stone-900 text-white shadow-xs'
-                : 'bg-[#F5EFE6] text-stone-700 hover:bg-white border border-[#E8DFC2]'
-            }`}
-          >
-            {t('All Schedules')}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('morning');
-              playChime('tap');
-            }}
-            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
-              categoryFilter === 'morning'
-                ? 'bg-[#F5B865] text-stone-950 shadow-xs border border-[#E2A44E]'
-                : 'bg-amber-50/80 text-amber-900 hover:bg-amber-100 border border-amber-200'
-            }`}
-          >
-            <Sun className="w-3.5 h-3.5" />
-            <span>{t('Morning')} ☀️</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('school');
-              playChime('tap');
-            }}
-            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
-              categoryFilter === 'school'
-                ? 'bg-[#E5D4ED] text-stone-950 shadow-xs border border-[#CDB4DB]'
-                : 'bg-purple-50/80 text-purple-900 hover:bg-purple-100 border border-purple-200'
-            }`}
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            <span>{t('School & Study')} 🎒</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('work');
-              playChime('tap');
-            }}
-            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
-              categoryFilter === 'work'
-                ? 'bg-[#A3C4BC] text-stone-950 shadow-xs border border-[#8AAFA6]'
-                : 'bg-teal-50/80 text-teal-900 hover:bg-teal-100 border border-teal-200'
-            }`}
-          >
-            <Briefcase className="w-3.5 h-3.5" />
-            <span>{t('Workday')} 💼</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('evening');
-              playChime('tap');
-            }}
-            className={`px-3.5 py-1.5 rounded-2xl font-black text-xs cursor-pointer transition-all shrink-0 flex items-center gap-1 ${
-              categoryFilter === 'evening'
-                ? 'bg-[#99C2A2] text-stone-950 shadow-xs border border-[#85AE8E]'
-                : 'bg-indigo-50/80 text-indigo-900 hover:bg-indigo-100 border border-indigo-200'
-            }`}
-          >
-            <Moon className="w-3.5 h-3.5" />
-            <span>{t('Evening')} 🌙</span>
-          </button>
-        </div>
-
-        {/* View Mode Switcher & Contextual Help Button */}
-        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-          <div data-tour="myday-viewmode" className="flex items-center p-1 bg-[#F5EFE6] rounded-2xl border border-[#E8DFC2]">
-            <button
-              type="button"
-              onClick={() => {
-                setScheduleViewMode('focus_mode');
-                playChime('tap');
-              }}
-              className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all flex items-center gap-1 ${
-                scheduleViewMode === 'focus_mode'
-                  ? 'bg-white text-stone-900 shadow-xs font-black border border-[#E8DFC2]'
-                  : 'text-stone-600'
-              }`}
-              title="Focus on one activity at a time"
-            >
-              <span>🎯 {t('One at a Time')}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setScheduleViewMode('list_mode');
-                playChime('tap');
-              }}
-              className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all flex items-center gap-1 ${
-                scheduleViewMode === 'list_mode'
-                  ? 'bg-white text-stone-900 shadow-xs font-black border border-[#E8DFC2]'
-                  : 'text-stone-600'
-              }`}
-              title="View full schedule checklist"
-            >
-              <span>📋 {t('Full List')}</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setIsCoachMarksActive(true);
-              playChime('tap');
-            }}
-            className="px-3.5 py-1.5 rounded-2xl bg-[#F5B865] hover:bg-[#EEAC53] text-stone-950 font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all border border-[#E2A44E]"
-            title="Interactive live tutorial on where to click"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('Help Me')}</span>
-          </button>
-
-          <ContextualHelpButton topic="schedules" label="Guide" variant="pill" />
-        </div>
-      </div>
-
-      {/* 3. ROUTINE SELECTOR TABS */}
-      <div data-tour="myday-routines" className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-        {filteredRoutines.map((routine) => {
-          const isSelected = routine.id === selectedRoutineId;
-          const isAllDone =
-            routine.steps.length > 0 && routine.steps.every((s) => s.completed);
-
-          return (
-            <button
-              key={routine.id}
-              onClick={() => {
-                setSelectedRoutineId(routine.id);
-                playChime('tap');
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs sm:text-sm border transition-all shrink-0 cursor-pointer ${
-                isSelected
-                  ? 'bg-[#F5B865] text-stone-950 border-[#E2A44E] shadow-sm ring-2 ring-[#F5B865]/40'
-                  : 'bg-[#FCF9F2] hover:bg-white text-stone-800 border-[#EBE3D5] shadow-2xs'
-              }`}
-            >
-              <span className="text-lg">{routine.emoji}</span>
-              <span>{t(routine.title)}</span>
-              {isAllDone && <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-100" />}
-            </button>
-          );
-        })}
-
-        {/* Quick buttons to add routine or browse templates library */}
-        {onOpenTemplatesLibrary && (
-          <button
-            type="button"
-            onClick={() => {
-              onOpenTemplatesLibrary();
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-850 border border-sky-200 text-xs font-black transition-all shrink-0 cursor-pointer shadow-2xs"
-            title="Browse pre-built routine templates library"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
-            <span>{t('Templates Library')}</span>
-          </button>
-        )}
-
-        {onOpenCustomizer && (
-          <button
-            type="button"
-            onClick={() => {
-              onOpenCustomizer();
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black transition-all shrink-0 cursor-pointer shadow-2xs"
-            title="Create a new routine"
-          >
-            <Plus className="w-3.5 h-3.5 text-amber-700" />
-            <span>{t('New Routine')}</span>
-          </button>
-        )}
-      </div>
-
-      {/* 4. FIRST -> THEN CARD (Core Predictability Principle) */}
-      {currentRoutine.firstThen && (
-        <section
-          data-tour="myday-firstthen"
-          aria-label="First then board"
-          className="bg-[#FCF9F2] border border-[#EBE3D5] rounded-[28px] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]"
-        >
-          <div className="text-[11px] font-black uppercase tracking-wider text-stone-500 mb-2.5 flex items-center justify-between">
-            <span>{t('First → Then Routine Flow')}</span>
-            <span className="text-stone-400 font-bold">{t('Tap when completed!')}</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-            {/* FIRST */}
-            <AccessibleTile
-              variant="routine"
-              label={`First: ${t(currentRoutine.firstThen.first)}`}
-              completed={currentRoutine.firstThen.completedFirst}
-              onClick={() => toggleFirstThen(currentRoutine.id, 'first')}
-              className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
-                currentRoutine.firstThen.completedFirst
-                  ? 'bg-[#F0F7F2] border-emerald-300 text-emerald-950 shadow-inner'
-                  : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
-              }`}
-            >
-              <div aria-hidden="true" className="w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                1
-              </div>
-              <span aria-hidden="true" className="text-3xl">{currentRoutine.firstThen.firstEmoji}</span>
-              <div className="flex-1">
-                <span aria-hidden="true" className="text-[10px] font-black text-sky-700 uppercase tracking-wider block">
-                  {t('First')}
-                </span>
-                <span className="font-black text-sm sm:text-base leading-tight">
-                  {t(currentRoutine.firstThen.first)}
-                </span>
-              </div>
-              {currentRoutine.firstThen.completedFirst ? (
-                <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 fill-emerald-200" />
-              ) : (
-                <Circle aria-hidden="true" className="w-6 h-6 text-stone-300" />
-              )}
-            </AccessibleTile>
-
-            {/* THEN */}
-            <AccessibleTile
-              variant="routine"
-              label={`Then: ${t(currentRoutine.firstThen.then)}`}
-              completed={currentRoutine.firstThen.completedThen}
-              onClick={() => toggleFirstThen(currentRoutine.id, 'then')}
-              className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all active:scale-95 text-left cursor-pointer ${
-                currentRoutine.firstThen.completedThen
-                  ? 'bg-[#F0F7F2] border-emerald-300 text-emerald-950 shadow-inner'
-                  : 'bg-[#F5EFE6] hover:bg-white border-[#E8DFC2] text-stone-900 shadow-2xs'
-              }`}
-            >
-              <div aria-hidden="true" className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                2
-              </div>
-              <span aria-hidden="true" className="text-3xl">{currentRoutine.firstThen.thenEmoji}</span>
-              <div className="flex-1">
-                <span aria-hidden="true" className="text-[10px] font-black text-purple-700 uppercase tracking-wider block">
-                  {t('Then')}
-                </span>
-                <span className="font-black text-sm sm:text-base leading-tight">
-                  {t(currentRoutine.firstThen.then)}
-                </span>
-              </div>
-              {currentRoutine.firstThen.completedThen ? (
-                <CheckCircle2 aria-hidden="true" className="w-6 h-6 text-emerald-600 fill-emerald-200" />
-              ) : (
-                <Circle aria-hidden="true" className="w-6 h-6 text-stone-300" />
-              )}
-            </AccessibleTile>
-          </div>
-        </section>
-      )}
-
-      {/* 5. VISUAL TASK TIMER */}
-      <div ref={timerSectionRef} className="scroll-mt-4">
-        <VisualTaskTimer
-          initialTask={activeTimerTask}
-          onCompleteStep={handleTimerCompleteStep}
-        />
-      </div>
-
-      {/* 6. ROUTINE PROGRESS & REWARD BANNER */}
-      <div className="bg-[#FCF9F2] rounded-[28px] border border-[#EBE3D5] p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.9)]">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl sm:text-4xl">{currentRoutine.emoji}</span>
-            <div>
-              <h2 className="text-lg sm:text-xl font-black text-stone-900">
-                {t(currentRoutine.title)}
-              </h2>
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-500">
-                {currentRoutine.time && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-stone-400" />
-                    {currentRoutine.time}
-                  </span>
-                )}
-                <span>•</span>
-                <span>
-                  {completedStepsCount} {t('of')} {totalStepsCount} {t('completed')}
-                </span>
-              </div>
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">
+                {timerRoutine.title} {timerRoutine.emoji}
+              </span>
+              <h4 className="text-base sm:text-lg font-black truncate text-white">
+                {timerRoutine.steps[timerStepIndex]?.emoji}{' '}
+                {timerRoutine.steps[timerStepIndex]?.title || t('In Progress')}
+              </h4>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Edit Routine Button: direct for adults, caregiver 4-digit PIN for kids/teens */}
-            {isAdult ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditingRoutine(!isEditingRoutine);
-                  playChime('tap');
-                }}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer border ${
-                  isEditingRoutine
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'
-                    : 'bg-[#F5EFE6] hover:bg-white text-stone-800 border-[#E8DFC2]'
-                }`}
-                title={isEditingRoutine ? t('Done Editing') : t('Edit Routine')}
-              >
-                {isEditingRoutine ? <Check className="w-4 h-4" /> : <Pencil className="w-3.5 h-3.5 text-stone-500" />}
-                <span>{isEditingRoutine ? t('Done Editing') : t('Edit Routine')}</span>
-              </button>
-            ) : isEditingRoutine ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditingRoutine(false);
-                  playChime('tap');
-                }}
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              >
-                <Check className="w-4 h-4" />
-                <span>{t('Done Editing')}</span>
-              </button>
-            ) : (
-              <CaregiverLockShield
-                title={t('Caregiver PIN: Edit Routine')}
-                onUnlocked={() => {
-                  setIsEditingRoutine(true);
-                  playChime('tap');
-                }}
-              >
-                <button
-                  type="button"
-                  className="px-3 py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-800 border border-[#E8DFC2] font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
-                  title="Caregiver PIN required to edit this routine"
-                >
-                  <Lock className="w-3.5 h-3.5 text-stone-500" />
-                  <Pencil className="w-3.5 h-3.5 text-stone-500" />
-                  <span>{t('Edit Routine')}</span>
-                </button>
-              </CaregiverLockShield>
-            )}
-
             <button
-              onClick={() => resetRoutine(currentRoutine.id)}
-              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-[#F5EFE6] hover:bg-white text-stone-700 font-black text-xs flex items-center gap-1 transition-all cursor-pointer border border-[#E8DFC2]"
-              title="Reset routine"
+              type="button"
+              onClick={() => setIsTimerRunning(!isTimerRunning)}
+              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('Reset')}</span>
+              {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
+              <span>{isTimerRunning ? t('Pause') : t('Resume')}</span>
             </button>
-          </div>
-        </div>
-
-        {/* Visual Progress Bar */}
-        <div className="w-full bg-[#EFE9DF] h-3 rounded-full overflow-hidden border border-[#E0D8CB]">
-          <div
-            className="bg-[#99C2A2] h-full transition-all duration-500 rounded-full"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-
-        {/* Digital Sticker Reward Banner */}
-        <div className="mt-3.5 p-3 rounded-2xl border flex items-center justify-between flex-wrap gap-2 transition-all bg-[#F5EFE6] border-[#E8DFC2]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white border border-amber-200 flex items-center justify-center text-2xl shadow-2xs shrink-0">
-              {routineStickerDef.emoji}
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
-                  {isRoutineCompleted ? `🎉 ${t('Sticker Unlocked!')}` : `🎁 ${t('Routine Completion Reward')}`}
-                </span>
-                <span className="text-[11px] font-bold text-amber-800">
-                  +{routineStickerDef.starsAward} {t('Stars')}
-                </span>
-              </div>
-              <p className="font-black text-xs sm:text-sm text-stone-900 mt-0.5">
-                {t(routineStickerDef.stickerName)}: <span className="text-stone-500 font-medium">{t(routineStickerDef.description)}</span>
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setChildView('rewards');
-              playChime('tap');
-            }}
-            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-stone-900 border border-amber-300 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs"
-          >
-            <span>{t('Sticker Album')} ({earnedStickers.length})</span>
-            <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
-          </button>
-        </div>
-      </div>
-
-      {/* ── INLINE ROUTINE EDITOR (Unlocked for Adults or via Caregiver PIN) ── */}
-      {isEditingRoutine && (
-        <div className="bg-[#FFFDF9] border-2 border-[#E2A44E] rounded-[28px] p-4 sm:p-6 shadow-md space-y-4 animate-in fade-in">
-          <div className="flex items-center justify-between pb-3 border-b border-[#EBE3D5] flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">✏️</span>
-              <div>
-                <h3 className="font-black text-stone-900 text-base sm:text-lg">
-                  {t('Editing Routine')}: {currentRoutine.title}
-                </h3>
-                <p className="text-xs font-semibold text-stone-500">
-                  {isAdult ? t('Adult self-edit mode enabled') : t('Caregiver unlocked edit mode')}
-                </p>
-              </div>
-            </div>
             <button
               type="button"
               onClick={() => {
-                setIsEditingRoutine(false);
-                playChime('complete');
+                const currentStep = timerRoutine.steps[timerStepIndex];
+                if (currentStep) {
+                  toggleRoutineStep(timerRoutine.id, currentStep.id);
+                  playChime('star');
+                }
+                if (timerStepIndex + 1 < timerRoutine.steps.length) {
+                  const nextIdx = timerStepIndex + 1;
+                  setTimerStepIndex(nextIdx);
+                  const nextStep = timerRoutine.steps[nextIdx];
+                  setTimerSecondsLeft((nextStep?.durationMin || 5) * 60);
+                } else {
+                  setTimerRoutine(null);
+                }
               }}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              className="px-4 py-2 rounded-full bg-[#FACC15] hover:bg-amber-400 text-stone-950 font-black text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
-              <Check className="w-4 h-4" />
-              <span>{t('Save & Close')}</span>
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>{t('Done')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimerRoutine(null)}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-stone-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+              title={t('Close Timer')}
+            >
+              <X className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Routine Metadata: Title & Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-black text-stone-700 uppercase tracking-wider mb-1">
-                {t('Routine Name')}
-              </label>
-              <input
-                type="text"
-                value={currentRoutine.title}
-                onChange={(e) => {
-                  updateRoutine({ ...currentRoutine, title: e.target.value });
-                }}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#D5C9B3] bg-white font-bold text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                placeholder="e.g. Workday Focus & Flow"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-black text-stone-700 uppercase tracking-wider mb-1">
-                {t('Time / Schedule')}
-              </label>
-              <input
-                type="text"
-                value={currentRoutine.time || ''}
-                onChange={(e) => {
-                  updateRoutine({ ...currentRoutine, time: e.target.value });
-                }}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#D5C9B3] bg-white font-bold text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                placeholder="e.g. 8:30 AM - 4:30 PM"
-              />
-            </div>
-          </div>
-
-          {/* Routine Steps List */}
-          <div className="space-y-2.5">
-            <label className="block text-xs font-black text-stone-700 uppercase tracking-wider">
-              {t('Schedule Steps')} ({currentRoutine.steps.length})
-            </label>
-            {currentRoutine.steps.map((step, idx) => (
-              <div
-                key={step.id}
-                className="flex items-center gap-2 p-2.5 sm:p-3 rounded-2xl bg-[#F5EFE6] border border-[#E8DFC2] hover:border-amber-300 transition-all"
-              >
-                {/* Step index badge */}
-                <div className="w-6 h-6 rounded-lg bg-stone-300 text-stone-800 font-black text-xs flex items-center justify-center shrink-0">
-                  {idx + 1}
-                </div>
-
-                {/* Emoji input */}
-                <input
-                  type="text"
-                  value={step.emoji}
-                  onChange={(e) => {
-                    const newSteps = [...currentRoutine.steps];
-                    newSteps[idx] = { ...step, emoji: e.target.value };
-                    updateRoutine({ ...currentRoutine, steps: newSteps });
-                  }}
-                  className="w-10 text-center py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-lg font-bold shrink-0 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                  title="Step icon / emoji"
-                />
-
-                {/* Title input */}
-                <input
-                  type="text"
-                  value={step.title}
-                  onChange={(e) => {
-                    const newSteps = [...currentRoutine.steps];
-                    newSteps[idx] = { ...step, title: e.target.value };
-                    updateRoutine({ ...currentRoutine, steps: newSteps });
-                  }}
-                  className="flex-1 min-w-[120px] px-2.5 py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-xs sm:text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                  placeholder="Step title"
-                />
-
-                {/* Duration input */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <input
-                    type="number"
-                    min="1"
-                    max="180"
-                    value={step.durationMin || 5}
-                    onChange={(e) => {
-                      const newSteps = [...currentRoutine.steps];
-                      newSteps[idx] = { ...step, durationMin: Number(e.target.value) || 5 };
-                      updateRoutine({ ...currentRoutine, steps: newSteps });
-                    }}
-                    className="w-14 px-2 py-1.5 rounded-lg border border-[#D5C9B3] bg-white text-xs font-bold text-stone-900 text-center focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                  />
-                  <span className="text-[11px] font-bold text-stone-500">m</span>
-                </div>
-
-                {/* Move Up */}
-                <button
-                  type="button"
-                  disabled={idx === 0}
-                  onClick={() => {
-                    if (idx === 0) return;
-                    const newSteps = [...currentRoutine.steps];
-                    const temp = newSteps[idx - 1];
-                    newSteps[idx - 1] = newSteps[idx];
-                    newSteps[idx] = temp;
-                    updateRoutine({ ...currentRoutine, steps: newSteps });
-                    playChime('tap');
-                  }}
-                  className="p-1.5 rounded-lg bg-white hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed border border-[#D5C9B3] text-stone-700 cursor-pointer"
-                  title="Move step up"
-                >
-                  <ChevronUp className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Move Down */}
-                <button
-                  type="button"
-                  disabled={idx === currentRoutine.steps.length - 1}
-                  onClick={() => {
-                    if (idx === currentRoutine.steps.length - 1) return;
-                    const newSteps = [...currentRoutine.steps];
-                    const temp = newSteps[idx + 1];
-                    newSteps[idx + 1] = newSteps[idx];
-                    newSteps[idx] = temp;
-                    updateRoutine({ ...currentRoutine, steps: newSteps });
-                    playChime('tap');
-                  }}
-                  className="p-1.5 rounded-lg bg-white hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed border border-[#D5C9B3] text-stone-700 cursor-pointer"
-                  title="Move step down"
-                >
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Delete Step */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newSteps = currentRoutine.steps.filter((_, i) => i !== idx);
-                    updateRoutine({ ...currentRoutine, steps: newSteps });
-                    playChime('tap');
-                  }}
-                  className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 cursor-pointer"
-                  title="Delete step"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add New Step Form */}
-          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
-            <div className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Plus className="w-3.5 h-3.5 text-amber-700" />
-              <span>{t('Add New Step')}</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Quick emoji selection */}
-              <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200">
-                {['🎒', '📚', '💻', '🧘', '☕', '🥪', '🧼', '⭐'].map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => setNewStepEmoji(emoji)}
-                    className={`text-base p-1 rounded-lg transition-transform hover:scale-125 cursor-pointer ${
-                      newStepEmoji === emoji ? 'bg-amber-100 ring-2 ring-amber-400' : ''
-                    }`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-
-              <input
-                type="text"
-                value={newStepTitle}
-                onChange={(e) => setNewStepTitle(e.target.value)}
-                placeholder="e.g. Science Class / Coffee Break / Check Emails"
-                className="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-amber-200 bg-white font-bold text-xs sm:text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-              />
-
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  min="1"
-                  max="180"
-                  value={newStepDuration}
-                  onChange={(e) => setNewStepDuration(Number(e.target.value) || 10)}
-                  className="w-14 px-2 py-2 rounded-xl border border-amber-200 bg-white font-bold text-xs text-stone-900 text-center focus:outline-none focus:ring-2 focus:ring-[#E2A44E]"
-                />
-                <span className="text-xs font-bold text-amber-900">min</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (!newStepTitle.trim()) return;
-                  const newStep: VisualScheduleStep = {
-                    id: `step-${Date.now()}`,
-                    title: newStepTitle.trim(),
-                    emoji: newStepEmoji || '⭐',
-                    durationMin: newStepDuration || 10,
-                    completed: false,
-                    instruction: newStepInstruction.trim() || undefined,
-                  };
-                  updateRoutine({
-                    ...currentRoutine,
-                    steps: [...currentRoutine.steps, newStep],
-                  });
-                  setNewStepTitle('');
-                  setNewStepInstruction('');
-                  playChime('star');
-                }}
-                disabled={!newStepTitle.trim()}
-                className="px-4 py-2 rounded-xl bg-[#F5B865] hover:bg-[#EEAC53] disabled:opacity-40 text-stone-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer border border-[#E2A44E]"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{t('Add Step')}</span>
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════
-          7A. FOCUS MODE: ONE STEP AT A TIME (Current Activity Experience)
-      ════════════════════════════════════════════════════════════════ */}
-      {scheduleViewMode === 'focus_mode' && (
-        <div className="space-y-4 animate-in fade-in">
-          {activeStep ? (
-            <div className="space-y-3">
-              {/* CURRENT STEP (NOW) HERO CARD */}
-              <div
-                data-tour="myday-activetask"
-                className="p-5 sm:p-6 rounded-[32px] bg-[#FCF9F2] border-2 border-[#E2A44E] shadow-[0_6px_20px_rgba(0,0,0,0.04)] space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-[#F5B865] text-stone-950 font-black text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-2xs border border-[#E2A44E]">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{t('NOW')} • {t('Step')} {activeStepIndex + 1} {t('of')} {totalStepsCount}</span>
-                  </span>
-                  {activeStep.durationMin && (
-                    <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-950 font-black text-xs">
-                      ⏱️ {activeStep.durationMin} {t('minutes')}
-                    </span>
-                  )}
-                </div>
+      {/* Routine Category Sections */}
+      {categorizedGroups.map((group) => {
+        const isCollapsed = collapsedCategories.has(group.id);
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left py-2">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#F5EFE6] border-2 border-[#E8DFC2] flex items-center justify-center text-5xl sm:text-6xl shadow-sm shrink-0">
-                    {activeStep.emoji}
-                  </div>
-
-                  <div className="flex-1 space-y-1.5">
-                    <h3 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
-                      {t(activeStep.title)}
-                    </h3>
-                    {activeStep.instruction && (
-                      <p className="text-sm sm:text-base text-stone-600 font-medium">
-                        {t(activeStep.instruction)}
-                      </p>
-                    )}
-                    {activeStep.sensoryNote && (
-                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 px-3 py-1 rounded-xl mt-1">
-                        <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                        <span>{t('Sensory tip:')} {t(activeStep.sensoryNote)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Primary Action Buttons: Start Timer & Complete Button */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <button
-                    data-tour="myday-starttimer"
-                    type="button"
-                    onClick={() => startTimerForStep(activeStep, true)}
-                    className="py-3.5 px-4 rounded-2xl bg-[#FDE293] hover:bg-[#F6D06F] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#F6D06F]"
-                  >
-                    <Timer className="w-5 h-5" />
-                    <span>{t('Start Timer')} ({activeStep.durationMin || 2}m)</span>
-                  </button>
-
-                  <button
-                    data-tour="myday-markdone"
-                    type="button"
-                    onClick={() => {
-                      toggleRoutineStep(currentRoutine.id, activeStep.id);
-                      playChime('star');
-                    }}
-                    className="py-3.5 px-4 rounded-2xl bg-[#99C2A2] hover:bg-[#8BB594] text-stone-950 font-black text-sm shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 border border-[#85AE8E]"
-                  >
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span>✓ {t('Mark as Done!')}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* UP NEXT PREVIEW CARD */}
-              {subsequentStep && (
-                <div className="p-4 rounded-3xl bg-[#FCF9F2] border border-[#EBE3D5] flex items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl sm:text-3xl">{subsequentStep.emoji}</span>
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                        {t('NEXT')}
-                      </span>
-                      <h4 className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">
-                        {t(subsequentStep.title)}
-                      </h4>
-                    </div>
-                  </div>
-
-                  <span className="text-xs font-bold text-slate-500 px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700">
-                    {subsequentStep.durationMin || 2}m
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="p-8 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 text-center space-y-3">
-              <span className="text-5xl block animate-bounce">🎉</span>
-              <h3 className="text-xl sm:text-2xl font-black text-emerald-950 dark:text-emerald-200">
-                {t('All done with')} {t(currentRoutine.title)}!
-              </h3>
-              <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-medium max-w-md mx-auto">
-                {t('Great job following each step! You earned your routine reward stars.')}
-              </p>
+        return (
+          <section key={group.id} className="space-y-3">
+            {/* Section Header: e.g. "^ 🔆 Morning · 1         +" */}
+            <div className="flex items-center justify-between text-stone-500 font-bold text-sm px-2 py-0.5">
               <button
                 type="button"
-                onClick={() => resetRoutine(currentRoutine.id)}
-                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-xs cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+                onClick={() => toggleCategory(group.id)}
+                className="flex items-center gap-1.5 hover:text-stone-800 transition-colors cursor-pointer"
               >
-                <RotateCcw className="w-4 h-4" />
-                <span>{t('Start Routine Again')}</span>
+                {isCollapsed ? (
+                  <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+                ) : (
+                  <ChevronUp className="w-4 h-4 stroke-[2.5]" />
+                )}
+                <span>{group.emoji}</span>
+                <span className="text-stone-700 font-extrabold">{group.label}</span>
+                <span>·</span>
+                <span>{group.routines.length}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onOpenCustomizer?.({ category: group.id as any })}
+                className="text-stone-400 hover:text-stone-800 text-2xl font-light leading-none p-1 -m-1 transition-colors cursor-pointer"
+                title={t('Add routine')}
+              >
+                +
               </button>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* ════════════════════════════════════════════════════════════════
-          7B. LIST MODE: STEP-BY-STEP MISSION CHECKLIST
-      ════════════════════════════════════════════════════════════════ */}
-      {scheduleViewMode === 'list_mode' && (
-        <div className="space-y-2.5 animate-in fade-in">
-          {currentRoutine.steps.map((step, idx) => (
-            <div
-              key={step.id}
-              className={`p-3.5 sm:p-4 rounded-3xl border-2 transition-all select-none ${
-                step.completed
-                  ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 opacity-90'
-                  : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-700 shadow-2xs'
-              }`}
-            >
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <AccessibleTile
-                  variant="routine"
-                  label={t(step.title)}
-                  completed={step.completed}
-                  onClick={() => toggleRoutineStep(currentRoutine.id, step.id)}
-                  className="flex items-start sm:items-center gap-3 flex-1 text-left bg-transparent border-0 p-0 shadow-none hover:opacity-90 cursor-pointer min-h-[48px]"
-                >
-                  {/* Checkbox indicator */}
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 sm:mt-0 text-emerald-600 transition-transform shrink-0"
-                  >
-                    {step.completed ? (
-                      <CheckCircle2 className="w-7 h-7 fill-emerald-500 text-white" />
-                    ) : (
-                      <Circle className="w-7 h-7 text-slate-300" />
-                    )}
-                  </span>
+            {/* Routine Cards in this category */}
+            {!isCollapsed && (
+              <div className="space-y-3.5">
+                {group.routines.map((routine) => {
+                  const isExpanded = expandedRoutineIds.has(routine.id);
+                  const totalMinutes = getTotalMinutes(routine.steps);
+                  const recurrenceText = getRecurrenceText(routine.assignedDays);
+                  const completedCount = routine.steps.filter((s) => s.completed).length;
 
-                  <span aria-hidden="true" className="text-3xl shrink-0">{step.emoji}</span>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span aria-hidden="true" className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <h3
-                        className={`font-black text-sm sm:text-base leading-tight ${
-                          step.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'
-                        }`}
+                  return (
+                    <div
+                      key={routine.id}
+                      className="bg-white rounded-[2rem] sm:rounded-[2.4rem] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-stone-200/80 transition-all"
+                    >
+                      {/* Collapsed Routine Header: Chevron, Title, Subtitle, Play Button */}
+                      <div
+                        className="flex items-center justify-between gap-3 cursor-pointer select-none"
+                        onClick={() => toggleRoutineExpanded(routine.id)}
                       >
-                        {t(step.title)}
-                      </h3>
-                      {step.durationMin && (
-                        <span aria-hidden="true" className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {step.durationMin}m
-                        </span>
+                        <div className="flex items-center gap-3 min-w-0">
+                          {isExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-stone-500 shrink-0 stroke-[2.5]" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-stone-400 shrink-0 stroke-[2.5]" />
+                          )}
+
+                          <div className="min-w-0">
+                            <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-1.5 truncate">
+                              <span>{t(routine.title)}</span>
+                              <span className="shrink-0">{routine.emoji}</span>
+                            </h3>
+                            <p className="text-xs sm:text-sm font-semibold text-stone-400 flex items-center gap-1.5 mt-0.5">
+                              <span>{totalMinutes}m</span>
+                              <span>·</span>
+                              <span className="flex items-center gap-1">🔄 {recurrenceText}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Circular Dark Play Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartTimer(routine);
+                          }}
+                          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1E232A] hover:bg-[#2D3748] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer shrink-0"
+                          title={t('Start Routine Timer')}
+                        >
+                          <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                        </button>
+                      </div>
+
+                      {/* Expanded Dropdown Steps List */}
+                      {isExpanded && (
+                        <div className="mt-4 pt-4 border-t border-stone-100 space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {routine.steps.map((step) => {
+                            return (
+                              <div
+                                key={step.id}
+                                onClick={() => handleToggleStep(routine.id, step.id)}
+                                className="flex items-center justify-between gap-3 py-1.5 px-2 rounded-2xl hover:bg-stone-50 cursor-pointer select-none transition-colors group"
+                              >
+                                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                  {/* Checkbox: Gold badge with black checkmark when done, hollow gray outline when incomplete */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleStep(routine.id, step.id);
+                                    }}
+                                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                                      step.completed
+                                        ? 'bg-[#FACC15] text-stone-950 shadow-xs'
+                                        : 'border-2 border-stone-300 group-hover:border-stone-400 bg-transparent'
+                                    }`}
+                                    title={step.completed ? t('Completed - click to uncheck') : t('Click to mark done')}
+                                  >
+                                    {step.completed && (
+                                      <Check className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3] text-stone-950" />
+                                    )}
+                                  </button>
+
+                                  {/* Emoji */}
+                                  <span className="text-xl sm:text-2xl shrink-0 select-none">
+                                    {step.emoji}
+                                  </span>
+
+                                  {/* Title: Strikethrough when done, dark and clean when pending */}
+                                  <span
+                                    className={`text-sm sm:text-base font-semibold truncate transition-colors ${
+                                      step.completed
+                                        ? 'line-through text-stone-400 font-medium'
+                                        : 'text-stone-800'
+                                    }`}
+                                  >
+                                    {t(step.title)}
+                                  </span>
+                                </div>
+
+                                {/* Duration on the right */}
+                                <span className="text-xs sm:text-sm font-semibold text-stone-400 shrink-0">
+                                  {step.durationMin || 5}m
+                                </span>
+                              </div>
+                            );
+                          })}
+
+                          {/* Routine Footer: Completed summary and Reset */}
+                          <div className="flex items-center justify-between pt-2 px-2 text-xs font-bold text-stone-400 border-t border-stone-100">
+                            <span>
+                              {completedCount} of {routine.steps.length} {t('completed')}
+                            </span>
+                            {completedCount > 0 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  resetRoutine(routine.id);
+                                }}
+                                className="text-stone-400 hover:text-stone-700 underline cursor-pointer"
+                              >
+                                {t('Reset all')}
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {step.instruction && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-snug">
-                        {t(step.instruction)}
-                      </p>
-                    )}
-
-                    {step.sensoryNote && (
-                      <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md mt-1.5 w-fit">
-                        <Info aria-hidden="true" className="w-3 h-3 text-amber-600 shrink-0" />
-                        <span>{t('Sensory tip:')} {t(step.sensoryNote)}</span>
-                      </div>
-                    )}
-                  </div>
-                </AccessibleTile>
-
-                {/* Action buttons */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {step.audioDataUrl && (
-                    <button
-                      type="button"
-                      onClick={() => playParentVoice(step)}
-                      aria-label={`Listen to parent voice for ${step.title}`}
-                      className={`px-2.5 py-2 rounded-2xl border-2 font-black text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
-                        playingAudioStepId === step.id
-                          ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
-                          : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
-                      }`}
-                      title="Listen to voice recording for this step"
-                    >
-                      <Mic aria-hidden="true" className="w-4 h-4 text-rose-600" />
-                      <span className="hidden sm:inline">{playingAudioStepId === step.id ? t('Playing...') : t('Voice')}</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => startTimerForStep(step, true)}
-                    aria-label={`Start countdown timer for ${step.title}`}
-                    className="px-2.5 sm:px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-800 hover:border-sky-300 cursor-pointer flex items-center gap-1.5 text-xs font-black transition-all active:scale-95 shadow-xs"
-                    title={`Start countdown timer for ${step.title}`}
-                  >
-                    <Timer aria-hidden="true" className="w-4 h-4 text-sky-600" />
-                    <span className="hidden sm:inline">{t('Start Timer')}</span>
-                    <span className="sm:hidden">{t('Timer')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => speak(`${t(step.title)}. ${step.instruction ? t(step.instruction) : ''}`)}
-                    aria-label={`Speak step instructions for ${step.title}`}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer focus-visible:ring-4 focus-visible:ring-amber-500/70"
-                    title="Hear step instructions"
-                  >
-                    <Volume2 aria-hidden="true" className="w-4 h-4" />
-                  </button>
-                </div>
+                  );
+                })}
               </div>
+            )}
+          </section>
+        );
+      })}
 
-              {/* Micro-Steps Breakdown */}
-              {step.microSteps && step.microSteps.length > 0 && (
-                <div 
-                  className="mt-2.5 p-2 sm:p-2.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 space-y-1.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1">
-                      <Wand2 aria-hidden="true" className="w-3 h-3 text-purple-600" />
-                      <span>{t('Micro-Steps')} ({step.microSteps.filter((m) => completedMicroSteps[m.id]).length}/{step.microSteps.length})</span>
-                    </span>
-                    <span className="text-[10px] font-bold text-purple-700 dark:text-purple-400">{t('Tap to check off')}</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    {step.microSteps.map((ms) => {
-                      const isDone = completedMicroSteps[ms.id];
-                      return (
-                        <div
-                          key={ms.id}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all min-h-[44px] ${
-                            isDone
-                              ? 'bg-purple-100/90 dark:bg-purple-900/60 border-purple-300 text-purple-900 line-through opacity-75'
-                              : 'bg-white dark:bg-slate-900 hover:bg-purple-100/50 border-purple-200 dark:border-purple-700 text-purple-950 dark:text-purple-200'
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCompletedMicroSteps((prev) => ({ ...prev, [ms.id]: !prev[ms.id] }));
-                              playChime('tap');
-                            }}
-                            aria-label={`Micro-step: ${ms.title}.${isDone ? 'Completed' : 'Not completed'}`}
-                            aria-pressed={isDone}
-                            className="flex items-center gap-1.5 min-w-0 flex-1 text-left cursor-pointer focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none"
-                          >
-                            <span aria-hidden="true" className="text-sm shrink-0">{isDone ? '✅' : '⬜'}</span>
-                            <span aria-hidden="true" className="text-sm shrink-0">{ms.emoji}</span>
-                            <span className="truncate">{t(ms.title)}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              startTimerForStep({ title: ms.title, emoji: ms.emoji, durationMin: 2, id: ms.id }, true);
-                            }}
-                            aria-label={`Start 2-min timer for micro-step ${ms.title}`}
-                            className="p-1 min-w-[32px] min-h-[32px] rounded-lg text-purple-600 hover:bg-purple-200/80 shrink-0 ml-1 cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none"
-                            title="2-min micro-step timer"
-                          >
-                            <Timer aria-hidden="true" className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+      {/* Quick link to Pre-Built Routine Templates */}
+      {onOpenTemplatesLibrary && (
+        <div className="pt-2 text-center">
+          <button
+            type="button"
+            onClick={onOpenTemplatesLibrary}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-black text-xs transition-all shadow-2xs cursor-pointer active:scale-95"
+          >
+            <BookOpen className="w-4 h-4 text-amber-700" />
+            <span>{t('Browse Pre-Built Routine Templates Library')} ➔</span>
+          </button>
         </div>
       )}
-
-      {/* Live Interactive Coach Marks Walkthrough */}
-      <CoachMarksOverlay
-        isActive={isCoachMarksActive}
-        steps={MY_DAY_COACH_STEPS}
-        tourName="My Day Visual Schedule Guide"
-        onComplete={() => setIsCoachMarksActive(false)}
-        onSkip={() => setIsCoachMarksActive(false)}
-      />
-
-      {/* Deep-Dive Help Modal */}
-      <InteractiveMyDayGuideModal
-        isOpen={showMyDayGuideModal}
-        onClose={() => setShowMyDayGuideModal(false)}
-      />
     </div>
   );
 };
