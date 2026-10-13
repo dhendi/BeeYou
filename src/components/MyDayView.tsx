@@ -7,6 +7,7 @@ import {
   Check, 
   Plus, 
   RotateCcw, 
+  RotateCw,
   Clock, 
   X,
   BookOpen,
@@ -212,8 +213,13 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               {String(timerSecondsLeft % 60).padStart(2, '0')}
             </div>
             <div className="min-w-0">
-              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">
-                {timerRoutine.title} {timerRoutine.emoji}
+              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span>{timerRoutine.title}</span>
+                <RoutineStickerIcon
+                  emoji={timerRoutine.emoji}
+                  title={timerRoutine.title}
+                  className="w-4 h-4 object-contain inline-block shrink-0"
+                />
               </span>
               <h4 className="text-base sm:text-lg font-black truncate text-white flex items-center gap-2">
                 <RoutineStickerIcon
@@ -287,7 +293,9 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                 ) : (
                   <ChevronUp className="w-4 h-4 stroke-[2.5]" />
                 )}
-                <span>{group.emoji}</span>
+                <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <RoutineStickerIcon emoji={group.emoji} title={group.label} className="w-5 h-5 object-contain" />
+                </div>
                 <span className="text-stone-700 font-extrabold">{group.label}</span>
                 <span>·</span>
                 <span>{group.routines.length}</span>
@@ -330,14 +338,19 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                           )}
 
                           <div className="min-w-0">
-                            <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-1.5 truncate">
+                            <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-2 truncate">
                               <span>{t(routine.title)}</span>
-                              <span className="shrink-0">{routine.emoji}</span>
+                              <div className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shrink-0">
+                                <RoutineStickerIcon emoji={routine.emoji} title={routine.title} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
+                              </div>
                             </h3>
                             <p className="text-xs sm:text-sm font-semibold text-stone-400 flex items-center gap-1.5 mt-0.5">
                               <span>{totalMinutes}m</span>
                               <span>·</span>
-                              <span className="flex items-center gap-1">🔄 {recurrenceText}</span>
+                              <span className="flex items-center gap-1">
+                                <RotateCw className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                                <span>{recurrenceText}</span>
+                              </span>
                             </p>
                           </div>
                         </div>

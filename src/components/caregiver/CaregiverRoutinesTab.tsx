@@ -6,6 +6,7 @@ import { RoutineTemplatesLibrary } from '../RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from '../RoutineCustomizerModal';
 import { playChime } from '../../utils/audio';
 import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Sparkles, ClipboardList, Calendar } from 'lucide-react';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverRoutinesTabProps {
   onShowNotification: (msg: string) => void;
@@ -339,7 +340,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
                 <div className="flex items-start sm:items-center gap-3.5">
                   <div className="w-12 h-12 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-center shrink-0">
                     {r.emoji ? (
-                      <span className="text-2xl">{r.emoji}</span>
+                      <RoutineStickerIcon emoji={r.emoji} title={r.title} className="w-9 h-9 object-contain" />
                     ) : (
                       <ClipboardList className="w-6 h-6 text-sky-600" />
                     )}

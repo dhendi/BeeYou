@@ -97,7 +97,7 @@ export const RoutineStickerIcon: React.FC<{
   const normTitle = (title || '').toLowerCase();
 
   // ⏰ Wake up / Morning
-  if (normEmoji === '⏰' || normEmoji === '🌅' || normTitle.includes('wake') || normTitle.includes('morning')) return <AlarmClockSticker className={className} size={size} />;
+  if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning')) return <AlarmClockSticker className={className} size={size} />;
   // 🚽 Toilet / restroom
   if (normEmoji === '🚽' || normTitle.includes('toilet') || normTitle.includes('bathroom') || normTitle.includes('restroom')) return <ToiletSticker className={className} size={size} />;
   // 🚿 Shower / wash face
@@ -106,8 +106,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '👕' || normTitle.includes('dress') || normTitle.includes('clothes') || normTitle.includes('shirt')) return <GetDressedSticker className={className} size={size} />;
   // 🪥 Toothbrush / teeth
   if (normEmoji === '🪥' || normEmoji === '🦷' || normTitle.includes('teeth') || normTitle.includes('brush')) return <ToothbrushSticker className={className} size={size} />;
-  // 🥞 Breakfast / Food / Sandwich
-  if (normEmoji === '🥞' || normEmoji === '🥪' || normTitle.includes('pancake') || normTitle.includes('breakfast') || normTitle.includes('lunch') || normTitle.includes('dinner')) return <PancakesSticker className={className} size={size} />;
+  // 🥞 Breakfast / Food / Pancakes
+  if (normEmoji === '🥞' || normTitle.includes('pancake') || normTitle.includes('breakfast')) return <PancakesSticker className={className} size={size} />;
+  // 🥪 Lunch / Sandwich / Snack / Apple
+  if (normEmoji === '🥪' || normEmoji === '🍎' || normTitle.includes('sandwich') || normTitle.includes('lunch') || normTitle.includes('snack') || normTitle.includes('apple') || normTitle.includes('fruit')) return <AppleSticker className={className} size={size} />;
   // 🎒 Backpack
   if (normEmoji === '🎒' || normTitle.includes('backpack') || normTitle.includes('pack')) return <BackpackSticker className={className} size={size} />;
   // 🚌 School bus / ride to school / dismissal / School building
@@ -116,16 +118,14 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '👟' || normTitle.includes('shoe') || normTitle.includes('sneaker')) return <SneakersSticker className={className} size={size} />;
   // 🧼 Wash hands / soap
   if (normEmoji === '🧼' || normTitle.includes('wash hand') || normTitle.includes('soap')) return <WashHandsSticker className={className} size={size} />;
-  // 🍎 Snack / apple
-  if (normEmoji === '🍎' || normTitle.includes('snack') || normTitle.includes('apple') || normTitle.includes('fruit')) return <AppleSticker className={className} size={size} />;
   // 📁 Folder / cubby / binder
   if (normEmoji === '📁' || normEmoji === '📂' || normTitle.includes('folder') || normTitle.includes('cubby') || normTitle.includes('binder')) return <FolderSticker className={className} size={size} />;
-  // ✏️ Pencil / writing / classwork
-  if (normEmoji === '✏️' || normEmoji === '📝' || normTitle.includes('pencil') || normTitle.includes('write') || normTitle.includes('draw') || normTitle.includes('homework')) return <PencilSticker className={className} size={size} />;
+  // ✏️ Pencil / writing / classwork / Math
+  if (normEmoji === '✏️' || normEmoji === '📝' || normEmoji === '🔢' || normTitle.includes('pencil') || normTitle.includes('write') || normTitle.includes('draw') || normTitle.includes('homework') || normTitle.includes('math')) return <PencilSticker className={className} size={size} />;
   // 🔬 Science
   if (normEmoji === '🔬' || normTitle.includes('science')) return <ScienceFlaskSticker className={className} size={size} />;
   // 🧸 Teddy bear / toys / play / recess / cart
-  if (normEmoji === '🧸' || normEmoji === '🛒' || normEmoji === '🛝' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play')) return <TeddyBearSticker className={className} size={size} />;
+  if (normEmoji === '🧸' || normEmoji === '🛒' || normEmoji === '🛝' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play') || normTitle.includes('recess')) return <TeddyBearSticker className={className} size={size} />;
   // 📖 / 📚 Books / reading
   if (normEmoji === '📖' || normEmoji === '📚' || normTitle.includes('read') || normTitle.includes('book') || normTitle.includes('story')) return <ReadingBookSticker className={className} size={size} />;
   // 🌙 Evening / bedtime / moon
@@ -134,10 +134,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📱' || normTitle.includes('tablet') || normTitle.includes('ipad')) return <TabletIpadSticker className={className} size={size} />;
   // ⏱️ Timer
   if (normEmoji === '⏱️' || normEmoji === '⏳') return <CountdownTimerSticker className={className} size={size} />;
-  // 🫧 Fidget bubbles / sparkle / puzzle
-  if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '✨' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
-  // 🛋️ Quiet / break
-  if (normEmoji === '🛋️' || normEmoji === '🌬️' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet')) return <BreathingCloudSticker className={className} size={size} />;
+  // 🫧 Fidget bubbles / sparkle / puzzle / circle / stars
+  if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '✨' || normEmoji === '⭐' || normEmoji === '⭕' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
+  // 🛋️ Quiet / break / Home / Afternoon
+  if (normEmoji === '🛋️' || normEmoji === '🌬️' || normEmoji === '🏡' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet') || normTitle.includes('home')) return <BreathingCloudSticker className={className} size={size} />;
 
   // Fallback to raw emoji if none match
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;

@@ -15,6 +15,7 @@ import { Routine } from '../types';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { CaregiverLockShield } from './CaregiverLockShield';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 interface RoutineCalendarStripProps {
   selectedDate: Date;
@@ -332,7 +333,9 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base">{routine.emoji}</span>
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                      <RoutineStickerIcon emoji={routine.emoji} title={routine.title} className="w-5 h-5 object-contain" />
+                    </div>
                     <div className="min-w-0">
                       <div className="font-bold text-xs truncate">{t(routine.title)}</div>
                       <div className="text-[10px] text-stone-500">{routine.time || 'Flexible'}</div>
