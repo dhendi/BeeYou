@@ -68,3 +68,62 @@ export const SpoonSticker = renderStickerPng('/assets/stickers/spoons_energy.png
 export const MoodJournalSticker = renderStickerPng('/assets/stickers/passport_book.png', 'Mood Journal');
 export const TabletIpadSticker = renderStickerPng('/assets/stickers/tablet_ipad.png', 'Tablet iPad');
 
+// Morning Routine & School Step Stickers
+export const AlarmClockSticker = renderStickerPng('/assets/stickers/alarm_clock.png', 'Wake Up Alarm Clock');
+export const ToiletSticker = renderStickerPng('/assets/stickers/toilet_restroom.png', 'Toilet Restroom');
+export const PancakesSticker = renderStickerPng('/assets/stickers/pancakes_breakfast.png', 'Breakfast Pancakes');
+export const BackpackSticker = renderStickerPng('/assets/stickers/backpack_school.png', 'School Backpack');
+export const SneakersSticker = renderStickerPng('/assets/stickers/sneaker_shoes.png', 'Shoes Sneakers');
+export const AppleSticker = renderStickerPng('/assets/stickers/apple_snack.png', 'Healthy Apple Snack');
+export const FolderSticker = renderStickerPng('/assets/stickers/folder_schoolwork.png', 'School Binder Folder');
+export const PencilSticker = renderStickerPng('/assets/stickers/pencil_write.png', 'Pencil Writing');
+export const TeddyBearSticker = renderStickerPng('/assets/stickers/teddy_bear.png', 'Teddy Bear Play');
+export const ShowerSticker = renderStickerPng('/assets/stickers/shower_wash.png', 'Shower Wash');
+
+/**
+ * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
+ * Gracefully falls back to original emoji if no sticker exists for that specific action.
+ */
+export const RoutineStickerIcon: React.FC<{
+  emoji?: string;
+  title?: string;
+  className?: string;
+  size?: number;
+}> = ({ emoji, title, className = 'w-9 h-9', size }) => {
+  const normEmoji = (emoji || '').trim();
+  const normTitle = (title || '').toLowerCase();
+
+  // ⏰ Wake up
+  if (normEmoji === '⏰' || normTitle.includes('wake')) return <AlarmClockSticker className={className} size={size} />;
+  // 🚽 Toilet / restroom
+  if (normEmoji === '🚽' || normTitle.includes('toilet') || normTitle.includes('bathroom') || normTitle.includes('restroom')) return <ToiletSticker className={className} size={size} />;
+  // 🚿 Shower / wash face
+  if (normEmoji === '🚿' || normTitle.includes('shower') || normTitle.includes('bath')) return <ShowerSticker className={className} size={size} />;
+  // 👕 Get dressed
+  if (normEmoji === '👕' || normTitle.includes('dress') || normTitle.includes('clothes')) return <GetDressedSticker className={className} size={size} />;
+  // 🪥 Toothbrush
+  if (normEmoji === '🪥' || normTitle.includes('teeth') || normTitle.includes('brush')) return <ToothbrushSticker className={className} size={size} />;
+  // 🥞 Breakfast
+  if (normEmoji === '🥞' || normTitle.includes('pancake') || normTitle.includes('breakfast')) return <PancakesSticker className={className} size={size} />;
+  // 🎒 Backpack
+  if (normEmoji === '🎒' || normTitle.includes('backpack') || normTitle.includes('pack')) return <BackpackSticker className={className} size={size} />;
+  // 👟 Shoes
+  if (normEmoji === '👟' || normTitle.includes('shoe') || normTitle.includes('sneaker')) return <SneakersSticker className={className} size={size} />;
+  // 🧼 Wash hands
+  if (normEmoji === '🧼' || normTitle.includes('wash hand') || normTitle.includes('soap')) return <WashHandsSticker className={className} size={size} />;
+  // 🍎 Snack / apple
+  if (normEmoji === '🍎' || normTitle.includes('snack') || normTitle.includes('apple')) return <AppleSticker className={className} size={size} />;
+  // 📁 Folder / cubby / binder
+  if (normEmoji === '📁' || normEmoji === '📂' || normTitle.includes('folder') || normTitle.includes('cubby') || normTitle.includes('binder')) return <FolderSticker className={className} size={size} />;
+  // ✏️ Pencil / writing / drawing
+  if (normEmoji === '✏️' || normEmoji === '📝' || normTitle.includes('pencil') || normTitle.includes('write') || normTitle.includes('draw')) return <PencilSticker className={className} size={size} />;
+  // 🧸 Teddy bear / toys
+  if (normEmoji === '🧸' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play')) return <TeddyBearSticker className={className} size={size} />;
+  // ⏱️ Timer
+  if (normEmoji === '⏱️' || normEmoji === '⏳') return <CountdownTimerSticker className={className} size={size} />;
+
+  // Fallback to raw emoji if none match
+  return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;
+};
+
+

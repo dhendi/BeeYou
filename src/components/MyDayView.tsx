@@ -16,6 +16,7 @@ import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { Routine, VisualScheduleStep } from '../types';
 import { DEFAULT_ROUTINES } from '../data/defaultData';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 interface MyDayViewProps {
   selectedCalendarDate?: Date;
@@ -214,9 +215,13 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider block">
                 {timerRoutine.title} {timerRoutine.emoji}
               </span>
-              <h4 className="text-base sm:text-lg font-black truncate text-white">
-                {timerRoutine.steps[timerStepIndex]?.emoji}{' '}
-                {timerRoutine.steps[timerStepIndex]?.title || t('In Progress')}
+              <h4 className="text-base sm:text-lg font-black truncate text-white flex items-center gap-2">
+                <RoutineStickerIcon
+                  emoji={timerRoutine.steps[timerStepIndex]?.emoji}
+                  title={timerRoutine.steps[timerStepIndex]?.title}
+                  className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
+                />
+                <span>{timerRoutine.steps[timerStepIndex]?.title || t('In Progress')}</span>
               </h4>
             </div>
           </div>
@@ -381,10 +386,14 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                     )}
                                   </button>
 
-                                  {/* Emoji */}
-                                  <span className="text-xl sm:text-2xl shrink-0 select-none">
-                                    {step.emoji}
-                                  </span>
+                                  {/* Custom Hand-Drawn Sticker Icon / Emoji */}
+                                  <div className="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8">
+                                    <RoutineStickerIcon
+                                      emoji={step.emoji}
+                                      title={step.title}
+                                      className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                                    />
+                                  </div>
 
                                   {/* Title: Strikethrough when done, dark and clean when pending */}
                                   <span
