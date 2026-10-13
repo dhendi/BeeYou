@@ -77,8 +77,8 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
 
   // Helper to check if a routine is active on a specific day of week (0..6)
   const isRoutineOnDay = (routine: Routine, dayIndex: number) => {
-    if (!routine.assignedDays || routine.assignedDays.length === 0) {
-      return true; // default: runs every day
+    if (routine.assignedDays === undefined) {
+      return true; // default: runs every day if not explicitly configured
     }
     return routine.assignedDays.includes(dayIndex);
   };
@@ -321,7 +321,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {routines.map((routine) => {
               const isActiveToday = isRoutineOnDay(routine, selectedDayIndex);
-              const currentDays = routine.assignedDays || [0, 1, 2, 3, 4, 5, 6];
+              const currentDays = routine.assignedDays !== undefined ? routine.assignedDays : [0, 1, 2, 3, 4, 5, 6];
 
               return (
                 <div

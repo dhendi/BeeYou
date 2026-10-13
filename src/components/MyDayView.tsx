@@ -169,7 +169,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
   const isRoutineActiveOnDate = (routine: Routine) => {
     if (!selectedCalendarDate) return true;
     const day = selectedCalendarDate.getDay();
-    if (!routine.assignedDays || routine.assignedDays.length === 0) return true;
+    if (routine.assignedDays === undefined) return true;
     return routine.assignedDays.includes(day);
   };
 
@@ -182,11 +182,12 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     { id: 'custom', label: 'Other Routines', emoji: '⭐', matcher: () => true },
   ];
 
-  // Map routines to categories without duplicating
+  // Map routines to categories without duplicating, filtering by active day
   const placedRoutineIds = new Set<string>();
   const categorizedGroups = categoryConfigs.map((cfg) => {
     const groupRoutines = validRoutines.filter((r) => {
       if (placedRoutineIds.has(r.id)) return false;
+      if (!isRoutineActiveOnDate(r)) return false;
       if (cfg.matcher(r)) {
         placedRoutineIds.add(r.id);
         return true;
@@ -272,6 +273,21 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <X className="w-4 h-4" />
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Empty State when no routines are scheduled for this day */}
+      {categorizedGroups.length === 0 && (
+        <div className="bg-white rounded-[2.5rem] p-8 sm:p-12 border-2 border-stone-200 text-center space-y-3 shadow-xs">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl">
+            ☀️
+          </div>
+          <h4 className="text-base sm:text-lg font-black text-stone-900">
+            {t('No Routines Scheduled for This Day')}
+          </h4>
+          <p className="text-xs sm:text-sm font-semibold text-stone-500 max-w-sm mx-auto">
+            {t('All routines are turned off for today. You can tap "Edit Days" above to activate routines, or browse pre-built templates.')}
+          </p>
         </div>
       )}
 
