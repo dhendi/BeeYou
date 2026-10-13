@@ -674,16 +674,34 @@ export const AACView: React.FC = () => {
         return filteredItems;
       })();
 
+  const isCoreStageMode = activeCategory === 'core' && !searchQuery.trim() && !activeSceneData;
+
   const gridColsClass = (() => {
-    if (activeCategory === 'core' && !searchQuery.trim() && !activeSceneData) {
+    if (isCoreStageMode) {
       if (gridStage === 1) {
-        return 'grid-cols-2 max-w-xl mx-auto';
+        // Stage 4: 2 columns with fixed, visually distinct max-widths per button size
+        if (buttonSize === 'small') {
+          return 'grid-cols-2 max-w-[320px] sm:max-w-[360px] mx-auto';
+        }
+        if (buttonSize === 'large') {
+          return 'grid-cols-2 max-w-[660px] sm:max-w-[740px] mx-auto';
+        }
+        // medium
+        return 'grid-cols-2 max-w-[480px] sm:max-w-[540px] mx-auto';
       }
       if (gridStage === 2) {
+        // Stage 12: Distinct column count & max-width per button size
+        if (buttonSize === 'small') {
+          return 'grid-cols-4 sm:grid-cols-6 max-w-2xl mx-auto';
+        }
+        if (buttonSize === 'large') {
+          return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-4xl sm:max-w-5xl mx-auto';
+        }
+        // medium
         return 'grid-cols-3 sm:grid-cols-4 max-w-3xl mx-auto';
       }
     }
-    // Standard AAC Button Density (TouchChat, Proloquo2Go, TD Snap, LAMP)
+    // Standard AAC Button Density for Full Stage & category folders
     if (buttonSize === 'large') {
       return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full';
     }
@@ -695,6 +713,69 @@ export const AACView: React.FC = () => {
   })();
 
   const buttonSizeStyles = (() => {
+    // If in Stage 4 (gridStage 1): buttons are larger, so fonts & paddings scale up proportionally
+    if (isCoreStageMode && gridStage === 1) {
+      switch (buttonSize) {
+        case 'small':
+          return {
+            tilePadding: 'p-2 sm:p-2.5',
+            folderPadding: 'p-2 sm:p-2.5',
+            labelFont: 'text-xs sm:text-sm font-bold',
+            folderFont: 'text-xs sm:text-sm font-bold',
+            categoryTag: 'text-[8px] sm:text-[9px] px-1.5 py-0.5',
+          };
+        case 'large':
+          return {
+            tilePadding: 'p-4 sm:p-6',
+            folderPadding: 'p-4 sm:p-6',
+            labelFont: 'text-base sm:text-xl md:text-2xl font-black',
+            folderFont: 'text-base sm:text-xl md:text-2xl font-black',
+            categoryTag: 'text-[10px] sm:text-xs px-2.5 py-0.5 font-black',
+          };
+        case 'medium':
+        default:
+          return {
+            tilePadding: 'p-3 sm:p-4',
+            folderPadding: 'p-3 sm:p-4',
+            labelFont: 'text-sm sm:text-base md:text-lg font-black',
+            folderFont: 'text-sm sm:text-base md:text-lg font-black',
+            categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5',
+          };
+      }
+    }
+
+    // If in Stage 12 (gridStage 2):
+    if (isCoreStageMode && gridStage === 2) {
+      switch (buttonSize) {
+        case 'small':
+          return {
+            tilePadding: 'p-1.5 sm:p-2',
+            folderPadding: 'p-1.5 sm:p-2',
+            labelFont: 'text-[10px] sm:text-xs font-bold',
+            folderFont: 'text-[10px] sm:text-xs font-bold',
+            categoryTag: 'text-[7px] sm:text-[8px] px-1 py-0.2',
+          };
+        case 'large':
+          return {
+            tilePadding: 'p-3.5 sm:p-5',
+            folderPadding: 'p-3.5 sm:p-5',
+            labelFont: 'text-sm sm:text-base md:text-lg font-black',
+            folderFont: 'text-sm sm:text-base md:text-lg font-black',
+            categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5 font-black',
+          };
+        case 'medium':
+        default:
+          return {
+            tilePadding: 'p-2 sm:p-3',
+            folderPadding: 'p-2 sm:p-3',
+            labelFont: 'text-xs sm:text-sm font-black',
+            folderFont: 'text-xs sm:text-sm font-black',
+            categoryTag: 'text-[8px] px-1.5 py-0.5',
+          };
+      }
+    }
+
+    // Full stage (gridStage 3) and general category views:
     switch (buttonSize) {
       case 'small':
         return {
@@ -1533,10 +1614,10 @@ export const AACView: React.FC = () => {
         ) : (
         <main
           className={`grid ${gridColsClass} ${
-            buttonSize === 'small' ? 'gap-1.5 sm:gap-2' : buttonSize === 'large' ? 'gap-3 sm:gap-4' : 'gap-2'
+            buttonSize === 'small' ? 'gap-1.5 sm:gap-2.5' : buttonSize === 'large' ? 'gap-3.5 sm:gap-5' : 'gap-2.5 sm:gap-3.5'
           } pb-10 bg-[#EFE9DF] ${
-            buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3 sm:p-5' : 'p-3 sm:p-4'
-          } rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)]`}
+            buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3.5 sm:p-6' : 'p-2.5 sm:p-4'
+          } rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
           aria-label="Vocabulary grid"
         >
           {/* FOLDER TILES (Rendered at top of Core View for Proloquo2Go architecture) */}
