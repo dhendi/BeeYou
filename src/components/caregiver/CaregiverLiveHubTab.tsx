@@ -104,39 +104,37 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
       {/* 1. HERO LIVE CONNECTION & CHILD SNAPSHOT CARD */}
       <div
         data-tour="caregiver-live-card"
-        className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-indigo-500/15 border-2 border-amber-300/80 shadow-xs relative overflow-hidden"
+        className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-indigo-500/10 border border-amber-200/80 shadow-xs relative overflow-hidden"
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 flex items-center justify-center shadow-inner shrink-0 text-amber-700">
-              <Sparkles className="w-7 h-7" />
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 relative z-10">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/30 border border-amber-400/50 flex items-center justify-center shadow-inner shrink-0 text-amber-700">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  {childProfile.name} {t("'s Caregiver Command Hub")}
+                <h2 className="text-base sm:text-lg font-black text-slate-900 truncate">
+                  {childProfile.name ? <span className="whitespace-nowrap">{childProfile.name}'s </span> : null}
+                  <span>{t("Caregiver Command Hub")}</span>
                 </h2>
                 <span
                   data-tour="status-connection-badge"
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-black flex items-center gap-1.5 ${
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shrink-0 ${
                     connectionStatus.isConnected 
                       ? 'bg-emerald-500 text-white shadow-xs' 
-                      : 'bg-amber-200 text-amber-950'
+                      : 'bg-amber-100 text-amber-900 border border-amber-200'
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full ${connectionStatus.isConnected ? 'bg-white animate-pulse' : 'bg-amber-600'}`} />
-                  <span>{connectionStatus.isConnected ? `${t("Connected:")} ${connectionStatus.peerName || t("Child Device")}` : t("Waiting for Device Connection")}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus.isConnected ? 'bg-white animate-pulse' : 'bg-amber-500'}`} />
+                  <span>{connectionStatus.isConnected ? `${t("Connected:")} ${connectionStatus.peerName || t("Child Device")}` : t("Waiting for Connection")}</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-600 font-medium mt-1">
-                {t("Send instant nudges & alerts, receive real-time SOS notifications, and manage routines and speech support.")}
-              </p>
             </div>
           </div>
 
           <div
             data-tour="caregiver-quick-actions"
-            className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap"
+            className="flex items-center gap-1.5 w-full lg:w-auto shrink-0 flex-wrap"
           >
             <button
               type="button"
@@ -144,11 +142,11 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 setShowFamilyAuthModal(true);
                 playChime('tap');
               }}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+              className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
               title={t("Shared Family Email & 1-Click Demo Testing")}
             >
-              <Zap className="w-4 h-4 text-amber-300" />
-              <span>{t("Family Email & Demo")}</span>
+              <Zap className="w-3.5 h-3.5 text-amber-300" />
+              <span>{t("Family Demo")}</span>
             </button>
 
             <button
@@ -157,11 +155,11 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 setShowCameraScanner(true);
                 playChime('tap');
               }}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+              className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
               title={t("Open device camera to scan pairing QR code")}
             >
-              <Camera className="w-4 h-4" />
-              <span>{t("Scan Child QR")}</span>
+              <Camera className="w-3.5 h-3.5" />
+              <span>{t("Scan QR")}</span>
             </button>
 
             <button
@@ -170,59 +168,57 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 setActiveTab('caregiver');
                 playChime('tap');
               }}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
             >
-              <Smartphone className="w-4 h-4 text-amber-600" />
+              <Smartphone className="w-3.5 h-3.5 text-amber-600" />
               <span>{t("Pairing & QR")}</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (onStartTour) {
+            {onStartTour && (
+              <button
+                type="button"
+                onClick={() => {
                   onStartTour();
-                } else {
-                  setActiveTab('guide');
-                }
-                playChime('tap');
-              }}
-              className="flex-1 md:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
-              title={t("Launch Interactive Coachmark Feature Tour")}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{t("Feature Tour")}</span>
-            </button>
+                  playChime('tap');
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
+                title={t("Launch Interactive Coachmark Feature Tour")}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t("Feature Tour")}</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Live Snapshot Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-amber-200/60 text-xs">
-          <div data-tour="status-mood-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Current Mood")}</span>
-            <span className="text-sm font-black text-slate-900 flex items-center gap-1.5 mt-0.5 capitalize">
-              <Smile className="w-4 h-4 text-amber-500" />
+        {/* Live Snapshot Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-2.5 border-t border-amber-200/60 text-xs">
+          <div data-tour="status-mood-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("Mood")}</span>
+            <span className="text-xs font-black text-slate-900 flex items-center gap-1 capitalize shrink-0">
+              <Smile className="w-3.5 h-3.5 text-amber-500" />
               <span>{currentMood ? t(currentMood) : t("Happy")}</span>
             </span>
           </div>
 
-          <div data-tour="status-activity-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Current View")}</span>
-            <span className="text-sm font-black text-slate-900 mt-0.5 block truncate">
-              {liveChildStatus?.currentActivity ? t(liveChildStatus.currentActivity) : t("BeeYou Active")}
+          <div data-tour="status-activity-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("View")}</span>
+            <span className="text-xs font-black text-slate-900 truncate" title={liveChildStatus?.currentActivity}>
+              {liveChildStatus?.currentActivity ? t(liveChildStatus.currentActivity) : t("In BeeYou")}
             </span>
           </div>
 
-          <div data-tour="status-habits-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Habits Done")}</span>
-            <span className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>{habits.filter(h => h.completedToday).length} / {habits.length} {t("Done")}</span>
+          <div data-tour="status-habits-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("Habits")}</span>
+            <span className="text-xs font-black text-slate-900 flex items-center gap-1 shrink-0">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span>{habits.filter(h => h.completedToday).length} / {habits.length}</span>
             </span>
           </div>
 
-          <div data-tour="status-pairing-code-pill" className="bg-white/80 backdrop-blur-xs p-3 rounded-2xl border border-amber-200/70">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">{t("Pairing Code")}</span>
-            <span className="text-sm font-black text-indigo-700 font-mono mt-0.5 block">
+          <div data-tour="status-pairing-code-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("Pairing Code")}</span>
+            <span className="text-xs font-black text-indigo-700 font-mono tracking-wider shrink-0 select-all">
               {getPairingCode()}
             </span>
           </div>
