@@ -149,9 +149,18 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     });
   };
 
-  // Toggle step completion cleanly
-  const handleToggleStep = (routineId: string, stepId: string) => {
-    toggleRoutineStep(routineId, stepId);
+  // Select any step to put on the top timer without crossing it off
+  const handleSelectStepForTimer = (routine: Routine, stepIndex: number) => {
+    const step = routine.steps[stepIndex];
+    if (!step) return;
+    const duration = (step.durationMin || 5) * 60;
+
+    setTimerRoutine(routine);
+    setTimerStepIndex(stepIndex);
+    setTimerSecondsLeft(duration);
+    setIsTimerRunning(true);
+    setIsWaitingForNext(false);
+    playChime('tap');
   };
 
   // Start visual countdown timer for a routine
@@ -466,32 +475,38 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                       {/* Expanded Dropdown Steps List */}
                       {isExpanded && (
                         <div className="mt-4 pt-4 border-t border-stone-100 space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {routine.steps.map((step) => {
+                          {routine.steps.map((step, stepIdx) => {
+                            const isStepActiveOnTimer =
+                              timerRoutine?.id === routine.id && timerStepIndex === stepIdx;
+
                             return (
                               <div
                                 key={step.id}
-                                onClick={() => handleToggleStep(routine.id, step.id)}
-                                className="flex items-center justify-between gap-3 py-1.5 px-2 rounded-2xl hover:bg-stone-50 cursor-pointer select-none transition-colors group"
+                                onClick={() => handleSelectStepForTimer(routine, stepIdx)}
+                                className={`flex items-center justify-between gap-3 py-2 px-3 rounded-2xl cursor-pointer select-none transition-all group ${
+                                  isStepActiveOnTimer
+                                    ? 'bg-amber-50/90 border-2 border-amber-400 shadow-xs'
+                                    : 'hover:bg-stone-50 border-2 border-transparent'
+                                }`}
+                                title={t('Click to put on top timer')}
                               >
                                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                                  {/* Checkbox: Gold badge with black checkmark when done, hollow gray outline when incomplete */}
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleToggleStep(routine.id, step.id);
-                                    }}
+                                  {/* Status indicator: Gold checkmark badge when done, amber play icon when on timer, hollow gray circle otherwise */}
+                                  <div
                                     className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
                                       step.completed
                                         ? 'bg-[#FACC15] text-stone-950 shadow-xs'
+                                        : isStepActiveOnTimer
+                                        ? 'bg-amber-400 text-stone-950 ring-2 ring-amber-400/50 shadow-xs animate-pulse'
                                         : 'border-2 border-stone-300 group-hover:border-stone-400 bg-transparent'
                                     }`}
-                                    title={step.completed ? t('Completed - click to uncheck') : t('Click to mark done')}
                                   >
-                                    {step.completed && (
+                                    {step.completed ? (
                                       <Check className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3] text-stone-950" />
-                                    )}
-                                  </button>
+                                    ) : isStepActiveOnTimer ? (
+                                      <Play className="w-3.5 h-3.5 fill-stone-950 text-stone-950 ml-0.5" />
+                                    ) : null}
+                                  </div>
 
                                   {/* Custom Hand-Drawn Sticker Icon / Emoji */}
                                   <div className="shrink-0 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9">
@@ -502,20 +517,40 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                     />
                                   </div>
 
-                                  {/* Title: Strikethrough when done, dark and clean when pending */}
-                                  <span
-                                    className={`text-sm sm:text-base font-semibold truncate transition-colors ${
-                                      step.completed
-                                        ? 'line-through text-stone-400 font-medium'
-                                        : 'text-stone-800'
-                                    }`}
-                                  >
-                                    {t(step.title)}
-                                  </span>
+                                  {/* Title & timer badge: Strikethrough when done, amber highlight when active on timer, dark clean when pending */}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={`text-sm sm:text-base font-semibold truncate transition-colors ${
+                                          step.completed
+                                            ? 'line-through text-stone-400 font-medium'
+                                            : isStepActiveOnTimer
+                                            ? 'text-amber-950 font-bold'
+                                            : 'text-stone-800'
+                                        }`}
+                                      >
+                                        {t(step.title)}
+                                      </span>
+                                      {isStepActiveOnTimer && (
+                                        <span className="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px] font-black tracking-wide shrink-0">
+                                          {t('On Timer')}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {isStepActiveOnTimer && (
+                                      <p className="text-[11px] text-amber-700 font-medium">
+                                        {t('Click "Done" on the top timer to finish')}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
 
                                 {/* Duration on the right */}
-                                <span className="text-xs sm:text-sm font-semibold text-stone-400 shrink-0">
+                                <span
+                                  className={`text-xs sm:text-sm font-semibold shrink-0 ${
+                                    isStepActiveOnTimer ? 'text-amber-800 font-bold' : 'text-stone-400'
+                                  }`}
+                                >
                                   {step.durationMin || 5}m
                                 </span>
                               </div>
