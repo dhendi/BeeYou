@@ -17,6 +17,7 @@ import {
 import { RoutineTemplate, Routine } from '../types';
 import { PREBUILT_ROUTINE_TEMPLATES } from '../data/routineTemplates';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 interface RoutineTemplatesLibraryProps {
   onQuickImport: (template: RoutineTemplate) => void;
@@ -107,7 +108,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              <span>{cat.emoji}</span>
+              <RoutineStickerIcon emoji={cat.emoji} title={cat.label} className="w-4 h-4 object-contain" />
               <span>{cat.label}</span>
             </button>
           );
@@ -135,9 +136,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                 {/* Top Badge Row */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-3xl p-2 bg-sky-50 rounded-2xl border border-sky-100 shrink-0">
-                      {template.emoji}
-                    </span>
+                    <div className="w-12 h-12 p-1 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-center shrink-0">
+                      <RoutineStickerIcon emoji={template.emoji} title={template.title} className="w-9 h-9 object-contain" />
+                    </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="font-black text-slate-900 text-sm sm:text-base">
@@ -184,14 +185,16 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                       <span className="px-1.5 py-0.5 rounded-md bg-indigo-200 text-indigo-900 text-[10px] font-black uppercase">
                         First
                       </span>
-                      <span className="truncate">{template.firstThen.firstEmoji} {template.firstThen.first}</span>
+                      <RoutineStickerIcon emoji={template.firstThen.firstEmoji} title={template.firstThen.first} className="w-4 h-4 shrink-0 object-contain" />
+                      <span className="truncate">{template.firstThen.first}</span>
                     </div>
                     <span className="text-indigo-400 font-bold px-1">→</span>
                     <div className="flex items-center gap-1.5 text-purple-950 font-bold truncate">
                       <span className="px-1.5 py-0.5 rounded-md bg-purple-200 text-purple-900 text-[10px] font-black uppercase">
                         Then
                       </span>
-                      <span className="truncate">{template.firstThen.thenEmoji} {template.firstThen.then}</span>
+                      <RoutineStickerIcon emoji={template.firstThen.thenEmoji} title={template.firstThen.then} className="w-4 h-4 shrink-0 object-contain" />
+                      <span className="truncate">{template.firstThen.then}</span>
                     </div>
                   </div>
                 )}
@@ -211,7 +214,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                           <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
                             {idx + 1}
                           </span>
-                          <span className="text-base shrink-0">{st.emoji}</span>
+                          <div className="w-7 h-7 flex items-center justify-center shrink-0 bg-white rounded-lg border border-slate-200 p-0.5 shadow-2xs">
+                            <RoutineStickerIcon emoji={st.emoji} title={st.title} className="w-5 h-5 object-contain" />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-bold text-slate-800">{st.title}</div>
                             {st.instruction && (

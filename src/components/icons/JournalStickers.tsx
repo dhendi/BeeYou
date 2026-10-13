@@ -96,22 +96,22 @@ export const RoutineStickerIcon: React.FC<{
   const normEmoji = (emoji || '').trim();
   const normTitle = (title || '').toLowerCase();
 
-  // ⏰ Wake up
-  if (normEmoji === '⏰' || normTitle.includes('wake')) return <AlarmClockSticker className={className} size={size} />;
+  // ⏰ Wake up / Morning
+  if (normEmoji === '⏰' || normEmoji === '🌅' || normTitle.includes('wake') || normTitle.includes('morning')) return <AlarmClockSticker className={className} size={size} />;
   // 🚽 Toilet / restroom
   if (normEmoji === '🚽' || normTitle.includes('toilet') || normTitle.includes('bathroom') || normTitle.includes('restroom')) return <ToiletSticker className={className} size={size} />;
   // 🚿 Shower / wash face
   if (normEmoji === '🚿' || normTitle.includes('shower') || normTitle.includes('wash face') || normTitle.includes('bath')) return <ShowerSticker className={className} size={size} />;
   // 👕 Get dressed
   if (normEmoji === '👕' || normTitle.includes('dress') || normTitle.includes('clothes') || normTitle.includes('shirt')) return <GetDressedSticker className={className} size={size} />;
-  // 🪥 Toothbrush
-  if (normEmoji === '🪥' || normTitle.includes('teeth') || normTitle.includes('brush')) return <ToothbrushSticker className={className} size={size} />;
-  // 🥞 Breakfast
-  if (normEmoji === '🥞' || normTitle.includes('pancake') || normTitle.includes('breakfast')) return <PancakesSticker className={className} size={size} />;
+  // 🪥 Toothbrush / teeth
+  if (normEmoji === '🪥' || normEmoji === '🦷' || normTitle.includes('teeth') || normTitle.includes('brush')) return <ToothbrushSticker className={className} size={size} />;
+  // 🥞 Breakfast / Food / Sandwich
+  if (normEmoji === '🥞' || normEmoji === '🥪' || normTitle.includes('pancake') || normTitle.includes('breakfast') || normTitle.includes('lunch') || normTitle.includes('dinner')) return <PancakesSticker className={className} size={size} />;
   // 🎒 Backpack
   if (normEmoji === '🎒' || normTitle.includes('backpack') || normTitle.includes('pack')) return <BackpackSticker className={className} size={size} />;
-  // 🚌 School bus / ride to school / dismissal
-  if (normEmoji === '🚌' || normTitle.includes('bus') || normTitle.includes('go to school') || normTitle.includes('dismissal') || normTitle.includes('head to school') || normTitle.includes('head home')) return <SchoolBusSticker className={className} size={size} />;
+  // 🚌 School bus / ride to school / dismissal / School building
+  if (normEmoji === '🚌' || normEmoji === '🏫' || normTitle.includes('bus') || normTitle.includes('go to school') || normTitle.includes('dismissal') || normTitle.includes('head to school') || normTitle.includes('head home') || normTitle.includes('school')) return <SchoolBusSticker className={className} size={size} />;
   // 👟 Shoes
   if (normEmoji === '👟' || normTitle.includes('shoe') || normTitle.includes('sneaker')) return <SneakersSticker className={className} size={size} />;
   // 🧼 Wash hands / soap
@@ -124,8 +124,8 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '✏️' || normEmoji === '📝' || normTitle.includes('pencil') || normTitle.includes('write') || normTitle.includes('draw') || normTitle.includes('homework')) return <PencilSticker className={className} size={size} />;
   // 🔬 Science
   if (normEmoji === '🔬' || normTitle.includes('science')) return <ScienceFlaskSticker className={className} size={size} />;
-  // 🧸 Teddy bear / toys
-  if (normEmoji === '🧸' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play')) return <TeddyBearSticker className={className} size={size} />;
+  // 🧸 Teddy bear / toys / play / recess / cart
+  if (normEmoji === '🧸' || normEmoji === '🛒' || normEmoji === '🛝' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play')) return <TeddyBearSticker className={className} size={size} />;
   // 📖 / 📚 Books / reading
   if (normEmoji === '📖' || normEmoji === '📚' || normTitle.includes('read') || normTitle.includes('book') || normTitle.includes('story')) return <ReadingBookSticker className={className} size={size} />;
   // 🌙 Evening / bedtime / moon
@@ -134,8 +134,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📱' || normTitle.includes('tablet') || normTitle.includes('ipad')) return <TabletIpadSticker className={className} size={size} />;
   // ⏱️ Timer
   if (normEmoji === '⏱️' || normEmoji === '⏳') return <CountdownTimerSticker className={className} size={size} />;
+  // 🫧 Fidget bubbles / sparkle / puzzle
+  if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '✨' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
   // 🛋️ Quiet / break
-  if (normEmoji === '🛋️' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet')) return <BreathingCloudSticker className={className} size={size} />;
+  if (normEmoji === '🛋️' || normEmoji === '🌬️' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet')) return <BreathingCloudSticker className={className} size={size} />;
 
   // Fallback to raw emoji if none match
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 interface RoutineCustomizerModalProps {
   isOpen: boolean;
@@ -308,7 +309,9 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <span className="text-3xl p-2 bg-sky-50 rounded-2xl border border-sky-100">{emoji}</span>
+            <div className="w-12 h-12 p-1.5 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-center shrink-0">
+              <RoutineStickerIcon emoji={emoji} title={title} className="w-9 h-9 object-contain" />
+            </div>
             <div>
               <h3 className="text-xl font-black text-slate-900">
                 {initialRoutine?.id ? 'Customize Active Routine' : 'Customize & Import Routine'}
@@ -375,20 +378,20 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
               />
             </div>
 
-            {/* Quick Emoji Bar */}
+            {/* Quick Icon Bar */}
             <div className="sm:col-span-4">
-              <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Pick Icon Emoji:</label>
+              <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Pick an icon:</label>
               <div className="flex flex-wrap gap-1.5 items-center">
                 {COMMON_EMOJIS.map((em) => (
                   <button
                     key={em}
                     type="button"
                     onClick={() => setEmoji(em)}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-base transition-all ${
-                      emoji === em ? 'bg-sky-500 text-white scale-110 shadow-xs' : 'bg-white hover:bg-slate-200 border border-slate-200'
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all p-1 cursor-pointer ${
+                      emoji === em ? 'bg-sky-100 ring-2 ring-sky-500 scale-105 shadow-xs' : 'bg-white hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
-                    {em}
+                    <RoutineStickerIcon emoji={em} className="w-6 h-6 object-contain" />
                   </button>
                 ))}
               </div>
@@ -413,12 +416,9 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                   1. FIRST (Demand / Task):
                 </span>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={firstEmoji}
-                    onChange={(e) => setFirstEmoji(e.target.value)}
-                    className="w-10 text-center px-1 py-1.5 rounded-lg border border-slate-300 font-bold text-sm"
-                  />
+                  <div className="w-9 h-9 rounded-xl border border-indigo-200 bg-indigo-50/50 flex items-center justify-center shrink-0">
+                    <RoutineStickerIcon emoji={firstEmoji} title={firstTask} className="w-6 h-6 object-contain" />
+                  </div>
                   <input
                     type="text"
                     value={firstTask}
@@ -434,12 +434,9 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                   2. THEN (Reward / Motivation):
                 </span>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={thenEmoji}
-                    onChange={(e) => setThenEmoji(e.target.value)}
-                    className="w-10 text-center px-1 py-1.5 rounded-lg border border-slate-300 font-bold text-sm"
-                  />
+                  <div className="w-9 h-9 rounded-xl border border-purple-200 bg-purple-50/50 flex items-center justify-center shrink-0">
+                    <RoutineStickerIcon emoji={thenEmoji} title={thenTask} className="w-6 h-6 object-contain" />
+                  </div>
                   <input
                     type="text"
                     value={thenTask}
@@ -477,7 +474,9 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-800 text-xs font-black flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="text-xl shrink-0">{st.emoji}</span>
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-white rounded-lg border border-slate-200 p-0.5 shadow-2xs">
+                        <RoutineStickerIcon emoji={st.emoji} title={st.title} className="w-7 h-7 object-contain" />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <input
                           type="text"
@@ -557,7 +556,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       <p className="text-[10px] font-black uppercase tracking-wider text-purple-600">✨ Micro-steps:</p>
                       {st.microSteps.map((ms) => (
                         <div key={ms.id} className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-xl px-3 py-1.5">
-                          <span className="text-sm">{ms.emoji}</span>
+                          <RoutineStickerIcon emoji={ms.emoji} title={ms.title} className="w-4 h-4 shrink-0 object-contain" />
                           <span className="text-[11px] font-bold text-purple-800">{ms.title}</span>
                         </div>
                       ))}
@@ -580,13 +579,17 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
             <div className="bg-sky-50/50 border border-sky-200 rounded-2xl p-3.5 space-y-2">
               <span className="text-xs font-black text-sky-900 block">Add Step:</span>
               <div className="grid grid-cols-1 sm:grid-cols-6 gap-2">
-                <input
-                  type="text"
-                  value={newStepEmoji}
-                  onChange={(e) => setNewStepEmoji(e.target.value)}
-                  placeholder="Emoji"
-                  className="sm:col-span-1 px-2 py-1.5 text-center rounded-xl bg-white border border-slate-300 text-sm font-bold"
-                />
+                <div className="sm:col-span-1 flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1">
+                  <RoutineStickerIcon emoji={newStepEmoji} title={newStepTitle} className="w-5 h-5 shrink-0 object-contain" />
+                  <input
+                    type="text"
+                    value={newStepEmoji}
+                    onChange={(e) => setNewStepEmoji(e.target.value)}
+                    placeholder="Icon"
+                    className="w-full text-center text-xs font-bold bg-transparent outline-none"
+                    title="Icon or emoji"
+                  />
+                </div>
                 <input
                   type="text"
                   value={newStepTitle}
