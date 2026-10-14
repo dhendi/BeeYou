@@ -195,7 +195,7 @@ export const CopingToolkitModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100">
+        <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100 shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">🛋️</span>
             <div>
@@ -217,73 +217,73 @@ export const CopingToolkitModal: React.FC = () => {
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50 p-1.5 gap-1 overflow-x-auto">
+        <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
           <button
             onClick={() => setActiveTab('breathing')}
-            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'breathing'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Wind className="w-4 h-4" />
+            <Wind className="w-4 h-4 shrink-0" />
             <span>{t('Deep Breathing')}</span>
           </button>
           <button
             onClick={() => setActiveTab('strategies')}
-            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'strategies'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-4 h-4 shrink-0" />
             <span>{t('Calm Tools')}</span>
           </button>
           <button
             onClick={() => setActiveTab('timer')}
-            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'timer'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Timer className="w-4 h-4" />
+            <Timer className="w-4 h-4 shrink-0" />
             <span>{t('Break Timer')}</span>
           </button>
           <button
             onClick={() => setActiveTab('grounding')}
-            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'grounding'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-4 h-4 shrink-0" />
             <span>{t('5-4-3-2-1')}</span>
           </button>
           <button
             onClick={() => setActiveTab('sound')}
-            className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'sound'
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Volume2 className="w-4 h-4" />
+            <Volume2 className="w-4 h-4 shrink-0" />
             <span>{t('Sounds')}</span>
           </button>
         </div>
 
         {/* Quick Tools Bar */}
-        <div className="flex items-center gap-1.5 px-4 py-2 bg-teal-50/50 border-b border-teal-100 overflow-x-auto">
+        <div className="flex items-center gap-2 px-4 py-2 bg-teal-50/70 border-b border-teal-100 overflow-x-auto shrink-0 scrollbar-none">
           <span className="text-[10px] font-black uppercase text-teal-800 shrink-0">{t('More Tools:')}</span>
           <button
             onClick={() => {
               setShowFidgetModal(true);
               playChime('tap');
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
             <span>🫧</span>
             <span>{t('Digital Fidgets')}</span>
@@ -293,7 +293,7 @@ export const CopingToolkitModal: React.FC = () => {
               setShowPieTimerModal(true);
               playChime('tap');
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
             <span>⏰</span>
             <span>{t('Pie Clock')}</span>
@@ -303,7 +303,7 @@ export const CopingToolkitModal: React.FC = () => {
               setShowFivePointModal(true);
               playChime('tap');
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
             <span>🌡️</span>
             <span>{t('5-Point Scale')}</span>
@@ -314,7 +314,7 @@ export const CopingToolkitModal: React.FC = () => {
               activateEmergencyMode();
               playChime('tap');
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs whitespace-nowrap active:scale-95"
           >
             <span>🚨</span>
             <span>{t('Emergency Mode')}</span>
@@ -322,7 +322,7 @@ export const CopingToolkitModal: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        <div className={`p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col ${
+        <div className={`p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 flex flex-col ${
           activeTab === 'breathing' ? 'items-center justify-center text-center' : 'items-stretch justify-start text-left'
         }`}>
           {/* TAB 1: BREATHING */}
