@@ -42,30 +42,189 @@ class FidgetAudioEngine {
     }
   }
 
-  playPop(pitchModifier = 1.0, enabled = true) {
+  playPopIt(isPoppingIn = true, pitchModifier = 1.0, enabled = true) {
     if (!enabled) return;
     try {
       this.init();
       if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      
       const now = this.ctx.currentTime;
-      const freq = (420 + Math.random() * 120) * pitchModifier;
-      
+
+      // 1. High-frequency silicone dome snap transient (physical buckling click)
+      const snapLen = 0.007;
+      const snapBuf = this.ctx.createBuffer(1, Math.max(1, Math.floor(this.ctx.sampleRate * snapLen)), this.ctx.sampleRate);
+      const snapData = snapBuf.getChannelData(0);
+      for (let i = 0; i < snapData.length; i++) {
+        snapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (snapData.length * 0.22));
+      }
+      const snapSource = this.ctx.createBufferSource();
+      snapSource.buffer = snapBuf;
+
+      const snapFilter = this.ctx.createBiquadFilter();
+      snapFilter.type = 'bandpass';
+      snapFilter.frequency.setValueAtTime((isPoppingIn ? 2600 : 1900) * pitchModifier, now);
+      snapFilter.Q.setValueAtTime(3.8, now);
+
+      const snapGain = this.ctx.createGain();
+      snapGain.gain.setValueAtTime(isPoppingIn ? 0.4 : 0.25, now);
+      snapGain.gain.exponentialRampToValueAtTime(0.001, now + snapLen);
+
+      snapSource.connect(snapFilter);
+      snapFilter.connect(snapGain);
+      snapGain.connect(this.ctx.destination);
+      snapSource.start(now);
+
+      // 2. Resonant air cavity "plop/thock" (Helmholtz dome displacement)
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+
+      const startFreq = (isPoppingIn ? 440 : 340) * pitchModifier + (Math.random() * 20 - 10);
+      const endFreq = (isPoppingIn ? 240 : 170) * pitchModifier;
+
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+      osc.frequency.setValueAtTime(startFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.045);
 
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      oscGain.gain.setValueAtTime(isPoppingIn ? 0.45 : 0.35, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
 
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      const cavityFilter = this.ctx.createBiquadFilter();
+      cavityFilter.type = 'lowpass';
+      cavityFilter.frequency.setValueAtTime(1300 * pitchModifier, now);
+
+      osc.connect(cavityFilter);
+      cavityFilter.connect(oscGain);
+      oscGain.connect(this.ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.09);
+      osc.stop(now + 0.065);
+
+      // 3. Tactile sub-bass thump
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime((isPoppingIn ? 130 : 105) * pitchModifier, now);
+      subOsc.frequency.exponentialRampToValueAtTime(50, now + 0.035);
+
+      subGain.gain.setValueAtTime(0.28, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+
+      subOsc.start(now);
+      subOsc.stop(now + 0.045);
     } catch (e) {}
+  }
+
+  playBubbleWrap(pitchModifier = 1.0, enabled = true) {
+    if (!enabled) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+
+      // 1. Explosive air burst rupture (transient noise burst)
+      const burstLen = 0.024;
+      const bufferSize = Math.max(1, Math.floor(this.ctx.sampleRate * burstLen));
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        const decay = Math.exp(-i / (bufferSize * 0.16));
+        data[i] = (Math.random() * 2 - 1) * decay;
+      }
+
+      const burstSource = this.ctx.createBufferSource();
+      burstSource.buffer = buffer;
+
+      const burstFilter = this.ctx.createBiquadFilter();
+      burstFilter.type = 'bandpass';
+      burstFilter.frequency.setValueAtTime((4200 + Math.random() * 600) * pitchModifier, now);
+      burstFilter.Q.setValueAtTime(2.5, now);
+
+      const burstGain = this.ctx.createGain();
+      burstGain.gain.setValueAtTime(0.55, now);
+      burstGain.gain.exponentialRampToValueAtTime(0.001, now + burstLen);
+
+      burstSource.connect(burstFilter);
+      burstFilter.connect(burstGain);
+      burstGain.connect(this.ctx.destination);
+      burstSource.start(now);
+
+      // 2. Rapid acoustic air decompression pop
+      const airOsc = this.ctx.createOscillator();
+      const airGain = this.ctx.createGain();
+      airOsc.type = 'triangle';
+      const airFreq = (1200 + Math.random() * 200) * pitchModifier;
+      airOsc.frequency.setValueAtTime(airFreq, now);
+      airOsc.frequency.exponentialRampToValueAtTime(260 * pitchModifier, now + 0.016);
+
+      airGain.gain.setValueAtTime(0.45, now);
+      airGain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+      airOsc.connect(airGain);
+      airGain.connect(this.ctx.destination);
+      airOsc.start(now);
+      airOsc.stop(now + 0.022);
+
+      // 3. Post-pop plastic crinkle micro-crackles (realistic plastic relaxation)
+      const crinkleCount = 2 + Math.floor(Math.random() * 2);
+      for (let c = 0; c < crinkleCount; c++) {
+        const crinkleDelay = 0.007 + (c * 0.007) + (Math.random() * 0.004);
+        const crinkleLen = 0.005;
+        const cBuffer = this.ctx.createBuffer(1, Math.max(1, Math.floor(this.ctx.sampleRate * crinkleLen)), this.ctx.sampleRate);
+        const cData = cBuffer.getChannelData(0);
+        for (let j = 0; j < cData.length; j++) {
+          cData[j] = (Math.random() * 2 - 1) * Math.exp(-j / (cData.length * 0.2));
+        }
+        const cSource = this.ctx.createBufferSource();
+        cSource.buffer = cBuffer;
+
+        const cFilter = this.ctx.createBiquadFilter();
+        cFilter.type = 'highpass';
+        cFilter.frequency.setValueAtTime(3400 + Math.random() * 800, now + crinkleDelay);
+
+        const cGain = this.ctx.createGain();
+        cGain.gain.setValueAtTime(0.18 + Math.random() * 0.08, now + crinkleDelay);
+        cGain.gain.exponentialRampToValueAtTime(0.001, now + crinkleDelay + crinkleLen);
+
+        cSource.connect(cFilter);
+        cFilter.connect(cGain);
+        cGain.connect(this.ctx.destination);
+        cSource.start(now + crinkleDelay);
+      }
+    } catch (e) {}
+  }
+
+  playPlasticUnroll(enabled = true) {
+    if (!enabled) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const len = 0.14;
+      const buf = this.ctx.createBuffer(1, Math.max(1, Math.floor(this.ctx.sampleRate * len)), this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.sin((i / data.length) * Math.PI);
+      }
+      const src = this.ctx.createBufferSource();
+      src.buffer = buf;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(3600, now);
+      filter.Q.setValueAtTime(1.8, now);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + len);
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      src.start(now);
+    } catch (e) {}
+  }
+
+  playPop(pitchModifier = 1.0, enabled = true) {
+    this.playPopIt(true, pitchModifier, enabled);
   }
 
   playSwitch(type: 'blue' | 'brown' | 'red' | 'relay', enabled = true) {
@@ -225,6 +384,7 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
   const handlePop = (r: number, c: number) => {
     const key = `${r}-${c}`;
     const isPopped = popped.has(key);
+    const poppingIn = !isPopped;
     
     // Toggle pop state (can pop back and forth like real silicone pop-it!)
     setPopped((prev) => {
@@ -238,27 +398,36 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
     });
 
     setTotalPopCount((prev) => prev + 1);
-    const pitch = 0.8 + ((r + c) * 0.08);
-    audioEngine.playPop(pitch, soundEnabled);
-    triggerHaptic(20, hapticEnabled);
+    const pitch = 0.92 + ((r + c) * 0.03) + (Math.random() * 0.04 - 0.02);
+    audioEngine.playPopIt(poppingIn, pitch, soundEnabled);
+    triggerHaptic(poppingIn ? 24 : 16, hapticEnabled);
   };
 
   const handleFlipReset = () => {
     setPopped(new Set());
-    if (soundEnabled) playChime('complete');
-    triggerHaptic(40, hapticEnabled);
+    audioEngine.playPopIt(false, 0.8, soundEnabled);
+    triggerHaptic(35, hapticEnabled);
   };
 
   const handlePopAll = () => {
     const all = new Set<string>();
+    const unpopped: { r: number; c: number }[] = [];
     pattern.forEach((row, r) => {
       row.forEach((cell, c) => {
-        if (cell === 1) all.add(`${r}-${c}`);
+        if (cell === 1) {
+          all.add(`${r}-${c}`);
+          if (!popped.has(`${r}-${c}`)) unpopped.push({ r, c });
+        }
       });
     });
     setPopped(all);
-    if (soundEnabled) playChime('star');
-    triggerHaptic(60, hapticEnabled);
+    setTotalPopCount((prev) => prev + unpopped.length);
+    unpopped.forEach((item, idx) => {
+      setTimeout(() => {
+        audioEngine.playPopIt(true, 0.9 + ((item.r + item.c) * 0.03), soundEnabled);
+        triggerHaptic(14, hapticEnabled);
+      }, idx * 28);
+    });
   };
 
   return (
@@ -343,6 +512,171 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
         <button
           onClick={handlePopAll}
           className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>{t('Pop All')}</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ── TOY: Bubble Wrap Packaging Sheet ──────────────────────────────────────────
+type BubbleWrapSize = 'regular' | 'jumbo';
+
+const BUBBLE_WRAP_CONFIG = {
+  regular: { rows: 6, cols: 6, bubbleClass: 'w-10 h-10 sm:w-11 sm:h-11', pitchBase: 1.0 },
+  jumbo: { rows: 4, cols: 4, bubbleClass: 'w-14 h-14 sm:w-16 sm:h-16', pitchBase: 0.78 },
+};
+
+interface BubbleWrapProps {
+  soundEnabled: boolean;
+  hapticEnabled: boolean;
+}
+
+const BubbleWrapToy: React.FC<BubbleWrapProps> = ({ soundEnabled, hapticEnabled }) => {
+  const [sizeMode, setSizeMode] = useState<BubbleWrapSize>('regular');
+  const [popped, setPopped] = useState<Set<string>>(new Set());
+  const [totalSessionPops, setTotalSessionPops] = useState<number>(0);
+
+  const cfg = BUBBLE_WRAP_CONFIG[sizeMode];
+  const totalInSheet = cfg.rows * cfg.cols;
+
+  const handlePop = (r: number, c: number) => {
+    const key = `${r}-${c}`;
+    if (popped.has(key)) {
+      // Re-pop / crinkle sound if already popped
+      audioEngine.playBubbleWrap(1.3, soundEnabled);
+      triggerHaptic(15, hapticEnabled);
+      return;
+    }
+
+    setPopped((prev) => new Set(prev).add(key));
+    setTotalSessionPops((prev) => prev + 1);
+
+    const pitchVar = cfg.pitchBase + ((r * cfg.cols + c) % 5) * 0.04 + (Math.random() * 0.08 - 0.04);
+    audioEngine.playBubbleWrap(pitchVar, soundEnabled);
+    triggerHaptic(sizeMode === 'jumbo' ? 38 : 24, hapticEnabled);
+  };
+
+  const handleFreshSheet = () => {
+    setPopped(new Set());
+    audioEngine.playPlasticUnroll(soundEnabled);
+    triggerHaptic(30, hapticEnabled);
+  };
+
+  const handlePopAll = () => {
+    const all = new Set<string>();
+    const unpopped: { r: number; c: number }[] = [];
+    for (let r = 0; r < cfg.rows; r++) {
+      for (let c = 0; c < cfg.cols; c++) {
+        const k = `${r}-${c}`;
+        all.add(k);
+        if (!popped.has(k)) unpopped.push({ r, c });
+      }
+    }
+    setPopped(all);
+    setTotalSessionPops((prev) => prev + unpopped.length);
+
+    // Cascading rapid firecracker pops
+    unpopped.forEach((item, idx) => {
+      setTimeout(() => {
+        const pitch = cfg.pitchBase + (Math.random() * 0.3 - 0.15);
+        audioEngine.playBubbleWrap(pitch, soundEnabled);
+        triggerHaptic(15, hapticEnabled);
+      }, idx * 28);
+    });
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 w-full">
+      {/* Size Selector & Stats */}
+      <div className="flex items-center justify-between w-full px-2">
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <button
+            type="button"
+            onClick={() => { setSizeMode('regular'); setPopped(new Set()); }}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              sizeMode === 'regular'
+                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('Classic')}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSizeMode('jumbo'); setPopped(new Set()); }}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              sizeMode === 'jumbo'
+                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('Jumbo')}
+          </button>
+        </div>
+
+        <div className="text-right">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('Popped')}</p>
+          <p className="text-sm font-black text-sky-600 dark:text-sky-400">
+            {popped.size} / {totalInSheet}
+            <span className="text-[11px] font-semibold text-slate-400 ml-1.5">({totalSessionPops} {t('total')})</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Bubble Wrap Translucent Packaging Sheet */}
+      <div className="p-3.5 sm:p-4 rounded-3xl bg-sky-50/80 dark:bg-sky-950/40 border-2 border-sky-200/90 dark:border-sky-800/80 shadow-inner flex flex-col items-center justify-center gap-2 max-w-full overflow-hidden backdrop-blur-xs select-none">
+        {Array.from({ length: cfg.rows }, (_, r) => (
+          <div key={r} className="flex gap-2">
+            {Array.from({ length: cfg.cols }, (_, c) => {
+              const key = `${r}-${c}`;
+              const isPopped = popped.has(key);
+
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => handlePop(r, c)}
+                  aria-label={`Bubble ${r + 1}, ${c + 1} ${isPopped ? 'Popped' : 'Unpopped'}`}
+                  className={`${cfg.bubbleClass} rounded-full transition-all duration-150 cursor-pointer flex items-center justify-center relative active:scale-90 ${
+                    isPopped
+                      ? 'bg-sky-900/10 dark:bg-slate-800/60 border border-dashed border-sky-300/60 shadow-inner scale-90 opacity-60'
+                      : 'bg-gradient-to-br from-white/95 via-sky-100/80 to-sky-200/60 border border-white/90 ring-2 ring-sky-300/60 shadow-[0_4px_8px_rgba(56,189,248,0.25),inset_0_2px_3px_rgba(255,255,255,0.9)] hover:scale-105'
+                  }`}
+                >
+                  {isPopped ? (
+                    <div className="w-2.5 h-2.5 rounded-full bg-sky-400/30 border border-sky-400/50" />
+                  ) : (
+                    <>
+                      {/* Top-left specular highlight gleam */}
+                      <div className="absolute top-1 left-1.5 w-3 h-1.5 rounded-full bg-white/95 rotate-[-30deg] pointer-events-none" />
+                      {/* Inner air ring */}
+                      <div className="w-4 h-4 rounded-full border border-sky-300/40 pointer-events-none" />
+                    </>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Control Actions */}
+      <div className="flex items-center gap-2 w-full max-w-xs">
+        <button
+          type="button"
+          onClick={handleFreshSheet}
+          className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>{t('Fresh Sheet')}</span>
+        </button>
+        <button
+          type="button"
+          onClick={handlePopAll}
+          className="flex-1 py-2 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/60 dark:hover:bg-sky-900/60 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>{t('Pop All')}</span>
@@ -1031,7 +1365,7 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
 };
 
 // ── Main Modal Component ──────────────────────────────────────────────────────
-type FidgetCategory = 'pop' | 'switches' | 'spinner' | 'toggles' | 'slime' | 'starlight' | 'cube';
+type FidgetCategory = 'pop' | 'bubblewrap' | 'switches' | 'spinner' | 'toggles' | 'slime' | 'starlight' | 'cube';
 
 export const DigitalFidgetModal: React.FC = () => {
   const { showFidgetModal, setShowFidgetModal, settings, updateSettings } = useApp();
@@ -1050,6 +1384,7 @@ export const DigitalFidgetModal: React.FC = () => {
 
   const categories = [
     { id: 'pop' as const, label: 'Pop-It', icon: CircleDot, desc: 'Silicone shapes' },
+    { id: 'bubblewrap' as const, label: 'Bubble Wrap', icon: Grid, desc: 'Crisp plastic sheets' },
     { id: 'switches' as const, label: 'Clickers', icon: Keyboard, desc: 'Key switches' },
     { id: 'spinner' as const, label: 'Spinner', icon: RotateCw, desc: 'Physics RPM' },
     { id: 'toggles' as const, label: 'Switches', icon: ToggleLeft, desc: 'Relays & sliders' },
@@ -1148,6 +1483,7 @@ export const DigitalFidgetModal: React.FC = () => {
         {/* Active Fidget Playground */}
         <div className="p-4 sm:p-5 flex-1 flex flex-col items-center justify-center min-h-[320px] overflow-y-auto">
           {activeFidget === 'pop' && <PopItToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
+          {activeFidget === 'bubblewrap' && <BubbleWrapToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
           {activeFidget === 'switches' && <MechanicalClickerToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
           {activeFidget === 'spinner' && <PhysicsFidgetSpinnerToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
           {activeFidget === 'toggles' && <ToggleSwitchBoardToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
