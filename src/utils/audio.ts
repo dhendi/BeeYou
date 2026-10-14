@@ -87,6 +87,8 @@ function playAudioSample(src: string, volume = 0.35): boolean {
 
 // Gentle pleasant musical chime for AAC taps and successes
 export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
+  // Silent on button taps per user request (removes navigation button press noise)
+  if (type === 'tap') return;
   try {
     const file = CHIME_AUDIO_FILES[type];
     if (file) {
@@ -101,6 +103,8 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
 
 // Procedural synthesizer for clean, subtle, soothing UI feedback (zero retro/arcade noise)
 export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
+  // Silent on button taps per user request
+  if (type === 'tap') return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;

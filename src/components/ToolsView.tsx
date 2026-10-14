@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import {
   FidgetBubblesSticker,
@@ -46,10 +45,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
       color: 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950',
       Sticker: FidgetBubblesSticker,
-      action: () => {
-        setShowFidgetModal(true);
-        playChime('tap');
-      },
+      action: () => setShowFidgetModal(true),
     },
 
     // Calm & Reset: Deep Breathing
@@ -62,10 +58,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
       color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
       Sticker: BreathingCloudSticker,
-      action: () => {
-        openCopingToolkit('breathing');
-        playChime('tap');
-      },
+      action: () => openCopingToolkit('breathing'),
     },
 
     // Time & Energy: Visual Countdown Timer (Pie Clock)
@@ -78,10 +71,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
       color: 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
       Sticker: CountdownTimerSticker,
-      action: () => {
-        setShowPieTimerModal(true);
-        playChime('tap');
-      },
+      action: () => setShowPieTimerModal(true),
     },
 
     // Calm & Reset: 5-4-3-2-1 Sensory Grounding
@@ -94,10 +84,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-200',
       color: 'border-2 border-cyan-300/80 bg-cyan-50/40 hover:bg-cyan-50/80 text-cyan-950',
       Sticker: ConnectHeartSticker,
-      action: () => {
-        openCopingToolkit('grounding');
-        playChime('tap');
-      },
+      action: () => openCopingToolkit('grounding'),
     },
 
     // Calm & Reset: Soothing Ambient Sounds
@@ -110,10 +97,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
       color: 'border-2 border-indigo-300/80 bg-indigo-50/40 hover:bg-indigo-50/80 text-indigo-950',
       Sticker: MusicSensorySticker,
-      action: () => {
-        openCopingToolkit('sound');
-        playChime('tap');
-      },
+      action: () => openCopingToolkit('sound'),
     },
 
     // Sensory Play: Decision Wheel
@@ -126,10 +110,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
       color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
       Sticker: DecisionWheelSticker,
-      action: () => {
-        setShowDecisionWheelModal(true);
-        playChime('tap');
-      },
+      action: () => setShowDecisionWheelModal(true),
     },
 
     // Emotion & SOS: Incredible 5-Point Scale
@@ -142,10 +123,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
       color: 'border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950',
       Sticker: ThermometerSticker,
-      action: () => {
-        setShowFivePointModal(true);
-        playChime('tap');
-      },
+      action: () => setShowFivePointModal(true),
     },
 
     // Time & Energy: Spoon Theory Budget
@@ -158,10 +136,7 @@ export const ToolsView: React.FC = () => {
       badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
       color: 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
       Sticker: SpoonSticker,
-      action: () => {
-        setShowSpoonModal(true);
-        playChime('tap');
-      },
+      action: () => setShowSpoonModal(true),
     },
   ];
 
@@ -199,10 +174,7 @@ export const ToolsView: React.FC = () => {
               key={cat.id}
               role="tab"
               aria-selected={isSelected}
-              onClick={() => {
-                setSelectedCategory(cat.id);
-                playChime('tap');
-              }}
+              onClick={() => setSelectedCategory(cat.id)}
               className={`px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-black whitespace-nowrap transition-all cursor-pointer min-h-[42px] flex items-center gap-1.5 active:scale-95 border-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
                 isSelected
                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
