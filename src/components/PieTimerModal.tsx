@@ -55,17 +55,18 @@ export const PieTimerModal: React.FC = () => {
   const rHub = 52;
 
   // Remaining time wedge math:
-  // Starts at 12 o'clock (0 degrees) and sweeps clockwise by `angle` radians
-  const angle = pct * 2 * Math.PI;
-  const x1 = cx;
-  const y1 = cy - rWedge;
-  const x2 = cx + rWedge * Math.sin(angle);
-  const y2 = cy - rWedge * Math.cos(angle);
-  const largeArc = angle > Math.PI ? 1 : 0;
+  // Elapsed angle sweeps clockwise from 12 o'clock (0 rad) to 2*PI rad
+  // The needle sits at elapsedAngle and rotates CLOCKWISE as time counts down
+  const elapsedAngle = (1 - pct) * 2 * Math.PI;
+  const xStart = cx + rWedge * Math.sin(elapsedAngle);
+  const yStart = cy - rWedge * Math.cos(elapsedAngle);
+  const largeArc = pct > 0.5 ? 1 : 0;
 
-  // Indicator hand tip coordinates
-  const needleX = cx + (rWedge + 3) * Math.sin(angle);
-  const needleY = cy - (rWedge + 3) * Math.cos(angle);
+  // Indicator hand tip coordinates (moving CLOCKWISE)
+  const needleX = cx + (rWedge + 3) * Math.sin(elapsedAngle);
+  const needleY = cy - (rWedge + 3) * Math.cos(elapsedAngle);
+  const needleBaseX = cx + (rHub - 2) * Math.sin(elapsedAngle);
+  const needleBaseY = cy - (rHub - 2) * Math.cos(elapsedAngle);
 
   // Status colors based on remaining percentage
   const getColor = useCallback(() => {
@@ -327,19 +328,19 @@ export const PieTimerModal: React.FC = () => {
                 )}
                 {pct > 0.001 && pct < 0.999 && (
                   <path
-                    d={`M ${cx} ${cy} L ${x1} ${y1} A ${rWedge} ${rWedge} 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                    d={`M ${cx} ${cy} L ${xStart} ${yStart} A ${rWedge} ${rWedge} 0 ${largeArc} 1 ${cx} ${cy - rWedge} Z`}
                     fill={getGradientId()}
                     filter="url(#wedge-shadow)"
                     style={{ transition: 'all 0.8s ease-out' }}
                   />
                 )}
 
-                {/* Indicator Needle / Pointer at Remaining Edge */}
+                {/* Indicator Needle / Pointer at Leading Edge (moving CLOCKWISE) */}
                 {pct > 0.002 && (
                   <g>
                     <line
-                      x1={cx + (rHub - 2) * Math.sin(angle)}
-                      y1={cy - (rHub - 2) * Math.cos(angle)}
+                      x1={needleBaseX}
+                      y1={needleBaseY}
                       x2={needleX}
                       y2={needleY}
                       stroke="#0f172a"
@@ -375,13 +376,13 @@ export const PieTimerModal: React.FC = () => {
                   x={cx}
                   y={cy - 5}
                   textAnchor="middle"
-                  fontSize={isFinished ? 28 : 22}
+                  fontSize={isFinished ? 24 : 22}
                   fontWeight="900"
                   fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
                   fill={isFinished ? '#10b981' : '#1e293b'}
                   letterSpacing="-0.5"
                 >
-                  {isFinished ? '🎉' : formatTime(secondsLeft)}
+                  {isFinished ? t('DONE!') : formatTime(secondsLeft)}
                 </text>
 
                 {/* Status Sub-Label */}

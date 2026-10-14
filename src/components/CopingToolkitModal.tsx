@@ -19,7 +19,13 @@ import {
   Layers,
   Trash2,
   Plus,
-  Clock
+  Clock,
+  Hand,
+  Droplets,
+  Thermometer,
+  ShieldAlert,
+  Home,
+  CircleDot
 } from 'lucide-react';
 import { 
   playChime, 
@@ -194,11 +200,11 @@ export const CopingToolkitModal: React.FC = () => {
   };
 
   const groundingItems = [
-    { title: 'Look Around: 5 things you can see', emoji: '👀', prompt: 'Notice colors, shapes, or lights in the room.' },
-    { title: 'Touch Gently: 4 things you can feel', emoji: '🤲', prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.' },
-    { title: 'Listen Closely: 3 things you can hear', emoji: '👂', prompt: 'Listen to the quiet hum, birds outside, or your own breath.' },
-    { title: 'Smell: 2 scents around you', emoji: '👃', prompt: 'Take a soft breath through your nose.' },
-    { title: 'Taste / Sip: 1 cool sip of water', emoji: '💧', prompt: 'Take a gentle swallow or relax your jaw.' },
+    { title: 'Look Around: 5 things you can see', icon: Eye, prompt: 'Notice colors, shapes, or lights in the room.' },
+    { title: 'Touch Gently: 4 things you can feel', icon: Hand, prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.' },
+    { title: 'Listen Closely: 3 things you can hear', icon: Volume2, prompt: 'Listen to the quiet hum, birds outside, or your own breath.' },
+    { title: 'Smell: 2 scents around you', icon: Wind, prompt: 'Take a soft breath through your nose.' },
+    { title: 'Taste / Sip: 1 cool sip of water', icon: Droplets, prompt: 'Take a gentle swallow or relax your jaw.' },
   ];
 
   return (
@@ -213,7 +219,9 @@ export const CopingToolkitModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100 shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="text-3xl">🛋️</span>
+            <div className="w-10 h-10 rounded-2xl bg-teal-100/80 border border-teal-200 flex items-center justify-center text-teal-800 shrink-0 shadow-2xs">
+              <Sparkles className="w-5 h-5 text-teal-700" aria-hidden="true" />
+            </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-teal-950">{t('Calm & Coping Toolkit')}</h2>
               <p className="text-xs text-teal-700 font-medium">{t('Safe space to pause, breathe, and reset')}</p>
@@ -301,7 +309,7 @@ export const CopingToolkitModal: React.FC = () => {
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
-            <span>🫧</span>
+            <CircleDot className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
             <span>{t('Digital Fidgets')}</span>
           </button>
           <button
@@ -311,7 +319,7 @@ export const CopingToolkitModal: React.FC = () => {
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
-            <span>⏰</span>
+            <Timer className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
             <span>{t('Pie Clock')}</span>
           </button>
           <button
@@ -321,7 +329,7 @@ export const CopingToolkitModal: React.FC = () => {
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
           >
-            <span>🌡️</span>
+            <Thermometer className="w-4 h-4 text-blue-600 shrink-0" aria-hidden="true" />
             <span>{t('5-Point Scale')}</span>
           </button>
           <button
@@ -332,7 +340,7 @@ export const CopingToolkitModal: React.FC = () => {
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs whitespace-nowrap active:scale-95"
           >
-            <span>🚨</span>
+            <ShieldAlert className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
             <span>{t('Emergency Mode')}</span>
           </button>
         </div>
@@ -508,7 +516,7 @@ export const CopingToolkitModal: React.FC = () => {
                 className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
               >
                 <Clock className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
-                <span>{t('Open Full Pie Clock')} ⏰</span>
+                <span>{t('Open Full Pie Clock')}</span>
               </button>
             </div>
           )}
@@ -516,7 +524,9 @@ export const CopingToolkitModal: React.FC = () => {
           {/* TAB 3: GROUNDING */}
           {activeTab === 'grounding' && (
             <div className="w-full max-w-md flex flex-col items-center">
-              <span className="text-5xl mb-2">{groundingItems[groundingStep].emoji}</span>
+              <div className="w-16 h-16 rounded-3xl bg-teal-100 border-2 border-teal-300 text-teal-800 flex items-center justify-center mb-3 shadow-xs">
+                {React.createElement(groundingItems[groundingStep].icon, { className: 'w-8 h-8 text-teal-700' })}
+              </div>
               <h3 className="text-lg font-black text-slate-800 mb-1">
                 {t(groundingItems[groundingStep].title)}
               </h3>
@@ -873,23 +883,26 @@ export const CopingToolkitModal: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[
-              { text: 'I want a glass of water.', emoji: '💧' },
-              { text: 'Can I have a hug?', emoji: '🤗' },
-              { text: 'I want to sit quietly.', emoji: '🤫' },
-              { text: 'I want my comfort item.', emoji: '🦕' },
-              { text: 'Can we go home?', emoji: '🏠' },
-            ].map((need, idx) => (
-              <button
-                key={idx}
-                type="button"
-                aria-label={`Speak phrase: ${need.text}`}
-                onClick={() => speak(t(need.text))}
-                className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-              >
-                <span aria-hidden="true">{need.emoji}</span>
-                <span>{t(need.text)}</span>
-              </button>
-            ))}
+              { text: 'I want a glass of water.', icon: Droplets },
+              { text: 'Can I have a hug?', icon: Heart },
+              { text: 'I want to sit quietly.', icon: VolumeX },
+              { text: 'I want my comfort item.', icon: Sparkles },
+              { text: 'Can we go home?', icon: Home },
+            ].map((need, idx) => {
+              const IconComp = need.icon;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  aria-label={`Speak phrase: ${need.text}`}
+                  onClick={() => speak(t(need.text))}
+                  className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                >
+                  <IconComp className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
+                  <span>{t(need.text)}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -81,7 +81,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Incredible 5-Point Scale',
       desc: 'Emotional thermometer & coping actions',
-      emoji: '🌡️',
       badge: 'Regulation',
       bg: 'from-emerald-50 to-green-100/70 border-emerald-300 text-emerald-950',
       action: () => openTool(() => setShowFivePointModal(true)),
@@ -91,7 +90,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Visual Pie Clock',
       desc: 'Time Timer visual countdown disk',
-      emoji: '⏰',
       badge: 'Time',
       bg: 'from-sky-50 to-cyan-100/70 border-sky-300 text-sky-950',
       action: () => openTool(() => setShowPieTimerModal(true)),
@@ -101,7 +99,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Decision Wheel',
       desc: 'Spin to break choice paralysis',
-      emoji: '🎡',
       badge: 'Decide',
       bg: 'from-indigo-50 to-purple-100/70 border-indigo-300 text-indigo-950',
       action: () => openTool(() => setShowDecisionWheelModal(true)),
@@ -111,7 +108,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Digital Fidget Toys',
       desc: 'Bubble pop, water sand ripples & marble',
-      emoji: '🫧',
       badge: 'Stimming',
       bg: 'from-purple-50 to-pink-100/70 border-purple-300 text-purple-950',
       action: () => openTool(() => setShowFidgetModal(true)),
@@ -121,7 +117,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Deep Sensory Breathing',
       desc: 'Box breathing, flower breath & 4-7-8 pacers',
-      emoji: '🌬️',
       badge: 'Breathe',
       bg: 'from-teal-50 to-emerald-100/70 border-teal-300 text-teal-950',
       action: () => openTool(() => openCopingToolkit('breathing')),
@@ -131,7 +126,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Calm Tools & Strategies',
       desc: 'Sensory coping kit & personalized calm ideas',
-      emoji: '💖',
       badge: 'Coping Kit',
       bg: 'from-rose-50 to-pink-100/70 border-rose-300 text-rose-950',
       action: () => openTool(() => openCopingToolkit('strategies')),
@@ -141,7 +135,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: '5-4-3-2-1 Grounding',
       desc: 'Sensory countdown to reset during overwhelm',
-      emoji: '👁️',
       badge: 'Grounding',
       bg: 'from-cyan-50 to-sky-100/70 border-cyan-300 text-cyan-950',
       action: () => openTool(() => openCopingToolkit('grounding')),
@@ -151,7 +144,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Soothing Ambient Sounds',
       desc: '17 gentle multi-track audio soundscapes',
-      emoji: '🎵',
       badge: 'Soundscapes',
       bg: 'from-indigo-50 to-violet-100/70 border-indigo-300 text-indigo-950',
       action: () => openTool(() => openCopingToolkit('sound')),
@@ -161,7 +153,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'sensory',
       title: 'Emergency Sensory Mode',
       desc: 'Instant dim screen & emergency speech cards',
-      emoji: '🚨',
       badge: 'Crisis / SOS',
       bg: 'from-rose-50 to-red-100/80 border-rose-300 text-rose-950',
       action: () => openTool(() => activateEmergencyMode()),
@@ -175,7 +166,6 @@ export const ToolsHubModal: React.FC = () => {
       desc: todaySpoons
         ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} ${t('spoons remaining today')}`
         : 'Morning check-in & stamina tracker',
-      emoji: '🥄',
       badge: todaySpoons ? `${todaySpoons.totalSpoons - todaySpoons.usedSpoons} ${t('Spoons')}` : 'Energy',
       bg: 'from-amber-50 to-yellow-100/70 border-amber-300 text-amber-950',
       action: () => openTool(() => setShowSpoonModal(true)),
@@ -187,7 +177,6 @@ export const ToolsHubModal: React.FC = () => {
             category: 'wellness',
             title: 'Medication Reminders',
             desc: pendingMeds.length > 0 ? `${pendingMeds.length} ${t('pending doses')}` : 'All caught up for today!',
-            emoji: '💊',
             badge: `${medications.length} ${t('Meds')}`,
             bg: 'from-teal-50 to-cyan-100/70 border-teal-300 text-teal-950',
             action: () => openTool(() => setShowMedicationModal(true)),
@@ -201,7 +190,6 @@ export const ToolsHubModal: React.FC = () => {
             category: 'wellness',
             title: 'Mood Journal',
             desc: 'Reflect on sensory overload & triggers',
-            emoji: '📖',
             badge: 'Reflection',
             bg: 'from-purple-50 to-indigo-100/70 border-purple-300 text-purple-950',
             action: () => openTool(() => setShowMoodJournalModal(true)),
@@ -215,7 +203,6 @@ export const ToolsHubModal: React.FC = () => {
             category: 'wellness',
             title: cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle & Sensory Rhythm',
             desc: 'Sensory tolerance & hormonal wellness tracking',
-            emoji: cycleSettings.discreetMode ? '🌿' : '🌸',
             badge: 'Rhythm',
             bg: 'from-pink-50 to-rose-100/70 border-pink-300 text-pink-950',
             action: () => openTool(() => setShowCycleTrackerModal(true)),
@@ -229,7 +216,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'support',
       title: 'Communication Passport',
       desc: '1-page printable summary for teachers & dentists',
-      emoji: '🪪',
       badge: 'Printable',
       bg: 'from-slate-50 to-slate-100 border-slate-300 text-slate-900',
       action: () => openTool(() => setShowPassportModal(true)),
@@ -239,7 +225,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'support',
       title: 'About Me Emergency ID',
       desc: 'Caregiver contact details & medical info',
-      emoji: '🆔',
       badge: 'ID Card',
       bg: 'from-blue-50 to-indigo-100/70 border-blue-300 text-blue-950',
       action: () => openTool(() => setShowAboutMeModal(true)),
@@ -249,7 +234,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'support',
       title: 'Accessibility & Sensory Hub',
       desc: 'Color coding, sound effects, spoken voice & feature toggles',
-      emoji: '♿',
       badge: 'Preferences',
       bg: 'from-sky-50 to-indigo-100/70 border-indigo-300 text-indigo-950',
       action: () => openTool(() => setShowAccessibilityModal(true)),
@@ -259,7 +243,6 @@ export const ToolsHubModal: React.FC = () => {
       category: 'support',
       title: 'Themes & Companion Studio',
       desc: 'Change theme palette, sounds & mascot',
-      emoji: '🎨',
       badge: 'Themes',
       bg: 'from-violet-50 to-purple-100/70 border-violet-300 text-violet-950',
       action: () => openTool(() => setShowThemeModal(true)),
@@ -303,9 +286,9 @@ export const ToolsHubModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-[#FCF9F2] border-b-2 border-[#E0D8CB]">
           <div className="flex items-center gap-3">
-            <span className="text-2xl p-2 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
-              🧰
-            </span>
+            <div className="w-10 h-10 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-center text-[#2D241E] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
+              <Sparkles className="w-5 h-5 text-amber-700" aria-hidden="true" />
+            </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#2D241E] leading-tight">
                 {t('BeeYou Tools Hub')}
@@ -326,10 +309,10 @@ export const ToolsHubModal: React.FC = () => {
         {/* Category Pills (Debossed Silicone Rail) */}
         <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#EFE9DF] border-b border-[#E0D8CB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] overflow-x-auto">
           {[
-            { id: 'all' as const, label: 'All Tools', emoji: '✨' },
-            { id: 'sensory' as const, label: 'Calm & Regulate', emoji: '🫧' },
-            { id: 'wellness' as const, label: 'Health & Energy', emoji: '🥄' },
-            { id: 'support' as const, label: 'Support & Profile', emoji: '🪪' },
+            { id: 'all' as const, label: 'All Tools' },
+            { id: 'sensory' as const, label: 'Calm & Regulate' },
+            { id: 'wellness' as const, label: 'Health & Energy' },
+            { id: 'support' as const, label: 'Support & Profile' },
           ].filter((cat) => cat.id === 'all' || availableTools.some((t) => t.category === cat.id)).map((cat) => (
             <button
               key={cat.id}
@@ -343,7 +326,6 @@ export const ToolsHubModal: React.FC = () => {
                   : 'text-[#6B5E52] hover:text-[#2D241E]'
               }`}
             >
-              <span>{cat.emoji}</span>
               <span>{t(cat.label)}</span>
             </button>
           ))}

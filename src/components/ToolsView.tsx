@@ -39,7 +39,7 @@ export const ToolsView: React.FC = () => {
   ];
 
   const toolCards = [
-    // 🫧 Sensory Play
+    // Sensory Play
     {
       id: 'fidgets',
       category: 'play' as ToolCategory,
@@ -55,7 +55,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🌬️ Calm & Reset: Deep Breathing
+    // Calm & Reset: Deep Breathing
     {
       id: 'breathing',
       category: 'calm' as ToolCategory,
@@ -71,7 +71,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 💖 Calm & Reset: Coping Kit & Strategies
+    // Calm & Reset: Coping Kit & Strategies
     {
       id: 'calm-strategies',
       category: 'calm' as ToolCategory,
@@ -87,7 +87,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // ⏱️ Time & Energy: Visual Countdown Timer (Pie Clock)
+    // Time & Energy: Visual Countdown Timer (Pie Clock)
     {
       id: 'pie-timer',
       category: 'focus' as ToolCategory,
@@ -103,7 +103,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 👁️ Calm & Reset: 5-4-3-2-1 Sensory Grounding
+    // Calm & Reset: 5-4-3-2-1 Sensory Grounding
     {
       id: 'grounding',
       category: 'calm' as ToolCategory,
@@ -119,7 +119,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🎵 Calm & Reset: Soothing Ambient Sounds
+    // Calm & Reset: Soothing Ambient Sounds
     {
       id: 'ambient-sounds',
       category: 'calm' as ToolCategory,
@@ -135,7 +135,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🎡 Sensory Play: Decision Wheel
+    // Sensory Play: Decision Wheel
     {
       id: 'decision-wheel',
       category: 'play' as ToolCategory,
@@ -151,7 +151,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🌡️ Emotion & SOS: Incredible 5-Point Scale
+    // Emotion & SOS: Incredible 5-Point Scale
     {
       id: 'five-point-scale',
       category: 'sos' as ToolCategory,
@@ -167,7 +167,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🚨 Emotion & SOS: Emergency Sensory Mode
+    // Emotion & SOS: Emergency Sensory Mode
     {
       id: 'emergency-mode',
       category: 'sos' as ToolCategory,
@@ -183,7 +183,7 @@ export const ToolsView: React.FC = () => {
       },
     },
 
-    // 🥄 Time & Energy: Spoon Theory Budget
+    // Time & Energy: Spoon Theory Budget
     {
       id: 'spoon-budget',
       category: 'focus' as ToolCategory,
@@ -210,7 +210,7 @@ export const ToolsView: React.FC = () => {
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            {t('Tools')} 🧰
+            {t('Tools')}
           </h1>
           <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
             {toolCards.length}

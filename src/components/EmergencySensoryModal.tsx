@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, ShieldAlert, Volume2, VolumeX, Heart } from 'lucide-react';
+import { X, ShieldAlert, Volume2, VolumeX, Heart, MicOff, Hand, Moon, PhoneCall } from 'lucide-react';
 import { playSoundscape, stopSoundscape, setSoundscapeVolume } from '../utils/audio';
 import { SoundscapeId } from '../types';
 import { AccessibleTile } from './common/AccessibleTile';
+import { t } from '../services/translator';
 
 const EMERGENCY_AAC_CARDS = [
-  { text: 'I cannot speak right now.', emoji: '🤐', color: '#1e40af' },
-  { text: 'Please give me space.', emoji: '🙏', color: '#7c3aed' },
-  { text: 'Dim the lights.', emoji: '💡', color: '#92400e' },
-  { text: 'Call my caregiver.', emoji: '📞', color: '#991b1b' },
+  { text: 'I cannot speak right now.', icon: MicOff, color: '#1e40af' },
+  { text: 'Please give me space.', icon: Hand, color: '#7c3aed' },
+  { text: 'Dim the lights.', icon: Moon, color: '#92400e' },
+  { text: 'Call my caregiver.', icon: PhoneCall, color: '#991b1b' },
 ];
 
 const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string }[] = [
@@ -107,24 +108,29 @@ export const EmergencySensoryModal: React.FC = () => {
 
       {/* 4 Large Emergency AAC Cards */}
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg mb-6">
-        {EMERGENCY_AAC_CARDS.map((card) => (
-          <AccessibleTile
-            key={card.text}
-            variant="emergency"
-            label={card.text}
-            onClick={() => handleCard(card.text)}
-            className="relative rounded-3xl p-5 sm:p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all active:scale-95 border-2 border-white/10 hover:border-white/30"
-            style={{ backgroundColor: card.color + '33', borderColor: spokenCard === card.text ? '#ffffff80' : undefined }}
-          >
-            {spokenCard === card.text && (
-              <div className="absolute inset-0 rounded-3xl bg-white/10 animate-pulse pointer-events-none" />
-            )}
-            <span aria-hidden="true" className="text-5xl sm:text-6xl">{card.emoji}</span>
-            <p className="text-white font-black text-sm sm:text-base text-center leading-tight">
-              {card.text}
-            </p>
-          </AccessibleTile>
-        ))}
+        {EMERGENCY_AAC_CARDS.map((card) => {
+          const IconComp = card.icon;
+          return (
+            <AccessibleTile
+              key={card.text}
+              variant="emergency"
+              label={card.text}
+              onClick={() => handleCard(card.text)}
+              className="relative rounded-3xl p-5 sm:p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all active:scale-95 border-2 border-white/10 hover:border-white/30"
+              style={{ backgroundColor: card.color + '33', borderColor: spokenCard === card.text ? '#ffffff80' : undefined }}
+            >
+              {spokenCard === card.text && (
+                <div className="absolute inset-0 rounded-3xl bg-white/10 animate-pulse pointer-events-none" />
+              )}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                <IconComp className="w-8 h-8 sm:w-10 sm:h-10 text-white" aria-hidden="true" />
+              </div>
+              <p className="text-white font-black text-sm sm:text-base text-center leading-tight">
+                {card.text}
+              </p>
+            </AccessibleTile>
+          );
+        })}
       </div>
 
       {/* Bottom Controls */}
@@ -171,7 +177,7 @@ export const EmergencySensoryModal: React.FC = () => {
 
       {/* Safe exit hint */}
       <p className="mt-6 text-gray-600 text-xs text-center">
-        Press the ✕ button or take some deep breaths when you feel ready.
+        {t('Press the Close button or take some deep breaths when you feel ready.')}
       </p>
     </div>
   );

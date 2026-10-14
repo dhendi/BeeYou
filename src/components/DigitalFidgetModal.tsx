@@ -17,7 +17,11 @@ import {
   Heart, 
   Grid, 
   Layers,
-  CircleDot
+  CircleDot,
+  Keyboard,
+  RotateCw,
+  Waves,
+  Box
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -359,10 +363,10 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
   const [activeKey, setActiveKey] = useState<string | null>(null);
 
   const keys = [
-    { id: 'blue-1', label: 'Blue Clicky', switchType: 'blue' as const, sub: 'Loud & Crisp', emoji: '🔊', color: 'border-blue-400 bg-blue-50 text-blue-900', led: 'bg-blue-400' },
-    { id: 'brown-1', label: 'Brown Tactile', switchType: 'brown' as const, sub: 'Soft Bump', emoji: '🎧', color: 'border-amber-500 bg-amber-50 text-amber-900', led: 'bg-amber-400' },
-    { id: 'red-1', label: 'Red Linear', switchType: 'red' as const, sub: 'Smooth Bounce', emoji: '☁️', color: 'border-rose-400 bg-rose-50 text-rose-900', led: 'bg-rose-400' },
-    { id: 'relay-1', label: 'Relay Clicker', switchType: 'relay' as const, sub: 'Industrial Snap', emoji: '⚡', color: 'border-emerald-500 bg-emerald-50 text-emerald-900', led: 'bg-emerald-400' },
+    { id: 'blue-1', label: 'Blue Clicky', switchType: 'blue' as const, sub: 'Loud & Crisp', color: 'border-blue-400 bg-blue-50 text-blue-900', led: 'bg-blue-400' },
+    { id: 'brown-1', label: 'Brown Tactile', switchType: 'brown' as const, sub: 'Soft Bump', color: 'border-amber-500 bg-amber-50 text-amber-900', led: 'bg-amber-400' },
+    { id: 'red-1', label: 'Red Linear', switchType: 'red' as const, sub: 'Smooth Bounce', color: 'border-rose-400 bg-rose-50 text-rose-900', led: 'bg-rose-400' },
+    { id: 'relay-1', label: 'Relay Clicker', switchType: 'relay' as const, sub: 'Industrial Snap', color: 'border-emerald-500 bg-emerald-50 text-emerald-900', led: 'bg-emerald-400' },
   ];
 
   const handleClick = (k: typeof keys[0]) => {
@@ -398,7 +402,7 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
             >
               <div className={`w-2 h-2 rounded-full mb-2 transition-all ${k.led} ${isPressed ? 'ring-4 ring-white/80 scale-125' : 'opacity-60'}`} />
               <span className="font-black text-sm">{t(k.label)}</span>
-              <span className="text-[11px] font-medium opacity-75 mt-0.5">{t(k.sub)} {k.emoji}</span>
+              <span className="text-[11px] font-medium opacity-75 mt-0.5">{t(k.sub)}</span>
             </button>
           );
         })}
@@ -422,7 +426,8 @@ const MechanicalClickerToy: React.FC<KeyboardToyProps> = ({ soundEnabled, haptic
             : '0 8px 0 rgba(99,102,241,0.3), 0 10px 14px rgba(0,0,0,0.08)',
         }}
       >
-        <span>⌨️ {t('Big Spacebar Clicker')}</span>
+        <Keyboard className="w-5 h-5 text-indigo-700" aria-hidden="true" />
+        <span>{t('Big Spacebar Clicker')}</span>
       </button>
     </div>
   );
@@ -533,9 +538,9 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
       <div className="flex items-center justify-between w-full px-2">
         <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
           {[
-            { id: 'bee' as const, label: 'Bee', emoji: '🐝' },
-            { id: 'rainbow' as const, label: 'Neon', emoji: '🌈' },
-            { id: 'midnight' as const, label: 'Galaxy', emoji: '🌌' },
+            { id: 'bee' as const, label: 'Honey' },
+            { id: 'rainbow' as const, label: 'Neon' },
+            { id: 'midnight' as const, label: 'Galaxy' },
           ].map((s) => (
             <button
               key={s.id}
@@ -544,7 +549,7 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
                 spinnerSkin === s.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'
               }`}
             >
-              {t(s.label)} {s.emoji}
+              {t(s.label)}
             </button>
           ))}
         </div>
@@ -593,7 +598,7 @@ const PhysicsFidgetSpinnerToy: React.FC<SpinnerToyProps> = ({ soundEnabled, hapt
 
           {/* Central Bearing Core */}
           <div className="w-14 h-14 rounded-full bg-gradient-to-b from-slate-200 to-slate-400 border-4 border-slate-500 shadow-xl flex items-center justify-center z-10">
-            <span className="text-base">{spinnerSkin === 'bee' ? '🐝' : '✨'}</span>
+            <div className="w-4 h-4 rounded-full bg-slate-700 shadow-inner" />
           </div>
         </div>
       </div>
@@ -999,7 +1004,8 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
                       : 'bg-white border-slate-300 text-slate-800 shadow-sm'
                   }`}
                 >
-                  {isSilent ? '🤫' : '🔊'}
+                  {/* Click button */}
+                  <span className={`w-2 h-2 rounded-full ${isSilent ? 'bg-slate-400' : 'bg-indigo-600'}`} />
                 </button>
               );
             })}
@@ -1043,13 +1049,13 @@ export const DigitalFidgetModal: React.FC = () => {
   if (!showFidgetModal) return null;
 
   const categories = [
-    { id: 'pop' as const, label: 'Pop-It', emoji: '🫧', desc: 'Silicone shapes' },
-    { id: 'switches' as const, label: 'Clickers', emoji: '⌨️', desc: 'Key switches' },
-    { id: 'spinner' as const, label: 'Spinner', emoji: '🌀', desc: 'Physics RPM' },
-    { id: 'toggles' as const, label: 'Switches', emoji: '⚡', desc: 'Relays & sliders' },
-    { id: 'slime' as const, label: 'Slime', emoji: '🟣', desc: 'Squishy stress ball' },
-    { id: 'starlight' as const, label: 'Starlight', emoji: '🌌', desc: 'Calm galaxy flow' },
-    { id: 'cube' as const, label: 'Worry Stone', emoji: '🪨', desc: 'Fidget cube pad' },
+    { id: 'pop' as const, label: 'Pop-It', icon: CircleDot, desc: 'Silicone shapes' },
+    { id: 'switches' as const, label: 'Clickers', icon: Keyboard, desc: 'Key switches' },
+    { id: 'spinner' as const, label: 'Spinner', icon: RotateCw, desc: 'Physics RPM' },
+    { id: 'toggles' as const, label: 'Switches', icon: ToggleLeft, desc: 'Relays & sliders' },
+    { id: 'slime' as const, label: 'Slime', icon: Waves, desc: 'Squishy stress ball' },
+    { id: 'starlight' as const, label: 'Starlight', icon: Sparkles, desc: 'Calm galaxy flow' },
+    { id: 'cube' as const, label: 'Worry Stone', icon: Box, desc: 'Fidget cube pad' },
   ];
 
   return (
@@ -1059,7 +1065,7 @@ export const DigitalFidgetModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('Tappy-Style Sensory Hub')}</p>
-            <h2 className="text-xl font-black text-slate-800">{t('Tactile Fidget Toys')} 🧸</h2>
+            <h2 className="text-xl font-black text-slate-800">{t('Tactile Fidget Toys')}</h2>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -1106,25 +1112,28 @@ export const DigitalFidgetModal: React.FC = () => {
 
         {/* Sensory Category Selector Carousel */}
         <div className="flex gap-2 px-4 py-3 border-b border-slate-100 overflow-x-auto no-scrollbar">
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => {
-                setActiveFidget(c.id);
-                audioEngine.playSwitch('red', soundEnabled);
-                triggerHaptic(15, hapticEnabled);
-              }}
-              title={t(c.desc)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                activeFidget === c.id
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span>{c.emoji}</span>
-              <span>{t(c.label)}</span>
-            </button>
-          ))}
+          {categories.map((c) => {
+            const IconComp = c.icon;
+            return (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setActiveFidget(c.id);
+                  audioEngine.playSwitch('red', soundEnabled);
+                  triggerHaptic(15, hapticEnabled);
+                }}
+                title={t(c.desc)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                  activeFidget === c.id
+                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <IconComp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <span>{t(c.label)}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Active Fidget Playground */}

@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Flame, CheckCircle2, ChevronRight } from 'lucide-react';
+import { 
+  X, 
+  Flame, 
+  CheckCircle2, 
+  ChevronRight,
+  Smile,
+  Meh,
+  Frown,
+  Wind,
+  Hand,
+  Box,
+  Sparkles,
+  ShieldAlert,
+  HelpCircle
+} from 'lucide-react';
 import { playChime } from '../utils/audio';
 
-const getCleanLevelEmoji = (level: number, rawEmoji?: string) => {
-  if (rawEmoji && !rawEmoji.includes('ð') && !rawEmoji.includes('dY') && rawEmoji.length <= 4) {
-    return rawEmoji;
-  }
+const getLevelIcon = (level: number) => {
   switch (level) {
-    case 1: return '😊';
-    case 2: return '🙂';
-    case 3: return '😐';
-    case 4: return '😟';
-    case 5: return '🌋';
-    default: return '😊';
+    case 1: return Smile;
+    case 2: return Smile;
+    case 3: return Meh;
+    case 4: return Frown;
+    case 5: return Flame;
+    default: return Smile;
   }
 };
 
-const getCleanActionEmoji = (rawEmoji?: string, defaultFallback: string = '⭐') => {
-  if (rawEmoji && !rawEmoji.includes('ð') && !rawEmoji.includes('dY') && rawEmoji.length <= 4) {
-    return rawEmoji;
-  }
-  return defaultFallback;
+const getActionIcon = (label: string, idx: number) => {
+  const l = label.toLowerCase();
+  if (l.includes('breath') || l.includes('inhale')) return Wind;
+  if (l.includes('wiggle') || l.includes('squeeze') || l.includes('finger')) return Hand;
+  if (l.includes('box')) return Box;
+  if (l.includes('toolkit') || l.includes('quiet') || l.includes('nice') || l.includes('going')) return Sparkles;
+  if (l.includes('emergency') || l.includes('button')) return ShieldAlert;
+  if (l.includes('help')) return HelpCircle;
+  return idx === 0 ? Sparkles : CheckCircle2;
 };
 
 export const FivePointScaleModal: React.FC = () => {
@@ -85,7 +100,7 @@ export const FivePointScaleModal: React.FC = () => {
         {/* Thermometer bar */}
         <div className="flex justify-between gap-1.5 mb-2" role="group" aria-label="5-Point scale level selector">
           {fivePointSettings.levels.map((l) => {
-            const emoji = getCleanLevelEmoji(l.level, l.emoji);
+            const LevelIcon = getLevelIcon(l.level);
             return (
               <button
                 key={l.level}
@@ -93,11 +108,11 @@ export const FivePointScaleModal: React.FC = () => {
                 aria-label={`Level ${l.level}: ${l.label}`}
                 aria-pressed={selectedLevel === l.level}
                 onClick={() => handleSelect(l.level)}
-                className={`flex-1 min-w-[48px] min-h-[56px] py-1 px-0.5 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-2 font-black focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${l.color} ${
+                className={`flex-1 min-w-[48px] min-h-[56px] py-1.5 px-0.5 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer border-2 font-black focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${l.color} ${
                   selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-90 hover:opacity-100'
                 }`}
               >
-                <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
+                <LevelIcon className={`w-5 h-5 ${l.textColor}`} aria-hidden="true" />
                 <span className={`text-[10px] font-black ${l.textColor} mt-0.5 tracking-tight text-center leading-tight line-clamp-1`}>
                   L{l.level} {l.label}
                 </span>
@@ -108,7 +123,7 @@ export const FivePointScaleModal: React.FC = () => {
 
         {/* Level cards (full) */}
         {fivePointSettings.levels.map((l) => {
-          const emoji = getCleanLevelEmoji(l.level, l.emoji);
+          const LevelIcon = getLevelIcon(l.level);
           return (
             <button
               key={l.level}
@@ -123,8 +138,8 @@ export const FivePointScaleModal: React.FC = () => {
               }`}
             >
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center text-3xl shadow-xs shrink-0" aria-hidden="true">
-                  {emoji}
+                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center shadow-xs shrink-0" aria-hidden="true">
+                  <LevelIcon className={`w-7 h-7 ${selectedLevel === l.level ? l.textColor : 'text-slate-700 dark:text-slate-200'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -148,7 +163,7 @@ export const FivePointScaleModal: React.FC = () => {
               Helpful right now at Level {selectedCfg.level} ({selectedCfg.label}):
             </p>
             {selectedCfg.actions.map((action, idx) => {
-              const actEmoji = getCleanActionEmoji(action.emoji, idx === 0 ? '⭐' : '💡');
+              const ActionIcon = getActionIcon(action.label, idx);
               return (
                 <button
                   key={idx}
@@ -157,7 +172,9 @@ export const FivePointScaleModal: React.FC = () => {
                   onClick={() => handleAction(action, selectedCfg.level)}
                   className="w-full min-h-[48px] text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
-                  <span className="text-2xl" aria-hidden="true">{actEmoji}</span>
+                  <div className="w-9 h-9 rounded-xl bg-slate-700/80 flex items-center justify-center shrink-0">
+                    <ActionIcon className="w-5 h-5 text-amber-300" aria-hidden="true" />
+                  </div>
                   <span className="font-bold text-white text-sm flex-1">{action.label}</span>
                   <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                 </button>

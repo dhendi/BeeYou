@@ -20,57 +20,57 @@ const DEFAULT_FIVE_POINT_LEVELS: FivePointLevelConfig[] = [
   {
     level: 1,
     label: 'Calm & Happy',
-    emoji: '😊',
+    emoji: '1',
     color: 'bg-green-400',
     textColor: 'text-green-900',
     bodyFeelings: 'Body feels relaxed. Breathing is slow and easy. Muscles are loose.',
-    actions: [{ label: 'Keep going!', emoji: '⭐' }, { label: 'Share something nice', emoji: '💬' }],
+    actions: [{ label: 'Keep going!', emoji: '' }, { label: 'Share something nice', emoji: '' }],
   },
   {
     level: 2,
     label: 'Okay / A Little Wiggly',
-    emoji: '🙂',
+    emoji: '2',
     color: 'bg-lime-400',
     textColor: 'text-lime-900',
     bodyFeelings: 'A tiny bit excited or distracted. Body is mostly comfortable.',
-    actions: [{ label: 'Take 2 deep breaths', emoji: '🌬️' }, { label: 'Wiggle your fingers', emoji: '🖐️' }],
+    actions: [{ label: 'Take 2 deep breaths', emoji: '' }, { label: 'Wiggle your fingers', emoji: '' }],
   },
   {
     level: 3,
     label: 'Medium / Uneasy',
-    emoji: '😐',
+    emoji: '3',
     color: 'bg-yellow-400',
     textColor: 'text-yellow-900',
     bodyFeelings: 'Heart might beat faster. Feeling tense, anxious, or frustrated.',
-    actions: [{ label: 'Try box breathing', emoji: '📦' }, { label: 'Squeeze a fidget', emoji: '🧸' }],
+    actions: [{ label: 'Try box breathing', emoji: '' }, { label: 'Squeeze a fidget', emoji: '' }],
   },
   {
     level: 4,
     label: 'Very Upset',
-    emoji: '😟',
+    emoji: '4',
     color: 'bg-orange-400',
     textColor: 'text-orange-900',
     bodyFeelings: 'Lots of tension. Might want to yell or run away. Hard to think clearly.',
-    actions: [{ label: 'Go to quiet space', emoji: '🤫' }, { label: 'Use Coping Toolkit', emoji: '🎧' }],
+    actions: [{ label: 'Go to quiet space', emoji: '' }, { label: 'Use Coping Toolkit', emoji: '' }],
   },
   {
     level: 5,
     label: 'Completely Overwhelmed',
-    emoji: '🌋',
+    emoji: '5',
     color: 'bg-red-500',
     textColor: 'text-red-100',
     bodyFeelings: "Out of control. Very hard to listen or stop. Body may feel like it's going to explode.",
-    actions: [{ label: 'Press Emergency Button', emoji: '🚨' }, { label: 'Ask for help now', emoji: '🆘' }],
+    actions: [{ label: 'Press Emergency Button', emoji: '' }, { label: 'Ask for help now', emoji: '' }],
   },
 ];
 
 const DEFAULT_WHEEL_OPTIONS: DecisionWheelOption[] = [
-  { id: 'opt-1', label: 'Watch a Movie', emoji: '🎬', color: '#818cf8' },
-  { id: 'opt-2', label: 'Play Outside', emoji: '⚽', color: '#34d399' },
-  { id: 'opt-3', label: 'Draw or Paint', emoji: '🎨', color: '#fb923c' },
-  { id: 'opt-4', label: 'Read a Book', emoji: '📚', color: '#60a5fa' },
-  { id: 'opt-5', label: 'Build with Legos', emoji: '🧱', color: '#f87171' },
-  { id: 'opt-6', label: 'Listen to Music', emoji: '🎵', color: '#a78bfa' },
+  { id: 'opt-1', label: 'Watch a Movie', emoji: '1', color: '#818cf8' },
+  { id: 'opt-2', label: 'Play Outside', emoji: '2', color: '#34d399' },
+  { id: 'opt-3', label: 'Draw or Paint', emoji: '3', color: '#fb923c' },
+  { id: 'opt-4', label: 'Read a Book', emoji: '4', color: '#60a5fa' },
+  { id: 'opt-5', label: 'Build with Legos', emoji: '5', color: '#f87171' },
+  { id: 'opt-6', label: 'Listen to Music', emoji: '6', color: '#a78bfa' },
 ];
 
 export function useSensoryToolsState({ childName, soundEffects }: UseSensoryToolsStateProps) {
@@ -155,7 +155,7 @@ export function useSensoryToolsState({ childName, soundEffects }: UseSensoryTool
             const isCorrupted = !l.emoji || l.emoji.includes('\u00f0') || l.emoji.includes('dY');
             const cleanEmoji = isCorrupted ? def.emoji : l.emoji;
             const cleanActions = (l.actions || def.actions).map((act, aIdx) => {
-              const defAct = def.actions[aIdx] || { label: act.label, emoji: '⭐' };
+              const defAct = def.actions[aIdx] || { label: act.label, emoji: '' };
               const actCorrupted = !act.emoji || act.emoji.includes('\u00f0') || act.emoji.includes('dY');
               return {
                 label: act.label || defAct.label,
