@@ -18,7 +18,8 @@ import {
   Sliders,
   Layers,
   Trash2,
-  Plus
+  Plus,
+  Clock
 } from 'lucide-react';
 import { 
   playChime, 
@@ -484,6 +485,16 @@ export const CopingToolkitModal: React.FC = () => {
                   {t('Reset')}
                 </button>
               </div>
+
+              {/* Quick shortcut to open Full Visual Pie Clock */}
+              <button
+                type="button"
+                onClick={() => setShowPieTimerModal(true)}
+                className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
+              >
+                <Clock className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
+                <span>{t('Open Full Pie Clock')} ⏰</span>
+              </button>
             </div>
           )}
 
