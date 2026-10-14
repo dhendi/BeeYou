@@ -761,9 +761,6 @@ export const CopingToolkitModal: React.FC = () => {
                               {item.tags.map((tg) => t(tg)).join(' • ')}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-                            {t(item.description)}
-                          </p>
                         </div>
 
                         {/* Direct adjustable volume slider on card */}
@@ -835,9 +832,6 @@ export const CopingToolkitModal: React.FC = () => {
                             {item.tags.map((tg) => t(tg)).join(' • ')}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-                          {t(item.description)}
-                        </p>
                       </div>
 
                       {/* Card Footer Action Button */}
