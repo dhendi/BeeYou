@@ -1075,9 +1075,9 @@ export const AACView: React.FC = () => {
                   setActiveCategory('core');
                   playChime('tap');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-xs flex items-center gap-1.5 shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.8)] border border-[#E2A44E] active:scale-95 transition-all cursor-pointer"
+                className="px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.8)] border border-[#E2A44E] active:scale-95 transition-all cursor-pointer min-h-[40px] sm:min-h-[44px]"
               >
-                <HomeIcon className="w-4 h-4" />
+                <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Core Board</span>
               </button>
               <span className="text-[#C8BCAC] font-bold text-sm">/</span>
@@ -1099,7 +1099,7 @@ export const AACView: React.FC = () => {
         <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-1 scrollbar-thin">
           
           {/* Category Navigation Pills */}
-          <div data-tour="aac-categories" className="flex items-center gap-1.5 shrink-0 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB]">
+          <div data-tour="aac-categories" className="flex items-center gap-2 sm:gap-2.5 shrink-0 bg-[#EFE9DF] p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 border-[#E0D8CB] shadow-xs">
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -1109,24 +1109,24 @@ export const AACView: React.FC = () => {
                   setSearchQuery('');
                   playChime('tap');
                 }}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
                   !activeSceneData && activeCategory === cat.id
                     ? cat.id === 'core'
-                      ? 'bg-[#F5B865] text-[#4A2F0F] border border-[#E2A44E] shadow-[0_3px_8px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                      ? 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                       : cat.id === 'favorites'
-                      ? 'bg-[#E68E8E] text-[#4A1616] border border-[#D57B7B] shadow-[0_3px_8px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
-                      : 'bg-[#4A3E34] text-white shadow-[0_3px_8px_rgba(0,0,0,0.08)]'
-                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] border border-[#E0D8CB]'
+                      ? 'bg-[#E68E8E] text-[#4A1616] border-2 border-[#D57B7B] shadow-[0_4px_12px_rgba(230,142,142,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]'
+                      : 'bg-[#4A3E34] text-white border-2 border-[#382F27] shadow-[0_4px_12px_rgba(74,62,52,0.3)]'
+                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs'
                 }`}
               >
-                <span>{cat.emoji}</span>
-                <span>{cat.label}</span>
+                <span className="text-base sm:text-xl shrink-0 leading-none">{cat.emoji}</span>
+                <span className="whitespace-nowrap tracking-tight">{cat.label}</span>
               </button>
             ))}
           </div>
 
           {/* Clinical AAC Tools: Quick-Chat, Masking Mode, Instant Speak, Add Word, Symbol Picker */}
-          <div className="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
+          <div className="flex items-center gap-2 shrink-0 ml-auto flex-wrap">
             
             {/* Quick-Chat Expressions Drawer Button */}
             <button
@@ -1136,11 +1136,11 @@ export const AACView: React.FC = () => {
                 setShowQuickChatDrawer(true);
                 playChime('tap');
               }}
-              className="px-3 py-1.5 rounded-xl text-xs font-black border border-[#B8B4DC] bg-[#D7D4F0] hover:bg-[#CBC8E8] text-[#2C2954] flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)]"
+              className="px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-[#B8B4DC] bg-[#D7D4F0] hover:bg-[#CBC8E8] text-[#2C2954] flex items-center gap-2 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)] active:scale-95"
               title="Quick-Chat: Instant expressions that won't clear your sentence"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#51488C]" />
-              <span>{t('Quick Chat')}</span>
+              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#51488C]" />
+              <span className="whitespace-nowrap">{t('Quick Chat')}</span>
             </button>
 
             {/* Motor Masking / Blank Slots Mode */}
@@ -1150,15 +1150,15 @@ export const AACView: React.FC = () => {
                 setIsMaskingMode(!isMaskingMode);
                 playChime('tap');
               }}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                 isMaskingMode
-                  ? 'bg-[#99C2A2] text-[#1C3E25] border-[#85AE8E] font-black shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                  ? 'bg-[#99C2A2] text-[#1C3E25] border-[#85AE8E] shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
                   : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
               }`}
               title="Vocabulary Masking: Hide words while preserving exact motor planning coordinates"
             >
-              {isMaskingMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isMaskingMode ? t('Masking ON') : t('Mask')}</span>
+              {isMaskingMode ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <span className="hidden sm:inline whitespace-nowrap">{isMaskingMode ? t('Masking ON') : t('Mask')}</span>
             </button>
 
             {/* Instant Speak Mode */}
@@ -1168,15 +1168,15 @@ export const AACView: React.FC = () => {
                 setInstantSpeakMode(!instantSpeakMode);
                 playChime('tap');
               }}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                 instantSpeakMode
-                  ? 'bg-[#F5B865] text-[#4A2F0F] border-[#E2A44E] font-black shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
+                  ? 'bg-[#F5B865] text-[#4A2F0F] border-[#E2A44E] shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
                   : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
               }`}
               title="Instant Speak Mode: Tap any tile to speak it aloud immediately"
             >
-              <Zap className="w-3.5 h-3.5 text-[#A76318]" />
-              <span className="hidden sm:inline">{t('Instant')}</span>
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-[#A76318]" />
+              <span className="hidden sm:inline whitespace-nowrap">{t('Instant')}</span>
             </button>
 
             {/* Add Word Button */}
@@ -1186,11 +1186,11 @@ export const AACView: React.FC = () => {
                 setEditingItem(null);
                 setShowWordEditor(true);
               }}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-black border border-[#E2A44E] bg-[#FDE293] hover:bg-[#FCD876] text-[#4A2F0F] flex items-center gap-1 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)]"
+              className="px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-[#E2A44E] bg-[#FDE293] hover:bg-[#FCD876] text-[#4A2F0F] flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)] active:scale-95"
               title="Add a custom word or favorite phrase"
             >
-              <Plus className="w-3.5 h-3.5 text-[#8B571A]" />
-              <span className="hidden sm:inline">{t('Add Word')}</span>
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B571A]" />
+              <span className="hidden sm:inline whitespace-nowrap">{t('Add Word')}</span>
             </button>
 
             {/* Edit Mode Toggle */}
@@ -1200,15 +1200,15 @@ export const AACView: React.FC = () => {
                 setIsEditMode(!isEditMode);
                 playChime('tap');
               }}
-              className={`px-2 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                 isEditMode
-                  ? 'bg-indigo-600 text-white border-indigo-700 font-black shadow-xs ring-2 ring-indigo-400'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs ring-2 ring-indigo-400'
+                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
               }`}
               title="Toggle Edit Mode to customize words or set favorites"
             >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isEditMode ? t('Done') : t('Edit')}</span>
+              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline whitespace-nowrap">{isEditMode ? t('Done') : t('Edit')}</span>
             </button>
 
             {/* Mulberry Symbols Picker */}
@@ -1220,11 +1220,11 @@ export const AACView: React.FC = () => {
                   setShowSymbolPicker(true);
                   playChime('tap');
                 }}
-                className="px-2.5 py-1 rounded-xl text-xs font-black border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1 transition-all cursor-pointer shadow-2xs ring-1 ring-indigo-200"
+                className="px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
                 title="Add words from the Mulberry Symbols AAC library (CC BY-SA)"
               >
-                <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                <span>{t('Symbols')}</span>
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 shrink-0" />
+                <span className="whitespace-nowrap">{t('Symbols')}</span>
               </button>
               <button
                 type="button"
@@ -1232,10 +1232,10 @@ export const AACView: React.FC = () => {
                   setShowAttributionModal(true);
                   playChime('tap');
                 }}
-                className="p-1 rounded-xl text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 transition-all cursor-pointer"
+                className="p-2.5 rounded-xl sm:rounded-2xl text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 transition-all cursor-pointer min-h-[46px] sm:min-h-[52px] flex items-center justify-center border-2 border-transparent hover:border-indigo-200"
                 title="Mulberry Symbols License & Attribution"
               >
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
@@ -1246,11 +1246,11 @@ export const AACView: React.FC = () => {
                 setIsCoachMarksActive(true);
                 playChime('tap');
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-black border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              className="px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
               title="Open Interactive AAC Coach Marks Guide"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>{t('AAC Guide')} 💡</span>
+              <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 shrink-0" />
+              <span className="whitespace-nowrap">{t('AAC Guide')} 💡</span>
             </button>
 
             {/* Standard Clinical AAC Button Size Selector (Small, Medium, Large) */}
