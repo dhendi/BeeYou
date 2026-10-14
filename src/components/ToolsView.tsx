@@ -9,7 +9,6 @@ import {
   CountdownTimerSticker,
   ThermometerSticker,
   MusicSensorySticker,
-  CalmSparklesSticker,
   ConnectHeartSticker,
   SpoonSticker,
 } from './icons/JournalStickers';
@@ -65,22 +64,6 @@ export const ToolsView: React.FC = () => {
       Sticker: BreathingCloudSticker,
       action: () => {
         openCopingToolkit('breathing');
-        playChime('tap');
-      },
-    },
-
-    // Calm & Reset: Coping Kit & Strategies
-    {
-      id: 'calm-strategies',
-      category: 'calm' as ToolCategory,
-      title: 'Calm Tools & Strategies',
-      desc: 'Personalized sensory coping strategies, calm activities, and safe reset ideas.',
-      badge: 'Coping Kit',
-      badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
-      color: 'border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950',
-      Sticker: CalmSparklesSticker,
-      action: () => {
-        openCopingToolkit('strategies');
         playChime('tap');
       },
     },

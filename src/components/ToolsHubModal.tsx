@@ -120,15 +120,6 @@ export const ToolsHubModal: React.FC = () => {
       action: () => openTool(() => openCopingToolkit('breathing')),
     },
     {
-      id: 'calm-kit',
-      category: 'sensory',
-      title: 'Calm Tools & Strategies',
-      desc: 'Sensory coping kit & personalized calm ideas',
-      badge: 'Coping Kit',
-      bg: 'from-rose-50 to-pink-100/70 border-rose-300 text-rose-950',
-      action: () => openTool(() => openCopingToolkit('strategies')),
-    },
-    {
       id: 'grounding',
       category: 'sensory',
       title: '5-4-3-2-1 Grounding',
@@ -243,7 +234,6 @@ export const ToolsHubModal: React.FC = () => {
     scale: 'sensoryBreathingPacer',
     fidgets: 'sensoryBreathingPacer',
     breathing: 'sensoryBreathingPacer',
-    'calm-kit': 'sensoryBreathingPacer',
     grounding: 'sensoryBreathingPacer',
     sounds: 'sensoryBreathingPacer',
     'pie-timer': 'visualCountdownTimer',
