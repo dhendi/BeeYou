@@ -28,7 +28,11 @@ interface RoutineCustomizerModalProps {
   onSave: (routineData: Omit<Routine, 'id'>, existingId?: string) => void;
 }
 
-const COMMON_EMOJIS = ['🌅', '🏫', '🌙', '🎒', '🦷', '🧩', '🛒', '🥞', '🧸', '🚿', '🪥', '👕', '🥪', '🛝', '📖', '✨', '👟', '🚌'];
+const COMMON_EMOJIS = [
+  '🌅', '🏫', '🌙', '🎒', '🛏️', '💧', '🐕', '🎵', '☀️', 
+  '📓', '🎨', '🏆', '🛁', '🦷', '🧩', '🛒', '🥞', '🧸', 
+  '🚿', '🪥', '👕', '🥪', '🛝', '📖', '✨', '👟', '🚌'
+];
 
 export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   isOpen,

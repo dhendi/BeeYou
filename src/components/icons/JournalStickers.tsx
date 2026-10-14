@@ -91,6 +91,18 @@ export const CaregiverPhoneSticker = renderStickerPng('/assets/stickers/caregive
 export const ScheduleCalendarSticker = renderStickerPng('/assets/stickers/schedule_calendar.png', 'Schedule Calendar');
 export const TrialCrownSticker = renderStickerPng('/assets/stickers/trial_crown.png', '15-Day Free Trial Crown');
 
+// Future Expansion Routine & Activity Stickers
+export const BedtimeSleepSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Bedtime Sleep');
+export const DrinkWaterSticker = renderStickerPng('/assets/stickers/drink_water.png', 'Drink Water');
+export const PetCareSticker = renderStickerPng('/assets/stickers/pet_care.png', 'Pet Care');
+export const MusicSensorySticker = renderStickerPng('/assets/stickers/music_sensory.png', 'Music Sensory');
+export const OutdoorSunSticker = renderStickerPng('/assets/stickers/outdoor_sun.png', 'Outdoor Sunshine');
+export const HomeworkStudySticker = renderStickerPng('/assets/stickers/homework_study.png', 'Homework Study');
+export const ArtCraftsSticker = renderStickerPng('/assets/stickers/art_crafts.png', 'Art Crafts');
+export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Sparkles');
+export const RewardTrophySticker = renderStickerPng('/assets/stickers/reward_trophy.png', 'Reward Trophy');
+export const BathTimeSticker = renderStickerPng('/assets/stickers/bath_time.png', 'Bath Time');
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -143,10 +155,30 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📱' || normTitle.includes('tablet') || normTitle.includes('ipad')) return <TabletIpadSticker className={className} size={size} />;
   // ⏱️ Timer
   if (normEmoji === '⏱️' || normEmoji === '⏳') return <CountdownTimerSticker className={className} size={size} />;
-  // 🫧 Fidget bubbles / sparkle / puzzle / circle / stars
-  if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '✨' || normEmoji === '⭐' || normEmoji === '⭕' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
+  // 🫧 Fidget bubbles / puzzle / circle / stars
+  if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '⭕' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
   // 🛋️ Quiet / break / Home / Afternoon
   if (normEmoji === '🛋️' || normEmoji === '🌬️' || normEmoji === '🏡' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet') || normTitle.includes('home')) return <BreathingCloudSticker className={className} size={size} />;
+  // 🛏️ Bed / Sleep
+  if (normEmoji === '🛏️' || normTitle.includes('bed') || normTitle.includes('wind down') || normTitle.includes('sleep')) return <BedtimeSleepSticker className={className} size={size} />;
+  // 💧 Drink water / Hydration
+  if (normEmoji === '💧' || normEmoji === '🥤' || normEmoji === '🥛' || normTitle.includes('water') || normTitle.includes('drink') || normTitle.includes('hydrate')) return <DrinkWaterSticker className={className} size={size} />;
+  // 🐕 Pet care / dog / cat
+  if (normEmoji === '🐕' || normEmoji === '🐾' || normEmoji === '🐶' || normEmoji === '🐱' || normTitle.includes('pet') || normTitle.includes('dog') || normTitle.includes('cat')) return <PetCareSticker className={className} size={size} />;
+  // 🎵 Music / audio calm
+  if (normEmoji === '🎵' || normEmoji === '🎶' || normEmoji === '🎸' || normTitle.includes('music') || normTitle.includes('song') || normTitle.includes('listen')) return <MusicSensorySticker className={className} size={size} />;
+  // ☀️ Outdoor / sunshine / park
+  if (normEmoji === '☀️' || normEmoji === '🌳' || normTitle.includes('outdoor') || normTitle.includes('outside') || normTitle.includes('park') || normTitle.includes('sunshine')) return <OutdoorSunSticker className={className} size={size} />;
+  // 📓 Homework / study
+  if (normEmoji === '📓' || normTitle.includes('homework') || normTitle.includes('study')) return <HomeworkStudySticker className={className} size={size} />;
+  // 🎨 Art / crafts / drawing
+  if (normEmoji === '🎨' || normEmoji === '🖍️' || normTitle.includes('art') || normTitle.includes('paint') || normTitle.includes('craft')) return <ArtCraftsSticker className={className} size={size} />;
+  // ✨ Sparkles / calm mindfulness
+  if (normEmoji === '✨' || normEmoji === '⭐' || normTitle.includes('sparkle') || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
+  // 🏆 Trophy / reward / milestone
+  if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;
+  // 🛁 Bath time / tub
+  if (normEmoji === '🛁' || normTitle.includes('bath') || normTitle.includes('tub')) return <BathTimeSticker className={className} size={size} />;
 
   // Fallback to raw emoji if none match
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;
