@@ -82,6 +82,15 @@ export const ShowerSticker = renderStickerPng('/assets/stickers/shower_wash.png'
 export const SchoolBusSticker = renderStickerPng('/assets/stickers/school_bus.png', 'School Bus');
 export const ScienceFlaskSticker = renderStickerPng('/assets/stickers/science_flask.png', 'Science Flask');
 
+// Onboarding, Personas & Feature Stickers
+export const LanguageGlobeSticker = renderStickerPng('/assets/stickers/language_globe.png', 'Language Globe');
+export const ChildPersonaSticker = renderStickerPng('/assets/stickers/child_persona.png', 'Child Persona');
+export const TeenHeadphonesSticker = renderStickerPng('/assets/stickers/teen_headphones.png', 'Teen Headphones');
+export const AdultBriefcaseSticker = renderStickerPng('/assets/stickers/adult_briefcase.png', 'Adult Briefcase');
+export const CaregiverPhoneSticker = renderStickerPng('/assets/stickers/caregiver_phone.png', 'Caregiver Phone');
+export const ScheduleCalendarSticker = renderStickerPng('/assets/stickers/schedule_calendar.png', 'Schedule Calendar');
+export const TrialCrownSticker = renderStickerPng('/assets/stickers/trial_crown.png', '15-Day Free Trial Crown');
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.

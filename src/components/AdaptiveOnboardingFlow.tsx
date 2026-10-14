@@ -33,6 +33,19 @@ import { getPairingCode } from '../services/caregiverSync';
 import { playChime } from '../utils/audio';
 import { LanguageDropdown } from './LanguageDropdown';
 import { t } from '../services/translator';
+import {
+  LanguageGlobeSticker,
+  ChildPersonaSticker,
+  TeenHeadphonesSticker,
+  AdultBriefcaseSticker,
+  CaregiverPhoneSticker,
+  ScheduleCalendarSticker,
+  TrialCrownSticker,
+  QuickPhrasesSticker,
+  SpoonSticker,
+  ShieldSosSticker,
+  TabletIpadSticker,
+} from './icons/JournalStickers';
 
 interface AdaptiveOnboardingFlowProps {
   isOpen: boolean;
@@ -258,8 +271,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               {/* Language Selection Card */}
               <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-slate-800/80 border-2 border-amber-300 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 flex items-center justify-center text-xl shrink-0">
-                    <Globe className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-200/80 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                    <LanguageGlobeSticker className="w-7 h-7 sm:w-8 sm:h-8" />
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
@@ -293,8 +306,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 flex items-center justify-center mb-2">
-                      <Smile className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center mb-2">
+                      <ChildPersonaSticker className="w-8 h-8 sm:w-9 sm:h-9" />
                     </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Child (Ages 3–11)')}
@@ -324,8 +337,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-300 flex items-center justify-center mb-2">
-                      <Headphones className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950/40 flex items-center justify-center mb-2">
+                      <TeenHeadphonesSticker className="w-8 h-8 sm:w-9 sm:h-9" />
                     </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Teen (Ages 12–17)')}
@@ -355,8 +368,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     </div>
                   )}
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/40 text-teal-600 dark:text-teal-300 flex items-center justify-center mb-2">
-                      <Briefcase className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/40 flex items-center justify-center mb-2">
+                      <AdultBriefcaseSticker className="w-8 h-8 sm:w-9 sm:h-9" />
                     </div>
                     <h3 className="font-black text-base text-slate-900 dark:text-white mt-2">
                       {t('Adult (Ages 18+)')}
@@ -386,7 +399,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                         : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                     }`}
                   >
-                    <Smartphone className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <CaregiverPhoneSticker className="w-7 h-7 shrink-0 -mt-0.5" />
                     <div>
                       <div className="font-bold text-sm">{t('Pair with Caregiver Hub')}</div>
                       <div className="text-xs opacity-75 mt-0.5">
@@ -404,7 +417,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                         : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                     }`}
                   >
-                    <Heart className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <TabletIpadSticker className="w-7 h-7 shrink-0 -mt-0.5" />
                     <div>
                       <div className="font-bold text-sm">{t('Standalone Mode')}</div>
                       <div className="text-xs opacity-75 mt-0.5">
@@ -510,8 +523,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 {/* 1. AAC Grid */}
                 <div className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 flex items-center justify-between">
                   <div className="flex items-start gap-3.5 pr-2">
-                    <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/50 text-orange-600 flex items-center justify-center shrink-0">
-                      <MessageSquare className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/50 flex items-center justify-center shrink-0">
+                      <QuickPhrasesSticker className="w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -540,8 +553,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 {/* 2. Visual Schedules */}
                 <div className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 flex items-center justify-between">
                   <div className="flex items-start gap-3.5 pr-2">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center shrink-0">
-                      <Calendar className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center shrink-0">
+                      <ScheduleCalendarSticker className="w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -570,8 +583,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 {/* 3. Spoon Theory Energy Budget */}
                 <div className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 flex items-center justify-between">
                   <div className="flex items-start gap-3.5 pr-2">
-                    <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/50 text-teal-600 flex items-center justify-center shrink-0">
-                      <Battery className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/50 flex items-center justify-center shrink-0">
+                      <SpoonSticker className="w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -600,8 +613,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 {/* 4. Sensory Safe Mode & Emergency SOS */}
                 <div className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 flex items-center justify-between">
                   <div className="flex items-start gap-3.5 pr-2">
-                    <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/50 text-red-600 flex items-center justify-center shrink-0">
-                      <ShieldAlert className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/50 flex items-center justify-center shrink-0">
+                      <ShieldSosSticker className="w-7 h-7 sm:w-8 sm:h-8" />
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -634,8 +647,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           {step === 4 && (
             <div className="space-y-4 sm:space-y-5 animate-in fade-in">
               <div className="text-center space-y-1.5 sm:space-y-2">
-                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner border border-amber-300 dark:border-amber-700">
-                  <Crown className="w-5 h-5 sm:w-7 sm:h-7" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mx-auto shadow-sm border border-amber-300 dark:border-amber-700">
+                  <TrialCrownSticker className="w-10 h-10 sm:w-12 sm:h-12" />
                 </div>
                 <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   {t('Start Your 15-Day Free Trial')}
