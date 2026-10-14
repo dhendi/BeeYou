@@ -51,9 +51,19 @@ export const CopingToolkitModal: React.FC = () => {
     breathingConfig,
     calmStrategies,
     setShowEditCalmModal,
+    copingToolkitTab,
+    setCopingToolkitTab,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound'>('breathing');
+  const [activeTab, setActiveTab] = useState<'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound'>(
+    copingToolkitTab || 'breathing'
+  );
+
+  useEffect(() => {
+    if (copingToolkitTab && showCopingToolkit) {
+      setActiveTab(copingToolkitTab);
+    }
+  }, [copingToolkitTab, showCopingToolkit]);
 
   // Breathing state
   const [breathePhase, setBreathePhase] = useState<'Inhale...' | 'Hold...' | 'Exhale...' | 'Rest...' | string>('Inhale...');
@@ -161,6 +171,11 @@ export const CopingToolkitModal: React.FC = () => {
     };
   }, []);
 
+  const selectTab = (tab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound') => {
+    setActiveTab(tab);
+    setCopingToolkitTab(tab);
+  };
+
   if (!showCopingToolkit) return null;
 
   const startBreakTimer = (mins: number) => {
@@ -220,7 +235,7 @@ export const CopingToolkitModal: React.FC = () => {
         {/* Tab Selector */}
         <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
           <button
-            onClick={() => setActiveTab('breathing')}
+            onClick={() => selectTab('breathing')}
             className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'breathing'
                 ? 'bg-teal-600 text-white shadow-sm'
@@ -231,7 +246,7 @@ export const CopingToolkitModal: React.FC = () => {
             <span>{t('Deep Breathing')}</span>
           </button>
           <button
-            onClick={() => setActiveTab('strategies')}
+            onClick={() => selectTab('strategies')}
             className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'strategies'
                 ? 'bg-teal-600 text-white shadow-sm'
@@ -242,7 +257,7 @@ export const CopingToolkitModal: React.FC = () => {
             <span>{t('Calm Tools')}</span>
           </button>
           <button
-            onClick={() => setActiveTab('timer')}
+            onClick={() => selectTab('timer')}
             className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'timer'
                 ? 'bg-teal-600 text-white shadow-sm'
@@ -253,7 +268,7 @@ export const CopingToolkitModal: React.FC = () => {
             <span>{t('Break Timer')}</span>
           </button>
           <button
-            onClick={() => setActiveTab('grounding')}
+            onClick={() => selectTab('grounding')}
             className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'grounding'
                 ? 'bg-teal-600 text-white shadow-sm'
@@ -264,7 +279,7 @@ export const CopingToolkitModal: React.FC = () => {
             <span>{t('5-4-3-2-1')}</span>
           </button>
           <button
-            onClick={() => setActiveTab('sound')}
+            onClick={() => selectTab('sound')}
             className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
               activeTab === 'sound'
                 ? 'bg-teal-600 text-white shadow-sm'

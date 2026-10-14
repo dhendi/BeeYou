@@ -118,6 +118,9 @@ export interface AppContextType {
   setShowQuickPhrasesDrawer: (val: boolean) => void;
   showCopingToolkit: boolean;
   setShowCopingToolkit: (val: boolean) => void;
+  copingToolkitTab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound';
+  setCopingToolkitTab: (tab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound') => void;
+  openCopingToolkit: (tab?: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound') => void;
   showPlansChangedModal: boolean;
   setShowPlansChangedModal: (val: boolean) => void;
   showMorningBrief: boolean;
@@ -465,6 +468,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const [showPinModal, setShowPinModal] = useState<boolean>(false);
   const [showQuickPhrasesDrawer, setShowQuickPhrasesDrawer] = useState<boolean>(false);
   const [showCopingToolkit, setShowCopingToolkit] = useState<boolean>(false);
+  const [copingToolkitTab, setCopingToolkitTab] = useState<'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound'>('breathing');
+
+  const openCopingToolkit = useCallback((tab?: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound') => {
+    if (tab) setCopingToolkitTab(tab);
+    setShowCopingToolkit(true);
+  }, []);
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
   const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
@@ -950,6 +959,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setShowQuickPhrasesDrawer,
     showCopingToolkit,
     setShowCopingToolkit,
+    copingToolkitTab,
+    setCopingToolkitTab,
+    openCopingToolkit,
     showPlansChangedModal: routinesSchedule.showPlansChangedModal,
     setShowPlansChangedModal: routinesSchedule.setShowPlansChangedModal,
     showMorningBrief: routinesSchedule.showMorningBrief,
