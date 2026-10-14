@@ -16,6 +16,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 const getLevelIcon = (level: number) => {
   switch (level) {
@@ -79,24 +80,35 @@ export const FivePointScaleModal: React.FC = () => {
   const selectedCfg = selectedLevel ? fivePointSettings.levels.find((l) => l.level === selectedLevel) : null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 z-10">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Incredible 5-Point Scale</p>
-          <h2 className="text-xl font-black text-slate-800 dark:text-white">How do I feel right now?</h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('Incredible 5-Point Scale')}
+      className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
+      onClick={() => setShowFivePointModal(false)}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{t('Incredible 5-Point Scale')}</p>
+            <h2 className="text-xl font-black text-slate-800 dark:text-white">{t('How do I feel right now?')}</h2>
+          </div>
+          <button
+            type="button"
+            aria-label={t('Close emotional scale modal')}
+            onClick={() => setShowFivePointModal(false)}
+            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer active:scale-95 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+          >
+            <X className="w-5 h-5 text-slate-600 dark:text-slate-300" aria-hidden="true" />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Close emotional scale modal"
-          onClick={() => setShowFivePointModal(false)}
-          className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-        >
-          <X className="w-5 h-5 text-slate-600 dark:text-slate-300" aria-hidden="true" />
-        </button>
-      </div>
 
-      <div className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-3">
+        {/* Content Body */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 min-h-0 space-y-3">
         {/* Thermometer bar */}
         <div className="flex justify-between gap-1.5 mb-2" role="group" aria-label="5-Point scale level selector">
           {fivePointSettings.levels.map((l) => {
@@ -182,6 +194,7 @@ export const FivePointScaleModal: React.FC = () => {
             })}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

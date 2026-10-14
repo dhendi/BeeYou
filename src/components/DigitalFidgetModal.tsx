@@ -1059,13 +1059,22 @@ export const DigitalFidgetModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-slate-900/60 backdrop-blur-md overflow-y-auto p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="max-w-md w-full mx-auto my-auto bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('Tactile Fidget Toys')}
+      className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
+      onClick={() => setShowFidgetModal(false)}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('Tappy-Style Sensory Hub')}</p>
-            <h2 className="text-xl font-black text-slate-800">{t('Tactile Fidget Toys')}</h2>
+            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">{t('Tactile Fidget Toys')}</h2>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -1075,8 +1084,8 @@ export const DigitalFidgetModal: React.FC = () => {
                 setSoundEnabled((p) => !p);
                 if (navigator.vibrate) navigator.vibrate(20);
               }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                soundEnabled ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                soundEnabled ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
               }`}
               title={soundEnabled ? t('Mute sound') : t('Unmute sound')}
               aria-label={soundEnabled ? t('Mute sound') : t('Unmute sound')}
@@ -1090,8 +1099,8 @@ export const DigitalFidgetModal: React.FC = () => {
                 setHapticEnabled((p) => !p);
                 if (!hapticEnabled && navigator.vibrate) navigator.vibrate(30);
               }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                hapticEnabled ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                hapticEnabled ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
               }`}
               title={hapticEnabled ? t('Disable vibration') : t('Enable vibration')}
               aria-label={hapticEnabled ? t('Disable vibration') : t('Enable vibration')}
@@ -1103,7 +1112,7 @@ export const DigitalFidgetModal: React.FC = () => {
             <button
               onClick={() => setShowFidgetModal(false)}
               aria-label={t('Close')}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer ml-1"
+              className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all ml-1 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -1137,7 +1146,7 @@ export const DigitalFidgetModal: React.FC = () => {
         </div>
 
         {/* Active Fidget Playground */}
-        <div className="p-4 sm:p-5 flex-1 flex flex-col items-center justify-center min-h-[320px]">
+        <div className="p-4 sm:p-5 flex-1 flex flex-col items-center justify-center min-h-[320px] overflow-y-auto">
           {activeFidget === 'pop' && <PopItToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
           {activeFidget === 'switches' && <MechanicalClickerToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}
           {activeFidget === 'spinner' && <PhysicsFidgetSpinnerToy soundEnabled={soundEnabled} hapticEnabled={hapticEnabled} />}

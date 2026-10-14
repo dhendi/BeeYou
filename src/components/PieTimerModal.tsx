@@ -188,41 +188,47 @@ export const PieTimerModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-labelledby="pie-timer-title"
-      className="fixed inset-0 z-[200] flex flex-col bg-slate-900/60 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
+      onClick={() => {
+        setShowPieTimerModal(false);
+        setIsRunning(false);
+      }}
     >
-      <div className="min-h-full flex flex-col justify-center items-center py-6 px-4">
-        {/* Main Clock Card */}
-        <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-xs">
-                <Clock className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  {t('Visual Time Timer')}
-                </p>
-                <h2 id="pie-timer-title" className="text-lg font-black text-slate-800">
-                  {t('Pie Clock')}
-                </h2>
-              </div>
+      {/* Main Clock Card */}
+      <div
+        className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
+              <Clock className="w-5 h-5" aria-hidden="true" />
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setShowPieTimerModal(false);
-                setIsRunning(false);
-              }}
-              aria-label={t('Close Pie Clock')}
-              className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-            >
-              <X className="w-5 h-5" aria-hidden="true" />
-            </button>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                {t('Visual Time Timer')}
+              </p>
+              <h2 id="pie-timer-title" className="text-lg font-black text-slate-800 dark:text-slate-100">
+                {t('Pie Clock')}
+              </h2>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowPieTimerModal(false);
+              setIsRunning(false);
+            }}
+            aria-label={t('Close Pie Clock')}
+            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
+          </button>
+        </div>
 
-          {/* Clock Dial & Controls Body */}
-          <div className="p-6 flex flex-col items-center gap-6">
+        {/* Clock Dial & Controls Body */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 min-h-0 flex flex-col items-center gap-6">
             {/* Visual Clock SVG */}
             <div className={`relative flex items-center justify-center ${isFinished ? 'animate-bounce' : ''}`}>
               <svg
@@ -600,6 +606,5 @@ export const PieTimerModal: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };

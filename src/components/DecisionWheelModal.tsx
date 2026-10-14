@@ -112,32 +112,44 @@ export const DecisionWheelModal: React.FC = () => {
   const sliceAngle = (2 * Math.PI) / count;
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 backdrop-blur-sm overflow-y-auto">
-      <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white border-b border-slate-100 z-10">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('Choice Paralysis Helper')}</p>
-          <h2 className="text-xl font-black text-slate-800">{t('Decision Wheel')}</h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('Decision Wheel')}
+      className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
+      onClick={() => setShowDecisionWheelModal(false)}
+    >
+      <div
+        className="bg-white w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-slate-100 shrink-0">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('Choice Paralysis Helper')}</p>
+            <h2 className="text-xl font-black text-slate-800">{t('Decision Wheel')}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditMode((v) => !v)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                editMode ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 text-slate-700 border-slate-200'
+              }`}
+            >
+              {editMode ? t('Done') : t('Edit')}
+            </button>
+            <button
+              onClick={() => setShowDecisionWheelModal(false)}
+              aria-label={t('Close')}
+              className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-indigo-400 focus-visible:outline-none"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setEditMode((v) => !v)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-              editMode ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 text-slate-700 border-slate-200'
-            }`}
-          >
-            {editMode ? t('Done') : t('Edit')}
-          </button>
-          <button
-            onClick={() => setShowDecisionWheelModal(false)}
-            aria-label={t('Close')}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
-          >
-            <X className="w-4 h-4 text-slate-600" />
-          </button>
-        </div>
-      </div>
 
-      <div className="flex-1 px-4 py-5 flex flex-col items-center gap-5 max-w-md mx-auto w-full">
+        {/* Content Body */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 min-h-0 flex flex-col items-center gap-5">
         {/* SVG Wheel */}
         <div className="relative">
           <svg
@@ -266,6 +278,7 @@ export const DecisionWheelModal: React.FC = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
