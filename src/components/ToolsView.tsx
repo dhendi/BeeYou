@@ -7,7 +7,6 @@ import {
   BreathingCloudSticker,
   DecisionWheelSticker,
   CountdownTimerSticker,
-  ShieldSosSticker,
   ThermometerSticker,
   MusicSensorySticker,
   CalmSparklesSticker,
@@ -23,7 +22,6 @@ export const ToolsView: React.FC = () => {
     setShowDecisionWheelModal,
     setShowPieTimerModal,
     setShowFivePointModal,
-    activateEmergencyMode,
     setShowSpoonModal,
     openCopingToolkit,
   } = useApp();
@@ -163,22 +161,6 @@ export const ToolsView: React.FC = () => {
       Sticker: ThermometerSticker,
       action: () => {
         setShowFivePointModal(true);
-        playChime('tap');
-      },
-    },
-
-    // Emotion & SOS: Emergency Sensory Mode
-    {
-      id: 'emergency-mode',
-      category: 'sos' as ToolCategory,
-      title: 'Emergency Sensory Mode',
-      desc: 'Instant low-stimulation shield, dimmed screen, and emergency help speech cards.',
-      badge: 'Sensory SOS',
-      badgeClass: 'bg-red-100 text-red-800 border-red-200',
-      color: 'border-2 border-red-300/80 bg-red-50/40 hover:bg-red-50/80 text-red-950',
-      Sticker: ShieldSosSticker,
-      action: () => {
-        activateEmergencyMode();
         playChime('tap');
       },
     },

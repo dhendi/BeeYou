@@ -24,7 +24,6 @@ import {
   SpoonSticker,
   MedicationSticker,
   MoodJournalSticker,
-  ShieldSosSticker,
   IdCardSticker,
   ThermometerSticker,
   ConnectHeartSticker,
@@ -35,7 +34,6 @@ export const ToolsHubModal: React.FC = () => {
   const {
     showToolsHubModal,
     setShowToolsHubModal,
-    activateEmergencyMode,
     setShowFivePointModal,
     setShowPassportModal,
     setShowSpoonModal,
@@ -148,15 +146,6 @@ export const ToolsHubModal: React.FC = () => {
       bg: 'from-indigo-50 to-violet-100/70 border-indigo-300 text-indigo-950',
       action: () => openTool(() => openCopingToolkit('sound')),
     },
-    {
-      id: 'emergency',
-      category: 'sensory',
-      title: 'Emergency Sensory Mode',
-      desc: 'Instant dim screen & emergency speech cards',
-      badge: 'Crisis / SOS',
-      bg: 'from-rose-50 to-red-100/80 border-rose-300 text-rose-950',
-      action: () => openTool(() => activateEmergencyMode()),
-    },
 
     // ── Wellness & Energy ──
     {
@@ -258,7 +247,6 @@ export const ToolsHubModal: React.FC = () => {
     grounding: 'sensoryBreathingPacer',
     sounds: 'sensoryBreathingPacer',
     'pie-timer': 'visualCountdownTimer',
-    emergency: 'emergencyAlertSOS',
   };
   const CATEGORY_BLURB: Record<'sensory' | 'wellness' | 'support', string> = {
     sensory: 'Calm down, reset and make choices when things feel like too much.',
@@ -351,8 +339,6 @@ export const ToolsHubModal: React.FC = () => {
                 ? FidgetBubblesSticker
                 : tool.id === 'coping'
                 ? BreathingCloudSticker
-                : tool.id === 'emergency'
-                ? ShieldSosSticker
                 : tool.id === 'spoons'
                 ? SpoonSticker
                 : tool.id === 'meds'
