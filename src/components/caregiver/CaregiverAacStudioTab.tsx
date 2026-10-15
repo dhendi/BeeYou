@@ -571,8 +571,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
       {/* Voice & Speech Controls */}
       <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-            <Volume2 className="w-4 h-4 text-indigo-600" />
+          <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300/80 flex items-center justify-center p-0.5 shrink-0 shadow-2xs">
+              <img src="/assets/stickers/voice_microphone.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            </div>
             <span>{t("Fluid Human Voice & Speech Settings")}</span>
           </h3>
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
@@ -585,15 +587,14 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           <label className="text-xs font-black text-slate-700 block mb-1.5">
             {t("Human Voice Persona:")}
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {[
-              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', icon: Heart, badge: 'Recommended' },
-              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', icon: Sun },
-              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', icon: Wind },
-              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', icon: Smartphone },
+              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', sticker: '/assets/stickers/fav_love_heart.png', badge: 'Recommended' },
+              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', sticker: '/assets/stickers/outdoor_sun.png' },
+              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', sticker: '/assets/stickers/wind_breeze.png' },
+              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', sticker: '/assets/stickers/tablet_ipad.png' },
             ].map((persona) => {
               const isSelected = (settings.voicePersona || 'Kore') === persona.id;
-              const PersonaIcon = persona.icon;
               return (
                 <button
                   key={persona.id}
@@ -602,22 +603,24 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                     updateSettings({ voicePersona: persona.id as any });
                     playChime('tap');
                   }}
-                  className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                  className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer group ${
                     isSelected
-                      ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-400 text-indigo-950 shadow-xs'
+                      ? 'bg-amber-50/80 border-amber-500 ring-2 ring-amber-400 text-amber-950 shadow-xs'
                       : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <PersonaIcon className="w-5 h-5 text-indigo-600" />
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                      <img src={persona.sticker} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    </div>
                     {persona.badge && (
-                      <span className="text-[9px] font-black uppercase text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[9px] font-black uppercase text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md">
                         {persona.badge}
                       </span>
                     )}
                   </div>
                   <span className="font-black text-xs block">{persona.name}</span>
-                  <span className="text-[10px] text-slate-500 font-medium block leading-tight">
+                  <span className="text-[10px] text-slate-500 font-medium block leading-tight mt-0.5">
                     {persona.desc}
                   </span>
                 </button>
