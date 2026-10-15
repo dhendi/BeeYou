@@ -20,6 +20,7 @@ import { t } from '../services/translator';
 import { Routine, VisualScheduleStep } from '../types';
 import { DEFAULT_ROUTINES } from '../data/defaultData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { VisualStepPacer } from './VisualStepPacer';
 import { 
   getCurrentTimeRoutine,
   getTimePeriodCategory,
@@ -85,6 +86,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
   const [timerRoutine, setTimerRoutine] = useState<Routine | null>(null);
   const [timerStepIndex, setTimerStepIndex] = useState<number>(0);
   const [timerSecondsLeft, setTimerSecondsLeft] = useState<number>(300);
+  const [timerTotalSeconds, setTimerTotalSeconds] = useState<number>(300);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [isWaitingForNext, setIsWaitingForNext] = useState<boolean>(false);
 
@@ -186,6 +188,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     setTimerRoutine(routine);
     setTimerStepIndex(stepIndex);
     setTimerSecondsLeft(duration);
+    setTimerTotalSeconds(duration);
     setIsTimerRunning(true);
     setIsWaitingForNext(false);
     playChime('tap');
@@ -201,8 +204,16 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     setTimerRoutine(routine);
     setTimerStepIndex(stepIdx);
     setTimerSecondsLeft(duration);
+    setTimerTotalSeconds(duration);
     setIsTimerRunning(true);
     setIsWaitingForNext(false);
+    playChime('tap');
+  };
+
+  // Add extra grace time to current step
+  const handleAddGraceTime = (addedSeconds: number) => {
+    setTimerSecondsLeft((prev) => prev + addedSeconds);
+    setTimerTotalSeconds((prev) => Math.max(prev, timerSecondsLeft + addedSeconds));
     playChime('tap');
   };
 
@@ -218,8 +229,10 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     if (timerStepIndex + 1 < timerRoutine.steps.length) {
       const nextIdx = timerStepIndex + 1;
       const nextStep = timerRoutine.steps[nextIdx];
+      const nextDuration = (nextStep?.durationMin || 5) * 60;
       setTimerStepIndex(nextIdx);
-      setTimerSecondsLeft((nextStep?.durationMin || 5) * 60);
+      setTimerSecondsLeft(nextDuration);
+      setTimerTotalSeconds(nextDuration);
       // Wait until person is ready before starting the next item's timer
       setIsTimerRunning(false);
       setIsWaitingForNext(true);
@@ -286,184 +299,26 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 pb-20 select-none">
-      {/* Visual Timer Banner Modal (if activated via Play ▶ button) */}
-      {timerRoutine && (() => {
-        const activeTimerStep = timerRoutine.steps[timerStepIndex];
-        const isTimerStepDone = Boolean(activeTimerStep?.completed);
-
-        return (
-          <div className="bg-[#1E232A] text-white p-4 sm:p-5 rounded-[2.5rem] shadow-xl border border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
-            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-              <div className={`w-14 h-14 rounded-full font-black text-xl flex items-center justify-center shrink-0 shadow-md transition-all ${
-                isWaitingForNext
-                  ? 'bg-amber-300/20 text-amber-300 border-2 border-amber-400/50'
-                  : 'bg-amber-400 text-stone-950'
-              }`}>
-                {Math.floor(timerSecondsLeft / 60)}:
-                {String(timerSecondsLeft % 60).padStart(2, '0')}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>{timerRoutine.title}</span>
-                    <RoutineStickerIcon
-                      emoji={timerRoutine.emoji}
-                      title={timerRoutine.title}
-                      className="w-4 h-4 object-contain inline-block shrink-0"
-                    />
-                  </span>
-                  {isTimerStepDone ? (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-400/25 text-emerald-300 text-[10px] font-black border border-emerald-400/40 flex items-center gap-1">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                      {t('Already Done')}
-                    </span>
-                  ) : isWaitingForNext ? (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black animate-pulse">
-                      {t('Ready when you are')}
-                    </span>
-                  ) : null}
-                </div>
-                <h4 className="text-base sm:text-lg font-black truncate text-white flex items-center gap-2 mt-0.5 flex-wrap">
-                  <RoutineStickerIcon
-                    emoji={activeTimerStep?.emoji}
-                    title={activeTimerStep?.title}
-                    className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
-                  />
-                  <span className={isTimerStepDone ? 'line-through text-stone-300' : ''}>
-                    {activeTimerStep?.title || t('In Progress')}
-                  </span>
-                  <span className="text-xs font-semibold text-stone-400 shrink-0">
-                    ({timerStepIndex + 1}/{timerRoutine.steps.length})
-                  </span>
-                  {isTimerStepDone && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black border border-emerald-500/30 shrink-0 flex items-center gap-1">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                      {t('Already Done')}
-                    </span>
-                  )}
-                </h4>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-              {isWaitingForNext ? (
-                <>
-                  {/* When waiting for person to be ready for next item */}
-                  {isTimerStepDone ? (
-                    <>
-                      {/* Already done: Next step is the primary action */}
-                      {timerStepIndex + 1 < timerRoutine.steps.length ? (
-                        <button
-                          type="button"
-                          onClick={() => handleAdvanceStep(false)}
-                          className="px-4 py-2 rounded-full bg-[#FACC15] hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
-                        >
-                          <span>{t('Next Step')}</span>
-                          <ChevronRight className="w-4 h-4 stroke-[3]" />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTimerRoutine(null);
-                            setIsWaitingForNext(false);
-                            playChime('complete');
-                          }}
-                          className="px-4 py-2 rounded-full bg-[#FACC15] hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
-                        >
-                          <Check className="w-4 h-4 stroke-[3]" />
-                          <span>{t('Finish Routine')}</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={handleStartNextWhenReady}
-                        className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                        title={t('Restart timer for this step')}
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                        <span>{t('Redo Timer')}</span>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleStartNextWhenReady}
-                        className="px-4 py-2 rounded-full bg-[#FACC15] hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
-                      >
-                        <Play className="w-4 h-4 fill-stone-950 text-stone-950" />
-                        <span>{t('Start When Ready')}</span>
-                      </button>
-                      {timerStepIndex + 1 < timerRoutine.steps.length && (
-                        <button
-                          type="button"
-                          onClick={() => handleAdvanceStep(false)}
-                          className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
-                          title={t('Skip to next step')}
-                        >
-                          <span>{t('Next')}</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* When step is actively counting down or paused */}
-                  <button
-                    type="button"
-                    onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
-                    <span>{isTimerRunning ? t('Pause') : t('Resume')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAdvanceStep(true)}
-                    className="px-4 py-2 rounded-full bg-[#FACC15] hover:bg-amber-400 text-stone-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
-                  >
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    <span>
-                      {isTimerStepDone
-                        ? timerStepIndex + 1 < timerRoutine.steps.length
-                          ? t('Next')
-                          : t('Finish')
-                        : timerStepIndex + 1 < timerRoutine.steps.length
-                        ? t('Done')
-                        : t('Finish')}
-                    </span>
-                  </button>
-                  {timerStepIndex + 1 < timerRoutine.steps.length && (
-                    <button
-                      type="button"
-                      onClick={() => handleAdvanceStep(false)}
-                      className="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
-                      title={t('Skip to next step')}
-                    >
-                      <span>{t('Next')}</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  )}
-                </>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setTimerRoutine(null);
-                  setIsWaitingForNext(false);
-                }}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-stone-400 hover:text-white flex items-center justify-center transition-all cursor-pointer ml-1"
-                title={t('Close Timer')}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        );
-      })()}
+      {/* Visual Step Pacer Banner (if activated via Play ▶ button) */}
+      {timerRoutine && (
+        <VisualStepPacer
+          routine={timerRoutine}
+          stepIndex={timerStepIndex}
+          secondsLeft={timerSecondsLeft}
+          totalSeconds={timerTotalSeconds}
+          isRunning={isTimerRunning}
+          isWaitingForNext={isWaitingForNext}
+          onTogglePlayPause={() => setIsTimerRunning(!isTimerRunning)}
+          onAdvanceStep={handleAdvanceStep}
+          onAddGraceTime={handleAddGraceTime}
+          onStartWhenReady={handleStartNextWhenReady}
+          onClose={() => {
+            setTimerRoutine(null);
+            setIsWaitingForNext(false);
+          }}
+          onSelectStepIndex={(idx) => handleSelectStepForTimer(timerRoutine, idx)}
+        />
+      )}
 
       {/* Empty State when no routines are scheduled for this day */}
       {categorizedGroups.length === 0 && (
@@ -696,13 +551,16 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                 </div>
 
                                 {/* Duration on the right */}
-                                <span
-                                  className={`text-xs sm:text-sm font-semibold shrink-0 ${
-                                    isStepActiveOnTimer ? 'text-amber-800 font-bold' : 'text-stone-400'
-                                  }`}
-                                >
-                                  {step.durationMin || 5}m
-                                </span>
+                                {isStepActiveOnTimer ? (
+                                  <div className="flex items-center gap-1.5 shrink-0 bg-amber-400 text-stone-950 px-2.5 py-1 rounded-full font-black text-xs shadow-xs animate-pulse">
+                                    <Clock className="w-3 h-3 text-stone-900" />
+                                    <span>{Math.floor(timerSecondsLeft / 60)}:{String(timerSecondsLeft % 60).padStart(2, '0')}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs sm:text-sm font-semibold shrink-0 text-stone-400">
+                                    {step.durationMin || 5}m
+                                  </span>
+                                )}
                               </div>
                             );
                           })}
