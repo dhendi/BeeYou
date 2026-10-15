@@ -582,14 +582,14 @@ export const AdventuresView: React.FC = () => {
           {adventures.map((adventure) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300'
-              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+              : 'border-2 border-amber-300/90 hover:border-amber-400 bg-amber-100/90 hover:bg-amber-100 text-slate-900';
             const iconBoxClass = isColorCoded
-              ? 'bg-emerald-50 border border-emerald-200'
-              : 'bg-white/90 border border-amber-200/90';
+              ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-emerald-50 border border-emerald-200'
+              : 'w-16 h-16 flex items-center justify-center p-1 shrink-0';
             const badgeClass = isColorCoded
               ? 'text-emerald-700 bg-emerald-50'
-              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
-            const subtextClass = isColorCoded ? 'text-emerald-700' : 'text-amber-800';
+              : 'text-amber-950 bg-white/90 border border-amber-300/80 shadow-2xs';
+            const subtextClass = isColorCoded ? 'text-emerald-700' : 'text-amber-900';
 
             return (
               <button
@@ -604,7 +604,7 @@ export const AdventuresView: React.FC = () => {
                 }}
                 className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
+                <div className={iconBoxClass} aria-hidden="true">
                   {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
                     <img
                       src={adventure.stickerSrc || getAdventureSticker(adventure.id)}
@@ -623,17 +623,17 @@ export const AdventuresView: React.FC = () => {
                   <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
                     {t(adventure.title)}
                   </h3>
-                  <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1">
+                  <p className="text-xs text-slate-700 font-medium line-clamp-2 mt-1 leading-relaxed">
                     {t(adventure.summary)}
                   </p>
                   <div className="flex items-center gap-3 mt-3 text-xs font-bold text-slate-400">
-                    <span>{adventure.steps.length} {t('steps')}</span>
+                    <span className="text-slate-600 font-bold">{adventure.steps.length} {t('steps')}</span>
                     <span>•</span>
                     <span className={subtextClass}>{t('Sensory guide')}</span>
                     {adventure.completedCount ? (
                       <>
                         <span>•</span>
-                        <span className="text-amber-600 font-black">
+                        <span className="text-amber-700 font-black">
                           ⭐ {t('Done')} {adventure.completedCount}x
                         </span>
                       </>
@@ -649,14 +649,14 @@ export const AdventuresView: React.FC = () => {
           {socialStories.map((story) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300'
-              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+              : 'border-2 border-amber-300/90 hover:border-amber-400 bg-amber-100/90 hover:bg-amber-100 text-slate-900';
             const iconBoxClass = isColorCoded
-              ? 'bg-indigo-50 border border-indigo-200'
-              : 'bg-white/90 border border-amber-200/90';
+              ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-indigo-50 border border-indigo-200'
+              : 'w-16 h-16 flex items-center justify-center p-1 shrink-0';
             const badgeClass = isColorCoded
               ? 'text-indigo-700 bg-indigo-50'
-              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
-            const subtextClass = isColorCoded ? 'text-indigo-700' : 'text-amber-800';
+              : 'text-amber-950 bg-white/90 border border-amber-300/80 shadow-2xs';
+            const subtextClass = isColorCoded ? 'text-indigo-700' : 'text-amber-900';
 
             return (
               <button
@@ -670,7 +670,7 @@ export const AdventuresView: React.FC = () => {
                 }}
                 className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
+                <div className={iconBoxClass} aria-hidden="true">
                   {(story.stickerSrc || getStorySticker(story.id)) ? (
                     <img
                       src={story.stickerSrc || getStorySticker(story.id)}
@@ -689,7 +689,7 @@ export const AdventuresView: React.FC = () => {
                   <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
                     {t(story.title)}
                   </h3>
-                  <p className="text-xs text-slate-600 font-medium mt-1">
+                  <p className="text-xs text-slate-700 font-medium mt-1 leading-relaxed">
                     {story.pages.length} {t('illustrated pages • Calm & predictable expectations')}
                   </p>
                   <div className={`mt-3 text-xs font-bold flex items-center gap-1 ${subtextClass}`}>
