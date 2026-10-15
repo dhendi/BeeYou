@@ -28,6 +28,11 @@ import {
   ThermometerSticker,
   ConnectHeartSticker,
   EveningMoonSticker,
+  ReadingBookSticker,
+  RepeatLoopSticker,
+  MusicSensorySticker,
+  ArtCraftsSticker,
+  AccessibilityHubSticker,
 } from './icons/JournalStickers';
 
 export const ToolsHubModal: React.FC = () => {
@@ -323,26 +328,36 @@ export const ToolsHubModal: React.FC = () => {
           )}
           {filteredTools.map((tool) => {
             const Sticker =
-              tool.id === 'wheel'
+              tool.id === 'scale'
+                ? ThermometerSticker
+                : tool.id === 'timer' || tool.id === 'pie-timer'
+                ? CountdownTimerSticker
+                : tool.id === 'wheel'
                 ? DecisionWheelSticker
                 : tool.id === 'fidgets'
                 ? FidgetBubblesSticker
-                : tool.id === 'coping'
+                : tool.id === 'breathing' || tool.id === 'coping'
                 ? BreathingCloudSticker
+                : tool.id === 'grounding'
+                ? ConnectHeartSticker
+                : tool.id === 'sounds'
+                ? MusicSensorySticker
                 : tool.id === 'spoons'
                 ? SpoonSticker
                 : tool.id === 'meds'
                 ? MedicationSticker
                 : tool.id === 'journal'
                 ? MoodJournalSticker
-                : tool.id === 'scale'
-                ? ThermometerSticker
-                : tool.id === 'timer' || tool.id === 'pie-timer'
-                ? CountdownTimerSticker
                 : tool.id === 'cycle'
-                ? ConnectHeartSticker
+                ? RepeatLoopSticker
                 : tool.id === 'passport'
+                ? ReadingBookSticker
+                : tool.id === 'aboutme'
                 ? IdCardSticker
+                : tool.id === 'accessibility'
+                ? AccessibilityHubSticker
+                : tool.id === 'theme'
+                ? ArtCraftsSticker
                 : tool.id === 'recollection'
                 ? EveningMoonSticker
                 : FidgetBubblesSticker;
