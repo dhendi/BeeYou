@@ -24,22 +24,32 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('BeeYou Uncaught Error:', error, errorInfo);
   }
 
-  private handleResetApp = () => {
+  private handleResetApp = async () => {
     try {
-      // Clear potentially corrupt local storage keys while preserving important settings if possible
       sessionStorage.clear();
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map((name) => caches.delete(name)));
+      }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      }
     } catch (e) {}
     window.location.reload();
   };
 
-  private handleClearAllAndReload = () => {
+  private handleClearAllAndReload = async () => {
     try {
       localStorage.clear();
       sessionStorage.clear();
       if ('caches' in window) {
-        caches.keys().then((names) => {
-          names.forEach((name) => caches.delete(name));
-        });
+        const names = await caches.keys();
+        await Promise.all(names.map((name) => caches.delete(name)));
+      }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
       }
     } catch (e) {}
     window.location.href = '/';

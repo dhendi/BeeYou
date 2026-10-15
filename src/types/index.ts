@@ -76,6 +76,7 @@ export interface FavoriteSentence {
 export interface VisualScheduleStep {
   id: string;
   title: string;
+  time?: string;
   instruction?: string;
   durationMin?: number;
   completed: boolean;
@@ -141,7 +142,7 @@ export interface SensoryProfileItem {
 export interface AdventureStep {
   order: number;
   title: string;
-  description: string;
+  description?: string;
   emoji: string;
   sensoryTip?: string;
 }

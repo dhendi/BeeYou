@@ -116,16 +116,7 @@ export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' 
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    if (type === 'tap') {
-      // Gentle, whisper-quiet 40ms physical tap tick (never loud, never cosmic)
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(280, now + 0.04);
-      gain.gain.setValueAtTime(0.035, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
-      osc.start(now);
-      osc.stop(now + 0.045);
-    } else if (type === 'speak') {
+    if (type === 'speak') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(440, now);
       osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);

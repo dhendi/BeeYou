@@ -286,9 +286,11 @@ export const AdventuresView: React.FC = () => {
               {t(step.title)}
             </h3>
 
-            <p className="text-sm sm:text-base text-slate-600 font-medium max-w-md leading-relaxed mb-4">
-              {t(step.description)}
-            </p>
+            {step.description && (
+              <p className="text-sm sm:text-base text-slate-600 font-medium max-w-md leading-relaxed mb-4">
+                {t(step.description)}
+              </p>
+            )}
 
             {step.sensoryTip && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-amber-900 max-w-sm mb-6 flex items-center gap-2 text-left">
@@ -298,7 +300,7 @@ export const AdventuresView: React.FC = () => {
             )}
 
             <button
-              onClick={() => speak(`${t(step.title)}. ${t(step.description)}`)}
+              onClick={() => speak(`${t(step.title)}.${step.description ? ` ${t(step.description)}` : ''}`)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs active:scale-95 transition-all mb-6 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" />
