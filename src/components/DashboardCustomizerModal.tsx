@@ -14,6 +14,13 @@ import {
 import { playChime } from '../utils/audio';
 import { DashboardWidgetId } from '../types';
 import { isWidgetAvailable, MINIMAL_WIDGETS } from '../data/navigation';
+import {
+  RoutineStickerIcon,
+  ScheduleCalendarSticker,
+  FidgetBubblesSticker,
+  SpoonSticker,
+  IdCardSticker,
+} from './icons/JournalStickers';
 
 export const DashboardCustomizerModal: React.FC = () => {
   const {
@@ -80,8 +87,8 @@ export const DashboardCustomizerModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-[#FCF9F2] border-b-2 border-[#E0D8CB]">
           <div className="flex items-center gap-3">
-            <span className="text-3xl p-2 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
-              ✏️
+            <span className="w-11 h-11 bg-[#F5EFE6] rounded-2xl border border-[#E0D8CB] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0">
+              <SlidersHorizontal className="w-6 h-6 text-[#5D5045]" />
             </span>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#2D241E] leading-tight">
@@ -136,11 +143,11 @@ export const DashboardCustomizerModal: React.FC = () => {
         {/* Category Filters */}
         <div className="flex items-center gap-1.5 px-4 py-2 border-b border-[#E0D8CB] overflow-x-auto bg-[#FCF9F2]">
           {[
-            { id: 'all' as const, label: 'All', emoji: '' },
-            { id: 'core' as const, label: 'Core & Schedule', emoji: '📅' },
-            { id: 'sensory' as const, label: 'Sensory & Regulation', emoji: '🫧' },
-            { id: 'wellness' as const, label: 'Health & Energy', emoji: '🥄' },
-            { id: 'support' as const, label: 'Support', emoji: '🪪' },
+            { id: 'all' as const, label: 'All', Icon: null },
+            { id: 'core' as const, label: 'Core & Schedule', Icon: ScheduleCalendarSticker },
+            { id: 'sensory' as const, label: 'Sensory & Regulation', Icon: FidgetBubblesSticker },
+            { id: 'wellness' as const, label: 'Health & Energy', Icon: SpoonSticker },
+            { id: 'support' as const, label: 'Support', Icon: IdCardSticker },
           ].map((cat) => (
             <button
               key={cat.id}
@@ -148,13 +155,13 @@ export const DashboardCustomizerModal: React.FC = () => {
                 setActiveCategory(cat.id);
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 activeCategory === cat.id
                   ? 'bg-[#F5B865] text-[#4A2F0F] border border-[#E2A44E] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
                   : 'bg-[#F5EFE6] hover:bg-white text-[#6B5E52] border border-[#E0D8CB]'
               }`}
             >
-              {cat.emoji ? <span>{cat.emoji}</span> : null}
+              {cat.Icon ? <cat.Icon className="w-4 h-4 object-contain inline-block shrink-0" /> : null}
               <span>{cat.label}</span>
             </button>
           ))}
@@ -193,9 +200,9 @@ export const DashboardCustomizerModal: React.FC = () => {
                     <Check className="w-4 h-4 stroke-[3]" />
                   </button>
 
-                  <span className="text-2xl p-1.5 bg-[#F5EFE6] border border-[#E0D8CB] rounded-xl shrink-0">
-                    {widget.emoji}
-                  </span>
+                  <div className="w-11 h-11 p-1 bg-[#F5EFE6] border border-[#E0D8CB] rounded-xl shrink-0 flex items-center justify-center">
+                    <RoutineStickerIcon emoji={widget.emoji} title={widget.title} className="w-8 h-8 object-contain" />
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     <h4 className="font-black text-sm text-[#2D241E] truncate">

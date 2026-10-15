@@ -25,6 +25,8 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'trophy', emoji: '🏆', label: 'Reward Trophy', category: 'fun', keywords: ['trophy', 'reward', 'win', 'prize', 'success'] },
   { id: 'gold_star', emoji: '⭐', label: 'Gold Star Reward', category: 'fun', keywords: ['star', 'gold', 'reward', 'achievement', 'win'] },
   { id: 'target', emoji: '🎯', label: 'Target / Focus Sprint', category: 'fun', keywords: ['target', 'bullseye', 'focus', 'deep work', 'goal', 'sprint'] },
+  { id: 'bee_mascot', emoji: '🐝', label: 'Bee Mascot Companion', category: 'fun', keywords: ['bee', 'mascot', 'companion', 'cute'] },
+  { id: 'rocket_ship', emoji: '🚀', label: "Today's Rocket Adventure", category: 'fun', keywords: ['rocket', 'adventure', 'space', 'ship'] },
   { id: 'balloons', emoji: '🎈', label: 'Celebration', category: 'fun', keywords: ['party', 'balloon', 'fun', 'celebrate'] },
 
   // Calm & Sensory

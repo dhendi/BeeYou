@@ -46,6 +46,7 @@ import {
   MoodJournalSticker,
   ConnectHeartSticker,
   EveningMoonSticker,
+  BeeMascotSticker,
 } from './icons/JournalStickers';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
@@ -367,7 +368,7 @@ export const ChildHomeView: React.FC = () => {
                       className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] font-black text-xl flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                       title="About Me ID Card"
                     >
-                      <span aria-hidden="true">🐝</span>
+                      <BeeMascotSticker className="w-8 h-8 object-contain" />
                     </button>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none">

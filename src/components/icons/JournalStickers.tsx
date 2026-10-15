@@ -119,6 +119,8 @@ export const ClipboardShutdownSticker = renderStickerPng('/assets/stickers/clipb
 export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.png', 'Gold Star');
 export const LockerScheduleSticker = renderStickerPng('/assets/stickers/locker_schedule.png', 'Locker & Daily Schedule');
 export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_shorts.png', 'Put on Pajamas');
+export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
+export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // AAC Dedicated Category Badge Stickers
 export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
@@ -208,12 +210,29 @@ export const RoutineStickerIcon: React.FC<{
     return <img src={normEmoji} alt={title || ''} className={className} />;
   }
 
+  // 📅 Visual Schedule & Routine / Calendar
+  if (normEmoji === '📅' || normTitle.includes('visual schedule') || normTitle.includes('schedule & routine') || normTitle.includes('calendar')) return <ScheduleCalendarSticker className={className} size={size} />;
+  // 🐝 Themed Companion & Motivation / Bee Mascot
+  if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
+  // 🚀 Today's Adventure Spotlight / Rocket
+  if (normEmoji === '🚀' || normTitle.includes('adventure spotlight') || normTitle.includes('rocket')) return <RocketAdventureSticker className={className} size={size} />;
+  // 🌡️ Incredible 5-Point Scale / Thermometer
+  if (normEmoji === '🌡️' || normTitle.includes('5-point') || normTitle.includes('scale') || normTitle.includes('thermometer')) return <ThermometerSticker className={className} size={size} />;
+  // 🥄 Spoon Theory Energy Budget
+  if (normEmoji === '🥄' || normTitle.includes('spoon') || normTitle.includes('energy budget')) return <SpoonSticker className={className} size={size} />;
+  // 🎡 Decision Wheel Spinner
+  if (normEmoji === '🎡' || normTitle.includes('decision wheel') || normTitle.includes('wheel') || normTitle.includes('spinner')) return <DecisionWheelSticker className={className} size={size} />;
+  // 🪪 About Me ID / Support
+  if (normEmoji === '🪪' || normTitle.includes('about me') || normTitle.includes('id card')) return <IdCardSticker className={className} size={size} />;
+  // 🌸 Cycle & Sensory Rhythm
+  if (normEmoji === '🌸' || normTitle.includes('cycle') || normTitle.includes('rhythm')) return <ConnectHeartSticker className={className} size={size} />;
+
   // ⏰ Wake up / Morning / Routine
   if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;
   // 💻 Laptop / Execution Sprint
   if (normEmoji === '💻' || normTitle.includes('execution sprint') || normTitle.includes('laptop')) return <LaptopExecutionSticker className={className} size={size} />;
-  // 📋 Clipboard / Daily Shutdown / Tomorrow Prep
-  if (normEmoji === '📋' || normTitle.includes('shutdown') || normTitle.includes('tomorrow prep') || normTitle.includes('clipboard')) return <ClipboardShutdownSticker className={className} size={size} />;
+  // 📋 Clipboard / Daily Shutdown / Tomorrow Prep / Passport
+  if (normEmoji === '📋' || normTitle.includes('shutdown') || normTitle.includes('tomorrow prep') || normTitle.includes('clipboard') || normTitle.includes('passport')) return <ClipboardShutdownSticker className={className} size={size} />;
   // 🎯 Target / Bullseye / Focus Sprint / Deep Work
   if (normEmoji === '🎯' || normTitle.includes('deep work') || normTitle.includes('focus sprint') || normTitle.includes('bullseye') || normTitle.includes('target')) return <DecisionWheelSticker className={className} size={size} />;
   // 💼 Workday / Briefcase
