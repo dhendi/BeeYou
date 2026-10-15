@@ -194,6 +194,17 @@ export const CaregiverCycleTrackerTab: React.FC<CaregiverCycleTrackerTabProps> =
             <p className="text-[11px] text-slate-400">
               {t("When symptoms or flow are logged, history will appear here.")}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowCycleTrackerModal(true);
+                playChime('tap');
+              }}
+              className="mt-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{t("Open Cycle Studio & Log Day")}</span>
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-slate-200">

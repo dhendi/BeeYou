@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Calendar,
@@ -58,6 +58,16 @@ export const CycleTrackerModal: React.FC = () => {
   const [editStartDate, setEditStartDate] = useState<string>(cycleSettings?.lastPeriodStartDate || '');
   const [editDiscreet, setEditDiscreet] = useState<boolean>(cycleSettings?.discreetMode || false);
   const [editSensoryTrack, setEditSensoryTrack] = useState<boolean>(cycleSettings?.trackSensoryAmplification ?? true);
+
+  useEffect(() => {
+    if (cycleSettings) {
+      setEditCycleLen(cycleSettings.averageCycleLength || 28);
+      setEditPeriodLen(cycleSettings.averagePeriodLength || 5);
+      setEditStartDate(cycleSettings.lastPeriodStartDate || '');
+      setEditDiscreet(cycleSettings.discreetMode || false);
+      setEditSensoryTrack(cycleSettings.trackSensoryAmplification ?? true);
+    }
+  }, [cycleSettings, showCycleTrackerModal]);
 
   if (!showCycleTrackerModal) return null;
 
@@ -158,7 +168,7 @@ export const CycleTrackerModal: React.FC = () => {
                   {cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle & Hormonal Health'}
                 </span>
                 <span className="text-xs text-white/80 font-medium">
-                  {childProfile.name}'s Tracker
+                  {childProfile.name ? `${childProfile.name}'s ` : ''}Tracker
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
