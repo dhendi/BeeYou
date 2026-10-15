@@ -464,9 +464,26 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           </div>
         </div>
 
-        {/* Additional Motor & Touch Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer">
+        {/* Additional Motor & Visual Options */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+          {/* Color-Coded Action Cards Toggle */}
+          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors">
+            <div className="flex items-center gap-2.5">
+              <Palette className="w-5 h-5 text-indigo-600 shrink-0" />
+              <div>
+                <h4 className="text-xs font-black text-slate-800">{t("Color-Coded Action Cards")}</h4>
+                <p className="text-[11px] text-slate-500 font-medium leading-snug">{t("Show multi-colored cards instead of unified yellow.")}</p>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.colorCodedActionCards || false}
+              onChange={(e) => updateSettings({ colorCodedActionCards: e.target.checked })}
+              className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
+            />
+          </label>
+
+          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors">
             <div className="flex items-center gap-2.5">
               <Type className="w-5 h-5 text-indigo-600 shrink-0" />
               <div>

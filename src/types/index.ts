@@ -634,6 +634,7 @@ export interface AppSettings {
   features?: EnabledFeatures;
   onboardingCompleted?: boolean;
   aacButtonColorMode?: 'fitzgerald' | 'theme' | 'high_contrast_white' | 'neutral_monochrome';
+  colorCodedActionCards?: boolean;
   visualAlerts?: boolean;
   soundAlerts?: boolean;
   vibrationAlerts?: boolean;

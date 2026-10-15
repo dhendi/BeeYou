@@ -136,6 +136,7 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   colorCodingEnabled: true,
   autoSpeakSentence: true,
   aacButtonColorMode: 'fitzgerald',
+  colorCodedActionCards: false,
   visualAlerts: true,
   soundAlerts: true,
   vibrationAlerts: true,

@@ -159,6 +159,13 @@ export const SchoolBuildingSticker = renderStickerPng('/assets/stickers/school_b
 export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
 export const PlaygroundSwingsSticker = renderStickerPng('/assets/stickers/playground_swings.png', 'Playground Swings');
 
+// Morning Mood & Emotion Yellow Stickers
+export const MoodHappySticker = renderStickerPng('/assets/stickers/mood_happy.png', 'Happy Mood');
+export const MoodCalmSticker = renderStickerPng('/assets/stickers/mood_calm.png', 'Calm Mood');
+export const MoodExcitedSticker = renderStickerPng('/assets/stickers/mood_excited.png', 'Excited Mood');
+export const MoodSleepySticker = renderStickerPng('/assets/stickers/mood_sleepy.png', 'Sleepy Mood');
+export const MoodUnsureSticker = renderStickerPng('/assets/stickers/mood_unsure.png', 'Unsure Mood');
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.

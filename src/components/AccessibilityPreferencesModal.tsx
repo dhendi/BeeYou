@@ -311,6 +311,27 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
+              {/* Color-Coded Action Cards */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                    Color-Coded Action Cards
+                  </h4>
+                  <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                    Show category pastel colors across Me and Communicate action cards instead of the default theme yellow.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={settings.colorCodedActionCards || false}
+                    onChange={(e) => updateSettings({ colorCodedActionCards: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-12 h-7 bg-[#E0D8CB] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-xs peer-checked:bg-[#E28743]"></div>
+                </label>
+              </div>
+
               {/* AAC Button Size / Grid Density */}
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
                 <div>

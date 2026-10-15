@@ -19,13 +19,20 @@ import {
 import { playChime, speakText } from '../utils/audio';
 import { EmotionType } from '../types';
 import { fetchLiveWeather, LiveWeatherData, DEFAULT_WEATHER_DATA } from '../utils/weather';
+import { 
+  MoodHappySticker, 
+  MoodCalmSticker, 
+  MoodExcitedSticker, 
+  MoodSleepySticker, 
+  MoodUnsureSticker 
+} from './icons/JournalStickers';
 
-const MOOD_OPTIONS: { id: EmotionType; label: string; emoji: string; response: string }[] = [
-  { id: 'happy', label: 'Happy', emoji: '😊', response: 'Wonderful! We are glad you feel happy today.' },
-  { id: 'calm', label: 'Calm', emoji: '😌', response: 'Peaceful and steady. A great way to start.' },
-  { id: 'excited', label: 'Excited', emoji: '🤩', response: 'So much energy! Lots of fun things to explore.' },
-  { id: 'tired', label: 'Sleepy', emoji: '🥱', response: 'Take it slow and gentle this morning. No rush.' },
-  { id: 'worried', label: 'Unsure', emoji: '😟', response: 'You are safe. We will do each step together.' },
+const MOOD_OPTIONS: { id: EmotionType; label: string; Sticker: React.FC<{ className?: string }>; response: string }[] = [
+  { id: 'happy', label: 'Happy', Sticker: MoodHappySticker, response: 'Wonderful! We are glad you feel happy today.' },
+  { id: 'calm', label: 'Calm', Sticker: MoodCalmSticker, response: 'Peaceful and steady. A great way to start.' },
+  { id: 'excited', label: 'Excited', Sticker: MoodExcitedSticker, response: 'So much energy! Lots of fun things to explore.' },
+  { id: 'tired', label: 'Sleepy', Sticker: MoodSleepySticker, response: 'Take it slow and gentle this morning. No rush.' },
+  { id: 'worried', label: 'Unsure', Sticker: MoodUnsureSticker, response: 'You are safe. We will do each step together.' },
 ];
 
 export const MorningBriefModal: React.FC = () => {
@@ -290,18 +297,21 @@ export const MorningBriefModal: React.FC = () => {
             <div className="grid grid-cols-5 gap-2">
               {MOOD_OPTIONS.map((mood) => {
                 const isSelected = selectedMood === mood.id;
+                const Sticker = mood.Sticker;
                 return (
                   <button
                     key={mood.id}
                     type="button"
                     onClick={() => handleSelectMood(mood)}
-                    className={`p-2.5 sm:p-3 rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                    className={`p-2 sm:p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer active:scale-95 ${
                       isSelected
-                        ? 'bg-rose-50 border-rose-400 ring-2 ring-rose-300 text-rose-950 shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                        ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-xs'
+                        : 'bg-white hover:bg-amber-50/40 border-slate-200 text-slate-700'
                     }`}
                   >
-                    <span className="text-2xl sm:text-3xl mb-1">{mood.emoji}</span>
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 mb-1 flex items-center justify-center">
+                      <Sticker className="w-full h-full object-contain" />
+                    </div>
                     <span className="font-black text-[11px] text-center">{mood.label}</span>
                   </button>
                 );
@@ -310,8 +320,8 @@ export const MorningBriefModal: React.FC = () => {
 
             {/* Gentle Mood Feedback Response */}
             {moodFeedback && (
-              <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200 flex items-center gap-2 text-xs text-rose-950 animate-in fade-in">
-                <Smile className="w-4 h-4 text-rose-500 shrink-0" />
+              <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center gap-2 text-xs text-amber-950 animate-in fade-in">
+                <Smile className="w-4 h-4 text-amber-600 shrink-0" />
                 <span className="font-semibold">{moodFeedback}</span>
               </div>
             )}
