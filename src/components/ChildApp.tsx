@@ -30,12 +30,12 @@ import { setActiveDeviceView } from '../services/authService';
 import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '../services/caregiverSync';
 import { SensoryEmergencyButton } from './SensoryEmergencyButton';
 import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
-import { AdaptiveOnboardingFlow } from './AdaptiveOnboardingFlow';
 import { OnboardingModal } from './onboarding/OnboardingModal';
 import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
 import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 
 // Lazy-loaded child tools and modals
+const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
 const CopingToolkitModal = lazy(() => import('./CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const MorningBriefModal = lazy(() => import('./MorningBriefModal').then(m => ({ default: m.MorningBriefModal })));
