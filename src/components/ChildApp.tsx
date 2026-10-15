@@ -64,10 +64,16 @@ const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ defa
 const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
 const FamilyAuthModal = lazy(() => import('./FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
 const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
+const AvatarCreatorModal = lazy(() => import('./AvatarCreatorModal').then(m => ({ default: m.AvatarCreatorModal })));
+const MyWorldView = lazy(() => import('./MyWorldView').then(m => ({ default: m.MyWorldView })));
+const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards })));
+const MoreView = lazy(() => import('./MoreView').then(m => ({ default: m.MoreView })));
 
 const ChildAppContent: React.FC = () => {
   const { 
     childView, 
+    showAvatarCreator,
+    setShowAvatarCreator,
     showCaregiverModal, 
     setShowCaregiverModal,
     showFamilyAuthModal,
@@ -234,6 +240,9 @@ const ChildAppContent: React.FC = () => {
         {childView === 'adventures' && <AdventuresView />}
         {childView === 'skills' && <SkillsView />}
         {childView === 'feelings' && <FeelingsView />}
+        {childView === 'my-world' && <MyWorldView />}
+        {childView === 'rewards' && <Rewards />}
+        {childView === 'more' && <MoreView />}
       </main>
 
       {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}
@@ -383,6 +392,12 @@ const ChildAppContent: React.FC = () => {
         <FamilyAuthModal
           isOpen={showFamilyAuthModal}
           onClose={() => setShowFamilyAuthModal(false)}
+        />
+
+        {/* Inclusive Avatar Creator Studio Modal */}
+        <AvatarCreatorModal
+          isOpen={showAvatarCreator}
+          onClose={() => setShowAvatarCreator(false)}
         />
       </Suspense>
     </div>

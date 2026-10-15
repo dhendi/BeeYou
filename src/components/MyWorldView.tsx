@@ -22,6 +22,7 @@ import {
 import { playChime, playEntitySound } from '../utils/audio';
 import { Rewards } from './Rewards';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { ChildAvatar } from './ChildAvatar';
 
 export const MyWorldView: React.FC = () => {
   const {
@@ -35,6 +36,9 @@ export const MyWorldView: React.FC = () => {
     settings,
     isPremium,
     triggerUpgrade,
+    avatar,
+    childProfile,
+    setShowAvatarCreator,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'world' | 'shop' | 'rewards'>('world');
@@ -120,8 +124,8 @@ export const MyWorldView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
       {/* World Top Bar */}
-      <div className="flex items-center justify-between bg-white rounded-2xl p-2 border-2 border-slate-200 shadow-xs gap-2">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between bg-white rounded-2xl p-2 border-2 border-slate-200 shadow-xs gap-2 flex-wrap">
+        <div className="flex items-center gap-1 flex-wrap">
           <button
             onClick={() => setActiveTab('world')}
             className={`px-3 py-2 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer ${
@@ -154,6 +158,25 @@ export const MyWorldView: React.FC = () => {
             <Trophy className="w-3.5 h-3.5" />
             <span>Badges</span>
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowAvatarCreator(true);
+              playChime('tap');
+            }}
+            className="px-3 py-2 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer bg-purple-100 hover:bg-purple-200 text-purple-950 border border-purple-300 shadow-2xs"
+            title="Open Avatar Creator Studio"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-purple-700" />
+            <span>Avatar Studio</span>
+          </button>
+        </div>
+
+        {/* Stars counter */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-black text-xs sm:text-sm shadow-2xs">
+          <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+          <span>{worldState.stars || 0}</span>
+          <span className="text-[10px] text-amber-700 font-bold uppercase">Stars</span>
         </div>
       </div>
 
@@ -192,6 +215,26 @@ export const MyWorldView: React.FC = () => {
 
             {/* Placed Items inside room */}
             <div className="flex-1 flex flex-wrap items-end justify-around gap-6 p-4 z-10 min-h-[220px]">
+              {/* Child's Avatar standing proudly in their space */}
+              <div 
+                onClick={() => {
+                  setShowAvatarCreator(true);
+                  playChime('tap');
+                }}
+                className="relative flex flex-col items-center cursor-pointer group hover:scale-105 active:scale-95 transition-all shrink-0 z-20"
+                title="Tap to customize your avatar in Avatar Studio"
+              >
+                <div className="relative">
+                  <ChildAvatar config={avatar} size="lg" />
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-purple-600 text-white text-[9px] font-black shadow-xs group-hover:scale-110 transition-transform">
+                    Edit ✨
+                  </span>
+                </div>
+                <span className="text-[11px] font-black text-slate-800 bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded-lg border border-slate-200/90 shadow-2xs mt-1">
+                  {childProfile.name}
+                </span>
+              </div>
+
               {roomPlacedItems.length === 0 && (
                 <div className="text-center bg-white/80 backdrop-blur-xs p-4 rounded-2xl border border-dashed border-slate-300 mx-auto my-auto">
                   <p className="text-xs font-bold text-slate-600">Your room is waiting for your favorite companions!</p>

@@ -10,7 +10,10 @@ import {
   MusicSensorySticker,
   ConnectHeartSticker,
   SpoonSticker,
+  FavQuietBreakSticker,
+  IdCardSticker,
 } from './icons/JournalStickers';
+import { playChime } from '../utils/audio';
 
 type ToolCategory = 'all' | 'calm' | 'play' | 'focus' | 'sos';
 
@@ -23,6 +26,8 @@ export const ToolsView: React.FC = () => {
     setShowFivePointModal,
     setShowSpoonModal,
     openCopingToolkit,
+    setChildView,
+    setShowAvatarCreator,
   } = useApp();
 
   const isColorCoded = settings?.colorCodedActionCards === true;
@@ -49,6 +54,38 @@ export const ToolsView: React.FC = () => {
       color: 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950',
       Sticker: FidgetBubblesSticker,
       action: () => setShowFidgetModal(true),
+    },
+
+    // Sensory Play: My World & Virtual Room
+    {
+      id: 'my-world',
+      category: 'play' as ToolCategory,
+      title: 'My World & Pet Sanctuary',
+      desc: 'Interactive virtual space to decorate your room, pet companions, and earn star rewards.',
+      badge: 'Virtual Space',
+      badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
+      color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
+      Sticker: FavQuietBreakSticker,
+      action: () => {
+        setChildView('my-world');
+        playChime('tap');
+      },
+    },
+
+    // Sensory Play: Avatar Creator Studio
+    {
+      id: 'avatar-studio',
+      category: 'play' as ToolCategory,
+      title: 'Avatar Creator Studio',
+      desc: 'Design your own character with inclusive hairstyles, mobility aids, sensory headphones, and outfits.',
+      badge: 'Character Studio',
+      badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
+      color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
+      Sticker: IdCardSticker,
+      action: () => {
+        setShowAvatarCreator(true);
+        playChime('tap');
+      },
     },
 
     // Calm & Reset: Deep Breathing

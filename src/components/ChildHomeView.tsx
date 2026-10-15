@@ -59,11 +59,14 @@ import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { getGrammaticalCategoryLabel } from './AACView';
+import { ChildAvatar } from './ChildAvatar';
 
 export const ChildHomeView: React.FC = () => {
   const {
     settings,
     childProfile,
+    avatar,
+    setShowAvatarCreator,
     worldState,
     setChildView,
     plansChanged,
@@ -364,26 +367,46 @@ export const ChildHomeView: React.FC = () => {
                     isFullWidth ? 'col-span-1' : ''
                   }`}
                 >
-                  <div className="flex items-center gap-3.5">
+                  <div className="flex items-center gap-3.5 min-w-0">
                     <button 
                       type="button"
-                      aria-label="Open About Me profile card"
+                      aria-label="Open Avatar Creator Studio"
                       onClick={() => {
-                        setShowAboutMeModal(true);
+                        setShowAvatarCreator(true);
                         playChime('tap');
                       }}
-                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] font-black text-xl flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-                      title="About Me ID Card"
+                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none overflow-hidden"
+                      title="Avatar Studio"
                     >
-                      <BeeMascotSticker className="w-8 h-8 object-contain" />
+                      <ChildAvatar config={avatar} size="sm" />
                     </button>
-                    <div>
-                      <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none">
+                    <div className="min-w-0">
+                      <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none truncate">
                         {t('Hi')}, {childProfile.name}! 🐝
                       </h2>
-                      <p className="text-xs text-[#7A6C60] font-bold mt-1">
-                        {t('You can be yourself here')}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setChildView('my-world');
+                            playChime('tap');
+                          }}
+                          className="text-xs text-amber-900 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>🏡 {t('My World')}</span>
+                        </button>
+                        <span className="text-stone-300">•</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAvatarCreator(true);
+                            playChime('tap');
+                          }}
+                          className="text-xs text-purple-900 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>✨ {t('Avatar Studio')}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
 

@@ -32,6 +32,7 @@ export const Rewards: React.FC = () => {
     skills,
     emotionHistory,
     setChildView,
+    setShowAvatarCreator,
     earnedStickers,
   } = useApp();
 
@@ -800,7 +801,7 @@ export const Rewards: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setChildView('my-world');
+                setShowAvatarCreator(true);
                 playChime('tap');
               }}
               className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0"
