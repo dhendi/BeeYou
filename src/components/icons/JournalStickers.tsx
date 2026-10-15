@@ -109,6 +109,7 @@ export const WallClockSticker = renderStickerPng('/assets/stickers/clock_time.pn
 export const CutlerySticker = renderStickerPng('/assets/stickers/fork_knife.png', 'Fork & Knife');
 export const CarRideSticker = renderStickerPng('/assets/stickers/car_ride.png', 'Car Ride');
 export const WindBreezeSticker = renderStickerPng('/assets/stickers/wind_breeze.png', 'Wind Breeze');
+export const LungsInhalerSticker = renderStickerPng('/assets/stickers/lungs_inhaler.png', 'Lungs Inhaler');
 export const RepeatLoopSticker = renderStickerPng('/assets/stickers/refresh_repeat.png', 'Repeat Loop');
 
 // AAC Dedicated Category Badge Stickers
@@ -229,8 +230,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🥤' || normTitle.includes('juice') || normTitle.includes('soda') || normTitle.includes('smoothie')) return <DrinkCupSticker className={className} size={size} />;
   // 💬 Speech Bubble / Quick Phrases / Talk / Communication
   if (normEmoji === '💬' || normEmoji === '🗨️' || normEmoji === '🗣️' || normTitle.includes('phrase') || normTitle.includes('speak') || normTitle.includes('talk') || normTitle.includes('chat') || normTitle.includes('say') || normTitle.includes('communication') || normTitle.includes('expressing')) return <QuickPhrasesSticker className={className} size={size} />;
-  // 💊 Pill / Medication / Vitamin
-  if (normEmoji === '💊' || normTitle.includes('med') || normTitle.includes('pill') || normTitle.includes('vitamin')) return <MedicationSticker className={className} size={size} />;
+  // 🫁 Inhaler / Lungs / Breathing / Asthma / Puff
+  if (normEmoji === '🫁' || normEmoji === 'wind' || normTitle.includes('inhaler') || normTitle.includes('albuterol') || normTitle.includes('asthma') || normTitle.includes('puff') || normTitle.includes('lung')) return <LungsInhalerSticker className={className} size={size} />;
+  // 🍬 Candy / Treat / Gummy / Multivitamin
+  if (normEmoji === '🍬' || normEmoji === '🍭' || normEmoji === 'sparkles' || normEmoji === 'gummy' || normTitle.includes('candy') || normTitle.includes('treat') || normTitle.includes('gummy') || normTitle.includes('multivitamin')) return <CandyTreatSticker className={className} size={size} />;
+  // 💧 Water / Drops / Melatonin / Liquid
+  if (normEmoji === '💧' || normEmoji === 'droplets' || normEmoji === 'drops' || normTitle.includes('drop') || normTitle.includes('melatonin') || normTitle.includes('liquid')) return <DrinkWaterSticker className={className} size={size} />;
+  // 💊 Pill / Medication / Capsule / Tablet
+  if (normEmoji === '💊' || normEmoji === 'pill' || normTitle.includes('med') || normTitle.includes('pill') || normTitle.includes('capsule') || normTitle.includes('tablet')) return <MedicationSticker className={className} size={size} />;
+  // ❤️ Health / Caregiver Heart
+  if (normEmoji === '❤️' || normEmoji === 'heart' || normEmoji === '🩹' || normEmoji === 'shield' || normTitle.includes('health')) return <ConnectHeartSticker className={className} size={size} />;
   // 🔄 Repeat / Loop / Cycle / Again / Refresh / Plans Change / Routine Change
   if (normTitle.includes('plans change') || normTitle.includes('routine change') || (normTitle.includes('plan') && normTitle.includes('change'))) return <PlansChangeStorySticker className={className} size={size} />;
   if (normEmoji === '🔄' || normEmoji === '🔁' || normTitle.includes('repeat') || normTitle.includes('loop') || normTitle.includes('cycle') || normTitle.includes('again') || normTitle.includes('refresh')) return <RepeatLoopSticker className={className} size={size} />;

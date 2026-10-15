@@ -19,6 +19,7 @@ import {
   Heart
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverMedicationsTabProps {
   onShowNotification: (msg: string) => void;
@@ -128,26 +129,14 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
     setEditingMedId(null);
   };
 
-  const renderMedIcon = (emojiOrId?: string) => {
-    switch (emojiOrId) {
-      case 'droplets':
-      case '💧':
-        return <Droplets className="w-5 h-5 text-sky-600" />;
-      case 'wind':
-      case '🫁':
-        return <Wind className="w-5 h-5 text-teal-600" />;
-      case 'sparkles':
-      case '🍬':
-        return <Sparkles className="w-5 h-5 text-amber-600" />;
-      case 'shield':
-      case '🧴':
-        return <Shield className="w-5 h-5 text-indigo-600" />;
-      case 'heart':
-      case '🩹':
-        return <Heart className="w-5 h-5 text-rose-600" />;
-      default:
-        return <Pill className="w-5 h-5 text-indigo-600" />;
-    }
+  const renderMedIcon = (emojiOrId?: string, name?: string) => {
+    return (
+      <RoutineStickerIcon
+        emoji={emojiOrId}
+        title={name}
+        className="w-10 h-10 object-contain drop-shadow-2xs"
+      />
+    );
   };
 
   return (
@@ -269,30 +258,32 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
                 <label className="block text-xs font-black text-slate-700 mb-1">
                   {t("Icon / Type")}
                 </label>
-                <div className="flex items-center gap-1.5 overflow-x-auto">
+                <div className="flex items-center gap-1.5 overflow-x-auto p-1">
                   {[
-                    { id: 'pill', label: 'Pill', icon: Pill },
-                    { id: 'droplets', label: 'Liquid', icon: Droplets },
-                    { id: 'wind', label: 'Inhaler', icon: Wind },
-                    { id: 'sparkles', label: 'Gummy', icon: Sparkles },
-                    { id: 'shield', label: 'Topical', icon: Shield },
-                    { id: 'heart', label: 'Health', icon: Heart },
+                    { id: '🍬', label: 'Gummy / Chewable', emoji: '🍬', legacy: 'sparkles' },
+                    { id: '🫁', label: 'Inhaler / Puffs', emoji: '🫁', legacy: 'wind' },
+                    { id: '💧', label: 'Drops / Liquid', emoji: '💧', legacy: 'droplets' },
+                    { id: '💊', label: 'Pill / Capsule', emoji: '💊', legacy: 'pill' },
+                    { id: '❤️', label: 'Health / General', emoji: '❤️', legacy: 'heart' },
                   ].map((item) => {
-                    const IconComp = item.icon;
-                    const isSelected = medEmoji === item.id || (item.id === 'pill' && (!medEmoji || medEmoji === 'pill'));
+                    const isSelected =
+                      medEmoji === item.id ||
+                      medEmoji === item.emoji ||
+                      medEmoji === item.legacy ||
+                      (item.legacy === 'pill' && (!medEmoji || medEmoji === 'pill'));
                     return (
                       <button
                         type="button"
                         key={item.id}
-                        onClick={() => setMedEmoji(item.id)}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
+                        onClick={() => setMedEmoji(item.emoji)}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
-                            : 'bg-white hover:bg-slate-100 border border-slate-200 text-slate-600'
+                            ? 'bg-amber-100 border-2 border-amber-400 ring-2 ring-amber-300 shadow-xs'
+                            : 'bg-white hover:bg-amber-50/50 border border-slate-200'
                         }`}
-                        title={item.label}
+                        title={t(item.label)}
                       >
-                        <IconComp className="w-4 h-4" />
+                        <RoutineStickerIcon emoji={item.emoji} title={item.label} className="w-7 h-7 object-contain" />
                       </button>
                     );
                   })}
@@ -531,8 +522,8 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
               >
                 {/* Left: Info */}
                 <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 shadow-2xs">
-                    {renderMedIcon(med.emoji)}
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50/80 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs">
+                    {renderMedIcon(med.emoji, med.name)}
                   </div>
 
                   <div className="min-w-0 flex-1">

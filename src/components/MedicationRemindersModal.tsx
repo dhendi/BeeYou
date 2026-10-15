@@ -19,6 +19,7 @@ import {
   Info
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const MedicationRemindersModal: React.FC = () => {
   const {
@@ -161,8 +162,8 @@ export const MedicationRemindersModal: React.FC = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner backdrop-blur-xs">
-              💊
+            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center p-1 shadow-inner backdrop-blur-xs">
+              <RoutineStickerIcon emoji="💊" title="Medications" className="w-8 h-8 object-contain drop-shadow-2xs" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -308,8 +309,8 @@ export const MedicationRemindersModal: React.FC = () => {
                     >
                       {/* Left: Emoji + Med Info */}
                       <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
-                          {dose.emoji}
+                        <div className="w-12 h-12 rounded-2xl bg-amber-50/80 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs">
+                          <RoutineStickerIcon emoji={dose.emoji} title={dose.medName} className="w-9 h-9 object-contain drop-shadow-2xs" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -416,8 +417,8 @@ export const MedicationRemindersModal: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
-                        {med.emoji || '💊'}
+                      <div className="w-11 h-11 rounded-2xl bg-amber-50/80 border border-amber-200/90 flex items-center justify-center shrink-0 shadow-2xs">
+                        <RoutineStickerIcon emoji={med.emoji || '💊'} title={med.name} className="w-8 h-8 object-contain drop-shadow-2xs" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
