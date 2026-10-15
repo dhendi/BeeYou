@@ -472,7 +472,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               <Palette className="w-5 h-5 text-indigo-600 shrink-0" />
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Color-Coded Action Cards")}</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-snug">{t("Show multi-colored cards instead of unified yellow.")}</p>
+                <p className="text-[11px] text-slate-500 font-medium leading-snug">{t("Show multi-colored cards instead of unified yellow (Tools, Me, Communicate).")}</p>
               </div>
             </div>
             <input

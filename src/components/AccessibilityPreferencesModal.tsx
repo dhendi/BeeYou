@@ -318,7 +318,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     Color-Coded Action Cards
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Show category pastel colors across Me and Communicate action cards instead of the default theme yellow.
+                    Show category pastel colors across Tools, Me, and Communicate action cards instead of the default theme yellow.
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">

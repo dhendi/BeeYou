@@ -16,6 +16,7 @@ type ToolCategory = 'all' | 'calm' | 'play' | 'focus' | 'sos';
 
 export const ToolsView: React.FC = () => {
   const {
+    settings,
     setShowFidgetModal,
     setShowDecisionWheelModal,
     setShowPieTimerModal,
@@ -23,6 +24,8 @@ export const ToolsView: React.FC = () => {
     setShowSpoonModal,
     openCopingToolkit,
   } = useApp();
+
+  const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
 
@@ -198,14 +201,22 @@ export const ToolsView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
         {filteredCards.map((tool) => {
           const Sticker = tool.Sticker;
+          const cardClass = isColorCoded
+            ? tool.color
+            : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+          const badgeClass = isColorCoded
+            ? tool.badgeClass
+            : 'border border-amber-300/80 bg-amber-100 text-amber-900';
+          const stickerBorder = isColorCoded ? 'border-slate-200/80' : 'border-amber-200/90';
+
           return (
             <button
               key={tool.id}
               onClick={tool.action}
-              className={`w-full text-left p-4 sm:p-5 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${tool.color}`}
+              className={`w-full text-left p-4 sm:p-5 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
             >
               <div className="min-w-0 flex-1">
-                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md border inline-block mb-1.5 ${tool.badgeClass}`}>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md inline-block mb-1.5 ${badgeClass}`}>
                   {t(tool.badge)}
                 </span>
                 <h3 className="font-black text-sm sm:text-base leading-snug text-slate-900 group-hover:text-slate-950 transition-colors">
@@ -215,7 +226,7 @@ export const ToolsView: React.FC = () => {
                   {t(tool.desc)}
                 </p>
               </div>
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/90 border border-slate-200/80 shadow-2xs flex items-center justify-center shrink-0 p-1 group-hover:scale-108 transition-transform">
+              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/90 border ${stickerBorder} shadow-2xs flex items-center justify-center shrink-0 p-1 group-hover:scale-108 transition-transform`}>
                 <Sticker className="w-full h-full object-contain" />
               </div>
             </button>
