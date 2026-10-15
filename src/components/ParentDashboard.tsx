@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext';
 
 // Caregiver portal lazy-loaded modals
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
+const DailyRecollectionChart = lazy(() => import('./DailyRecollectionChart').then(m => ({ default: m.DailyRecollectionChart })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
@@ -19,6 +21,7 @@ import {
   Calendar,
   Pill,
   BarChart3,
+  FileText,
   BookOpen,
   HeartPulse,
   Heart,
@@ -116,6 +119,7 @@ export const ParentDashboard: React.FC = () => {
     | 'caregiver'
     | 'medications'
     | 'mood-journal'
+    | 'recollection'
     | 'offline'
     | 'plans-changed'
     | 'routines'
@@ -366,6 +370,12 @@ export const ParentDashboard: React.FC = () => {
           label: 'Routine Library',
           icon: Calendar,
           badge: t('Library'),
+        },
+        {
+          id: 'recollection',
+          label: 'Daily Mood & Therapist Summary',
+          icon: FileText,
+          badge: t('Therapy'),
         },
         {
           id: 'medications',
@@ -776,6 +786,18 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
+          {/* TAB: DAILY MOOD & THERAPIST CLINICAL RECOLLECTION */}
+          {activeTab === 'recollection' && (
+            <div className="space-y-6">
+              <Suspense fallback={<div className="p-8 text-center text-stone-500 font-bold">{t('Loading Clinical Reports...')}</div>}>
+                <DailyRecollectionChart 
+                  isParentPortal={true}
+                  onStartTour={() => handleStartSectionTour('moodJournal')}
+                />
+              </Suspense>
+            </div>
+          )}
+
           {/* TAB: MOOD JOURNAL & SELF-REFLECTION */}
           {activeTab === 'mood-journal' && (
             <CaregiverMoodJournalTab 
@@ -896,6 +918,7 @@ export const ParentDashboard: React.FC = () => {
 
       {/* Caregiver Portal Modals */}
       <Suspense fallback={null}>
+        <DailyRecollectionModal />
         <MoodJournalModal />
         <PlansChangedModal />
         <AboutMeIDModal

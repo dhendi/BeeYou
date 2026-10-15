@@ -7,6 +7,7 @@ import {
   MedicationSticker,
   ReadingBookSticker,
   SpoonSticker,
+  EveningMoonSticker,
 } from './icons/JournalStickers';
 
 export const MeView: React.FC = () => {
@@ -16,11 +17,13 @@ export const MeView: React.FC = () => {
     enabledFeatures,
     medications,
     moodJournalEntries,
+    dailyRecollections,
     getTodaySpoonEntry,
     setShowFivePointModal,
     setShowMedicationModal,
     setShowMoodJournalModal,
     setShowSpoonModal,
+    setShowRecollectionModal,
   } = useApp();
 
   const isColorCoded = settings?.colorCodedActionCards === true;
@@ -90,6 +93,23 @@ export const MeView: React.FC = () => {
       show: isTeenOrAdult,
       action: () => {
         setShowSpoonModal(true);
+        playChime('tap');
+      },
+    },
+    {
+      id: 'evening-reflection',
+      title: 'Evening Reflection & Wins',
+      desc: dailyRecollections.length > 0 
+        ? `${dailyRecollections.length} days recorded. Log your evening review, sensory triggers, and therapist summary.`
+        : 'Look back on the highlights of your day, sensory wins, and generate therapist summaries.',
+      badge: 'Therapy & Daily Review',
+      badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
+      color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
+      stickerBox: 'bg-white border-teal-200/90 shadow-2xs',
+      Sticker: EveningMoonSticker,
+      show: enabledFeatures?.dailyMoodRecollection !== false,
+      action: () => {
+        setShowRecollectionModal(true);
         playChime('tap');
       },
     },

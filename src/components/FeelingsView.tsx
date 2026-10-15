@@ -8,12 +8,14 @@ import {
   CheckCircle2, 
   Smile,
   BookOpen,
+  BarChart3,
   Plus,
   Volume2
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { DailyRecollectionChart } from './DailyRecollectionChart';
 
 export const FeelingsView: React.FC = () => {
   const {
@@ -26,6 +28,7 @@ export const FeelingsView: React.FC = () => {
     userAgeGroup,
     enabledFeatures,
     moodJournalEntries,
+    dailyRecollections,
     setShowMoodJournalModal,
     setShowFivePointModal,
   } = useApp();
@@ -33,7 +36,7 @@ export const FeelingsView: React.FC = () => {
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const showMoodJournalTab = isTeenOrAdult && enabledFeatures?.moodJournal !== false;
 
-  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'journal'>('check-in');
+  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'journal' | 'recollection'>('check-in');
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionType | null>(currentMood);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
@@ -127,6 +130,22 @@ export const FeelingsView: React.FC = () => {
         <button
           type="button"
           onClick={() => {
+            setActiveSubTab('recollection');
+            playChime('tap');
+          }}
+          className={`flex-1 min-w-[110px] py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'recollection'
+              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
+              : 'text-[#6B5E52] hover:text-[#2D241E]'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4 text-[#5B7BB2]" />
+          <span>{t('Reflections')} ({dailyRecollections.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             setShowFivePointModal(true);
             playChime('tap');
           }}
@@ -138,7 +157,9 @@ export const FeelingsView: React.FC = () => {
         </button>
       </div>
 
-      {activeSubTab === 'journal' ? (
+      {activeSubTab === 'recollection' ? (
+        <DailyRecollectionChart />
+      ) : activeSubTab === 'journal' ? (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>

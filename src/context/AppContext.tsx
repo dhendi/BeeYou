@@ -23,6 +23,7 @@ import {
   MedicationReminder,
   MedicationDoseLog,
   MoodJournalEntry,
+  DailyRecollectionEntry,
   SubscriptionInfo,
   SubscriptionTier,
   BillingCycle,
@@ -66,6 +67,7 @@ import { useSensoryToolsState } from '../hooks/useSensoryToolsState';
 import { useCustomToolsState } from '../hooks/useCustomToolsState';
 import { useMedicationState } from '../hooks/useMedicationState';
 import { useMoodJournalState } from '../hooks/useMoodJournalState';
+import { useRecollectionsState } from '../hooks/useRecollectionsState';
 import { useThemeState } from '../hooks/useThemeState';
 import { useFamilyCloudSync } from '../hooks/useFamilyCloudSync';
 
@@ -230,6 +232,14 @@ export interface AppContextType {
   newlyAwardedSticker: EarnedRoutineSticker | null;
   awardRoutineSticker: (routine: Routine) => EarnedRoutineSticker;
   dismissStickerCelebration: () => void;
+
+  // Daily Mood & Recollection
+  dailyRecollections: DailyRecollectionEntry[];
+  showRecollectionModal: boolean;
+  setShowRecollectionModal: (val: boolean) => void;
+  addDailyRecollection: (entry: Omit<DailyRecollectionEntry, 'id' | 'timestamp'>) => void;
+  updateDailyRecollection: (id: string, updates: Partial<DailyRecollectionEntry>) => void;
+  deleteDailyRecollection: (id: string) => void;
 
   // Themes & Customization
   themes: AppTheme[];
@@ -716,6 +726,15 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
 
 
+  // 11. Daily Recollections Hook
+  const recollections = useRecollectionsState({
+    soundEffects: settings.soundEffects,
+    childName: childProfile.name,
+    recordEmotion: gamification.recordEmotion,
+    awardStars: gamification.awardStars,
+    speak: speechEngine.speak,
+  });
+
   // 12. Themes Hook
   const themeState = useThemeState({
     isPremium: subscriptionState.isPremium,
@@ -836,6 +855,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       skills: gamification.skills,
       habits: gamification.habits,
       socialStories: gamification.socialStories,
+      dailyRecollections: recollections.dailyRecollections,
       medications: medication.medications,
       userAgeGroup,
       enabledFeatures,
@@ -876,6 +896,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       if (Array.isArray(data.skills)) gamification.setSkills(data.skills);
       if (Array.isArray(data.habits)) gamification.setHabits(data.habits);
       if (Array.isArray(data.socialStories)) gamification.setSocialStories(data.socialStories);
+      if (Array.isArray(data.dailyRecollections)) recollections.setDailyRecollections(data.dailyRecollections);
       if (Array.isArray(data.medications)) medication.setMedications(data.medications);
       if (data.userAgeGroup) setUserAgeGroup(data.userAgeGroup);
       if (data.enabledFeatures) updateEnabledFeatures(data.enabledFeatures);
@@ -893,6 +914,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const resetToDefaults = () => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('beeyou_daily_recollections');
     localStorage.removeItem('beeyou_medications');
     localStorage.removeItem('beeyou_mood_journal_entries');
     localStorage.removeItem('beeyou_user_age_group');
@@ -1044,6 +1066,14 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     newlyAwardedSticker: gamification.newlyAwardedSticker,
     awardRoutineSticker: gamification.awardRoutineSticker,
     dismissStickerCelebration: gamification.dismissStickerCelebration,
+
+    // Daily Mood & Recollection
+    dailyRecollections: recollections.dailyRecollections,
+    showRecollectionModal: recollections.showRecollectionModal,
+    setShowRecollectionModal: recollections.setShowRecollectionModal,
+    addDailyRecollection: recollections.addDailyRecollection,
+    updateDailyRecollection: recollections.updateDailyRecollection,
+    deleteDailyRecollection: recollections.deleteDailyRecollection,
 
     // Themes & Customization
     themes: themeState.themes,

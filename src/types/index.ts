@@ -420,6 +420,7 @@ export interface EnabledFeatures {
   sensoryBreathingPacer: boolean;  // Calm sensory breathing pacer & coping toolkit
   medicationReminders: boolean;    // Medication reminders, dose tracking & inventory supply
   moodJournal: boolean;            // Reflective mood & trigger journal (teens to adults)
+  dailyMoodRecollection?: boolean; // Evening reflection, daily recollection & therapist summary chart
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
   routines?: boolean;
   aac?: boolean;
@@ -839,6 +840,10 @@ export interface DailySummaryChart {
 }
 
 
+
+export type {
+  DailyRecollectionEntry,
+} from '../data/recollectionData';
 
 export type {
   AppTheme,

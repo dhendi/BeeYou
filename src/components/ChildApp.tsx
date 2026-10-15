@@ -47,6 +47,7 @@ const RoutineStickerCelebrationModal = lazy(() => import('./RoutineStickerCelebr
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const MedicationRemindersModal = lazy(() => import('./MedicationRemindersModal').then(m => ({ default: m.MedicationRemindersModal })));
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
 const EmergencySensoryModal = lazy(() => import('./EmergencySensoryModal').then(m => ({ default: m.EmergencySensoryModal })));
 const FivePointScaleModal = lazy(() => import('./FivePointScaleModal').then(m => ({ default: m.FivePointScaleModal })));
 const DecisionWheelModal = lazy(() => import('./DecisionWheelModal').then(m => ({ default: m.DecisionWheelModal })));
@@ -82,6 +83,8 @@ const ChildAppContent: React.FC = () => {
     enabledFeatures,
     showAboutMeModal,
     setShowAboutMeModal,
+    showRecollectionModal,
+    setShowRecollectionModal,
     settings,
     isParentMode,
     isSafeModeActive,
@@ -117,6 +120,7 @@ const ChildAppContent: React.FC = () => {
   useModalBackHandler(showCaregiverAlertModal, () => setShowCaregiverAlertModal(false));
   useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
   useModalBackHandler(showAboutMeModal, () => setShowAboutMeModal(false));
+  useModalBackHandler(showRecollectionModal, () => setShowRecollectionModal(false));
   useModalBackHandler(!!globalFeedbackState, () => setGlobalFeedbackState(null));
 
   useEffect(() => {
@@ -348,6 +352,9 @@ const ChildAppContent: React.FC = () => {
 
         {/* Teen & Adult Deep Mood Reflection Journal Modal */}
         <MoodJournalModal />
+
+        {/* Daily Mood & Recollection Check-in Modal */}
+        <DailyRecollectionModal />
 
         {/* Emergency Sensory Red Button Modal */}
         <EmergencySensoryModal />
