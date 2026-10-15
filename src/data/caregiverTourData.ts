@@ -23,6 +23,7 @@ export interface TourSectionMeta {
   id: TourSectionId;
   title: string;
   emoji: string;
+  stickerSrc?: string;
   description: string;
   tabId: string;
   steps: CoachMarkStep[];
@@ -33,6 +34,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'fullApp',
     title: 'Full Caregiver Hub Tour',
     emoji: '🌟',
+    stickerSrc: '/assets/stickers/star_gold.png',
     description: 'A complete step-by-step walkthrough covering every main tool and feature in the app.',
     tabId: 'home',
     steps: [
@@ -165,6 +167,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'pairing',
     title: 'Instant Device Pairing',
     emoji: '🔗',
+    stickerSrc: '/assets/stickers/pairing_qr_phone.png',
     description: 'Connect caregiver phones and child tablets in seconds using QR codes or shared email.',
     tabId: 'caregiver',
     steps: [
@@ -193,6 +196,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'alerts',
     title: 'Safety & SOS Alerts Inbox',
     emoji: '🚨',
+    stickerSrc: '/assets/stickers/alert_sos_shield.png',
     description: 'Receive instant alerts when your child needs help, requests a break, or triggers an SOS.',
     tabId: 'alerts',
     steps: [
@@ -227,6 +231,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'routines',
     title: 'Visual Routine Templates & First/Then',
     emoji: '📅',
+    stickerSrc: '/assets/stickers/schedule_calendar.png',
     description: 'Build step-by-step visual schedules, First/Then visual boards, and reward stickers.',
     tabId: 'routines',
     steps: [
@@ -255,6 +260,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'medications',
     title: 'Medication Reminders & Refill Tracker',
     emoji: '💊',
+    stickerSrc: '/assets/stickers/medications_health.png',
     description: 'Track daily pill schedules, dosage times, and receive automatic warnings before refills run out.',
     tabId: 'medications',
     steps: [
@@ -289,6 +295,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'plansChanged',
     title: 'Plans Changed Alert System',
     emoji: '⚠️',
+    stickerSrc: '/assets/stickers/story_plans_change.png',
     description: 'Calm sudden schedule changes by broadcasting gentle visual explanations to your child.',
     tabId: 'plans-changed',
     steps: [
@@ -317,6 +324,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'aac',
     title: 'AAC Symbol Studio & Custom Vocab',
     emoji: '🗣️',
+    stickerSrc: '/assets/stickers/aac_core.png',
     description: 'Customize AAC communication boards with 3,400+ Mulberry symbols, family photos, and custom speech.',
     tabId: 'aac',
     steps: [
@@ -345,6 +353,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'moodJournal',
     title: 'Mood & Self-Reflection Journal',
     emoji: '📖',
+    stickerSrc: '/assets/stickers/routine_writing_journal.png',
     description: 'Daily emotional reflections, voice notes, and sensory regulation logs.',
     tabId: 'mood-journal',
     steps: [
@@ -367,6 +376,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'subscription',
     title: 'Membership & 15-Day Free Trial',
     emoji: '👑',
+    stickerSrc: '/assets/stickers/trial_crown.png',
     description: 'Manage subscription plans, 15-day free trial, and billing cycles with $0 upfront.',
     tabId: 'subscription',
     steps: [
@@ -451,6 +461,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'adventures',
     title: 'Life Adventures & Contextual AAC',
     emoji: '🧭',
+    stickerSrc: '/assets/stickers/rocket_adventure.png',
     description: 'Prepare for community outings like dentists, grocery stores, and haircuts with suggested phrases.',
     tabId: 'adventures',
     steps: [
@@ -473,6 +484,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'skills',
     title: 'Independence Missions & Skills',
     emoji: '⭐',
+    stickerSrc: '/assets/stickers/star_gold.png',
     description: 'Break everyday tasks into rewarding micro-missions with star rewards.',
     tabId: 'skills',
     steps: [
@@ -495,6 +507,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'profile',
     title: 'Profile & Emergency ID Card',
     emoji: '🪪',
+    stickerSrc: '/assets/stickers/about_id.png',
     description: 'Manage child interests, pronouns, sensory sensitivities, and digital advocacy badge.',
     tabId: 'profile',
     steps: [

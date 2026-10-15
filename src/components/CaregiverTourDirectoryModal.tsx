@@ -48,8 +48,8 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
         {/* Modal Header */}
         <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-b border-amber-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-2xl shadow-xs font-black shrink-0">
-              🐝
+            <div className="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center p-1.5 shadow-xs shrink-0">
+              <img src="/assets/stickers/bee_mascot.png" alt="Bee Mascot" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -88,7 +88,8 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                 Recommended for First Time Caregivers
               </span>
               <h3 className="text-base sm:text-lg font-black flex items-center gap-2">
-                <span>🌟 Complete Caregiver Hub Tour</span>
+                <img src="/assets/stickers/star_gold.png" alt="" className="w-5 h-5 object-contain inline-block drop-shadow-2xs" />
+                <span>Complete Caregiver Hub Tour</span>
               </h3>
               <p className="text-xs text-amber-100 max-w-xl font-medium">
                 Walk through all key features step-by-step to learn how everything connects.
@@ -130,8 +131,19 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                   className="w-full text-left p-3.5 sm:p-4 min-h-[48px] rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-white dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-start justify-between gap-3 group shadow-2xs focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 flex items-center justify-center text-xl shrink-0" aria-hidden="true">
-                      {sec.emoji}
+                    <div className="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300/80 dark:border-amber-800/60 flex items-center justify-center p-1.5 shrink-0 shadow-2xs group-hover:scale-105 transition-transform" aria-hidden="true">
+                      {sec.stickerSrc ? (
+                        <img
+                          src={sec.stickerSrc}
+                          alt=""
+                          className="w-full h-full object-contain drop-shadow-2xs"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-xl select-none">
+                          {sec.emoji}
+                        </span>
+                      )}
                     </div>
                     <div className="space-y-0.5">
                       <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition">
