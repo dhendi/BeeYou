@@ -239,19 +239,67 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
 ];
 
 export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [
-  { id: 'qp-1', text: 'I need a break.', emoji: '🛋️', isEmergency: true },
-  { id: 'qp-2', text: 'Please help me.', emoji: '🆘', isEmergency: true },
-  { id: 'qp-3', text: "I don't like that.", emoji: '✋', isEmergency: false },
-  { id: 'qp-4', text: 'Stop.', emoji: '🛑', isEmergency: true },
+  { id: 'qp-1', text: 'I need a break.', emoji: '🛋️', isEmergency: true, stickerSrc: '/assets/stickers/fav_quiet_break.png' },
+  { id: 'qp-2', text: 'Please help me.', emoji: '🆘', isEmergency: true, stickerSrc: '/assets/stickers/fav_help_sos.png' },
+  { id: 'qp-3', text: "I don't like that.", emoji: '👎', isEmergency: false },
+  { id: 'qp-4', text: 'Stop.', emoji: '🛑', isEmergency: true, stickerSrc: '/assets/stickers/fav_stop.png' },
   { id: 'qp-5', text: 'I want to go home.', emoji: '🏠', isEmergency: false },
-  { id: 'qp-6', text: "I'm hungry.", emoji: '🥪', isEmergency: false },
-  { id: 'qp-7', text: "I'm tired.", emoji: '🥱', isEmergency: false },
-  { id: 'qp-8', text: 'Something hurts.', emoji: '🩹', isEmergency: true },
-  { id: 'qp-9', text: "I'm okay.", emoji: '👍', isEmergency: false },
-  { id: 'qp-10', text: 'Not right now.', emoji: '⏳', isEmergency: false },
-  { id: 'qp-11', text: "What's next?", emoji: '❓', isEmergency: false },
-  { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false },
+  { id: 'qp-6', text: "I'm hungry.", emoji: '🥪', isEmergency: false, stickerSrc: '/assets/stickers/fav_sandwich.png' },
+  { id: 'qp-7', text: "I'm tired.", emoji: '🥱', isEmergency: false, stickerSrc: '/assets/stickers/fav_rest_tired.png' },
+  { id: 'qp-8', text: 'Something hurts.', emoji: '🩹', isEmergency: true, stickerSrc: '/assets/stickers/caregiver_heart.png' },
+  { id: 'qp-9', text: "I'm okay.", emoji: '😊', isEmergency: false, stickerSrc: '/assets/stickers/fav_happy.png' },
+  { id: 'qp-10', text: 'Not right now.', emoji: '⏳', isEmergency: false, stickerSrc: '/assets/stickers/timer_clock.png' },
+  { id: 'qp-11', text: "What's next?", emoji: '❓', isEmergency: false, stickerSrc: '/assets/stickers/schedule_calendar.png' },
+  { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false, stickerSrc: '/assets/stickers/clock_time.png' },
 ];
+
+export const getQuickPhraseSticker = (phrase: {
+  id?: string;
+  text?: string;
+  emoji?: string;
+  stickerSrc?: string;
+}): string | undefined => {
+  if (phrase.stickerSrc) return phrase.stickerSrc;
+  const id = phrase.id || '';
+  const text = (phrase.text || '').toLowerCase();
+  const emoji = (phrase.emoji || '').trim();
+
+  if (id === 'qp-1' || text.includes('break') || text.includes('quiet') || emoji === '🛋️') {
+    return '/assets/stickers/fav_quiet_break.png';
+  }
+  if (id === 'qp-2' || text.includes('help') || emoji === '🆘') {
+    return '/assets/stickers/fav_help_sos.png';
+  }
+  if (id === 'qp-4' || text.includes('stop') || emoji === '🛑') {
+    return '/assets/stickers/fav_stop.png';
+  }
+  if (id === 'qp-6' || text.includes('hungry') || text.includes('snack') || text.includes('eat') || emoji === '🥪') {
+    return '/assets/stickers/fav_sandwich.png';
+  }
+  if (id === 'qp-7' || text.includes('tired') || text.includes('sleep') || text.includes('rest') || emoji === '🥱' || emoji === '😴') {
+    return '/assets/stickers/fav_rest_tired.png';
+  }
+  if (id === 'qp-8' || text.includes('hurt') || text.includes('pain') || emoji === '🩹') {
+    return '/assets/stickers/caregiver_heart.png';
+  }
+  if (id === 'qp-9' || text.includes('okay') || text.includes('good') || text.includes('happy') || emoji === '😊' || emoji === '👍') {
+    return '/assets/stickers/fav_happy.png';
+  }
+  if (id === 'qp-10' || text.includes('not right now') || text.includes('later') || text.includes('not now') || emoji === '⏳') {
+    return '/assets/stickers/timer_clock.png';
+  }
+  if (id === 'qp-11' || text.includes("what's next") || text.includes('what next') || emoji === '❓') {
+    return '/assets/stickers/schedule_calendar.png';
+  }
+  if (id === 'qp-12' || text.includes('wait') || emoji === '🖐️' || emoji === '⏰') {
+    return '/assets/stickers/clock_time.png';
+  }
+  if (text.includes('water') || text.includes('drink')) return '/assets/stickers/fav_water.png';
+  if (text.includes('music')) return '/assets/stickers/fav_music.png';
+  if (text.includes('outside')) return '/assets/stickers/fav_outside.png';
+  if (text.includes('love')) return '/assets/stickers/fav_love_heart.png';
+  return undefined;
+};
 
 export const getFavoriteSentenceSticker = (fav: {
   id?: string;

@@ -64,6 +64,7 @@ export interface QuickPhrase {
   isCustom?: boolean;
   audioDataUrl?: string;
   audioRecordedBy?: string;
+  stickerSrc?: string;
 }
 
 export interface FavoriteSentence {
