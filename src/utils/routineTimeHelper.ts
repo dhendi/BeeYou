@@ -124,3 +124,53 @@ export function getCurrentTimeRoutine(routines: Routine[], now: Date = new Date(
   // 3. Fallback to first routine
   return candidates[0] || null;
 }
+
+/**
+ * Returns current time-of-day category: 'morning' | 'school' | 'after-school' | 'bedtime'
+ */
+export function getTimePeriodCategory(now: Date = new Date()): 'morning' | 'school' | 'after-school' | 'bedtime' {
+  const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+  if (currentTotalMinutes >= 300 && currentTotalMinutes < 510) {
+    return 'morning';
+  } else if (currentTotalMinutes >= 510 && currentTotalMinutes < 930) {
+    return 'school';
+  } else if (currentTotalMinutes >= 930 && currentTotalMinutes < 1200) {
+    return 'after-school';
+  } else {
+    return 'bedtime';
+  }
+}
+
+/**
+ * Returns category IDs ordered starting with the current time of day.
+ */
+export function getTimeOrderedCategoryOrder(now: Date = new Date()): ('morning' | 'school' | 'after-school' | 'bedtime' | 'custom')[] {
+  const period = getTimePeriodCategory(now);
+  if (period === 'morning') {
+    return ['morning', 'school', 'after-school', 'bedtime', 'custom'];
+  } else if (period === 'school') {
+    return ['school', 'after-school', 'bedtime', 'morning', 'custom'];
+  } else if (period === 'after-school') {
+    return ['after-school', 'bedtime', 'morning', 'school', 'custom'];
+  } else {
+    return ['bedtime', 'morning', 'school', 'after-school', 'custom'];
+  }
+}
+
+/**
+ * Sorts routines chronologically based on their start time.
+ * Earlier routines appear first.
+ */
+export function sortRoutinesByTime(routines: Routine[]): Routine[] {
+  return [...routines].sort((a, b) => {
+    const [startA] = parseTimeRange(a.time);
+    const [startB] = parseTimeRange(b.time);
+
+    if (startA !== null && startB !== null) {
+      return startA - startB;
+    }
+    if (startA !== null && startB === null) return -1;
+    if (startA === null && startB !== null) return 1;
+    return 0;
+  });
+}

@@ -21,6 +21,7 @@ import { RoutineCalendarStrip } from './RoutineCalendarStrip';
 import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from './RoutineCustomizerModal';
 import { Routine, RoutineTemplate } from '../types';
+import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { t } from '../services/translator';
 
 export const MyRoutineView: React.FC = () => {
@@ -52,12 +53,21 @@ export const MyRoutineView: React.FC = () => {
   // Calendar selected date (defaults to today)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
   
-  // Currently active selected routine ID
+  // Currently active selected routine ID (automatically selected according to current time of day)
   const [selectedRoutineId, setSelectedRoutineId] = useState<string>(() => {
-    const today = new Date().getDay();
-    if (today >= 1 && today <= 5) return 'routine-school-prep';
-    return 'routine-morning';
+    const timeMatch = getCurrentTimeRoutine(routines, new Date());
+    return timeMatch?.id || (routines[0]?.id ?? 'routine-morning');
   });
+
+  // Automatically keep selected routine in sync with current time of day and selected calendar date
+  React.useEffect(() => {
+    const isToday = selectedCalendarDate.toDateString() === new Date().toDateString();
+    const targetDate = isToday ? new Date() : selectedCalendarDate;
+    const timeMatch = getCurrentTimeRoutine(routines, targetDate);
+    if (timeMatch) {
+      setSelectedRoutineId(timeMatch.id);
+    }
+  }, [selectedCalendarDate, routines]);
 
   // Parent edit mode unlocked state
   const [isParentMode, setIsParentMode] = useState<boolean>(false);

@@ -19,7 +19,12 @@ import { t } from '../services/translator';
 import { Routine, VisualScheduleStep } from '../types';
 import { DEFAULT_ROUTINES } from '../data/defaultData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
-import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
+import { 
+  getCurrentTimeRoutine,
+  getTimePeriodCategory,
+  getTimeOrderedCategoryOrder,
+  sortRoutinesByTime
+} from '../utils/routineTimeHelper';
 
 interface MyDayViewProps {
   selectedCalendarDate?: Date;
@@ -48,6 +53,12 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     (r) => r.id !== 'routine-school-full' && (r.steps?.length || 0) < 18
   );
 
+  // Target date for time awareness (today vs specific calendar day)
+  const isToday = !selectedCalendarDate || selectedCalendarDate.toDateString() === new Date().toDateString();
+  const targetDate = isToday ? new Date() : selectedCalendarDate;
+  const currentActiveRoutine = getCurrentTimeRoutine(validRoutines, targetDate);
+  const currentPeriod = getTimePeriodCategory(targetDate);
+
   // Set of expanded routine card IDs
   const [expandedRoutineIds, setExpandedRoutineIds] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -55,7 +66,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     if (selectedRoutineIdProp) {
       initial.add(selectedRoutineIdProp);
     } else {
-      const timeRoutine = getCurrentTimeRoutine(validRoutines);
+      const timeRoutine = getCurrentTimeRoutine(validRoutines, targetDate);
       if (timeRoutine) {
         initial.add(timeRoutine.id);
       } else if (validRoutines.length > 0) {
@@ -75,7 +86,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [isWaitingForNext, setIsWaitingForNext] = useState<boolean>(false);
 
-  // Sync expanded routine when parent prop changes
+  // Sync expanded routine when parent prop or calendar date changes
   React.useEffect(() => {
     if (selectedRoutineIdProp) {
       setExpandedRoutineIds((prev) => {
@@ -83,8 +94,17 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
         next.add(selectedRoutineIdProp);
         return next;
       });
+    } else {
+      const timeRoutine = getCurrentTimeRoutine(validRoutines, targetDate);
+      if (timeRoutine) {
+        setExpandedRoutineIds((prev) => {
+          const next = new Set(prev);
+          next.add(timeRoutine.id);
+          return next;
+        });
+      }
     }
-  }, [selectedRoutineIdProp]);
+  }, [selectedRoutineIdProp, selectedCalendarDate]);
 
   // Timer interval countdown
   React.useEffect(() => {
@@ -233,9 +253,17 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     { id: 'custom', label: 'Other Routines', emoji: '⭐', matcher: () => true },
   ];
 
-  // Map routines to categories without duplicating, filtering by active day
+  // Dynamic category ordering: routines relevant to current time of day appear first
+  const categoryOrder = getTimeOrderedCategoryOrder(targetDate);
+  const orderedCategoryConfigs = [...categoryConfigs].sort((a, b) => {
+    const idxA = categoryOrder.indexOf(a.id as any);
+    const idxB = categoryOrder.indexOf(b.id as any);
+    return (idxA >= 0 ? idxA : 99) - (idxB >= 0 ? idxB : 99);
+  });
+
+  // Map routines to categories without duplicating, filtering by active day and sorting chronologically
   const placedRoutineIds = new Set<string>();
-  const categorizedGroups = categoryConfigs.map((cfg) => {
+  const categorizedGroups = orderedCategoryConfigs.map((cfg) => {
     const groupRoutines = validRoutines.filter((r) => {
       if (placedRoutineIds.has(r.id)) return false;
       if (!isRoutineActiveOnDate(r)) return false;
@@ -250,7 +278,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
       id: cfg.id,
       label: cfg.label,
       emoji: cfg.emoji,
-      routines: groupRoutines,
+      routines: sortRoutinesByTime(groupRoutines),
     };
   }).filter((group) => group.routines.length > 0);
 
@@ -453,6 +481,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
       {/* Routine Category Sections */}
       {categorizedGroups.map((group) => {
         const isCollapsed = collapsedCategories.has(group.id);
+        const isCurrentPeriod = isToday && group.id === currentPeriod;
 
         return (
           <section key={group.id} className="space-y-3">
@@ -471,9 +500,15 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0">
                   <RoutineStickerIcon emoji={group.emoji} title={group.label} className="w-5 h-5 object-contain" />
                 </div>
-                <span className="text-stone-700 font-extrabold">{group.label}</span>
+                <span className="text-stone-700 font-extrabold">{t(group.label)}</span>
                 <span>·</span>
                 <span>{group.routines.length}</span>
+                {isCurrentPeriod && (
+                  <span className="ml-1.5 px-2 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-[10px] font-black border border-amber-300 flex items-center gap-1 shadow-2xs">
+                    <span>✨</span>
+                    <span>{t('Now')}</span>
+                  </span>
+                )}
               </button>
 
               <button
@@ -491,6 +526,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <div className="space-y-3.5">
                 {group.routines.map((routine) => {
                   const isExpanded = expandedRoutineIds.has(routine.id);
+                  const isCurrentRoutine = isToday && routine.id === currentActiveRoutine?.id;
                   const totalMinutes = getTotalMinutes(routine.steps);
                   const recurrenceText = getRecurrenceText(routine.assignedDays);
                   const completedCount = routine.steps.filter((s) => s.completed).length;
@@ -498,7 +534,11 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                   return (
                     <div
                       key={routine.id}
-                      className="bg-white rounded-[2rem] sm:rounded-[2.4rem] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-stone-200/80 transition-all"
+                      className={`bg-white rounded-[2rem] sm:rounded-[2.4rem] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border transition-all ${
+                        isCurrentRoutine
+                          ? 'border-amber-400 ring-2 ring-amber-200/70 shadow-md'
+                          : 'border-stone-200/80'
+                      }`}
                     >
                       {/* Collapsed Routine Header: Chevron, Title, Subtitle, Play Button */}
                       <div
@@ -513,13 +553,30 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                           )}
 
                           <div className="min-w-0">
-                            <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-2 truncate">
-                              <span>{t(routine.title)}</span>
-                              <div className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shrink-0">
-                                <RoutineStickerIcon emoji={routine.emoji} title={routine.title} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
-                              </div>
-                            </h3>
-                            <p className="text-xs sm:text-sm font-semibold text-stone-400 flex items-center gap-1.5 mt-0.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-2 truncate">
+                                <span>{t(routine.title)}</span>
+                                <div className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shrink-0">
+                                  <RoutineStickerIcon emoji={routine.emoji} title={routine.title} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
+                                </div>
+                              </h3>
+                              {isCurrentRoutine && (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-black border border-amber-500/70 flex items-center gap-1 shadow-2xs shrink-0 animate-pulse">
+                                  <span>✨</span>
+                                  <span>{t('Current Now')}</span>
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm font-semibold text-stone-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              {routine.time && (
+                                <>
+                                  <span className="flex items-center gap-1 text-stone-700 font-bold bg-stone-100 px-2 py-0.5 rounded-md text-[11px] sm:text-xs">
+                                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <span>{routine.time}</span>
+                                  </span>
+                                  <span>·</span>
+                                </>
+                              )}
                               <span>{totalMinutes}m</span>
                               <span>·</span>
                               <span className="flex items-center gap-1">
