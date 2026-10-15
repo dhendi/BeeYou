@@ -176,6 +176,16 @@ interface CaregiverSessionData {
 const caregiverSessions = new Map<string, CaregiverSessionData>();
 const pairingSessions = new Map<string, TemporaryPairingSessionData>();
 
+// Periodic cleanup for stale pairing sessions (> 24 hours old) to prevent memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, session] of pairingSessions.entries()) {
+    if (now - session.createdAt > 24 * 60 * 60 * 1000) {
+      pairingSessions.delete(code);
+    }
+  }
+}, 60 * 60 * 1000).unref?.();
+
 // In-Memory Cloud Sync Event Bus (Multi-device pub/sub & SSE)
 interface CloudSyncEvent {
   eventId: string;
