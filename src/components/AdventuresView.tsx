@@ -39,6 +39,7 @@ const getStorySticker = (id: string): string | undefined => {
 
 export const AdventuresView: React.FC = () => {
   const {
+    settings,
     adventures,
     socialStories,
     activeAdventureId,
@@ -50,6 +51,8 @@ export const AdventuresView: React.FC = () => {
     completeAdventure,
     setChildView,
   } = useApp();
+
+  const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [activeTab, setActiveTab] = useState<'adventures' | 'stories'>('adventures');
   const [adventureSubTab, setAdventureSubTab] = useState<'steps' | 'sensory' | 'say' | 'practice'>('steps');
@@ -180,14 +183,14 @@ export const AdventuresView: React.FC = () => {
             <span>{t('All Adventures')}</span>
           </button>
 
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+          <span className="text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300/80 px-3 py-1 rounded-full">
             {t(selectedAdventure.category)}
           </span>
         </div>
 
         {/* Adventure Header Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
+          <div className="w-20 h-20 rounded-3xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
             {(selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)) ? (
               <img
                 src={selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)}
@@ -230,7 +233,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('steps')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'steps'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-amber-500 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -240,7 +243,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('sensory')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'sensory'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-amber-500 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -250,7 +253,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('say')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'say'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-amber-500 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -260,7 +263,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('practice')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'practice'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-amber-500 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -271,11 +274,11 @@ export const AdventuresView: React.FC = () => {
         {/* SUB-TAB 1: INTERACTIVE STEP WALKTHROUGH */}
         {adventureSubTab === 'steps' && (
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-7 shadow-sm flex flex-col items-center text-center">
-            <div className="text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full mb-4">
+            <div className="text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-300/80 px-3 py-1 rounded-full mb-4">
               {t('Step')} {currentStepIndex + 1} {t('of')} {selectedAdventure.steps.length}
             </div>
 
-            <div className="w-28 h-28 rounded-3xl bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center text-6xl mb-4 shadow-inner">
+            <div className="w-28 h-28 rounded-3xl bg-amber-50 border-2 border-amber-200/80 flex items-center justify-center text-6xl mb-4 shadow-inner">
               {step.emoji}
             </div>
 
@@ -330,7 +333,7 @@ export const AdventuresView: React.FC = () => {
                     completeAdventure(selectedAdventure.id);
                   }
                 }}
-                className="flex-1 py-2.5 rounded-2xl font-black text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-2xl font-black text-xs sm:text-sm bg-amber-500 hover:bg-amber-600 text-white shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 {isLastStep ? t('Complete Adventure! ⭐') : `${t('Next Step')} →`}
               </button>
@@ -343,7 +346,7 @@ export const AdventuresView: React.FC = () => {
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-emerald-600" />
+                <Sparkles className="w-5 h-5 text-amber-600" />
                 <span>{t('Sensory Guide for')} {t(selectedAdventure.title)}</span>
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -413,11 +416,11 @@ export const AdventuresView: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mt-2">
-              <span className="text-xs font-black text-emerald-900 uppercase tracking-wider block mb-1">
+            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mt-2">
+              <span className="text-xs font-black text-amber-900 uppercase tracking-wider block mb-1">
                 {t('What Happens Afterward:')}
               </span>
-              <p className="text-xs sm:text-sm text-emerald-950 font-bold leading-relaxed">
+              <p className="text-xs sm:text-sm text-amber-950 font-bold leading-relaxed">
                 {t(selectedAdventure.whatHappensAfter)}
               </p>
             </div>
@@ -516,11 +519,11 @@ export const AdventuresView: React.FC = () => {
             </div>
 
             {practiceFeedback && (
-              <div className="w-full max-w-lg bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 animate-in fade-in zoom-in-95">
-                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800 block mb-1">
+              <div className="w-full max-w-lg bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-4 animate-in fade-in zoom-in-95">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 block mb-1">
                   {t('How caregiver/doctor responds:')}
                 </span>
-                <p className="text-sm font-bold text-emerald-950 leading-relaxed">
+                <p className="text-sm font-bold text-amber-950 leading-relaxed">
                   "{practiceFeedback}"
                 </p>
               </div>
@@ -540,7 +543,9 @@ export const AdventuresView: React.FC = () => {
           onClick={() => setActiveTab('adventures')}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeTab === 'adventures'
-              ? 'bg-emerald-600 text-white shadow-sm'
+              ? isColorCoded
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-amber-500 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -551,7 +556,9 @@ export const AdventuresView: React.FC = () => {
           onClick={() => setActiveTab('stories')}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeTab === 'stories'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? isColorCoded
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-amber-500 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -562,101 +569,127 @@ export const AdventuresView: React.FC = () => {
 
       {activeTab === 'adventures' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {adventures.map((adventure) => (
-            <button
-              type="button"
-              key={adventure.id}
-              aria-label={`Adventure: ${t(adventure.title)}. ${adventure.steps.length} steps. ${t(adventure.summary)}`}
-              onClick={() => {
-                setActiveAdventureId(adventure.id);
-                setAdventureSubTab('steps');
-                setCurrentStepIndex(0);
-                playChime('tap');
-              }}
-              className="w-full text-left bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
-                {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
-                  <img
-                    src={adventure.stickerSrc || getAdventureSticker(adventure.id)}
-                    alt=""
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="text-4xl">{adventure.emoji}</span>
-                )}
-              </div>
-              <div className="flex-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                  {t(adventure.category)}
-                </span>
-                <h3 className="font-black text-slate-800 text-base sm:text-lg mt-1 leading-snug">
-                  {t(adventure.title)}
-                </h3>
-                <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-1">
-                  {t(adventure.summary)}
-                </p>
-                <div className="flex items-center gap-3 mt-3 text-xs font-bold text-slate-400">
-                  <span>{adventure.steps.length} {t('steps')}</span>
-                  <span>•</span>
-                  <span className="text-emerald-700">{t('Sensory guide')}</span>
-                  {adventure.completedCount ? (
-                    <>
-                      <span>•</span>
-                      <span className="text-amber-600 font-black">
-                        ⭐ {t('Done')} {adventure.completedCount}x
-                      </span>
-                    </>
-                  ) : null}
+          {adventures.map((adventure) => {
+            const cardClass = isColorCoded
+              ? 'bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300'
+              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            const iconBoxClass = isColorCoded
+              ? 'bg-emerald-50 border border-emerald-200'
+              : 'bg-white/90 border border-amber-200/90';
+            const badgeClass = isColorCoded
+              ? 'text-emerald-700 bg-emerald-50'
+              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
+            const subtextClass = isColorCoded ? 'text-emerald-700' : 'text-amber-800';
+
+            return (
+              <button
+                type="button"
+                key={adventure.id}
+                aria-label={`Adventure: ${t(adventure.title)}. ${adventure.steps.length} steps. ${t(adventure.summary)}`}
+                onClick={() => {
+                  setActiveAdventureId(adventure.id);
+                  setAdventureSubTab('steps');
+                  setCurrentStepIndex(0);
+                  playChime('tap');
+                }}
+                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+              >
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
+                  {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
+                    <img
+                      src={adventure.stickerSrc || getAdventureSticker(adventure.id)}
+                      alt=""
+                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-4xl">{adventure.emoji}</span>
+                  )}
                 </div>
-              </div>
-            </button>
-          ))}
+                <div className="flex-1">
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
+                    {t(adventure.category)}
+                  </span>
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
+                    {t(adventure.title)}
+                  </h3>
+                  <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1">
+                    {t(adventure.summary)}
+                  </p>
+                  <div className="flex items-center gap-3 mt-3 text-xs font-bold text-slate-400">
+                    <span>{adventure.steps.length} {t('steps')}</span>
+                    <span>•</span>
+                    <span className={subtextClass}>{t('Sensory guide')}</span>
+                    {adventure.completedCount ? (
+                      <>
+                        <span>•</span>
+                        <span className="text-amber-600 font-black">
+                          ⭐ {t('Done')} {adventure.completedCount}x
+                        </span>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {socialStories.map((story) => (
-            <button
-              type="button"
-              key={story.id}
-              aria-label={`Social Story: ${t(story.title)}. ${story.pages.length} pages.`}
-              onClick={() => {
-                setActiveStoryId(story.id);
-                setCurrentPageIndex(0);
-                playChime('tap');
-              }}
-              className="w-full text-left bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
-                {(story.stickerSrc || getStorySticker(story.id)) ? (
-                  <img
-                    src={story.stickerSrc || getStorySticker(story.id)}
-                    alt=""
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="text-4xl">{story.emoji}</span>
-                )}
-              </div>
-              <div className="flex-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                  {t('Social Story')}
-                </span>
-                <h3 className="font-black text-slate-800 text-base sm:text-lg mt-1 leading-snug">
-                  {t(story.title)}
-                </h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">
-                  {story.pages.length} {t('illustrated pages • Calm & predictable expectations')}
-                </p>
-                <div className="mt-3 text-xs font-bold text-indigo-700 flex items-center gap-1">
-                  <span>{t('Read story')}</span>
-                  <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+          {socialStories.map((story) => {
+            const cardClass = isColorCoded
+              ? 'bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300'
+              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            const iconBoxClass = isColorCoded
+              ? 'bg-indigo-50 border border-indigo-200'
+              : 'bg-white/90 border border-amber-200/90';
+            const badgeClass = isColorCoded
+              ? 'text-indigo-700 bg-indigo-50'
+              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
+            const subtextClass = isColorCoded ? 'text-indigo-700' : 'text-amber-800';
+
+            return (
+              <button
+                type="button"
+                key={story.id}
+                aria-label={`Social Story: ${t(story.title)}. ${story.pages.length} pages.`}
+                onClick={() => {
+                  setActiveStoryId(story.id);
+                  setCurrentPageIndex(0);
+                  playChime('tap');
+                }}
+                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+              >
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
+                  {(story.stickerSrc || getStorySticker(story.id)) ? (
+                    <img
+                      src={story.stickerSrc || getStorySticker(story.id)}
+                      alt=""
+                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-4xl">{story.emoji}</span>
+                  )}
                 </div>
-              </div>
-            </button>
-          ))}
+                <div className="flex-1">
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
+                    {t('Social Story')}
+                  </span>
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
+                    {t(story.title)}
+                  </h3>
+                  <p className="text-xs text-slate-600 font-medium mt-1">
+                    {story.pages.length} {t('illustrated pages • Calm & predictable expectations')}
+                  </p>
+                  <div className={`mt-3 text-xs font-bold flex items-center gap-1 ${subtextClass}`}>
+                    <span>{t('Read story')}</span>
+                    <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
