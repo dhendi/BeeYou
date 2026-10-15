@@ -95,7 +95,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
             </span>
           </div>
           <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            {childProfile.name}'s Day-to-Day Summary
+            {childProfile.name ? `${childProfile.name}'s ` : ''}Day-to-Day Summary
           </h3>
           <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
             Daily mood trends, energy regulation, and quick summaries for parents & therapists.

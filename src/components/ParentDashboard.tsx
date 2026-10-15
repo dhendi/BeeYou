@@ -1,5 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useApp } from '../context/AppContext';
+
+// Caregiver portal lazy-loaded modals
+const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
+const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
+const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
+const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
+const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
+const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
 import {
   ArrowLeft,
   Crown,
@@ -101,6 +110,8 @@ export const ParentDashboard: React.FC = () => {
     getTrialDaysRemaining,
     settings,
     updateSettings,
+    showAboutMeModal,
+    setShowAboutMeModal,
   } = useApp();
 
   type TabType =
@@ -975,6 +986,20 @@ export const ParentDashboard: React.FC = () => {
         onSkip={() => setShowCaregiverTour(false)}
         tourName={currentTourName}
       />
+
+      {/* Caregiver Portal Modals */}
+      <Suspense fallback={null}>
+        <DailyRecollectionModal />
+        <MoodJournalModal />
+        <CycleTrackerModal />
+        <PlansChangedModal />
+        <AboutMeIDModal
+          isOpen={showAboutMeModal}
+          onClose={() => setShowAboutMeModal(false)}
+        />
+        <EditAlertsModal />
+        <EditCalmModal />
+      </Suspense>
     </div>
   );
 };
