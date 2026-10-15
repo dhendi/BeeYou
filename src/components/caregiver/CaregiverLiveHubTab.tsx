@@ -8,14 +8,7 @@ import {
   ShieldAlert, 
   ShieldCheck, 
   Send, 
-  Clock, 
-  Utensils, 
-  Pill, 
-  Car, 
-  Wind, 
   Sparkles, 
-  RotateCcw, 
-  MessageCircle,
   Bell,
   Star,
   Smile
@@ -78,8 +71,8 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
     playChime('star');
   };
 
-  const handleSendQuickNudge = (title: string, text: string, _emoji?: string) => {
-    sendCaregiverMessage(getPairingCode(), text, 'Caregiver', '');
+  const handleSendQuickNudge = (title: string, text: string, iconSrc?: string) => {
+    sendCaregiverMessage(getPairingCode(), text, 'Caregiver', iconSrc || '');
     showNotification(`Sent nudge to child: "${title}"`);
     playChime('tap');
   };
@@ -388,23 +381,23 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         {/* 1-Tap Quick Nudges Grid */}
         <div data-tour="nudges-grid-buttons" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
-            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
-            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), icon: Utensils, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-100 border-emerald-200', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
-            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), icon: Pill, iconColor: 'text-rose-700', iconBg: 'bg-rose-100 border-rose-200', bg: 'hover:bg-rose-50/70 border-rose-200' },
-            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), icon: Car, iconColor: 'text-indigo-700', iconBg: 'bg-indigo-100 border-indigo-200', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
-            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), icon: Wind, iconColor: 'text-sky-700', iconBg: 'bg-sky-100 border-sky-200', bg: 'hover:bg-sky-50/70 border-sky-200' },
-            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), icon: Sparkles, iconColor: 'text-purple-700', iconBg: 'bg-purple-100 border-purple-200', bg: 'hover:bg-purple-50/70 border-purple-200' },
-            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), icon: RotateCcw, iconColor: 'text-amber-700', iconBg: 'bg-amber-100 border-amber-200', bg: 'hover:bg-amber-50/70 border-amber-200' },
-            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), icon: MessageCircle, iconColor: 'text-blue-700', iconBg: 'bg-blue-100 border-blue-200', bg: 'hover:bg-blue-50/70 border-blue-200' },
+            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), iconSrc: '/assets/stickers/wall_clock.png', bg: 'hover:bg-amber-50/70 border-amber-200' },
+            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), iconSrc: '/assets/stickers/fork_knife.png', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
+            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), iconSrc: '/assets/stickers/pill_capsule.png', bg: 'hover:bg-rose-50/70 border-rose-200' },
+            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), iconSrc: '/assets/stickers/car_ride.png', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
+            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), iconSrc: '/assets/stickers/wind_breeze.png', bg: 'hover:bg-sky-50/70 border-sky-200' },
+            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), iconSrc: '/assets/stickers/purple_stars.png', bg: 'hover:bg-purple-50/70 border-purple-200' },
+            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), iconSrc: '/assets/stickers/circular_arrow.png', bg: 'hover:bg-amber-200 border-amber-200' },
+            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), iconSrc: '/assets/stickers/speech_bubble.png', bg: 'hover:bg-blue-50/70 border-blue-200' },
           ].map((nudge, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => handleSendQuickNudge(nudge.title, nudge.text)}
+              onClick={() => handleSendQuickNudge(nudge.title, nudge.text, nudge.iconSrc)}
               className={`p-3.5 rounded-2xl border text-left transition active:scale-95 cursor-pointer flex flex-col justify-between gap-2 shadow-2xs ${nudge.bg}`}
             >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${nudge.iconBg} ${nudge.iconColor} shadow-2xs`}>
-                <nudge.icon className="w-5 h-5 stroke-[2.3]" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center p-0.5 shadow-2xs shrink-0">
+                <img src={nudge.iconSrc} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <div>
                 <h4 className="font-bold text-xs text-slate-900">{nudge.title}</h4>

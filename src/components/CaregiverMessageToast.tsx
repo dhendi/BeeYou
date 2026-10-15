@@ -43,8 +43,12 @@ export const CaregiverMessageToast: React.FC = () => {
     >
       <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-2 border-rose-300 ring-4 ring-rose-400/20 text-slate-800 shadow-xl">
         <div className="flex items-start gap-3.5">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-100 to-amber-100 text-rose-600 flex items-center justify-center text-3xl shrink-0 shadow-sm border border-rose-200 animate-bounce">
-            {incomingCaregiverMessage.emoji || '❤️'}
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 text-rose-600 flex items-center justify-center text-3xl shrink-0 shadow-sm border border-amber-200 animate-bounce p-1 overflow-hidden">
+            {incomingCaregiverMessage.emoji && (incomingCaregiverMessage.emoji.startsWith('/') || incomingCaregiverMessage.emoji.includes('.png')) ? (
+              <img src={incomingCaregiverMessage.emoji} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            ) : (
+              incomingCaregiverMessage.emoji || '❤️'
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
