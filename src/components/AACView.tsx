@@ -675,34 +675,8 @@ export const AACView: React.FC = () => {
         return filteredItems;
       })();
 
-  const isCoreStageMode = activeCategory === 'core' && !searchQuery.trim() && !activeSceneData;
-
+  // Standardized AAC Button Density: small, medium, and large maintain identical sizes across 4, 12, and Full stages
   const gridColsClass = (() => {
-    if (isCoreStageMode) {
-      if (gridStage === 1) {
-        // Stage 4: 2 columns with fixed, visually distinct max-widths per button size
-        if (buttonSize === 'small') {
-          return 'grid-cols-2 max-w-[320px] sm:max-w-[360px] mx-auto';
-        }
-        if (buttonSize === 'large') {
-          return 'grid-cols-2 max-w-[660px] sm:max-w-[740px] mx-auto';
-        }
-        // medium
-        return 'grid-cols-2 max-w-[480px] sm:max-w-[540px] mx-auto';
-      }
-      if (gridStage === 2) {
-        // Stage 12: Distinct column count & max-width per button size
-        if (buttonSize === 'small') {
-          return 'grid-cols-4 sm:grid-cols-6 max-w-2xl mx-auto';
-        }
-        if (buttonSize === 'large') {
-          return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 max-w-4xl sm:max-w-5xl mx-auto';
-        }
-        // medium
-        return 'grid-cols-3 sm:grid-cols-4 max-w-3xl mx-auto';
-      }
-    }
-    // Standard AAC Button Density for Full Stage & category folders
     if (buttonSize === 'large') {
       return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 w-full';
     }
@@ -714,74 +688,14 @@ export const AACView: React.FC = () => {
   })();
 
   const buttonSizeStyles = (() => {
-    // If in Stage 4 (gridStage 1): buttons are larger, so fonts & paddings scale up proportionally
-    if (isCoreStageMode && gridStage === 1) {
-      switch (buttonSize) {
-        case 'small':
-          return {
-            tilePadding: 'p-2 sm:p-2.5',
-            folderPadding: 'p-2 sm:p-2.5',
-            labelFont: 'text-xs sm:text-sm font-bold',
-            folderFont: 'text-xs sm:text-sm font-bold',
-            categoryTag: 'text-[8px] sm:text-[9px] px-1.5 py-0.5',
-          };
-        case 'large':
-          return {
-            tilePadding: 'p-4 sm:p-6',
-            folderPadding: 'p-4 sm:p-6',
-            labelFont: 'text-base sm:text-xl md:text-2xl font-black',
-            folderFont: 'text-base sm:text-xl md:text-2xl font-black',
-            categoryTag: 'text-[10px] sm:text-xs px-2.5 py-0.5 font-black',
-          };
-        case 'medium':
-        default:
-          return {
-            tilePadding: 'p-3 sm:p-4',
-            folderPadding: 'p-3 sm:p-4',
-            labelFont: 'text-sm sm:text-base md:text-lg font-black',
-            folderFont: 'text-sm sm:text-base md:text-lg font-black',
-            categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5',
-          };
-      }
-    }
-
-    // If in Stage 12 (gridStage 2):
-    if (isCoreStageMode && gridStage === 2) {
-      switch (buttonSize) {
-        case 'small':
-          return {
-            tilePadding: 'p-1.5 sm:p-2',
-            folderPadding: 'p-1.5 sm:p-2',
-            labelFont: 'text-[10px] sm:text-xs font-bold',
-            folderFont: 'text-[10px] sm:text-xs font-bold',
-            categoryTag: 'text-[7px] sm:text-[8px] px-1 py-0.2',
-          };
-        case 'large':
-          return {
-            tilePadding: 'p-3.5 sm:p-5',
-            folderPadding: 'p-3.5 sm:p-5',
-            labelFont: 'text-sm sm:text-base md:text-lg font-black',
-            folderFont: 'text-sm sm:text-base md:text-lg font-black',
-            categoryTag: 'text-[9px] sm:text-[10px] px-2 py-0.5 font-black',
-          };
-        case 'medium':
-        default:
-          return {
-            tilePadding: 'p-2 sm:p-3',
-            folderPadding: 'p-2 sm:p-3',
-            labelFont: 'text-xs sm:text-sm font-black',
-            folderFont: 'text-xs sm:text-sm font-black',
-            categoryTag: 'text-[8px] px-1.5 py-0.5',
-          };
-      }
-    }
-
-    // Full stage (gridStage 3) and general category views:
     switch (buttonSize) {
       case 'small':
         return {
           tilePadding: 'p-1 sm:p-1.5',
           folderPadding: 'p-1 sm:p-1.5',
+          folderBadge: 'top-1 right-1 text-[7.5px] sm:text-[8px] px-1 py-0.5 rounded gap-0.5',
+          folderBadgeIcon: 'w-2 h-2',
+          folderSymbolArea: 'pt-3.5 sm:pt-4 pb-0.5 px-0.5',
           labelFont: 'text-[9px] sm:text-[10px] md:text-[11px]',
           folderFont: 'text-[9px] sm:text-[10px]',
           categoryTag: 'text-[7px] px-1 py-0.2',
@@ -790,6 +704,9 @@ export const AACView: React.FC = () => {
         return {
           tilePadding: 'p-3 sm:p-4 md:p-5',
           folderPadding: 'p-3 sm:p-4 md:p-5',
+          folderBadge: 'top-2 right-2 text-[10px] sm:text-xs px-2 py-0.5 rounded-md gap-1',
+          folderBadgeIcon: 'w-3 h-3',
+          folderSymbolArea: 'pt-5 sm:pt-6 pb-1 px-1',
           labelFont: 'text-sm sm:text-base md:text-lg lg:text-xl font-black',
           folderFont: 'text-xs sm:text-base md:text-lg font-black',
           categoryTag: 'text-[9px] sm:text-[10px] md:text-xs px-2 py-0.5 font-black',
@@ -799,6 +716,9 @@ export const AACView: React.FC = () => {
         return {
           tilePadding: 'p-2',
           folderPadding: 'p-2',
+          folderBadge: 'top-1.5 right-1.5 text-[8.5px] sm:text-[9px] px-1.5 py-0.5 rounded-md gap-0.5',
+          folderBadgeIcon: 'w-2.5 h-2.5',
+          folderSymbolArea: 'pt-4 sm:pt-4.5 pb-0.5 px-1',
           labelFont: 'text-[10px] sm:text-xs',
           folderFont: 'text-[11px] sm:text-xs',
           categoryTag: 'text-[8px] px-1.5 py-0.5',
@@ -1683,13 +1603,13 @@ export const AACView: React.FC = () => {
                 className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]`}
               >
                 {/* Folder Top-Right Corner Tab / Badge */}
-                <div className="absolute top-1.5 right-1.5 z-10 bg-[#4A3E34] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs">
-                  <Folder className="w-2.5 h-2.5 fill-white" />
+                <div className={`absolute ${buttonSizeStyles.folderBadge} z-20 bg-[#4A3E34] text-white font-black flex items-center shadow-2xs pointer-events-none`}>
+                  <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
                   <span>{t('Folder')}</span>
                 </div>
 
                 {/* Mulberry Symbol Area */}
-                <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 p-1 mt-1">
+                <div className={`relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 ${buttonSizeStyles.folderSymbolArea}`}>
                   <img
                     src={folder.stickerSrc || resolveAacImageUrl(folder)}
                     alt={folder.label}
