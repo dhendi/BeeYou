@@ -19,6 +19,7 @@ import { t } from '../services/translator';
 import { Routine, VisualScheduleStep } from '../types';
 import { DEFAULT_ROUTINES } from '../data/defaultData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 
 interface MyDayViewProps {
   selectedCalendarDate?: Date;
@@ -50,11 +51,16 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
   // Set of expanded routine card IDs
   const [expandedRoutineIds, setExpandedRoutineIds] = useState<Set<string>>(() => {
     const initial = new Set<string>();
-    // Default: expand the selected routine or the first routine
+    // Default: expand the selected routine or the time-appropriate routine
     if (selectedRoutineIdProp) {
       initial.add(selectedRoutineIdProp);
-    } else if (validRoutines.length > 0) {
-      initial.add(validRoutines[0].id);
+    } else {
+      const timeRoutine = getCurrentTimeRoutine(validRoutines);
+      if (timeRoutine) {
+        initial.add(timeRoutine.id);
+      } else if (validRoutines.length > 0) {
+        initial.add(validRoutines[0].id);
+      }
     }
     return initial;
   });

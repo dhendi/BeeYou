@@ -51,7 +51,9 @@ import {
   FavQuietBreakSticker,
   FavHelpSosSticker,
   PlansChangeStorySticker,
+  RoutineStickerIcon,
 } from './icons/JournalStickers';
+import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
@@ -101,6 +103,7 @@ export const ChildHomeView: React.FC = () => {
     getTodaySpoonEntry,
     dashboardWidgets,
     setShowDashboardCustomizer,
+    updateRoutine,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
@@ -108,7 +111,7 @@ export const ChildHomeView: React.FC = () => {
   const latestMoodEntry = moodJournalEntries[0];
   const todaySpoonEntry = getTodaySpoonEntry();
 
-  const currentRoutine = routines[0];
+  const currentRoutine = getCurrentTimeRoutine(routines) || routines[0];
   const nextStep = currentRoutine?.steps.find((s) => !s.completed);
   const todaysAdventure = adventures[0];
 
@@ -457,37 +460,77 @@ export const ChildHomeView: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="p-3 rounded-xl bg-sky-50/50 border border-sky-200/70 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentRoutine.firstThen) {
+                          const updated = {
+                            ...currentRoutine,
+                            firstThen: {
+                              ...currentRoutine.firstThen,
+                              completedFirst: !currentRoutine.firstThen.completedFirst,
+                            },
+                          };
+                          updateRoutine(updated);
+                          playChime(updated.firstThen.completedFirst ? 'star' : 'tap');
+                        }
+                      }}
+                      className="w-full p-3 rounded-xl bg-sky-50/50 hover:bg-sky-50 border border-sky-200/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
+                    >
                       <div className="min-w-0 flex-1">
-                        <span className="font-bold text-xs sm:text-sm text-sky-950 truncate block">
-                          {currentRoutine.firstThen?.first ? `${t('First')}: ${t(currentRoutine.firstThen.first)}` : `${t('First')}: ${t('Brush teeth')}`}
+                        <span className={`font-bold text-xs sm:text-sm text-sky-950 truncate block ${currentRoutine.firstThen?.completedFirst ? 'line-through opacity-70' : ''}`}>
+                          {currentRoutine.firstThen?.first ? `${t('First')}: ${t(currentRoutine.firstThen.first)}` : `${t('First')}: ${t(currentRoutine.steps[0]?.title || 'Start routine')}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="w-6 h-6 rounded-lg bg-white border border-sky-200 p-0.5 shadow-2xs">
-                          <ToothbrushSticker className="w-full h-full" />
+                        <div className="w-7 h-7 rounded-lg bg-white border border-sky-200 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
+                          <RoutineStickerIcon emoji={currentRoutine.firstThen?.firstEmoji || currentRoutine.steps[0]?.emoji} title={currentRoutine.firstThen?.first || currentRoutine.steps[0]?.title} size={20} className="w-full h-full object-contain" />
                         </div>
-                        <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-300">
-                          ✓
+                        <span className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center border transition-all ${
+                          currentRoutine.firstThen?.completedFirst
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : 'bg-white text-stone-400 border-stone-300'
+                        }`}>
+                          {currentRoutine.firstThen?.completedFirst ? '✓' : '○'}
                         </span>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="p-3 rounded-xl bg-purple-50/50 border border-purple-200/70 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentRoutine.firstThen) {
+                          const updated = {
+                            ...currentRoutine,
+                            firstThen: {
+                              ...currentRoutine.firstThen,
+                              completedThen: !currentRoutine.firstThen.completedThen,
+                            },
+                          };
+                          updateRoutine(updated);
+                          playChime(updated.firstThen.completedThen ? 'star' : 'tap');
+                        }
+                      }}
+                      className="w-full p-3 rounded-xl bg-purple-50/50 hover:bg-purple-50 border border-purple-200/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
+                    >
                       <div className="min-w-0 flex-1">
-                        <span className="font-bold text-xs sm:text-sm text-purple-950 truncate block">
-                          {currentRoutine.firstThen?.then ? `${t('Then')}: ${t(currentRoutine.firstThen.then)}` : `${t('Then')}: ${t('Tablet time (15 min)')}`}
+                        <span className={`font-bold text-xs sm:text-sm text-purple-950 truncate block ${currentRoutine.firstThen?.completedThen ? 'line-through opacity-70' : ''}`}>
+                          {currentRoutine.firstThen?.then ? `${t('Then')}: ${t(currentRoutine.firstThen.then)}` : `${t('Then')}: ${t(currentRoutine.steps[1]?.title || 'Next step')}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="w-6 h-6 rounded-lg bg-white border border-purple-200 p-0.5 shadow-2xs">
-                          <ReadingBookSticker className="w-full h-full" />
+                        <div className="w-7 h-7 rounded-lg bg-white border border-purple-200 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
+                          <RoutineStickerIcon emoji={currentRoutine.firstThen?.thenEmoji || currentRoutine.steps[1]?.emoji} title={currentRoutine.firstThen?.then || currentRoutine.steps[1]?.title} size={20} className="w-full h-full object-contain" />
                         </div>
-                        <span className="w-6 h-6 rounded-full bg-stone-200/80 text-stone-500 font-bold text-xs flex items-center justify-center border border-stone-300">
-                          ○
+                        <span className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center border transition-all ${
+                          currentRoutine.firstThen?.completedThen
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : 'bg-stone-200/80 text-stone-500 border-stone-300'
+                        }`}>
+                          {currentRoutine.firstThen?.completedThen ? '✓' : '○'}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 </div>
               ) : null;
