@@ -24,7 +24,8 @@ import {
   MoodCalmSticker, 
   MoodExcitedSticker, 
   MoodSleepySticker, 
-  MoodUnsureSticker 
+  MoodUnsureSticker,
+  RoutineStickerIcon
 } from './icons/JournalStickers';
 
 const MOOD_OPTIONS: { id: EmotionType; label: string; Sticker: React.FC<{ className?: string }>; response: string }[] = [
@@ -95,9 +96,8 @@ export const MorningBriefModal: React.FC = () => {
   const keyActivityTitle = firstThen
     ? `${firstThen.first} → then ${firstThen.then}`
     : keyAdventure?.title || keyRoutine?.title || 'Play & explore routines';
-  const keyActivityEmoji = firstThen
-    ? `${firstThen.firstEmoji} ${firstThen.thenEmoji}`
-    : keyAdventure?.emoji || keyRoutine?.emoji || '⭐';
+  const keySingleEmoji = firstThen?.firstEmoji || keyRoutine?.emoji || keyAdventure?.emoji || '⭐';
+  const keySingleTitle = firstThen?.first || keyRoutine?.title || keyAdventure?.title || '';
   const keyActivityTime = keyRoutine?.time || '10:00 AM';
 
   const handleHearBrief = () => {
@@ -242,24 +242,24 @@ export const MorningBriefModal: React.FC = () => {
               Key Activity for Today
             </span>
 
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 flex items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white border border-indigo-200 flex items-center justify-center text-2xl shadow-xs shrink-0">
-                  {keyActivityEmoji}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/70 via-yellow-50/60 to-amber-50/70 border-2 border-amber-200/90 flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-14 h-14 rounded-2xl bg-white/90 border-2 border-amber-200/90 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+                  <RoutineStickerIcon emoji={keySingleEmoji} title={keySingleTitle} className="w-10 h-10 object-contain drop-shadow-2xs" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-black uppercase text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-100 border border-amber-300/80 px-2.5 py-0.5 rounded-full">
                       {keyActivityTime}
                     </span>
-                    <span className="text-xs text-indigo-950 font-semibold">
+                    <span className="text-xs text-amber-950 font-bold">
                       Main Focus
                     </span>
                   </div>
-                  <h4 className="font-black text-slate-900 text-sm sm:text-base mt-0.5">
+                  <h4 className="font-black text-slate-900 text-sm sm:text-base mt-0.5 leading-snug">
                     {keyActivityTitle}
                   </h4>
-                  <p className="text-[11px] text-slate-500 font-medium">
+                  <p className="text-[11px] text-slate-600 font-medium">
                     Clear, calm steps prepared so you know exactly what is happening.
                   </p>
                 </div>
@@ -272,7 +272,7 @@ export const MorningBriefModal: React.FC = () => {
                   setChildView('my-day');
                   playChime('tap');
                 }}
-                className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shrink-0 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shrink-0 transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <span>View</span>
                 <ArrowRight className="w-3.5 h-3.5" />
