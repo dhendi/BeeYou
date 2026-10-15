@@ -23,6 +23,8 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'reading', emoji: '📖', label: 'Story & Books', category: 'fun', keywords: ['book', 'read', 'story', 'literature'] },
   { id: 'science', emoji: '🔬', label: 'Science Flask', category: 'fun', keywords: ['science', 'flask', 'experiment', 'lab', 'explore'] },
   { id: 'trophy', emoji: '🏆', label: 'Reward Trophy', category: 'fun', keywords: ['trophy', 'reward', 'win', 'prize', 'success'] },
+  { id: 'gold_star', emoji: '⭐', label: 'Gold Star Reward', category: 'fun', keywords: ['star', 'gold', 'reward', 'achievement', 'win'] },
+  { id: 'target', emoji: '🎯', label: 'Target / Focus Sprint', category: 'fun', keywords: ['target', 'bullseye', 'focus', 'deep work', 'goal', 'sprint'] },
   { id: 'balloons', emoji: '🎈', label: 'Celebration', category: 'fun', keywords: ['party', 'balloon', 'fun', 'celebrate'] },
 
   // Calm & Sensory
@@ -70,6 +72,11 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'writing', emoji: '✏️', label: 'Writing Class', category: 'daily', keywords: ['pencil', 'write', 'draw', 'homework', 'math'] },
   { id: 'meds', emoji: '💊', label: 'Medication', category: 'daily', keywords: ['medicine', 'medication', 'pill', 'vitamin', 'health'] },
   { id: 'inhaler', emoji: '🫁', label: 'Inhaler / Lungs', category: 'daily', keywords: ['inhaler', 'lungs', 'breathe', 'puff', 'asthma'] },
+  { id: 'laptop', emoji: '💻', label: 'Laptop / Computer', category: 'daily', keywords: ['laptop', 'computer', 'screen', 'tech', 'work', 'execution'] },
+  { id: 'clipboard', emoji: '📋', label: 'Clipboard / Checklist', category: 'daily', keywords: ['clipboard', 'list', 'check', 'shutdown', 'prep', 'task'] },
+  { id: 'locker', emoji: '🗄️', label: 'Locker / Filing Cabinet', category: 'daily', keywords: ['locker', 'cabinet', 'schedule', 'school', 'drawers'] },
+  { id: 'pajamas', emoji: '🩳', label: 'Pajamas / Sleepwear', category: 'daily', keywords: ['pajama', 'pajamas', 'shorts', 'sleep', 'bedtime', 'clothes'] },
+  { id: 'briefcase', emoji: '💼', label: 'Work Briefcase', category: 'daily', keywords: ['briefcase', 'work', 'job', 'bag', 'office'] },
 
   // Adventures & Community
   { id: 'cart', emoji: '🛒', label: 'Supermarket / Grocery', category: 'daily', keywords: ['grocery', 'supermarket', 'store', 'shop', 'cart', 'market', 'shopping', 'buy'] },

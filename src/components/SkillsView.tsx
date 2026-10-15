@@ -16,7 +16,7 @@ import {
 import { playChime } from '../utils/audio';
 import { DailyHabitsModule } from './DailyHabitsModule';
 import { t } from '../services/translator';
-import { RoutineStickerIcon } from './icons/JournalStickers';
+import { RoutineStickerIcon, GoldStarSticker } from './icons/JournalStickers';
 
 const getSkillSticker = (id: string, emoji?: string): string | undefined => {
   if (id === 'skill-teeth' || emoji === '🪥') return '/assets/stickers/toothbrush.png';
@@ -264,7 +264,7 @@ export const SkillsView: React.FC = () => {
             {t('Master everyday activities step-by-step and practice recurring daily habits at your own pace!')}
           </p>
         </div>
-        <span className="text-5xl hidden sm:inline">⭐</span>
+        <GoldStarSticker className="w-14 h-14 hidden sm:inline-block drop-shadow-md" />
       </div>
 
       {/* Mode Switcher: Step-by-Step Missions vs Daily Habits */}

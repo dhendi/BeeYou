@@ -113,6 +113,13 @@ export const LungsInhalerSticker = renderStickerPng('/assets/stickers/lungs_inha
 export const RepeatLoopSticker = renderStickerPng('/assets/stickers/refresh_repeat.png', 'Repeat Loop');
 export const AccessibilityHubSticker = renderStickerPng('/assets/stickers/accessibility_hub.png', 'Accessibility & Sensory Hub');
 
+// User Provided Routine Replacements
+export const LaptopExecutionSticker = renderStickerPng('/assets/stickers/laptop_execution.png', 'Laptop Execution Sprint');
+export const ClipboardShutdownSticker = renderStickerPng('/assets/stickers/clipboard_shutdown.png', 'Daily Shutdown Prep');
+export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.png', 'Gold Star');
+export const LockerScheduleSticker = renderStickerPng('/assets/stickers/locker_schedule.png', 'Locker & Daily Schedule');
+export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_shorts.png', 'Put on Pajamas');
+
 // AAC Dedicated Category Badge Stickers
 export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
 export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.png', 'Favorite Sentences');
@@ -203,6 +210,20 @@ export const RoutineStickerIcon: React.FC<{
 
   // ⏰ Wake up / Morning / Routine
   if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;
+  // 💻 Laptop / Execution Sprint
+  if (normEmoji === '💻' || normTitle.includes('execution sprint') || normTitle.includes('laptop')) return <LaptopExecutionSticker className={className} size={size} />;
+  // 📋 Clipboard / Daily Shutdown / Tomorrow Prep
+  if (normEmoji === '📋' || normTitle.includes('shutdown') || normTitle.includes('tomorrow prep') || normTitle.includes('clipboard')) return <ClipboardShutdownSticker className={className} size={size} />;
+  // 🎯 Target / Bullseye / Focus Sprint / Deep Work
+  if (normEmoji === '🎯' || normTitle.includes('deep work') || normTitle.includes('focus sprint') || normTitle.includes('bullseye') || normTitle.includes('target')) return <DecisionWheelSticker className={className} size={size} />;
+  // 💼 Workday / Briefcase
+  if (normEmoji === '💼' || normTitle.includes('workday') || normTitle.includes('briefcase')) return <AdultBriefcaseSticker className={className} size={size} />;
+  // 🗄️ Locker / Filing Cabinet
+  if (normEmoji === '🗄️' || normTitle.includes('locker') || normTitle.includes('filing cabinet')) return <LockerScheduleSticker className={className} size={size} />;
+  // 🩳 Pajamas / Sleep Shorts
+  if (normEmoji === '🩳' || normTitle.includes('pajama')) return <PajamasShortsSticker className={className} size={size} />;
+  // ⭐ Gold Star
+  if (normEmoji === '⭐' || normEmoji === '🌟') return <GoldStarSticker className={className} size={size} />;
   // 🕰️ Wall Clock / Time / Hour
   if (normEmoji === '🕰️' || normEmoji === '🕐' || normEmoji === '🕒' || normTitle.includes('clock') || normTitle.includes('time check') || normTitle.includes('hour')) return <WallClockSticker className={className} size={size} />;
   // 🚗 Car / Ride / Drive / Commute
@@ -307,7 +328,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🎨 Art / crafts / drawing
   if (normEmoji === '🎨' || normEmoji === '🖍️' || normTitle.includes('art') || normTitle.includes('paint') || normTitle.includes('craft')) return <ArtCraftsSticker className={className} size={size} />;
   // ✨ Sparkles / calm mindfulness
-  if (normEmoji === '✨' || normEmoji === '⭐' || normTitle.includes('sparkle') || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
+  if (normEmoji === '✨' || normTitle.includes('sparkle') || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
   // 🏆 Trophy / reward / milestone
   if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;
   // 🛁 Bath time / tub
