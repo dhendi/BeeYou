@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { playChime, speakText } from '../utils/audio';
+import { RewardTrophySticker, GoldStarSticker } from './icons/JournalStickers';
 
 export const Rewards: React.FC = () => {
   const {
@@ -139,7 +140,7 @@ export const Rewards: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-4 text-center sm:text-left">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#F5EFE6] border-2 border-[#E0D8CB] p-1 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] shrink-0">
-              <span className="text-4xl sm:text-5xl animate-bounce">🏆</span>
+              <RewardTrophySticker size={54} className="w-13 h-13 sm:w-14 sm:h-14 shrink-0 drop-shadow-sm" />
             </div>
 
             <div>
@@ -529,7 +530,7 @@ export const Rewards: React.FC = () => {
               </div>
             ) : (
               <div className="p-8 text-center bg-white rounded-2xl border border-indigo-100 text-slate-500">
-                <span className="text-3xl block mb-1">🌟</span>
+                <GoldStarSticker size={36} className="w-9 h-9 mx-auto mb-1 drop-shadow-xs" />
                 <p className="font-bold text-sm text-slate-700">No Routine Stickers Yet!</p>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Complete all the steps of any routine in My Day to unlock your first digital sticker!

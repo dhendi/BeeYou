@@ -47,6 +47,10 @@ import {
   ConnectHeartSticker,
   EveningMoonSticker,
   BeeMascotSticker,
+  QuickPhrasesSticker,
+  FavQuietBreakSticker,
+  FavHelpSosSticker,
+  PlansChangeStorySticker,
 } from './icons/JournalStickers';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
@@ -326,7 +330,7 @@ export const ChildHomeView: React.FC = () => {
           className="w-full text-left bg-amber-100/95 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3">
-            <span className="text-3xl sm:text-4xl animate-bounce" aria-hidden="true">🔄</span>
+            <PlansChangeStorySticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
@@ -403,9 +407,9 @@ export const ChildHomeView: React.FC = () => {
                       setChildView('aac');
                       playChime('tap');
                     }}
-                    className="py-3.5 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#E2A44E]"
+                    className="py-3 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#E2A44E]"
                   >
-                    <span>💬</span>
+                    <QuickPhrasesSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('Talk')}</span>
                   </button>
                   <button
@@ -413,9 +417,9 @@ export const ChildHomeView: React.FC = () => {
                       setShowCopingToolkit(true);
                       playChime('tap');
                     }}
-                    className="py-3.5 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#85AE8E]"
+                    className="py-3 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#85AE8E]"
                   >
-                    <span>🛋️</span>
+                    <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('Calm down')}</span>
                   </button>
                   <button
@@ -423,9 +427,9 @@ export const ChildHomeView: React.FC = () => {
                       setShowCaregiverAlertModal(true);
                       playChime('tap');
                     }}
-                    className="py-3.5 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#D57B7B]"
+                    className="py-3 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#D57B7B]"
                   >
-                    <span>🆘</span>
+                    <FavHelpSosSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('I need help')}</span>
                   </button>
                 </div>

@@ -371,14 +371,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normTitle.includes('hungry') || (normTitle.includes('snack') && !normTitle.includes('apple'))) return <FavSandwichSticker className={className} size={size} />;
   // 💧 Thirsty / Water
   if (normTitle.includes('thirsty') || (normTitle.includes('water') && normTitle.includes('want'))) return <FavWaterSticker className={className} size={size} />;
-  // 🛋️ Quiet Break
-  if (normTitle.includes('quiet break') || normTitle.includes('sensory quiet')) return <FavQuietBreakSticker className={className} size={size} />;
+  // 🛋️ Quiet Break / Quiet time
+  if (normEmoji === '🤫' || normTitle.includes('quiet break') || normTitle.includes('quiet time') || normTitle.includes('sensory quiet')) return <FavQuietBreakSticker className={className} size={size} />;
   // 🆘 Help Please / SOS
-  if (normEmoji === '🆘' || normTitle.includes('help me') || normTitle.includes('can you help')) return <FavHelpSosSticker className={className} size={size} />;
+  if (normEmoji === '🆘' || normTitle.includes('help me') || normTitle.includes('can you help') || normTitle.includes('help from a grown-up')) return <FavHelpSosSticker className={className} size={size} />;
   // 🌳 Go Outside / Tree
   if (normTitle.includes('go outside') || normTitle.includes('want to go outside')) return <FavOutsideSticker className={className} size={size} />;
-  // 💖 I Love You / Heart
-  if (normEmoji === '💖' || normTitle.includes('love you') || normTitle.includes('i love')) return <FavLoveHeartSticker className={className} size={size} />;
+  // 💖 I Love You / Heart / Hug
+  if (normEmoji === '💖' || normEmoji === '🤗' || normTitle.includes('love you') || normTitle.includes('i love') || normTitle.includes('hug')) return <FavLoveHeartSticker className={className} size={size} />;
+  // 🦕 Comfort Toy / Item
+  if (normEmoji === '🦕' || normTitle.includes('comfort item') || normTitle.includes('comfort toy')) return <TeddyBearSticker className={className} size={size} />;
   // 😴 Tired / Rest
   if ((normTitle.includes('tired') && normTitle.includes('rest')) || normTitle.includes('want to rest')) return <FavRestTiredSticker className={className} size={size} />;
   // 🎧 Listen to Music

@@ -25,7 +25,10 @@ import {
   MoodExcitedSticker, 
   MoodSleepySticker, 
   MoodUnsureSticker,
-  RoutineStickerIcon
+  RoutineStickerIcon,
+  AlarmClockSticker,
+  OutdoorSunSticker,
+  EveningMoonSticker
 } from './icons/JournalStickers';
 
 const MOOD_OPTIONS: { id: EmotionType; label: string; Sticker: React.FC<{ className?: string }>; response: string }[] = [
@@ -86,42 +89,41 @@ export const MorningBriefModal: React.FC = () => {
   // Determine Greeting, Badges, and Icons dynamically based on time of day
   const currentHour = new Date().getHours();
   let greeting = 'Good morning';
-  let timeBadge = 'Daily Morning Brief';
-  let timeHeaderIcon = '☀️';
-  let timeTitleEmoji = '🌅';
   let feelingQuestion = 'How are you feeling this morning? (Optional)';
   let checkInLabel = 'Morning Check-In';
 
   if (currentHour >= 5 && currentHour < 12) {
     greeting = 'Good morning';
     timeBadge = 'Daily Morning Brief';
-    timeHeaderIcon = '☀️';
-    timeTitleEmoji = '🌅';
     feelingQuestion = 'How are you feeling this morning? (Optional)';
     checkInLabel = 'Morning Check-In';
   } else if (currentHour >= 12 && currentHour < 17) {
     greeting = 'Good afternoon';
     timeBadge = 'Daily Afternoon Brief';
-    timeHeaderIcon = '🌤️';
-    timeTitleEmoji = '☀️';
     feelingQuestion = 'How are you feeling this afternoon? (Optional)';
     checkInLabel = 'Afternoon Check-In';
   } else if (currentHour >= 17 && currentHour < 21) {
     greeting = 'Good evening';
     timeBadge = 'Daily Evening Brief';
-    timeHeaderIcon = '🌆';
-    timeTitleEmoji = '🌇';
     feelingQuestion = 'How are you feeling this evening? (Optional)';
     checkInLabel = 'Evening Check-In';
   } else {
     // Late night / early hours (9:00 PM - 4:59 AM)
     greeting = 'Good evening';
     timeBadge = 'Daily Evening Brief';
-    timeHeaderIcon = '🌙';
-    timeTitleEmoji = '✨';
     feelingQuestion = 'How are you feeling tonight? (Optional)';
     checkInLabel = 'Evening Check-In';
   }
+
+  const renderTimeHeaderIcon = () => {
+    if (currentHour >= 5 && currentHour < 12) {
+      return <AlarmClockSticker size={28} className="w-7 h-7 drop-shadow-xs" />;
+    } else if (currentHour >= 12 && currentHour < 17) {
+      return <OutdoorSunSticker size={28} className="w-7 h-7 drop-shadow-xs" />;
+    } else {
+      return <EveningMoonSticker size={28} className="w-7 h-7 drop-shadow-xs" />;
+    }
+  };
 
   // Gracefully format greeting with child's name if present (avoids "Good morning, !")
   const childName = childProfile?.name?.trim();
@@ -179,8 +181,8 @@ export const MorningBriefModal: React.FC = () => {
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-6 text-amber-950 relative flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-2xl shrink-0">
-              {timeHeaderIcon}
+            <div className="w-11 h-11 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center shrink-0 overflow-hidden">
+              {renderTimeHeaderIcon()}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -192,7 +194,7 @@ export const MorningBriefModal: React.FC = () => {
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black mt-0.5 leading-tight">
-                {greetingTitle} {timeTitleEmoji}
+                {greetingTitle}
               </h2>
             </div>
           </div>

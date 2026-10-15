@@ -16,6 +16,7 @@ import {
 import { playChime } from '../utils/audio';
 import { DailyRecollectionChart } from './DailyRecollectionChart';
 import { t } from '../services/translator';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const FeelingsView: React.FC = () => {
   const {
@@ -384,7 +385,7 @@ export const FeelingsView: React.FC = () => {
                         : 'bg-[#F5EFE6] hover:bg-white border-[#E0D8CB] text-[#5D5045]'
                     }`}
                   >
-                    <span className="text-xl">{r.emoji}</span>
+                    <RoutineStickerIcon emoji={r.emoji} title={r.text} size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t(r.text)}</span>
                   </button>
                 ))}
@@ -415,7 +416,7 @@ export const FeelingsView: React.FC = () => {
                         : 'bg-[#F5EFE6] hover:bg-white border-[#E0D8CB] text-[#5D5045]'
                     }`}
                   >
-                    <span className="text-xl">{n.emoji}</span>
+                    <RoutineStickerIcon emoji={n.emoji} title={n.text} size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span className="flex-1">{t(n.text)}</span>
                     {n.action === 'toolkit' && (
                       <span className="text-[10px] font-black text-[#1C3E25] bg-[#C4E7D4] border border-[#99C2A2] px-2 py-0.5 rounded-lg">

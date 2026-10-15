@@ -1,6 +1,21 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
+import { SlidersHorizontal, Lock } from 'lucide-react';
+import {
+  RocketAdventureSticker,
+  ToothbrushSticker,
+  ThermometerSticker,
+  ReadingBookSticker,
+  EveningMoonSticker,
+  MedicationSticker,
+  ConnectHeartSticker,
+  FavHelpSosSticker,
+  RewardTrophySticker,
+  FavQuietBreakSticker,
+  ArtCraftsSticker,
+  IdCardSticker,
+} from './icons/JournalStickers';
 
 interface MoreItem {
   id: string;
@@ -216,6 +231,60 @@ export const MoreView: React.FC = () => {
     .map((s) => ({ ...s, items: s.items.filter((i) => i.show) }))
     .filter((s) => s.items.length > 0);
 
+  const renderSectionIcon = (sectionId: string) => {
+    switch (sectionId) {
+      case 'skills':
+        return <RocketAdventureSticker size={18} className="w-4.5 h-4.5 shrink-0" />;
+      case 'feelings':
+        return <ThermometerSticker size={18} className="w-4.5 h-4.5 shrink-0" />;
+      case 'health':
+        return <MedicationSticker size={18} className="w-4.5 h-4.5 shrink-0" />;
+      case 'caregiver':
+        return <ConnectHeartSticker size={18} className="w-4.5 h-4.5 shrink-0" />;
+      case 'personal':
+        return <RewardTrophySticker size={18} className="w-4.5 h-4.5 shrink-0" />;
+      default:
+        return null;
+    }
+  };
+
+  const renderItemIcon = (itemId: string) => {
+    switch (itemId) {
+      case 'adventures':
+        return <RocketAdventureSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'skills':
+        return <ToothbrushSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'feelings':
+        return <ThermometerSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'mood-journal':
+        return <ReadingBookSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'evening':
+        return <EveningMoonSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'medication':
+        return <MedicationSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'cycle':
+        return <ConnectHeartSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'alert':
+        return <FavHelpSosSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'connect':
+        return <ConnectHeartSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'parent':
+        return <Lock className="w-6 h-6 text-[#5D5045]" />;
+      case 'rewards':
+        return <RewardTrophySticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'my-world':
+        return <FavQuietBreakSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'themes':
+        return <ArtCraftsSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'about':
+        return <IdCardSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'access':
+        return <SlidersHorizontal className="w-6 h-6 text-[#5D5045]" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-5">
       <header>
@@ -232,14 +301,14 @@ export const MoreView: React.FC = () => {
         }}
         className="w-full min-h-[60px] rounded-3xl bg-[#F5B865] hover:bg-[#EDA548] border-2 border-[#E2A44E] text-[#4A2F0F] font-black text-base flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer transition-all shadow-[0_4px_14px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]"
       >
-        <span aria-hidden="true" className="text-2xl">🧰</span>
+        <SlidersHorizontal className="w-5 h-5 text-[#4A2F0F]" />
         <span>Open Tools Hub</span>
       </button>
 
       {visibleSections.map((section) => (
         <section key={section.id} aria-labelledby={`more-${section.id}`}>
-          <h2 id={`more-${section.id}`} className="text-xs font-black uppercase tracking-wider text-[#8C7E72] mb-2.5 flex items-center gap-1.5">
-            <span aria-hidden="true">{section.emoji}</span>
+          <h2 id={`more-${section.id}`} className="text-xs font-black uppercase tracking-wider text-[#8C7E72] mb-2.5 flex items-center gap-2">
+            {renderSectionIcon(section.id)}
             <span>{section.title}</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -252,8 +321,8 @@ export const MoreView: React.FC = () => {
                 }}
                 className="min-h-[76px] p-4 rounded-3xl bg-[#FCF9F2] hover:bg-white border-2 border-[#E0D8CB] text-left flex items-center gap-3.5 active:scale-98 transition-all cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)]"
               >
-                <span className="w-12 h-12 rounded-2xl bg-[#F5EFE6] text-3xl flex items-center justify-center border border-[#E0D8CB] shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]" aria-hidden="true">
-                  {item.emoji}
+                <span className="w-12 h-12 rounded-2xl bg-[#F5EFE6] flex items-center justify-center border border-[#E0D8CB] shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] overflow-hidden" aria-hidden="true">
+                  {renderItemIcon(item.id)}
                 </span>
                 <span className="min-w-0">
                   <span className="block font-black text-[#2D241E] text-base leading-snug">{item.title}</span>
