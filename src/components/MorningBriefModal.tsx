@@ -32,7 +32,7 @@ const MOOD_OPTIONS: { id: EmotionType; label: string; Sticker: React.FC<{ classN
   { id: 'happy', label: 'Happy', Sticker: MoodHappySticker, response: 'Wonderful! We are glad you feel happy today.' },
   { id: 'calm', label: 'Calm', Sticker: MoodCalmSticker, response: 'Peaceful and steady. A great way to start.' },
   { id: 'excited', label: 'Excited', Sticker: MoodExcitedSticker, response: 'So much energy! Lots of fun things to explore.' },
-  { id: 'tired', label: 'Sleepy', Sticker: MoodSleepySticker, response: 'Take it slow and gentle this morning. No rush.' },
+  { id: 'tired', label: 'Sleepy', Sticker: MoodSleepySticker, response: 'Take it slow and gentle right now. No rush.' },
   { id: 'worried', label: 'Unsure', Sticker: MoodUnsureSticker, response: 'You are safe. We will do each step together.' },
 ];
 
@@ -83,10 +83,49 @@ export const MorningBriefModal: React.FC = () => {
     day: 'numeric',
   }).format(new Date());
 
-  // Determine Greeting based on hour
+  // Determine Greeting, Badges, and Icons dynamically based on time of day
   const currentHour = new Date().getHours();
-  const greetingGreeting =
-    currentHour < 12 ? 'Good morning' : currentHour < 17 ? 'Good afternoon' : 'Good evening';
+  let greeting = 'Good morning';
+  let timeBadge = 'Daily Morning Brief';
+  let timeHeaderIcon = '☀️';
+  let timeTitleEmoji = '🌅';
+  let feelingQuestion = 'How are you feeling this morning? (Optional)';
+  let checkInLabel = 'Morning Check-In';
+
+  if (currentHour >= 5 && currentHour < 12) {
+    greeting = 'Good morning';
+    timeBadge = 'Daily Morning Brief';
+    timeHeaderIcon = '☀️';
+    timeTitleEmoji = '🌅';
+    feelingQuestion = 'How are you feeling this morning? (Optional)';
+    checkInLabel = 'Morning Check-In';
+  } else if (currentHour >= 12 && currentHour < 17) {
+    greeting = 'Good afternoon';
+    timeBadge = 'Daily Afternoon Brief';
+    timeHeaderIcon = '🌤️';
+    timeTitleEmoji = '☀️';
+    feelingQuestion = 'How are you feeling this afternoon? (Optional)';
+    checkInLabel = 'Afternoon Check-In';
+  } else if (currentHour >= 17 && currentHour < 21) {
+    greeting = 'Good evening';
+    timeBadge = 'Daily Evening Brief';
+    timeHeaderIcon = '🌆';
+    timeTitleEmoji = '🌇';
+    feelingQuestion = 'How are you feeling this evening? (Optional)';
+    checkInLabel = 'Evening Check-In';
+  } else {
+    // Late night / early hours (9:00 PM - 4:59 AM)
+    greeting = 'Good evening';
+    timeBadge = 'Daily Evening Brief';
+    timeHeaderIcon = '🌙';
+    timeTitleEmoji = '✨';
+    feelingQuestion = 'How are you feeling tonight? (Optional)';
+    checkInLabel = 'Evening Check-In';
+  }
+
+  // Gracefully format greeting with child's name if present (avoids "Good morning, !")
+  const childName = childProfile?.name?.trim();
+  const greetingTitle = childName ? `${greeting}, ${childName}!` : `${greeting}!`;
 
   // Find key scheduled activity of today
   const keyRoutine = routines[0];
@@ -102,14 +141,14 @@ export const MorningBriefModal: React.FC = () => {
 
   const handleHearBrief = () => {
     playChime('speak');
-    const briefText = `${greetingGreeting}, ${childProfile.name}! Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${weatherData.tempDisplay}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
+    const briefText = `${greetingTitle} Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${weatherData.tempDisplay}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
     speakText(briefText);
   };
 
   const handleSelectMood = (mood: typeof MOOD_OPTIONS[0]) => {
     setSelectedMood(mood.id);
     setMoodFeedback(mood.response);
-    recordEmotion(mood.id, 'Morning Check-In');
+    recordEmotion(mood.id, checkInLabel);
     playChime('star');
     speakText(`Recorded: Feeling ${mood.label}. ${mood.response}`);
   };
@@ -133,7 +172,7 @@ export const MorningBriefModal: React.FC = () => {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Morning Brief"
+      aria-label={timeBadge}
       className="fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] overflow-y-auto animate-in fade-in"
     >
       <div className="bg-white border-3 border-amber-300 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)]">
@@ -141,19 +180,19 @@ export const MorningBriefModal: React.FC = () => {
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-6 text-amber-950 relative flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-2xl shrink-0">
-              ☀️
+              {timeHeaderIcon}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-amber-950/15 text-amber-950 px-2 py-0.5 rounded-full">
-                  Daily Morning Brief
+                  {timeBadge}
                 </span>
                 <span className="text-xs font-bold text-amber-900/80">
                   {todayFormatted}
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black mt-0.5 leading-tight">
-                {greetingGreeting}, {childProfile.name}! 🌅
+                {greetingTitle} {timeTitleEmoji}
               </h2>
             </div>
           </div>
@@ -162,8 +201,8 @@ export const MorningBriefModal: React.FC = () => {
             <button
               onClick={handleHearBrief}
               className="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/80 hover:bg-white text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95"
-              title="Hear morning brief spoken aloud"
-              aria-label="Hear morning brief"
+              title={`Hear ${timeBadge.toLowerCase()} spoken aloud`}
+              aria-label={`Hear ${timeBadge.toLowerCase()}`}
             >
               <Volume2 className="w-4 h-4 text-amber-600" />
               <span className="hidden sm:inline">Read Aloud</span>
@@ -175,7 +214,7 @@ export const MorningBriefModal: React.FC = () => {
                 playChime('tap');
               }}
               className="p-2 rounded-xl bg-white/50 hover:bg-white/80 text-amber-950 transition-all cursor-pointer"
-              aria-label="Close morning brief"
+              aria-label={`Close ${timeBadge.toLowerCase()}`}
             >
               <X className="w-5 h-5" />
             </button>
@@ -285,7 +324,7 @@ export const MorningBriefModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                 <Heart className="w-3.5 h-3.5 text-rose-500" />
-                <span>How are you feeling this morning? (Optional)</span>
+                <span>{feelingQuestion}</span>
               </span>
               {selectedMood && (
                 <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
