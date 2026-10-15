@@ -89,6 +89,7 @@ export const MorningBriefModal: React.FC = () => {
   // Determine Greeting, Badges, and Icons dynamically based on time of day
   const currentHour = new Date().getHours();
   let greeting = 'Good morning';
+  let timeBadge = 'Daily Morning Brief';
   let feelingQuestion = 'How are you feeling this morning? (Optional)';
   let checkInLabel = 'Morning Check-In';
 

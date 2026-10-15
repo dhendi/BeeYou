@@ -12,7 +12,8 @@ import {
   Pill, 
   HeartPulse, 
   ArrowRight,
-  Palette
+  Palette,
+  SlidersHorizontal
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
