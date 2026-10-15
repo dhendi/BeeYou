@@ -4,13 +4,11 @@ import { useApp } from '../../context/AppContext';
 import { UserAgeGroup, DEFAULT_KID_FEATURES, DEFAULT_TEEN_FEATURES, DEFAULT_ADULT_FEATURES } from '../../types';
 import { playChime } from '../../utils/audio';
 import { 
-  FileJson, 
   Download, 
   Upload, 
   Check,
   Lightbulb,
   Star,
-  Wind,
   Settings as SettingsIcon
 } from 'lucide-react';
 
@@ -628,9 +626,11 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setShowEditCalmModal(true)}
-            className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
+            className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-2xs shrink-0 active:scale-95 transition"
           >
-            <Wind className="w-3.5 h-3.5" />
+            <div className="w-4 h-4 rounded-full overflow-hidden shrink-0">
+              <img src="/assets/stickers/calm_wind.png" alt="" className="w-full h-full object-contain" />
+            </div>
             <span>{t("Edit Calm Tools")}</span>
           </button>
         </div>
@@ -638,15 +638,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
       {/* BACKUP & RESTORE DATA SECTION */}
       <div className="pt-6 border-t border-slate-200">
-        <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 border border-indigo-100 rounded-2xl p-5 shadow-xs">
+        <div className="bg-gradient-to-br from-amber-50/70 to-orange-50/50 border border-amber-200/80 rounded-2xl p-5 shadow-xs">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-              <FileJson className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+              <img src="/assets/stickers/offline_storage.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
                 {t("Profile Backup & Data Portability")}
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                   {t("Offline Safe")}
                 </span>
               </h4>
@@ -656,14 +656,14 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-indigo-100/80">
+          <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-amber-200/60">
             <button
               type="button"
               onClick={() => {
                 exportProfileBackup();
                 onShowNotification('Backup exported successfully!');
               }}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm inline-flex items-center gap-2 transition-all cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm inline-flex items-center gap-2 transition-all cursor-pointer active:scale-95"
             >
               <Download className="w-4 h-4" />
               {t("Export Backup (JSON)")}
@@ -672,9 +672,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-900 border border-indigo-200 font-bold text-xs shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-amber-50/50 text-amber-950 border border-amber-300 font-bold text-xs shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer active:scale-95"
             >
-              <Upload className="w-4 h-4 text-indigo-600" />
+              <Upload className="w-4 h-4 text-amber-700" />
               {t("Restore from Backup File")}
             </button>
             <input
