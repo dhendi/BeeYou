@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   AboutMeCardData, 
@@ -107,6 +107,15 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   const [profileName, setProfileName] = useState(childProfile.name || 'Leo');
   const [profilePronouns, setProfilePronouns] = useState(childProfile.pronouns || 'they/them');
 
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(childProfile.aboutMe || defaultAboutMe);
+      setProfileName(childProfile.name || 'Leo');
+      setProfilePronouns(childProfile.pronouns || 'they/them');
+      setIsEditing(false);
+    }
+  }, [isOpen, childProfile]);
+
   // Input states for adding new items in edit mode
   const [newCondition, setNewCondition] = useState('');
   const [newSensitivity, setNewSensitivity] = useState('');
@@ -205,8 +214,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
         {/* HEADER BADGE */}
         <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-2xl shadow-inner border border-white/30">
-              🪪
+            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center p-1.5 shadow-inner border border-white/30">
+              <img src="/assets/stickers/about_id.png" alt="ID Card" className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -218,7 +227,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
-                {childProfile.name}'s Digital ID & Safety Card
+                {childProfile.name ? `${childProfile.name}'s ` : ''}Digital ID & Safety Card
               </h2>
             </div>
           </div>

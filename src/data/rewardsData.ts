@@ -112,14 +112,14 @@ export const REWARD_BADGES: RewardBadge[] = [
   {
     id: 'badge-allstar',
     title: 'Golden Legend',
-    description: 'Collected 10 or more shining star coins for your room!',
+    description: 'Completed 10 daily routine steps or skills with perseverance!',
     emoji: '👑',
     category: 'routines',
     targetCount: 10,
     currentCount: 14,
     isUnlocked: true,
     unlockedStickerId: 'st-crown',
-    rewardStars: 5,
+    rewardStars: 0,
   },
 ];
 

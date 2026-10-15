@@ -7,7 +7,7 @@ interface UseMedicationStateProps {
   isPremium: boolean;
   soundEffects: boolean;
   triggerUpgrade: (reason?: string) => void;
-  awardStars: (amount: number) => void;
+  awardStars?: (amount: number) => void;
   announce: (text: string) => void;
 }
 
@@ -15,7 +15,6 @@ export function useMedicationState({
   isPremium,
   soundEffects,
   triggerUpgrade,
-  awardStars,
   announce,
 }: UseMedicationStateProps) {
   const [medications, setMedications] = useState<MedicationReminder[]>(() => {
@@ -134,9 +133,8 @@ export function useMedicationState({
     };
     setMedicationLogs((prev) => [newLog, ...prev]);
 
-    awardStars(1);
-    if (soundEffects) playChime('star');
-    announce(`Great job taking your ${targetMed.name}! You earned 1 star!`);
+    if (soundEffects) playChime('complete');
+    announce(`Great job taking your ${targetMed.name}!`);
   };
 
   const undoMedicationDose = (medId: string, time?: string) => {

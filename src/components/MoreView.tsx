@@ -171,8 +171,8 @@ export const MoreView: React.FC = () => {
         {
           id: 'rewards',
           title: 'Rewards',
-          desc: 'Stars, badges and stickers',
-          emoji: '⭐',
+          desc: 'Badges and routine stickers',
+          emoji: '🏆',
           show: on('starsAndRewards'),
           onOpen: go('rewards'),
         },

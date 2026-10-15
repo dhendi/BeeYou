@@ -1074,23 +1074,23 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
 ];
 
 export const WORLD_ITEMS_CATALOG: WorldItem[] = [
-  { id: 'wi-beanbag', name: 'Cozy Beanbag', emoji: '🛋️', category: 'furniture', costStars: 2, description: 'A super soft squishy beanbag chair to sink into.' },
-  { id: 'wi-puppy', name: 'Friendly Puppy', emoji: '🐶', category: 'pet', costStars: 5, description: 'A gentle wagging puppy companion that loves to play fetch.' },
-  { id: 'wi-kitten', name: 'Fluffy Kitten', emoji: '🐱', category: 'pet', costStars: 5, description: 'A purring cuddly kitten that naps in warm spots.' },
-  { id: 'wi-bunny', name: 'Calm Bunny', emoji: '🐰', category: 'pet', costStars: 4, description: 'A soft velvet bunny that munches crunchy carrots.' },
-  { id: 'wi-turtle', name: 'Wise Turtle', emoji: '🐢', category: 'pet', costStars: 4, description: 'A slow, calm turtle that reminds us to take deep breaths.' },
-  { id: 'wi-nightlight', name: 'Star Projector', emoji: '✨', category: 'decoration', costStars: 3, description: 'Projects spinning stars and galaxies across the ceiling.' },
-  { id: 'wi-tent', name: 'Sensory Hideaway Tent', emoji: '⛺', category: 'comfort', costStars: 4, description: 'A cozy tent with fairy lights for peaceful quiet time.' },
-  { id: 'wi-trainset', name: 'Wooden Train Track', emoji: '🚂', category: 'toy', costStars: 3, description: 'A looping railway with bridges and colorful steam engines.' },
-  { id: 'wi-plant', name: 'Sunflower Friend', emoji: '🌻', category: 'decoration', costStars: 2, description: 'A cheerful golden sunflower that turns toward the sunshine.' },
-  { id: 'wi-rug', name: 'Rainbow Cloud Rug', emoji: '🌈', category: 'furniture', costStars: 3, description: 'An ultra-soft fluffy rug for cozy floor play.' },
-  { id: 'wi-aquarium', name: 'Glowing Aquarium', emoji: '🐠', category: 'decoration', costStars: 6, description: 'Gentle swimming neon fish and bubbling water.' },
-  { id: 'wi-trampoline', name: 'Mini Rebounder', emoji: '🤸', category: 'toy', costStars: 5, description: 'A soft mini trampoline for fun bouncy sensory breaks.' },
+  { id: 'wi-beanbag', name: 'Cozy Beanbag', emoji: '🛋️', category: 'furniture', costStars: 0, description: 'A super soft squishy beanbag chair to sink into.' },
+  { id: 'wi-puppy', name: 'Friendly Puppy', emoji: '🐶', category: 'pet', costStars: 0, description: 'A gentle wagging puppy companion that loves to play fetch.' },
+  { id: 'wi-kitten', name: 'Fluffy Kitten', emoji: '🐱', category: 'pet', costStars: 0, description: 'A purring cuddly kitten that naps in warm spots.' },
+  { id: 'wi-bunny', name: 'Calm Bunny', emoji: '🐰', category: 'pet', costStars: 0, description: 'A soft velvet bunny that munches crunchy carrots.' },
+  { id: 'wi-turtle', name: 'Wise Turtle', emoji: '🐢', category: 'pet', costStars: 0, description: 'A slow, calm turtle that reminds us to take deep breaths.' },
+  { id: 'wi-nightlight', name: 'Star Projector', emoji: '✨', category: 'decoration', costStars: 0, description: 'Projects spinning stars and galaxies across the ceiling.' },
+  { id: 'wi-tent', name: 'Sensory Hideaway Tent', emoji: '⛺', category: 'comfort', costStars: 0, description: 'A cozy tent with fairy lights for peaceful quiet time.' },
+  { id: 'wi-trainset', name: 'Wooden Train Track', emoji: '🚂', category: 'toy', costStars: 0, description: 'A looping railway with bridges and colorful steam engines.' },
+  { id: 'wi-plant', name: 'Sunflower Friend', emoji: '🌻', category: 'decoration', costStars: 0, description: 'A cheerful golden sunflower that turns toward the sunshine.' },
+  { id: 'wi-rug', name: 'Rainbow Cloud Rug', emoji: '🌈', category: 'furniture', costStars: 0, description: 'An ultra-soft fluffy rug for cozy floor play.' },
+  { id: 'wi-aquarium', name: 'Glowing Aquarium', emoji: '🐠', category: 'decoration', costStars: 0, description: 'Gentle swimming neon fish and bubbling water.' },
+  { id: 'wi-trampoline', name: 'Mini Rebounder', emoji: '🤸', category: 'toy', costStars: 0, description: 'A soft mini trampoline for fun bouncy sensory breaks.' },
 ];
 
 export const INITIAL_WORLD_STATE: MyWorldState = {
-  stars: 14, // Child starts with stars earned from earlier skills!
-  unlockedItemIds: ['wi-beanbag', 'wi-plant'],
+  stars: 0,
+  unlockedItemIds: ['wi-beanbag', 'wi-plant', 'wi-puppy', 'wi-kitten', 'wi-bunny', 'wi-turtle', 'wi-nightlight', 'wi-tent', 'wi-trainset', 'wi-rug', 'wi-aquarium', 'wi-trampoline'],
   placedItems: [
     { id: 'placed-1', itemId: 'wi-beanbag', room: 'bedroom', x: 25, y: 60 },
     { id: 'placed-2', itemId: 'wi-plant', room: 'bedroom', x: 80, y: 40 },

@@ -7,7 +7,7 @@ interface UseRecollectionsStateProps {
   soundEffects: boolean;
   childName: string;
   recordEmotion: (emotion: EmotionType, reason?: string, need?: string) => void;
-  awardStars: (amount: number) => void;
+  awardStars?: (amount: number) => void;
   speak: (text: string) => Promise<void>;
 }
 
@@ -15,7 +15,6 @@ export function useRecollectionsState({
   soundEffects,
   childName,
   recordEmotion,
-  awardStars,
   speak,
 }: UseRecollectionsStateProps) {
   const [dailyRecollections, setDailyRecollections] = useState<DailyRecollectionEntry[]>(() => {
@@ -55,14 +54,11 @@ export function useRecollectionsState({
       newEntry.additionalNotes
     );
 
-    awardStars(newEntry.starsAwarded || 3);
-
     if (soundEffects) {
-      playChime('star');
-      setTimeout(() => playChime('complete'), 350);
+      playChime('complete');
     }
 
-    speak(`Wonderful reflection, ${childName}! You earned ${newEntry.starsAwarded || 3} stars.`);
+    speak(`Wonderful reflection, ${childName}! Great job reflecting on your day.`);
   };
 
   const updateDailyRecollection = (id: string, updates: Partial<DailyRecollectionEntry>) => {

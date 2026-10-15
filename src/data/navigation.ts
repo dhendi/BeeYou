@@ -182,5 +182,5 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
   { id: 'skills', title: 'Life skills & social stories', emoji: '🚀', blurb: 'Get ready for new things', keys: ['lifeSkills', 'socialStories'] },
   { id: 'caregiver', title: 'Caregiver support', emoji: '🚨', blurb: 'Ask a trusted person for help', keys: ['emergencyAlertSOS'] },
   { id: 'health', title: 'Health & wellness', emoji: '💊', blurb: 'Reminders and body tracking', keys: ['medicationReminders', 'cycleTracker'] },
-  { id: 'rewards', title: 'Rewards & motivation', emoji: '⭐', blurb: 'Stars, stickers and celebrations', keys: ['starsAndRewards'] },
+  { id: 'rewards', title: 'Rewards & motivation', emoji: '🏆', blurb: 'Badges, stickers and celebrations', keys: ['starsAndRewards'] },
 ];

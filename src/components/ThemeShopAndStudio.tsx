@@ -4,14 +4,12 @@ import { AppTheme, ThemePalette, WallpaperPattern } from '../types';
 import { 
   Sparkles, 
   Check, 
-  Lock, 
   Plus, 
   Palette, 
   ShoppingBag, 
   Volume2, 
   Trash2, 
   Edit3, 
-  Star, 
   Eye, 
   RotateCcw,
   CheckCircle2,
@@ -207,7 +205,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     buyTheme,
     createCustomTheme,
     deleteCustomTheme,
-    worldState,
     childProfile,
     isPremium,
     triggerUpgrade,
@@ -334,13 +331,24 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               ) : null}
             </button>
 
-            {/* Star Wallet */}
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/30 shrink-0">
-              <Star className="w-5 h-5 text-amber-300 fill-amber-300" />
-              <span className="text-sm font-black tracking-wide">
-                {worldState.stars} Star Coins
-              </span>
-            </div>
+            {/* Premium Status Pill */}
+            {isPremium ? (
+              <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/30 shrink-0 text-white">
+                <Crown className="w-4 h-4 text-amber-300 fill-amber-300" />
+                <span className="text-xs font-black tracking-wide">
+                  Premium Unlocked
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => triggerUpgrade('Unlock all 14+ themes and the custom Theme Studio with BeeYou Premium!')}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 px-3.5 py-2 rounded-2xl border border-amber-200 shrink-0 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+              >
+                <Crown className="w-4 h-4 fill-amber-600 text-amber-900" />
+                <span>15-Day Free Trial</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -636,7 +644,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           <div data-tour="themes-catalog-grid" className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {filteredThemes.map((theme) => {
               const isEquipped = theme.id === activeThemeId;
-              const canAfford = worldState.stars >= theme.costStars;
 
               return (
                 <div
@@ -644,7 +651,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   className={`bg-white rounded-3xl p-4 sm:p-5 border-2 transition-all flex flex-col justify-between shadow-xs hover:shadow-md ${
                     isEquipped
                       ? 'border-emerald-500 ring-2 ring-emerald-300'
-                      : theme.isUnlocked
+                      : isPremium || theme.id === 'theme-classic'
                       ? 'border-slate-200 hover:border-slate-300'
                       : 'border-slate-200 opacity-95'
                   }`}
@@ -663,12 +670,18 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                             </h4>
                             {theme.id === 'theme-classic' && (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
-                                ⭐ Default Theme
+                                ✨ Default Theme
                               </span>
                             )}
                             {theme.isCustom && (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
                                 Custom
+                              </span>
+                            )}
+                            {!isPremium && theme.id !== 'theme-classic' && (
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 flex items-center gap-1 border border-amber-200">
+                                <Crown className="w-3 h-3 text-amber-600" />
+                                Premium
                               </span>
                             )}
                           </div>
@@ -757,7 +770,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                         className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-95"
                       >
                         <Crown className="w-4 h-4 text-amber-200" />
-                        <span>Unlock with Premium (30d Trial)</span>
+                        <span>Unlock with Premium (15-Day Free Trial)</span>
                       </button>
                     ) : isEquipped ? (
                       <div className="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs">
@@ -773,7 +786,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                         <RotateCcw className="w-4 h-4" />
                         <span>Equip Default Theme</span>
                       </button>
-                    ) : theme.isUnlocked ? (
+                    ) : (
                       <button
                         type="button"
                         onClick={() => setTheme(theme.id)}
@@ -781,24 +794,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                       >
                         <Sparkles className="w-4 h-4" />
                         <span>Equip Theme</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => buyTheme(theme.id)}
-                        disabled={!canAfford}
-                        className={`w-full py-2.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-95 ${
-                          canAfford
-                            ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
-                            : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                        }`}
-                      >
-                        <Lock className="w-4 h-4" />
-                        <span>
-                          {canAfford
-                            ? `Unlock for ⭐ ${theme.costStars} Stars`
-                            : `Need ${theme.costStars - worldState.stars} more ⭐ (Cost: ${theme.costStars})`}
-                        </span>
                       </button>
                     )}
                   </div>
@@ -941,7 +936,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 { id: 'turtle_shell', label: '🐢 Turtle Shell' },
                 { id: 'dino_footprints', label: '🦖 Dino Tracks' },
                 { id: 'lily_pads', label: '🐸 Lily Pads' },
-                { id: 'cosmic_stars', label: '⭐ Cosmic Stars' },
+                { id: 'cosmic_stars', label: '✨ Cosmic Stars' },
                 { id: 'bubbles', label: '🫧 Bubbles' },
                 { id: 'railroad', label: '🚂 Railroad' },
                 { id: 'ocean_waves', label: '🌊 Ocean Waves' },
@@ -1030,7 +1025,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-white/40 text-[10px] font-bold">
-                  ⭐ 25 Stars
+                  ✨ Custom Theme
                 </span>
               </div>
 

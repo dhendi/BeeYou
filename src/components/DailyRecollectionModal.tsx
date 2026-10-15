@@ -502,8 +502,8 @@ export const DailyRecollectionModal: React.FC = () => {
         {/* MODAL FOOTER WITH SAVE + STAR REWARD */}
         <div className="shrink-0 p-4 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
-            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400 animate-spin-slow" />
-            <span>Earns +3 Stars upon saving! ⭐⭐⭐</span>
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+            <span>Saves to your daily reflections journal</span>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">

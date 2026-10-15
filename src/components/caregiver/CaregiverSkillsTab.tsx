@@ -56,7 +56,7 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
               <div>
                 <h4 className="font-black text-slate-800">{sk.title}</h4>
                 <span data-tour={i === 0 ? "skills-reward-badge" : undefined} className="text-xs text-purple-700 font-bold">
-                  {sk.steps.length} steps • +{sk.starsReward} Stars
+                  {sk.steps.length} steps
                 </span>
               </div>
             </div>

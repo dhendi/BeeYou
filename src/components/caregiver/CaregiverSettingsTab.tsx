@@ -132,7 +132,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
-            { id: 'kid', label: 'Kids (3–11)', icon: Smile, desc: 'Mascots, stars, stickers, First/Then' },
+            { id: 'kid', label: 'Kids (3–11)', icon: Smile, desc: 'Mascots, routine stickers, First/Then' },
             { id: 'teen', label: 'Teens (12–17)', icon: Headphones, desc: 'Modern lofi/cyber, countdowns, independence' },
             { id: 'adult', label: 'Adults (18+)', icon: Briefcase, desc: 'Executive function, discreet AAC, zero clutter' },
           ].map((a) => {
@@ -213,7 +213,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', icon: MessageSquare, desc: 'Motor-planned AAC tiles with voice' },
             { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', icon: Timer, desc: 'Activity countdown ring for routines' },
             { key: 'firstThenSchedules', label: 'First / Then Routine Cards', icon: ListOrdered, desc: 'Clear step-by-step guidance' },
-            { key: 'starsAndRewards', label: 'Stars & Digital Routine Stickers', icon: Award, desc: 'Gamification reward coins & badges' },
+            { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', icon: Award, desc: 'Achievement celebration & badges' },
             { key: 'mascotCompanion', label: 'Playful Mascot Companion', icon: Sparkles, desc: 'Rex/Hopper cheer greetings & banner' },
             { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', icon: Moon, desc: 'Evening reflection & therapist chart' },
             { key: 'medicationReminders', label: 'Medication & Health Reminders', icon: Pill, desc: 'Schedule doses, inventory & refill alerts' },

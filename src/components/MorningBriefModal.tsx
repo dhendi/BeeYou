@@ -38,7 +38,6 @@ export const MorningBriefModal: React.FC = () => {
     routines,
     adventures,
     recordEmotion,
-    awardStars,
     setChildView,
   } = useApp();
 
@@ -110,9 +109,6 @@ export const MorningBriefModal: React.FC = () => {
 
   const handleStartDay = () => {
     playChime('complete');
-
-    // Award +1 morning login star!
-    awardStars(1);
 
     // Save date in localStorage so it only opens once a day automatically
     try {
@@ -322,11 +318,11 @@ export const MorningBriefModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Modal Footer with Star Award & Start Button */}
+        {/* Modal Footer with Daily Check-In & Start Button */}
         <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
             <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
-            <span>Earn 1 Morning Star Coin</span>
+            <span>Daily Check-In</span>
           </div>
 
           <button

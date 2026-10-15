@@ -57,8 +57,8 @@ export function useGamificationState({
   });
   const [newlyAwardedSticker, setNewlyAwardedSticker] = useState<EarnedRoutineSticker | null>(null);
 
-  const awardStars = (amount: number) => {
-    setWorldState((prev) => ({ ...prev, stars: prev.stars + amount }));
+  const awardStars = (_amount: number) => {
+    // Star coins economy removed per user request
   };
 
   const updateAvatar = (partial: Partial<AvatarConfig>) => {
@@ -76,14 +76,12 @@ export function useGamificationState({
     const item = WORLD_ITEMS_CATALOG.find((i) => i.id === itemId);
     if (!item) return false;
     if (worldState.unlockedItemIds.includes(itemId)) return true;
-    if (worldState.stars < item.costStars) return false;
 
     setWorldState((prev) => ({
       ...prev,
-      stars: prev.stars - item.costStars,
       unlockedItemIds: [...prev.unlockedItemIds, itemId],
     }));
-    if (soundEffects) playChime('star');
+    if (soundEffects) playChime('complete');
     return true;
   };
 
@@ -148,11 +146,9 @@ export function useGamificationState({
     });
 
     setNewlyAwardedSticker(newSticker);
-    awardStars(stickerDef.starsAward || 3);
 
     if (soundEffects) {
       playChime('complete');
-      setTimeout(() => playChime('star'), 400);
     }
 
     speak(
@@ -182,7 +178,6 @@ export function useGamificationState({
 
   const completeAdventure = (id: string) => {
     if (soundEffects) playChime('complete');
-    awardStars(3);
     setAdventures((prev) =>
       prev.map((a) =>
         a.id === id ? { ...a, completedCount: (a.completedCount || 0) + 1 } : a
@@ -208,10 +203,7 @@ export function useGamificationState({
   };
 
   const completeSkill = (skillId: string) => {
-    const target = skills.find((s) => s.id === skillId);
-    const reward = target?.starsReward || 2;
-    if (soundEffects) playChime('star');
-    awardStars(reward);
+    if (soundEffects) playChime('complete');
     setSkills((prev) =>
       prev.map((sk) =>
         sk.id === skillId
@@ -256,8 +248,7 @@ export function useGamificationState({
         if (h.id === habitId) {
           const nextCompleted = !h.completedToday;
           if (nextCompleted) {
-            if (soundEffects) playChime('star');
-            awardStars(1);
+            if (soundEffects) playChime('complete');
             speak(`Great job! ${h.title}. ${h.encouragement}`);
           } else {
             if (soundEffects) playChime('tap');
@@ -286,10 +277,9 @@ export function useGamificationState({
           const nextTimes = currentTimes + 1;
           const nowCompleted = nextTimes >= target;
 
-          if (soundEffects) playChime('star');
+          if (soundEffects) playChime('complete');
 
           if (nowCompleted && !h.completedToday) {
-            awardStars(1);
             speak(`Super! Finished ${h.title} for today! ${h.encouragement}`);
           } else {
             speak(`${h.title}: ${nextTimes} of ${target}`);

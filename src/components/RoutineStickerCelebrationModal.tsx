@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, Star, Award, ArrowRight, X } from 'lucide-react';
+import { Sparkles, Award, ArrowRight, X } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 export const RoutineStickerCelebrationModal: React.FC = () => {
@@ -65,8 +65,8 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
             {newlyAwardedSticker.emoji}
           </span>
           <div className="absolute -bottom-2.5 px-3 py-0.5 rounded-full bg-amber-500 text-white font-black text-[11px] shadow-sm flex items-center gap-1">
-            <Star className="w-3 h-3 fill-white text-white" />
-            <span>+{newlyAwardedSticker.starsAwarded} Stars</span>
+            <Sparkles className="w-3 h-3 text-white" />
+            <span>New Sticker!</span>
           </div>
         </div>
 

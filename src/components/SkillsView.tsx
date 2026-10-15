@@ -120,10 +120,6 @@ export const SkillsView: React.FC = () => {
               <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
                 {t('Mission')}
               </span>
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
-                <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                +{selectedSkill.starsReward} {t('Stars')}
-              </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-800 mt-1">
               {t(selectedSkill.title)}
@@ -148,7 +144,7 @@ export const SkillsView: React.FC = () => {
             <span className="text-5xl">🏆</span>
             <h3 className="text-xl font-black text-amber-950 mt-2">{t('Mission Accomplished!')}</h3>
             <p className="text-xs sm:text-sm font-bold text-amber-800 mt-1">
-              {t('You completed')} "{t(selectedSkill.title)}" {t('independently!')} {t('You earned')} +{selectedSkill.starsReward} {t('Stars')}.
+              {t('You completed')} "{t(selectedSkill.title)}" {t('independently!')}
             </p>
           </div>
         )}
@@ -340,10 +336,6 @@ export const SkillsView: React.FC = () => {
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
                       {t(skill.category)}
-                    </span>
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-amber-700">
-                      <Sparkles className="w-3.5 h-3.5 fill-amber-400 text-amber-500" aria-hidden="true" />
-                      +{skill.starsReward} {t('Stars')}
                     </span>
                   </div>
                   <h3 className="font-black text-slate-800 text-base sm:text-lg mt-1 leading-snug">

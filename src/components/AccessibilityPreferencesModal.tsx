@@ -55,9 +55,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     },
     {
       key: 'starsAndRewards',
-      title: 'Stars & Gamification Rewards',
-      desc: 'Star coins, unlocks, and celebration stickers',
-      emoji: '⭐',
+      title: 'Badges & Routine Stickers',
+      desc: 'Achievement celebrations, stickers, and flair',
+      emoji: '🏆',
     },
     {
       key: 'emergencyAlertSOS',

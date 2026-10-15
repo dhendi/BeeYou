@@ -174,8 +174,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🐸',
     greetingMessage: 'Ribbit ribbit! Welcome to the peaceful lily pad pond!',
     description: 'Calming fresh pond water, vibrant bouncy tree frogs, and floating lily pads.',
-    costStars: 5,
-    isUnlocked: true, // Unlocked for immediate enjoyment!
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#65a30d',
       primaryBg: 'bg-lime-600',
@@ -216,8 +216,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🚂',
     greetingMessage: 'All aboard! Full steam ahead on our daily schedule!',
     description: 'Chugga-chugga tracks, shiny steam locomotives, and brass conductor bells.',
-    costStars: 8,
-    isUnlocked: false,
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#0284c7',
       primaryBg: 'bg-sky-600',
@@ -255,8 +255,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🚀',
     greetingMessage: '3.. 2.. 1.. Blastoff! Ready for an interstellar space mission!',
     description: 'Stardust galaxies, glowing nebulae, planetary rings, and flying rocket ships.',
-    costStars: 10,
-    isUnlocked: false,
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#7c3aed',
       primaryBg: 'bg-purple-600',
@@ -293,8 +293,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🐬',
     greetingMessage: 'Splash! Smooth waters and cheerful calm ocean waves!',
     description: 'Deep ocean coral, playful sea turtles, dancing dolphins, and seafoam bubbles.',
-    costStars: 8,
-    isUnlocked: false,
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#0891b2',
       primaryBg: 'bg-cyan-600',
@@ -438,8 +438,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🏎️',
     greetingMessage: 'Vroom! Green flag is out — ready to zoom through today!',
     description: 'High-speed racecars, checkered finish lines, and turbo boost power.',
-    costStars: 10,
-    isUnlocked: false,
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#dc2626',
       primaryBg: 'bg-red-600',
@@ -476,8 +476,8 @@ export const PRESET_THEMES: AppTheme[] = [
     mascotEmoji: '🦄',
     greetingMessage: 'Sparkle and wonder fill your gentle, happy day!',
     description: 'Whimsical pastel unicorns, fairy dust, and calm lavender gardens.',
-    costStars: 10,
-    isUnlocked: false,
+    costStars: 0,
+    isUnlocked: true,
     palette: {
       primary: '#db2777',
       primaryBg: 'bg-pink-600',
