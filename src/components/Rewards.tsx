@@ -33,7 +33,6 @@ export const Rewards: React.FC = () => {
     skills,
     emotionHistory,
     setChildView,
-    setShowAvatarCreator,
     earnedStickers,
   } = useApp();
 
@@ -825,30 +824,6 @@ export const Rewards: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Quick Shortcuts to Customize Avatar in My World */}
-          <div className="bg-white rounded-3xl p-5 border-2 border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
-            <div>
-              <h4 className="font-black text-slate-800 text-sm">
-                Want to change your hairstyle, skin tone, or headphones?
-              </h4>
-              <p className="text-xs text-slate-500">
-                You can customize your avatar's accessories, wheelchair, and glasses in My World!
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowAvatarCreator(true);
-                playChime('tap');
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0"
-            >
-              <span>Customize Avatar</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
       )}

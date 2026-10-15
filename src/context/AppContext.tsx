@@ -88,7 +88,6 @@ export type ChildViewType =
   | 'adventures'
   | 'skills'
   | 'feelings'
-  | 'my-world'
   | 'rewards'
   | 'scrapbook'
   | 'more'
@@ -135,8 +134,8 @@ export interface AppContextType {
   setShowFamilyAuthModal: (val: boolean) => void;
   showAboutMeModal: boolean;
   setShowAboutMeModal: (val: boolean) => void;
-  showAvatarCreator: boolean;
-  setShowAvatarCreator: (val: boolean) => void;
+  showAvatarCreator?: boolean;
+  setShowAvatarCreator?: (val: boolean) => void;
   incomingCaregiverMessage: CaregiverMessage | null;
   dismissIncomingCaregiverMessage: () => void;
   activeContextTopic: string | null;
@@ -467,7 +466,14 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   initialRole,
 }) => {
   // Navigation & View Modals
-  const [childView, setChildView] = useState<ChildViewType>('home');
+  const [childView, _setChildView] = useState<ChildViewType>('home');
+  const setChildView = useCallback((view: ChildViewType) => {
+    if ((view as any) === 'my-world') {
+      _setChildView('home');
+      return;
+    }
+    _setChildView(view);
+  }, []);
   const [activeAdventureId, setActiveAdventureId] = useState<string | null>(null);
   const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
@@ -517,7 +523,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   }, []);
 
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
-  const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
 
   // Root Profile & Settings
@@ -707,15 +712,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 2. Subscription Hook
   const subscriptionState = useSubscriptionState();
 
-  const setShowAvatarCreator = (val: boolean) => {
-    if (val && !subscriptionState.isPremium) {
-      subscriptionState.triggerUpgrade(
-        'Avatar Customizer Studio is a BeeYou Premium feature! Start your 15-day free trial to customize hair, colors, and accessories.'
-      );
-      return;
-    }
-    _setShowAvatarCreator(val);
-  };
+  const setShowAvatarCreator = () => {};
+  const showAvatarCreator = false;
 
   // 3. Gamification Hook
   const gamification = useGamificationState({

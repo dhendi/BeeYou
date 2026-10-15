@@ -232,10 +232,6 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Avatar:</strong> Standard avatar customization</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <span><strong>Offline:</strong> 100% offline-ready</span>
                   </li>
                 </ul>
@@ -291,7 +287,7 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>Avatar Studio:</strong> Full customization (hairstyles, colors, wheelchairs, sensory aids)</span>
+                    <span><strong>Stickers & Rewards:</strong> Digital badges, scrapbook flair &amp; milestone rewards</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />

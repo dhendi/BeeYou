@@ -8,7 +8,7 @@ import { DashboardWidgetId, EnabledFeatures, DashboardWidgetConfig } from '../ty
  */
 
 /** Main-area views that live under the "More" tab instead of the bottom bar. */
-export const MORE_VIEWS = ['more', 'adventures', 'skills', 'feelings', 'rewards', 'my-world'] as const;
+export const MORE_VIEWS = ['more', 'adventures', 'skills', 'feelings', 'rewards'] as const;
 
 export const isMoreView = (view: string): boolean => (MORE_VIEWS as readonly string[]).includes(view);
 
@@ -32,9 +32,9 @@ export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
   },
   {
     id: 'mascot_companion',
-    title: 'Themed Companion & Motivation',
+    title: 'Daily Welcome Greeting',
     emoji: '🐝',
-    description: 'Daily greeting, mascot companion, and star motivation',
+    description: 'Warm daily greeting and comforting encouragement',
     category: 'core',
     enabled: false,
   },

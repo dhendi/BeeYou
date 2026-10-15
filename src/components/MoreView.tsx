@@ -57,14 +57,13 @@ export const MoreView: React.FC = () => {
     setShowThemeModal,
     setShowAccessibilityModal,
     setShowToolsHubModal,
-    setShowAvatarCreator,
     openPrintSchedule,
   } = useApp();
 
   const on = (key: keyof NonNullable<typeof enabledFeatures>) => enabledFeatures?.[key] !== false;
   const teenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
 
-  const go = (view: 'adventures' | 'skills' | 'feelings' | 'rewards' | 'my-world') => () => {
+  const go = (view: 'adventures' | 'skills' | 'feelings' | 'rewards') => () => {
     setActiveAdventureId(null);
     setActiveSkillId(null);
     setActiveStoryId(null);
@@ -210,22 +209,6 @@ export const MoreView: React.FC = () => {
           onOpen: () => openPrintSchedule({ mode: 'checklist' }),
         },
         {
-          id: 'my-world',
-          title: 'My World',
-          desc: 'Decorate your own space',
-          emoji: '🏡',
-          show: on('starsAndRewards'),
-          onOpen: go('my-world'),
-        },
-        {
-          id: 'avatar',
-          title: 'Avatar Studio',
-          desc: 'Customize character, hair and accessories',
-          emoji: '👤',
-          show: true,
-          onOpen: () => setShowAvatarCreator(true),
-        },
-        {
           id: 'themes',
           title: 'Themes & wallpaper',
           desc: 'Change colors, sounds and style',
@@ -302,10 +285,6 @@ export const MoreView: React.FC = () => {
         return <ArtCraftsSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'print-schedules':
         return <Printer className="w-6 h-6 text-amber-600" />;
-      case 'my-world':
-        return <FavQuietBreakSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
-      case 'avatar':
-        return <IdCardSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'themes':
         return <ArtCraftsSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'about':

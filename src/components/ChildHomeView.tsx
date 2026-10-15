@@ -59,15 +59,11 @@ import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { getGrammaticalCategoryLabel } from './AACView';
-import { ChildAvatar } from './ChildAvatar';
 
 export const ChildHomeView: React.FC = () => {
   const {
     settings,
     childProfile,
-    avatar,
-    setShowAvatarCreator,
-    worldState,
     setChildView,
     plansChanged,
     setShowPlansChangedModal,
@@ -359,7 +355,8 @@ export const ChildHomeView: React.FC = () => {
 
         const renderWidgetCard = (widget: (typeof enabledWidgets)[0], isFullWidth = false) => {
           switch (widget.id) {
-            case 'mascot_companion':
+            case 'mascot_companion': {
+              const displayName = childProfile.name?.trim() ? childProfile.name.trim() : null;
               return (
                 <div 
                   key={widget.id}
@@ -368,45 +365,20 @@ export const ChildHomeView: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <button 
-                      type="button"
-                      aria-label="Open Avatar Creator Studio"
-                      onClick={() => {
-                        setShowAvatarCreator(true);
-                        playChime('tap');
-                      }}
-                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] text-[#4A2F0F] border-2 border-[#E0D8CB] flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none overflow-hidden"
-                      title="Avatar Studio"
+                    <div 
+                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FDF4E7] text-[#4A2F0F] border-2 border-[#E2A44E]/40 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none"
+                      aria-hidden="true"
                     >
-                      <ChildAvatar config={avatar} size="sm" />
-                    </button>
+                      🐝
+                    </div>
                     <div className="min-w-0">
                       <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none truncate">
-                        {t('Hi')}, {childProfile.name}! 🐝
+                        {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`} 🐝
                       </h2>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setChildView('my-world');
-                            playChime('tap');
-                          }}
-                          className="text-xs text-amber-900 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>🏡 {t('My World')}</span>
-                        </button>
-                        <span className="text-stone-300">•</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowAvatarCreator(true);
-                            playChime('tap');
-                          }}
-                          className="text-xs text-purple-900 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>✨ {t('Avatar Studio')}</span>
-                        </button>
-                      </div>
+                      <p className="text-xs text-[#7A6C60] font-semibold mt-1 flex items-center gap-1.5 truncate">
+                        <span className="text-amber-600">✨</span>
+                        <span>{t("Let's have a calm, wonderful day!")}</span>
+                      </p>
                     </div>
                   </div>
 
@@ -424,6 +396,7 @@ export const ChildHomeView: React.FC = () => {
                   </button>
                 </div>
               );
+            }
 
             case 'quick_aac':
               return !isAacActive ? (
