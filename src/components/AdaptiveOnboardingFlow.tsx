@@ -45,6 +45,8 @@ import {
   SpoonSticker,
   ShieldSosSticker,
   TabletIpadSticker,
+  FidgetBubblesSticker,
+  ConnectHeartSticker,
 } from './icons/JournalStickers';
 
 interface AdaptiveOnboardingFlowProps {
@@ -76,7 +78,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
-  const totalSteps = 4;
+  const totalSteps = 5;
   const [selectedPersona, setSelectedPersona] = useState<UserPersona>(userPersona || 'child');
   const [pairingMode, setPairingMode] = useState<PairingMode>('caregiver_hub');
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('yearly');
@@ -235,10 +237,11 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                {t('Step')} {step} {t('of')} {totalSteps} • {step === 1 && t('Role & Persona')}
-                {step === 2 && t('Identity & Dynamic Profile')}
-                {step === 3 && t('Modular Toolkit Customization')}
-                {step === 4 && t('BeeYou Plus & Free Trial')}
+                {t('Step')} {step} {t('of')} {totalSteps} • {step === 1 && t('Welcome to BeeYou')}
+                {step === 2 && t('Role & Persona')}
+                {step === 3 && t('Identity & Dynamic Profile')}
+                {step === 4 && t('Modular Toolkit Customization')}
+                {step === 5 && t('BeeYou Plus & Free Trial')}
               </span>
             </div>
 
@@ -267,8 +270,94 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
         {/* Scrollable Step Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
-          {/* ════════════════ STEP 1: ROLE & PERSONA ════════════════ */}
+          {/* ════════════════ STEP 1: WELCOME TO BEEYOU ════════════════ */}
           {step === 1 && (
+            <div className="space-y-6 text-center py-2 sm:py-4 animate-in fade-in">
+              <div className="mx-auto w-fit rounded-3xl bg-white px-6 py-4 shadow-md border-2 border-amber-200">
+                <img src="/logo.png" alt="BeeYou" className="h-20 sm:h-28 w-auto object-contain" draggable={false} />
+              </div>
+
+              <div className="space-y-2 max-w-lg mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {t('Welcome to BeeYou')}
+                </h2>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                  {t('BeeYou is an all-in-one supportive space for neurodivergent minds—bringing together visual routines, AAC picture communication, gentle sensory regulation, and flexible tools tailored to you.')}
+                </p>
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+                  <span className="inline-block px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 font-bold text-xs">
+                    🐝 "{t('You can be yourself here.')}"
+                  </span>
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('Language')}:</span>
+                    <LanguageDropdown />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Feature Highlights with NEW Sticker Icons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 max-w-xl mx-auto text-left">
+                {/* Visual Routines */}
+                <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mb-1">
+                    <ScheduleCalendarSticker className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">{t('Visual Routines')}</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('Step-by-step clarity')}</p>
+                  </div>
+                </div>
+
+                {/* Mulberry AAC */}
+                <div className="p-3 rounded-2xl bg-sky-50/80 dark:bg-slate-800 border border-sky-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mb-1">
+                    <QuickPhrasesSticker className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">{t('Mulberry AAC')}</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('Picture talker & TTS')}</p>
+                  </div>
+                </div>
+
+                {/* Sensory Tools */}
+                <div className="p-3 rounded-2xl bg-emerald-50/80 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-1">
+                    <FidgetBubblesSticker className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">{t('Sensory Tools')}</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('Fidgets & pacers')}</p>
+                  </div>
+                </div>
+
+                {/* Caregiver Link */}
+                <div className="p-3 rounded-2xl bg-purple-50/80 dark:bg-slate-800 border border-purple-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-1">
+                    <CaregiverPhoneSticker className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-xs text-slate-900 dark:text-white mt-1">{t('Caregiver Link')}</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('Easy 2-way pairing')}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Central Get Started Button */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-base shadow-lg shadow-amber-500/25 transition-all transform active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{t('Get Started')}</span>
+                  <ArrowRight className="w-5 h-5 stroke-3" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ STEP 2: ROLE & PERSONA ════════════════ */}
+          {step === 2 && (
             <div className="space-y-6 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -441,8 +530,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* ════════════════ STEP 2: IDENTITY & DYNAMIC FIELDS ════════════════ */}
-          {step === 2 && (
+          {/* ════════════════ STEP 3: IDENTITY & DYNAMIC FIELDS ════════════════ */}
+          {step === 3 && (
             <div className="space-y-6 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -518,8 +607,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* ════════════════ STEP 3: MODULAR TOOLKIT CUSTOMIZATION ════════════════ */}
-          {step === 3 && (
+          {/* ════════════════ STEP 4: MODULAR TOOLKIT CUSTOMIZATION ════════════════ */}
+          {step === 4 && (
             <div className="space-y-5 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -654,8 +743,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* ════════════════ STEP 4: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
-          {step === 4 && (
+          {/* ════════════════ STEP 5: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
+          {step === 5 && (
             <div className="space-y-4 sm:space-y-5 animate-in fade-in">
               <div className="text-center space-y-1.5 sm:space-y-2">
                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mx-auto shadow-sm border border-amber-300 dark:border-amber-700">
@@ -880,7 +969,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               onClick={handleNext}
               className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition active:scale-95"
             >
-              <span>{t('Continue')}</span>
+              <span>{step === 1 ? t('Get Started') : t('Continue')}</span>
               <ArrowRight className="w-4 h-4 stroke-3" />
             </button>
           ) : (
