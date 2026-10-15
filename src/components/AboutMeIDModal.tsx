@@ -20,7 +20,7 @@ import {
   Trash2, 
   AlertTriangle, 
   Smile, 
-  Sparkles, 
+  Star, 
   User, 
   ExternalLink,
   MessageSquare,
@@ -470,7 +470,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                       key={idx}
                       className="px-3 py-1.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center gap-1.5 shadow-2xs"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <Star className="w-3.5 h-3.5 text-emerald-600" />
                       <span>{item}</span>
                     </span>
                   ))}

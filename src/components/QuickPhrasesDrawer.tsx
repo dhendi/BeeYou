@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, 
   Volume2, 
-  Sparkles, 
+  Lightbulb, 
   MessageSquare,
   Coffee,
   LifeBuoy,
@@ -112,7 +112,7 @@ export const QuickPhrasesDrawer: React.FC = () => {
         <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
           <span>Tap any phrase to speak immediately.</span>
           <span className="text-amber-700 font-bold flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Lightbulb className="w-3.5 h-3.5" />
             Customizable by parent
           </span>
         </div>

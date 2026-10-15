@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Mail, 
   Lock, 
-  Sparkles, 
+  Star, 
   CheckCircle2, 
   Smartphone, 
   Heart, 
@@ -271,7 +271,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   Shared Family Account
                 </span>
                 <span className="text-xs text-amber-200 font-bold flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Star className="w-3.5 h-3.5" />
                   <span>1 Email Links Both Devices</span>
                 </span>
               </div>
@@ -725,7 +725,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           ══════════════════════════════════════════════════════ */}
           <div className="p-4 sm:p-5 rounded-3xl bg-emerald-50/90 dark:bg-slate-800 border-2 border-emerald-300 dark:border-slate-700 space-y-3">
             <div className="flex items-center gap-2 text-emerald-950 dark:text-emerald-200 font-black text-sm">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <Star className="w-4 h-4 text-emerald-600" />
               <span>🌟 Advantages of Having a Shared Family Email:</span>
             </div>
 

@@ -9,7 +9,7 @@ import {
   Timer, 
   Heart, 
   Smile, 
-  Sparkles, 
+  Star, 
   Pill, 
   FileText, 
   Sliders, 

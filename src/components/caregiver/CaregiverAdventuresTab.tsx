@@ -9,7 +9,7 @@ import {
   Edit3,
   Trash2,
   Copy,
-  Sparkles,
+  Star,
   ChevronDown,
   ChevronUp,
   X,
@@ -129,7 +129,7 @@ const ADVENTURE_TEMPLATES = [
       { order: 1, title: 'Enter using quiet feet', description: 'Walk in and remember our gentle library voice.', emoji: '🤫' },
       { order: 2, title: 'Browse children book section', description: 'Look at book covers and pick 2-3 favorites.', emoji: '📖' },
       { order: 3, title: 'Sit in the cozy reading corner', description: 'Flip through pages on soft pillows or rugs.', emoji: '🛋️' },
-      { order: 4, title: 'Self-checkout scanner', description: 'Scan our library card and beep each book barcode.', emoji: '✨' },
+      { order: 4, title: 'Self-checkout scanner', description: 'Scan our library card and beep each book barcode.', emoji: '⭐' },
       { order: 5, title: 'Pack books into backpack', description: 'Zip up and head home for storytime!', emoji: '🎒' },
     ],
     sensoryPreview: {
@@ -585,7 +585,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
       <div className="bg-linear-to-r from-amber-50 via-teal-50/60 to-purple-50 border-2 border-amber-200/80 rounded-2xl p-3.5 sm:p-4">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+            <Star className="w-4 h-4 text-amber-600 shrink-0" />
             <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
               {t("Quick-Start Starter Templates:")}
             </span>
@@ -1061,7 +1061,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                     >
                       <RoutineStickerIcon emoji={formEmoji} title="Selected Icon" className="w-7 h-7 object-contain group-hover:scale-110 transition-transform" />
                       <span className="text-xs font-black text-amber-950">{t("Change Icon")}</span>
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <Star className="w-3.5 h-3.5 text-amber-600" />
                     </button>
                   </div>
                 </div>

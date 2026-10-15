@@ -8,7 +8,7 @@ import {
   VolumeX, 
   Heart, 
   Eye, 
-  Sparkles,
+  Star,
   PhoneCall,
   CheckCircle2,
   Lock,
@@ -223,7 +223,7 @@ export const CopingToolkitModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-teal-100/80 border border-teal-200 flex items-center justify-center text-teal-800 shrink-0 shadow-2xs">
-              <Sparkles className="w-5 h-5 text-teal-700" aria-hidden="true" />
+              <Star className="w-5 h-5 text-teal-700" aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-teal-950">{t('Calm & Coping Toolkit')}</h2>
@@ -883,7 +883,7 @@ export const CopingToolkitModal: React.FC = () => {
               { text: 'I want a glass of water.', icon: Droplets },
               { text: 'Can I have a hug?', icon: Heart },
               { text: 'I want to sit quietly.', icon: VolumeX },
-              { text: 'I want my comfort item.', icon: Sparkles },
+              { text: 'I want my comfort item.', icon: Star },
               { text: 'Can we go home?', icon: Home },
             ].map((need, idx) => {
               const IconComp = need.icon;

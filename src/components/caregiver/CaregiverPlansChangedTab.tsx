@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { Eye, Save, Trash2, Plus, Sparkles, MessageSquare } from 'lucide-react';
+import { Eye, Save, Trash2, Plus, Star, MessageSquare } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { IconLibraryModal } from '../common/IconLibraryModal';
@@ -152,7 +152,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
               title={t("Tour this section")}
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <Star className="w-4 h-4 text-amber-600" />
               <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
@@ -412,7 +412,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               <span className="text-xs font-black text-amber-950">
                 {t("Icon")}
               </span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+              <Star className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
             </button>
             <input
               type="text"

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X, Sparkles, Check } from 'lucide-react';
+import { Search, X, Palette, Check } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { playChime } from '../../utils/audio';
 
@@ -31,7 +31,7 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'quiet', emoji: '🛋️', label: 'Quiet Break', category: 'calm', keywords: ['break', 'quiet', 'couch', 'relax', 'fort', 'chill', 'sofa'] },
   { id: 'bubbles', emoji: '🫧', label: 'Fidget Bubbles', category: 'calm', keywords: ['fidget', 'bubble', 'sensory', 'squishy', 'pop'] },
   { id: 'headphones', emoji: '🎧', label: 'Headphones', category: 'calm', keywords: ['headphone', 'audio', 'earmuffs', 'calm', 'decompress'] },
-  { id: 'sparkles', emoji: '✨', label: 'Mindful Calm', category: 'calm', keywords: ['sparkle', 'magic', 'mindful', 'reset', 'star'] },
+  { id: 'sparkles', emoji: '⭐', label: 'Mindful Calm', category: 'calm', keywords: ['sparkle', 'magic', 'mindful', 'reset', 'star'] },
   { id: 'breathe', emoji: '🌬️', label: 'Deep Breathing', category: 'calm', keywords: ['breathe', 'wind', 'air', 'inhale', 'exhale'] },
   { id: 'rest', emoji: '🌙', label: 'Evening Rest', category: 'calm', keywords: ['rest', 'night', 'moon', 'relax', 'bedtime'] },
   { id: 'bed', emoji: '🛏️', label: 'Bed & Nap', category: 'calm', keywords: ['sleep', 'nap', 'bed', 'blanket', 'lie down'] },
@@ -165,7 +165,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-5 text-amber-950 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-xl shrink-0">
-              <Sparkles className="w-5 h-5 text-amber-700" />
+              <Palette className="w-5 h-5 text-amber-700" />
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-black leading-tight">

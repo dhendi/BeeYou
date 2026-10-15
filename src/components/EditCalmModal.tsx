@@ -7,7 +7,7 @@ import {
   RotateCcw, 
   Wind, 
   Heart, 
-  Sparkles, 
+  Star, 
   Clock, 
   Volume2, 
   Sliders,

@@ -5,7 +5,7 @@ import {
   Plus, 
   Trash2, 
   Clock, 
-  Sparkles, 
+  Star, 
   Smile, 
   ArrowRight,
   ChevronUp,
@@ -91,7 +91,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
         setSteps(initialRoutine.steps.map(s => ({ ...s })));
       } else {
         setSteps([
-          { id: `step-${Date.now()}-1`, title: 'Get ready', instruction: 'Start calmly', durationMin: 5, completed: false, emoji: '✨' },
+          { id: `step-${Date.now()}-1`, title: 'Get ready', instruction: 'Start calmly', durationMin: 5, completed: false, emoji: '⭐' },
           { id: `step-${Date.now()}-2`, title: 'Complete first task', instruction: 'Finish current step', durationMin: 10, completed: false, emoji: '👍' },
         ]);
       }
@@ -296,7 +296,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
         completedThen: false,
       } : undefined,
       steps: steps.length > 0 ? steps : [
-        { id: `step-${Date.now()}`, title: 'First step', completed: false, emoji: '✨' }
+        { id: `step-${Date.now()}`, title: 'First step', completed: false, emoji: '⭐' }
       ],
     };
 
@@ -406,7 +406,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
           <div className="bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-base font-black text-indigo-950 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
+                <Star className="w-4 h-4 text-indigo-600" />
                 First / Then Visual Sequence
               </span>
               <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">

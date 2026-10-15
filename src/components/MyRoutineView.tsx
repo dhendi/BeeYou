@@ -7,7 +7,7 @@ import {
   AlertTriangle, 
   Clock, 
   Sun, 
-  Sparkles,
+  Star,
   BookOpen,
   Plus,
   Check,

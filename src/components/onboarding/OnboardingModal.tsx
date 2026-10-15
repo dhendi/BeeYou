@@ -7,7 +7,7 @@ import {
   Volume2, 
   Home, 
   Camera, 
-  Sparkles, 
+  Star, 
   Layers, 
   Lock, 
   Mic, 
@@ -565,7 +565,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       ))}
                       {builtSentence.length > 1 && (
                         <span className="ml-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 flex items-center gap-1 shrink-0 animate-in fade-in">
-                          <Sparkles className="w-3 h-3 text-emerald-600" />
+                          <Star className="w-3 h-3 text-emerald-600" />
                           <span>&quot;{autocorrectAacGrammar(builtSentence, activeLang)}&quot;</span>
                         </span>
                       )}
@@ -808,7 +808,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 {/* 2. Claymorphic Cutout Output */}
                 <div className="p-4 rounded-3xl bg-amber-50 border-3 border-amber-400 flex flex-col items-center text-center space-y-2 shadow-xs">
                   <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-amber-700 tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <Star className="w-3.5 h-3.5 text-amber-500" />
                     <span>2. AI Clay Cutout</span>
                   </div>
 

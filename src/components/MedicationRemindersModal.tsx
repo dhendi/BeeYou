@@ -9,7 +9,7 @@ import {
   Plus,
   Volume2,
   X,
-  Sparkles,
+  Star,
   Package,
   History,
   Calendar,

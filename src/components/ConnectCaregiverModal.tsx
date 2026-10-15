@@ -6,7 +6,7 @@ import {
   Check, 
   X, 
   Volume2, 
-  Sparkles, 
+  Star, 
   ShieldCheck, 
   Smile, 
   MessageSquare, 

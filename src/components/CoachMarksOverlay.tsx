@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, X, Check, ArrowUp, ArrowDown } from 'lucide-react';
+import { Star, ArrowRight, ArrowLeft, X, Check, ArrowUp, ArrowDown } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 export interface CoachMarkStep {

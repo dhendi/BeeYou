@@ -6,7 +6,6 @@ import {
   VolumeX, 
   Smartphone, 
   RotateCcw, 
-  Sparkles, 
   Sliders, 
   Radio, 
   ToggleLeft, 
@@ -513,7 +512,7 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
           onClick={handlePopAll}
           className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Star className="w-3.5 h-3.5" />
           <span>{t('Pop All')}</span>
         </button>
       </div>
@@ -678,7 +677,7 @@ const BubbleWrapToy: React.FC<BubbleWrapProps> = ({ soundEnabled, hapticEnabled 
           onClick={handlePopAll}
           className="flex-1 py-2 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/60 dark:hover:bg-sky-900/60 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Star className="w-3.5 h-3.5" />
           <span>{t('Pop All')}</span>
         </button>
       </div>
@@ -1389,7 +1388,7 @@ export const DigitalFidgetModal: React.FC = () => {
     { id: 'spinner' as const, label: 'Spinner', icon: RotateCw, desc: 'Physics RPM' },
     { id: 'toggles' as const, label: 'Switches', icon: ToggleLeft, desc: 'Relays & sliders' },
     { id: 'slime' as const, label: 'Slime', icon: Waves, desc: 'Squishy stress ball' },
-    { id: 'starlight' as const, label: 'Starlight', icon: Sparkles, desc: 'Calm galaxy flow' },
+    { id: 'starlight' as const, label: 'Starlight', icon: Star, desc: 'Calm galaxy flow' },
     { id: 'cube' as const, label: 'Worry Stone', icon: Box, desc: 'Fidget cube pad' },
   ];
 

@@ -5,7 +5,6 @@ import {
   ShieldAlert, 
   ShieldCheck, 
   Send, 
-  Sparkles, 
   Bell,
   Star,
   Smile
@@ -99,7 +98,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-xl bg-amber-400/30 border border-amber-400/50 flex items-center justify-center shadow-inner shrink-0 text-amber-700">
-              <Sparkles className="w-5 h-5" />
+              <Star className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
@@ -174,7 +173,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
                 title={t("Launch Interactive Coachmark Feature Tour")}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Star className="w-3.5 h-3.5" />
                 <span>{t("Feature Tour")}</span>
               </button>
             )}

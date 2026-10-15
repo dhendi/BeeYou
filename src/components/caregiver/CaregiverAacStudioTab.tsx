@@ -7,7 +7,7 @@ import { AACSymbolPickerModal } from '../AACSymbolPickerModal';
 import { optimizeImageFile } from '../../utils/mediaOptimizer';
 import { playChime, rateVoiceNaturalness, isVoiceFluid, speakText } from '../../utils/audio';
 import {
-  Sparkles,
+  Star,
   Search,
   Palette,
   Plus,
@@ -146,7 +146,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
               title={t("Tour this section")}
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <Star className="w-4 h-4 text-amber-600" />
               <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
@@ -197,7 +197,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
             className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
             title={t("Convert all AAC buttons to Mulberry symbols")}
           >
-            <Sparkles className="w-4 h-4 text-amber-950" />
+            <Star className="w-4 h-4 text-amber-950" />
             <span>{t("Apply Mulberry to All Buttons")}</span>
           </button>
 
@@ -228,7 +228,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
         <div className="flex items-center gap-1.5 flex-wrap">
           {[
             { id: 'fitzgerald', label: 'Clinical Colors (Default)', icon: Palette, title: 'Fitzgerald Key: yellow, green, orange, blue, purple' },
-            { id: 'theme', label: 'Theme Colors', icon: Sparkles, title: 'Matches the active theme palette' },
+            { id: 'theme', label: 'Theme Colors', icon: Star, title: 'Matches the active theme palette' },
             { id: 'high_contrast_white', label: 'White High-Contrast', icon: Eye, title: 'Pure white with bold borders' },
           ].map((m) => {
             const ModeIcon = m.icon;
@@ -449,7 +449,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                 }}
                 className="mt-3 w-full py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-1 cursor-pointer transition shadow-2xs"
               >
-                <Sparkles className="w-3 h-3" />
+                <Star className="w-3 h-3" />
                 <span>Import {pack.items.length} Words</span>
               </button>
             </div>
@@ -681,7 +681,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                         </span>
                         {isFluid && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 shrink-0 inline-flex items-center gap-1">
-                            <Sparkles className="w-2.5 h-2.5 text-emerald-700" />
+                            <Star className="w-2.5 h-2.5 text-emerald-700" />
                             <span>{t("Fluid Human Voice")}</span>
                           </span>
                         )}

@@ -3,7 +3,7 @@ import {
   Heart, 
   Send, 
   RefreshCw, 
-  Sparkles, 
+  Star, 
   Smile, 
   MessageSquare, 
   CheckCircle2, 

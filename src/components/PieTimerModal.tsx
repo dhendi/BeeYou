@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Play, Pause, RotateCcw, Plus, Minus, Volume2, VolumeX, Sparkles, Clock } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Plus, Minus, Volume2, VolumeX, Star, Clock } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 
@@ -560,7 +560,7 @@ export const PieTimerModal: React.FC = () => {
                           : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                       }`}
                     >
-                      {isSelected && <Sparkles className="w-3 h-3 text-amber-400 shrink-0" aria-hidden="true" />}
+                      {isSelected && <Star className="w-3 h-3 text-amber-400 shrink-0" aria-hidden="true" />}
                       <span>{p.minutes}m</span>
                     </button>
                   );

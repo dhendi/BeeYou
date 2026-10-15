@@ -11,7 +11,7 @@ import {
   Crown,
   Edit3,
   X,
-  Sparkles,
+  Star,
   Pill,
   Droplets,
   Wind,
@@ -164,7 +164,7 @@ export const CaregiverMedicationsTab: React.FC<CaregiverMedicationsTabProps> = (
               className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition-all border border-amber-300"
               title={t("Tour this section")}
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <Star className="w-4 h-4 text-amber-600" />
               <span>{t("How This Works (Tour)")}</span>
             </button>
           )}

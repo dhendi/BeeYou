@@ -11,7 +11,7 @@ import {
   Wind,
   Hand,
   Box,
-  Sparkles,
+  Star,
   ShieldAlert,
   HelpCircle
 } from 'lucide-react';
@@ -34,10 +34,10 @@ const getActionIcon = (label: string, idx: number) => {
   if (l.includes('breath') || l.includes('inhale')) return Wind;
   if (l.includes('wiggle') || l.includes('squeeze') || l.includes('finger')) return Hand;
   if (l.includes('box')) return Box;
-  if (l.includes('toolkit') || l.includes('quiet') || l.includes('nice') || l.includes('going')) return Sparkles;
+  if (l.includes('toolkit') || l.includes('quiet') || l.includes('nice') || l.includes('going')) return Star;
   if (l.includes('emergency') || l.includes('button')) return ShieldAlert;
   if (l.includes('help')) return HelpCircle;
-  return idx === 0 ? Sparkles : CheckCircle2;
+  return idx === 0 ? Star : CheckCircle2;
 };
 
 export const FivePointScaleModal: React.FC = () => {

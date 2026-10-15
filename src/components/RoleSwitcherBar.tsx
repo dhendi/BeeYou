@@ -11,7 +11,7 @@ import {
   ChevronUp, 
   Send, 
   Radio, 
-  Sparkles,
+  Star,
   ArrowRightLeft
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';

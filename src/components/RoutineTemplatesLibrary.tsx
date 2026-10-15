@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
+  Star, 
   Search, 
   Plus, 
   Check, 
@@ -35,7 +35,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(null);
 
   const categories = [
-    { id: 'all', label: 'All Templates', emoji: '✨' },
+    { id: 'all', label: 'All Templates', emoji: '⭐' },
     { id: 'morning', label: 'Morning', emoji: '🌅' },
     { id: 'school', label: 'School Day', emoji: '🏫' },
     { id: 'bedtime', label: 'Bedtime', emoji: '🌙' },
@@ -66,7 +66,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
         <div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
-              <Sparkles className="w-5 h-5" />
+              <Star className="w-5 h-5" />
             </div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900">
               Pre-Built Routine Templates Library

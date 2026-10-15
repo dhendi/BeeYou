@@ -1,6 +1,6 @@
 import React from 'react';
 import { t } from '../../services/translator';
-import { Sparkles, CheckCircle2, Lightbulb, Info } from 'lucide-react';
+import { Star, CheckCircle2, Lightbulb, Info } from 'lucide-react';
 import { CaregiverFeatureWalkthrough } from '../CaregiverFeatureWalkthrough';
 
 interface CaregiverGuideTabProps {
@@ -42,7 +42,7 @@ export const CaregiverGuideTab: React.FC<CaregiverGuideTabProps> = ({ onNavigate
             }}
             className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
           >
-            <Sparkles className="w-4 h-4" />
+            <Star className="w-4 h-4" />
             <span>{t("Launch In-Place Feature Tour")}</span>
           </button>
         </div>

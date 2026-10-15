@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Search, 
-  Sparkles, 
+  Star, 
   X, 
   Check, 
   Upload, 
@@ -322,7 +322,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                 className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Apply official Mulberry Symbols to all AAC buttons in BeeYou"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Star className="w-3.5 h-3.5" />
                 <span>{upgradedAll ? 'Symbols Upgraded ✓' : 'Upgrade All to Mulberry'}</span>
               </button>
             )}
@@ -487,7 +487,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-2 border-emerald-300 rounded-2xl">
                 <div className="flex items-center gap-2">
                   <span className="p-1 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-2xs">
-                    <Sparkles className="w-3 h-3" />
+                    <Star className="w-3 h-3" />
                     <span>Instant 1-Tap Add</span>
                   </span>
                   <span className="text-xs font-bold text-emerald-950">
@@ -565,7 +565,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                             className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer z-10 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-400"
                             title="Add directly to AAC board"
                           >
-                            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                            <Star className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
                         )}
 
@@ -708,7 +708,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Star className="w-3.5 h-3.5" />
                             <span>Install Pack Words</span>
                           </>
                         )}
@@ -828,7 +828,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
             <div className="p-4 sm:p-5 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Star className="w-3.5 h-3.5" />
                   <span>Selected Button Live Preview</span>
                 </span>
                 <span className="text-[10px] font-bold text-slate-400">

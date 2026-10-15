@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AACItem, AACCategory } from '../types';
-import { X, Heart, Sparkles, Volume2, Trash2, Upload, Image as ImageIcon, Camera, Link, RefreshCw } from 'lucide-react';
+import { X, Heart, Star, Volume2, Trash2, Upload, Image as ImageIcon, Camera, Link, RefreshCw } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 interface AACWordEditorModalProps {

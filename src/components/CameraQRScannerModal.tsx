@@ -8,7 +8,7 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   Flashlight,
-  Sparkles,
+  Star,
   ShieldAlert
 } from 'lucide-react';
 import jsQR from 'jsqr';

@@ -7,7 +7,7 @@ import {
   CheckCircle2, 
   Smile, 
   Home, 
-  Sparkles, 
+  Star, 
   AlertCircle, 
   ArrowRight,
   Volume2,

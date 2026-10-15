@@ -7,7 +7,7 @@ import {
   Wind, 
   Volume2, 
   Calendar, 
-  Sparkles, 
+  Star, 
   ArrowRight, 
   X, 
   Check, 
@@ -370,7 +370,7 @@ export const MorningBriefModal: React.FC = () => {
         {/* Modal Footer with Daily Check-In & Start Button */}
         <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
-            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+            <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
             <span>Daily Check-In</span>
           </div>
 

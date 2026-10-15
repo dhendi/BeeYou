@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { WORLD_ITEMS_CATALOG } from '../data/defaultData';
 import { AnimatedWorldItem } from './AnimatedWorldItem';
 import { 
-  Sparkles, 
+  Star, 
   ShoppingBag, 
   UserCheck, 
   Home, 
@@ -311,7 +311,7 @@ export const MyWorldView: React.FC = () => {
                 className="text-amber-800 hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>Add new furniture or pets</span>
-                <Sparkles className="w-3.5 h-3.5" />
+                <Star className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

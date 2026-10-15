@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Volume2, X, Send, Sparkles, Check } from 'lucide-react';
+import { Heart, Volume2, X, Send, Star, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
 import { sendCaregiverMessage, getPairingCode } from '../services/caregiverSync';

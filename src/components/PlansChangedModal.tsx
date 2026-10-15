@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   X, 
   ArrowRight, 
-  Sparkles, 
+  Star, 
   Heart, 
   CheckCircle2, 
   HelpCircle,
@@ -226,7 +226,7 @@ export const PlansChangedModal: React.FC = () => {
       newSteps:
         steps.length > 0
           ? steps
-          : [{ title: 'Quiet rest & relaxing at home', emoji: '✨', time: 'Now' }],
+          : [{ title: 'Quiet rest & relaxing at home', emoji: '⭐', time: 'Now' }],
       relevantPhrases:
         phrases.length > 0 ? phrases : ['What happens now?', 'I need a quiet break.'],
       targetRoutineId,
@@ -549,7 +549,7 @@ export const PlansChangedModal: React.FC = () => {
                         <span className="text-xs font-black text-amber-950">
                           {t('Icon')}
                         </span>
-                        <Sparkles className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+                        <Star className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
                       </button>
 
                       <input
@@ -612,7 +612,7 @@ export const PlansChangedModal: React.FC = () => {
                         }}
                         className="text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ml-auto transition-all cursor-pointer border border-amber-300 shadow-2xs"
                       >
-                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <Star className="w-3 h-3 text-amber-600" />
                         <span>{t('Full Icon Library')}</span>
                       </button>
                     </div>
@@ -744,7 +744,7 @@ export const PlansChangedModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-emerald-600" />
+                    <Star className="w-5 h-5 text-emerald-600" />
                     <h3 className="text-base sm:text-lg font-black text-slate-800">
                       {t('Our New Plan:')} {plansChanged.newPlanTitle}
                     </h3>

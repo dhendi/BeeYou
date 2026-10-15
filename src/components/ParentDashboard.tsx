@@ -31,7 +31,7 @@ import {
   User,
   Palette,
   Settings as SettingsIcon,
-  Sparkles,
+  Star,
   ChevronDown,
   Radio
 } from 'lucide-react';
@@ -502,7 +502,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'guide',
           label: 'Feature Tour (Guide)',
-          icon: Sparkles,
+          icon: Star,
           badge: 'Tour',
         },
       ],
@@ -562,7 +562,7 @@ export const ParentDashboard: React.FC = () => {
             className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100 text-xs font-black transition-all active:scale-95 cursor-pointer border border-amber-300/80 shadow-2xs"
             title={t('Launch Interactive In-Place Coachmark Tour')}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <Star className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span className="hidden sm:inline">{t('Feature Tour (Guide)')}</span>
             <span className="sm:hidden">{t('Guide')}</span>
           </button>

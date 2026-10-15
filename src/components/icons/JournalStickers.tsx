@@ -99,7 +99,7 @@ export const MusicSensorySticker = renderStickerPng('/assets/stickers/music_sens
 export const OutdoorSunSticker = renderStickerPng('/assets/stickers/outdoor_sun.png', 'Outdoor Sunshine');
 export const HomeworkStudySticker = renderStickerPng('/assets/stickers/homework_study.png', 'Homework Study');
 export const ArtCraftsSticker = renderStickerPng('/assets/stickers/art_crafts.png', 'Art Crafts');
-export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Sparkles');
+export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Star');
 export const RewardTrophySticker = renderStickerPng('/assets/stickers/reward_trophy.png', 'Reward Trophy');
 export const BathTimeSticker = renderStickerPng('/assets/stickers/bath_time.png', 'Bath Time');
 export const DinnerBowlSticker = renderStickerPng('/assets/stickers/dinner_bowl.png', 'Dinner Plate');
@@ -327,7 +327,7 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📓' || normTitle.includes('homework') || normTitle.includes('study')) return <HomeworkStudySticker className={className} size={size} />;
   // 🎨 Art / crafts / drawing
   if (normEmoji === '🎨' || normEmoji === '🖍️' || normTitle.includes('art') || normTitle.includes('paint') || normTitle.includes('craft')) return <ArtCraftsSticker className={className} size={size} />;
-  // ✨ Sparkles / calm mindfulness
+  // ✨ Star / calm mindfulness
   if (normEmoji === '✨' || normTitle.includes('sparkle') || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
   // 🏆 Trophy / reward / milestone
   if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;

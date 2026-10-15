@@ -11,7 +11,7 @@ import {
   RotateCcw, 
   ArrowRight, 
   Check, 
-  Sparkles,
+  Star,
   ChevronRight,
   Sliders,
   Shield,
@@ -228,7 +228,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
         <div className="shrink-0 px-4 sm:px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-amber-100 shadow-xs">
-              <Sparkles className="w-5 h-5" />
+              <Star className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -326,7 +326,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
                   onClick={handleSpotlightClick}
                   className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-xs flex items-center gap-1 border border-amber-300 shadow-2xs cursor-pointer active:scale-95 shrink-0"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <Star className="w-3.5 h-3.5 text-amber-600" />
                   <span>Show in App</span>
                 </button>
               )}

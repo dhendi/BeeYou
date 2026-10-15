@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { AppTheme, ThemePalette, WallpaperPattern } from '../types';
 import { 
-  Sparkles, 
+  Star, 
   Check, 
   Plus, 
   Palette, 
@@ -581,7 +581,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 { id: 'kid', label: 'Kids (3–11)', emoji: '🧒' },
                 { id: 'teen', label: 'Teens (12–17)', emoji: '🎧' },
                 { id: 'adult', label: 'Adults (18+)', emoji: '💼' },
-                { id: 'custom', label: 'Custom Creations', emoji: '✨' },
+                { id: 'custom', label: 'Custom Creations', emoji: '⭐' },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -792,7 +792,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                         onClick={() => setTheme(theme.id)}
                         className="w-full py-2.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-95"
                       >
-                        <Sparkles className="w-4 h-4" />
+                        <Star className="w-4 h-4" />
                         <span>Equip Theme</span>
                       </button>
                     )}
@@ -941,7 +941,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 { id: 'railroad', label: '🚂 Railroad' },
                 { id: 'ocean_waves', label: '🌊 Ocean Waves' },
                 { id: 'zen_botanical', label: '🌿 Zen Botanical' },
-                { id: 'sparkles', label: '✨ Sparkles' },
+                { id: 'sparkles', label: '✨ Star' },
                 { id: 'none', label: '🧼 Clean Solid' },
               ].map((wp) => (
                 <button
@@ -1072,7 +1072,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               onClick={handleSaveCustomTheme}
               className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-200 flex items-center gap-2 cursor-pointer transition-all active:scale-95"
             >
-              <Sparkles className="w-4 h-4" />
+              <Star className="w-4 h-4" />
               <span>Save & Equip Theme!</span>
             </button>
           </div>

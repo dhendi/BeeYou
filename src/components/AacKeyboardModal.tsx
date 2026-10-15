@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Volume2, Trash2, Delete, BookmarkPlus, Sparkles } from 'lucide-react';
+import { X, Volume2, Trash2, Delete, BookmarkPlus, Lightbulb } from 'lucide-react';
 import { playChime } from '../utils/audio';
 
 // High frequency AAC core vocabulary for predictive word completion
@@ -222,7 +222,7 @@ export const AacKeyboardModal: React.FC = () => {
       {/* Predictive / Suggestion Text Bar */}
       <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-2 scrollbar-thin bg-slate-800/80 border-y border-slate-700/80 shrink-0">
         <div className="flex items-center gap-1 text-[10px] font-black uppercase text-amber-400 shrink-0 pr-1">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
           <span className="hidden sm:inline">Predict:</span>
         </div>
         {suggestions.map((word, i) => (

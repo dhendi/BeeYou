@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { BillingCycle } from '../types';
 import { 
   X, 
-  Sparkles, 
+  Star, 
   Check, 
   ShieldCheck, 
   Heart, 
@@ -85,7 +85,7 @@ export const SubscriptionModal: React.FC = () => {
           {/* Trigger Reason Highlight */}
           {paywallTriggerReason && (
             <div className="mt-3.5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs shadow-xs">
-              <Sparkles className="w-4 h-4 shrink-0" />
+              <Star className="w-4 h-4 shrink-0" />
               <span>{paywallTriggerReason}</span>
             </div>
           )}
@@ -257,7 +257,7 @@ export const SubscriptionModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-slate-900 text-base flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <Star className="w-4 h-4 text-amber-500" />
                     <span>BeeYou Plus</span>
                   </h3>
                   <span className="text-xs font-bold text-amber-800">

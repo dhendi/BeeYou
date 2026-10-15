@@ -5,7 +5,6 @@ import {
   CheckCircle2, 
   Circle, 
   Plus, 
-  Sparkles, 
   Flame, 
   Volume2, 
   Trash2, 

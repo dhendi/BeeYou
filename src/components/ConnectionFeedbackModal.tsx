@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { 
   CheckCircle2, 
   XCircle, 
-  Sparkles, 
+  Star, 
   RefreshCw, 
   Camera, 
   Heart, 
@@ -176,7 +176,7 @@ export const ConnectionFeedbackModal: React.FC<ConnectionFeedbackModalProps> = (
                 onClick={onClose}
                 className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md cursor-pointer transition active:scale-95 flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-4 h-4 text-emerald-200" />
+                <Star className="w-4 h-4 text-emerald-200" />
                 <span>Great, Let's Go! 🎉</span>
               </button>
             ) : (

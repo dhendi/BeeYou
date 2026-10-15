@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   X, 
-  Sparkles, 
   Calendar, 
   Timer, 
   CheckCircle2, 

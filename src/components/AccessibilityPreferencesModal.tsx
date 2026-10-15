@@ -7,7 +7,7 @@ import {
   Sliders, 
   SlidersHorizontal,
   Check, 
-  Sparkles,
+  Star,
   VolumeX,
   Zap,
 } from 'lucide-react';

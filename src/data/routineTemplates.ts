@@ -436,7 +436,7 @@ export const PREBUILT_ROUTINE_TEMPLATES: RoutineTemplate[] = [
         title: 'Star projector & sound machine',
         instruction: 'Turn on ceiling star lights and soothing rain sounds.',
         durationMin: 3,
-        emoji: '✨',
+        emoji: '⭐',
         sensoryNote: 'Pink noise or rain sounds mask sudden house noises.',
         communicationShortcutPhrases: ['Make it quiet', 'Stars on please'],
       },

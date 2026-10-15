@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, ArrowRight } from 'lucide-react';
+import { X, Star, ArrowRight } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
 

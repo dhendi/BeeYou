@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, 
   HelpCircle, 
-  Sparkles, 
+  Star, 
   Calendar, 
   Timer, 
   ShieldAlert, 
@@ -101,7 +101,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
     icon: any;
     badge?: string;
   }> = [
-    { id: 'what_is_beeyou', title: 'What is BeeYou?', icon: Sparkles },
+    { id: 'what_is_beeyou', title: 'What is BeeYou?', icon: Star },
     { id: 'visual_walkthrough', title: 'Step-by-Step Feature Visuals & Screenshots', icon: BookOpen, badge: 'Visuals & Clicks' },
     { id: 'quick_start', title: '5-Step Quick Start Guide', icon: UserCheck, badge: 'Caregiver' },
     { id: 'who_is_it_for', title: 'Who is BeeYou for?', icon: Heart },

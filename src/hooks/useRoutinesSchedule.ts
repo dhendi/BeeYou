@@ -233,7 +233,7 @@ export function useRoutinesSchedule({ soundEffects }: UseRoutinesScheduleProps) 
       id: newRoutineId,
       title: `✨ New Plan: ${target.newPlanTitle || 'Updated Schedule'}`,
       category: 'special',
-      emoji: '✨',
+      emoji: '⭐',
       time: target.newSteps[0]?.time || 'Now',
       firstThen: {
         first: target.newSteps[0]?.title || 'First step',

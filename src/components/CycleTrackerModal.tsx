@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Calendar,
-  Sparkles,
+  Star,
   Heart,
   X,
   Plus,
@@ -89,7 +89,7 @@ export const CycleTrackerModal: React.FC = () => {
     { id: 'breast_tenderness', label: 'Breast Tenderness', emoji: '🌸' },
     { id: 'backache', label: 'Lower Backache', emoji: '⚡' },
     { id: 'nausea', label: 'Nausea / GI Upset', emoji: '🤢' },
-    { id: 'acne', label: 'Skin Breakouts', emoji: '✨' },
+    { id: 'acne', label: 'Skin Breakouts', emoji: '⭐' },
     { id: 'joint_muscle_pain', label: 'Joint & Muscle Aches', emoji: '🦴' },
   ];
 
@@ -207,7 +207,7 @@ export const CycleTrackerModal: React.FC = () => {
             </p>
 
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-white/80 px-2.5 py-1 rounded-xl border border-purple-200 w-fit mt-1">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+              <Star className="w-3.5 h-3.5 text-purple-600 shrink-0" />
               <span>Sensory tip: {cycleInfo.sensoryInsight}</span>
             </div>
           </div>

@@ -9,7 +9,7 @@ import {
   stopSpeaking as haltSpeaking,
   playChime
 } from '../../utils/audio';
-import { Volume2, Sparkles, Mic, Check, Lightbulb } from 'lucide-react';
+import { Volume2, Star, Mic, Check, Lightbulb } from 'lucide-react';
 
 interface CaregiverVoiceTabProps {
   onShowNotification: (msg: string) => void;
@@ -71,7 +71,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
             }}
             className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Star className="w-3.5 h-3.5" />
             <span>{t("Auto-Pick Most Natural Voice")}</span>
           </button>
         </div>
@@ -242,7 +242,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                   : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Star className="w-3.5 h-3.5" />
               <span>{t("Natural / Fluid Only")}</span>
             </button>
           </div>
@@ -287,7 +287,7 @@ export const CaregiverVoiceTab: React.FC<CaregiverVoiceTabProps> = ({
                         </span>
                         {isFluid ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-emerald-600" />
+                            <Star className="w-3 h-3 text-emerald-600" />
                             <span>{t("Fluid Human Voice")}</span>
                           </span>
                         ) : (

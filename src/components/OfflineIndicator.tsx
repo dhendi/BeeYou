@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WifiOff, Database, CheckCircle2, ShieldCheck, RefreshCw, X, Sparkles, Volume2 } from 'lucide-react';
+import { WifiOff, Database, CheckCircle2, ShieldCheck, RefreshCw, X, Star, Volume2 } from 'lucide-react';
 import { verifyOfflineIntegrity, indexOfflineData } from '../utils/offlineStorage';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
@@ -129,7 +129,7 @@ export const OfflineIndicator: React.FC = () => {
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-slate-600 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <Star className="w-3.5 h-3.5 text-amber-500" />
                     AAC Speech Grid Tiles:
                   </span>
                   <span className="font-black text-slate-800 bg-white px-2 py-0.5 rounded-md border border-slate-200">

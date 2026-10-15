@@ -13,7 +13,7 @@ import {
   Heart, 
   User, 
   X, 
-  Sparkles, 
+  Star, 
   CheckCircle2, 
   Calendar, 
   ShieldAlert, 
@@ -469,7 +469,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                       </div>
                       {selectedPersona === 'kid' && (
                         <span className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
@@ -591,7 +591,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs font-medium text-amber-950 dark:text-amber-200 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <Star className="w-4 h-4 text-amber-600 shrink-0" />
                   <span><strong>Flexible Choice:</strong> You can switch personas, change age presets, or toggle individual features at any time in Settings.</span>
                 </div>
               </div>
@@ -623,7 +623,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            <Star className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                           </div>
                           <h4 className="font-black text-sm text-amber-950 dark:text-amber-200">Visual Steps & Stickers</h4>
                         </div>
@@ -1107,7 +1107,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     </div>
                   </div>
                   <span className="text-xs font-bold text-indigo-600 group-hover:underline flex items-center gap-1">
-                    Use Demo <Sparkles className="w-3.5 h-3.5" />
+                    Use Demo <Star className="w-3.5 h-3.5" />
                   </span>
                 </button>
 
@@ -1172,7 +1172,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   </div>
 
                   <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <Star className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <span><strong>How connectivity works:</strong> When you complete setup, you will immediately get a popup to connect to your child's device via camera QR scan or sync code (<code>{getDeterministicFamilyCode(caregiverEmail || 'demo@beeyou.app')}</code>).</span>
                   </div>
                 </div>
@@ -1242,7 +1242,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-amber-950 dark:text-amber-200 text-xs font-medium flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <Star className="w-4 h-4 text-amber-600 shrink-0" />
                   <span><strong>You're ready!</strong> Tap below to launch your tailored BeeYou space.</span>
                 </div>
               </div>
@@ -1293,7 +1293,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       : 'bg-emerald-500 hover:bg-emerald-600 animate-pulse'
                   }`}
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Star className="w-4 h-4" />
                   <span>{isCaregiver ? 'Register & Link Device' : 'Start Using BeeYou'}</span>
                 </button>
               )}

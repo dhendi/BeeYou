@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   X, 
-  Sparkles, 
+  Star, 
   MessageSquare, 
   Volume2, 
   Heart, 
@@ -113,7 +113,7 @@ export const AACGuideModal: React.FC<AACGuideModalProps> = ({
             { id: 'overview', label: '⭐ AAC Basics', emoji: '🗣️' },
             { id: 'favorites', label: '💬 Favorite Sentences', emoji: '❤️' },
             { id: 'sentence_bar', label: '📝 Sentence Strip', emoji: '🔊' },
-            { id: 'custom_photos', label: '📷 Custom Words & Photos', emoji: '✨' },
+            { id: 'custom_photos', label: '📷 Custom Words & Photos', emoji: '⭐' },
             { id: 'interactive_demo', label: '🎮 Try Live Demo', emoji: '▶️' },
           ].map((tab) => (
             <button

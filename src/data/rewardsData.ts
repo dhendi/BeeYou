@@ -191,7 +191,7 @@ export const PROFILE_STICKERS: ProfileSticker[] = [
     id: 'st-wand',
     name: 'Magic Wand',
     emoji: '🪄',
-    description: 'Sparkles and wonder wherever you go.',
+    description: 'Star and wonder wherever you go.',
     badgeIdRequired: 'badge-hands',
   },
   {

@@ -58,7 +58,7 @@ import {
   Trash2, 
   Delete, 
   BookmarkPlus, 
-  Sparkles, 
+  Lightbulb, 
   Layers, 
   SlidersHorizontal,
   Search,
@@ -116,7 +116,7 @@ const QUICK_CHAT_GROUPS = [
       { text: 'Hello!', emoji: '👋' },
       { text: 'Good morning!', emoji: '☀️' },
       { text: 'Goodbye!', emoji: '👋' },
-      { text: 'See you later!', emoji: '✨' },
+      { text: 'See you later!', emoji: '⭐' },
       { text: 'How are you?', emoji: '😊' },
       { text: 'Have a great day!', emoji: '🌟' },
     ],
@@ -868,7 +868,7 @@ export const AACView: React.FC = () => {
                     ))}
                     {sentence.length > 1 && (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-950 font-black text-xs shrink-0 animate-in fade-in select-none">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                         <span>&quot;{autocorrectAacGrammar(sentence, settings.language)}&quot;</span>
                       </div>
                     )}
@@ -1730,7 +1730,7 @@ export const AACView: React.FC = () => {
                     className="absolute top-1 left-1 z-20 p-1 rounded-md bg-white/90 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs text-[9px] font-black flex items-center gap-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
                     title="Grammar forms (+ed, -ing, plurals)"
                   >
-                    <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                    <Lightbulb className="w-2.5 h-2.5 text-amber-600" />
                   </button>
                 )}
 

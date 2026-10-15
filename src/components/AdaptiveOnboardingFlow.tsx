@@ -3,7 +3,7 @@ import {
   User, 
   Users, 
   QrCode, 
-  Sparkles, 
+  Star, 
   Check, 
   CheckCircle2, 
   ArrowRight, 
@@ -873,7 +873,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
-                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                       <h4 className="font-black text-amber-950 dark:text-amber-100 text-xs sm:text-sm">
                         {t('BeeYou Plus (Trial)')}
                       </h4>

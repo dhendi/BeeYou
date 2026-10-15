@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, 
-  Sparkles, 
+  Star, 
   Heart, 
   Wind, 
   Timer, 
@@ -270,7 +270,7 @@ export const ToolsHubModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 py-4 bg-[#FCF9F2] border-b-2 border-[#E0D8CB]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-center text-[#2D241E] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]">
-              <Sparkles className="w-5 h-5 text-amber-700" aria-hidden="true" />
+              <SlidersHorizontal className="w-5 h-5 text-amber-700" aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#2D241E] leading-tight">

@@ -4,7 +4,6 @@ import { REWARD_BADGES, PROFILE_STICKERS, CHARACTER_TITLES, ROUTINE_STICKER_REWA
 import { RewardBadge, ProfileSticker } from '../types';
 import { 
   Trophy, 
-  Sparkles, 
   Star, 
   Check, 
   Lock, 
@@ -149,7 +148,7 @@ export const Rewards: React.FC = () => {
                   Achievement Showcase
                 </span>
                 <span className="text-xs font-bold text-[#A76318] flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 fill-[#F5B865] text-[#A76318]" />
+                  <Star className="w-3.5 h-3.5 fill-[#F5B865] text-[#A76318]" />
                   {earnedCount} of {totalBadges} Badges
                 </span>
               </div>
@@ -544,7 +543,7 @@ export const Rewards: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-black text-sm text-slate-800 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
                   <span>Routine Stickers to Unlock in My Day</span>
                 </h4>
                 <p className="text-xs text-slate-500 font-medium">
@@ -585,7 +584,7 @@ export const Rewards: React.FC = () => {
           <div className="space-y-3">
             <div className="border-b border-slate-100 pb-2">
               <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+                <Star className="w-4 h-4 text-indigo-600" aria-hidden="true" />
                 <span>General Flair & Collectible Stickers</span>
               </h4>
               <p className="text-xs text-slate-500 font-medium">
@@ -707,7 +706,7 @@ export const Rewards: React.FC = () => {
           <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-sky-600 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
             {/* Background shimmer */}
             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-              <Sparkles className="w-48 h-48" />
+              <Star className="w-48 h-48" />
             </div>
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">

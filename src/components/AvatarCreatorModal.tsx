@@ -5,7 +5,7 @@ import { ChildAvatar } from './ChildAvatar';
 import { playChime, speakText } from '../utils/audio';
 import { 
   X,
-  Sparkles, 
+  Star, 
   Dices, 
   Volume2, 
   Check, 
@@ -867,7 +867,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {[
-                        { id: 'stars', label: 'Golden Sparkles', icon: '✨', desc: 'Twinkling golden magic stars' },
+                        { id: 'stars', label: 'Golden Star', icon: '✨', desc: 'Twinkling golden magic stars' },
                         { id: 'bubbles', label: 'Ocean Bubbles', icon: '🫧', desc: 'Floating translucent bubbles' },
                         { id: 'rainbow', label: 'Rainbow Arc', icon: '🌈', desc: 'Gentle pastel rainbow arch' },
                         { id: 'space', label: 'Cosmic Galaxy', icon: '🪐', desc: 'Orbit ring and planetary dust' },
@@ -952,7 +952,7 @@ export const AvatarCreatorModal: React.FC<AvatarCreatorModalProps> = ({ isOpen, 
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 fill-white" />
+                    <Star className="w-4 h-4 fill-white" />
                     <span>Save & Apply Avatar</span>
                   </>
                 )}

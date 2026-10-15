@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Sparkles, 
+  Star, 
   HelpCircle, 
   CheckCircle2, 
   GraduationCap, 

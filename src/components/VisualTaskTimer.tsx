@@ -5,7 +5,7 @@ import {
   RotateCcw, 
   Volume2, 
   VolumeX, 
-  Sparkles, 
+  Star, 
   CheckCircle2, 
   Clock, 
   Plus, 

@@ -10,7 +10,7 @@ import {
   Upload, 
   Check,
   Lightbulb,
-  Sparkles,
+  Star,
   Smile,
   Headphones,
   Briefcase,
@@ -124,7 +124,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             }}
             className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Star className="w-3.5 h-3.5" />
             <span>{t("Relaunch Onboarding Setup Wizard")}</span>
           </button>
         </div>
@@ -213,7 +213,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', icon: Timer, desc: 'Activity countdown ring for routines' },
             { key: 'firstThenSchedules', label: 'First / Then Routine Cards', icon: ListOrdered, desc: 'Clear step-by-step guidance' },
             { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', icon: Award, desc: 'Achievement celebration & badges' },
-            { key: 'mascotCompanion', label: 'Playful Mascot Companion', icon: Sparkles, desc: 'Rex/Hopper cheer greetings & banner' },
+            { key: 'mascotCompanion', label: 'Playful Mascot Companion', icon: Star, desc: 'Rex/Hopper cheer greetings & banner' },
             { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', icon: Moon, desc: 'Evening reflection & therapist chart' },
             { key: 'medicationReminders', label: 'Medication & Health Reminders', icon: Pill, desc: 'Schedule doses, inventory & refill alerts' },
             { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', icon: BookOpen, desc: 'Nuanced emotions, sensory load & coping strategies' },
@@ -341,7 +341,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
+                  <Star className="w-5 h-5 text-indigo-600" />
                   {settings.aacButtonColorMode === 'theme' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                       {t("Active")}

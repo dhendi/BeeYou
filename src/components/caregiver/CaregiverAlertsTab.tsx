@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft, Sparkles, Radio } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Star, Radio } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
@@ -98,7 +98,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
               title={t('Tour this section')}
             >
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <Star className="w-4 h-4 text-amber-600" />
               <span>{t('How This Works (Tour)')}</span>
             </button>
           )}

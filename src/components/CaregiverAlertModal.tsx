@@ -14,7 +14,7 @@ import {
   Clock,
   Phone,
   MessageCircle,
-  Sparkles,
+  Star,
   Loader2,
   Check,
   Smartphone,

@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { 
   CheckCircle2, 
   Circle, 
-  Sparkles, 
+  Star, 
   Timer, 
   Volume2, 
   ArrowLeft, 

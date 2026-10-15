@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   BookOpen,
-  Sparkles,
+  Star,
   Heart,
   X,
   Plus,
@@ -69,7 +69,7 @@ export const MoodJournalModal: React.FC = () => {
     // Positive / Grounded
     { id: 'peaceful', label: 'Peaceful', emoji: '😌', category: 'positive', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },
     { id: 'content', label: 'Content', emoji: '😊', category: 'positive', bg: 'bg-teal-50 border-teal-200', text: 'text-teal-800' },
-    { id: 'inspired', label: 'Inspired', emoji: '✨', category: 'positive', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
+    { id: 'inspired', label: 'Inspired', emoji: '⭐', category: 'positive', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
     { id: 'energized', label: 'Energized', emoji: '⚡', category: 'positive', bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-800' },
     { id: 'confident', label: 'Confident', emoji: '🦁', category: 'positive', bg: 'bg-orange-50 border-orange-200', text: 'text-orange-800' },
     { id: 'grateful', label: 'Grateful', emoji: '🙏', category: 'positive', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },
@@ -489,7 +489,7 @@ export const MoodJournalModal: React.FC = () => {
                   type="submit"
                   className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-sm shadow-md shadow-indigo-200 cursor-pointer transition-all flex items-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4 fill-indigo-200" />
+                  <Star className="w-4 h-4 fill-indigo-200" />
                   <span>Save Journal Entry</span>
                 </button>
               </div>
@@ -599,7 +599,7 @@ export const MoodJournalModal: React.FC = () => {
                       {/* Gratitude / Win */}
                       {entry.gratitudeOrWin && (
                         <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                          <Sparkles className="w-3.5 h-3.5 text-emerald-600 fill-emerald-300 shrink-0" />
+                          <Star className="w-3.5 h-3.5 text-emerald-600 fill-emerald-300 shrink-0" />
                           <span>Win / Anchor: {entry.gratitudeOrWin}</span>
                         </div>
                       )}
@@ -642,7 +642,7 @@ export const MoodJournalModal: React.FC = () => {
             <div className="space-y-4">
               <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200">
                 <h4 className="font-black text-sm text-indigo-950 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-600" />
+                  <Star className="w-4 h-4 text-indigo-600" />
                   <span>Neurodivergent Pattern Insights</span>
                 </h4>
                 <p className="text-xs text-indigo-800 mt-1">

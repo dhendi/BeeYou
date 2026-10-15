@@ -13,7 +13,7 @@ import {
   Check, 
   MessageSquare, 
   ShieldAlert, 
-  Sparkles,
+  Star,
   Sliders
 } from 'lucide-react';
 import { HelpAlertPreset, CaregiverResponsePreset } from '../types';

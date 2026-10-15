@@ -7,7 +7,7 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   Volume2, 
-  Sparkles, 
+  Star, 
   Ear, 
   Eye, 
   Users, 
@@ -346,7 +346,7 @@ export const AdventuresView: React.FC = () => {
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-600" />
+                <Star className="w-5 h-5 text-amber-600" />
                 <span>{t('Sensory Guide for')} {t(selectedAdventure.title)}</span>
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">

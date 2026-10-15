@@ -6,7 +6,7 @@ import {
   ChevronDown, 
   Check, 
   RotateCcw, 
-  Sparkles, 
+  Star, 
   SlidersHorizontal,
   Eye,
   EyeOff
@@ -136,7 +136,7 @@ export const DashboardCustomizerModal: React.FC = () => {
         {/* Category Filters */}
         <div className="flex items-center gap-1.5 px-4 py-2 border-b border-[#E0D8CB] overflow-x-auto bg-[#FCF9F2]">
           {[
-            { id: 'all' as const, label: 'All', emoji: '✨' },
+            { id: 'all' as const, label: 'All', emoji: '' },
             { id: 'core' as const, label: 'Core & Schedule', emoji: '📅' },
             { id: 'sensory' as const, label: 'Sensory & Regulation', emoji: '🫧' },
             { id: 'wellness' as const, label: 'Health & Energy', emoji: '🥄' },
@@ -154,7 +154,7 @@ export const DashboardCustomizerModal: React.FC = () => {
                   : 'bg-[#F5EFE6] hover:bg-white text-[#6B5E52] border border-[#E0D8CB]'
               }`}
             >
-              <span>{cat.emoji}</span>
+              {cat.emoji ? <span>{cat.emoji}</span> : null}
               <span>{cat.label}</span>
             </button>
           ))}
