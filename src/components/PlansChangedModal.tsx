@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { IconLibraryModal } from './common/IconLibraryModal';
 import { t } from '../services/translator';
 
 const REASON_PRESETS = [
@@ -95,6 +96,8 @@ export const PlansChangedModal: React.FC = () => {
   const [newStepTitle, setNewStepTitle] = useState<string>('');
   const [newStepEmoji, setNewStepEmoji] = useState<string>('✨');
   const [newStepTime, setNewStepTime] = useState<string>('');
+  const [showIconLibrary, setShowIconLibrary] = useState<boolean>(false);
+  const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);
 
   // Input for adding a phrase
   const [newPhraseInput, setNewPhraseInput] = useState<string>('');
@@ -473,17 +476,18 @@ export const PlansChangedModal: React.FC = () => {
                           {idx + 1}
                         </span>
 
-                        <input
-                          type="text"
-                          value={step.emoji}
-                          onChange={(e) => {
-                            const updated = [...steps];
-                            updated[idx].emoji = e.target.value;
-                            setSteps(updated);
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPickingForStepIndex(idx);
+                            setShowIconLibrary(true);
+                            playChime('tap');
                           }}
-                          className="w-10 h-8 text-center rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold shrink-0"
-                          title={t('Step Icon')}
-                        />
+                          className="w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 flex items-center justify-center shrink-0 border border-amber-200 transition-all cursor-pointer group"
+                          title={t('Click to pick icon from library')}
+                        >
+                          <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-7 h-7 object-contain group-hover:scale-105 transition-transform" />
+                        </button>
 
                         <input
                           type="text"
@@ -528,13 +532,26 @@ export const PlansChangedModal: React.FC = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <input
-                        type="text"
-                        value={newStepEmoji}
-                        onChange={(e) => setNewStepEmoji(e.target.value)}
-                        placeholder="Icon"
-                        className="w-12 px-2 py-2 text-center rounded-xl bg-slate-50 border border-slate-300 text-base font-bold shrink-0"
-                      />
+                      {/* Interactive Icon Library Picker Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPickingForStepIndex(null);
+                          setShowIconLibrary(true);
+                          playChime('tap');
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border-2 border-amber-300 hover:border-amber-400 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs group shrink-0 active:scale-95"
+                        title={t('Pick an icon from our icon library')}
+                      >
+                        <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                          <RoutineStickerIcon emoji={newStepEmoji || '✨'} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+                        </div>
+                        <span className="text-xs font-black text-amber-950">
+                          {t('Icon')}
+                        </span>
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+                      </button>
+
                       <input
                         type="text"
                         value={newStepTitle}
@@ -584,6 +601,20 @@ export const PlansChangedModal: React.FC = () => {
                           {em}
                         </button>
                       ))}
+
+                      {/* Browse full Icon Library button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPickingForStepIndex(null);
+                          setShowIconLibrary(true);
+                          playChime('tap');
+                        }}
+                        className="text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ml-auto transition-all cursor-pointer border border-amber-300 shadow-2xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <span>{t('Full Icon Library')}</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -845,6 +876,25 @@ export const PlansChangedModal: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Full Icon Library Modal */}
+      <IconLibraryModal
+        isOpen={showIconLibrary}
+        onClose={() => {
+          setShowIconLibrary(false);
+          setPickingForStepIndex(null);
+        }}
+        selectedEmoji={pickingForStepIndex !== null ? steps[pickingForStepIndex]?.emoji : newStepEmoji}
+        onSelectIcon={(emoji, _label) => {
+          if (pickingForStepIndex !== null) {
+            const updated = [...steps];
+            updated[pickingForStepIndex] = { ...updated[pickingForStepIndex], emoji };
+            setSteps(updated);
+          } else {
+            setNewStepEmoji(emoji);
+          }
+        }}
+      />
     </div>
   );
 };

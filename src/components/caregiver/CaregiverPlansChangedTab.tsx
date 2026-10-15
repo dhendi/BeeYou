@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { Eye, Save, Trash2, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
+import { IconLibraryModal } from '../common/IconLibraryModal';
 
 interface CaregiverPlansChangedTabProps {
   onShowNotification: (msg: string) => void;
@@ -34,9 +35,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [pcSteps, setPcSteps] = useState(plansChanged.newSteps);
   const [pcPhrases, setPcPhrases] = useState(plansChanged.relevantPhrases);
   const [newStepTitle, setNewStepTitle] = useState('');
-  const [newStepEmoji, setNewStepEmoji] = useState('');
+  const [newStepEmoji, setNewStepEmoji] = useState('✨');
   const [newStepTime, setNewStepTime] = useState('');
   const [newPhraseInput, setNewPhraseInput] = useState('');
+  const [showIconLibrary, setShowIconLibrary] = useState(false);
+  const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);
 
   const handleSavePlansChanged = () => {
     let targetRoutineId: string | undefined = undefined;
@@ -353,9 +356,18 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
-                <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                  <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 object-contain" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPickingForStepIndex(idx);
+                    setShowIconLibrary(true);
+                    playChime('tap');
+                  }}
+                  className="w-9 h-9 rounded-xl hover:bg-amber-100/80 flex items-center justify-center shrink-0 border border-transparent hover:border-amber-300 transition-all cursor-pointer group"
+                  title={t("Click to pick icon from library")}
+                >
+                  <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 object-contain group-hover:scale-105 transition-transform" />
+                </button>
                 <span className="flex-1 font-bold text-xs sm:text-sm text-slate-800">
                   {step.title}
                 </span>
@@ -381,34 +393,47 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               value={newStepTitle}
               onChange={(e) => setNewStepTitle(e.target.value)}
               placeholder={t("Step name (e.g. Draw pictures at home)")}
-              className="flex-1 min-w-[200px] px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold"
+              className="flex-1 min-w-[200px] px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
-            <input
-              type="text"
-              value={newStepEmoji}
-              onChange={(e) => setNewStepEmoji(e.target.value)}
-              placeholder={t("Icon")}
-              className="w-16 px-2 py-2 text-center rounded-xl bg-white border border-slate-300 text-sm"
-            />
+            {/* Interactive Icon Library Picker Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setPickingForStepIndex(null);
+                setShowIconLibrary(true);
+                playChime('tap');
+              }}
+              className="px-3 py-2 rounded-xl bg-white hover:bg-amber-50 border-2 border-amber-300 hover:border-amber-400 flex items-center gap-2 transition-all cursor-pointer shadow-2xs group shrink-0 active:scale-95"
+              title={t("Pick an icon from our icon library")}
+            >
+              <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                <RoutineStickerIcon emoji={newStepEmoji || '✨'} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+              </div>
+              <span className="text-xs font-black text-amber-950">
+                {t("Icon")}
+              </span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+            </button>
             <input
               type="text"
               value={newStepTime}
               onChange={(e) => setNewStepTime(e.target.value)}
               placeholder={t("Time (optional)")}
-              className="w-28 px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold"
+              className="w-28 px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
             <button
               onClick={() => {
                 if (newStepTitle.trim()) {
                   setPcSteps([
                     ...pcSteps,
-                    { title: newStepTitle.trim(), emoji: newStepEmoji || '', time: newStepTime.trim() || undefined },
+                    { title: newStepTitle.trim(), emoji: newStepEmoji || '✨', time: newStepTime.trim() || undefined },
                   ]);
                   setNewStepTitle('');
                   setNewStepTime('');
+                  setNewStepEmoji('✨');
                 }
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{t("Add Step")}</span>
@@ -483,6 +508,25 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
           </button>
         </div>
       </div>
+
+      {/* Icon Library Modal */}
+      <IconLibraryModal
+        isOpen={showIconLibrary}
+        onClose={() => {
+          setShowIconLibrary(false);
+          setPickingForStepIndex(null);
+        }}
+        selectedEmoji={pickingForStepIndex !== null ? pcSteps[pickingForStepIndex]?.emoji : newStepEmoji}
+        onSelectIcon={(emoji, _label) => {
+          if (pickingForStepIndex !== null) {
+            const updated = [...pcSteps];
+            updated[pickingForStepIndex] = { ...updated[pickingForStepIndex], emoji };
+            setPcSteps(updated);
+          } else {
+            setNewStepEmoji(emoji);
+          }
+        }}
+      />
     </div>
   );
 };
