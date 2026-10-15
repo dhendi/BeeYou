@@ -14,17 +14,17 @@ interface AACWordEditorModalProps {
   existingItems?: AACItem[];
 }
 
-const CATEGORY_OPTIONS: { id: AACCategory; label: string; emoji: string }[] = [
-  { id: 'favorites', label: 'Favorites', emoji: '❤️' },
-  { id: 'core', label: 'Core Words', emoji: '⭐' },
-  { id: 'food', label: 'Food', emoji: '🍕' },
-  { id: 'drinks', label: 'Drinks', emoji: '🧃' },
-  { id: 'activities', label: 'Play & Fun', emoji: '🎮' },
-  { id: 'places', label: 'Places', emoji: '🏠' },
-  { id: 'people', label: 'People', emoji: '👥' },
-  { id: 'feelings', label: 'Feelings', emoji: '💛' },
-  { id: 'sensory', label: 'Sensory', emoji: '🎧' },
-  { id: 'personal', label: 'Personal', emoji: '🪥' },
+const CATEGORY_OPTIONS: { id: AACCategory; label: string; iconSrc: string }[] = [
+  { id: 'favorites', label: 'Favorites', iconSrc: '/assets/stickers/aac_favorites.png' },
+  { id: 'core', label: 'Core Words', iconSrc: '/assets/stickers/aac_core.png' },
+  { id: 'food', label: 'Food', iconSrc: '/assets/stickers/aac_food.png' },
+  { id: 'drinks', label: 'Drinks', iconSrc: '/assets/stickers/aac_drinks.png' },
+  { id: 'activities', label: 'Play & Fun', iconSrc: '/assets/stickers/aac_activities.png' },
+  { id: 'places', label: 'Places', iconSrc: '/assets/stickers/aac_places.png' },
+  { id: 'people', label: 'People', iconSrc: '/assets/stickers/aac_people.png' },
+  { id: 'feelings', label: 'Feelings', iconSrc: '/assets/stickers/aac_feelings.png' },
+  { id: 'sensory', label: 'Sensory', iconSrc: '/assets/stickers/aac_sensory.png' },
+  { id: 'personal', label: 'Personal', iconSrc: '/assets/stickers/toothbrush.png' },
 ];
 
 const COLOR_TYPE_OPTIONS: { id: AACItem['colorType']; label: string; desc: string; bg: string }[] = [
@@ -424,7 +424,7 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
                       : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
-                  <span>{cat.emoji}</span>
+                  <img src={cat.iconSrc} alt="" className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
                   <span className="truncate">{cat.label}</span>
                 </button>
               ))}

@@ -30,26 +30,26 @@ const AAC_COACH_STEPS: CoachMarkStep[] = [
   {
     targetSelector: '[data-tour="aac-categories"]',
     title: '1. Vocabulary Categories',
-    instruction: 'Tap category folders like Food 🍕, Drinks 🧃, Play 🎮, or Favorite Sentences 💬 to browse words.',
-    mascotHint: 'Click any folder above or tap Next! 👇',
+    instruction: 'Tap category folders like Food, Drinks, Play, or Favorite Sentences to browse words.',
+    mascotHint: 'Click any folder above or tap Next!',
   },
   {
     targetSelector: '[data-tour="aac-sentence-strip"]',
     title: '2. Sentence Builder Strip',
     instruction: 'Words you tap appear here. Tap SPEAK to hear your entire sentence spoken aloud with high quality voice output!',
-    mascotHint: 'Tap SPEAK to talk with your voice! 🔊',
+    mascotHint: 'Tap SPEAK to talk with your voice!',
   },
   {
     targetSelector: '[data-tour="aac-quickchat"]',
     title: '3. Quick Chat Expressions',
     instruction: 'Tap Quick Chat to instantly say common phrases (Yes, No, Help, Thank You) without clearing your sentence.',
-    mascotHint: 'Click for instant everyday phrases! 💬',
+    mascotHint: 'Click for instant everyday phrases!',
   },
   {
     targetSelector: '[data-tour="aac-symbols"]',
     title: '4. Clinical Symbols Studio',
     instruction: 'Tap Symbols to search and add thousands of research-backed AAC symbols from the Mulberry Library.',
-    mascotHint: 'Add new words anytime! 🌟',
+    mascotHint: 'Add new words anytime!',
   },
 ];
 import { 
@@ -93,19 +93,19 @@ const FOLDER_TILES: Array<{
   id: string;
   category: AACCategory;
   label: string;
-  emoji: string;
+  stickerSrc: string;
   symbolId: string;
   arasaacId?: number;
   colorType: 'noun' | 'subject' | 'social';
   description: string;
 }> = [
-  { id: 'folder-food', category: 'food', label: 'Food', emoji: '🍕', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
-  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', emoji: '🧃', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
-  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', emoji: '🎮', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
-  { id: 'folder-places', category: 'places', label: 'Places', emoji: '🏠', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
-  { id: 'folder-people', category: 'people', label: 'People', emoji: '👥', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
-  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', emoji: '💛', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
-  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', emoji: '🎧', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
+  { id: 'folder-food', category: 'food', label: 'Food', stickerSrc: '/assets/stickers/aac_food.png', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
+  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', stickerSrc: '/assets/stickers/aac_drinks.png', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
+  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', stickerSrc: '/assets/stickers/aac_activities.png', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
+  { id: 'folder-places', category: 'places', label: 'Places', stickerSrc: '/assets/stickers/aac_places.png', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
+  { id: 'folder-people', category: 'people', label: 'People', stickerSrc: '/assets/stickers/aac_people.png', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
+  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', stickerSrc: '/assets/stickers/aac_feelings.png', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
+  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', stickerSrc: '/assets/stickers/aac_sensory.png', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
 ];
 
 const QUICK_CHAT_GROUPS = [
@@ -295,18 +295,18 @@ export const AACView: React.FC = () => {
   const isDentistDay = true;
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
-  const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; emoji: string }[] = [
-    { id: 'core', label: t('Core Board'), emoji: '⭐' },
-    { id: 'favorite_sentences', label: t('Favorite Sentences'), emoji: '💬' },
-    { id: 'favorites', label: t('Favorites'), emoji: '❤️' },
-    { id: 'food', label: t('Food'), emoji: '🍕' },
-    { id: 'drinks', label: t('Drinks'), emoji: '🧃' },
-    { id: 'activities', label: t('Play & Fun'), emoji: '🎮' },
-    { id: 'places', label: t('Places'), emoji: '🏠' },
-    { id: 'people', label: t('People'), emoji: '👥' },
-    { id: 'feelings', label: t('Feelings'), emoji: '💛' },
-    { id: 'sensory', label: t('Sensory'), emoji: '🎧' },
-    { id: 'all', label: t('All Words'), emoji: '🌐' },
+  const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
+    { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.png' },
+    { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.png' },
+    { id: 'favorites', label: t('Favorites'), iconSrc: '/assets/stickers/aac_favorites.png' },
+    { id: 'food', label: t('Food'), iconSrc: '/assets/stickers/aac_food.png' },
+    { id: 'drinks', label: t('Drinks'), iconSrc: '/assets/stickers/aac_drinks.png' },
+    { id: 'activities', label: t('Play & Fun'), iconSrc: '/assets/stickers/aac_activities.png' },
+    { id: 'places', label: t('Places'), iconSrc: '/assets/stickers/aac_places.png' },
+    { id: 'people', label: t('People'), iconSrc: '/assets/stickers/aac_people.png' },
+    { id: 'feelings', label: t('Feelings'), iconSrc: '/assets/stickers/aac_feelings.png' },
+    { id: 'sensory', label: t('Sensory'), iconSrc: '/assets/stickers/aac_sensory.png' },
+    { id: 'all', label: t('All Words'), iconSrc: '/assets/stickers/aac_all_words.png' },
   ];
 
   // Filter items while keeping consistent motor planning order (sorted by motorIndex)
@@ -1030,8 +1030,14 @@ export const AACView: React.FC = () => {
         {/* Minimized Sentence Bar Restorer */}
         {isSentenceBarCollapsed && (
           <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 text-xs font-bold text-[#6B5E52] shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
-            <span className="flex items-center gap-1.5">
-              <span>💬 {t('Sentence Bar Minimized')}</span>
+            <span className="flex items-center gap-2">
+              <img
+                src="/assets/stickers/aac_sentences.png"
+                alt=""
+                aria-hidden="true"
+                className="w-4 h-4 object-contain pointer-events-none drop-shadow-2xs select-none"
+              />
+              <span>{t('Sentence Bar Minimized')}</span>
               {instantSpeakMode && <span className="text-[#A76318] font-black">({t('Instant Speak is Active')})</span>}
             </span>
             <button
@@ -1056,9 +1062,15 @@ export const AACView: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => speak(phrase)}
-                  className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
-                  💬 {phrase}
+                  <img
+                    src="/assets/stickers/aac_sentences.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-3.5 h-3.5 object-contain pointer-events-none drop-shadow-2xs select-none"
+                  />
+                  <span>{phrase}</span>
                 </button>
               ))}
             </div>
@@ -1082,7 +1094,14 @@ export const AACView: React.FC = () => {
               </button>
               <span className="text-[#C8BCAC] font-bold text-sm">/</span>
               <span className="font-black text-xs sm:text-sm text-[#3E342B] flex items-center gap-1.5">
-                <span>{categories.find(c => c.id === activeCategory)?.emoji}</span>
+                {categories.find(c => c.id === activeCategory)?.iconSrc && (
+                  <img
+                    src={categories.find(c => c.id === activeCategory)?.iconSrc}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-4 h-4 sm:w-5 sm:h-5 object-contain pointer-events-none drop-shadow-2xs select-none"
+                  />
+                )}
                 <span>{categories.find(c => c.id === activeCategory)?.label} Folder</span>
               </span>
             </div>
@@ -1109,7 +1128,7 @@ export const AACView: React.FC = () => {
                   setSearchQuery('');
                   playChime('tap');
                 }}
-                className={`px-4 sm:px-5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
+                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
                   !activeSceneData && activeCategory === cat.id
                     ? cat.id === 'core'
                       ? 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]'
@@ -1119,7 +1138,13 @@ export const AACView: React.FC = () => {
                     : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs'
                 }`}
               >
-                <span className="text-base sm:text-xl shrink-0 leading-none">{cat.emoji}</span>
+                <img
+                  src={cat.iconSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none drop-shadow-2xs select-none shrink-0"
+                  loading="eager"
+                />
                 <span className="whitespace-nowrap tracking-tight">{cat.label}</span>
               </button>
             ))}
@@ -1384,8 +1409,8 @@ export const AACView: React.FC = () => {
             {/* Header banner */}
             <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-500/10 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-xs shrink-0">
-                  💬
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shadow-xs shrink-0 p-1 border border-amber-200">
+                  <img src="/assets/stickers/aac_sentences.png" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
@@ -1545,8 +1570,9 @@ export const AACView: React.FC = () => {
                             {t(fav.text)}
                           </h4>
                           {fav.isParentPinned && (
-                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-0.5">
-                              ⭐ Pinned
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1">
+                              <img src="/assets/stickers/aac_core.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                              <span>Pinned</span>
                             </span>
                           )}
                         </div>
@@ -1640,7 +1666,7 @@ export const AACView: React.FC = () => {
                 {/* Mulberry Symbol Area */}
                 <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 p-1 mt-1">
                   <img
-                    src={resolveAacImageUrl(folder)}
+                    src={folder.stickerSrc || resolveAacImageUrl(folder)}
                     alt={folder.label}
                     className="w-full h-full object-contain rounded-lg pointer-events-none"
                     loading="lazy"

@@ -111,6 +111,40 @@ export const CarRideSticker = renderStickerPng('/assets/stickers/car_ride.png', 
 export const WindBreezeSticker = renderStickerPng('/assets/stickers/wind_breeze.png', 'Wind Breeze');
 export const RepeatLoopSticker = renderStickerPng('/assets/stickers/refresh_repeat.png', 'Repeat Loop');
 
+// AAC Dedicated Category Badge Stickers
+export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
+export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.png', 'Favorite Sentences');
+export const AacFavoritesSticker = renderStickerPng('/assets/stickers/aac_favorites.png', 'Favorites');
+export const AacFoodSticker = renderStickerPng('/assets/stickers/aac_food.png', 'Food');
+export const AacDrinksSticker = renderStickerPng('/assets/stickers/aac_drinks.png', 'Drinks');
+export const AacActivitiesSticker = renderStickerPng('/assets/stickers/aac_activities.png', 'Play & Fun');
+export const AacPlacesSticker = renderStickerPng('/assets/stickers/aac_places.png', 'Places');
+export const AacPeopleSticker = renderStickerPng('/assets/stickers/aac_people.png', 'People');
+export const AacFeelingsSticker = renderStickerPng('/assets/stickers/aac_feelings.png', 'Feelings');
+export const AacSensorySticker = renderStickerPng('/assets/stickers/aac_sensory.png', 'Sensory');
+export const AacAllWordsSticker = renderStickerPng('/assets/stickers/aac_all_words.png', 'All Words');
+
+export const AacCategoryIcon: React.FC<{
+  categoryId: string;
+  className?: string;
+  size?: number;
+}> = ({ categoryId, className = 'w-5 h-5 sm:w-6 sm:h-6', size }) => {
+  switch (categoryId) {
+    case 'core': return <AacCoreSticker className={className} size={size} />;
+    case 'favorite_sentences': return <AacSentencesSticker className={className} size={size} />;
+    case 'favorites': return <AacFavoritesSticker className={className} size={size} />;
+    case 'food': return <AacFoodSticker className={className} size={size} />;
+    case 'drinks': return <AacDrinksSticker className={className} size={size} />;
+    case 'activities': return <AacActivitiesSticker className={className} size={size} />;
+    case 'places': return <AacPlacesSticker className={className} size={size} />;
+    case 'people': return <AacPeopleSticker className={className} size={size} />;
+    case 'feelings': return <AacFeelingsSticker className={className} size={size} />;
+    case 'sensory': return <AacSensorySticker className={className} size={size} />;
+    case 'all': return <AacAllWordsSticker className={className} size={size} />;
+    default: return <AacCoreSticker className={className} size={size} />;
+  }
+};
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
