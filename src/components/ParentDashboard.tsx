@@ -912,6 +912,7 @@ export const ParentDashboard: React.FC = () => {
           {/* TAB: LIFE ADVENTURES & CONTEXTUAL PHRASES */}
           {activeTab === 'adventures' && (
             <CaregiverAdventuresTab 
+              onShowNotification={showNotification}
               onStartTour={() => handleStartSectionTour('adventures')}
             />
           )}

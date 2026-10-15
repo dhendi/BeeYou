@@ -70,6 +70,23 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'writing', emoji: '✏️', label: 'Writing Class', category: 'daily', keywords: ['pencil', 'write', 'draw', 'homework', 'math'] },
   { id: 'meds', emoji: '💊', label: 'Medication', category: 'daily', keywords: ['medicine', 'medication', 'pill', 'vitamin', 'health'] },
   { id: 'inhaler', emoji: '🫁', label: 'Inhaler / Lungs', category: 'daily', keywords: ['inhaler', 'lungs', 'breathe', 'puff', 'asthma'] },
+
+  // Adventures & Community
+  { id: 'cart', emoji: '🛒', label: 'Supermarket / Grocery', category: 'daily', keywords: ['grocery', 'supermarket', 'store', 'shop', 'cart', 'market', 'shopping', 'buy'] },
+  { id: 'plane', emoji: '✈️', label: 'Airplane / Airport', category: 'daily', keywords: ['plane', 'airplane', 'airport', 'flight', 'travel', 'trip', 'flying'] },
+  { id: 'train', emoji: '🚆', label: 'Train / Subway', category: 'daily', keywords: ['train', 'subway', 'metro', 'station', 'transit', 'ride'] },
+  { id: 'zoo', emoji: '🦁', label: 'Zoo & Animals', category: 'fun', keywords: ['zoo', 'animal', 'lion', 'safari', 'wildlife', 'pets'] },
+  { id: 'library', emoji: '📚', label: 'Library & Reading', category: 'daily', keywords: ['library', 'books', 'quiet', 'borrow', 'study', 'read'] },
+  { id: 'cinema', emoji: '🍿', label: 'Movie Theater', category: 'fun', keywords: ['movie', 'theater', 'cinema', 'popcorn', 'film', 'show'] },
+  { id: 'swim', emoji: '🏊', label: 'Swimming Pool', category: 'fun', keywords: ['swim', 'pool', 'swimming', 'water', 'splash'] },
+  { id: 'beach', emoji: '🏖️', label: 'Beach & Ocean', category: 'fun', keywords: ['beach', 'sand', 'ocean', 'sea', 'vacation', 'waves'] },
+  { id: 'camp', emoji: '⛺', label: 'Camping & Tent', category: 'fun', keywords: ['camp', 'camping', 'tent', 'outdoors', 'nature', 'fire'] },
+  { id: 'bowling', emoji: '🎳', label: 'Bowling Alley', category: 'fun', keywords: ['bowling', 'pins', 'ball', 'strike', 'game'] },
+  { id: 'ferris', emoji: '🎡', label: 'Amusement Park', category: 'fun', keywords: ['amusement', 'carnival', 'ferris', 'wheel', 'fair', 'rides', 'park'] },
+  { id: 'museum', emoji: '🏛️', label: 'Museum Visit', category: 'fun', keywords: ['museum', 'art', 'history', 'exhibit', 'tour'] },
+  { id: 'park', emoji: '🌳', label: 'Park & Nature Walk', category: 'fun', keywords: ['park', 'tree', 'walk', 'nature', 'outside', 'trail'] },
+  { id: 'post', emoji: '✉️', label: 'Post Office & Mail', category: 'daily', keywords: ['mail', 'post', 'letter', 'package', 'stamp'] },
+  { id: 'hotel', emoji: '🏨', label: 'Hotel & Vacation Stay', category: 'daily', keywords: ['hotel', 'motel', 'vacation', 'stay', 'trip', 'travel'] },
 ];
 
 export interface IconLibraryModalProps {

@@ -41,7 +41,13 @@ export function useGamificationState({
 }: UseGamificationStateProps) {
   const [worldState, setWorldState] = useState<MyWorldState>(INITIAL_WORLD_STATE);
   const [avatar, setAvatar] = useState<AvatarConfig>(INITIAL_AVATAR);
-  const [adventures, setAdventures] = useState<LifeAdventure[]>(DEFAULT_ADVENTURES);
+  const [adventures, setAdventures] = useState<LifeAdventure[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_adventures');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return DEFAULT_ADVENTURES;
+  });
   const [skills, setSkills] = useState<LifeSkill[]>(DEFAULT_SKILLS);
   const [habits, setHabits] = useState<DailyHabit[]>(DEFAULT_DAILY_HABITS);
   const [socialStories, setSocialStories] = useState<SocialStory[]>(DEFAULT_SOCIAL_STORIES);
@@ -168,21 +174,49 @@ export function useGamificationState({
       ...adventure,
       isCustom: true,
     };
-    setAdventures((prev) => [...prev, newAdv]);
+    setAdventures((prev) => {
+      const updated = [...prev, newAdv];
+      try {
+        localStorage.setItem('beeyou_adventures', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     if (soundEffects) playChime('star');
   };
 
   const updateAdventure = (adventure: LifeAdventure) => {
-    setAdventures((prev) => prev.map((a) => (a.id === adventure.id ? adventure : a)));
+    setAdventures((prev) => {
+      const updated = prev.map((a) => (a.id === adventure.id ? adventure : a));
+      try {
+        localStorage.setItem('beeyou_adventures', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    if (soundEffects) playChime('tap');
+  };
+
+  const deleteAdventure = (id: string) => {
+    setAdventures((prev) => {
+      const updated = prev.filter((a) => a.id !== id);
+      try {
+        localStorage.setItem('beeyou_adventures', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    if (soundEffects) playChime('clear');
   };
 
   const completeAdventure = (id: string) => {
     if (soundEffects) playChime('complete');
-    setAdventures((prev) =>
-      prev.map((a) =>
+    setAdventures((prev) => {
+      const updated = prev.map((a) =>
         a.id === id ? { ...a, completedCount: (a.completedCount || 0) + 1 } : a
-      )
-    );
+      );
+      try {
+        localStorage.setItem('beeyou_adventures', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const toggleSkillStep = (skillId: string, stepId: number) => {
@@ -368,6 +402,7 @@ export function useGamificationState({
     setAdventures,
     addAdventure,
     updateAdventure,
+    deleteAdventure,
     completeAdventure,
 
     skills,

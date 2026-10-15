@@ -199,6 +199,7 @@ export interface AppContextType {
   adventures: LifeAdventure[];
   addAdventure: (adventure: Omit<LifeAdventure, 'id'>) => void;
   updateAdventure: (adventure: LifeAdventure) => void;
+  deleteAdventure: (id: string) => void;
   completeAdventure: (id: string) => void;
 
   // Skills
@@ -1040,6 +1041,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     adventures: gamification.adventures,
     addAdventure: gamification.addAdventure,
     updateAdventure: gamification.updateAdventure,
+    deleteAdventure: gamification.deleteAdventure,
     completeAdventure: gamification.completeAdventure,
 
     // Skills
