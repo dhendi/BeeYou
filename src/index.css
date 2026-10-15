@@ -97,25 +97,60 @@
 @media print {
   @page {
     size: auto;
-    margin: 8mm;
+    margin: 6mm;
   }
 
-  html, body, #root {
+  html, 
+  body, 
+  #root,
+  #root > div {
     height: auto !important;
+    min-height: 0 !important;
     max-height: none !important;
     overflow: visible !important;
     background: #ffffff !important;
     color: #1e293b !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Hide app chrome, modals backdrop, navigation, and everything outside printable area */
+  /* Hide app chrome, modals navigation, and everything marked .no-print */
   header,
   footer,
   nav,
   aside,
-  .no-print,
-  #print-hide-backdrop {
+  .no-print {
     display: none !important;
+  }
+
+  /* Neutralize the modal backdrop container during print so it does not hide or clip the document */
+  .print-schedule-root,
+  #beeyou-print-modal-backdrop {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    inset: auto !important;
+    z-index: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .print-schedule-root > main,
+  #beeyou-print-modal-backdrop > main {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 
   body * {
@@ -124,20 +159,25 @@
 
   #beeyou-printable-document,
   #beeyou-printable-document * {
-    visibility: visible;
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   #beeyou-printable-document {
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 8mm !important;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
+    color: #0f172a !important;
+    z-index: 999999 !important;
   }
 
   .print-page-break {

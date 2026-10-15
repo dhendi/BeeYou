@@ -95,8 +95,10 @@ export const PrintScheduleModal: React.FC = () => {
 
   const handlePrint = () => {
     playChime('star');
-    // Ensure all images are loaded before printing
-    window.print();
+    // Ensure all images and layouts are committed before opening print dialog
+    setTimeout(() => {
+      window.print();
+    }, 60);
   };
 
   // Instant PNG download using HTML SVG foreignObject rasterization
@@ -167,8 +169,8 @@ export const PrintScheduleModal: React.FC = () => {
 
   return (
     <div 
-      id="print-hide-backdrop"
-      className="fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-md flex flex-col justify-between overflow-hidden animate-in fade-in duration-200"
+      id="beeyou-print-modal-backdrop"
+      className="print-schedule-root fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-md flex flex-col justify-between overflow-hidden animate-in fade-in duration-200"
     >
       {/* TOP CONTROLS & SETTINGS TOOLBAR (Hidden during physical print) */}
       <header className="no-print bg-white border-b border-stone-200 shadow-sm p-3 sm:p-4 shrink-0 z-10 flex flex-col gap-2.5 sm:gap-3">
@@ -380,7 +382,7 @@ export const PrintScheduleModal: React.FC = () => {
         <div
           ref={printableRef}
           id="beeyou-printable-document"
-          className={`printable-document w-full max-w-[850px] min-h-[1050px] mx-auto my-2 sm:my-6 bg-white text-stone-900 p-6 sm:p-10 shadow-2xl rounded-2xl border border-stone-300 relative transition-all ${
+          className={`printable-document w-full max-w-[850px] min-h-[1050px] mx-auto my-2 sm:my-6 bg-white text-stone-900 p-6 sm:p-10 pb-12 sm:pb-14 shadow-2xl rounded-2xl border border-stone-300 relative transition-all ${
             colorMode === 'bw' ? 'grayscale contrast-125' : ''
           }`}
           style={{
@@ -828,6 +830,18 @@ export const PrintScheduleModal: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Subtle Watermark Logo on Lower Right */}
+          <div 
+            aria-hidden="true" 
+            className="absolute bottom-3 right-4 sm:bottom-4 sm:right-6 flex items-center gap-1.5 opacity-30 select-none pointer-events-none print:opacity-35"
+          >
+            <img 
+              src="/logo.png" 
+              alt="BeeYou" 
+              className="h-6 sm:h-7.5 w-auto object-contain" 
+            />
+          </div>
         </div>
       </main>
     </div>
