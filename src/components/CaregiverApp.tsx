@@ -11,7 +11,7 @@ import { setActiveDeviceView } from '../services/authService';
 const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal').then(m => ({ default: m.SubscriptionModal })));
 const ConnectCaregiverModal = lazy(() => import('./ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
-const OnboardingWizardModal = lazy(() => import('./OnboardingWizardModal').then(m => ({ default: m.OnboardingWizardModal })));
+const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
 const FamilyAuthModal = lazy(() => import('./FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
 
 const CaregiverAppContent: React.FC = () => {
@@ -57,7 +57,7 @@ const CaregiverAppContent: React.FC = () => {
           onClose={() => setShowCaregiverModal(false)} 
           initialTab="enter_code"
         />
-        <OnboardingWizardModal
+        <AdaptiveOnboardingFlow
           isOpen={showOnboardingModal}
           onClose={() => setShowOnboardingModal(false)}
           canDismiss={true}

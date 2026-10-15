@@ -89,6 +89,17 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
   }, []);
 
+  // Reset to Step 1 whenever the setup wizard is reopened
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setSelectedPersona(userPersona || 'child');
+      if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) {
+        setName(childProfile.name);
+      }
+    }
+  }, [isOpen]);
+
   // Step 2 Form State
   const [name, setName] = useState<string>(() => {
     if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) return childProfile.name;
