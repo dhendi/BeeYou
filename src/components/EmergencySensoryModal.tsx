@@ -19,7 +19,7 @@ const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string }[] = [
   { id: 'ocean', label: 'Ocean' },
   { id: 'fireplace', label: 'Cozy Fireplace' },
   { id: 'white_noise', label: 'White Noise' },
-  { id: 'forest', label: 'Forest' },
+  { id: 'stream', label: 'River' },
 ];
 
 export const EmergencySensoryModal: React.FC = () => {
