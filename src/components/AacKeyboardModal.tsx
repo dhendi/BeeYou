@@ -294,12 +294,11 @@ export const AacKeyboardModal: React.FC = () => {
           {/* Primary Backspace Key on Keyboard */}
           <button
             onClick={handleBackspace}
-            className="px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-rose-300 font-bold text-xs sm:text-sm shadow-md cursor-pointer transition-all active:scale-90 border border-slate-700 flex items-center justify-center gap-1 shrink-0"
+            className="px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-rose-300 font-bold text-xs sm:text-sm shadow-md cursor-pointer transition-all active:scale-90 border border-slate-700 flex items-center justify-center shrink-0"
             aria-label="Backspace"
             title="Backspace"
           >
             <Delete className="w-4 h-4 sm:w-5 sm:h-5 text-rose-300" />
-            <span className="hidden sm:inline">⌫</span>
           </button>
         </div>
 
