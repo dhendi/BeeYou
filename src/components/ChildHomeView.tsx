@@ -723,8 +723,12 @@ export const ChildHomeView: React.FC = () => {
                       {t('Walkthrough, sensory guide & confidence tips.')}
                     </p>
                   </div>
-                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 text-2xl group-hover:scale-110 transition-transform">
-                    <span aria-hidden="true">{todaysAdventure.emoji}</span>
+                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform p-1">
+                    {todaysAdventure.stickerSrc ? (
+                      <img src={todaysAdventure.stickerSrc} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    ) : (
+                      <span aria-hidden="true" className="text-2xl">{todaysAdventure.emoji}</span>
+                    )}
                   </div>
                 </button>
               ) : null;

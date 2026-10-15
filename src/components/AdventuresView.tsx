@@ -22,6 +22,21 @@ import {
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 
+const getAdventureSticker = (id: string): string | undefined => {
+  if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
+  if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.png';
+  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut.png';
+  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor.png';
+  return undefined;
+};
+
+const getStorySticker = (id: string): string | undefined => {
+  if (id === 'story-plans-change') return '/assets/stickers/story_plans_change.png';
+  if (id === 'story-birthday') return '/assets/stickers/story_birthday.png';
+  if (id === 'story-sharing') return '/assets/stickers/story_sharing.png';
+  return undefined;
+};
+
 export const AdventuresView: React.FC = () => {
   const {
     adventures,
@@ -69,7 +84,15 @@ export const AdventuresView: React.FC = () => {
 
         <div className="bg-white rounded-3xl border-3 border-indigo-200 shadow-md p-6 sm:p-8 flex flex-col items-center text-center">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-3xl">{selectedStory.emoji}</span>
+            {(selectedStory.stickerSrc || getStorySticker(selectedStory.id)) ? (
+              <img
+                src={selectedStory.stickerSrc || getStorySticker(selectedStory.id)}
+                alt=""
+                className="w-10 h-10 object-contain drop-shadow-xs shrink-0"
+              />
+            ) : (
+              <span className="text-3xl">{selectedStory.emoji}</span>
+            )}
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">{t(selectedStory.title)}</h2>
           </div>
 
@@ -164,8 +187,16 @@ export const AdventuresView: React.FC = () => {
 
         {/* Adventure Header Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-100 border-2 border-emerald-200 flex items-center justify-center text-5xl shrink-0">
-            {selectedAdventure.emoji}
+          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
+            {(selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)) ? (
+              <img
+                src={selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)}
+                alt=""
+                className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
+              />
+            ) : (
+              <span className="text-5xl">{selectedAdventure.emoji}</span>
+            )}
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">
@@ -544,8 +575,17 @@ export const AdventuresView: React.FC = () => {
               }}
               className="w-full text-left bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
-              <div className="w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
-                {adventure.emoji}
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
+                {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
+                  <img
+                    src={adventure.stickerSrc || getAdventureSticker(adventure.id)}
+                    alt=""
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-4xl">{adventure.emoji}</span>
+                )}
               </div>
               <div className="flex-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
@@ -588,8 +628,17 @@ export const AdventuresView: React.FC = () => {
               }}
               className="w-full text-left bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             >
-              <div className="w-16 h-16 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
-                {story.emoji}
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
+                {(story.stickerSrc || getStorySticker(story.id)) ? (
+                  <img
+                    src={story.stickerSrc || getStorySticker(story.id)}
+                    alt=""
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-4xl">{story.emoji}</span>
+                )}
               </div>
               <div className="flex-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">

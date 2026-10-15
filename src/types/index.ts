@@ -150,6 +150,7 @@ export interface LifeAdventure {
   title: string;
   category: string;
   emoji: string;
+  stickerSrc?: string;
   summary: string;
   steps: AdventureStep[];
   sensoryPreview: {
@@ -213,6 +214,7 @@ export interface SocialStory {
   id: string;
   title: string;
   emoji: string;
+  stickerSrc?: string;
   pages: SocialStoryPage[];
   keyTakeaways: string[];
   suggestedPhrases: string[];

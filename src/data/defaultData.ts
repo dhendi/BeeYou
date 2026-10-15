@@ -600,6 +600,7 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Visiting the Dentist',
     category: 'Health & Care',
     emoji: '🦷',
+    stickerSrc: '/assets/stickers/adventure_dentist.png',
     summary: 'See what happens during a regular dental check-up, practice what to say, and know what to expect.',
     steps: [
       { order: 1, title: 'Drive there & park', description: 'We ride in the car and arrive at the dentist building.', emoji: '🚗' },
@@ -643,6 +644,7 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Eating at a Restaurant',
     category: 'Community',
     emoji: '🍽️',
+    stickerSrc: '/assets/stickers/adventure_restaurant.png',
     summary: 'Ordering yummy food, sitting at a table, waiting calmly, and enjoying a meal out.',
     steps: [
       { order: 1, title: 'Walk inside & see host', description: 'The host welcomes us and asks how many people.', emoji: '🚪' },
@@ -683,6 +685,7 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Getting a Haircut',
     category: 'Health & Care',
     emoji: '✂️',
+    stickerSrc: '/assets/stickers/adventure_haircut.png',
     summary: 'A predictable look at hair trimming, scissors, water spray, and sitting in the styling chair.',
     steps: [
       { order: 1, title: 'Enter the salon / barbershop', description: 'Smell of shampoo and mirrors all around.', emoji: '💈' },
@@ -720,6 +723,7 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Doctor Check-Up',
     category: 'Health & Care',
     emoji: '🩺',
+    stickerSrc: '/assets/stickers/adventure_doctor.png',
     summary: 'Measuring height, checking heartbeat with a stethoscope, and getting healthy advice.',
     steps: [
       { order: 1, title: 'Arrive at clinic', description: 'Walk into doctor office with caregiver.', emoji: '🏥' },
@@ -926,6 +930,7 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-plans-change',
     title: 'When Plans Change',
     emoji: '🔄',
+    stickerSrc: '/assets/stickers/story_plans_change.png',
     pages: [
       {
         pageNumber: 1,
@@ -969,6 +974,7 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-birthday',
     title: 'Going to a Birthday Party',
     emoji: '🎂',
+    stickerSrc: '/assets/stickers/story_birthday.png',
     pages: [
       {
         pageNumber: 1,
@@ -1012,6 +1018,7 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-sharing',
     title: 'Taking Turns with Toys',
     emoji: '🤝',
+    stickerSrc: '/assets/stickers/story_sharing.png',
     pages: [
       {
         pageNumber: 1,
