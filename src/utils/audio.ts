@@ -665,8 +665,19 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
 // Audio file mappings for authentic, high-quality ambient recordings (100% offline & seamless looping)
 export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   rain: '/sounds/rain.mp3',
-  rain_roof: '/sounds/rain.mp3',
+  rain_roof: '/sounds/rain_roof.mp3',
+  thunderstorm: '/sounds/thunderstorm.mp3',
   ocean: '/sounds/ocean.mp3',
+  beach: '/sounds/beach.mp3',
+  morning_birds: '/sounds/morning_birds.mp3',
+  cafe: '/sounds/cafe.mp3',
+  library: '/sounds/library.mp3',
+  underwater: '/sounds/underwater.mp3',
+  box_fan: '/sounds/box_fan.mp3',
+  clock: '/sounds/clock.mp3',
+  clock_tick: '/sounds/clock.mp3',
+  counting_sheep: '/sounds/counting_sheep.mp3',
+  tibetan_bowl: '/sounds/tibetan_bowl.mp3',
   brown_noise: '/sounds/brown_noise.wav',
   white_noise: '/sounds/white_noise.wav',
   stream: '/sounds/stream.mp3',
@@ -678,15 +689,14 @@ export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   driving: '/sounds/driving.mp3',
   city: '/sounds/city.mp3',
   night_time: '/sounds/night_time.mp3',
-  beach: '/sounds/beach.mp3',
   forest: '/sounds/forest.mp3',
   fireplace: '/sounds/fireplace.mp3',
   campfire: '/sounds/fireplace.mp3',
-  cafe: '/sounds/medieval_tavern.mp3',
   medieval_tavern: '/sounds/medieval_tavern.mp3',
   cat_purr: '/sounds/kitten.mp3',
   puppy: '/sounds/puppy.mp3',
   kitten: '/sounds/kitten.mp3',
+  bubble_wrap: '/sounds/bubbles.mp3',
 };
 
 export interface ActiveSoundTrack {

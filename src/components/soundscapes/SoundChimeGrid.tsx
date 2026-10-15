@@ -401,6 +401,19 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
       </svg>
     ),
   },
+  {
+    id: 'library',
+    name: 'Quiet Library',
+    category: 'city',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+        <path d="M6 6h10" />
+        <path d="M6 10h10" />
+      </svg>
+    ),
+  },
 
   // ── FOCUS & SLEEP ──
   {
@@ -554,6 +567,36 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
         <circle cx="8" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
         <circle cx="12" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
         <circle cx="16" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
+      </svg>
+    ),
+  },
+  {
+    id: 'box_fan',
+    name: 'Box Fan',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <circle cx="12" cy="12" r="6" />
+        <path d="M12 12c-1.5-2-1.5-4 0-5" />
+        <path d="M12 12c2-1.5 4-1.5 5 0" />
+        <path d="M12 12c1.5 2 1.5 4 0 5" />
+        <path d="M12 12c-2 1.5-4 1.5-5 0" />
+      </svg>
+    ),
+  },
+  {
+    id: 'tibetan_bowl',
+    name: 'Singing Bowl',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 11a8 8 0 0 0 16 0V8H4v3z" />
+        <path d="M9 19h6" />
+        <path d="M12 19v2" />
+        <path d="M3 8h18" />
       </svg>
     ),
   },
