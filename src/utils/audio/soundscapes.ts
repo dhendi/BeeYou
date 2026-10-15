@@ -116,29 +116,56 @@ export function setSoundscapeVolume(vol: number, soundId?: SoundscapeId | null):
   } catch (e) {}
 }
 
+// In-memory cache for decoded AudioBuffers to guarantee zero-latency gapless looping
+const audioBufferCache: Map<string, AudioBuffer> = new Map();
+const pendingBufferLoads: Map<string, Promise<AudioBuffer | null>> = new Map();
+
+export async function getOrLoadAudioBuffer(url: string, ctx: AudioContext): Promise<AudioBuffer | null> {
+  if (audioBufferCache.has(url)) {
+    return audioBufferCache.get(url)!;
+  }
+  if (pendingBufferLoads.has(url)) {
+    return pendingBufferLoads.get(url)!;
+  }
+  const loadPromise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const arrayBuffer = await res.arrayBuffer();
+      const decoded = await ctx.decodeAudioData(arrayBuffer);
+      audioBufferCache.set(url, decoded);
+      return decoded;
+    } catch (err) {
+      console.warn(`[BeeYou Audio] Failed to load/decode audio buffer from ${url}:`, err);
+      return null;
+    } finally {
+      pendingBufferLoads.delete(url);
+    }
+  })();
+  pendingBufferLoads.set(url, loadPromise);
+  return loadPromise;
+}
+
+export function preloadSoundscapes(ids?: SoundscapeId[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const targetIds = ids || (Object.keys(SOUNDSCAPE_AUDIO_FILES) as SoundscapeId[]);
+    targetIds.forEach((id) => {
+      const file = SOUNDSCAPE_AUDIO_FILES[id];
+      if (file && !audioBufferCache.has(file)) {
+        getOrLoadAudioBuffer(file, ctx).catch(() => {});
+      }
+    });
+  } catch (e) {}
+}
+
 function cleanupTrack(track: ActiveSoundTrack): void {
   track.active = false;
   if (track.fadeTimer) {
     clearInterval(track.fadeTimer);
     track.fadeTimer = null;
-  }
-  if (track.audioElement) {
-    const audioToStop = track.audioElement;
-    track.audioElement = null;
-    const initialVol = audioToStop.volume;
-    const step = initialVol / 4;
-    let cur = initialVol;
-    const fadeOutTimer = setInterval(() => {
-      cur = Math.max(0, cur - step);
-      try {
-        audioToStop.volume = cur;
-      } catch (e) {}
-      if (cur <= 0.01) {
-        clearInterval(fadeOutTimer);
-        audioToStop.pause();
-        audioToStop.currentTime = 0;
-      }
-    }, 30);
   }
   track.timers.forEach((t) => clearInterval(t));
   track.timers = [];
@@ -149,24 +176,44 @@ function cleanupTrack(track: ActiveSoundTrack): void {
     try {
       track.gainNode.gain.cancelScheduledValues(now);
       track.gainNode.gain.setValueAtTime(track.gainNode.gain.value, now);
-      track.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+      track.gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.12);
     } catch (e) {}
+    
     const nodesToClean = [...track.nodes];
+    const sourceToStop = track.sourceNode;
+    track.sourceNode = null;
+
     setTimeout(() => {
+      if (sourceToStop) {
+        try { sourceToStop.stop(); } catch (e) {}
+      }
       nodesToClean.forEach((n) => {
         try {
           (n as any).stop?.();
           n.disconnect();
         } catch (e) {}
       });
-    }, 250);
+    }, 150);
   } else {
+    if (track.sourceNode) {
+      try { track.sourceNode.stop(); } catch (e) {}
+      track.sourceNode = null;
+    }
     track.nodes.forEach((n) => {
       try {
         (n as any).stop?.();
         n.disconnect();
       } catch (e) {}
     });
+  }
+
+  if (track.audioElement) {
+    const audioToStop = track.audioElement;
+    track.audioElement = null;
+    try {
+      audioToStop.pause();
+      audioToStop.currentTime = 0;
+    } catch (e) {}
   }
 }
 
@@ -186,6 +233,45 @@ export function stopSoundscape(id?: SoundscapeId | null): void {
     }
   } catch (e) {
     console.error('Error stopping soundscape:', e);
+  }
+}
+
+function startHtmlAudioOrProcedural(
+  id: SoundscapeId,
+  volume: number,
+  track: ActiveSoundTrack,
+  soundFile: string,
+  gainNode: GainNode
+): void {
+  try {
+    const audio = new Audio(soundFile);
+    audio.loop = true;
+    audio.crossOrigin = 'anonymous';
+    track.audioElement = audio;
+
+    const ctx = getAudioContext();
+    if (ctx) {
+      try {
+        const source = ctx.createMediaElementSource(audio);
+        source.connect(gainNode);
+        track.nodes.push(source);
+      } catch (e) {}
+    }
+
+    audio.onerror = () => {
+      track.audioElement = null;
+      startProceduralTrack(id, volume, track);
+    };
+
+    const p = audio.play();
+    if (p !== undefined) {
+      p.catch(() => {
+        track.audioElement = null;
+        startProceduralTrack(id, volume, track);
+      });
+    }
+  } catch (e) {
+    startProceduralTrack(id, volume, track);
   }
 }
 
@@ -210,71 +296,67 @@ export function playSoundscape(id: SoundscapeId, volume?: number, isPremiumUser 
     const track: ActiveSoundTrack = {
       id,
       audioElement: null,
+      sourceNode: null,
       gainNode: null,
       nodes: [],
       timers: [],
       fadeTimer: null,
       volume: targetVolume,
+      active: true,
     };
     activeSoundTracks.set(id, track);
     notifySoundscapeChange();
 
-    const soundFile = SOUNDSCAPE_AUDIO_FILES[id];
     const targetVol = normalizeSoundscapeVolume(targetVolume);
+    const soundFile = SOUNDSCAPE_AUDIO_FILES[id];
+    const ctx = getAudioContext();
 
-    if (soundFile && typeof window !== 'undefined') {
-      try {
-        const audio = new Audio(soundFile);
-        audio.loop = true;
-        audio.crossOrigin = 'anonymous';
-        track.audioElement = audio;
+    if (ctx) {
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
-        // Route through Web Audio GainNode for full hardware/software volume control on iOS & Android
-        try {
-          const ctx = getAudioContext();
-          if (ctx) {
-            const source = ctx.createMediaElementSource(audio);
-            const gain = ctx.createGain();
-            gain.gain.setValueAtTime(targetVol, ctx.currentTime);
-            source.connect(gain);
-            gain.connect(ctx.destination);
-            track.gainNode = gain;
-            track.nodes.push(source, gain);
+      // Create dedicated GainNode for this sound channel
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(targetVol, ctx.currentTime + 0.05);
+      gain.connect(ctx.destination);
+      track.gainNode = gain;
+      track.nodes.push(gain);
+
+      if (soundFile && typeof window !== 'undefined') {
+        getOrLoadAudioBuffer(soundFile, ctx).then((buffer) => {
+          if (!track.active) return; // User stopped track while loading
+
+          if (buffer) {
+            // Sample-accurate, zero-latency Web Audio buffer looping (100% fluid, no cuts)
+            try {
+              const source = ctx.createBufferSource();
+              source.buffer = buffer;
+              source.loop = true;
+              source.connect(gain);
+              source.start(0);
+              track.sourceNode = source;
+              track.nodes.push(source);
+              return;
+            } catch (err) {
+              console.warn(`[BeeYou Audio] Buffer source failed for ${id}, using fallback:`, err);
+            }
           }
-        } catch (e) {
-          // Fallback if MediaElementSource is unavailable
-        }
 
-        try {
-          audio.volume = targetVol;
-        } catch (e) {}
-
-        // Fallback to procedural synthesis if file fails to load/decode or errors
-        audio.onerror = (err) => {
-          console.warn(`[BeeYou Audio] Audio file error for ${id}, switching to procedural fallback:`, err);
-          track.audioElement = null;
-          startProceduralTrack(id, targetVolume, track);
-        };
-
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              // Audio element playing successfully
-            })
-            .catch((err) => {
-              console.warn(`[BeeYou Audio] Audio file playback failed for ${id}, using procedural fallback:`, err);
-              track.audioElement = null;
-              startProceduralTrack(id, targetVolume, track);
-            });
-        }
+          // Fallback to HTML5 audio or procedural if buffer decode fails
+          startHtmlAudioOrProcedural(id, targetVolume, track, soundFile, gain);
+        }).catch((err) => {
+          console.warn(`[BeeYou Audio] Audio buffer load error for ${id}:`, err);
+          if (track.active) {
+            startProceduralTrack(id, targetVolume, track);
+          }
+        });
         return;
-      } catch (err) {
-        console.warn(`[BeeYou Audio] Audio file init failed for ${id}:`, err);
       }
     }
 
-    // Procedural synthesis fallback
+    // Direct procedural synthesis (for solfeggio frequencies 20Hz/396Hz/528Hz or when no audio file exists)
     startProceduralTrack(id, targetVolume, track);
   } catch (e) {
     console.error('Error playing soundscape:', e);

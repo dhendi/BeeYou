@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Square, 
   Volume2, 
@@ -38,7 +38,8 @@ import {
   playSoundscape, 
   stopSoundscape, 
   setSoundscapeVolume, 
-  getSavedSoundscapeVolume 
+  getSavedSoundscapeVolume,
+  preloadSoundscapes
 } from '../../utils/audio';
 import { SoundscapeId } from '../../types';
 import { t } from '../../services/translator';
@@ -627,6 +628,11 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
   // Theme state: defaults to false (cozy warm cream as selected by user), with night toggle option
   const [isNightMode, setIsNightMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SoundGroup>('all');
+
+  // Preload soundscape buffers in background for zero-latency, gapless looping
+  useEffect(() => {
+    preloadSoundscapes();
+  }, []);
 
   const toggleSound = (id: SoundscapeId) => {
     if (activeSoundIds.includes(id)) {

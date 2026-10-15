@@ -5,6 +5,7 @@ import { playProceduralPetSound } from './chimes';
 export interface ActiveSoundTrack {
   id: SoundscapeId;
   audioElement: HTMLAudioElement | null;
+  sourceNode?: AudioBufferSourceNode | null;
   gainNode: GainNode | null;
   nodes: AudioNode[];
   timers: any[];
