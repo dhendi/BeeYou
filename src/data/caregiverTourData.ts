@@ -105,6 +105,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'liveStatus',
     title: 'Live Child Status & Mood',
     emoji: '📡',
+    stickerSrc: '/assets/stickers/satellite_dish.png',
     description: 'Learn how live connection, real-time emotions, and habit counters work.',
     tabId: 'home',
     steps: [
@@ -145,6 +146,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'nudges',
     title: 'Spoken Audio Nudges',
     emoji: '📣',
+    stickerSrc: '/assets/stickers/spoken_megaphone.png',
     description: 'Broadcast spoken voice announcements and countdown alerts directly to your child\'s device.',
     tabId: 'home',
     steps: [
@@ -405,6 +407,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'voice',
     title: 'Voice Customization & Testing',
     emoji: '🎙️',
+    stickerSrc: '/assets/stickers/voice_microphone.png',
     description: 'Audition and fine-tune natural speech voices, pacing speed, and natural pitch.',
     tabId: 'voice',
     steps: [
@@ -433,6 +436,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'offline',
     title: 'Offline Readiness & Storage',
     emoji: '💾',
+    stickerSrc: '/assets/stickers/offline_storage.png',
     description: 'Ensure all AAC pictograms, routines, and sensory tools work 100% without internet.',
     tabId: 'offline',
     steps: [
@@ -530,6 +534,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'settings',
     title: 'PIN Security & Safety Settings',
     emoji: '🔒',
+    stickerSrc: '/assets/stickers/security_lock.png',
     description: 'Set custom 4-digit PIN locks and configure caregiver safety preferences.',
     tabId: 'settings',
     steps: [

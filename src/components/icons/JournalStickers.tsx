@@ -131,6 +131,13 @@ export const GoldenTrainSticker = renderStickerPng('/assets/stickers/golden_trai
 export const RainbowHeartSticker = renderStickerPng('/assets/stickers/rainbow_heart.png', 'Rainbow Heart');
 export const MorningSunriseSticker = renderStickerPng('/assets/stickers/morning_sunrise.png', 'Morning Sunrise');
 
+// Caregiver Tour & Section Stickers
+export const SatelliteDishSticker = renderStickerPng('/assets/stickers/satellite_dish.png', 'Satellite Dish Live Status');
+export const SpokenMegaphoneSticker = renderStickerPng('/assets/stickers/spoken_megaphone.png', 'Spoken Megaphone Nudge');
+export const VoiceMicrophoneSticker = renderStickerPng('/assets/stickers/voice_microphone.png', 'Voice Customization Microphone');
+export const OfflineStorageSticker = renderStickerPng('/assets/stickers/offline_storage.png', 'Offline Storage Readiness');
+export const SecurityLockSticker = renderStickerPng('/assets/stickers/security_lock.png', 'PIN Security Lock');
+
 // Table A Confirmed Existing Illustrated Stickers
 export const BookStorySticker = renderStickerPng('/assets/stickers/passport_book.png', 'Storybooks Reading');
 export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Cozy Armchair Break');
@@ -282,6 +289,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🪪' || normTitle.includes('about me') || normTitle.includes('id card')) return <IdCardSticker className={className} size={size} />;
   // 🌸 Cycle & Sensory Rhythm
   if (normEmoji === '🌸' || normTitle.includes('cycle') || normTitle.includes('rhythm')) return <ConnectHeartSticker className={className} size={size} />;
+  // 📡 Satellite Dish / Live Status
+  if (normEmoji === '📡' || normTitle.includes('satellite') || normTitle.includes('live status')) return <SatelliteDishSticker className={className} size={size} />;
+  // 📣 Spoken Nudges / Megaphone
+  if (normEmoji === '📣' || normTitle.includes('megaphone') || normTitle.includes('audio nudge') || normTitle.includes('spoken nudge')) return <SpokenMegaphoneSticker className={className} size={size} />;
+  // 🎙️ Voice Testing / Microphone
+  if (normEmoji === '🎙️' || normTitle.includes('microphone') || normTitle.includes('voice testing') || normTitle.includes('voice custom')) return <VoiceMicrophoneSticker className={className} size={size} />;
+  // 💾 Offline Readiness / Floppy Disk
+  if (normEmoji === '💾' || normTitle.includes('floppy') || normTitle.includes('offline storage') || normTitle.includes('offline readiness')) return <OfflineStorageSticker className={className} size={size} />;
+  // 🔒 PIN Security / Safety Lock
+  if (normEmoji === '🔒' || normTitle.includes('padlock') || normTitle.includes('pin security') || normTitle.includes('safety setting')) return <SecurityLockSticker className={className} size={size} />;
 
   // 🎸 Electric Guitar / Routine Rocker
   if (normEmoji === '🎸' || normTitle.includes('guitar') || normTitle.includes('rocker')) return <GuitarRockerSticker className={className} size={size} />;
