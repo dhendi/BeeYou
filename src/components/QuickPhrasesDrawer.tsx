@@ -34,6 +34,8 @@ const getPhraseIcon = (text: string) => {
   return MessageSquare;
 };
 
+import { useModalBackHandler } from '../services/modalBackHandler';
+
 export const QuickPhrasesDrawer: React.FC = () => {
   const {
     showQuickPhrasesDrawer,
@@ -42,6 +44,8 @@ export const QuickPhrasesDrawer: React.FC = () => {
     speak,
     setShowCopingToolkit,
   } = useApp();
+
+  useModalBackHandler(showQuickPhrasesDrawer, () => setShowQuickPhrasesDrawer(false));
 
   if (!showQuickPhrasesDrawer) return null;
 

@@ -8,6 +8,9 @@ import { AppProvider, useApp } from '../context/AppContext';
 import { setPairingCode, subscribeToCloudChannel } from '../services/caregiverSync';
 import { setActiveDeviceView } from '../services/authService';
 
+import { useModalBackHandler } from '../services/modalBackHandler';
+import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
+
 const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal').then(m => ({ default: m.SubscriptionModal })));
 const ConnectCaregiverModal = lazy(() => import('./ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
@@ -24,6 +27,11 @@ const CaregiverAppContent: React.FC = () => {
     setShowFamilyAuthModal,
     activeTheme,
   } = useApp();
+
+  useMobileHardwareBack();
+  useModalBackHandler(showCaregiverModal, () => setShowCaregiverModal(false));
+  useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
+  useModalBackHandler(showFamilyAuthModal, () => setShowFamilyAuthModal(false));
 
   useEffect(() => {
     setActiveDeviceView('caregiver');

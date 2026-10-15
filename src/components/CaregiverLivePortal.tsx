@@ -210,7 +210,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
     <div className="min-h-screen bg-[#FAF8F5] text-slate-800 pb-20 flex flex-col">
       
       {/* Top Header */}
-      <header className="bg-slate-900 text-white p-4 sm:p-5 sticky top-0 z-30 shadow-md border-b border-slate-800">
+      <header className="bg-slate-900 text-white px-4 sm:px-5 pb-4 sm:pb-5 pt-[calc(env(safe-area-inset-top,0px)+1rem)] sticky top-0 z-30 shadow-md border-b border-slate-800">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {onBackToApp && !isCaregiverOnly && (

@@ -33,6 +33,8 @@ import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
 import { OnboardingModal } from './onboarding/OnboardingModal';
 import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
 import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
+import { useModalBackHandler } from '../services/modalBackHandler';
+import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
 
 // Lazy-loaded child tools and modals
 const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
@@ -74,6 +76,7 @@ const MoreView = lazy(() => import('./MoreView').then(m => ({ default: m.MoreVie
 const ChildAppContent: React.FC = () => {
   const { 
     childView, 
+    setChildView,
     showAvatarCreator,
     setShowAvatarCreator,
     showCaregiverModal, 
@@ -104,6 +107,26 @@ const ChildAppContent: React.FC = () => {
 
   // Companion Caregiver Help Hub Modal State
   const [showCaregiverHelpHub, setShowCaregiverHelpHub] = useState<boolean>(false);
+
+  // Hardware Back Button (Android Capacitor) & Keyboard Escape Handler
+  useMobileHardwareBack({
+    onNavigateBack: () => {
+      if (childView !== 'home') {
+        setChildView('home');
+        return true;
+      }
+      return false;
+    },
+  });
+
+  useModalBackHandler(showCaregiverHelpHub, () => setShowCaregiverHelpHub(false));
+  useModalBackHandler(showInteractiveOnboarding, () => setShowInteractiveOnboarding(false));
+  useModalBackHandler(showAacExperiencePrompt, () => setShowAacExperiencePrompt(false));
+  useModalBackHandler(showCaregiverModal, () => setShowCaregiverModal(false));
+  useModalBackHandler(showCaregiverAlertModal, () => setShowCaregiverAlertModal(false));
+  useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
+  useModalBackHandler(showAboutMeModal, () => setShowAboutMeModal(false));
+  useModalBackHandler(!!globalFeedbackState, () => setGlobalFeedbackState(null));
 
   useEffect(() => {
     const handleOpenHelpHub = () => setShowCaregiverHelpHub(true);

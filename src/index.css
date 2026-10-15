@@ -18,6 +18,8 @@
     padding: 0;
     overflow: hidden;
     background-color: #FAF8F5;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
 
   body {
@@ -32,6 +34,23 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   }
+}
+
+/* Safe Area Inset Utility Classes for iOS Notch, Dynamic Island, and Android Camera Cutouts */
+.safe-top-inset {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+.safe-bottom-inset {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-left-inset {
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+}
+
+.safe-right-inset {
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
 }
 
 /* Custom friendly scrollbars */

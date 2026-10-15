@@ -3,11 +3,17 @@ import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { X, Lock, KeyRound, Check, Users } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { useModalBackHandler } from '../services/modalBackHandler';
 
 export const PinModal: React.FC = () => {
   const { showPinModal, setShowPinModal, setIsParentMode, settings, setShowFamilyAuthModal } = useApp();
   const [pinInput, setPinInput] = useState('');
   const [error, setError] = useState(false);
+
+  useModalBackHandler(showPinModal, () => {
+    setShowPinModal(false);
+    setPinInput('');
+  });
 
   if (!showPinModal) return null;
 

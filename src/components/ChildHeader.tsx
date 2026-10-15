@@ -37,7 +37,7 @@ export const ChildHeader: React.FC = () => {
   } = useApp();
 
   return (
-    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 py-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
+    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
       {/* Left: Monogram Badge + Name */}
       <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
         <button 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AACItem, AACCategory } from '../types';
+import { useModalBackHandler } from '../services/modalBackHandler';
 import { 
   X, 
   Heart, 
@@ -584,10 +585,12 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
     onClose();
   };
 
+  useModalBackHandler(isOpen, onClose, 20);
+
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] my-auto flex flex-col shadow-2xl border-4 border-amber-300 overflow-hidden text-slate-800">
         
         {/* Hidden File Inputs */}
