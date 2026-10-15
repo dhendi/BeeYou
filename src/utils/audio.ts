@@ -178,9 +178,16 @@ export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' 
 export function playPetSound(petType: 'puppy' | 'kitten' | 'bunny' | 'turtle') {
   try {
     const file = PET_AUDIO_FILES[petType];
-    if (file) {
-      const played = playAudioSample(file, 0.45);
-      if (played) return;
+    if (file && typeof window !== 'undefined') {
+      const audio = new Audio(file);
+      audio.volume = 0.45;
+      const p = audio.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          playProceduralPetSound(petType);
+        });
+      }
+      return;
     }
   } catch (e) {}
 
@@ -637,11 +644,28 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     category: 'special_interest',
     tags: ['Sensory Pop', 'Tactile Fidget', 'ASMR', 'Premium'],
   },
+  {
+    id: 'puppy',
+    name: 'Playful Puppy Barks',
+    description: 'Gentle, friendly puppy barks and cheerful tail-wagging sounds.',
+    isPremium: false,
+    category: 'nature',
+    tags: ['Puppy', 'Companion', 'Friendly'],
+  },
+  {
+    id: 'kitten',
+    name: 'Purring Kitten & Soft Meows',
+    description: 'Soft rhythmic purring and sweet gentle kitten meows.',
+    isPremium: false,
+    category: 'nature',
+    tags: ['Kitten', 'Purring', 'Soothing'],
+  },
 ];
 
 // Audio file mappings for authentic, high-quality ambient recordings (100% offline & seamless looping)
 export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   rain: '/sounds/rain.mp3',
+  rain_roof: '/sounds/rain.mp3',
   ocean: '/sounds/ocean.mp3',
   brown_noise: '/sounds/brown_noise.wav',
   white_noise: '/sounds/white_noise.wav',
@@ -660,6 +684,9 @@ export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   campfire: '/sounds/fireplace.mp3',
   cafe: '/sounds/medieval_tavern.mp3',
   medieval_tavern: '/sounds/medieval_tavern.mp3',
+  cat_purr: '/sounds/kitten.mp3',
+  puppy: '/sounds/puppy.mp3',
+  kitten: '/sounds/kitten.mp3',
 };
 
 export interface ActiveSoundTrack {
@@ -1144,6 +1171,22 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       tremolo.start(now);
       breathLfo.start(now);
       track.nodes.push(purrOsc, purrHarmonic, purrFilter, purrGain, tremolo, tremGain, breathLfo, breathGain);
+
+    } else if (id === 'kitten') {
+      playProceduralPetSound('kitten');
+      const kittenTimer = setInterval(() => {
+        if (!activeSoundTracks.has('kitten')) return;
+        playProceduralPetSound('kitten');
+      }, 3000);
+      track.timers.push(kittenTimer);
+
+    } else if (id === 'puppy') {
+      playProceduralPetSound('puppy');
+      const puppyTimer = setInterval(() => {
+        if (!activeSoundTracks.has('puppy')) return;
+        playProceduralPetSound('puppy');
+      }, 3500);
+      track.timers.push(puppyTimer);
 
     } else if (id === 'box_fan') {
       // Motor hum + steady air turbulence

@@ -201,6 +201,41 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
 
   // ── ANIMALS ──
   {
+    id: 'puppy',
+    name: 'Playful Puppy',
+    category: 'animal',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M10 5.5C8 3 5 4 4 6c-1 2 .5 5 2 6.5" />
+        <path d="M14 5.5C16 3 19 4 20 6c1 2-.5 5-2 6.5" />
+        <path d="M6 12.5C6 17 9 20 12 20s6-3 6-7.5c0-3.5-2.5-6.5-6-6.5s-6 3-6 6.5z" />
+        <circle cx="9" cy="13" r="1" fill="currentColor" />
+        <circle cx="15" cy="13" r="1" fill="currentColor" />
+        <path d="M11 16c.5.5 1.5.5 2 0" />
+        <ellipse cx="12" cy="14.5" rx="1.5" ry="1" fill={active ? 'currentColor' : 'none'} />
+      </svg>
+    ),
+  },
+  {
+    id: 'kitten',
+    name: 'Gentle Kitten',
+    category: 'animal',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M5 10V5l5 3a7.5 7.5 0 0 1 4 0l5-3v5c0 5-3.5 7.5-7 7.5S5 15 5 10z" />
+        <circle cx="9" cy="11.5" r="1" fill="currentColor" />
+        <circle cx="15" cy="11.5" r="1" fill="currentColor" />
+        <path d="M12 13.5l-1 1h2l-1-1z" fill={active ? 'currentColor' : 'none'} />
+        <path d="M7 12.5l-2-.5" />
+        <path d="M7 14l-2 .5" />
+        <path d="M17 12.5l2-.5" />
+        <path d="M17 14l2 .5" />
+      </svg>
+    ),
+  },
+  {
     id: 'cat_purr',
     name: 'Purring Cat',
     category: 'animal',

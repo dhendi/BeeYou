@@ -953,7 +953,9 @@ export type SoundscapeId =
   | 'sleep_affirmations'
   | 'elvish_whispers'
   | 'counting_sheep'
-  | 'bubble_wrap';
+  | 'bubble_wrap'
+  | 'puppy'
+  | 'kitten';
 
 export interface SoundscapeItem {
   id: SoundscapeId;

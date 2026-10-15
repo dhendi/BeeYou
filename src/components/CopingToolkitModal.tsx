@@ -51,6 +51,7 @@ export const CopingToolkitModal: React.FC = () => {
   // Breathing state
   const [breathePhase, setBreathePhase] = useState<'Inhale...' | 'Hold...' | 'Exhale...' | 'Rest...' | string>('Inhale...');
   const [breatheScale, setBreatheScale] = useState(1);
+  const [breathingAudioEnabled, setBreathingAudioEnabled] = useState(false);
 
   // Timer state
   const [timerMinutes, setTimerMinutes] = useState(3);
@@ -102,7 +103,7 @@ export const CopingToolkitModal: React.FC = () => {
       while (isSubscribed) {
         setBreathePhase(`Inhale (${inhaleSec}s)`);
         setBreatheScale(1.4);
-        if (settings?.soundEffects) {
+        if (settings?.soundEffects && breathingAudioEnabled) {
           playChime('breathe');
         }
         await new Promise((r) => setTimeout(r, inhaleSec * 1000));
@@ -131,7 +132,7 @@ export const CopingToolkitModal: React.FC = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [showCopingToolkit, activeTab, inhaleSec, holdSec, exhaleSec, pauseSec, settings?.soundEffects]);
+  }, [showCopingToolkit, activeTab, inhaleSec, holdSec, exhaleSec, pauseSec, settings?.soundEffects, breathingAudioEnabled]);
 
   // Timer interval
   useEffect(() => {
@@ -332,7 +333,7 @@ export const CopingToolkitModal: React.FC = () => {
               <p className="text-slate-600 font-medium text-xs sm:text-sm mt-6 max-w-xs">
                 {t('Follow the gentle bubble. Breathe in slowly through your nose, hold, and breathe out like blowing a dandelion.')}
               </p>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setShowEditCalmModal(true)}
@@ -340,6 +341,19 @@ export const CopingToolkitModal: React.FC = () => {
                 >
                   <Sliders className="w-3.5 h-3.5" />
                   <span>{t('Customize Pace')} ({inhaleSec}s - {holdSec}s - {exhaleSec}s)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBreathingAudioEnabled((prev) => !prev)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                    breathingAudioEnabled
+                      ? 'bg-teal-600 text-white border-teal-700 shadow-xs'
+                      : 'bg-teal-50 hover:bg-teal-100 text-teal-800 border-teal-200'
+                  }`}
+                  aria-label={breathingAudioEnabled ? t('Mute chime cue') : t('Enable chime cue')}
+                >
+                  {breathingAudioEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  <span>{breathingAudioEnabled ? t('Chime Sound: On') : t('Chime Sound: Off')}</span>
                 </button>
               </div>
             </div>
