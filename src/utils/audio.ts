@@ -2788,7 +2788,7 @@ export async function speakText(
 /**
  * Audio playback helper for base64 / audio URL
  */
-function playAudioUrl(src: string, originalText: string, rate?: number): Promise<boolean> {
+export function playAudioUrl(src: string, originalText: string = '', rate?: number): Promise<boolean> {
   return new Promise((resolve) => {
     try {
       stopSpeaking();
@@ -2839,6 +2839,13 @@ function playAudioUrl(src: string, originalText: string, rate?: number): Promise
       resolve(false);
     }
   });
+}
+
+/**
+ * Play recorded caregiver voice clip for AAC tile
+ */
+export async function playVoiceRecording(src: string, label: string = 'Voice'): Promise<boolean> {
+  return playAudioUrl(src, label);
 }
 
 /**

@@ -4,8 +4,9 @@ import { useApp } from '../../context/AppContext';
 import { AACItem, AACCategory } from '../../types';
 import { INDUSTRY_AAC_PACKS } from '../../services/symbolService';
 import { AACSymbolPickerModal } from '../AACSymbolPickerModal';
+import { AACWordEditorModal } from '../AACWordEditorModal';
 import { optimizeImageFile } from '../../utils/mediaOptimizer';
-import { playChime, rateVoiceNaturalness, isVoiceFluid, speakText } from '../../utils/audio';
+import { playChime, rateVoiceNaturalness, isVoiceFluid, speakText, playAudioUrl } from '../../utils/audio';
 import {
   Star,
   Search,
@@ -20,7 +21,8 @@ import {
   Heart,
   Sun,
   Wind,
-  Smartphone
+  Smartphone,
+  Mic
 } from 'lucide-react';
 
 interface CaregiverAacStudioTabProps {
@@ -50,6 +52,8 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
   const [newWordColorType, setNewWordColorType] = useState<any>('noun');
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
   const [editingAacItem, setEditingAacItem] = useState<AACItem | null>(null);
+  const [showWordEditorModal, setShowWordEditorModal] = useState(false);
+  const [editorEditingItem, setEditorEditingItem] = useState<AACItem | null>(null);
   const parentAacFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleParentAacPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -257,17 +261,30 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
 
       {/* Add Custom Word Form */}
       <form data-tour="aac-studio-add-button" onSubmit={handleAddCustomWord} className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
             <Plus className="w-4 h-4 text-amber-600" />
             <span>{t("Create Custom AAC Button")}</span>
           </h3>
 
-          {newWordPhotoUrl && (
-            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              <span>{t("Symbol Attached ✓")}</span>
-            </span>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {newWordPhotoUrl && (
+              <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span>{t("Symbol Attached ✓")}</span>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setEditorEditingItem(null);
+                setShowWordEditorModal(true);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
+            >
+              <Mic className="w-3.5 h-3.5" />
+              <span>{t("Voice & Custom Tile Studio 🎙️")}</span>
+            </button>
+          </div>
         </div>
 
         {/* Symbol Preview Bar */}
@@ -490,9 +507,37 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                 <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 capitalize">
                   {item.colorType}
                 </span>
+                {item.audioDataUrl && (
+                  <div className="mt-1 flex items-center justify-center gap-1 bg-purple-100 text-purple-900 px-1.5 py-0.5 rounded-full text-[9px] font-black w-full">
+                    <Mic className="w-2.5 h-2.5 text-purple-700 shrink-0" />
+                    <span className="truncate">{item.audioRecordedBy || 'Voice'}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playAudioUrl(item.audioDataUrl!, item.speechText || item.label);
+                      }}
+                      className="w-3.5 h-3.5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[7px] ml-0.5 cursor-pointer active:scale-95 shrink-0"
+                      title="Play voice clip"
+                    >
+                      ▶
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-1 w-full pt-1 border-t border-slate-200/60">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditorEditingItem(item);
+                    setShowWordEditorModal(true);
+                  }}
+                  className="p-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 cursor-pointer"
+                  title={t("Edit button & record voice")}
+                >
+                  <Mic className="w-3 h-3" />
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -502,7 +547,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
                   className="flex-1 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] cursor-pointer"
                   title={t("Change symbol for this button")}
                 >
-                  {t("Change Symbol")}
+                  {t("Symbol")}
                 </button>
                 {item.isCustom && (
                   <button
@@ -750,6 +795,41 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           }}
           onSelectSymbol={handlePickSymbol}
           initialSearch={editingAacItem ? editingAacItem.label : newWordLabel}
+        />
+      )}
+
+      {/* AAC Custom Tile Creator & Caregiver Voice Studio Modal */}
+      {showWordEditorModal && (
+        <AACWordEditorModal
+          isOpen={showWordEditorModal}
+          onClose={() => {
+            setShowWordEditorModal(false);
+            setEditorEditingItem(null);
+          }}
+          editingItem={editorEditingItem}
+          onSave={(item) => {
+            if (editorEditingItem) {
+              updateAacItem({
+                ...editorEditingItem,
+                ...item,
+                id: editorEditingItem.id,
+                motorIndex: editorEditingItem.motorIndex,
+              });
+              onShowNotification(`Updated "${item.label}" with voice recording!`);
+            } else {
+              addAacItem(item);
+              onShowNotification(`Added "${item.label}" to AAC with voice recording!`);
+            }
+            setShowWordEditorModal(false);
+            setEditorEditingItem(null);
+          }}
+          onDelete={(id) => {
+            deleteAacItem(id);
+            onShowNotification("Deleted word from AAC.");
+            setShowWordEditorModal(false);
+            setEditorEditingItem(null);
+          }}
+          existingItems={aacItems}
         />
       )}
     </div>

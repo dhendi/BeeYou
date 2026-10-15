@@ -48,6 +48,10 @@ export interface AACItem {
   motorIndex: number; // for motor planning consistency
   isCustom?: boolean;
   isFavorite?: boolean;
+  audioDataUrl?: string; // Base64 audio/webm recording
+  audioRecordedBy?: string; // e.g. "Mom", "Dad", "Caregiver", "Child"
+  audioRecordedAt?: string; // ISO date timestamp
+  customDrawingUrl?: string; // Base64 image from canvas doodle pad
 }
 
 export interface QuickPhrase {
@@ -58,6 +62,8 @@ export interface QuickPhrase {
   category?: string;
   isEmergency?: boolean;
   isCustom?: boolean;
+  audioDataUrl?: string;
+  audioRecordedBy?: string;
 }
 
 export interface FavoriteSentence {
@@ -71,6 +77,8 @@ export interface FavoriteSentence {
   isParentPinned?: boolean;
   isCustom?: boolean;
   category?: string;
+  audioDataUrl?: string;
+  audioRecordedBy?: string;
 }
 
 export interface VisualScheduleStep {

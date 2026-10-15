@@ -85,9 +85,10 @@ import {
   HelpCircle,
   ShieldAlert,
   Info,
-  ExternalLink
+  ExternalLink,
+  Mic
 } from 'lucide-react';
-import { playChime } from '../utils/audio';
+import { playChime, playAudioUrl } from '../utils/audio';
 
 // Standard Category Folder Tiles (Proloquo2Go Style)
 const FOLDER_TILES: Array<{
@@ -740,11 +741,19 @@ export const AACView: React.FC = () => {
       ? t(item.speechText)
       : t(item.label);
     if (instantSpeakMode) {
-      speak(speech);
+      if (item.audioDataUrl) {
+        playAudioUrl(item.audioDataUrl, speech);
+      } else {
+        speak(speech);
+      }
     } else {
       addToSentence({ ...item, label: t(item.label), speechText: speech });
       if (!settings.autoSpeakSentence) {
-        speak(speech);
+        if (item.audioDataUrl) {
+          playAudioUrl(item.audioDataUrl, speech);
+        } else {
+          speak(speech);
+        }
       }
     }
     playChime('tap');
@@ -864,6 +873,11 @@ export const AACView: React.FC = () => {
                         />
                         <span aria-hidden="true" className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
                         <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
+                        {item.audioDataUrl && (
+                          <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs" title={`Recorded by ${item.audioRecordedBy || 'Voice'}`}>
+                            <Mic className="w-2.5 h-2.5" />
+                          </span>
+                        )}
                       </div>
                     ))}
                     {sentence.length > 1 && (
@@ -1480,7 +1494,11 @@ export const AACView: React.FC = () => {
                       type="button"
                       onClick={() => {
                         const spoken = t(fav.speechText || fav.text);
-                        speak(spoken);
+                        if (fav.audioDataUrl) {
+                          playAudioUrl(fav.audioDataUrl, spoken);
+                        } else {
+                          speak(spoken);
+                        }
                         recordSentenceSpoken(spoken, fav.emoji);
                         playChime('speak');
                         addToSentence({
@@ -1492,6 +1510,8 @@ export const AACView: React.FC = () => {
                           category: 'favorites',
                           colorType: 'social',
                           motorIndex: 0,
+                          audioDataUrl: fav.audioDataUrl,
+                          audioRecordedBy: fav.audioRecordedBy,
                         });
                       }}
                       className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-xl"
@@ -1518,6 +1538,12 @@ export const AACView: React.FC = () => {
                           <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
                             {t(fav.text)}
                           </h4>
+                          {fav.audioDataUrl && (
+                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-[10px] flex items-center gap-1">
+                              <Mic className="w-3 h-3 text-purple-700" />
+                              <span>{fav.audioRecordedBy || 'Voice'}</span>
+                            </span>
+                          )}
                           {fav.isParentPinned && (
                             <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1">
                               <img src="/assets/stickers/aac_core.png" alt="" className="w-3.5 h-3.5 object-contain" />
@@ -1540,7 +1566,11 @@ export const AACView: React.FC = () => {
                         type="button"
                         onClick={() => {
                           const spoken = t(fav.speechText || fav.text);
-                          speak(spoken);
+                          if (fav.audioDataUrl) {
+                            playAudioUrl(fav.audioDataUrl, spoken);
+                          } else {
+                            speak(spoken);
+                          }
                           recordSentenceSpoken(spoken, fav.emoji);
                           playChime('speak');
                           addToSentence({
@@ -1552,6 +1582,8 @@ export const AACView: React.FC = () => {
                             category: 'favorites',
                             colorType: 'social',
                             motorIndex: 0,
+                            audioDataUrl: fav.audioDataUrl,
+                            audioRecordedBy: fav.audioRecordedBy,
                           });
                         }}
                         className="px-3.5 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
@@ -1769,6 +1801,17 @@ export const AACView: React.FC = () => {
                   >
                     <Edit3 className="w-3 h-3" />
                   </button>
+                )}
+
+                {/* Recorded Voice Badge */}
+                {item.audioDataUrl && (
+                  <div
+                    className="absolute bottom-1 right-1 z-20 px-1.5 py-0.5 rounded-full bg-purple-600/90 text-white text-[8px] font-black flex items-center gap-0.5 shadow-2xs pointer-events-none"
+                    title={`Recorded voice: ${item.audioRecordedBy || 'Voice'}`}
+                  >
+                    <Mic className="w-2 h-2" />
+                    <span className="hidden sm:inline">{item.audioRecordedBy || 'Voice'}</span>
+                  </div>
                 )}
               </div>
             );

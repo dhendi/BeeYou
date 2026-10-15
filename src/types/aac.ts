@@ -35,6 +35,8 @@ export interface AACTourTile {
   col: number;
   category?: string;
   photoUrl?: string;
+  audioDataUrl?: string;
+  audioRecordedBy?: string;
   isLockedOriginal?: boolean; // Highlight motor continuity for the first 4 words
   grammars?: {
     present: string;

@@ -6,7 +6,7 @@ import {
   DEFAULT_FAVORITE_SENTENCES,
   getFavoriteSentenceSticker,
 } from '../data/defaultData';
-import { playChime } from '../utils/audio';
+import { playChime, playAudioUrl } from '../utils/audio';
 import { autocorrectAacGrammar } from '../utils/aacGrammar';
 import { resolveAacImageUrl } from '../services/symbolService';
 import { syncChildStatusToCaregiver } from '../services/caregiverSync';
@@ -32,7 +32,19 @@ export function useAacCommunication({
   const [showAacKeyboardModal, setShowAacKeyboardModal] = useState<boolean>(false);
   const [aacActiveScene, setAacActiveScene] = useState<string | null>(null);
 
-  const [aacItems, setAacItems] = useState<AACItem[]>(DEFAULT_AAC_ITEMS);
+  const [aacItems, setAacItems] = useState<AACItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_aac_items');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_AAC_ITEMS;
+  });
+
   const [sentence, setSentence] = useState<AACItem[]>([]);
   const [quickPhrases, setQuickPhrases] = useState<QuickPhrase[]>(DEFAULT_QUICK_PHRASES);
   const [favoriteSentences, setFavoriteSentences] = useState<FavoriteSentence[]>(() => {
@@ -50,6 +62,12 @@ export function useAacCommunication({
     } catch (e) {}
     return DEFAULT_FAVORITE_SENTENCES;
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_aac_items', JSON.stringify(aacItems));
+    } catch (e) {}
+  }, [aacItems]);
 
   useEffect(() => {
     try {
@@ -78,7 +96,11 @@ export function useAacCommunication({
       return updated;
     });
     if (autoSpeakSentence) {
-      speak(item.speechText || item.label);
+      if (item.audioDataUrl) {
+        playAudioUrl(item.audioDataUrl, item.speechText || item.label);
+      } else {
+        speak(item.speechText || item.label);
+      }
     }
   };
 
@@ -164,6 +186,18 @@ export function useAacCommunication({
 
   const speakSentence = async () => {
     if (sentence.length === 0) return;
+    // If single tile with recorded voice, prioritize playing the authentic caregiver recording
+    if (sentence.length === 1 && sentence[0].audioDataUrl) {
+      const singleSpoken = sentence[0].speechText || sentence[0].label;
+      recordSentenceSpoken(singleSpoken, sentence[0].emoji);
+      syncChildStatusToCaregiver({
+        childName: childName || 'Leo',
+        lastAacSentence: singleSpoken,
+        currentMood: currentMood as any,
+      });
+      await playAudioUrl(sentence[0].audioDataUrl, singleSpoken);
+      return;
+    }
     const fullText = autocorrectAacGrammar(sentence, language);
     recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
@@ -192,12 +226,16 @@ export function useAacCommunication({
       speechText: phraseText,
       emoji: sentence[0]?.emoji || '💬',
       isParentPinned: true,
+      audioDataUrl: sentence.length === 1 ? sentence[0].audioDataUrl : undefined,
+      audioRecordedBy: sentence.length === 1 ? sentence[0].audioRecordedBy : undefined,
     });
     const newQP: QuickPhrase = {
       id: `qp-custom-${Date.now()}`,
       text: phraseText,
       emoji: sentence[0]?.emoji || '💬',
       isCustom: true,
+      audioDataUrl: sentence.length === 1 ? sentence[0].audioDataUrl : undefined,
+      audioRecordedBy: sentence.length === 1 ? sentence[0].audioRecordedBy : undefined,
     };
     setQuickPhrases((prev) => [newQP, ...prev]);
     if (soundEffects) playChime('star');
@@ -217,13 +255,17 @@ export function useAacCommunication({
                 ...it,
                 speechText: item.speechText || it.speechText,
                 emoji: item.emoji || it.emoji,
-                photoUrl: item.photoUrl || it.photoUrl,
+                photoUrl: item.photoUrl !== undefined ? item.photoUrl : it.photoUrl,
                 symbolId: item.symbolId !== undefined ? item.symbolId : it.symbolId,
                 symbolSource: item.symbolSource !== undefined ? item.symbolSource : it.symbolSource,
                 arasaacId: item.arasaacId !== undefined ? item.arasaacId : it.arasaacId,
                 category: item.category || it.category,
                 colorType: item.colorType || it.colorType,
                 isFavorite: item.isFavorite !== undefined ? item.isFavorite : it.isFavorite,
+                audioDataUrl: item.audioDataUrl !== undefined ? item.audioDataUrl : it.audioDataUrl,
+                audioRecordedBy: item.audioRecordedBy !== undefined ? item.audioRecordedBy : it.audioRecordedBy,
+                audioRecordedAt: item.audioRecordedAt !== undefined ? item.audioRecordedAt : it.audioRecordedAt,
+                customDrawingUrl: item.customDrawingUrl !== undefined ? item.customDrawingUrl : it.customDrawingUrl,
               }
             : it
         );
@@ -236,13 +278,17 @@ export function useAacCommunication({
         emoji: item.emoji || '✨',
         photoUrl: item.photoUrl,
         symbolId: item.symbolId,
-        symbolSource: item.symbolSource || 'mulberry',
+        symbolSource: item.symbolSource || (item.photoUrl ? 'custom' : 'mulberry'),
         arasaacId: item.arasaacId,
         category: item.category,
         colorType: item.colorType,
         motorIndex: prev.length,
         isCustom: true,
         isFavorite: item.isFavorite !== undefined ? item.isFavorite : item.category === 'favorites',
+        audioDataUrl: item.audioDataUrl,
+        audioRecordedBy: item.audioRecordedBy,
+        audioRecordedAt: item.audioRecordedAt,
+        customDrawingUrl: item.customDrawingUrl,
       };
       return [...prev, newItem];
     });
