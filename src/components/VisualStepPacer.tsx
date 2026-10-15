@@ -14,7 +14,8 @@ import {
   Wind,
   Clock,
   HeartHandshake,
-  CheckCircle2
+  CheckCircle2,
+  Hourglass
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { RoutineStickerIcon } from './icons/JournalStickers';
@@ -50,8 +51,8 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
   onClose,
   onSelectStepIndex,
 }) => {
-  // Pacer mode: 'pie' (Time-Timer Visual Clock) | 'bubbles' (Calm Floating Bubbles Sandglass)
-  const [pacerStyle, setPacerStyle] = useState<'pie' | 'bubbles'>('pie');
+  // Pacer mode: 'pie' (Time-Timer Visual Clock) | 'hourglass' (Calming Sandglass Timer)
+  const [pacerStyle, setPacerStyle] = useState<'pie' | 'hourglass'>('pie');
 
   // Fullscreen / Countertop Mode (for bathroom counter / bedside display)
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -145,6 +146,15 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
   const needleX = cx + (rWedge + 4) * Math.sin(elapsedAngle);
   const needleY = cy - (rWedge + 4) * Math.cos(elapsedAngle);
 
+  // Hourglass geometry math (200 x 240 viewBox)
+  // Top sand level drains from y=24 down to y=120 as pct goes 1.0 -> 0.0
+  const sandTopY = 24 + (1 - pct) * (120 - 24);
+  // Bottom sand accumulates from y=216 up to y=128 as elapsed (1 - pct) goes 0.0 -> 1.0
+  const elapsed = 1 - pct;
+  const bottomHeight = elapsed * 88;
+  const sandPeakY = 216 - bottomHeight;
+  const sandShoulderY = 216 - bottomHeight * 0.72;
+
   // Dynamic Sensory Color based on remaining time percentage
   const getPieColor = () => {
     if (secondsLeft === 0) return '#10B981'; // Green complete
@@ -217,7 +227,7 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
 
         {/* Toolbar Controls */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Style toggle (Pie vs Bubbles) */}
+          {/* Style toggle (Clock vs Hourglass) */}
           <div className="flex items-center bg-stone-900/90 border border-stone-800 p-0.5 rounded-xl">
             <button
               type="button"
@@ -235,15 +245,15 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
             <button
               type="button"
               onClick={() => {
-                setPacerStyle('bubbles');
+                setPacerStyle('hourglass');
                 playChime('tap');
               }}
               className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                pacerStyle === 'bubbles' ? 'bg-amber-500 text-stone-950 shadow-xs' : 'text-stone-400 hover:text-white'
+                pacerStyle === 'hourglass' ? 'bg-amber-500 text-stone-950 shadow-xs' : 'text-stone-400 hover:text-white'
               }`}
-              title="Calming floating sandglass bubbles"
+              title="Calming visual hourglass sand timer"
             >
-              🫧 {t('Bubbles')}
+              ⏳ {t('Hourglass')}
             </button>
           </div>
 
@@ -355,17 +365,17 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
                 />
 
                 {/* Shrinking Time Wedge (sweeps clockwise) */}
-                {pct > 0 && pct < 1 ? (
-                  <path
-                    d={`M ${cx} ${cy} L ${cx} ${cy - rWedge} A ${rWedge} ${rWedge} 0 ${largeArc} 1 ${xStart} ${yStart} Z`}
-                    fill={currentColor}
-                    opacity="0.9"
-                  />
-                ) : pct >= 1 ? (
+                {pct >= 0.999 ? (
                   <circle
                     cx={cx}
                     cy={cy}
                     r={rWedge}
+                    fill={currentColor}
+                    opacity="0.9"
+                  />
+                ) : pct > 0.001 ? (
+                  <path
+                    d={`M ${cx} ${cy} L ${xStart} ${yStart} A ${rWedge} ${rWedge} 0 ${largeArc} 1 ${cx} ${cy - rWedge} Z`}
                     fill={currentColor}
                     opacity="0.9"
                   />
@@ -428,59 +438,178 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
             </div>
           )}
 
-          {/* B. CALM FLOATING BUBBLES SANDGLASS PACER */}
-          {pacerStyle === 'bubbles' && (
-            <div className="relative w-48 h-56 sm:w-56 sm:h-64 bg-stone-900 rounded-3xl border-3 border-stone-700 p-4 flex flex-col justify-between overflow-hidden shadow-xl">
-              {/* Liquid Level rising/dropping */}
-              <div
-                className="absolute bottom-0 left-0 right-0 transition-all duration-700 opacity-30"
-                style={{
-                  height: `${pct * 100}%`,
-                  backgroundColor: currentColor,
-                }}
-              />
+          {/* B. CALM VISUAL HOURGLASS PACER */}
+          {pacerStyle === 'hourglass' && (
+            <div className="relative w-52 h-64 sm:w-60 sm:h-72 flex flex-col items-center justify-between p-2">
+              <svg
+                viewBox="0 0 200 240"
+                className="w-44 h-52 sm:w-48 sm:h-56 drop-shadow-xl select-none"
+                aria-label={`Hourglass sand timer: ${timeFormatted} remaining`}
+              >
+                <defs>
+                  {/* Top bulb inner glass clip */}
+                  <clipPath id="top-bulb-clip">
+                    <path d="M 54 24 C 54 75 88 108 95 120 L 105 120 C 112 108 146 75 146 24 Z" />
+                  </clipPath>
 
-              {/* Animated Floating Bubbles */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div
-                  className="absolute w-5 h-5 rounded-full bg-white/20 border border-white/40 animate-bounce"
-                  style={{ left: '25%', bottom: '20%', animationDuration: '3s' }}
-                />
-                <div
-                  className="absolute w-7 h-7 rounded-full bg-white/25 border border-white/40 animate-pulse"
-                  style={{ left: '60%', bottom: '45%', animationDuration: '2.5s' }}
-                />
-                <div
-                  className="absolute w-4 h-4 rounded-full bg-white/30 border border-white/50"
-                  style={{ left: '40%', bottom: '65%' }}
-                />
-              </div>
+                  {/* Bottom bulb inner glass clip */}
+                  <clipPath id="bottom-bulb-clip">
+                    <path d="M 95 120 C 88 132 54 165 54 216 L 146 216 C 146 165 112 132 105 120 Z" />
+                  </clipPath>
 
-              {/* Header Label */}
-              <div className="relative z-10 flex items-center justify-between text-xs font-black text-stone-400">
-                <span>🫧 {t('Sandglass')}</span>
-                <span>{Math.round(pct * 100)}%</span>
-              </div>
+                  {/* Sand Gradient (Warm Golden Honey) */}
+                  <linearGradient id="sand-grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FDE68A" />
+                    <stop offset="35%" stopColor="#F59E0B" />
+                    <stop offset="85%" stopColor="#D97706" />
+                    <stop offset="100%" stopColor="#B45309" />
+                  </linearGradient>
 
-              {/* Center Digital Display */}
-              <div className="relative z-10 text-center my-auto">
-                <div className="text-3xl sm:text-4xl font-black text-white drop-shadow-md">
+                  {/* Sand Surface Shimmer */}
+                  <linearGradient id="sand-top-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#D97706" />
+                    <stop offset="50%" stopColor="#FEF3C7" />
+                    <stop offset="100%" stopColor="#D97706" />
+                  </linearGradient>
+
+                  {/* Wooden Cap Gradient */}
+                  <linearGradient id="cap-wood-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#78350F" />
+                    <stop offset="50%" stopColor="#92400E" />
+                    <stop offset="100%" stopColor="#451A03" />
+                  </linearGradient>
+
+                  {/* Brass/Golden Rim Gradient */}
+                  <linearGradient id="rim-brass-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#B45309" />
+                    <stop offset="50%" stopColor="#FCD34D" />
+                    <stop offset="100%" stopColor="#B45309" />
+                  </linearGradient>
+
+                  {/* Glass tint gradient */}
+                  <linearGradient id="glass-tint" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.04" />
+                  </linearGradient>
+                </defs>
+
+                {/* Wooden Frame - Side Support Pillars */}
+                <rect x="42" y="18" width="6" height="204" rx="3" fill="url(#cap-wood-grad)" stroke="#451A03" strokeWidth="1" />
+                <rect x="152" y="18" width="6" height="204" rx="3" fill="url(#cap-wood-grad)" stroke="#451A03" strokeWidth="1" />
+
+                {/* Glass Chamber Backing Fill */}
+                <path
+                  d="M 54 24 C 54 75 88 108 95 120 C 88 132 54 165 54 216 L 146 216 C 146 165 112 132 105 120 C 112 108 146 75 146 24 Z"
+                  fill="#0F141C"
+                  stroke="#334155"
+                  strokeWidth="2"
+                  opacity="0.85"
+                />
+
+                {/* 1. TOP CHAMBER SAND (Draining Downwards) */}
+                {pct > 0.005 && (
+                  <g clipPath="url(#top-bulb-clip)">
+                    {/* Draining Sand Block with concave top surface */}
+                    <path
+                      d={`M 40 ${sandTopY} Q 100 ${Math.min(119, sandTopY + 5)} 160 ${sandTopY} L 160 120 L 40 120 Z`}
+                      fill="url(#sand-grad-gold)"
+                    />
+                    {/* Sand Top Rim Highlight */}
+                    <path
+                      d={`M 54 ${sandTopY} Q 100 ${Math.min(119, sandTopY + 5)} 146 ${sandTopY}`}
+                      stroke="url(#sand-top-grad)"
+                      strokeWidth="2"
+                      fill="none"
+                      opacity="0.9"
+                    />
+                  </g>
+                )}
+
+                {/* 2. BOTTOM CHAMBER SAND (Accumulating Mound) */}
+                {elapsed > 0.005 && (
+                  <g clipPath="url(#bottom-bulb-clip)">
+                    {/* Growing Sand Mound */}
+                    <path
+                      d={`M 40 220 L 40 ${sandShoulderY} Q 100 ${sandPeakY} 160 ${sandShoulderY} L 160 220 Z`}
+                      fill="url(#sand-grad-gold)"
+                    />
+                    {/* Sand Mound Peak Highlight */}
+                    <path
+                      d={`M 54 ${sandShoulderY} Q 100 ${sandPeakY} 146 ${sandShoulderY}`}
+                      stroke="url(#sand-top-grad)"
+                      strokeWidth="2"
+                      fill="none"
+                      opacity="0.8"
+                    />
+                  </g>
+                )}
+
+                {/* 3. TRICKLING SAND STREAM (Through the neck) */}
+                {isRunning && pct > 0.005 && pct < 0.999 && (
+                  <g>
+                    {/* Continuous flowing sand stream */}
+                    <line
+                      x1="100"
+                      y1="120"
+                      x2="100"
+                      y2={Math.min(214, Math.max(120, sandPeakY + 3))}
+                      stroke="#FCD34D"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeDasharray="4 2"
+                      className="animate-pulse"
+                    />
+                    {/* Animated falling sand droplets */}
+                    <circle cx="100" cy="125" r="1.5" fill="#FEF3C7" className="animate-ping" style={{ animationDuration: '1.2s' }} />
+                    <circle cx="100" cy={Math.min(212, sandPeakY - 2)} r="2" fill="#FDE68A" opacity="0.8" />
+                  </g>
+                )}
+
+                {/* Glass Chamber Outline & Translucent Sheen */}
+                <path
+                  d="M 54 24 C 54 75 88 108 95 120 C 88 132 54 165 54 216 L 146 216 C 146 165 112 132 105 120 C 112 108 146 75 146 24 Z"
+                  fill="url(#glass-tint)"
+                  stroke="#94A3B8"
+                  strokeWidth="2.5"
+                />
+
+                {/* Glass Specular Highlights (Left Side Curved Reflection) */}
+                <path
+                  d="M 62 34 C 62 70 82 98 88 112"
+                  stroke="#FFFFFF"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  opacity="0.4"
+                  fill="none"
+                />
+                <path
+                  d="M 88 128 C 82 142 62 170 62 206"
+                  stroke="#FFFFFF"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  opacity="0.4"
+                  fill="none"
+                />
+
+                {/* Top Wooden Base Plate & Brass Trim */}
+                <rect x="35" y="8" width="130" height="12" rx="5" fill="url(#cap-wood-grad)" stroke="#451A03" strokeWidth="1.5" />
+                <rect x="44" y="19" width="112" height="4" rx="2" fill="url(#rim-brass-grad)" />
+
+                {/* Bottom Wooden Base Plate & Brass Trim */}
+                <rect x="44" y="217" width="112" height="4" rx="2" fill="url(#rim-brass-grad)" />
+                <rect x="35" y="220" width="130" height="12" rx="5" fill="url(#cap-wood-grad)" stroke="#451A03" strokeWidth="1.5" />
+              </svg>
+
+              {/* Digital Time & Sensory Readout Beneath Hourglass */}
+              <div className="mt-2 text-center select-none">
+                <div className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-md">
                   {timeFormatted}
                 </div>
-                <div className="text-xs font-bold text-amber-300 mt-1">
-                  {isRunning ? t('Relaxing & pacing...') : t('Paused')}
+                <div className="text-[11px] font-bold text-amber-300 mt-0.5 flex items-center justify-center gap-1.5">
+                  <span>{isRunning ? t('Relaxing & pacing...') : isWaitingForNext ? t('Ready') : t('Paused')}</span>
+                  <span className="text-stone-400">•</span>
+                  <span className="text-stone-300">{Math.round(pct * 100)}%</span>
                 </div>
-              </div>
-
-              {/* Progress bar baseline */}
-              <div className="relative z-10 w-full bg-stone-800 h-2 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${pct * 100}%`,
-                    backgroundColor: currentColor,
-                  }}
-                />
               </div>
             </div>
           )}
