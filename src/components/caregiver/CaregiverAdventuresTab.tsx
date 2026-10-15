@@ -2,6 +2,15 @@ import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { Lightbulb, MessageSquare } from 'lucide-react';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
+
+const getAdventureSticker = (id: string): string | undefined => {
+  if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
+  if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.png';
+  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut.png';
+  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor.png';
+  return undefined;
+};
 
 interface CaregiverAdventuresTabProps {
   onStartTour?: () => void;
@@ -32,18 +41,34 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({ 
       </div>
 
       <div data-tour="adventures-list-card" className="space-y-3">
-        {adventures.map((adv, i) => (
-          <div key={adv.id} className="p-4 bg-white border-2 border-slate-200 rounded-2xl flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="text-3xl">{adv.emoji}</span>
-                <div>
-                  <h4 className="font-black text-slate-800 text-base">{adv.title}</h4>
-                  <span className="text-xs text-emerald-700 font-bold">{adv.category}</span>
+        {adventures.map((adv, i) => {
+          const stickerPath = adv.stickerSrc || getAdventureSticker(adv.id);
+          return (
+            <div key={adv.id} className="p-4 bg-white border-2 border-slate-200 rounded-2xl flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50/60 dark:bg-slate-800 border border-teal-100 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                    {stickerPath ? (
+                      <img
+                        src={stickerPath}
+                        alt={adv.title}
+                        className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none"
+                      />
+                    ) : (
+                      <RoutineStickerIcon
+                        emoji={adv.emoji}
+                        title={adv.title}
+                        className="w-10 h-10 object-contain drop-shadow-2xs"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-slate-800 text-base">{adv.title}</h4>
+                    <span className="text-xs text-emerald-700 font-bold">{adv.category}</span>
+                  </div>
                 </div>
+                <span className="text-xs font-bold text-slate-400">{adv.steps.length} steps</span>
               </div>
-              <span className="text-xs font-bold text-slate-400">{adv.steps.length} steps</span>
-            </div>
 
             <div data-tour={i === 0 ? "adventures-phrases-card" : undefined} className="bg-slate-50 p-3 rounded-xl border border-slate-200 mt-2">
               <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider block mb-1">
@@ -59,7 +84,8 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({ 
               </div>
             </div>
           </div>
-        ))}
+        );
+      })}
       </div>
     </div>
   );
