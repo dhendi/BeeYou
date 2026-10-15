@@ -14,12 +14,14 @@ import {
   IdCardSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
+import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 
 type ToolCategory = 'all' | 'calm' | 'play' | 'focus' | 'sos';
 
 export const ToolsView: React.FC = () => {
   const {
     settings,
+    activeTheme,
     setShowFidgetModal,
     setShowDecisionWheelModal,
     setShowPieTimerModal,
@@ -29,6 +31,7 @@ export const ToolsView: React.FC = () => {
     setChildView,
   } = useApp();
 
+  const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
@@ -207,11 +210,13 @@ export const ToolsView: React.FC = () => {
           const Sticker = tool.Sticker;
           const cardClass = isColorCoded
             ? tool.color
-            : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            : `${themeStyles.card} !p-4 sm:!p-5 !rounded-3xl`;
           const badgeClass = isColorCoded
             ? tool.badgeClass
-            : 'border border-amber-300/80 bg-amber-100 text-amber-900';
-          const stickerBorder = isColorCoded ? 'border-slate-200/80' : 'border-amber-200/90';
+            : themeStyles.adventureTag;
+          const stickerBorder = isColorCoded
+            ? 'border-slate-200/80'
+            : (themeStyles.stepIconBox.match(/border-[^ ]+/)?.[0] || 'border-amber-300');
 
           return (
             <button
@@ -220,13 +225,13 @@ export const ToolsView: React.FC = () => {
               className={`w-full text-left p-4 sm:p-5 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
             >
               <div className="min-w-0 flex-1">
-                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md inline-block mb-1.5 ${badgeClass}`}>
+                <span className={badgeClass}>
                   {t(tool.badge)}
                 </span>
-                <h3 className="font-black text-sm sm:text-base leading-snug text-slate-900 group-hover:text-slate-950 transition-colors">
+                <h3 className={`font-black text-sm sm:text-base leading-snug transition-colors ${isColorCoded ? 'text-slate-900 group-hover:text-slate-950' : themeStyles.headerText}`}>
                   {t(tool.title)}
                 </h3>
-                <p className="text-xs opacity-80 font-medium leading-relaxed mt-1 line-clamp-2">
+                <p className={`text-xs font-medium leading-relaxed mt-1 line-clamp-2 ${isColorCoded ? 'opacity-80' : themeStyles.headerSubtext}`}>
                   {t(tool.desc)}
                 </p>
               </div>
