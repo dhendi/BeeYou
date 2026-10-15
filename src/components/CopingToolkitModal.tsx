@@ -14,10 +14,7 @@ import {
   Clock,
   Hand,
   Droplets,
-  Thermometer,
-  ShieldAlert,
-  Home,
-  CircleDot
+  Home
 } from 'lucide-react';
 import { 
   playChime, 
@@ -40,10 +37,7 @@ export const CopingToolkitModal: React.FC = () => {
     childProfile,
     isPremium,
     triggerUpgrade,
-    activateEmergencyMode,
-    setShowFivePointModal,
     setShowPieTimerModal,
-    setShowFidgetModal,
     breathingConfig,
     calmStrategies,
     setShowEditCalmModal,
@@ -193,11 +187,46 @@ export const CopingToolkitModal: React.FC = () => {
     { title: 'Taste / Sip: 1 cool sip of water', icon: Droplets, prompt: 'Take a gentle swallow or relax your jaw.' },
   ];
 
+  const toolHeaderConfig: Record<string, { title: string; subtitle: string; icon: any }> = {
+    sound: {
+      title: 'Sensory Room Soundscapes',
+      subtitle: 'Procedural acoustic masking & soothing sensory frequencies',
+      icon: Volume2,
+    },
+    breathing: {
+      title: 'Sensory Breathing Pacer',
+      subtitle: 'Follow the gentle bubble to pause, breathe, and reset',
+      icon: Wind,
+    },
+    grounding: {
+      title: '5-4-3-2-1 Grounding',
+      subtitle: 'Sensory countdown to reset during overwhelm',
+      icon: Eye,
+    },
+    timer: {
+      title: 'Break Timer',
+      subtitle: 'Gentle visual timer to pause and reset',
+      icon: Timer,
+    },
+    strategies: {
+      title: 'Calming Coping Strategies',
+      subtitle: 'Personalized regulation and comfort strategies',
+      icon: Heart,
+    },
+  };
+
+  const headerInfo = toolHeaderConfig[activeTab] || {
+    title: 'Calm & Coping Toolkit',
+    subtitle: 'Safe space to pause, breathe, and reset',
+    icon: Star,
+  };
+  const HeaderIcon = headerInfo.icon;
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={t('Calm & Coping Toolkit')}
+      aria-label={t(headerInfo.title)}
       className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
       onClick={() => {
         stopSoundscape();
@@ -212,11 +241,11 @@ export const CopingToolkitModal: React.FC = () => {
         <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-teal-100/80 border border-teal-200 flex items-center justify-center text-teal-800 shrink-0 shadow-2xs">
-              <Star className="w-5 h-5 text-teal-700" aria-hidden="true" />
+              <HeaderIcon className="w-5 h-5 text-teal-700" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-teal-950">{t('Calm & Coping Toolkit')}</h2>
-              <p className="text-xs text-teal-700 font-medium">{t('Safe space to pause, breathe, and reset')}</p>
+              <h2 className="text-lg sm:text-xl font-black text-teal-950">{t(headerInfo.title)}</h2>
+              <p className="text-xs text-teal-700 font-medium">{t(headerInfo.subtitle)}</p>
             </div>
           </div>
           <button
@@ -226,116 +255,61 @@ export const CopingToolkitModal: React.FC = () => {
               setShowCopingToolkit(false);
             }}
             className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 active:scale-95 transition-all cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-            aria-label="Close calm and coping toolkit"
+            aria-label="Close"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
-          <button
-            onClick={() => selectTab('breathing')}
-            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-              activeTab === 'breathing'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Wind className="w-4 h-4 shrink-0" />
-            <span>{t('Deep Breathing')}</span>
-          </button>
-          <button
-            onClick={() => selectTab('strategies')}
-            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-              activeTab === 'strategies'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Heart className="w-4 h-4 shrink-0" />
-            <span>{t('Calm Tools')}</span>
-          </button>
-          <button
-            onClick={() => selectTab('timer')}
-            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-              activeTab === 'timer'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Timer className="w-4 h-4 shrink-0" />
-            <span>{t('Break Timer')}</span>
-          </button>
-          <button
-            onClick={() => selectTab('grounding')}
-            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-              activeTab === 'grounding'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Eye className="w-4 h-4 shrink-0" />
-            <span>{t('5-4-3-2-1')}</span>
-          </button>
-          <button
-            onClick={() => selectTab('sound')}
-            className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-              activeTab === 'sound'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <Volume2 className="w-4 h-4 shrink-0" />
-            <span>{t('Sounds')}</span>
-          </button>
-        </div>
-
-        {/* Quick Tools Bar */}
-        <div className="flex items-center gap-2 px-4 py-2 bg-teal-50/70 border-b border-teal-100 overflow-x-auto shrink-0 scrollbar-none">
-          <span className="text-[10px] font-black uppercase text-teal-800 shrink-0">{t('More Tools:')}</span>
-          <button
-            onClick={() => {
-              setShowFidgetModal(true);
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
-          >
-            <CircleDot className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
-            <span>{t('Digital Fidgets')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setShowPieTimerModal(true);
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
-          >
-            <Timer className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
-            <span>{t('Pie Clock')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setShowFivePointModal(true);
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
-          >
-            <Thermometer className="w-4 h-4 text-blue-600 shrink-0" aria-hidden="true" />
-            <span>{t('5-Point Scale')}</span>
-          </button>
-          <button
-            onClick={() => {
-              setShowCopingToolkit(false);
-              activateEmergencyMode();
-              playChime('tap');
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-black text-xs hover:bg-red-700 transition-all cursor-pointer shrink-0 shadow-2xs whitespace-nowrap active:scale-95"
-          >
-            <ShieldAlert className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
-            <span>{t('Emergency Mode')}</span>
-          </button>
-        </div>
+        {/* Tab Selector - only shown when not on sound tool */}
+        {activeTab !== 'sound' && (
+          <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
+            <button
+              onClick={() => selectTab('breathing')}
+              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
+                activeTab === 'breathing'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Wind className="w-4 h-4 shrink-0" />
+              <span>{t('Deep Breathing')}</span>
+            </button>
+            <button
+              onClick={() => selectTab('strategies')}
+              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
+                activeTab === 'strategies'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Heart className="w-4 h-4 shrink-0" />
+              <span>{t('Calm Tools')}</span>
+            </button>
+            <button
+              onClick={() => selectTab('timer')}
+              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
+                activeTab === 'timer'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Timer className="w-4 h-4 shrink-0" />
+              <span>{t('Break Timer')}</span>
+            </button>
+            <button
+              onClick={() => selectTab('grounding')}
+              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
+                activeTab === 'grounding'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Eye className="w-4 h-4 shrink-0" />
+              <span>{t('5-4-3-2-1')}</span>
+            </button>
+          </div>
+        )}
 
         {/* Tab Content */}
         <div className={`p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 flex flex-col ${
@@ -575,35 +549,37 @@ export const CopingToolkitModal: React.FC = () => {
           )}
         </div>
 
-        {/* Quick Communication Strip */}
-        <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200">
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
-            {t('Things you can ask for right now:')}
+        {/* Quick Communication Strip - hidden on dedicated sound tool */}
+        {activeTab !== 'sound' && (
+          <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
+              {t('Things you can ask for right now:')}
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {[
+                { text: 'I want a glass of water.', icon: Droplets },
+                { text: 'Can I have a hug?', icon: Heart },
+                { text: 'I want to sit quietly.', icon: VolumeX },
+                { text: 'I want my comfort item.', icon: Star },
+                { text: 'Can we go home?', icon: Home },
+              ].map((need, idx) => {
+                const IconComp = need.icon;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label={`Speak phrase: ${need.text}`}
+                    onClick={() => speak(t(need.text))}
+                    className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                  >
+                    <IconComp className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
+                    <span>{t(need.text)}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {[
-              { text: 'I want a glass of water.', icon: Droplets },
-              { text: 'Can I have a hug?', icon: Heart },
-              { text: 'I want to sit quietly.', icon: VolumeX },
-              { text: 'I want my comfort item.', icon: Star },
-              { text: 'Can we go home?', icon: Home },
-            ].map((need, idx) => {
-              const IconComp = need.icon;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  aria-label={`Speak phrase: ${need.text}`}
-                  onClick={() => speak(t(need.text))}
-                  className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-                >
-                  <IconComp className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
-                  <span>{t(need.text)}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
