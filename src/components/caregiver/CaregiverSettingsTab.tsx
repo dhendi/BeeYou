@@ -11,22 +11,7 @@ import {
   Check,
   Lightbulb,
   Star,
-  Smile,
-  Headphones,
-  Briefcase,
-  MessageSquare,
-  Timer,
-  ListOrdered,
-  Award,
-  Moon,
-  Pill,
-  BookOpen,
-  HeartPulse,
   Wind,
-  Bell,
-  Book,
-  Wrench,
-  EyeOff,
   Eye,
   ZoomIn,
   Maximize2,
@@ -131,11 +116,11 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
-            { id: 'kid', label: 'Kids (3–11)', icon: Smile, desc: 'Mascots, routine stickers, First/Then' },
-            { id: 'teen', label: 'Teens (12–17)', icon: Headphones, desc: 'Modern lofi/cyber, countdowns, independence' },
-            { id: 'adult', label: 'Adults (18+)', icon: Briefcase, desc: 'Executive function, discreet AAC, zero clutter' },
+            { id: 'kid', label: 'Kids (3–11)', sticker: '/assets/stickers/child_persona.png', desc: 'Mascots, routine stickers, First/Then' },
+            { id: 'teen', label: 'Teens (12–17)', sticker: '/assets/stickers/teen_headphones.png', desc: 'Modern lofi/cyber, countdowns, independence' },
+            { id: 'adult', label: 'Adults (18+)', sticker: '/assets/stickers/adult_briefcase.png', desc: 'Executive function, discreet AAC, zero clutter' },
           ].map((a) => {
-            const Icon = a.icon;
+            const isSelected = userAgeGroup === a.id;
             return (
               <button
                 key={a.id}
@@ -145,14 +130,14 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   playChime('tap');
                 }}
                 className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
-                  userAgeGroup === a.id
-                    ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-300'
+                  isSelected
+                    ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                     : 'border-slate-200 hover:bg-white bg-white/70'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-100/70 text-indigo-700 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                    <img src={a.sticker} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                   </div>
                   <span className="text-xs font-black text-slate-800">{a.label}</span>
                 </div>
@@ -209,23 +194,22 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
-            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', icon: MessageSquare, desc: 'Motor-planned AAC tiles with voice' },
-            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', icon: Timer, desc: 'Activity countdown ring for routines' },
-            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', icon: ListOrdered, desc: 'Clear step-by-step guidance' },
-            { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', icon: Award, desc: 'Achievement celebration & badges' },
-            { key: 'mascotCompanion', label: 'Playful Mascot Companion', icon: Star, desc: 'Rex/Hopper cheer greetings & banner' },
-            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', icon: Moon, desc: 'Evening reflection & therapist chart' },
-            { key: 'medicationReminders', label: 'Medication & Health Reminders', icon: Pill, desc: 'Schedule doses, inventory & refill alerts' },
-            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', icon: BookOpen, desc: 'Nuanced emotions, sensory load & coping strategies' },
-            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', icon: HeartPulse, desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
-            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', icon: Wind, desc: 'Coping toolkit & breath circle' },
-            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', icon: Bell, desc: 'One-tap emergency & emotion broadcast' },
-            { key: 'socialStories', label: 'Social Stories Preparation', icon: Book, desc: 'Scenarios for outings and changes' },
-            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', icon: Wrench, desc: 'Task analysis breakdowns for independence' },
-            { key: 'discreetMode', label: 'Discreet Minimal Mode', icon: EyeOff, desc: 'Text-focused layout, minimal clutter' },
+            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', sticker: '/assets/stickers/speech_bubble.png', desc: 'Motor-planned AAC tiles with voice' },
+            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', sticker: '/assets/stickers/timer_clock.png', desc: 'Activity countdown ring for routines' },
+            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', sticker: '/assets/stickers/clipboard_shutdown.png', desc: 'Clear step-by-step guidance' },
+            { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', sticker: '/assets/stickers/reward_trophy.png', desc: 'Achievement celebration & badges' },
+            { key: 'mascotCompanion', label: 'Playful Mascot Companion', sticker: '/assets/stickers/bee_mascot.png', desc: 'Rex/Hopper cheer greetings & banner' },
+            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', sticker: '/assets/stickers/evening_moon.png', desc: 'Evening reflection & therapist chart' },
+            { key: 'medicationReminders', label: 'Medication & Health Reminders', sticker: '/assets/stickers/pill_capsule.png', desc: 'Schedule doses, inventory & refill alerts' },
+            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', sticker: '/assets/stickers/passport_book.png', desc: 'Nuanced emotions, sensory load & coping strategies' },
+            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', sticker: '/assets/stickers/circular_arrow.png', desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
+            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', sticker: '/assets/stickers/calm_wind.png', desc: 'Coping toolkit & breath circle' },
+            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', sticker: '/assets/stickers/alert_sos_shield.png', desc: 'One-tap emergency & emotion broadcast' },
+            { key: 'socialStories', label: 'Social Stories Preparation', sticker: '/assets/stickers/story_sharing.png', desc: 'Scenarios for outings and changes' },
+            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', sticker: '/assets/stickers/clothes_dressed.png', desc: 'Task analysis breakdowns for independence' },
+            { key: 'discreetMode', label: 'Discreet Minimal Mode', sticker: '/assets/stickers/quiet_voice.png', desc: 'Text-focused layout, minimal clutter' },
           ].map((feat) => {
             const isChecked = enabledFeatures ? (enabledFeatures as any)[feat.key] !== false : true;
-            const FeatIcon = feat.icon;
             return (
               <button
                 type="button"
@@ -242,8 +226,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isChecked ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'}`} aria-hidden="true">
-                    <FeatIcon className="w-4 h-4" />
+                  <div
+                    className={`w-9 h-9 rounded-xl p-0.5 flex items-center justify-center shrink-0 transition-all ${
+                      isChecked
+                        ? 'bg-amber-50 border border-amber-200 shadow-2xs'
+                        : 'bg-slate-200/80 border border-slate-300 grayscale opacity-60'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <img src={feat.sticker} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-slate-800">{feat.label}</h4>
