@@ -229,6 +229,11 @@ export const BirthdayStorySticker = renderStickerPng('/assets/stickers/story_bir
 export const TakingTurnsStorySticker = renderStickerPng('/assets/stickers/story_sharing.png', 'Taking Turns with Toys');
 export const StethoscopeSticker = renderStickerPng('/assets/stickers/stethoscope.png', 'Stethoscope / Doctor');
 export const RainCloudSticker = renderStickerPng('/assets/stickers/rain_cloud.png', 'Rainy Day');
+export const PartlyCloudySticker = renderStickerPng('/assets/stickers/partly_cloudy.png', 'Partly Cloudy');
+export const CloudyWeatherSticker = renderStickerPng('/assets/stickers/cloudy_weather.png', 'Overcast Cloudy Weather');
+export const SnowWeatherSticker = renderStickerPng('/assets/stickers/snow_weather.png', 'Snow & Flurries');
+export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thunderstorm_weather.png', 'Thunderstorm');
+export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.png', 'Windy Breeze');
 export const SchoolBuildingSticker = renderStickerPng('/assets/stickers/school_building.png', 'School Building');
 export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
 export const PlaygroundSwingsSticker = renderStickerPng('/assets/stickers/playground_swings.png', 'Playground Swings');
@@ -424,6 +429,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '✂️' || normTitle.includes('haircut') || normTitle.includes('scissors')) return <HaircutAdventureSticker className={className} size={size} />;
   // 🩺 Doctor / Stethoscope / Check-up
   if (normEmoji === '🩺' || normTitle.includes('doctor') || normTitle.includes('stethoscope') || normTitle.includes('check-up')) return <StethoscopeSticker className={className} size={size} />;
+  // ⛅ Partly Cloudy
+  if (normEmoji === '⛅' || normEmoji === '🌤️' || normEmoji === '🌤' || normTitle.includes('partly cloudy')) return <PartlyCloudySticker className={className} size={size} />;
+  // ☁️ Cloudy / Overcast / Fog
+  if (normEmoji === '☁️' || normEmoji === '☁' || normEmoji === '🌫️' || normEmoji === '🌫' || normTitle.includes('cloudy') || normTitle.includes('overcast') || normTitle.includes('fog')) return <CloudyWeatherSticker className={className} size={size} />;
+  // ❄️ Snow / Flurries
+  if (normEmoji === '❄️' || normEmoji === '❄' || normEmoji === '🌨️' || normEmoji === '🌨' || normTitle.includes('snow') || normTitle.includes('flurr')) return <SnowWeatherSticker className={className} size={size} />;
+  // 🌩️ Thunderstorm / Lightning
+  if (normEmoji === '🌩️' || normEmoji === '🌩' || normEmoji === '⚡' || normTitle.includes('thunder') || normTitle.includes('lightning') || normTitle.includes('storm')) return <ThunderstormWeatherSticker className={className} size={size} />;
+  // 💨 / 🌬️ Windy / Breeze
+  if (normEmoji === '💨' || normEmoji === '🌬️' || normEmoji === '🌬' || normTitle.includes('windy') || normTitle.includes('breeze')) return <WindyWeatherSticker className={className} size={size} />;
   // 🌧️ Rain / Weather / Rainy day
   if (normEmoji === '🌧️' || normEmoji === '🌧' || normEmoji === '☔' || normEmoji === '⛈️' || normTitle.includes('rain')) return <RainCloudSticker className={className} size={size} />;
   // 🥞 Breakfast / Food / Pancakes

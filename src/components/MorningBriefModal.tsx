@@ -252,9 +252,22 @@ export const MorningBriefModal: React.FC = () => {
 
             {/* Live Weather Card - Non-editable */}
             <div className={`p-4 rounded-2xl bg-gradient-to-r ${weatherData.bgGradient} border-2 border-amber-200/80 flex items-start gap-3.5 transition-all shadow-xs`}>
-              <span className="text-4xl sm:text-5xl shrink-0 mt-0.5">
-                {weatherData.emoji}
-              </span>
+              <div className="shrink-0 mt-0.5 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                {weatherData.stickerSrc ? (
+                  <img
+                    src={weatherData.stickerSrc}
+                    alt={weatherData.condition}
+                    className="w-14 h-14 sm:w-16 sm:h-16 object-contain select-none pointer-events-none drop-shadow-xs"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <span className="text-4xl sm:text-5xl">
+                    {weatherData.emoji}
+                  </span>
+                )}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div>

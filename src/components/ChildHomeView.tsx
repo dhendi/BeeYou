@@ -50,6 +50,7 @@ import {
   FavHelpSosSticker,
   PlansChangeStorySticker,
   RoutineStickerIcon,
+  OutdoorSunSticker,
 } from './icons/JournalStickers';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
@@ -298,7 +299,7 @@ export const ChildHomeView: React.FC = () => {
               className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
               title="Open Morning Brief"
             >
-              <Sun className="w-4 h-4 text-amber-600" aria-hidden="true" />
+              <OutdoorSunSticker size={20} className="w-5 h-5 drop-shadow-2xs" />
             </button>
           )}
 
