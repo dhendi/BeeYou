@@ -1040,7 +1040,9 @@ export const AACView: React.FC = () => {
           
           {/* Category Navigation Pills */}
           <div data-tour="aac-categories" className="flex items-center gap-2 sm:gap-2.5 shrink-0 bg-[#EFE9DF] p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 border-[#E0D8CB] shadow-xs">
-            {categories.map((cat) => (
+            {categories
+              .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
+              .map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => {
@@ -1249,6 +1251,9 @@ export const AACView: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setGridStage(s.stage);
+                      if (s.stage !== 3 && !['core', 'favorite_sentences', 'favorites'].includes(activeCategory)) {
+                        setActiveCategory('core');
+                      }
                       try {
                         localStorage.setItem(STORAGE_KEYS.GRID_STAGE, s.stage.toString());
                       } catch {}
@@ -1591,8 +1596,8 @@ export const AACView: React.FC = () => {
           } rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
           aria-label="Vocabulary grid"
         >
-          {/* FOLDER TILES (Rendered at top of Core View for Proloquo2Go architecture) */}
-          {activeCategory === 'core' && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => (
+          {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
+          {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => (
             <div key={folder.id} className="relative group aspect-square">
               <button
                 type="button"
