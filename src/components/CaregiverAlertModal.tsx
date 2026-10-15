@@ -54,11 +54,13 @@ interface PredefinedAlertChoice {
   label: string;
   sublabel: string;
   icon: React.ElementType;
+  stickerSrc?: string;
   iconBgClass: string;
   iconColorClass: string;
   colorClass: string;
   borderClass: string;
   ttsAnnouncement: string;
+  isEmergency?: boolean;
 }
 
 const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
@@ -67,32 +69,37 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'I Need Help',
     sublabel: 'I need adult assistance right now',
     icon: LifeBuoy,
-    iconBgClass: 'bg-rose-100',
-    iconColorClass: 'text-rose-600',
-    colorClass: 'text-rose-900',
-    borderClass: 'border-rose-300 hover:border-rose-500 bg-rose-50 hover:bg-rose-100',
+    stickerSrc: '/assets/stickers/fav_help_sos.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert asking for help right now.',
+    isEmergency: true,
   },
   {
     id: 'overwhelmed',
     label: "I'm Overwhelmed",
     sublabel: 'Sensory overload, too loud or bright',
     icon: Zap,
-    iconBgClass: 'bg-amber-100',
-    iconColorClass: 'text-amber-600',
-    colorClass: 'text-amber-900',
-    borderClass: 'border-amber-300 hover:border-amber-500 bg-amber-50 hover:bg-amber-100',
+    stickerSrc: '/assets/stickers/zap_family_demo.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I feel overwhelmed.',
+    isEmergency: true,
   },
   {
     id: 'need_break',
     label: 'I Need a Break',
     sublabel: 'Pause from activity or noise',
     icon: Coffee,
-    iconBgClass: 'bg-teal-100',
-    iconColorClass: 'text-teal-600',
-    colorClass: 'text-teal-900',
-    borderClass: 'border-teal-300 hover:border-teal-500 bg-teal-50 hover:bg-teal-100',
+    stickerSrc: '/assets/stickers/hot_cocoa.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I need a calm break.',
   },
   {
@@ -100,10 +107,11 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Send Love / Hug',
     sublabel: 'Thinking of you and safe',
     icon: Heart,
-    iconBgClass: 'bg-emerald-100',
-    iconColorClass: 'text-emerald-600',
-    colorClass: 'text-emerald-900',
-    borderClass: 'border-emerald-300 hover:border-emerald-500 bg-emerald-50 hover:bg-emerald-100',
+    stickerSrc: '/assets/stickers/fav_love_heart.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent a loving check-in to my caregiver.',
   },
   {
@@ -111,10 +119,11 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Ready for Pickup / Home',
     sublabel: 'Ready to be picked up or go home',
     icon: Car,
-    iconBgClass: 'bg-indigo-100',
-    iconColorClass: 'text-indigo-600',
-    colorClass: 'text-indigo-900',
-    borderClass: 'border-indigo-300 hover:border-indigo-500 bg-indigo-50 hover:bg-indigo-100',
+    stickerSrc: '/assets/stickers/car_ride.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I am ready to go home.',
   },
   {
@@ -122,10 +131,11 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Hungry / Thirsty',
     sublabel: 'Need snack, meal or water',
     icon: Utensils,
-    iconBgClass: 'bg-orange-100',
-    iconColorClass: 'text-orange-600',
-    colorClass: 'text-orange-900',
-    borderClass: 'border-orange-300 hover:border-orange-500 bg-orange-50 hover:bg-orange-100',
+    stickerSrc: '/assets/stickers/cutlery_meal.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I need food or water.',
   },
   {
@@ -133,10 +143,11 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Need Restroom',
     sublabel: 'Need to use the bathroom',
     icon: DoorClosed,
-    iconBgClass: 'bg-sky-100',
-    iconColorClass: 'text-sky-600',
-    colorClass: 'text-sky-900',
-    borderClass: 'border-sky-300 hover:border-sky-500 bg-sky-50 hover:bg-sky-100',
+    stickerSrc: '/assets/stickers/routine_toilet_restroom.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I need the restroom.',
   },
   {
@@ -144,10 +155,11 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Finished My Task!',
     sublabel: 'Done with my routine or schedule',
     icon: CheckCircle2,
-    iconBgClass: 'bg-purple-100',
-    iconColorClass: 'text-purple-600',
-    colorClass: 'text-purple-900',
-    borderClass: 'border-purple-300 hover:border-purple-500 bg-purple-50 hover:bg-purple-100',
+    stickerSrc: '/assets/stickers/reward_trophy.png',
+    iconBgClass: 'bg-amber-100/90 border border-amber-300',
+    iconColorClass: 'text-amber-900',
+    colorClass: 'text-[#2D241E]',
+    borderClass: 'border-[#FED676] hover:border-amber-400 bg-[#FEF9EE] hover:bg-[#FDF3DE]',
     ttsAnnouncement: 'I sent an alert that I completed my task.',
   },
 ];
@@ -160,9 +172,11 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     alertId: string;
     label: string;
     icon?: React.ElementType;
+    stickerSrc?: string;
     time: string;
     location: string;
   } | null>(null);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
   
   const [deliveryStage, setDeliveryStage] = useState<'idle' | 'sending' | 'delivered' | 'acknowledged'>('idle');
   const [caregiverResponse, setCaregiverResponse] = useState<{
@@ -260,6 +274,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       alertId: choice.id,
       label: choice.label,
       icon: choice.icon,
+      stickerSrc: choice.stickerSrc,
       time: timeStr,
       location: selectedLocation,
     });
@@ -319,23 +334,30 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in">
-      <div className="w-full max-w-2xl rounded-3xl bg-[#FAF8F5] p-4 sm:p-6 shadow-2xl border-2 border-amber-300 text-slate-800 max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
+      <div className="w-full max-w-2xl rounded-3xl bg-[#FEFDF9] p-4 sm:p-6 shadow-2xl border-2 border-amber-300 text-slate-800 max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-stone-200 shrink-0">
+        {/* Header - Signature Theme Yellow */}
+        <div className="flex items-center justify-between pb-3.5 border-b-2 border-amber-200/90 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-md shadow-rose-300 animate-pulse">
-              <Bell className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-[#FFF2D4] border-2 border-[#FED676] flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+              <img
+                src="/assets/stickers/alert_sos_shield.png"
+                alt="Alert"
+                className="w-9 h-9 object-contain drop-shadow-xs select-none"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                }}
+              />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-black text-[#2D241E] flex items-center gap-2">
                 <span>{isAdult ? 'Support Alert & Quick Check-in' : 'Alert / Message Caregiver'}</span>
-                <span className="text-[10px] font-black text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5">
+                <span className="text-[10px] font-black text-amber-950 bg-amber-200/90 border border-amber-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 shadow-2xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Live Sync</span>
                 </span>
               </h2>
-              <p className="text-xs text-slate-600 font-medium">
+              <p className="text-xs text-[#7A4D05] font-semibold">
                 Tap once to notify your {isAdult ? 'trusted contact' : 'caregiver'} instantly
               </p>
             </div>
@@ -346,7 +368,8 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               handleReset();
               onClose();
             }}
-            className="p-2.5 rounded-2xl hover:bg-stone-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+            className="p-2.5 rounded-2xl bg-amber-100/80 hover:bg-amber-200 text-[#2D241E] border border-amber-300/80 shadow-xs active:scale-95 transition-all cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -419,26 +442,32 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               </div>
 
               {/* Delivery Banner */}
-              <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 shadow-xs">
+              <div className="p-4 rounded-3xl bg-amber-50/90 border-2 border-amber-300 text-amber-950 flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-                    {sentAlert.icon ? <sentAlert.icon className="w-6 h-6 text-white" /> : <CheckCircle2 className="w-6 h-6 text-white" />}
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF2D4] border border-[#FED676] flex items-center justify-center p-1 font-bold shadow-xs shrink-0">
+                    {sentAlert.stickerSrc ? (
+                      <img src={sentAlert.stickerSrc} alt={sentAlert.label} className="w-9 h-9 object-contain drop-shadow-xs" />
+                    ) : sentAlert.icon ? (
+                      <sentAlert.icon className="w-6 h-6 text-amber-900" />
+                    ) : (
+                      <CheckCircle2 className="w-6 h-6 text-amber-900" />
+                    )}
                   </div>
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+                    <div className="text-xs font-bold uppercase tracking-wider text-[#7A4D05] flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
                       <span>Sent at {sentAlert.time}</span>
                     </div>
-                    <div className="text-base font-black text-slate-900 mt-0.5">
+                    <div className="text-base font-black text-[#2D241E] mt-0.5">
                       "{sentAlert.label}"
                     </div>
-                    <div className="text-xs text-emerald-800 font-medium">
-                      Location Tag: <strong className="capitalize">{sentAlert.location}</strong>
+                    <div className="text-xs text-[#7A4D05] font-medium">
+                      Location Tag: <strong className="capitalize text-[#2D241E]">{sentAlert.location}</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="px-3 py-1.5 rounded-full bg-emerald-200 text-emerald-900 text-xs font-black shrink-0">
+                <div className="px-3 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-black shrink-0">
                   Delivered ✓
                 </div>
               </div>
@@ -527,19 +556,21 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
             /* Selection State: 1-Tap Quick Alerts & Messages */
             <div className="space-y-4">
               {/* Location Tag */}
-              <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-2xs">
-                <div className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-600" />
+              <div className="bg-[#FEF9EE] p-3.5 rounded-2xl border-2 border-[#FED676] shadow-2xs">
+                <div className="text-xs font-black text-[#7A4D05] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-amber-700" />
                   <span>Your Current Location:</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[
-                    { id: 'school', label: 'School', icon: School },
-                    { id: 'therapy', label: 'Therapy', icon: Activity },
-                    { id: 'bus', label: 'Transit', icon: Bus },
+                    { id: 'school', label: 'School', icon: School, stickerSrc: '/assets/stickers/school_building.png' },
+                    { id: 'therapy', label: 'Therapy', icon: Activity, stickerSrc: '/assets/stickers/adventure_doctor.png' },
+                    { id: 'bus', label: 'Transit', icon: Bus, stickerSrc: '/assets/stickers/school_bus.png' },
                     { id: 'home', label: 'Home', icon: Home },
                   ].map((loc) => {
                     const LocIcon = loc.icon;
+                    const isSelected = selectedLocation === loc.id;
+                    const hasSticker = loc.stickerSrc && !imgErrors[loc.id];
                     return (
                       <button
                         key={loc.id}
@@ -548,13 +579,22 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                           setSelectedLocation(loc.id as any);
                           playChime('tap');
                         }}
-                        className={`p-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border ${
-                          selectedLocation === loc.id
-                            ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                            : 'bg-stone-50 text-slate-700 border-stone-200 hover:bg-stone-100'
+                        className={`p-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer border-2 ${
+                          isSelected
+                            ? 'bg-amber-400 text-amber-950 border-amber-500 shadow-xs'
+                            : 'bg-white text-slate-700 border-amber-200/80 hover:bg-amber-50/80 hover:border-amber-300'
                         }`}
                       >
-                        <LocIcon className="w-4 h-4 shrink-0" />
+                        {hasSticker ? (
+                          <img
+                            src={loc.stickerSrc}
+                            alt={loc.label}
+                            className="w-4 h-4 object-contain shrink-0"
+                            onError={() => setImgErrors((prev) => ({ ...prev, [loc.id]: true }))}
+                          />
+                        ) : (
+                          <LocIcon className="w-4 h-4 shrink-0 text-amber-800" />
+                        )}
                         <span>{loc.label}</span>
                       </button>
                     );
@@ -564,32 +604,49 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
               {/* 1-Tap Quick Action Cards */}
               <div>
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-2">
+                <span className="text-xs font-black text-[#7A4D05] uppercase tracking-wider block mb-2">
                   Tap 1-Tap Instant Alert / Note:
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {DEFAULT_QUICK_ALERTS.map((choice, idx) => {
                     const Icon = choice.icon;
+                    const hasSticker = choice.stickerSrc && !imgErrors[choice.id];
                     return (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => handleSendAlert(choice)}
-                        className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-95 cursor-pointer shadow-xs group flex items-center gap-3.5`}
+                        className={`p-3.5 rounded-2xl border-2 ${choice.borderClass} text-left transition-all active:scale-[0.98] cursor-pointer shadow-xs hover:shadow-md group flex items-center gap-3.5`}
                       >
-                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-all ${choice.iconBgClass}`}>
-                          <Icon className={`w-5 h-5 ${choice.iconColorClass}`} />
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-all p-1.5 ${choice.iconBgClass}`}>
+                          {hasSticker ? (
+                            <img
+                              src={choice.stickerSrc}
+                              alt={choice.label}
+                              className="w-9 h-9 object-contain drop-shadow-xs select-none pointer-events-none"
+                              onError={() => {
+                                setImgErrors((prev) => ({ ...prev, [choice.id]: true }));
+                              }}
+                            />
+                          ) : (
+                            <Icon className={`w-5 h-5 ${choice.iconColorClass}`} />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-black ${choice.colorClass}`}>
-                            {choice.label}
+                          <div className={`text-sm font-black ${choice.colorClass} flex items-center gap-1.5`}>
+                            <span>{choice.label}</span>
+                            {choice.isEmergency && (
+                              <span className="shrink-0 text-[9px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded-full bg-amber-200/90 text-amber-950 border border-amber-300/80 shadow-2xs">
+                                Priority
+                              </span>
+                            )}
                           </div>
-                          <div className="text-xs text-slate-600 font-medium mt-0.5 leading-snug truncate">
+                          <div className="text-xs text-[#7A4D05] font-semibold mt-0.5 leading-snug truncate">
                             {choice.sublabel}
                           </div>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-white/90 border border-stone-200 flex items-center justify-center text-slate-400 group-hover:text-amber-600 shrink-0 shadow-2xs">
+                        <div className="w-8 h-8 rounded-full bg-amber-100/90 border border-amber-300 flex items-center justify-center text-amber-900 group-hover:text-amber-950 group-hover:bg-amber-200 group-hover:scale-110 transition-all shrink-0 shadow-2xs">
                           <Send className="w-3.5 h-3.5" />
                         </div>
                       </button>
@@ -599,19 +656,19 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               </div>
 
               {/* Custom Text / Message Composer */}
-              <div className="pt-2 border-t border-stone-200">
+              <div className="pt-2 border-t-2 border-amber-200/80">
                 <form onSubmit={handleSendCustomMessage} className="flex gap-2">
                   <input
                     type="text"
                     value={customText}
                     onChange={(e) => setCustomText(e.target.value)}
                     placeholder="Or type a custom note to caregiver..."
-                    className="flex-1 px-4 py-2.5 rounded-2xl bg-white border border-stone-300 text-sm font-medium placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 shadow-inner"
+                    className="flex-1 px-4 py-2.5 rounded-2xl bg-white border-2 border-amber-200/90 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-amber-400 focus:ring-2 focus:ring-amber-300 shadow-inner"
                   />
                   <button
                     type="submit"
                     disabled={!customText.trim()}
-                    className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs transition"
+                    className="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs border border-amber-500 transition"
                   >
                     <Send className="w-4 h-4" />
                     <span>Send</span>
