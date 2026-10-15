@@ -43,9 +43,6 @@ export const CommunicateView: React.FC = () => {
       title: 'Ask for Help (SOS)',
       desc: '1-Tap emergency or need-help alerts sent directly to your caregiver or helper.',
       badge: 'Emergency SOS',
-      badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
-      color: 'border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950',
-      stickerBox: 'bg-white border-rose-200/90 shadow-2xs',
       Sticker: ShieldSosSticker,
       action: () => {
         setShowCaregiverAlertModal(true);
@@ -59,15 +56,6 @@ export const CommunicateView: React.FC = () => {
         ? `Connected live with ${connectionStatus.peerName || 'Caregiver'}. Tap to manage link.`
         : 'Link to a parent, teacher, or helper device with a QR scan or 6-digit code.',
       badge: isCaregiverConnected ? 'Connected Live' : 'Link Device',
-      badgeClass: isCaregiverConnected 
-        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-        : 'bg-amber-100 text-amber-800 border-amber-200',
-      color: isCaregiverConnected 
-        ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
-        : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
-      stickerBox: isCaregiverConnected
-        ? 'bg-white border-emerald-200/90 shadow-2xs'
-        : 'bg-white border-amber-200/90 shadow-2xs',
       Sticker: ConnectHeartSticker,
       action: () => {
         setShowCaregiverModal(true);
@@ -79,9 +67,6 @@ export const CommunicateView: React.FC = () => {
       title: 'About Me ID Card',
       desc: 'Your emergency information, sensory sensitivities, communication tips, and emergency contacts.',
       badge: 'ID Card',
-      badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
-      color: 'border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950',
-      stickerBox: 'bg-white border-blue-200/90 shadow-2xs',
       Sticker: IdCardSticker,
       action: () => {
         setShowAboutMeModal(true);
@@ -93,9 +78,6 @@ export const CommunicateView: React.FC = () => {
       title: 'Communication Passport',
       desc: '1-Page summary for teachers, doctors, and therapists explaining your communication style.',
       badge: 'Support Passport',
-      badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
-      color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
-      stickerBox: 'bg-white border-purple-200/90 shadow-2xs',
       Sticker: ReadingBookSticker,
       action: () => {
         setShowPassportModal(true);
@@ -107,9 +89,6 @@ export const CommunicateView: React.FC = () => {
       title: 'Quick Phrases & Cards',
       desc: 'Instant pre-made phrases for quick responses, asking for breaks, and daily social interactions.',
       badge: `${quickPhrases.length} Phrases`,
-      badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
-      color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
-      stickerBox: 'bg-white border-teal-200/90 shadow-2xs',
       Sticker: QuickPhrasesSticker,
       action: () => {
         setShowQuickPhrasesDrawer(true);
@@ -121,9 +100,6 @@ export const CommunicateView: React.FC = () => {
       title: 'Type to Speak Keyboard',
       desc: 'High-contrast on-screen typing keyboard with instant text-to-speech engine.',
       badge: 'Spell & Speak',
-      badgeClass: 'bg-stone-200 text-stone-800 border-stone-300',
-      color: 'border-2 border-stone-300/80 bg-stone-50/50 hover:bg-stone-100/70 text-stone-900',
-      stickerBox: 'bg-white border-stone-200/90 shadow-2xs',
       Sticker: KeyboardSticker,
       action: () => {
         setShowAacKeyboardModal(true);
@@ -184,16 +160,16 @@ export const CommunicateView: React.FC = () => {
             <button
               key={card.id}
               onClick={card.action}
-              className={`w-full text-left p-4 sm:p-5 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${card.color}`}
+              className="w-full text-left p-4 sm:p-5 rounded-2xl border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group"
             >
               <div className="min-w-0 flex-1">
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border inline-block mb-1 ${card.badgeClass}`}>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-amber-300/80 bg-amber-100 text-amber-900 inline-block mb-1">
                   {t(card.badge)}
                 </span>
-                <h3 className="font-bold text-sm sm:text-base leading-snug truncate">
+                <h3 className="font-bold text-sm sm:text-base leading-snug truncate text-slate-900">
                   {t(card.title)}
                 </h3>
-                <p className="text-xs opacity-75 font-medium leading-snug mt-0.5 line-clamp-1">
+                <p className="text-xs text-slate-600 font-medium leading-snug mt-0.5 line-clamp-1">
                   {t(card.desc)}
                 </p>
               </div>
