@@ -138,7 +138,7 @@ export const ToolsHubModal: React.FC = () => {
       id: 'sounds',
       category: 'sensory',
       title: 'Soothing Ambient Sounds',
-      desc: '17 gentle multi-track audio soundscapes',
+      desc: '30+ gentle multi-track audio soundscapes & frequencies',
       badge: 'Soundscapes',
       bg: 'from-indigo-50 to-violet-100/70 border-indigo-300 text-indigo-950',
       action: () => openTool(() => openCopingToolkit('sound')),

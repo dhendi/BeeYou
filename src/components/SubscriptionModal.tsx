@@ -283,7 +283,7 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
-                    <span><strong>Sensory Room:</strong> All 17 ambient soundscapes (Train tracks, night starlight, white noise, campfire & more)</span>
+                    <span><strong>Sensory Room:</strong> All 30+ ambient soundscapes & frequencies (River, ocean, rain on roof, campfire, train tracks, solfeggio & more)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 stroke-[3]" />
