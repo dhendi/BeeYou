@@ -3,11 +3,8 @@ import {
   Square, 
   Volume2, 
   X, 
-  Sliders, 
   Moon, 
-  Sun,
-  ChevronDown,
-  ChevronUp
+  Sun
 } from 'lucide-react';
 import { 
   playSoundscape, 
@@ -18,7 +15,7 @@ import {
 import { SoundscapeId } from '../../types';
 import { t } from '../../services/translator';
 
-interface ChimeSoundDef {
+interface HoneycombSoundDef {
   id: SoundscapeId;
   name: string;
   type: 'wood' | 'frequency' | 'blue';
@@ -26,7 +23,9 @@ interface ChimeSoundDef {
   icon: (active: boolean) => React.ReactNode;
 }
 
-export const SOUND_CHIME_CATALOG: ChimeSoundDef[] = [
+export type ChimeSoundDef = HoneycombSoundDef;
+
+export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
   // ── ROW 1 ──
   {
     id: 'stream',
@@ -60,7 +59,7 @@ export const SOUND_CHIME_CATALOG: ChimeSoundDef[] = [
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
         <path d="M4 10h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10z" />
-        <path d="M4 10a2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0" />
+        <path d="M4 10a2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0" />
         <path d="M10 5a1.5 1.5 0 0 1 3 0v2h-3V5z" />
         <path d="M13 6h1a1 1 0 0 1 1 1v0a1 1 0 0 1-1 1h-1" />
         <path d="M10 14h4v7h-4z" />
@@ -396,6 +395,95 @@ export const SOUND_CHIME_CATALOG: ChimeSoundDef[] = [
   },
 ];
 
+export const SOUND_CHIME_CATALOG = SOUND_HONEYCOMB_CATALOG;
+
+/**
+ * BeeYou Honeycomb Pod Background Shape
+ * Smooth, 6-sided rounded hexagonal cell with warm honey nectar lighting when active
+ */
+const HoneycombPodShape: React.FC<{
+  id: string;
+  isPlaying: boolean;
+  type: 'wood' | 'frequency' | 'blue';
+  isNightMode: boolean;
+}> = ({ id, isPlaying, type, isNightMode }) => {
+  return (
+    <svg
+      viewBox="0 0 80 88"
+      className="absolute inset-0 w-full h-full pointer-events-none transition-transform duration-300"
+      fill="none"
+    >
+      <defs>
+        {/* Honey Nectar Warm Glow (Active Wood / Standard) */}
+        <linearGradient id={`grad-honey-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#FFFDF7" />
+          <stop offset="35%" stopColor="#FEE685" />
+          <stop offset="100%" stopColor="#F59E0B" />
+        </linearGradient>
+
+        {/* Electric Cyan Glow (Active Frequency) */}
+        <linearGradient id={`grad-cyan-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#F0FDF4" />
+          <stop offset="40%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0284C7" />
+        </linearGradient>
+
+        {/* Soft Sky Blue Glow (Active Special / Whispers) */}
+        <linearGradient id={`grad-blue-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#F0F9FF" />
+          <stop offset="45%" stopColor="#93C5FD" />
+          <stop offset="100%" stopColor="#3B82F6" />
+        </linearGradient>
+      </defs>
+
+      {/* Symmetrical 6-sided rounded hexagon path */}
+      <path
+        d="M 34 7 Q 40 4 46 7 L 71 20 Q 76 23 76 29 L 76 59 Q 76 65 71 68 L 46 81 Q 40 84 34 81 L 9 68 Q 4 65 4 59 L 4 29 Q 4 23 9 20 Z"
+        fill={
+          isPlaying
+            ? type === 'frequency'
+              ? `url(#grad-cyan-${id})`
+              : type === 'blue'
+              ? `url(#grad-blue-${id})`
+              : `url(#grad-honey-${id})`
+            : isNightMode
+            ? type === 'frequency'
+              ? '#152033'
+              : type === 'blue'
+              ? '#232D42'
+              : '#231C2D'
+            : type === 'frequency'
+            ? '#1E293B'
+            : type === 'blue'
+            ? '#E2ECF8'
+            : '#FAF3E7'
+        }
+        stroke={
+          isPlaying
+            ? type === 'frequency'
+              ? '#38BDF8'
+              : type === 'blue'
+              ? '#3B82F6'
+              : '#D97706'
+            : isNightMode
+            ? type === 'frequency'
+              ? 'rgba(56, 189, 248, 0.4)'
+              : type === 'blue'
+              ? 'rgba(147, 197, 253, 0.3)'
+              : 'rgba(255, 255, 255, 0.14)'
+            : type === 'frequency'
+            ? '#0284C7'
+            : type === 'blue'
+            ? '#BACEE8'
+            : '#DECCAF'
+        }
+        strokeWidth={isPlaying ? 2.6 : 1.8}
+        className="transition-colors duration-300"
+      />
+    </svg>
+  );
+};
+
 interface SoundChimeGridProps {
   activeSoundIds: SoundscapeId[];
   soundVolumes: Record<string, number>;
@@ -411,7 +499,6 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
 }) => {
   // Theme state: defaults to false (cozy warm cream as selected by user), with night toggle option
   const [isNightMode, setIsNightMode] = useState(false);
-  const [showMixDrawer, setShowMixDrawer] = useState(true);
 
   const toggleSound = (id: SoundscapeId) => {
     if (activeSoundIds.includes(id)) {
@@ -430,138 +517,227 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
           : 'bg-[#FCF9F2] text-slate-800 border-2 border-[#E9E1D2] shadow-inner'
       }`}
     >
-      {/* Subtle Ambient Night Sky Toggle */}
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-amber-900/10 dark:border-white/10 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black tracking-wide uppercase px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30">
-            {activeSoundIds.length === 0
-              ? t('Tap any chime to play')
-              : activeSoundIds.length === 1
-              ? t('1 Chime Playing')
-              : `${activeSoundIds.length} ${t('Chimes Blended')}`}
-          </span>
-        </div>
+      {/* ── TOP SOUND MIXER & CONTROLS ── */}
+      {activeSoundIds.length === 0 ? (
+        /* Idle Top Bar: Calm status + Day/Night Sky toggle */
+        <div className="flex items-center justify-between mb-5 pb-3 border-b border-amber-900/10 dark:border-white/10 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/15 dark:bg-amber-400/15 flex items-center justify-center text-amber-800 dark:text-amber-300 border border-amber-500/30 shrink-0">
+              <Volume2 className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">
+                {t('Sensory Honeycomb Soundscapes')}
+              </span>
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                {t('Tap any pod below to blend & mix ambient sounds')}
+              </span>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsNightMode(!isNightMode)}
-            aria-label={isNightMode ? 'Switch to Warm Cream Day' : 'Switch to Midnight Sky'}
-            className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-white/70 dark:bg-white/10 hover:bg-white/90 border border-amber-900/15 dark:border-white/20 text-slate-700 dark:text-slate-200 shadow-2xs"
-          >
-            {isNightMode ? (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">{t('Daylight')}</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="hidden sm:inline">{t('Night Sky')}</span>
-              </>
-            )}
-          </button>
-
-          {activeSoundIds.length > 0 && (
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => stopSoundscape()}
-              aria-label={t('Stop All Sounds')}
-              className="px-3 py-1 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs cursor-pointer shadow-xs transition-colors flex items-center gap-1.5 shrink-0 active:scale-95"
+              onClick={() => setIsNightMode(!isNightMode)}
+              aria-label={isNightMode ? 'Switch to Warm Cream Day' : 'Switch to Midnight Sky'}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-amber-900/15 dark:border-white/20 text-slate-700 dark:text-slate-200 shadow-2xs"
             >
-              <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-              <span>{t('Stop All')}</span>
+              {isNightMode ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">{t('Daylight')}</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                  <span className="hidden sm:inline">{t('Night Sky')}</span>
+                </>
+              )}
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Active Top Sound Mixer Console */
+        <div className="mb-6 rounded-2xl p-3 sm:p-4 transition-all duration-300 border-2 bg-amber-500/10 dark:bg-white/5 border-amber-400/50 dark:border-amber-400/30 shadow-md">
+          {/* Mixer Console Header */}
+          <div className="flex items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-amber-900/10 dark:border-white/10">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+              </span>
+              <div className="flex items-baseline gap-1.5 truncate">
+                <h3 className="text-xs sm:text-sm font-black tracking-wide uppercase text-amber-950 dark:text-amber-200">
+                  {t('Top Sound Mixer')}
+                </h3>
+                <span className="text-[11px] font-bold text-amber-800/80 dark:text-amber-300/80">
+                  ({activeSoundIds.length} {activeSoundIds.length === 1 ? t('sound playing') : t('sounds blended')})
+                </span>
+              </div>
+            </div>
 
-      {/* ── THE CHIME TILES GRID ── */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-3 sm:gap-x-4 gap-y-5 sm:gap-y-6 justify-items-center py-2 pb-24 sm:pb-28">
-        {SOUND_CHIME_CATALOG.map((item) => {
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsNightMode(!isNightMode)}
+                aria-label={isNightMode ? 'Switch to Warm Cream Day' : 'Switch to Midnight Sky'}
+                className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-amber-900/15 dark:border-white/20 text-slate-700 dark:text-slate-200 shadow-2xs"
+              >
+                {isNightMode ? (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="hidden sm:inline">{t('Daylight')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                    <span className="hidden sm:inline">{t('Night Sky')}</span>
+                  </>
+                )}
+              </button>
+
+              {/* Stop All Button */}
+              <button
+                type="button"
+                onClick={() => stopSoundscape()}
+                aria-label={t('Stop All Sounds')}
+                className="px-3 py-1 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs cursor-pointer shadow-xs transition-colors flex items-center gap-1.5 shrink-0 active:scale-95"
+              >
+                <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+                <span>{t('Stop All')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Active Sound Volume Channel Strips */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {activeSoundIds.map((id) => {
+              const item = SOUND_HONEYCOMB_CATALOG.find((s) => s.id === id);
+              const vol = soundVolumes[id] ?? getSavedSoundscapeVolume(id);
+
+              return (
+                <div
+                  key={id}
+                  className="flex items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-white/90 dark:bg-[#1E1933] border border-amber-200/90 dark:border-white/10 shadow-2xs transition-all hover:border-amber-400"
+                >
+                  {/* Mini Sound Indicator */}
+                  <div className="w-8 h-8 rounded-lg bg-amber-100/90 dark:bg-amber-400/15 flex items-center justify-center text-amber-900 dark:text-amber-300 shrink-0 border border-amber-300/40">
+                    {item?.type === 'frequency' ? (
+                      <span className="text-[10px] font-black">{item.freqHz}Hz</span>
+                    ) : item?.icon ? (
+                      <div className="scale-65 origin-center">{item.icon(true)}</div>
+                    ) : (
+                      <Volume2 className="w-3.5 h-3.5" />
+                    )}
+                  </div>
+
+                  {/* Sound Name & Volume Slider */}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center justify-between text-xs leading-tight mb-1">
+                      <span className="font-bold text-slate-800 dark:text-slate-100 truncate pr-1">
+                        {t(item?.name || id)}
+                      </span>
+                      <span className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-300 shrink-0">
+                        {Math.round(vol * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.01"
+                      max="1.0"
+                      step="0.01"
+                      value={vol}
+                      aria-label={`${t(item?.name || id)} ${t('Volume')}`}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        onVolumeChange(id, val);
+                        setSoundscapeVolume(val, id);
+                      }}
+                      className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer h-1.5 bg-amber-200/70 dark:bg-white/15 rounded-lg"
+                    />
+                  </div>
+
+                  {/* Individual Stop / Remove Button */}
+                  <button
+                    type="button"
+                    onClick={() => stopSoundscape(id)}
+                    aria-label={`${t('Stop')} ${t(item?.name || id)}`}
+                    className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-rose-500 hover:text-white text-slate-500 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── THE HONEYCOMB PODS GRID (Zero cords, zero chimes) ── */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-3 sm:gap-x-4 gap-y-4 sm:gap-y-5 justify-items-center py-2 pb-6">
+        {SOUND_HONEYCOMB_CATALOG.map((item) => {
           const isPlaying = activeSoundIds.includes(item.id);
 
           return (
             <div key={item.id} className="flex flex-col items-center group w-full max-w-[88px]">
-              {/* Subtle Hanging Cord & Eyelet */}
-              <div className="flex flex-col items-center mb-0.5 pointer-events-none">
-                <div 
-                  className={`w-[1px] h-3 transition-colors ${
-                    isPlaying 
-                      ? 'bg-amber-400 dark:bg-amber-300' 
-                      : isNightMode 
-                      ? 'bg-white/20' 
-                      : 'bg-amber-900/20'
-                  }`} 
-                />
-                <div 
-                  className={`w-1.5 h-1.5 rounded-full transition-colors -mt-0.5 ${
-                    isPlaying 
-                      ? 'bg-amber-400 dark:bg-amber-300 shadow-[0_0_6px_rgba(251,191,36,0.9)]' 
-                      : isNightMode 
-                      ? 'bg-white/30' 
-                      : 'bg-amber-900/30'
-                  }`} 
-                />
-              </div>
-
-              {/* The Chime Tile Button */}
+              {/* Tactile Honeycomb Pod Button */}
               <button
                 type="button"
                 onClick={() => toggleSound(item.id)}
-                aria-label={`${item.name} sound chime. ${isPlaying ? 'Currently playing' : 'Tap to play'}`}
+                aria-label={`${item.name} sound pod. ${isPlaying ? 'Currently playing' : 'Tap to play'}`}
                 aria-pressed={isPlaying}
-                className={`relative w-17 h-17 sm:w-19 sm:h-19 rounded-[24px] sm:rounded-[26px] flex flex-col items-center justify-center p-2 cursor-pointer transition-all duration-300 transform active:scale-92 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-400 ${
+                className={`relative w-[70px] h-[78px] sm:w-[76px] sm:h-[84px] flex items-center justify-center p-2 cursor-pointer transition-all duration-300 transform active:scale-92 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-400 ${
                   isPlaying
                     ? item.type === 'frequency'
-                      ? 'bg-[#0E2238] border-2 border-cyan-300 text-cyan-200 shadow-[0_0_22px_rgba(34,211,238,0.8),0_0_45px_rgba(6,182,212,0.4)] scale-105'
+                      ? 'drop-shadow-[0_0_14px_rgba(56,189,248,0.7)] text-[#082F49] scale-105'
                       : item.type === 'blue'
-                      ? 'bg-gradient-to-b from-[#EFF6FF] to-[#DBEAFE] border-2 border-sky-300 text-sky-950 shadow-[0_0_24px_rgba(147,197,253,0.8),0_0_45px_rgba(59,130,246,0.35)] scale-105'
-                      : 'bg-gradient-to-b from-[#FFFDF7] via-[#FFF8E7] to-[#FCEEC8] border-2 border-amber-300 text-amber-950 shadow-[0_0_24px_rgba(251,191,36,0.8),0_0_50px_rgba(245,158,11,0.35)] scale-105'
+                      ? 'drop-shadow-[0_0_14px_rgba(59,130,246,0.6)] text-[#1E3A8A] scale-105'
+                      : 'drop-shadow-[0_0_16px_rgba(245,158,11,0.65)] text-[#451A03] scale-105'
                     : item.type === 'frequency'
                     ? isNightMode
-                      ? 'bg-[#152033] hover:bg-[#1E2E48] border-2 border-cyan-500/30 text-cyan-300 shadow-[0_4px_10px_rgba(0,0,0,0.25)] hover:scale-102'
-                      : 'bg-[#1E293B] hover:bg-[#2C3B53] border-2 border-cyan-600/40 text-cyan-200 shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:scale-102'
+                      ? 'drop-shadow-[0_3px_6px_rgba(0,0,0,0.3)] text-cyan-300 hover:scale-103'
+                      : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.12)] text-cyan-200 hover:scale-103'
                     : item.type === 'blue'
                     ? isNightMode
-                      ? 'bg-[#2A374F] hover:bg-[#344563] border-2 border-[#41557A] text-sky-200 shadow-[0_4px_10px_rgba(0,0,0,0.25)] hover:scale-102'
-                      : 'bg-[#DCE5F2] hover:bg-[#CFDCED] border-2 border-[#BAC9DE] text-[#24354D] shadow-[0_3px_8px_rgba(36,53,77,0.08)] hover:scale-102'
+                      ? 'drop-shadow-[0_3px_6px_rgba(0,0,0,0.3)] text-sky-200 hover:scale-103'
+                      : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)] text-[#2B4365] hover:scale-103'
                     : isNightMode
-                    ? 'bg-[#2D241C] hover:bg-[#3B3026] border-2 border-[#574637] text-[#EADBB8] shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:scale-102'
-                    : 'bg-[#EFE4CF] hover:bg-[#E7DABE] border-2 border-[#D9C7A8] text-[#5A4325] shadow-[0_3px_8px_rgba(90,67,37,0.08),inset_0_1px_1px_rgba(255,255,255,0.8)] hover:scale-102'
+                    ? 'drop-shadow-[0_3px_6px_rgba(0,0,0,0.35)] text-[#D8CFE8] hover:text-white hover:scale-103'
+                    : 'drop-shadow-[0_2px_4px_rgba(120,94,58,0.08)] text-[#6B512F] hover:text-[#451A03] hover:scale-103'
                 }`}
               >
-                {/* Active Inner Glow Aura Ring */}
-                {isPlaying && (
-                  <span 
-                    className="absolute inset-0 rounded-[24px] sm:rounded-[26px] animate-pulse pointer-events-none opacity-40 ring-2 ring-amber-300/60" 
-                    aria-hidden="true" 
-                  />
-                )}
+                {/* Honeycomb Pod Background Shape */}
+                <HoneycombPodShape
+                  id={item.id}
+                  isPlaying={isPlaying}
+                  type={item.type}
+                  isNightMode={isNightMode}
+                />
 
-                {/* Content: Frequency Pill or Vector Icon */}
-                {item.type === 'frequency' ? (
-                  <div className="flex flex-col items-center justify-center leading-none select-none">
-                    <span className="text-sm sm:text-base font-black tracking-tight">{item.freqHz}</span>
-                    <span className="text-[9px] font-bold opacity-75 mt-0.5">Hz</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    {item.icon(isPlaying)}
-                  </div>
-                )}
+                {/* Content: Frequency Number or Vector Icon */}
+                <div className="relative z-10 flex items-center justify-center pointer-events-none">
+                  {item.type === 'frequency' ? (
+                    <div className="flex flex-col items-center justify-center leading-none select-none">
+                      <span className="text-sm sm:text-base font-black tracking-tight">{item.freqHz}</span>
+                      <span className="text-[9px] font-bold opacity-85 mt-0.5">Hz</span>
+                    </div>
+                  ) : (
+                    item.icon(isPlaying)
+                  )}
+                </div>
               </button>
 
-              {/* Clean Name At Bottom */}
+              {/* Just Icon & Name At Bottom */}
               <span 
-                className={`mt-2 text-center text-xs sm:text-[13px] leading-tight transition-colors line-clamp-2 px-0.5 select-none ${
+                className={`mt-1.5 text-center text-xs sm:text-[13px] leading-tight transition-colors line-clamp-2 px-1 select-none max-w-[82px] sm:max-w-[90px] ${
                   isPlaying 
                     ? isNightMode
-                      ? 'font-black text-amber-200 drop-shadow-[0_1px_2px_rgba(251,191,36,0.4)]'
+                      ? 'font-black text-amber-300 drop-shadow-[0_1px_3px_rgba(251,191,36,0.5)]'
                       : 'font-black text-amber-950'
                     : isNightMode 
-                    ? 'font-medium text-slate-300 group-hover:text-white' 
-                    : 'font-semibold text-slate-700 group-hover:text-slate-950'
+                    ? 'font-semibold text-slate-300 group-hover:text-white' 
+                    : 'font-bold text-slate-700 group-hover:text-slate-950'
                 }`}
               >
                 {t(item.name)}
@@ -570,95 +746,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
           );
         })}
       </div>
-
-      {/* ── MINIMAL FLOATING BOTTOM MIX DRAWER ── */}
-      {activeSoundIds.length > 0 && (
-        <div className="sticky bottom-2 inset-x-0 w-full max-w-xl mx-auto z-20 mt-auto animate-in slide-in-from-bottom-3 duration-200">
-          <div className="bg-white/95 dark:bg-[#1E1B33]/95 backdrop-blur-md rounded-2xl border-2 border-amber-300/80 dark:border-amber-400/30 p-3 shadow-xl flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-black text-slate-800 dark:text-slate-100">
-                  {t('Active Sound Mix')} ({activeSoundIds.length})
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowMixDrawer(!showMixDrawer)}
-                  className="px-2 py-0.5 rounded-lg text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <Sliders className="w-3 h-3" />
-                  <span>{showMixDrawer ? t('Hide Sliders') : t('Adjust Volumes')}</span>
-                  {showMixDrawer ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => stopSoundscape()}
-                  className="px-2.5 py-1 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-xs transition-colors shrink-0"
-                >
-                  <Square className="w-3 h-3 fill-current" />
-                  <span>{t('Stop')}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Individual Sound Sliders (Collapsible) */}
-            {showMixDrawer && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-white/10">
-                {activeSoundIds.map((id) => {
-                  const item = SOUND_CHIME_CATALOG.find((s) => s.id === id);
-                  const vol = soundVolumes[id] ?? getSavedSoundscapeVolume(id);
-
-                  return (
-                    <div 
-                      key={id}
-                      className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-white/5 px-2.5 py-1.5 rounded-xl border border-slate-200/60 dark:border-white/10"
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <Volume2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                          {t(item?.name || id)}
-                        </span>
-                        <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400">
-                          {Math.round(vol * 100)}%
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <input
-                          type="range"
-                          min="0.01"
-                          max="1.0"
-                          step="0.01"
-                          value={vol}
-                          aria-label={`${t(item?.name || id)} ${t('Volume')}`}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            onVolumeChange(id, val);
-                            setSoundscapeVolume(val, id);
-                          }}
-                          className="w-18 sm:w-22 accent-teal-600 cursor-pointer"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => stopSoundscape(id)}
-                          aria-label={`${t('Stop')} ${t(item?.name || id)}`}
-                          className="w-6 h-6 rounded-lg bg-slate-200/60 dark:bg-white/10 hover:bg-rose-100 hover:text-rose-600 text-slate-500 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
+
