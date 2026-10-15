@@ -255,13 +255,69 @@ export function useRoutinesSchedule({ soundEffects }: UseRoutinesScheduleProps) 
     };
 
     setRoutines((prev) => {
-      const idx = prev.findIndex((r) => r.id === newRoutineId);
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = updatedPlanRoutine;
-        return copy;
+      let nextRoutines = [...prev];
+
+      // If a specific routine was targeted:
+      if (target.targetRoutineId) {
+        const targetIdx = nextRoutines.findIndex((r) => r.id === target.targetRoutineId);
+        if (targetIdx >= 0) {
+          const origRoutine = nextRoutines[targetIdx];
+
+          if (target.targetStepId) {
+            // Replace a specific step in the routine
+            const newSteps = origRoutine.steps.flatMap((st) => {
+              if (st.id === target.targetStepId) {
+                return target.newSteps.map((ns, i) => ({
+                  id: `replacement-${st.id}-${i}-${Date.now()}`,
+                  title: ns.title,
+                  instruction: `Replacement for ${st.title}`,
+                  durationMin: 15,
+                  completed: false,
+                  emoji: ns.emoji || '✨',
+                  time: ns.time || st.time,
+                }));
+              }
+              return [st];
+            });
+            nextRoutines[targetIdx] = {
+              ...origRoutine,
+              title: `${origRoutine.title} (Updated)`,
+              steps: newSteps,
+            };
+          } else {
+            // Replace the entire routine
+            nextRoutines[targetIdx] = {
+              ...origRoutine,
+              title: `✨ New Plan: ${target.newPlanTitle || origRoutine.title}`,
+              time: target.newSteps[0]?.time || origRoutine.time,
+              steps: target.newSteps.map((step, idx) => ({
+                id: `pc-step-${idx}-${Date.now()}`,
+                title: step.title,
+                instruction: `Step ${idx + 1} of our updated plan`,
+                durationMin: 15,
+                completed: false,
+                emoji: step.emoji || '✨',
+                time: step.time,
+              })),
+            };
+          }
+        }
       }
-      return [updatedPlanRoutine, ...prev];
+
+      // Also ensure the prominent "routine-plans-changed" appears in today's active schedule
+      const idx = nextRoutines.findIndex((r) => r.id === newRoutineId);
+      if (idx >= 0) {
+        nextRoutines[idx] = updatedPlanRoutine;
+      } else {
+        nextRoutines = [updatedPlanRoutine, ...nextRoutines];
+      }
+
+      try {
+        localStorage.setItem('beeyou_routines', JSON.stringify(nextRoutines));
+      } catch {}
+      pushFamilyStateUpdate({ routines: nextRoutines });
+
+      return nextRoutines;
     });
 
     if (soundEffects) playChime('complete');

@@ -16,9 +16,17 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
     activatePlansChanged,
     dismissPlansChanged,
     setShowPlansChangedModal,
+    routines,
   } = useApp();
 
   const [pcActive, setPcActive] = useState(plansChanged.active);
+  const [pcTargetRoutine, setPcTargetRoutine] = useState<string>(
+    plansChanged.targetRoutineId
+      ? plansChanged.targetStepId
+        ? `${plansChanged.targetRoutineId}:::${plansChanged.targetStepId}`
+        : plansChanged.targetRoutineId
+      : 'custom'
+  );
   const [pcOriginal, setPcOriginal] = useState(plansChanged.originalPlanTitle);
   const [pcReason, setPcReason] = useState(plansChanged.reason);
   const [pcNewTitle, setPcNewTitle] = useState(plansChanged.newPlanTitle);
@@ -31,6 +39,19 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [newPhraseInput, setNewPhraseInput] = useState('');
 
   const handleSavePlansChanged = () => {
+    let targetRoutineId: string | undefined = undefined;
+    let targetStepId: string | undefined = undefined;
+
+    if (pcTargetRoutine !== 'custom') {
+      if (pcTargetRoutine.includes(':::')) {
+        const [rId, sId] = pcTargetRoutine.split(':::');
+        targetRoutineId = rId;
+        targetStepId = sId;
+      } else {
+        targetRoutineId = pcTargetRoutine;
+      }
+    }
+
     activatePlansChanged({
       active: pcActive,
       originalPlanTitle: pcOriginal,
@@ -39,6 +60,8 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       calmingMessage: pcCalming,
       newSteps: pcSteps,
       relevantPhrases: pcPhrases,
+      targetRoutineId,
+      targetStepId,
     });
     onShowNotification('Plans Changed configuration updated successfully!');
   };
@@ -218,6 +241,51 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
 
       {/* Form Fields */}
       <div data-tour="plans-changed-message-input" className="space-y-4">
+        {/* Routine Selector Dropdown */}
+        <div>
+          <label className="text-xs font-black text-slate-700 block mb-1.5 flex items-center gap-1.5">
+            <span>📅</span>
+            <span>{t("Select which part of the routine changed (or type custom):")}</span>
+          </label>
+          <select
+            value={pcTargetRoutine}
+            onChange={(e) => {
+              const val = e.target.value;
+              setPcTargetRoutine(val);
+              if (val && val !== 'custom') {
+                if (val.includes(':::')) {
+                  const [rId, sId] = val.split(':::');
+                  const r = routines.find((item) => item.id === rId);
+                  const st = r?.steps.find((s) => s.id === sId);
+                  if (st && r) {
+                    setPcOriginal(`${r.title}: ${st.title}${st.time ? ` (${st.time})` : ''}`);
+                  }
+                } else {
+                  const r = routines.find((item) => item.id === val);
+                  if (r) {
+                    setPcOriginal(`${r.title}${r.time ? ` (${r.time})` : ''}`);
+                  }
+                }
+              }
+            }}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-xs sm:text-sm focus:ring-2 focus:ring-amber-400 outline-none bg-white cursor-pointer"
+          >
+            <option value="custom">✍️ {t("Custom event / appointment (type manually)")}</option>
+            {routines.map((routine) => (
+              <optgroup key={routine.id} label={`${routine.emoji} ${routine.title}`}>
+                <option value={routine.id}>
+                  {t("Entire Routine:")} {routine.title} {routine.time ? `(${routine.time})` : ''}
+                </option>
+                {routine.steps?.map((step) => (
+                  <option key={step.id} value={`${routine.id}:::${step.id}`}>
+                    &nbsp;&nbsp;↳ {t("Step:")} {step.emoji} {step.title}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-black text-slate-700 block mb-1">

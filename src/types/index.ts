@@ -231,6 +231,8 @@ export interface PlansChangedState {
   newSteps: { title: string; emoji: string; time?: string }[];
   calmingMessage: string;
   relevantPhrases: string[];
+  targetRoutineId?: string;
+  targetStepId?: string;
 }
 
 export interface EmotionRecord {
