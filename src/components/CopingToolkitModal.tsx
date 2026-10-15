@@ -59,17 +59,10 @@ export const CopingToolkitModal: React.FC = () => {
     setShowEditCalmModal,
     copingToolkitTab,
     setCopingToolkitTab,
+    settings,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound'>(
-    copingToolkitTab || 'breathing'
-  );
-
-  useEffect(() => {
-    if (copingToolkitTab && showCopingToolkit) {
-      setActiveTab(copingToolkitTab);
-    }
-  }, [copingToolkitTab, showCopingToolkit]);
+  const activeTab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound' = copingToolkitTab || 'breathing';
 
   // Breathing state
   const [breathePhase, setBreathePhase] = useState<'Inhale...' | 'Hold...' | 'Exhale...' | 'Rest...' | string>('Inhale...');
@@ -126,7 +119,9 @@ export const CopingToolkitModal: React.FC = () => {
       while (isSubscribed) {
         setBreathePhase(`Inhale (${inhaleSec}s)`);
         setBreatheScale(1.4);
-        playChime('breathe');
+        if (settings?.soundEffects) {
+          playChime('breathe');
+        }
         await new Promise((r) => setTimeout(r, inhaleSec * 1000));
         if (!isSubscribed) break;
 
@@ -153,7 +148,7 @@ export const CopingToolkitModal: React.FC = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [showCopingToolkit, activeTab, inhaleSec, holdSec, exhaleSec, pauseSec]);
+  }, [showCopingToolkit, activeTab, inhaleSec, holdSec, exhaleSec, pauseSec, settings?.soundEffects]);
 
   // Timer interval
   useEffect(() => {
@@ -170,15 +165,17 @@ export const CopingToolkitModal: React.FC = () => {
     return () => clearInterval(interval);
   }, [isTimerRunning, timerSecondsLeft]);
 
-  // Clean up soundscapes on unmount
+  // Stop soundscapes whenever modal is closed or unmounted
   useEffect(() => {
+    if (!showCopingToolkit) {
+      stopSoundscape();
+    }
     return () => {
       stopSoundscape();
     };
-  }, []);
+  }, [showCopingToolkit]);
 
   const selectTab = (tab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound') => {
-    setActiveTab(tab);
     setCopingToolkitTab(tab);
   };
 
@@ -213,7 +210,10 @@ export const CopingToolkitModal: React.FC = () => {
       aria-modal="true"
       aria-label={t('Calm & Coping Toolkit')}
       className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
-      onClick={() => setShowCopingToolkit(false)}
+      onClick={() => {
+        stopSoundscape();
+        setShowCopingToolkit(false);
+      }}
     >
       <div
         className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
@@ -440,7 +440,7 @@ export const CopingToolkitModal: React.FC = () => {
                         <button
                           onClick={() => {
                             startBreakTimer(strat.durationMin || 3);
-                            setActiveTab('timer');
+                            selectTab('timer');
                           }}
                           className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                         >

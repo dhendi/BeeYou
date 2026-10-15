@@ -44,13 +44,10 @@ export const EmergencySensoryModal: React.FC = () => {
       setSoundOn(false);
       return;
     }
-    // Auto-start preferred soundscape
-    const sc = emergencyMode.preferredSoundscape || 'brown_noise';
-    const vol = emergencyMode.preferredSoundscapeVolume ?? 0.06;
-    playSoundscape(sc);
-    setSoundscapeVolume(vol);
-    setSoundOn(true);
-    audioStartedRef.current = true;
+    // Do not autoplay sound on open; keep silent until user explicitly turns sound on
+    stopSoundscape();
+    setSoundOn(false);
+    audioStartedRef.current = false;
   }, [showEmergencyModal]);
 
   const handleClose = () => {
