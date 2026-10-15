@@ -30,6 +30,7 @@ import {
 import { EMOTIONS } from '../data/defaultData';
 import { playChime } from '../utils/audio';
 import { ThemedEmotionFace } from './ThemedEmotionFace';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStartTour?: () => void }> = ({ 
   isParentPortal = false,
@@ -66,6 +67,26 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
     (e) => e.overallDay === 'great' || e.overallDay === 'good'
   ).length;
   const positivePercentage = totalLogged > 0 ? Math.round((positiveDays / totalLogged) * 100) : 0;
+
+  // Calculate top challenge from entries (or default to routine change)
+  const challengeCounts: Record<string, number> = {};
+  filteredEntries.forEach((e) => {
+    if (e.mainChallenge && e.mainChallenge !== 'none') {
+      challengeCounts[e.mainChallenge] = (challengeCounts[e.mainChallenge] || 0) + 1;
+    }
+  });
+  const topChallengeKey = Object.entries(challengeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'routine_change';
+  const topChallengeOption = CHALLENGE_OPTIONS.find((c) => c.value === topChallengeKey) || CHALLENGE_OPTIONS[1];
+
+  // Calculate top win from entries (or default to smooth routine)
+  const winCounts: Record<string, number> = {};
+  filteredEntries.forEach((e) => {
+    if (e.bestWin) {
+      winCounts[e.bestWin] = (winCounts[e.bestWin] || 0) + 1;
+    }
+  });
+  const topWinKey = Object.entries(winCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'routine_success';
+  const topWinOption = WIN_OPTIONS.find((w) => w.value === topWinKey) || WIN_OPTIONS[0];
 
   const handleCopyReport = () => {
     if (!isPremium) {
@@ -167,14 +188,20 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
           <span className="text-[10px] font-black uppercase text-amber-800 block">
             Top Challenge
           </span>
-          <div className="flex items-center gap-1.5 mt-1 truncate">
-            <span className="text-xl">🔄</span>
+          <div className="flex items-center gap-2 mt-1 truncate">
+            <div className="w-6 h-6 shrink-0 flex items-center justify-center">
+              <RoutineStickerIcon
+                emoji={topChallengeOption.emoji}
+                title={topChallengeOption.label}
+                className="w-6 h-6 object-contain drop-shadow-2xs"
+              />
+            </div>
             <span className="text-xs font-black text-amber-950 dark:text-amber-300 truncate">
-              Plan / Routine Change
+              {topChallengeOption.label}
             </span>
           </div>
-          <span className="text-[10px] text-slate-500 block mt-0.5">
-            Sensory & transitions
+          <span className="text-[10px] text-slate-500 block mt-0.5 truncate">
+            {topChallengeOption.description || 'Sensory & transitions'}
           </span>
         </div>
 
@@ -182,14 +209,20 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
           <span className="text-[10px] font-black uppercase text-purple-700 block">
             Top Win Strategy
           </span>
-          <div className="flex items-center gap-1.5 mt-1 truncate">
-            <span className="text-xl">⏰</span>
+          <div className="flex items-center gap-2 mt-1 truncate">
+            <div className="w-6 h-6 shrink-0 flex items-center justify-center">
+              <RoutineStickerIcon
+                emoji={topWinOption.emoji}
+                title={topWinOption.label}
+                className="w-6 h-6 object-contain drop-shadow-2xs"
+              />
+            </div>
             <span className="text-xs font-black text-purple-950 dark:text-purple-300 truncate">
-              Smooth Routines
+              {topWinOption.label}
             </span>
           </div>
-          <span className="text-[10px] text-slate-500 block mt-0.5">
-            Visual timer & structure
+          <span className="text-[10px] text-slate-500 block mt-0.5 truncate">
+            {topWinOption.description || 'Visual timer & structure'}
           </span>
         </div>
       </div>
@@ -369,14 +402,14 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
                       </span>
                     )}
 
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200">
-                      <span>{win?.emoji}</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200">
+                      <RoutineStickerIcon emoji={win?.emoji} title={win?.label} className="w-4 h-4 shrink-0 object-contain drop-shadow-2xs" />
                       <span>Win: {win?.label}</span>
                     </span>
 
                     {entry.mainChallenge !== 'none' && challenge && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200">
-                        <span>{challenge.emoji}</span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200">
+                        <RoutineStickerIcon emoji={challenge.emoji} title={challenge.label} className="w-4 h-4 shrink-0 object-contain drop-shadow-2xs" />
                         <span>Trigger: {challenge.label}</span>
                       </span>
                     )}

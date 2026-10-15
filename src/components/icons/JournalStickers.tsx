@@ -178,8 +178,8 @@ export const RoutineStickerIcon: React.FC<{
     return <img src={normEmoji} alt={title || ''} className={className} />;
   }
 
-  // ⏰ Wake up / Morning
-  if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning')) return <AlarmClockSticker className={className} size={size} />;
+  // ⏰ Wake up / Morning / Routine
+  if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;
   // 🕰️ Wall Clock / Time / Hour
   if (normEmoji === '🕰️' || normEmoji === '🕐' || normEmoji === '🕒' || normTitle.includes('clock') || normTitle.includes('time check') || normTitle.includes('hour')) return <WallClockSticker className={className} size={size} />;
   // 🚗 Car / Ride / Drive / Commute
@@ -212,20 +212,20 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🍽️' || normEmoji === '🥪' || normTitle.includes('dinner') || normTitle.includes('lunch') || normTitle.includes('meal') || normTitle.includes('sandwich')) return <DinnerBowlSticker className={className} size={size} />;
   // 🎂 Birthday Party / Cake
   if (normEmoji === '🎂' || normTitle.includes('birthday') || normTitle.includes('party')) return <BirthdayStorySticker className={className} size={size} />;
-  // 🤝 Taking Turns / Sharing / Friends
-  if (normEmoji === '🤝' || normTitle.includes('turn') || normTitle.includes('sharing')) return <TakingTurnsStorySticker className={className} size={size} />;
+  // 🤝 Taking Turns / Sharing / Friends / Social
+  if (normEmoji === '🤝' || normEmoji === '👥' || normTitle.includes('turn') || normTitle.includes('sharing') || normTitle.includes('social') || normTitle.includes('friction')) return <TakingTurnsStorySticker className={className} size={size} />;
   // 🍎 Healthy Snack / Apple / Fruit
   if (normEmoji === '🍎' || normTitle.includes('snack') || normTitle.includes('apple') || normTitle.includes('fruit')) return <AppleSticker className={className} size={size} />;
   // 🍬 Candy / Treat / Reward Snack
   if (normEmoji === '🍬' || normEmoji === '🍭' || normTitle.includes('candy') || normTitle.includes('treat')) return <CandyTreatSticker className={className} size={size} />;
   // 🥤 Drink / Juice / Soda
   if (normEmoji === '🥤' || normTitle.includes('juice') || normTitle.includes('soda') || normTitle.includes('smoothie')) return <DrinkCupSticker className={className} size={size} />;
-  // 💬 Speech Bubble / Quick Phrases / Talk
-  if (normEmoji === '💬' || normEmoji === '🗨️' || normTitle.includes('phrase') || normTitle.includes('speak') || normTitle.includes('talk') || normTitle.includes('chat') || normTitle.includes('say')) return <QuickPhrasesSticker className={className} size={size} />;
+  // 💬 Speech Bubble / Quick Phrases / Talk / Communication
+  if (normEmoji === '💬' || normEmoji === '🗨️' || normEmoji === '🗣️' || normTitle.includes('phrase') || normTitle.includes('speak') || normTitle.includes('talk') || normTitle.includes('chat') || normTitle.includes('say') || normTitle.includes('communication') || normTitle.includes('expressing')) return <QuickPhrasesSticker className={className} size={size} />;
   // 💊 Pill / Medication / Vitamin
   if (normEmoji === '💊' || normTitle.includes('med') || normTitle.includes('pill') || normTitle.includes('vitamin')) return <MedicationSticker className={className} size={size} />;
-  // 🔄 Repeat / Loop / Cycle / Again / Refresh / Plans Change
-  if (normTitle.includes('plans change')) return <PlansChangeStorySticker className={className} size={size} />;
+  // 🔄 Repeat / Loop / Cycle / Again / Refresh / Plans Change / Routine Change
+  if (normTitle.includes('plans change') || normTitle.includes('routine change') || (normTitle.includes('plan') && normTitle.includes('change'))) return <PlansChangeStorySticker className={className} size={size} />;
   if (normEmoji === '🔄' || normEmoji === '🔁' || normTitle.includes('repeat') || normTitle.includes('loop') || normTitle.includes('cycle') || normTitle.includes('again') || normTitle.includes('refresh')) return <RepeatLoopSticker className={className} size={size} />;
   // 🌬️ Wind / Breeze / Fresh Air
   if (normEmoji === '🌬️' || normEmoji === '💨' || normTitle.includes('wind') || normTitle.includes('breeze') || normTitle.includes('fresh air')) return <WindBreezeSticker className={className} size={size} />;
@@ -267,8 +267,8 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '💧' || normEmoji === '🥤' || normEmoji === '🥛' || normTitle.includes('water') || normTitle.includes('drink') || normTitle.includes('hydrate')) return <DrinkWaterSticker className={className} size={size} />;
   // 🐕 Pet care / dog / cat
   if (normEmoji === '🐕' || normEmoji === '🐾' || normEmoji === '🐶' || normEmoji === '🐱' || normTitle.includes('pet') || normTitle.includes('dog') || normTitle.includes('cat')) return <PetCareSticker className={className} size={size} />;
-  // 🎵 Music / audio calm
-  if (normEmoji === '🎵' || normEmoji === '🎶' || normEmoji === '🎸' || normTitle.includes('music') || normTitle.includes('song') || normTitle.includes('listen')) return <MusicSensorySticker className={className} size={size} />;
+  // 🎵 Music / audio calm / sensory sound
+  if (normEmoji === '🎵' || normEmoji === '🎶' || normEmoji === '🎸' || normEmoji === '🔊' || normTitle.includes('music') || normTitle.includes('song') || normTitle.includes('listen') || normTitle.includes('sensory') || normTitle.includes('overload')) return <MusicSensorySticker className={className} size={size} />;
   // ☀️ Outdoor / sunshine / park
   if (normEmoji === '☀️' || normEmoji === '🌳' || normTitle.includes('outdoor') || normTitle.includes('outside') || normTitle.includes('park') || normTitle.includes('sunshine')) return <OutdoorSunSticker className={className} size={size} />;
   // 📓 Homework / study
