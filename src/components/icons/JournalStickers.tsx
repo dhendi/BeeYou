@@ -288,6 +288,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;
   // 🛁 Bath time / tub
   if (normEmoji === '🛁' || normTitle.includes('bath') || normTitle.includes('tub')) return <BathTimeSticker className={className} size={size} />;
+  // 😊 Happy
+  if (normEmoji === '😊' || normEmoji === '😄' || normEmoji === '🙂' || normTitle.includes('happy')) return <MoodHappySticker className={className} size={size} />;
+  // 😌 Calm
+  if (normEmoji === '😌' || normTitle.includes('calm') || normTitle.includes('peaceful')) return <MoodCalmSticker className={className} size={size} />;
+  // 🤩 Excited
+  if (normEmoji === '🤩' || normTitle.includes('excited')) return <MoodExcitedSticker className={className} size={size} />;
+  // 🥱 Sleepy / tired
+  if (normEmoji === '🥱' || normEmoji === '😴' || normTitle.includes('sleepy') || normTitle.includes('tired')) return <MoodSleepySticker className={className} size={size} />;
+  // 😟 Unsure / worried
+  if (normEmoji === '😟' || normEmoji === '😕' || normTitle.includes('unsure') || normTitle.includes('worried')) return <MoodUnsureSticker className={className} size={size} />;
 
   // Fallback to raw emoji if none match
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;

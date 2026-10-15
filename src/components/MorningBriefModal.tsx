@@ -303,14 +303,14 @@ export const MorningBriefModal: React.FC = () => {
                     key={mood.id}
                     type="button"
                     onClick={() => handleSelectMood(mood)}
-                    className={`p-2 sm:p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                    className={`p-2 sm:p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer active:scale-95 group ${
                       isSelected
-                        ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-xs'
-                        : 'bg-white hover:bg-amber-50/40 border-slate-200 text-slate-700'
+                        ? 'bg-amber-100/90 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-xs'
+                        : 'bg-white hover:bg-amber-50/50 border-slate-200 hover:border-amber-200 text-slate-800'
                     }`}
                   >
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 mb-1 flex items-center justify-center">
-                      <Sticker className="w-full h-full object-contain" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 mb-1 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Sticker className="w-full h-full object-contain drop-shadow-2xs" />
                     </div>
                     <span className="font-black text-[11px] text-center">{mood.label}</span>
                   </button>
