@@ -944,7 +944,16 @@ export type SoundscapeId =
   | 'box_fan'
   | 'tibetan_bowl'
   | 'campfire'
-  | 'clock_tick';
+  | 'clock_tick'
+  | 'focus_20hz'
+  | 'anxiety_396hz'
+  | 'release_528hz'
+  | 'rain_roof'
+  | 'hypnotic_words'
+  | 'sleep_affirmations'
+  | 'elvish_whispers'
+  | 'counting_sheep'
+  | 'bubble_wrap';
 
 export interface SoundscapeItem {
   id: SoundscapeId;

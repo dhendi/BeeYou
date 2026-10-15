@@ -565,6 +565,78 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     category: 'special_interest',
     tags: ['Fantasy RPG', 'Harp & Woodwinds', 'Medieval Drone', 'Premium'],
   },
+  {
+    id: 'focus_20hz',
+    name: 'Focus (20 Hz)',
+    description: 'Binaural 20Hz beta-wave cognitive clarity frequency for deep attention and study.',
+    isPremium: true,
+    category: 'focus',
+    tags: ['20Hz Beta', 'Focus', 'Cognitive', 'Premium'],
+  },
+  {
+    id: 'anxiety_396hz',
+    name: 'Anxiety Healer (396 Hz)',
+    description: 'Grounding 396Hz Solfeggio frequency to release tension, worry, and nervous flutter.',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['396Hz', 'Solfeggio', 'Calm Nervous System', 'Premium'],
+  },
+  {
+    id: 'release_528hz',
+    name: 'Emotional Release (528 Hz)',
+    description: 'Harmonic 528Hz Solfeggio frequency encouraging deep emotional release and somatic balance.',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['528Hz', 'Miracle Tone', 'Transformation', 'Premium'],
+  },
+  {
+    id: 'rain_roof',
+    name: 'Rain On Roof',
+    description: 'Gentle, comforting raindrops pattering softly on an attic wooden and tin roof.',
+    isPremium: true,
+    category: 'nature',
+    tags: ['Attic Rain', 'Tin Roof', 'Cozy Shelter', 'Premium'],
+  },
+  {
+    id: 'hypnotic_words',
+    name: 'Hypnotic Words',
+    description: 'Soothing rhythmic resonant vocal drone and swaying acoustic pendulum hum.',
+    isPremium: true,
+    category: 'focus',
+    tags: ['Hypnotic Pendulum', 'Rhythmic Cadence', 'Premium'],
+  },
+  {
+    id: 'sleep_affirmations',
+    name: 'Sleep Affirmations',
+    description: 'Dreamy 432Hz ambient lullaby pad with warm acoustic heart warmth for bedtime.',
+    isPremium: true,
+    category: 'ambient',
+    tags: ['Bedtime Pad', '432Hz', 'Affirmation', 'Premium'],
+  },
+  {
+    id: 'elvish_whispers',
+    name: 'Elvish Whispers',
+    description: 'Gentle whispering breeze harmonies through ancient twilight canopy leaves.',
+    isPremium: true,
+    category: 'special_interest',
+    tags: ['Whisper Breeze', 'Fantasy Ambience', 'ASMR Gentle', 'Premium'],
+  },
+  {
+    id: 'counting_sheep',
+    name: 'Counting Sheep',
+    description: 'Peaceful nighttime meadow with soft pasture hum and gentle distant chime.',
+    isPremium: true,
+    category: 'special_interest',
+    tags: ['Counting Sheep', 'Night Meadow', 'Sleep Aid', 'Premium'],
+  },
+  {
+    id: 'bubble_wrap',
+    name: 'Bubble Wrap',
+    description: 'Pleasing, gentle tactile sensory popping impulses for grounding and tactile focus.',
+    isPremium: true,
+    category: 'special_interest',
+    tags: ['Sensory Pop', 'Tactile Fidget', 'ASMR', 'Premium'],
+  },
 ];
 
 // Audio file mappings for authentic, high-quality ambient recordings (100% offline & seamless looping)
@@ -1761,7 +1833,241 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
         track.nodes.push(dOsc, dFilter, dGain);
       });
 
-    } else {
+    } else if (id === 'focus_20hz') {
+      // 160Hz carrier with 20Hz beta-wave amplitude modulation
+      const carrier = ctx.createOscillator();
+      carrier.type = 'sine';
+      carrier.frequency.setValueAtTime(160, now);
+
+      const modGain = ctx.createGain();
+      modGain.gain.setValueAtTime(0.5, now);
+
+      const lfo = ctx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.setValueAtTime(20, now);
+      lfo.connect(modGain.gain);
+
+      carrier.connect(modGain);
+      modGain.connect(masterGain);
+
+      carrier.start(now);
+      lfo.start(now);
+      track.nodes.push(carrier, lfo, modGain);
+
+    } else if (id === 'anxiety_396hz') {
+      // Solfeggio 396Hz pure sine with gentle 0.1Hz breathing envelope
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(396, now);
+
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(792, now);
+
+      const gain2 = ctx.createGain();
+      gain2.gain.setValueAtTime(0.15, now);
+      osc2.connect(gain2);
+
+      const tremolo = ctx.createOscillator();
+      tremolo.type = 'sine';
+      tremolo.frequency.setValueAtTime(0.12, now);
+
+      const tremoloGain = ctx.createGain();
+      tremoloGain.gain.setValueAtTime(0.7, now);
+      tremolo.connect(tremoloGain.gain);
+
+      osc.connect(tremoloGain);
+      gain2.connect(tremoloGain);
+      tremoloGain.connect(masterGain);
+
+      osc.start(now);
+      osc2.start(now);
+      tremolo.start(now);
+      track.nodes.push(osc, osc2, gain2, tremolo, tremoloGain);
+
+    } else if (id === 'release_528hz') {
+      // Solfeggio 528Hz Transformation tone with warm harmonic resonance
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(528, now);
+
+      const oscHarmonic = ctx.createOscillator();
+      oscHarmonic.type = 'sine';
+      oscHarmonic.frequency.setValueAtTime(1056, now);
+
+      const harmGain = ctx.createGain();
+      harmGain.gain.setValueAtTime(0.18, now);
+      oscHarmonic.connect(harmGain);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1200, now);
+
+      osc.connect(filter);
+      harmGain.connect(filter);
+      filter.connect(masterGain);
+
+      osc.start(now);
+      oscHarmonic.start(now);
+      track.nodes.push(osc, oscHarmonic, harmGain, filter);
+
+    } else if (id === 'rain_roof') {
+      // Filtered noise simulating rain on tin / attic roof
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.04 * white) / 1.04;
+        last = data[i];
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(1400, now);
+      bp.Q.setValueAtTime(1.8, now);
+
+      noise.connect(bp);
+      bp.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(noise, bp);
+
+    } else if (id === 'hypnotic_words') {
+      // Rhythmic resonant formant drone
+      const f1 = ctx.createOscillator();
+      f1.type = 'triangle';
+      f1.frequency.setValueAtTime(220, now);
+
+      const f2 = ctx.createOscillator();
+      f2.type = 'sine';
+      f2.frequency.setValueAtTime(330, now);
+
+      const lpf = ctx.createBiquadFilter();
+      lpf.type = 'lowpass';
+      lpf.frequency.setValueAtTime(480, now);
+
+      f1.connect(lpf);
+      f2.connect(lpf);
+      lpf.connect(masterGain);
+
+      f1.start(now);
+      f2.start(now);
+      track.nodes.push(f1, f2, lpf);
+
+    } else if (id === 'sleep_affirmations') {
+      // Dreamy 432Hz ambient lullaby pad
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(432, now);
+
+      const osc5 = ctx.createOscillator();
+      osc5.type = 'sine';
+      osc5.frequency.setValueAtTime(648, now);
+
+      const gain5 = ctx.createGain();
+      gain5.gain.setValueAtTime(0.2, now);
+      osc5.connect(gain5);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(700, now);
+
+      osc.connect(filter);
+      gain5.connect(filter);
+      filter.connect(masterGain);
+
+      osc.start(now);
+      osc5.start(now);
+      track.nodes.push(osc, osc5, gain5, filter);
+
+    } else if (id === 'elvish_whispers') {
+      // Whispering breeze filtered pink noise
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        data[i] = (b0 + b1 + b2) * 0.18;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.setValueAtTime(1800, now);
+
+      noise.connect(hp);
+      hp.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(noise, hp);
+
+    } else if (id === 'counting_sheep') {
+      // Night meadow drone with periodic gentle pentatonic chime
+      const drone = ctx.createOscillator();
+      drone.type = 'sine';
+      drone.frequency.setValueAtTime(130.81, now);
+
+      const droneFilter = ctx.createBiquadFilter();
+      droneFilter.type = 'lowpass';
+      droneFilter.frequency.setValueAtTime(220, now);
+
+      drone.connect(droneFilter);
+      droneFilter.connect(masterGain);
+      drone.start(now);
+      track.nodes.push(drone, droneFilter);
+
+      const sheepTimer = setInterval(() => {
+        if (!activeSoundTracks.has('counting_sheep')) return;
+        const sCtx = getAudioContext();
+        if (!sCtx || !track.gainNode) return;
+        const sNow = sCtx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        const note = notes[Math.floor(Math.random() * notes.length)];
+        const bell = sCtx.createOscillator();
+        const bellGain = sCtx.createGain();
+        bell.type = 'sine';
+        bell.frequency.setValueAtTime(note, sNow);
+        bellGain.gain.setValueAtTime(0.0001, sNow);
+        bellGain.gain.linearRampToValueAtTime(0.08, sNow + 0.08);
+        bellGain.gain.exponentialRampToValueAtTime(0.0001, sNow + 2.4);
+        bell.connect(bellGain);
+        bellGain.connect(track.gainNode);
+        bell.start(sNow);
+        bell.stop(sNow + 2.5);
+      }, 3500);
+      track.timers.push(sheepTimer);
+
+    } else if (id === 'bubble_wrap') {
+      // Tactile gentle bubble wrap popping impulses
+      const popTimer = setInterval(() => {
+        if (!activeSoundTracks.has('bubble_wrap')) return;
+        const pCtx = getAudioContext();
+        if (!pCtx || !track.gainNode) return;
+        const pNow = pCtx.currentTime;
+        const popOsc = pCtx.createOscillator();
+        const popGain = pCtx.createGain();
+        const baseFreq = 480 + (Math.random() * 120 - 60);
+        popOsc.type = 'sine';
+        popOsc.frequency.setValueAtTime(baseFreq, pNow);
+        popOsc.frequency.exponentialRampToValueAtTime(90, pNow + 0.04);
+        popGain.gain.setValueAtTime(0.0001, pNow);
+        popGain.gain.linearRampToValueAtTime(0.35, pNow + 0.005);
+        popGain.gain.exponentialRampToValueAtTime(0.0001, pNow + 0.045);
+        popOsc.connect(popGain);
+        popGain.connect(track.gainNode);
+        popOsc.start(pNow);
+        popOsc.stop(pNow + 0.05);
+      }, 480);
+      track.timers.push(popTimer);
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(120, now);
