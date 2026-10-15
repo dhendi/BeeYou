@@ -171,27 +171,27 @@ export const PrintScheduleModal: React.FC = () => {
       className="fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-md flex flex-col justify-between overflow-hidden animate-in fade-in duration-200"
     >
       {/* TOP CONTROLS & SETTINGS TOOLBAR (Hidden during physical print) */}
-      <header className="no-print bg-white border-b border-stone-200 shadow-sm p-3 sm:p-4 shrink-0 z-10 flex flex-col gap-3">
+      <header className="no-print bg-white border-b border-stone-200 shadow-sm p-3 sm:p-4 shrink-0 z-10 flex flex-col gap-2.5 sm:gap-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-xs shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-lg sm:text-xl shadow-xs shrink-0">
               🖨️
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-stone-900 leading-tight">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base md:text-lg font-black text-stone-900 leading-tight truncate">
                 {t('Print & Export Visual Schedules')}
               </h2>
-              <p className="text-xs text-stone-500 font-medium">
+              <p className="text-xs text-stone-500 font-medium hidden sm:block truncate">
                 {t('Physical schedules, PECS cards & scrapbook posters for home, school, or fridge!')}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs cursor-pointer active:scale-95 transition-all shrink-0"
             >
               <Printer className="w-4 h-4" />
               <span>{t('Print Now')}</span>
@@ -200,7 +200,7 @@ export const PrintScheduleModal: React.FC = () => {
             <button
               type="button"
               onClick={handleDownloadImage}
-              className="px-3.5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+              className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
               title="Download as PNG image"
             >
               <Download className="w-4 h-4 text-stone-600" />
@@ -210,8 +210,9 @@ export const PrintScheduleModal: React.FC = () => {
             <button
               type="button"
               onClick={handleClose}
-              className="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-all cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-all cursor-pointer shrink-0"
               title="Close print preview"
+              aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
@@ -219,16 +220,16 @@ export const PrintScheduleModal: React.FC = () => {
         </div>
 
         {/* Sub-mode Tabs & Customization Strip */}
-        <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-stone-100">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 pt-2 border-t border-stone-100">
           {/* Format Switcher */}
-          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto max-w-full shrink-0">
             <button
               type="button"
               onClick={() => {
                 setActiveMode('checklist');
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeMode === 'checklist'
                   ? 'bg-white text-stone-900 shadow-2xs'
                   : 'text-stone-500 hover:text-stone-900'
@@ -244,7 +245,7 @@ export const PrintScheduleModal: React.FC = () => {
                 setActiveMode('cards');
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeMode === 'cards'
                   ? 'bg-white text-stone-900 shadow-2xs'
                   : 'text-stone-500 hover:text-stone-900'
@@ -260,7 +261,7 @@ export const PrintScheduleModal: React.FC = () => {
                 setActiveMode('first-then');
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeMode === 'first-then'
                   ? 'bg-white text-stone-900 shadow-2xs'
                   : 'text-stone-500 hover:text-stone-900'
@@ -276,7 +277,7 @@ export const PrintScheduleModal: React.FC = () => {
                 setActiveMode('scrapbook');
                 playChime('tap');
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeMode === 'scrapbook'
                   ? 'bg-white text-stone-900 shadow-2xs'
                   : 'text-stone-500 hover:text-stone-900'
@@ -295,7 +296,7 @@ export const PrintScheduleModal: React.FC = () => {
                 aria-label={t('Select routine to print')}
                 value={selectedRoutineId}
                 onChange={(e) => setSelectedRoutineId(e.target.value)}
-                className="bg-stone-100 border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 cursor-pointer focus:ring-2 focus:ring-amber-400"
+                className="bg-stone-100 border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 cursor-pointer focus:ring-2 focus:ring-amber-400 max-w-[200px] truncate"
               >
                 {routines.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -311,7 +312,7 @@ export const PrintScheduleModal: React.FC = () => {
                 aria-label={t('Select scrapbook page to print')}
                 value={selectedPageIndex}
                 onChange={(e) => setSelectedPageIndex(Number(e.target.value))}
-                className="bg-stone-100 border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 cursor-pointer focus:ring-2 focus:ring-amber-400"
+                className="bg-stone-100 border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 cursor-pointer focus:ring-2 focus:ring-amber-400 max-w-[200px] truncate"
               >
                 {scrapbookPages.map((p, idx) => (
                   <option key={p.id} value={idx}>
@@ -322,11 +323,11 @@ export const PrintScheduleModal: React.FC = () => {
             )}
 
             {/* Color Mode Toggle (Color vs Ink-Saver Grayscale) */}
-            <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200">
+            <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200 shrink-0">
               <button
                 type="button"
                 onClick={() => setColorMode('color')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   colorMode === 'color' ? 'bg-white text-amber-900 shadow-2xs' : 'text-stone-500'
                 }`}
                 title="Full color palette"
@@ -336,7 +337,7 @@ export const PrintScheduleModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setColorMode('bw')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   colorMode === 'bw' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                 }`}
                 title="Ink-saver black and white for cheap printing"
@@ -347,11 +348,11 @@ export const PrintScheduleModal: React.FC = () => {
 
             {/* Card Density Toggle (when in PECS mode) */}
             {activeMode === 'cards' && (
-              <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200">
+              <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-xl border border-stone-200 shrink-0">
                 <button
                   type="button"
                   onClick={() => setCardDensity('standard')}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     cardDensity === 'standard' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                   }`}
                   title="6 Large Cards per page"
@@ -361,7 +362,7 @@ export const PrintScheduleModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCardDensity('compact')}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     cardDensity === 'compact' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                   }`}
                   title="8 Pocket Cards per page"
@@ -375,11 +376,11 @@ export const PrintScheduleModal: React.FC = () => {
       </header>
 
       {/* PRINTABLE PREVIEW CANVAS (The exact sheet that gets printed) */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex items-center justify-center bg-stone-900/50">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-stone-900/50">
         <div
           ref={printableRef}
           id="beeyou-printable-document"
-          className={`printable-document w-full max-w-[850px] min-h-[1050px] bg-white text-stone-900 p-8 sm:p-10 shadow-2xl rounded-2xl border border-stone-300 relative transition-all ${
+          className={`printable-document w-full max-w-[850px] min-h-[1050px] mx-auto my-2 sm:my-6 bg-white text-stone-900 p-6 sm:p-10 shadow-2xl rounded-2xl border border-stone-300 relative transition-all ${
             colorMode === 'bw' ? 'grayscale contrast-125' : ''
           }`}
           style={{
