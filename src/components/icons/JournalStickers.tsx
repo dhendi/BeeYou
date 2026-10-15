@@ -131,6 +131,36 @@ export const GoldenTrainSticker = renderStickerPng('/assets/stickers/golden_trai
 export const RainbowHeartSticker = renderStickerPng('/assets/stickers/rainbow_heart.png', 'Rainbow Heart');
 export const MorningSunriseSticker = renderStickerPng('/assets/stickers/morning_sunrise.png', 'Morning Sunrise');
 
+// Table A Confirmed Existing Illustrated Stickers
+export const BookStorySticker = renderStickerPng('/assets/stickers/passport_book.png', 'Storybooks Reading');
+export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Cozy Armchair Break');
+export const CozyBedSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Cozy Bedroom Bed');
+export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
+export const GameControllerSticker = renderStickerPng('/assets/stickers/toy_box.png', 'Video Game Controller');
+export const LungsBreathingSticker = renderStickerPng('/assets/stickers/lungs_inhaler.png', 'Deep Breathing Lungs');
+export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
+export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
+
+// Table B User-Provided Outings, Coping, Pets & Wellness Stickers
+export const PlanetSaturnSticker = renderStickerPng('/assets/stickers/planet_saturn.png', 'Planet Saturn');
+export const AutumnLeafSticker = renderStickerPng('/assets/stickers/autumn_leaf.png', 'Autumn Leaf');
+export const OceanWaveSticker = renderStickerPng('/assets/stickers/ocean_wave.png', 'Ocean Wave Overwhelmed');
+export const BatteryMeterSticker = renderStickerPng('/assets/stickers/battery_meter.png', 'Battery Meter');
+export const PawPrintSticker = renderStickerPng('/assets/stickers/paw_print.png', 'Pet Paw Print');
+export const BoneTreatSticker = renderStickerPng('/assets/stickers/bone_treat.png', 'Dog Bone Treat');
+export const TennisBallSticker = renderStickerPng('/assets/stickers/tennis_ball.png', 'Tennis Ball');
+export const PottedPlantSticker = renderStickerPng('/assets/stickers/potted_plant.png', 'Potted Plant Care');
+export const LaundryHamperSticker = renderStickerPng('/assets/stickers/laundry_hamper.png', 'Laundry Hamper');
+export const ChocolateBarSticker = renderStickerPng('/assets/stickers/chocolate_bar.png', 'Comfort Chocolate Bar');
+export const RedBalloonSticker = renderStickerPng('/assets/stickers/red_balloon.png', 'Red Balloon');
+export const ShoppingCartSticker = renderStickerPng('/assets/stickers/shopping_cart.png', 'Supermarket Shopping Cart');
+export const AirplaneFlightSticker = renderStickerPng('/assets/stickers/airplane_flight.png', 'Passenger Airplane Flight');
+export const TravelLuggageSticker = renderStickerPng('/assets/stickers/travel_luggage.png', 'Travel Rolling Luggage');
+export const BoardingTicketSticker = renderStickerPng('/assets/stickers/boarding_ticket.png', 'Boarding Pass Ticket');
+export const QuietVoiceSticker = renderStickerPng('/assets/stickers/quiet_voice.png', 'Quiet Inside Voice');
+export const HotCocoaSticker = renderStickerPng('/assets/stickers/hot_cocoa.png', 'Warm Hot Cocoa Mug');
+export const JigsawPuzzleSticker = renderStickerPng('/assets/stickers/jigsaw_puzzle.png', 'Jigsaw Puzzle Piece');
+
 // AAC Dedicated Category Badge Stickers
 export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
 export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.png', 'Favorite Sentences');
@@ -250,6 +280,62 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🌈' || normTitle.includes('rainbow heart') || (normTitle.includes('rainbow') && normTitle.includes('heart'))) return <RainbowHeartSticker className={className} size={size} />;
   // 🌅 Morning Sun / Sunrise / Morning Superstar
   if (normEmoji === '🌅' || normTitle.includes('morning sun') || normTitle.includes('sunrise') || normTitle.includes('morning superstar')) return <MorningSunriseSticker className={className} size={size} />;
+
+  // 📚 / 📖 Books / Storybooks / Library
+  if (normEmoji === '📚' || normEmoji === '📖' || normTitle.includes('book') || normTitle.includes('library') || normTitle.includes('story')) return <BookStorySticker className={className} size={size} />;
+  // 🛋️ Cozy Armchair / Blanket Fort / Quiet Break / Couch
+  if (normEmoji === '🛋️' || normTitle.includes('armchair') || normTitle.includes('blanket fort') || normTitle.includes('fort') || normTitle.includes('couch')) return <CozyArmchairSticker className={className} size={size} />;
+  // 🛏️ Bed / Bedroom / Sleep Sanctuary
+  if (normEmoji === '🛏️' || normTitle.includes('bed') || normTitle.includes('bedroom')) return <CozyBedSticker className={className} size={size} />;
+  // 🌳 / 🌲 Green Tree / Sunny Yard / Nature Walk
+  if (normEmoji === '🌳' || normEmoji === '🌲' || normTitle.includes('yard') || normTitle.includes('nature') || normTitle.includes('tree')) return <GreenTreeSticker className={className} size={size} />;
+  // 🎮 Video Game / Special Interest
+  if (normEmoji === '🎮' || normTitle.includes('game') || normTitle.includes('gaming') || normTitle.includes('console')) return <GameControllerSticker className={className} size={size} />;
+  // 🫁 Deep Breathing / Lungs Pacer
+  if (normEmoji === '🫁' || normTitle.includes('lung') || normTitle.includes('breathing pacer')) return <LungsBreathingSticker className={className} size={size} />;
+  // 💤 Rest / Power Nap / Zzz
+  if (normEmoji === '💤' || normTitle.includes('nap') || (normTitle.includes('rest') && normTitle.includes('power'))) return <RestNapSticker className={className} size={size} />;
+  // 🤒 Feeling Unwell / Fever / Sick
+  if (normEmoji === '🤒' || normTitle.includes('unwell') || normTitle.includes('sick') || normTitle.includes('fever')) return <SickFeverSticker className={className} size={size} />;
+  // 🏥 Clinic / Hospital / Doctor Office
+  if (normEmoji === '🏥' || normTitle.includes('clinic') || normTitle.includes('hospital')) return <DoctorAdventureSticker className={className} size={size} />;
+
+  // 🪐 Planet Saturn / Spacey / Daydream
+  if (normEmoji === '🪐' || normTitle.includes('saturn') || normTitle.includes('spacey') || normTitle.includes('planet')) return <PlanetSaturnSticker className={className} size={size} />;
+  // 🍂 Autumn Leaf / Melancholy
+  if (normEmoji === '🍂' || normTitle.includes('leaf') || normTitle.includes('autumn') || normTitle.includes('melanchol')) return <AutumnLeafSticker className={className} size={size} />;
+  // 🌊 Ocean Wave / Overwhelmed Surge
+  if (normEmoji === '🌊' || normTitle.includes('wave') || normTitle.includes('ocean') || normTitle.includes('overwhelm')) return <OceanWaveSticker className={className} size={size} />;
+  // 🔋 / 🪫 Battery Meter
+  if (normEmoji === '🔋' || normEmoji === '🪫' || normTitle.includes('battery')) return <BatteryMeterSticker className={className} size={size} />;
+  // 🐾 Paw Print / Pet
+  if (normEmoji === '🐾' || normTitle.includes('paw')) return <PawPrintSticker className={className} size={size} />;
+  // 🦴 Bone Treat / Feed
+  if (normEmoji === '🦴' || normTitle.includes('bone')) return <BoneTreatSticker className={className} size={size} />;
+  // 🎾 Tennis Ball / Play Fetch
+  if (normEmoji === '🎾' || normTitle.includes('tennis')) return <TennisBallSticker className={className} size={size} />;
+  // 🪴 Potted Plant / Plant Care
+  if (normEmoji === '🪴' || normTitle.includes('plant') || normTitle.includes('sprout')) return <PottedPlantSticker className={className} size={size} />;
+  // 🧺 Laundry Hamper / Tidy Clothes
+  if (normEmoji === '🧺' || normTitle.includes('hamper') || normTitle.includes('laundry')) return <LaundryHamperSticker className={className} size={size} />;
+  // 🍫 Chocolate Bar / Comfort Craving
+  if (normEmoji === '🍫' || normTitle.includes('chocolate')) return <ChocolateBarSticker className={className} size={size} />;
+  // 🎈 Red Balloon / Bloating
+  if (normEmoji === '🎈' || normTitle.includes('balloon') || normTitle.includes('bloat')) return <RedBalloonSticker className={className} size={size} />;
+  // 🛒 Shopping Cart / Supermarket
+  if (normEmoji === '🛒' || normTitle.includes('cart') || normTitle.includes('supermarket') || normTitle.includes('grocery')) return <ShoppingCartSticker className={className} size={size} />;
+  // ✈️ Airplane Flight / Airport
+  if (normEmoji === '✈️' || normEmoji === '✈' || normTitle.includes('airplane') || normTitle.includes('flight') || normTitle.includes('plane') || normTitle.includes('airport')) return <AirplaneFlightSticker className={className} size={size} />;
+  // 🧳 Travel Luggage / Suitcase
+  if (normEmoji === '🧳' || normTitle.includes('luggage') || normTitle.includes('suitcase') || normTitle.includes('bag')) return <TravelLuggageSticker className={className} size={size} />;
+  // 🎫 Boarding Ticket / Pass
+  if (normEmoji === '🎫' || normTitle.includes('ticket') || normTitle.includes('boarding pass')) return <BoardingTicketSticker className={className} size={size} />;
+  // 🤫 Quiet Voice / Inside Voice / Shh
+  if (normEmoji === '🤫' || normTitle.includes('quiet voice') || normTitle.includes('inside voice') || normTitle.includes('shh')) return <QuietVoiceSticker className={className} size={size} />;
+  // ☕ Hot Cocoa / Warm Mug
+  if (normEmoji === '☕' || normTitle.includes('cocoa') || normTitle.includes('chocolate') || normTitle.includes('mug') || normTitle.includes('warm drink') || normTitle.includes('tea')) return <HotCocoaSticker className={className} size={size} />;
+  // 🧩 Jigsaw Puzzle
+  if (normEmoji === '🧩' || normTitle.includes('puzzle') || normTitle.includes('jigsaw')) return <JigsawPuzzleSticker className={className} size={size} />;
 
   // ⏰ Wake up / Morning / Routine
   if (normEmoji === '⏰' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;

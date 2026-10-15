@@ -392,9 +392,9 @@ export const PlansChangedModal: React.FC = () => {
                           setReason(item.reason);
                           playChime('tap');
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-white/90 hover:bg-amber-100/90 border border-amber-200 text-slate-800 text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg bg-white/90 hover:bg-amber-100/90 border border-amber-200 text-slate-800 text-[11px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1.5"
                       >
-                        <span>{item.icon}</span>
+                        <RoutineStickerIcon emoji={item.icon} title={item.label} size={16} className="w-4 h-4 object-contain" />
                         <span>{t(item.label)}</span>
                       </button>
                     ))}
@@ -432,7 +432,9 @@ export const PlansChangedModal: React.FC = () => {
                         onClick={() => handleApplyPreset(preset)}
                         className="p-2.5 rounded-2xl bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition-all cursor-pointer shadow-2xs active:scale-95 flex items-start gap-2"
                       >
-                        <span className="text-xl shrink-0">{preset.steps[0]?.emoji || '✨'}</span>
+                        <div className="w-6 h-6 shrink-0 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={preset.steps[0]?.emoji || '✨'} className="w-6 h-6 object-contain" />
+                        </div>
                         <div className="min-w-0">
                           <span className="font-black text-xs text-slate-900 block truncate">
                             {t(preset.title)}

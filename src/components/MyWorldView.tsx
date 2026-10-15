@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { playChime, playEntitySound } from '../utils/audio';
 import { Rewards } from './Rewards';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const MyWorldView: React.FC = () => {
   const {
@@ -171,7 +172,7 @@ export const MyWorldView: React.FC = () => {
                     : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
                 }`}
               >
-                <span>{r.emoji}</span>
+                <RoutineStickerIcon emoji={r.emoji} title={r.label} size={22} className="w-5.5 h-5.5 object-contain" />
                 <span>{r.label}</span>
               </button>
             ))}
@@ -224,7 +225,7 @@ export const MyWorldView: React.FC = () => {
                               className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
                               title="Pet with gentle pats"
                             >
-                              <span>🐾</span>
+                              <RoutineStickerIcon emoji="🐾" title="Pet" size={16} className="w-4 h-4 object-contain" />
                               <span>Pet</span>
                             </button>
                             <button
@@ -232,7 +233,7 @@ export const MyWorldView: React.FC = () => {
                               className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
                               title="Feed a treat"
                             >
-                              <span>🦴</span>
+                              <RoutineStickerIcon emoji="🦴" title="Feed" size={16} className="w-4 h-4 object-contain" />
                               <span>Feed</span>
                             </button>
                             <button
@@ -240,7 +241,7 @@ export const MyWorldView: React.FC = () => {
                               className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
                               title="Play fetch"
                             >
-                              <span>🎾</span>
+                              <RoutineStickerIcon emoji="🎾" title="Play" size={16} className="w-4 h-4 object-contain" />
                               <span>Play</span>
                             </button>
                           </>
@@ -249,7 +250,7 @@ export const MyWorldView: React.FC = () => {
                             onClick={() => handleInteractWithItem(item.id, item.name)}
                             className="px-2 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-black rounded-xl flex items-center gap-1 cursor-pointer transition-transform active:scale-95"
                           >
-                            <span>✨</span>
+                            <RoutineStickerIcon emoji="✨" title="Interact" size={16} className="w-4 h-4 object-contain" />
                             <span>Interact</span>
                           </button>
                         )}

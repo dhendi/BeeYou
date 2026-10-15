@@ -227,9 +227,9 @@ export const FeelingsView: React.FC = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-2xl p-1.5 rounded-xl bg-slate-50">
-                        {MOOD_META[entry.primaryMood]?.emoji || '💭'}
-                      </span>
+                      <div className="w-10 h-10 p-1.5 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
+                        <RoutineStickerIcon emoji={MOOD_META[entry.primaryMood]?.emoji || '💭'} className="w-7 h-7 object-contain" />
+                      </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-bold text-slate-900 text-sm">

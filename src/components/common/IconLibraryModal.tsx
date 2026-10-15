@@ -83,6 +83,8 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   // Adventures & Community
   { id: 'cart', emoji: '🛒', label: 'Supermarket / Grocery', category: 'daily', keywords: ['grocery', 'supermarket', 'store', 'shop', 'cart', 'market', 'shopping', 'buy'] },
   { id: 'plane', emoji: '✈️', label: 'Airplane / Airport', category: 'daily', keywords: ['plane', 'airplane', 'airport', 'flight', 'travel', 'trip', 'flying'] },
+  { id: 'luggage', emoji: '🧳', label: 'Travel Luggage', category: 'daily', keywords: ['luggage', 'suitcase', 'travel', 'trip', 'pack', 'vacation'] },
+  { id: 'ticket', emoji: '🎫', label: 'Boarding Pass / Ticket', category: 'daily', keywords: ['ticket', 'boarding', 'pass', 'movie', 'concert', 'flight', 'admission'] },
   { id: 'train', emoji: '🚆', label: 'Train / Subway', category: 'daily', keywords: ['train', 'subway', 'metro', 'station', 'transit', 'ride'] },
   { id: 'zoo', emoji: '🦁', label: 'Zoo & Animals', category: 'fun', keywords: ['zoo', 'animal', 'lion', 'safari', 'wildlife', 'pets'] },
   { id: 'library', emoji: '📚', label: 'Library & Reading', category: 'daily', keywords: ['library', 'books', 'quiet', 'borrow', 'study', 'read'] },
@@ -96,6 +98,19 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'park', emoji: '🌳', label: 'Park & Nature Walk', category: 'fun', keywords: ['park', 'tree', 'walk', 'nature', 'outside', 'trail'] },
   { id: 'post', emoji: '✉️', label: 'Post Office & Mail', category: 'daily', keywords: ['mail', 'post', 'letter', 'package', 'stamp'] },
   { id: 'hotel', emoji: '🏨', label: 'Hotel & Vacation Stay', category: 'daily', keywords: ['hotel', 'motel', 'vacation', 'stay', 'trip', 'travel'] },
+
+  // New Table B Stickers
+  { id: 'saturn', emoji: '🪐', label: 'Planet Saturn', category: 'fun', keywords: ['saturn', 'planet', 'space', 'galaxy', 'astronomy', 'stars'] },
+  { id: 'leaf', emoji: '🍂', label: 'Autumn Leaf', category: 'calm', keywords: ['leaf', 'autumn', 'fall', 'nature', 'tree', 'foliage', 'season'] },
+  { id: 'wave', emoji: '🌊', label: 'Ocean Waves', category: 'calm', keywords: ['wave', 'ocean', 'water', 'sea', 'surf', 'beach', 'calm'] },
+  { id: 'battery', emoji: '🔋', label: 'Battery / Energy', category: 'calm', keywords: ['battery', 'energy', 'charge', 'power', 'stamina', 'level'] },
+  { id: 'paw', emoji: '🐾', label: 'Pet Paw Print', category: 'fun', keywords: ['paw', 'print', 'dog', 'cat', 'pet', 'animal', 'footprint'] },
+  { id: 'bone', emoji: '🦴', label: 'Dog Bone / Treat', category: 'fun', keywords: ['bone', 'treat', 'dog', 'pet', 'feed', 'snack'] },
+  { id: 'tennis', emoji: '🎾', label: 'Tennis Ball / Fetch', category: 'fun', keywords: ['tennis', 'ball', 'fetch', 'play', 'sport', 'game'] },
+  { id: 'plant', emoji: '🪴', label: 'Potted Plant', category: 'calm', keywords: ['plant', 'potted', 'houseplant', 'garden', 'nature', 'kindness'] },
+  { id: 'hamper', emoji: '🧺', label: 'Laundry Hamper', category: 'daily', keywords: ['laundry', 'hamper', 'basket', 'clothes', 'wash', 'tidy', 'chore'] },
+  { id: 'chocolate', emoji: '🍫', label: 'Chocolate Bar', category: 'food', keywords: ['chocolate', 'candy', 'treat', 'snack', 'sweet', 'craving'] },
+  { id: 'quiet_voice', emoji: '🤫', label: 'Quiet Voice / Shh', category: 'calm', keywords: ['quiet', 'voice', 'shh', 'whisper', 'soft', 'silence'] },
 
   // Favorite Phrases & Requests
   { id: 'lego', emoji: '🧱', label: 'Lego / Building Blocks', category: 'fun', keywords: ['lego', 'brick', 'block', 'toy', 'build', 'play'] },

@@ -23,9 +23,9 @@ const getHabitSticker = (id: string, emoji?: string): string | undefined => {
   if (id === 'habit-shoes' || emoji === '👟') return '/assets/stickers/sneaker_shoes.png';
   if (id === 'habit-jacket' || emoji === '🧥') return '/assets/stickers/clothes_dressed.png';
   if (id === 'habit-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.png';
-  if (id === 'habit-hamper' || emoji === '🧺') return '/assets/stickers/clothes_dressed.png';
+  if (id === 'habit-hamper' || emoji === '🧺') return '/assets/stickers/laundry_hamper.png';
   if (id === 'habit-breath' || emoji === '🧘') return '/assets/stickers/breathing_cloud.png';
-  if (id === 'habit-kindness' || emoji === '🪴') return '/assets/stickers/reward_trophy.png';
+  if (id === 'habit-kindness' || emoji === '🪴') return '/assets/stickers/potted_plant.png';
   if (id === 'habit-snack' || emoji === '🍎') return '/assets/stickers/apple_snack.png';
   return undefined;
 };

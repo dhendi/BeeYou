@@ -20,6 +20,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 import { t } from '../services/translator';
 
 const getAdventureSticker = (id: string): string | undefined => {
@@ -94,7 +95,7 @@ export const AdventuresView: React.FC = () => {
                 className="w-10 h-10 object-contain drop-shadow-xs shrink-0"
               />
             ) : (
-              <span className="text-3xl">{selectedStory.emoji}</span>
+              <RoutineStickerIcon emoji={selectedStory.emoji} className="w-10 h-10 object-contain drop-shadow-xs shrink-0" />
             )}
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">{t(selectedStory.title)}</h2>
           </div>
@@ -103,8 +104,8 @@ export const AdventuresView: React.FC = () => {
             {t('Page')} {currentPageIndex + 1} {t('of')} {selectedStory.pages.length}
           </div>
 
-          <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-indigo-50 border-2 border-indigo-100 flex items-center justify-center text-7xl sm:text-8xl mb-6 shadow-inner">
-            {page.emoji}
+          <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-indigo-50 border-2 border-indigo-100 flex items-center justify-center p-4 mb-6 shadow-inner">
+            <RoutineStickerIcon emoji={page.emoji} className="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
           </div>
 
           <p className="text-base sm:text-xl font-bold text-slate-800 max-w-lg leading-relaxed mb-6">
@@ -198,7 +199,7 @@ export const AdventuresView: React.FC = () => {
                 className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
               />
             ) : (
-              <span className="text-5xl">{selectedAdventure.emoji}</span>
+              <RoutineStickerIcon emoji={selectedAdventure.emoji} className="w-16 h-16 object-contain" />
             )}
           </div>
           <div className="flex-1 text-center sm:text-left">
@@ -278,8 +279,8 @@ export const AdventuresView: React.FC = () => {
               {t('Step')} {currentStepIndex + 1} {t('of')} {selectedAdventure.steps.length}
             </div>
 
-            <div className="w-28 h-28 rounded-3xl bg-amber-50 border-2 border-amber-200/80 flex items-center justify-center text-6xl mb-4 shadow-inner">
-              {step.emoji}
+            <div className="w-28 h-28 rounded-3xl bg-amber-50 border-2 border-amber-200/80 flex items-center justify-center p-3 mb-4 shadow-inner">
+              <RoutineStickerIcon emoji={step.emoji} className="w-20 h-20 object-contain" />
             </div>
 
             <h3 className="text-lg sm:text-xl font-black text-slate-800 mb-2">
@@ -514,7 +515,9 @@ export const AdventuresView: React.FC = () => {
                   }}
                   className="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 text-indigo-950 font-bold text-xs sm:text-sm active:scale-95 transition-all cursor-pointer text-left"
                 >
-                  <span className="text-2xl">{practice.emoji}</span>
+                  <div className="w-7 h-7 shrink-0 flex items-center justify-center">
+                    <RoutineStickerIcon emoji={practice.emoji} className="w-7 h-7 object-contain" />
+                  </div>
                   <span>{t('Say')}: "{t(practice.text)}"</span>
                 </button>
               ))}
@@ -605,7 +608,7 @@ export const AdventuresView: React.FC = () => {
                       loading="lazy"
                     />
                   ) : (
-                    <span className="text-4xl">{adventure.emoji}</span>
+                    <RoutineStickerIcon emoji={adventure.emoji} className="w-12 h-12 object-contain" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -671,7 +674,7 @@ export const AdventuresView: React.FC = () => {
                       loading="lazy"
                     />
                   ) : (
-                    <span className="text-4xl">{story.emoji}</span>
+                    <RoutineStickerIcon emoji={story.emoji} className="w-12 h-12 object-contain" />
                   )}
                 </div>
                 <div className="flex-1">

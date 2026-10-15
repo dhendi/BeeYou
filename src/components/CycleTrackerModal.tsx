@@ -23,6 +23,7 @@ import {
   Activity
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 import { FlowIntensity, CycleSymptom, CycleDailyLog } from '../types';
 
 export const CycleTrackerModal: React.FC = () => {
@@ -315,7 +316,9 @@ export const CycleTrackerModal: React.FC = () => {
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 font-bold'
                         }`}
                       >
-                        <span className="text-lg block leading-none">{opt.emoji}</span>
+                        <div className="w-5 h-5 mx-auto flex items-center justify-center">
+                          <RoutineStickerIcon emoji={opt.emoji} className="w-5 h-5 object-contain" />
+                        </div>
                         <span className="text-[10px] mt-1 block truncate">{opt.label}</span>
                       </button>
                     ))}
@@ -349,8 +352,9 @@ export const CycleTrackerModal: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-slate-700">Energy Level</span>
-                    <span className="font-black text-amber-700">
-                      {['Drained 🔋', 'Low 🪫', 'Steady ⚡', 'High 🚀', 'Overcharged 💥'][energyLevel - 1]}
+                    <span className="font-black text-amber-700 inline-flex items-center gap-1.5">
+                      {['Drained', 'Low', 'Steady', 'High', 'Overcharged'][energyLevel - 1]}
+                      <RoutineStickerIcon emoji={['🪫', '🔋', '⚡', '🚀', '💥'][energyLevel - 1]} className="w-4 h-4 object-contain inline-block" />
                     </span>
                   </div>
                   <input
@@ -388,7 +392,9 @@ export const CycleTrackerModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <span>{sym.emoji}</span>
+                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={sym.emoji} className="w-4 h-4 object-contain" />
+                        </div>
                         <span>{sym.label}</span>
                       </button>
                     );
@@ -420,7 +426,9 @@ export const CycleTrackerModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <span>{sym.emoji}</span>
+                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={sym.emoji} className="w-4 h-4 object-contain" />
+                        </div>
                         <span>{sym.label}</span>
                       </button>
                     );
@@ -473,8 +481,9 @@ export const CycleTrackerModal: React.FC = () => {
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-black text-sm text-slate-900">{log.date}</span>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${flowObj?.color || ''}`}>
-                            {flowObj?.emoji} {flowObj?.label}
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border inline-flex items-center gap-1 ${flowObj?.color || ''}`}>
+                            <RoutineStickerIcon emoji={flowObj?.emoji || '🌸'} className="w-3 h-3 object-contain inline-block" />
+                            {flowObj?.label}
                           </span>
                           {log.painLevel > 0 && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">

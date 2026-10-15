@@ -25,6 +25,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 import { MoodJournalEmotion, MoodTriggerCategory, CopingStrategyUsed, MoodJournalEntry } from '../types';
 
 export const MoodJournalModal: React.FC = () => {
@@ -273,8 +274,9 @@ export const MoodJournalModal: React.FC = () => {
                     <span>1. Primary Emotional State</span>
                     <span className="text-purple-600">*</span>
                   </label>
-                  <span className="text-xs font-bold text-slate-500">
-                    Selected: {moodOptions.find((m) => m.id === selectedMood)?.label} {moodOptions.find((m) => m.id === selectedMood)?.emoji}
+                  <span className="text-xs font-bold text-slate-500 inline-flex items-center gap-1.5">
+                    Selected: {moodOptions.find((m) => m.id === selectedMood)?.label}
+                    <RoutineStickerIcon emoji={moodOptions.find((m) => m.id === selectedMood)?.emoji || '😊'} className="w-4 h-4 object-contain inline-block" />
                   </span>
                 </div>
 
@@ -295,7 +297,9 @@ export const MoodJournalModal: React.FC = () => {
                             : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold'
                         }`}
                       >
-                        <span className="text-2xl">{opt.emoji}</span>
+                        <div className="w-8 h-8 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={opt.emoji} className="w-8 h-8 object-contain" />
+                        </div>
                         <span className="text-xs truncate w-full">{opt.label}</span>
                       </button>
                     );
@@ -391,7 +395,9 @@ export const MoodJournalModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <span>{trig.emoji}</span>
+                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={trig.emoji} className="w-4 h-4 object-contain" />
+                        </div>
                         <span>{trig.label}</span>
                       </button>
                     );
@@ -418,7 +424,9 @@ export const MoodJournalModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <span>{cop.emoji}</span>
+                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                          <RoutineStickerIcon emoji={cop.emoji} className="w-4 h-4 object-contain" />
+                        </div>
                         <span>{cop.label}</span>
                       </button>
                     );
@@ -539,9 +547,9 @@ export const MoodJournalModal: React.FC = () => {
                       {/* Top Header */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-3xl p-2 rounded-2xl bg-slate-50 border border-slate-100">
-                            {moodObj?.emoji || '💭'}
-                          </span>
+                          <div className="w-12 h-12 p-1.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                            <RoutineStickerIcon emoji={moodObj?.emoji || '💭'} className="w-8 h-8 object-contain" />
+                          </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="font-black text-base text-slate-900">
@@ -611,9 +619,10 @@ export const MoodJournalModal: React.FC = () => {
                           return (
                             <span
                               key={t}
-                              className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-800 border border-rose-200"
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-800 border border-rose-200 inline-flex items-center gap-1"
                             >
-                              {trigObj?.emoji} {trigObj?.label || t}
+                              <RoutineStickerIcon emoji={trigObj?.emoji || '⚡'} className="w-3 h-3 object-contain inline-block" />
+                              {trigObj?.label || t}
                             </span>
                           );
                         })}
@@ -623,9 +632,10 @@ export const MoodJournalModal: React.FC = () => {
                           return (
                             <span
                               key={c}
-                              className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200"
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200 inline-flex items-center gap-1"
                             >
-                              {copObj?.emoji} {copObj?.label || c}
+                              <RoutineStickerIcon emoji={copObj?.emoji || '🌿'} className="w-3 h-3 object-contain inline-block" />
+                              {copObj?.label || c}
                             </span>
                           );
                         })}
@@ -700,7 +710,10 @@ export const MoodJournalModal: React.FC = () => {
                     return (
                       <div key={trig.id} className="space-y-0.5">
                         <div className="flex justify-between text-xs font-bold text-slate-700">
-                          <span>{trig.emoji} {trig.label}</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <RoutineStickerIcon emoji={trig.emoji} className="w-3.5 h-3.5 object-contain inline-block" />
+                            {trig.label}
+                          </span>
                           <span>{count} times ({Math.round(percent)}%)</span>
                         </div>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
