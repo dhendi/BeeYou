@@ -284,10 +284,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                   {t('BeeYou is an all-in-one supportive space for neurodivergent minds—bringing together visual routines, AAC picture communication, gentle sensory regulation, and flexible tools tailored to you.')}
                 </p>
-                <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
-                  <span className="inline-block px-3.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 font-bold text-xs">
-                    🐝 "{t('You can be yourself here.')}"
-                  </span>
+                <div className="pt-2 flex items-center justify-center">
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                     <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('Language')}:</span>
                     <LanguageDropdown />
@@ -340,18 +337,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('Easy 2-way pairing')}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Central Get Started Button */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-base shadow-lg shadow-amber-500/25 transition-all transform active:scale-95 inline-flex items-center gap-2 cursor-pointer"
-                >
-                  <span>{t('Get Started')}</span>
-                  <ArrowRight className="w-5 h-5 stroke-3" />
-                </button>
               </div>
             </div>
           )}
