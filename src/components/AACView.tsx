@@ -703,13 +703,13 @@ export const AACView: React.FC = () => {
     }
     // Standard AAC Button Density for Full Stage & category folders
     if (buttonSize === 'large') {
-      return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full';
+      return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 w-full';
     }
     if (buttonSize === 'small') {
-      return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 w-full';
+      return 'grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 w-full';
     }
     // 'medium' (default balanced AAC standard)
-    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 w-full';
+    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 w-full';
   })();
 
   const buttonSizeStyles = (() => {
@@ -866,7 +866,7 @@ export const AACView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 relative max-w-6xl mx-auto w-full px-2 sm:px-4 py-1">
+    <div className="flex flex-col flex-1 h-full min-h-0 relative w-full px-1.5 sm:px-3 py-1">
       {/* TOP CONTROLS & HEADER */}
       <div className="space-y-1.5 shrink-0 z-20">
         

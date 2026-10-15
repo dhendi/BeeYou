@@ -222,7 +222,7 @@ const ChildAppContent: React.FC = () => {
       {/* Main Content View Switcher */}
       <main 
         ref={mainScrollRef} 
-        className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'} overscroll-contain p-2 sm:p-4 relative z-10`}
+        className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col p-1 sm:p-2' : 'overflow-y-auto p-2 sm:p-4'} overscroll-contain relative z-10`}
       >
         {childView === 'home' && <ChildHomeView />}
         {childView === 'aac' && <AACView />}
