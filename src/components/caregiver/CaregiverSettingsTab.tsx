@@ -9,6 +9,7 @@ import {
   Check,
   Lightbulb,
   Star,
+  Palette,
   Settings as SettingsIcon
 } from 'lucide-react';
 
@@ -36,6 +37,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
     importProfileBackup,
     setShowEditAlertsModal,
     setShowEditCalmModal,
+    activeTheme,
+    setShowThemeModal,
+    setEditingThemeId,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -242,6 +246,66 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* APP THEMES & VISUAL CUSTOMIZER */}
+      <div className="bg-gradient-to-br from-amber-50/70 via-yellow-50/50 to-orange-50/60 border border-amber-200/90 rounded-3xl p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300/80 flex items-center justify-center p-1 shrink-0 shadow-2xs">
+              <img src="/assets/stickers/bee_mascot.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-amber-950 flex items-center gap-2">
+                <span>{t("App Themes & Visual Customizer")}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200/90 text-amber-950 border border-amber-300">
+                  {activeTheme.name}
+                </span>
+              </h3>
+              <p className="text-xs text-amber-900/80 font-medium">
+                {t("Choose or edit themes, mascots, and color palettes across dashboard widgets and communication buttons.")}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEditingThemeId(activeTheme.id);
+              setShowThemeModal(true);
+            }}
+            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 transition-all self-start sm:self-auto shrink-0"
+          >
+            <Palette className="w-4 h-4" />
+            <span>{t("Browse & Edit Themes")}</span>
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 p-3.5 rounded-2xl border border-amber-200/70">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl p-1.5 rounded-xl bg-amber-100 border border-amber-200 shrink-0">
+              {activeTheme.mascotEmoji || activeTheme.emoji}
+            </span>
+            <div>
+              <div className="text-xs font-black text-slate-800">
+                {activeTheme.name} ({activeTheme.mascotName})
+              </div>
+              <div className="text-[11px] text-slate-500 italic mt-0.5">
+                "{activeTheme.greetingMessage}"
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div
+              className="w-6 h-6 rounded-full border-2 border-white shadow-2xs shrink-0"
+              style={{ backgroundColor: activeTheme.palette.primary }}
+              title={`Primary color ${activeTheme.palette.primary}`}
+            />
+            <span className="text-xs font-bold text-slate-600 font-mono uppercase">
+              {activeTheme.palette.primary}
+            </span>
+          </div>
         </div>
       </div>
 

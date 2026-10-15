@@ -239,7 +239,13 @@ export interface AppContextType {
   buyTheme: (themeId: string) => boolean;
   createCustomTheme: (theme: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>) => AppTheme;
   updateCustomTheme: (id: string, updates: Partial<AppTheme>) => void;
+  updateTheme: (id: string, updates: Partial<AppTheme>) => void;
+  resetThemeToPreset: (id: string) => void;
   deleteCustomTheme: (id: string) => void;
+  showThemeModal: boolean;
+  setShowThemeModal: (val: boolean) => void;
+  editingThemeId: string | null;
+  setEditingThemeId: (id: string | null) => void;
 
   // Onboarding & Multi-Age Adaptability & Role
   userPersona: UserPersona;
@@ -1047,7 +1053,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     buyTheme: themeState.buyTheme,
     createCustomTheme: themeState.createCustomTheme,
     updateCustomTheme: themeState.updateCustomTheme,
+    updateTheme: themeState.updateTheme,
+    resetThemeToPreset: themeState.resetThemeToPreset,
     deleteCustomTheme: themeState.deleteCustomTheme,
+    showThemeModal: themeState.showThemeModal,
+    setShowThemeModal: themeState.setShowThemeModal,
+    editingThemeId: themeState.editingThemeId,
+    setEditingThemeId: themeState.setEditingThemeId,
 
     // Onboarding & Multi-Age Adaptability & Role
     userPersona,

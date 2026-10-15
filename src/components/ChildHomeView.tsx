@@ -76,6 +76,7 @@ export const ChildHomeView: React.FC = () => {
     speak,
     setShowCopingToolkit,
     activeTheme,
+    setShowThemeModal,
     enabledFeatures,
     userAgeGroup,
     userPersona,
@@ -300,6 +301,20 @@ export const ChildHomeView: React.FC = () => {
               <Sun className="w-4 h-4 text-amber-600" aria-hidden="true" />
             </button>
           )}
+
+          {/* Themes & Visual Customizer */}
+          <button
+            type="button"
+            aria-label="Open Themes & Visual Style"
+            onClick={() => {
+              setShowThemeModal(true);
+              playChime('tap');
+            }}
+            className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
+            title="Themes & Visual Customizer"
+          >
+            <Palette className="w-4 h-4 text-amber-600" aria-hidden="true" />
+          </button>
 
           {/* Caregiver Alert / Connect */}
           <button

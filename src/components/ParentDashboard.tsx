@@ -82,6 +82,7 @@ import { CaregiverSettingsTab } from './caregiver/CaregiverSettingsTab';
 
 // Shared Components
 import { FamilyAuthModal } from './FamilyAuthModal';
+import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 
 export const ParentDashboard: React.FC = () => {
   const {
@@ -123,6 +124,7 @@ export const ParentDashboard: React.FC = () => {
     | 'adventures'
     | 'skills'
     | 'profile'
+    | 'themes'
     | 'settings';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -415,6 +417,12 @@ export const ParentDashboard: React.FC = () => {
           id: 'profile',
           label: 'Child Profile & Persona',
           icon: User,
+        },
+        {
+          id: 'themes',
+          label: 'Themes & Visual Studio',
+          icon: Palette,
+          badge: 'Studio',
         },
         {
           id: 'offline',
@@ -843,6 +851,13 @@ export const ParentDashboard: React.FC = () => {
             <CaregiverProfileTab 
               onShowNotification={showNotification}
               onStartTour={() => handleStartSectionTour('profile')}
+            />
+          )}
+
+          {/* TAB: THEMES & VISUAL CUSTOMIZER STUDIO */}
+          {activeTab === 'themes' && (
+            <ThemeShopAndStudio 
+              onStartTour={() => handleStartSectionTour('themes')}
             />
           )}
 

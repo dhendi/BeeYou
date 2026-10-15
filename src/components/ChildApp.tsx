@@ -64,6 +64,7 @@ const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ defa
 const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards })));
 const StickerScrapbookView = lazy(() => import('./StickerScrapbookView').then(m => ({ default: m.StickerScrapbookView })));
 const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
+const ThemeCustomizerModal = lazy(() => import('./ThemeCustomizerModal').then(m => ({ default: m.ThemeCustomizerModal })));
 
 const ChildAppContent: React.FC = () => {
   const { 
@@ -291,6 +292,7 @@ const ChildAppContent: React.FC = () => {
         />
         <RoutineStickerCelebrationModal />
         <PrintScheduleModal />
+        <ThemeCustomizerModal />
 
         {/* First-Time AAC Experience Knowledge Prompt Modal ("Do you know how AAC works?") */}
         <AACExperiencePromptModal

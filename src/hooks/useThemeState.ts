@@ -105,6 +105,9 @@ export function useThemeState({
     return true;
   };
 
+  const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
+  const [editingThemeId, setEditingThemeId] = useState<string | null>(null);
+
   const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
     if (!isPremium) {
       triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 15-day free trial.');
@@ -126,10 +129,22 @@ export function useThemeState({
     return newTheme;
   };
 
-  const updateCustomTheme = (id: string, updates: Partial<AppTheme>) => {
+  const updateTheme = (id: string, updates: Partial<AppTheme>) => {
     setThemes((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
     );
+    if (soundEffects) playChime('complete');
+    if (spokenAnnouncements && updates.name) {
+      speak(`Saved updates to ${updates.name} theme!`);
+    }
+  };
+
+  const resetThemeToPreset = (id: string) => {
+    const original = PRESET_THEMES.find((p) => p.id === id);
+    if (original) {
+      setThemes((prev) => prev.map((t) => (t.id === id ? { ...original } : t)));
+      if (soundEffects) playChime('tap');
+    }
   };
 
   const deleteCustomTheme = (id: string) => {
@@ -147,7 +162,13 @@ export function useThemeState({
     setTheme,
     buyTheme,
     createCustomTheme,
-    updateCustomTheme,
+    updateCustomTheme: updateTheme,
+    updateTheme,
+    resetThemeToPreset,
     deleteCustomTheme,
+    showThemeModal,
+    setShowThemeModal,
+    editingThemeId,
+    setEditingThemeId,
   };
 }

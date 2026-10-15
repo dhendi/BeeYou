@@ -17,6 +17,7 @@ export type TourSectionId =
   | 'adventures'
   | 'skills'
   | 'profile'
+  | 'themes'
   | 'settings';
 
 export interface TourSectionMeta {
@@ -526,6 +527,29 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         title: 'Personalization & Interests',
         instruction: 'Customize favorite comfort items, special interests (e.g. Dinosaurs, Trains), and preferred pronouns.',
         mascotHint: 'Personalizes themes and mascot greetings! 🦖',
+      },
+    ],
+  },
+
+  themes: {
+    id: 'themes',
+    title: 'Custom Themes & Sensory Studio',
+    emoji: '🎨',
+    stickerSrc: '/assets/stickers/magic_wand.png',
+    description: 'Choose ready-made themes or build personalized color palettes, mascots, and AAC emojis.',
+    tabId: 'themes',
+    steps: [
+      {
+        targetSelector: '[data-tour="themes-active-card"]',
+        title: 'Currently Active Theme',
+        instruction: 'Shows the equipped theme, mascot greeting, and customized AAC button color scheme.',
+        mascotHint: 'See which mascot is currently active! 🐝',
+      },
+      {
+        targetSelector: '[data-tour="themes-catalog-grid"]',
+        title: 'Ready-Made Theme Catalog',
+        instruction: 'Choose from 14+ neurodiversity-affirming themes like Bee Classic, Jurassic Dino, and Wise Turtle.',
+        mascotHint: 'Pick any theme to transform the entire app! 🌈',
       },
     ],
   },
