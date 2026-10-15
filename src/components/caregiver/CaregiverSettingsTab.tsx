@@ -4,7 +4,6 @@ import { useApp } from '../../context/AppContext';
 import { UserAgeGroup, DEFAULT_KID_FEATURES, DEFAULT_TEEN_FEATURES, DEFAULT_ADULT_FEATURES } from '../../types';
 import { playChime } from '../../utils/audio';
 import { 
-  Palette, 
   FileJson, 
   Download, 
   Upload, 
@@ -12,13 +11,6 @@ import {
   Lightbulb,
   Star,
   Wind,
-  Eye,
-  ZoomIn,
-  Maximize2,
-  LayoutGrid,
-  Smartphone,
-  Type,
-  Clock,
   Settings as SettingsIcon
 } from 'lucide-react';
 
@@ -260,7 +252,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-              <Palette className="w-4 h-4 text-indigo-600" />
+              <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300/80 flex items-center justify-center p-0.5 shrink-0 shadow-2xs">
+                <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              </div>
               <span>{t("AAC Tile Colors & Accessibility")}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -287,15 +281,17 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
                 (settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald'
-                  ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                  ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                   : 'border-slate-200 bg-white/70 hover:bg-white'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <Palette className="w-5 h-5 text-indigo-600" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                    <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                  </div>
                   {(settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald' && (
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                       {t("Active (Default)")}
                     </span>
                   )}
@@ -326,15 +322,17 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
                 settings.aacButtonColorMode === 'theme'
-                  ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                  ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                   : 'border-slate-200 bg-white/70 hover:bg-white'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <Star className="w-5 h-5 text-indigo-600" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                    <img src="/assets/stickers/star_gold.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                  </div>
                   {settings.aacButtonColorMode === 'theme' && (
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
                       {t("Active")}
                     </span>
                   )}
@@ -364,15 +362,17 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               }}
               className={`p-3.5 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
                 settings.aacButtonColorMode === 'high_contrast_white'
-                  ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                  ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                   : 'border-slate-200 bg-white/70 hover:bg-white'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <Eye className="w-5 h-5 text-indigo-600" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                    <img src="/assets/stickers/sensory_bright_lights.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                  </div>
                   {settings.aacButtonColorMode === 'high_contrast_white' && (
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
                       {t("Active")}
                     </span>
                   )}
@@ -408,13 +408,12 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: ZoomIn },
-              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: Maximize2 },
-              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', icon: LayoutGrid },
-              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', icon: Smartphone },
+              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', sticker: '/assets/stickers/fidget_bubbles.png' },
+              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', sticker: '/assets/stickers/fav_lego.png' },
+              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', sticker: '/assets/stickers/jigsaw_puzzle.png' },
+              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', sticker: '/assets/stickers/tablet_ipad.png' },
             ].map((preset) => {
               const isSelected = (settings.gridColumns || 4) === preset.cols;
-              const PresetIcon = preset.icon;
               return (
                 <button
                   key={preset.cols}
@@ -433,14 +432,16 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   }}
                   className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'border-indigo-600 bg-white ring-2 ring-indigo-300 shadow-xs'
+                      ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-300 shadow-xs'
                       : 'border-slate-200 bg-white/70 hover:bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <PresetIcon className="w-5 h-5 text-indigo-600" />
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                      <img src={preset.sticker} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    </div>
                     {isSelected && (
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700">
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
                         {t("Active")}
                       </span>
                     )}
@@ -458,9 +459,11 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         {/* Additional Motor & Visual Options */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
           {/* Color-Coded Action Cards Toggle */}
-          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors">
+          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors">
             <div className="flex items-center gap-2.5">
-              <Palette className="w-5 h-5 text-indigo-600 shrink-0" />
+              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Color-Coded Action Cards")}</h4>
                 <p className="text-[11px] text-slate-500 font-medium leading-snug">{t("Show multi-colored cards instead of unified yellow (Tools, Me, Communicate).")}</p>
@@ -470,13 +473,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               type="checkbox"
               checked={settings.colorCodedActionCards || false}
               onChange={(e) => updateSettings({ colorCodedActionCards: e.target.checked })}
-              className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
+              className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"
             />
           </label>
 
-          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors">
+          <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors">
             <div className="flex items-center gap-2.5">
-              <Type className="w-5 h-5 text-indigo-600 shrink-0" />
+              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                <img src="/assets/stickers/routine_writing_journal.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Extra-Large Label Text")}</h4>
                 <p className="text-[11px] text-slate-500 font-medium">{t("Enlarge text under AAC pictograms.")}</p>
@@ -486,13 +491,15 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               type="checkbox"
               checked={settings.largeButtonMode}
               onChange={(e) => updateSettings({ largeButtonMode: e.target.checked })}
-              className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
+              className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer"
             />
           </label>
 
           <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
             <div className="flex items-center gap-2.5">
-              <Clock className="w-5 h-5 text-indigo-600 shrink-0" />
+              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                <img src="/assets/stickers/wall_clock.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Touch Hold Delay")}</h4>
                 <p className="text-[11px] text-slate-500 font-medium">{t("Accidental touch / tremor protection.")}</p>
