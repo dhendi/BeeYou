@@ -111,6 +111,11 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'hamper', emoji: '🧺', label: 'Laundry Hamper', category: 'daily', keywords: ['laundry', 'hamper', 'basket', 'clothes', 'wash', 'tidy', 'chore'] },
   { id: 'chocolate', emoji: '🍫', label: 'Chocolate Bar', category: 'food', keywords: ['chocolate', 'candy', 'treat', 'snack', 'sweet', 'craving'] },
   { id: 'quiet_voice', emoji: '🤫', label: 'Quiet Voice / Shh', category: 'calm', keywords: ['quiet', 'voice', 'shh', 'whisper', 'soft', 'silence'] },
+  { id: 'bright_lights', emoji: '💡', label: 'Bright Lights Trigger', category: 'calm', keywords: ['light', 'bright', 'glare', 'sensory', 'lights', 'sun'] },
+  { id: 'loud_noise', emoji: '🔊', label: 'Loud Noise Sensitivity', category: 'calm', keywords: ['noise', 'loud', 'sound', 'auditory', 'ear', 'overload'] },
+  { id: 'social_masking', emoji: '🎭', label: 'Social Masking Fatigue', category: 'calm', keywords: ['masking', 'social', 'pretend', 'theater', 'burnout', 'tired'] },
+  { id: 'writing_journal', emoji: '✍️', label: 'Writing & Reflection', category: 'daily', keywords: ['writing', 'write', 'journal', 'reflection', 'note', 'diary'] },
+  { id: 'toilet_restroom', emoji: '🚽', label: 'Toilet / Restroom', category: 'daily', keywords: ['toilet', 'bathroom', 'restroom', 'potty', 'wash'] },
 
   // Favorite Phrases & Requests
   { id: 'lego', emoji: '🧱', label: 'Lego / Building Blocks', category: 'fun', keywords: ['lego', 'brick', 'block', 'toy', 'build', 'play'] },

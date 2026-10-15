@@ -70,7 +70,7 @@ export const TabletIpadSticker = renderStickerPng('/assets/stickers/tablet_ipad.
 
 // Morning Routine & School Step Stickers
 export const AlarmClockSticker = renderStickerPng('/assets/stickers/alarm_clock.png', 'Wake Up Alarm Clock');
-export const ToiletSticker = renderStickerPng('/assets/stickers/toilet_restroom.png', 'Toilet Restroom');
+export const ToiletSticker = renderStickerPng('/assets/stickers/routine_toilet_restroom.png', 'Toilet Restroom');
 export const PancakesSticker = renderStickerPng('/assets/stickers/pancakes_breakfast.png', 'Breakfast Pancakes');
 export const BackpackSticker = renderStickerPng('/assets/stickers/backpack_school.png', 'School Backpack');
 export const SneakersSticker = renderStickerPng('/assets/stickers/sneaker_shoes.png', 'Shoes Sneakers');
@@ -93,7 +93,7 @@ export const TrialCrownSticker = renderStickerPng('/assets/stickers/trial_crown.
 
 // Future Expansion Routine & Activity Stickers
 export const BedtimeSleepSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Bedtime Sleep');
-export const DrinkWaterSticker = renderStickerPng('/assets/stickers/drink_water.png', 'Drink Water');
+export const DrinkWaterSticker = renderStickerPng('/assets/stickers/routine_water_drink.png', 'Drink Water');
 export const PetCareSticker = renderStickerPng('/assets/stickers/pet_care.png', 'Pet Care');
 export const MusicSensorySticker = renderStickerPng('/assets/stickers/music_sensory.png', 'Music Sensory');
 export const OutdoorSunSticker = renderStickerPng('/assets/stickers/outdoor_sun.png', 'Outdoor Sunshine');
@@ -137,7 +137,7 @@ export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_
 export const CozyBedSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Cozy Bedroom Bed');
 export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
 export const GameControllerSticker = renderStickerPng('/assets/stickers/toy_box.png', 'Video Game Controller');
-export const LungsBreathingSticker = renderStickerPng('/assets/stickers/lungs_inhaler.png', 'Deep Breathing Lungs');
+export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs');
 export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
 export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
 
@@ -160,6 +160,23 @@ export const BoardingTicketSticker = renderStickerPng('/assets/stickers/boarding
 export const QuietVoiceSticker = renderStickerPng('/assets/stickers/quiet_voice.png', 'Quiet Inside Voice');
 export const HotCocoaSticker = renderStickerPng('/assets/stickers/hot_cocoa.png', 'Warm Hot Cocoa Mug');
 export const JigsawPuzzleSticker = renderStickerPng('/assets/stickers/jigsaw_puzzle.png', 'Jigsaw Puzzle Piece');
+
+// Table C Sensory Triggers, Daily Care & Community Adventures (User Provided Sheets)
+export const BrightLightsSticker = renderStickerPng('/assets/stickers/sensory_bright_lights.png', 'Bright Lights Sensory Trigger');
+export const LoudNoiseSticker = renderStickerPng('/assets/stickers/sensory_loud_noise.png', 'Loud Noise Sensitivity Trigger');
+export const SocialMaskingSticker = renderStickerPng('/assets/stickers/sensory_social_masking.png', 'Social Masking Fatigue');
+export const LungsBreathingStickerNew = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs Pacer');
+export const WritingJournalSticker = renderStickerPng('/assets/stickers/routine_writing_journal.png', 'Writing & Journaling');
+export const MedicinePillSticker = renderStickerPng('/assets/stickers/routine_medicine_pill.png', 'Daily Medication Pill');
+export const ToiletRestroomSticker = renderStickerPng('/assets/stickers/routine_toilet_restroom.png', 'Toilet Restroom');
+export const WaterDropSticker = renderStickerPng('/assets/stickers/routine_water_drink.png', 'Water Hydration Tracker');
+export const HaircutSalonSticker = renderStickerPng('/assets/stickers/adventure_haircut_salon.png', 'Hair Salon Haircut');
+export const DoctorCheckupSticker = renderStickerPng('/assets/stickers/adventure_doctor_checkup.png', 'Doctor Check-Up');
+export const SwimmingPoolSticker = renderStickerPng('/assets/stickers/adventure_swimming_pool.png', 'Swimming Pool Outing');
+export const MovieCinemaSticker = renderStickerPng('/assets/stickers/adventure_movie_cinema.png', 'Movie Cinema Theater');
+export const BowlingAlleySticker = renderStickerPng('/assets/stickers/adventure_bowling_alley.png', 'Bowling Alley Outing');
+export const CampingTentSticker = renderStickerPng('/assets/stickers/adventure_camping_tent.png', 'Camping Adventure Tent');
+export const MuseumVisitSticker = renderStickerPng('/assets/stickers/adventure_museum_visit.png', 'Museum Visit Columns');
 
 // AAC Dedicated Category Badge Stickers
 export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
@@ -198,8 +215,8 @@ export const AacCategoryIcon: React.FC<{
 // Life Adventures & Social Stories Badge Stickers
 export const DentistAdventureSticker = renderStickerPng('/assets/stickers/adventure_dentist.png', 'Visiting the Dentist');
 export const RestaurantAdventureSticker = renderStickerPng('/assets/stickers/adventure_restaurant.png', 'Eating at a Restaurant');
-export const HaircutAdventureSticker = renderStickerPng('/assets/stickers/adventure_haircut.png', 'Getting a Haircut');
-export const DoctorAdventureSticker = renderStickerPng('/assets/stickers/adventure_doctor.png', 'Doctor Check-Up');
+export const HaircutAdventureSticker = renderStickerPng('/assets/stickers/adventure_haircut_salon.png', 'Getting a Haircut');
+export const DoctorAdventureSticker = renderStickerPng('/assets/stickers/adventure_doctor_checkup.png', 'Doctor Check-Up');
 export const PlansChangeStorySticker = renderStickerPng('/assets/stickers/story_plans_change.png', 'When Plans Change');
 export const BirthdayStorySticker = renderStickerPng('/assets/stickers/story_birthday.png', 'Going to a Birthday Party');
 export const TakingTurnsStorySticker = renderStickerPng('/assets/stickers/story_sharing.png', 'Taking Turns with Toys');
@@ -336,6 +353,25 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '☕' || normTitle.includes('cocoa') || normTitle.includes('chocolate') || normTitle.includes('mug') || normTitle.includes('warm drink') || normTitle.includes('tea')) return <HotCocoaSticker className={className} size={size} />;
   // 🧩 Jigsaw Puzzle
   if (normEmoji === '🧩' || normTitle.includes('puzzle') || normTitle.includes('jigsaw')) return <JigsawPuzzleSticker className={className} size={size} />;
+
+  // 💡 Bright Lights Sensory Trigger
+  if (normEmoji === '💡' || normTitle.includes('bright light') || normTitle.includes('light sensitivity') || normTitle.includes('glare') || normTitle.includes('overhead light')) return <BrightLightsSticker className={className} size={size} />;
+  // 🔊 Loud Noise Sensitivity Trigger
+  if (normEmoji === '🔊' || normEmoji === '📢' || normTitle.includes('loud noise') || normTitle.includes('loud sound') || normTitle.includes('noise sensitivity') || normTitle.includes('loud chatter')) return <LoudNoiseSticker className={className} size={size} />;
+  // 🎭 Social Masking Fatigue
+  if (normEmoji === '🎭' || normTitle.includes('social masking') || normTitle.includes('masking') || normTitle.includes('pretending') || normTitle.includes('social fatigue') || normTitle.includes('burnout')) return <SocialMaskingSticker className={className} size={size} />;
+  // ✍️ / 📝 Writing & Reflection / Journaling
+  if (normEmoji === '✍️' || normEmoji === '✍' || (normEmoji === '📝' && (normTitle.includes('journal') || normTitle.includes('reflect') || normTitle.includes('write'))) || normTitle.includes('journal') || normTitle.includes('reflection') || normTitle.includes('diary')) return <WritingJournalSticker className={className} size={size} />;
+  // 🏊 Swimming Pool Outing
+  if (normEmoji === '🏊' || normEmoji === '🏊‍♂️' || normEmoji === '🏊‍♀️' || normTitle.includes('swim') || normTitle.includes('pool') || normTitle.includes('swimming')) return <SwimmingPoolSticker className={className} size={size} />;
+  // 🍿 Movie Cinema Theater
+  if (normEmoji === '🍿' || normEmoji === '🎬' || normTitle.includes('movie') || normTitle.includes('cinema') || normTitle.includes('theater') || normTitle.includes('popcorn') || normTitle.includes('film')) return <MovieCinemaSticker className={className} size={size} />;
+  // 🎳 Bowling Alley Outing
+  if (normEmoji === '🎳' || normTitle.includes('bowling') || normTitle.includes('pins') || normTitle.includes('strike')) return <BowlingAlleySticker className={className} size={size} />;
+  // ⛺ Camping Adventure Tent
+  if (normEmoji === '⛺' || normTitle.includes('camp') || normTitle.includes('camping') || normTitle.includes('tent') || normTitle.includes('campfire')) return <CampingTentSticker className={className} size={size} />;
+  // 🏛️ Museum Visit
+  if (normEmoji === '🏛️' || normEmoji === '🏛' || normTitle.includes('museum') || normTitle.includes('exhibit') || normTitle.includes('gallery')) return <MuseumVisitSticker className={className} size={size} />;
 
   // ⏰ Wake up / Morning / Routine
   if (normEmoji === '⏰' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;

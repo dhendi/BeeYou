@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Plus, Trash2, Printer, Share2, ChevronDown, ChevronUp } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 type Section = 'communicationStyle' | 'sensoryTriggers' | 'whatHelps' | 'specialInterests' | 'comfortItems';
 
@@ -59,7 +60,7 @@ export const CommunicationPassportModal: React.FC = () => {
           className="w-full flex items-center justify-between p-3.5 cursor-pointer"
         >
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">{emoji}</span>
+            <RoutineStickerIcon emoji={emoji} title={title} className="w-6 h-6 object-contain shrink-0" />
             <span className="font-black text-sm text-slate-800">{title}</span>
             <span className="text-xs text-slate-500 font-medium">({items.length})</span>
           </div>
@@ -141,7 +142,9 @@ export const CommunicationPassportModal: React.FC = () => {
           {/* Identity Card */}
           <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-5 text-white">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-4xl">🪪</div>
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center p-2 shrink-0">
+                <RoutineStickerIcon emoji="🪪" title="ID Card" className="w-12 h-12 object-contain drop-shadow-sm" />
+              </div>
               <div>
                 <h3 className="text-2xl font-black">{childProfile.name}</h3>
                 <p className="text-indigo-200 text-sm font-medium">Communication Passport</p>
@@ -153,7 +156,7 @@ export const CommunicationPassportModal: React.FC = () => {
           {/* Communication Style */}
           <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">💬</span>
+              <RoutineStickerIcon emoji="💬" title="How I Communicate" className="w-6 h-6 object-contain shrink-0" />
               <span className="font-black text-sm text-slate-800">How I Communicate</span>
             </div>
             <textarea

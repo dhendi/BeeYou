@@ -27,6 +27,7 @@ import {
 import { SoundscapeId } from '../types';
 import { t } from '../services/translator';
 import { SoundChimeGrid } from './soundscapes/SoundChimeGrid';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const CopingToolkitModal: React.FC = () => {
   const {
@@ -384,9 +385,9 @@ export const CopingToolkitModal: React.FC = () => {
                     className="p-3.5 rounded-2xl bg-slate-50 hover:bg-teal-50/70 border border-slate-200 hover:border-teal-300 transition-all flex flex-col justify-between gap-2 shadow-xs group"
                   >
                     <div className="flex items-start gap-2.5">
-                      <span className="text-2xl p-1.5 rounded-xl bg-white shadow-xs group-hover:scale-110 transition shrink-0">
-                        {strat.emoji}
-                      </span>
+                      <div className="p-1 rounded-xl bg-white shadow-xs group-hover:scale-105 transition shrink-0 flex items-center justify-center">
+                        <RoutineStickerIcon emoji={strat.emoji} title={strat.title} className="w-8 h-8 object-contain" />
+                      </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="text-xs font-black text-slate-800 truncate">{t(strat.title)}</p>

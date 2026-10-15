@@ -26,8 +26,13 @@ import { t } from '../services/translator';
 const getAdventureSticker = (id: string): string | undefined => {
   if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
   if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.png';
-  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut.png';
-  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor.png';
+  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut_salon.png';
+  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor_checkup.png';
+  if (id === 'adv-pool') return '/assets/stickers/adventure_swimming_pool.png';
+  if (id === 'adv-cinema') return '/assets/stickers/adventure_movie_cinema.png';
+  if (id === 'adv-bowling') return '/assets/stickers/adventure_bowling_alley.png';
+  if (id === 'adv-camping') return '/assets/stickers/adventure_camping_tent.png';
+  if (id === 'adv-museum') return '/assets/stickers/adventure_museum_visit.png';
   return undefined;
 };
 

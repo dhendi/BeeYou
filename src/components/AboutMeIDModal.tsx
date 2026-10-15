@@ -6,6 +6,7 @@ import {
   UserAgeGroup 
 } from '../types';
 import { playChime, speakText } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 import { 
   X, 
   Volume2, 
@@ -446,15 +447,22 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {aboutMe.sensorySensitivities.map((s, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs font-bold text-rose-950 flex items-center gap-2"
-                    >
-                      <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                      <span>{s}</span>
-                    </div>
-                  ))}
+                  {aboutMe.sensorySensitivities.map((s, idx) => {
+                    const l = s.toLowerCase();
+                    let stickerEmoji = '⚡';
+                    if (l.includes('noise') || l.includes('loud') || l.includes('siren') || l.includes('sound')) stickerEmoji = '🔊';
+                    else if (l.includes('light') || l.includes('flash') || l.includes('glare')) stickerEmoji = '💡';
+                    else if (l.includes('mask') || l.includes('social') || l.includes('crowd') || l.includes('tight')) stickerEmoji = '🎭';
+                    return (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs font-bold text-rose-950 flex items-center gap-2"
+                      >
+                        <RoutineStickerIcon emoji={stickerEmoji} title={s} className="w-5 h-5 object-contain shrink-0" />
+                        <span>{s}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
