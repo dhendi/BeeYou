@@ -12,8 +12,8 @@ All sound recordings in this directory are vetted and cleared for **unrestricted
   - `stream.mp3` (Babbling forest river)
   - `forest.mp3` (Wind through pines)
   - `crickets.mp3` (Twilight crickets)
-  - `white_noise.wav` (Acoustic white noise)
-  - `brown_noise.wav` (Deep brown noise)
+  - `white_noise.mp3` (Acoustic white noise)
+  - `brown_noise.mp3` (Deep brown noise)
 
 ### 2. Pixabay Content License
 - **License**: [Pixabay Content License](https://pixabay.com/service/license-summary/)
