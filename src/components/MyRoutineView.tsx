@@ -212,7 +212,7 @@ export const MyRoutineView: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
               activeSubTab === 'templates'
-                ? 'bg-sky-600 text-white shadow-xs'
+                ? 'bg-amber-500 text-white shadow-xs'
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -344,13 +344,13 @@ export const MyRoutineView: React.FC = () => {
         {/* PRE-BUILT ROUTINE TEMPLATES LIBRARY */}
         {activeSubTab === 'templates' && (
           <div className="space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between bg-sky-50 border border-sky-200 p-3 sm:p-4 rounded-2xl">
+            <div className="flex items-center justify-between bg-amber-50/70 border border-amber-200 p-3 sm:p-4 rounded-2xl">
               <div>
-                <h3 className="font-black text-sky-950 text-sm sm:text-base flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-sky-700" />
+                <h3 className="font-black text-amber-950 text-sm sm:text-base flex items-center gap-1.5">
+                  <BookOpen className="w-4 h-4 text-amber-700" />
                   <span>{t('Pre-Built Routine Templates Library')}</span>
                 </h3>
-                <p className="text-xs text-sky-800 font-medium mt-0.5">
+                <p className="text-xs text-amber-900/80 font-medium mt-0.5">
                   {t('Click "1-Tap Import" to add any routine directly to your schedule, or "Customize" to tailor steps.')}
                 </p>
               </div>
@@ -360,7 +360,7 @@ export const MyRoutineView: React.FC = () => {
                   setActiveSubTab('schedules');
                   playChime('tap');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-100 text-sky-900 border border-sky-300 font-black text-xs transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100/70 text-amber-950 border border-amber-300 font-black text-xs transition-all cursor-pointer shadow-2xs"
               >
                 ← {t('Back to Schedule')}
               </button>
