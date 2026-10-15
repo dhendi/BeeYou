@@ -122,6 +122,15 @@ export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_s
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
+// User Provided Rewards & Milestone Badges
+export const GuitarRockerSticker = renderStickerPng('/assets/stickers/guitar_rocker.png', 'Electric Guitar');
+export const DinoRexSticker = renderStickerPng('/assets/stickers/dino_rex.png', 'Friendly Dinosaur');
+export const AstronautHelmetSticker = renderStickerPng('/assets/stickers/astronaut_helmet.png', 'Cosmic Astronaut Helmet');
+export const MagicWandSticker = renderStickerPng('/assets/stickers/magic_wand.png', 'Magic Star Wand');
+export const GoldenTrainSticker = renderStickerPng('/assets/stickers/golden_train.png', 'Golden Locomotive Train');
+export const RainbowHeartSticker = renderStickerPng('/assets/stickers/rainbow_heart.png', 'Rainbow Heart');
+export const MorningSunriseSticker = renderStickerPng('/assets/stickers/morning_sunrise.png', 'Morning Sunrise');
+
 // AAC Dedicated Category Badge Stickers
 export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
 export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.png', 'Favorite Sentences');
@@ -227,8 +236,23 @@ export const RoutineStickerIcon: React.FC<{
   // 🌸 Cycle & Sensory Rhythm
   if (normEmoji === '🌸' || normTitle.includes('cycle') || normTitle.includes('rhythm')) return <ConnectHeartSticker className={className} size={size} />;
 
+  // 🎸 Electric Guitar / Routine Rocker
+  if (normEmoji === '🎸' || normTitle.includes('guitar') || normTitle.includes('rocker')) return <GuitarRockerSticker className={className} size={size} />;
+  // 🦕 / 🦖 Dinosaur / Dino Discovery / Friendly Rex
+  if (normEmoji === '🦕' || normEmoji === '🦖' || normTitle.includes('dino') || normTitle.includes('rex')) return <DinoRexSticker className={className} size={size} />;
+  // 🧑‍🚀 Astronaut / Cosmic Helmet / Space Explorer
+  if (normEmoji === '🧑‍🚀' || normTitle.includes('astronaut') || normTitle.includes('cosmic') || normTitle.includes('helmet')) return <AstronautHelmetSticker className={className} size={size} />;
+  // 🪄 Magic Star Wand / Wonder
+  if (normEmoji === '🪄' || normTitle.includes('wand') || normTitle.includes('magic')) return <MagicWandSticker className={className} size={size} />;
+  // 🚂 Golden Locomotive / Steam Train
+  if (normEmoji === '🚂' || normTitle.includes('train') || normTitle.includes('locomotive')) return <GoldenTrainSticker className={className} size={size} />;
+  // 🌈 Rainbow Heart / Feelings Explorer
+  if (normEmoji === '🌈' || normTitle.includes('rainbow heart') || (normTitle.includes('rainbow') && normTitle.includes('heart'))) return <RainbowHeartSticker className={className} size={size} />;
+  // 🌅 Morning Sun / Sunrise / Morning Superstar
+  if (normEmoji === '🌅' || normTitle.includes('morning sun') || normTitle.includes('sunrise') || normTitle.includes('morning superstar')) return <MorningSunriseSticker className={className} size={size} />;
+
   // ⏰ Wake up / Morning / Routine
-  if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;
+  if (normEmoji === '⏰' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning') || normTitle.includes('routine')) return <AlarmClockSticker className={className} size={size} />;
   // 💻 Laptop / Execution Sprint
   if (normEmoji === '💻' || normTitle.includes('execution sprint') || normTitle.includes('laptop')) return <LaptopExecutionSticker className={className} size={size} />;
   // 📋 Clipboard / Daily Shutdown / Tomorrow Prep / Passport
@@ -339,7 +363,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🐕 Pet care / dog / cat
   if (normEmoji === '🐕' || normEmoji === '🐾' || normEmoji === '🐶' || normEmoji === '🐱' || normTitle.includes('pet') || normTitle.includes('dog') || normTitle.includes('cat')) return <PetCareSticker className={className} size={size} />;
   // 🎵 Music / audio calm / sensory sound
-  if (normEmoji === '🎵' || normEmoji === '🎶' || normEmoji === '🎸' || normEmoji === '🔊' || normTitle.includes('music') || normTitle.includes('song') || normTitle.includes('listen') || normTitle.includes('sensory') || normTitle.includes('overload')) return <MusicSensorySticker className={className} size={size} />;
+  if (normEmoji === '🎵' || normEmoji === '🎶' || normEmoji === '🔊' || normTitle.includes('music') || normTitle.includes('song') || normTitle.includes('listen') || normTitle.includes('sensory') || normTitle.includes('overload')) return <MusicSensorySticker className={className} size={size} />;
   // ☀️ Outdoor / sunshine / park
   if (normEmoji === '☀️' || normEmoji === '🌳' || normTitle.includes('outdoor') || normTitle.includes('outside') || normTitle.includes('park') || normTitle.includes('sunshine')) return <OutdoorSunSticker className={className} size={size} />;
   // 📓 Homework / study

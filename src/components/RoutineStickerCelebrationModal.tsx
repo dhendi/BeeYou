@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Star, Award, ArrowRight, X } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const RoutineStickerCelebrationModal: React.FC = () => {
   const {
@@ -61,9 +62,12 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
 
         {/* Big Gleaming Digital Sticker Card */}
         <div className="relative mx-auto w-36 h-36 sm:w-40 sm:h-40 rounded-3xl bg-gradient-to-tr from-amber-200 via-yellow-100 to-sky-100 border-4 border-white shadow-lg flex items-center justify-center ring-4 ring-amber-300/50 my-2">
-          <span className="text-6xl sm:text-7xl animate-bounce select-none">
-            {newlyAwardedSticker.emoji}
-          </span>
+          <RoutineStickerIcon
+            emoji={newlyAwardedSticker.emoji}
+            title={newlyAwardedSticker.stickerName}
+            size={92}
+            className="w-24 h-24 sm:w-28 sm:h-28 object-contain animate-bounce select-none drop-shadow-md"
+          />
           <div className="absolute -bottom-2.5 px-3 py-0.5 rounded-full bg-amber-500 text-white font-black text-[11px] shadow-sm flex items-center gap-1">
             <Star className="w-3 h-3 text-white" />
             <span>New Sticker!</span>
@@ -87,7 +91,12 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
             className="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-sm rounded-2xl shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
           >
             <span>Wear as Profile Flair</span>
-            <span>{newlyAwardedSticker.emoji}</span>
+            <RoutineStickerIcon
+              emoji={newlyAwardedSticker.emoji}
+              title={newlyAwardedSticker.stickerName}
+              size={22}
+              className="w-5.5 h-5.5 object-contain"
+            />
           </button>
 
           <button

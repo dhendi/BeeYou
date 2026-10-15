@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { playChime, speakText } from '../utils/audio';
-import { RewardTrophySticker, GoldStarSticker } from './icons/JournalStickers';
+import { RewardTrophySticker, GoldStarSticker, RoutineStickerIcon } from './icons/JournalStickers';
 
 export const Rewards: React.FC = () => {
   const {
@@ -326,14 +326,19 @@ export const Rewards: React.FC = () => {
                   {/* Status Ribbon */}
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div
-                      className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-xs shrink-0 ${
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center p-1 shadow-xs shrink-0 ${
                         badge.isUnlocked
                           ? 'bg-gradient-to-br from-amber-100 to-yellow-200 border border-amber-300'
-                          : 'bg-slate-100 border border-slate-200 grayscale'
+                          : 'bg-slate-100 border border-slate-200 grayscale opacity-80'
                       }`}
                       aria-hidden="true"
                     >
-                      {badge.emoji}
+                      <RoutineStickerIcon
+                        emoji={badge.emoji}
+                        title={badge.title}
+                        size={38}
+                        className="w-9 h-9 object-contain"
+                      />
                     </div>
 
                     <div className="flex flex-col items-end">
@@ -386,7 +391,14 @@ export const Rewards: React.FC = () => {
           {selectedBadge && (
             <div className="bg-amber-50 border-2 border-amber-300 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in shadow-xs">
               <div className="flex items-center gap-3.5 text-center sm:text-left">
-                <span className="text-5xl">{selectedBadge.emoji}</span>
+                <div className="shrink-0 flex items-center justify-center">
+                  <RoutineStickerIcon
+                    emoji={selectedBadge.emoji}
+                    title={selectedBadge.title}
+                    size={56}
+                    className="w-14 h-14 object-contain drop-shadow-sm"
+                  />
+                </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-black text-amber-950">
@@ -494,8 +506,13 @@ export const Rewards: React.FC = () => {
                         </span>
                       )}
 
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-100 to-indigo-100 border border-indigo-100 flex items-center justify-center text-4xl shadow-xs my-2" aria-hidden="true">
-                        {sticker.emoji}
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-100 to-indigo-100 border border-indigo-100 flex items-center justify-center p-1 shadow-xs my-2" aria-hidden="true">
+                        <RoutineStickerIcon
+                          emoji={sticker.emoji}
+                          title={sticker.stickerName}
+                          size={46}
+                          className="w-12 h-12 object-contain"
+                        />
                       </div>
 
                       <div className="space-y-0.5">
@@ -620,8 +637,13 @@ export const Rewards: React.FC = () => {
                       </span>
                     )}
 
-                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-4xl shadow-xs my-2" aria-hidden="true">
-                      {sticker.emoji}
+                    <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center p-1 shadow-xs my-2" aria-hidden="true">
+                      <RoutineStickerIcon
+                        emoji={sticker.emoji}
+                        title={sticker.name}
+                        size={46}
+                        className="w-12 h-12 object-contain"
+                      />
                     </div>
 
                     <div>
@@ -712,8 +734,13 @@ export const Rewards: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
               <div className="relative shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white/20 backdrop-blur-md p-2 flex items-center justify-center shadow-lg border-2 border-white/30 text-4xl sm:text-5xl">
-                  {childProfile.activeSticker || '🏆'}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white/20 backdrop-blur-md p-2 flex items-center justify-center shadow-lg border-2 border-white/30">
+                  <RoutineStickerIcon
+                    emoji={childProfile.activeSticker || '🏆'}
+                    title="Active profile flair"
+                    size={56}
+                    className="w-14 h-14 object-contain drop-shadow-md"
+                  />
                 </div>
                 {/* Active Star Badge */}
                 <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-sm shadow-md border-2 border-white font-black">
