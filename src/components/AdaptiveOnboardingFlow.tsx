@@ -284,12 +284,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                   {t('BeeYou is an all-in-one supportive space for neurodivergent minds—bringing together visual routines, AAC picture communication, gentle sensory regulation, and flexible tools tailored to you.')}
                 </p>
-                <div className="pt-2 flex items-center justify-center">
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{t('Language')}:</span>
-                    <LanguageDropdown />
-                  </div>
-                </div>
               </div>
 
               {/* 4 Feature Highlights with NEW Sticker Icons */}
