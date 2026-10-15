@@ -12,6 +12,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
 
@@ -413,6 +414,34 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     type="checkbox"
                     checked={settings.soundEffects}
                     onChange={(e) => updateSettings({ soundEffects: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-12 h-7 bg-[#E0D8CB] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-xs peer-checked:bg-[#5B8E7D]"></div>
+                </label>
+              </div>
+
+              {/* Gentle Tactile Haptics (Vibration) */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                    Gentle Tactile Haptics (Vibration)
+                  </h4>
+                  <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                    Soft sensory vibration feedback when tapping AAC cards, completing routine steps, and sliding sound volumes.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={settings.hapticsEnabled ?? false}
+                    onChange={(e) => {
+                      const enabled = e.target.checked;
+                      updateSettings({ hapticsEnabled: enabled });
+                      setHapticsEnabled(enabled);
+                      if (enabled) {
+                        triggerHaptic('light', true);
+                      }
+                    }}
                     className="sr-only peer"
                   />
                   <div className="w-12 h-7 bg-[#E0D8CB] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-xs peer-checked:bg-[#5B8E7D]"></div>

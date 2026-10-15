@@ -140,6 +140,7 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   visualAlerts: true,
   soundAlerts: true,
   vibrationAlerts: true,
+  hapticsEnabled: false,
   spokenAlerts: false,
 };
 

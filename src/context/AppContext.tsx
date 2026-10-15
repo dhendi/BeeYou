@@ -55,6 +55,7 @@ import {
   INITIAL_APP_SETTINGS,
 } from '../data/defaultData';
 import { playChime } from '../utils/audio';
+import { setHapticsEnabled } from '../services/haptics';
 import { indexOfflineData } from '../utils/offlineStorage';
 import {
   syncChildStatusToCaregiver,
@@ -814,6 +815,11 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     onRemotePlansChangedSync: (plans) => routinesSchedule.activatePlansChanged(plans),
     speak: speechEngine.speak,
   });
+
+  // Keep haptics enabled status in sync with user settings
+  useEffect(() => {
+    setHapticsEnabled(settings.hapticsEnabled ?? false);
+  }, [settings.hapticsEnabled]);
 
   // Root Storage Persistence Effect
   useEffect(() => {

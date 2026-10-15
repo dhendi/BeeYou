@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routine, PlansChangedState } from '../types';
 import { DEFAULT_ROUTINES, DEFAULT_PLANS_CHANGED } from '../data/defaultData';
 import { playChime } from '../utils/audio';
+import { triggerHaptic } from '../services/haptics';
 import { pushFamilyStateUpdate } from '../services/familySync';
 
 interface UseRoutinesScheduleProps {
@@ -66,6 +67,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
   }, [routines]);
 
   const toggleRoutineStep = (routineId: string, stepId: string) => {
+    triggerHaptic('light');
     if (soundEffects) playChime('tap');
     setRoutines((prev) => {
       const routineIndex = prev.findIndex(
@@ -138,6 +140,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
       const wasAllCompleted = currentSteps.length > 0 && currentSteps.every((s) => s.completed);
       const isNowAllCompleted = newSteps.length > 0 && newSteps.every((s) => s.completed);
       if (isNowAllCompleted && !wasAllCompleted) {
+        triggerHaptic('success');
         if (soundEffects) {
           playChime('complete');
         }

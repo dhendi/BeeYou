@@ -650,6 +650,7 @@ export interface AppSettings {
   visualAlerts?: boolean;
   soundAlerts?: boolean;
   vibrationAlerts?: boolean;
+  hapticsEnabled?: boolean;
   spokenAlerts?: boolean;
 }
 

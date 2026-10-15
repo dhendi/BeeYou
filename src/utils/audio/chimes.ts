@@ -1,4 +1,5 @@
 import { getAudioContext } from './context';
+import { triggerHaptic } from '../../services/haptics';
 
 // Audio file mappings for authentic high-fidelity chimes & sound effects
 export const CHIME_AUDIO_FILES: Record<string, string> = {};
@@ -42,8 +43,17 @@ function playAudioSample(src: string, volume = 0.35): boolean {
 
 // Gentle pleasant musical chime for AAC taps and successes
 export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
-  // Silent on button taps per user request (removes navigation button press noise)
-  if (type === 'tap') return;
+  // Fire sensory haptics if enabled by user (default OFF)
+  if (type === 'tap') {
+    triggerHaptic('light');
+    return; // Silent audio on button taps per user request (removes navigation button press noise)
+  }
+  if (type === 'star' || type === 'complete') {
+    triggerHaptic('success');
+  } else if (type === 'breathe') {
+    triggerHaptic('selection');
+  }
+
   try {
     const file = CHIME_AUDIO_FILES[type];
     if (file) {

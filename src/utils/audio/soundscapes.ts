@@ -2,9 +2,23 @@ import { SoundscapeId } from '../../types';
 import { getAudioContext } from './context';
 import { SOUNDSCAPE_AUDIO_FILES, SOUNDSCAPES_CATALOG } from './catalog';
 import { ActiveSoundTrack, startProceduralTrack } from './procedural';
+import { updateBackgroundAudioKeeper, registerSoundscapeControlCallbacks } from './background';
 
 const activeSoundTracks: Map<SoundscapeId, ActiveSoundTrack> = new Map();
 const soundscapeChangeListeners: Set<(ids: SoundscapeId[]) => void> = new Set();
+
+// Register lock-screen / notification controls to stop or resume soundscapes
+registerSoundscapeControlCallbacks(
+  () => {
+    stopSoundscape();
+  },
+  () => {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  }
+);
 
 function normalizeSoundscapeVolume(vol: number): number {
   if (vol <= 0.0001) return 0;
@@ -13,6 +27,12 @@ function normalizeSoundscapeVolume(vol: number): number {
 
 function notifySoundscapeChange(): void {
   const activeIds = Array.from(activeSoundTracks.keys());
+  const activeNames = activeIds.map((id) => {
+    const found = SOUNDSCAPES_CATALOG.find((s) => s.id === id);
+    return found ? found.name : id;
+  });
+  updateBackgroundAudioKeeper(activeIds.length, activeNames);
+
   soundscapeChangeListeners.forEach((l) => {
     try {
       l(activeIds);

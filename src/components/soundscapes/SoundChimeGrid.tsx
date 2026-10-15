@@ -42,6 +42,7 @@ import {
 } from '../../utils/audio';
 import { SoundscapeId } from '../../types';
 import { t } from '../../services/translator';
+import { triggerHaptic } from '../../services/haptics';
 
 export type SoundGroup = 'all' | 'ambiance' | 'city' | 'animal' | 'focus';
 
@@ -583,6 +584,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
   }, []);
 
   const toggleSound = (id: SoundscapeId) => {
+    triggerHaptic('light');
     if (activeSoundIds.includes(id)) {
       stopSoundscape(id);
     } else {
