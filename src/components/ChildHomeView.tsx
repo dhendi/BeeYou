@@ -221,7 +221,7 @@ export const ChildHomeView: React.FC = () => {
     <div className="flex flex-col flex-1 pb-24 max-w-7xl mx-auto w-full px-2 sm:px-4 py-2 space-y-4 select-none">
       
       {/* ── TOP PROMINENT HEADER & DASHBOARD CONTROL BAR ── */}
-      <div className="bg-[#FAF8F5] border-2 border-[#E7DFD5] rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-amber-50/40 border-2 border-amber-300/80 rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Left: Friendly Greeting & Status */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button 
@@ -231,18 +231,18 @@ export const ChildHomeView: React.FC = () => {
               setShowAboutMeModal(true);
               playChime('tap');
             }}
-            className="w-12 h-12 rounded-2xl bg-white border-2 border-[#E2D8CB] flex items-center justify-center p-1.5 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="w-12 h-12 rounded-2xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 flex items-center justify-center p-1.5 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="About Me ID Card"
           >
             <IdCardSticker className="w-full h-full object-contain" />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-[#2D241E] leading-tight">
+              <h2 className="text-base sm:text-lg font-black text-amber-950 leading-tight">
                 {t('Hi')}, {childProfile.name}!
               </h2>
             </div>
-            <p className="text-xs text-[#7A6C60] font-semibold">
+            <p className="text-xs text-amber-900/80 font-semibold">
               {getPersonaLabel(userPersona, 'dashboardGreetingSubtitle')}
             </p>
           </div>
@@ -276,10 +276,10 @@ export const ChildHomeView: React.FC = () => {
               setChildView('tools');
               playChime('tap');
             }}
-            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-amber-100/70 hover:bg-amber-200 text-amber-950 border border-amber-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Open Sensory Tools"
           >
-            <LayoutGrid className="w-4 h-4 text-stone-600" aria-hidden="true" />
+            <LayoutGrid className="w-4 h-4 text-amber-950" aria-hidden="true" />
           </button>
 
           {/* Morning Brief (if enabled) */}
@@ -291,10 +291,10 @@ export const ChildHomeView: React.FC = () => {
                 setShowMorningBrief(true);
                 playChime('tap');
               }}
-              className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+              className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-amber-100/70 hover:bg-amber-200 text-amber-950 border border-amber-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               title="Open Morning Brief"
             >
-              <Sun className="w-4 h-4 text-amber-500" aria-hidden="true" />
+              <Sun className="w-4 h-4 text-amber-600" aria-hidden="true" />
             </button>
           )}
 
@@ -306,7 +306,7 @@ export const ChildHomeView: React.FC = () => {
               setShowCaregiverModal(true);
               playChime('tap');
             }}
-            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-rose-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-amber-100/70 hover:bg-amber-200 text-rose-600 border border-amber-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
             title="Caregiver Pairing & Connect"
           >
             <Heart className="w-4 h-4 text-rose-500" aria-hidden="true" />
@@ -351,22 +351,22 @@ export const ChildHomeView: React.FC = () => {
               return (
                 <div 
                   key={widget.id}
-                  className={`p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.03),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] flex items-center justify-between gap-3 ${
+                  className={`p-4 sm:p-5 rounded-[28px] border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/60 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 transition-all ${
                     isFullWidth ? 'col-span-1' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div 
-                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-[#FDF4E7] text-[#4A2F0F] border-2 border-[#E2A44E]/40 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none"
+                      className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-amber-100 text-amber-950 border-2 border-amber-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none"
                       aria-hidden="true"
                     >
                       🐝
                     </div>
                     <div className="min-w-0">
-                      <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none truncate">
+                      <h2 className="text-xl sm:text-2xl font-black text-amber-950 tracking-tight leading-none truncate">
                         {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`} 🐝
                       </h2>
-                      <p className="text-xs text-[#7A6C60] font-semibold mt-1 truncate">
+                      <p className="text-xs text-amber-900/80 font-semibold mt-1 truncate">
                         {t("Let's have a calm, wonderful day!")}
                       </p>
                     </div>
@@ -379,10 +379,10 @@ export const ChildHomeView: React.FC = () => {
                       setShowDashboardCustomizer(true);
                       playChime('tap');
                     }}
-                    className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-[#F5EFE6] hover:bg-white text-[#4A2F0F] transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-[#E0D8CB] shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                    className="p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-amber-300 shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                     title="Edit & customize dashboard layout"
                   >
-                    <SlidersHorizontal className="w-4 h-4" />
+                    <SlidersHorizontal className="w-4 h-4 text-amber-950" />
                   </button>
                 </div>
               );
@@ -396,7 +396,7 @@ export const ChildHomeView: React.FC = () => {
                       setChildView('aac');
                       playChime('tap');
                     }}
-                    className="py-3 px-3 rounded-[24px] bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#E2A44E]"
+                    className="py-3 px-3 rounded-[24px] bg-amber-200/90 hover:bg-amber-300 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-400"
                   >
                     <QuickPhrasesSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('Talk')}</span>
@@ -406,7 +406,7 @@ export const ChildHomeView: React.FC = () => {
                       setShowCopingToolkit(true);
                       playChime('tap');
                     }}
-                    className="py-3 px-3 rounded-[24px] bg-[#99C2A2] hover:bg-[#85AE8E] text-[#1C3E25] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(153,194,162,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#85AE8E]"
+                    className="py-3 px-3 rounded-[24px] bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-300"
                   >
                     <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('Calm down')}</span>
@@ -416,7 +416,7 @@ export const ChildHomeView: React.FC = () => {
                       setShowCaregiverAlertModal(true);
                       playChime('tap');
                     }}
-                    className="py-3 px-3 rounded-[24px] bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-[#D57B7B]"
+                    className="py-3 px-3 rounded-[24px] bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(245,184,101,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-300"
                   >
                     <FavHelpSosSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('I need help')}</span>
@@ -428,17 +428,17 @@ export const ChildHomeView: React.FC = () => {
               return currentRoutine ? (
                 <div 
                   key={widget.id} 
-                  className={`p-4 sm:p-5 rounded-2xl bg-white border border-stone-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3 ${
+                  className={`p-4 sm:p-5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3 ${
                     isFullWidth ? 'md:col-span-2' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-900/80">
                       {t("Today's Schedule")} • {t(currentRoutine.title)}
                     </span>
                     <button
                       onClick={() => setChildView('my-day')}
-                      className="text-xs font-bold text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-bold text-amber-900 hover:text-amber-950 flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <span>{t('Open Schedule')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -461,21 +461,21 @@ export const ChildHomeView: React.FC = () => {
                           playChime(updated.firstThen.completedFirst ? 'star' : 'tap');
                         }
                       }}
-                      className="w-full p-3 rounded-xl bg-sky-50/50 hover:bg-sky-50 border border-sky-200/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
+                      className="w-full p-3 rounded-xl bg-amber-100/70 hover:bg-amber-100 border-2 border-amber-300/90 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
                     >
                       <div className="min-w-0 flex-1">
-                        <span className={`font-bold text-xs sm:text-sm text-sky-950 truncate block ${currentRoutine.firstThen?.completedFirst ? 'line-through opacity-70' : ''}`}>
+                        <span className={`font-bold text-xs sm:text-sm text-amber-950 truncate block ${currentRoutine.firstThen?.completedFirst ? 'line-through opacity-70' : ''}`}>
                           {currentRoutine.firstThen?.first ? `${t('First')}: ${t(currentRoutine.firstThen.first)}` : `${t('First')}: ${t(currentRoutine.steps[0]?.title || 'Start routine')}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="w-7 h-7 rounded-lg bg-white border border-sky-200 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
+                        <div className="w-7 h-7 rounded-lg bg-white border border-amber-300 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
                           <RoutineStickerIcon emoji={currentRoutine.firstThen?.firstEmoji || currentRoutine.steps[0]?.emoji} title={currentRoutine.firstThen?.first || currentRoutine.steps[0]?.title} size={20} className="w-full h-full object-contain" />
                         </div>
                         <span className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center border transition-all ${
                           currentRoutine.firstThen?.completedFirst
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : 'bg-white text-stone-400 border-stone-300'
+                            ? 'bg-amber-400 text-amber-950 border-amber-500 font-black'
+                            : 'bg-white text-amber-400 border-amber-300'
                         }`}>
                           {currentRoutine.firstThen?.completedFirst ? '✓' : '○'}
                         </span>
@@ -497,21 +497,21 @@ export const ChildHomeView: React.FC = () => {
                           playChime(updated.firstThen.completedThen ? 'star' : 'tap');
                         }
                       }}
-                      className="w-full p-3 rounded-xl bg-purple-50/50 hover:bg-purple-50 border border-purple-200/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
+                      className="w-full p-3 rounded-xl bg-amber-50 hover:bg-amber-100/70 border-2 border-amber-300/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer"
                     >
                       <div className="min-w-0 flex-1">
-                        <span className={`font-bold text-xs sm:text-sm text-purple-950 truncate block ${currentRoutine.firstThen?.completedThen ? 'line-through opacity-70' : ''}`}>
+                        <span className={`font-bold text-xs sm:text-sm text-amber-950 truncate block ${currentRoutine.firstThen?.completedThen ? 'line-through opacity-70' : ''}`}>
                           {currentRoutine.firstThen?.then ? `${t('Then')}: ${t(currentRoutine.firstThen.then)}` : `${t('Then')}: ${t(currentRoutine.steps[1]?.title || 'Next step')}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="w-7 h-7 rounded-lg bg-white border border-purple-200 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
+                        <div className="w-7 h-7 rounded-lg bg-white border border-amber-300 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden">
                           <RoutineStickerIcon emoji={currentRoutine.firstThen?.thenEmoji || currentRoutine.steps[1]?.emoji} title={currentRoutine.firstThen?.then || currentRoutine.steps[1]?.title} size={20} className="w-full h-full object-contain" />
                         </div>
                         <span className={`w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center border transition-all ${
                           currentRoutine.firstThen?.completedThen
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : 'bg-stone-200/80 text-stone-500 border-stone-300'
+                            ? 'bg-amber-400 text-amber-950 border-amber-500 font-black'
+                            : 'bg-white text-amber-400 border-amber-300'
                         }`}>
                           {currentRoutine.firstThen?.completedThen ? '✓' : '○'}
                         </span>
@@ -553,7 +553,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowFivePointModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -577,7 +577,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowFidgetModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -601,7 +601,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowDecisionWheelModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -625,7 +625,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowMedicationModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 hover:bg-sky-50/80 text-sky-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -673,7 +673,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowMoodJournalModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -697,7 +697,7 @@ export const ChildHomeView: React.FC = () => {
                     setShowPassportModal(true);
                     playChime('tap');
                   }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
+                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm sm:text-base leading-snug truncate">
@@ -757,13 +757,13 @@ export const ChildHomeView: React.FC = () => {
                 <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="text-xs font-black uppercase tracking-wider text-stone-500">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-900/80">
                       {t('AAC Sensory Board • Tap to Speak')}
                     </span>
                   </div>
                   <button
                     onClick={() => setChildView('aac')}
-                    className="text-xs font-black text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer bg-stone-200/60 hover:bg-stone-200 px-3 py-1 rounded-xl transition-all"
+                    className="text-xs font-black text-amber-950 hover:text-amber-900 flex items-center gap-1 cursor-pointer bg-amber-100 hover:bg-amber-200 border border-amber-300 px-3 py-1 rounded-xl transition-all"
                   >
                     <span>{t('Full Vocabulary Board')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -819,12 +819,12 @@ export const ChildHomeView: React.FC = () => {
                 </div>
 
                 {/* Quick Speak Feedback Strip */}
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-[#EFE9DF]/80 border border-[#E0D8CB] text-xs text-stone-600 font-bold transition-all">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-300/80 text-xs text-amber-900 font-bold transition-all">
                   <div className="flex items-center gap-2 min-w-0">
                     <Zap className="w-4 h-4 text-amber-600 shrink-0" />
                     {lastSpokenPhrase ? (
                       <span className="text-amber-950 font-extrabold flex items-center gap-1.5 truncate">
-                        <span className="text-stone-500 font-semibold">{t('Spoke')}:</span> &ldquo;{lastSpokenPhrase}&rdquo;
+                        <span className="text-amber-800/70 font-semibold">{t('Spoke')}:</span> &ldquo;{lastSpokenPhrase}&rdquo;
                       </span>
                     ) : (
                       <span>{t('Instant Voice Output is active. Tap any tile above to speak aloud.')}</span>
@@ -857,9 +857,9 @@ export const ChildHomeView: React.FC = () => {
                 >
                   <button
                     type="button"
-                    className="w-full py-3 px-4 rounded-2xl bg-white/80 hover:bg-white text-stone-600 hover:text-stone-900 border border-dashed border-stone-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs mt-1"
+                    className="w-full py-3 px-4 rounded-2xl bg-amber-50/50 hover:bg-amber-100/70 text-amber-900 hover:text-amber-950 border-2 border-dashed border-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs mt-1"
                   >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-amber-900" />
                     <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
                   </button>
                 </CaregiverLockShield>
@@ -882,10 +882,10 @@ export const ChildHomeView: React.FC = () => {
             >
               <button
                 type="button"
-                className="w-full py-3.5 px-4 rounded-2xl bg-white/80 hover:bg-white text-stone-600 hover:text-stone-900 border border-dashed border-stone-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs"
+                className="w-full py-3.5 px-4 rounded-2xl bg-amber-50/50 hover:bg-amber-100/70 text-amber-900 hover:text-amber-950 border-2 border-dashed border-amber-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs"
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>＋ Customize / Reorder Dashboard Widgets</span>
+                <SlidersHorizontal className="w-4 h-4 text-amber-900" />
+                <span>＋ {t('Customize / Reorder Dashboard Widgets')}</span>
               </button>
             </CaregiverLockShield>
           </div>
