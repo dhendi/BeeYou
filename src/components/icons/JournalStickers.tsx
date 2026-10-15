@@ -84,7 +84,7 @@ export const ScienceFlaskSticker = renderStickerPng('/assets/stickers/science_fl
 
 // Onboarding, Personas & Feature Stickers
 export const LanguageGlobeSticker = renderStickerPng('/assets/stickers/language_globe.png', 'Language Globe');
-export const ChildPersonaSticker = renderStickerPng('/assets/stickers/child_persona.png', 'Child Persona');
+export const ChildPersonaSticker = renderStickerPng('/assets/stickers/child_persona.png', 'Child Persona (Teddy Bear)');
 export const TeenHeadphonesSticker = renderStickerPng('/assets/stickers/teen_headphones.png', 'Teen Headphones');
 export const AdultBriefcaseSticker = renderStickerPng('/assets/stickers/adult_briefcase.png', 'Adult Briefcase');
 export const CaregiverPhoneSticker = renderStickerPng('/assets/stickers/caregiver_phone.png', 'Caregiver Phone');
