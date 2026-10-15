@@ -95,13 +95,16 @@ export function setSoundscapeVolume(vol: number, soundId?: SoundscapeId | null):
       if (track) {
         track.volume = clamped;
         if (track.audioElement) {
-          track.audioElement.volume = clamped;
+          try {
+            track.audioElement.volume = clamped;
+          } catch (e) {}
         }
         if (track.gainNode) {
           const ctx = getAudioContext();
           if (ctx) {
             track.gainNode.gain.cancelScheduledValues(ctx.currentTime);
-            track.gainNode.gain.linearRampToValueAtTime(Math.max(0.0001, clamped), ctx.currentTime + 0.05);
+            track.gainNode.gain.setValueAtTime(track.gainNode.gain.value, ctx.currentTime);
+            track.gainNode.gain.linearRampToValueAtTime(clamped, ctx.currentTime + 0.03);
           }
         }
       }
@@ -223,9 +226,28 @@ export function playSoundscape(id: SoundscapeId, volume?: number, isPremiumUser 
       try {
         const audio = new Audio(soundFile);
         audio.loop = true;
-        // Direct volume assignment avoids browser interval throttling that leaves audio silent at 0.01
-        audio.volume = targetVol;
+        audio.crossOrigin = 'anonymous';
         track.audioElement = audio;
+
+        // Route through Web Audio GainNode for full hardware/software volume control on iOS & Android
+        try {
+          const ctx = getAudioContext();
+          if (ctx) {
+            const source = ctx.createMediaElementSource(audio);
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(targetVol, ctx.currentTime);
+            source.connect(gain);
+            gain.connect(ctx.destination);
+            track.gainNode = gain;
+            track.nodes.push(source, gain);
+          }
+        } catch (e) {
+          // Fallback if MediaElementSource is unavailable
+        }
+
+        try {
+          audio.volume = targetVol;
+        } catch (e) {}
 
         // Fallback to procedural synthesis if file fails to load/decode or errors
         audio.onerror = (err) => {

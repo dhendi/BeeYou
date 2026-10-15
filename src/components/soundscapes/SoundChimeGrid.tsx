@@ -861,17 +861,22 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
                     </div>
                     <input
                       type="range"
-                      min="0.01"
+                      min="0.0"
                       max="1.0"
                       step="0.01"
                       value={vol}
                       aria-label={`${t(item?.name || id)} ${t('Volume')}`}
+                      onInput={(e) => {
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        onVolumeChange(id, val);
+                        setSoundscapeVolume(val, id);
+                      }}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value);
                         onVolumeChange(id, val);
                         setSoundscapeVolume(val, id);
                       }}
-                      className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer h-1.5 bg-amber-200/70 dark:bg-white/15 rounded-lg"
+                      className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer h-3 py-1 bg-amber-200/70 dark:bg-white/15 rounded-lg touch-pan-x"
                     />
                   </div>
 
