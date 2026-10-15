@@ -6,12 +6,12 @@ import {
   GraduationCap, 
   Compass, 
   ShieldCheck, 
-  X,
-  Volume2
+  X
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { LanguageDropdown } from '../LanguageDropdown';
+import { AacCoreSticker } from '../icons/JournalStickers';
 
 interface AACExperiencePromptModalProps {
   isOpen: boolean;
@@ -53,8 +53,8 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
 
         {/* Top Decorative Mascot / Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-amber-400 to-amber-500 text-white flex items-center justify-center mx-auto shadow-[0_6px_0_0_#d97706,0_10px_20px_rgba(217,119,6,0.25)] ring-4 ring-amber-100">
-            <Volume2 className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto flex items-center justify-center">
+            <AacCoreSticker className="w-full h-full object-contain drop-shadow-md" />
           </div>
           <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-black text-xs uppercase tracking-wider">
             {t('AAC Speech Board')}
