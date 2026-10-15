@@ -38,7 +38,10 @@ export const SkillsView: React.FC = () => {
     speak,
     announce,
     habits,
+    settings,
   } = useApp();
+
+  const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [skillsTab, setSkillsTab] = useState<'missions' | 'habits'>('missions');
   const selectedSkill = skills.find((s) => s.id === activeSkillId);
@@ -104,7 +107,7 @@ export const SkillsView: React.FC = () => {
 
         {/* Skill Hero Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-purple-50 border-2 border-purple-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
+          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center p-2 shrink-0 shadow-xs ${isColorCoded ? 'bg-purple-50 border-2 border-purple-200' : 'bg-amber-50/70 border-2 border-amber-200'}`}>
             {(selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)) ? (
               <img
                 src={selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)}
@@ -117,7 +120,7 @@ export const SkillsView: React.FC = () => {
           </div>
           <div className="flex-1 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${isColorCoded ? 'text-purple-700 bg-purple-100' : 'text-amber-900 bg-amber-100 border border-amber-300/80'}`}>
                 {t('Mission')}
               </span>
             </div>
@@ -131,7 +134,7 @@ export const SkillsView: React.FC = () => {
             {/* Progress bar */}
             <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200 mt-3">
               <div
-                className="bg-purple-500 h-full transition-all duration-500 rounded-full"
+                className={`h-full transition-all duration-500 rounded-full ${isColorCoded ? 'bg-purple-500' : 'bg-amber-500'}`}
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -160,7 +163,7 @@ export const SkillsView: React.FC = () => {
                 key={step.id}
                 className={`p-4 rounded-3xl border-2 transition-all shadow-xs ${
                   step.completed
-                    ? 'bg-purple-50/70 border-purple-300'
+                    ? (isColorCoded ? 'bg-purple-50/70 border-purple-300' : 'bg-amber-50/70 border-amber-300')
                     : 'bg-white hover:bg-slate-50 border-slate-200'
                 }`}
               >
@@ -172,9 +175,9 @@ export const SkillsView: React.FC = () => {
                     onClick={() => toggleSkillStep(selectedSkill.id, step.id)}
                     className="flex items-start sm:items-center gap-3 flex-1 cursor-pointer select-none text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px]"
                   >
-                    <span className="text-purple-600 transition-transform hover:scale-110 mt-0.5 sm:mt-0 shrink-0 pointer-events-none" aria-hidden="true">
+                    <span className={`${isColorCoded ? 'text-purple-600' : 'text-amber-600'} transition-transform hover:scale-110 mt-0.5 sm:mt-0 shrink-0 pointer-events-none`} aria-hidden="true">
                       {step.completed ? (
-                        <CheckCircle2 className="w-7 h-7 fill-purple-500 text-white" />
+                        <CheckCircle2 className={`w-7 h-7 ${isColorCoded ? 'fill-purple-500' : 'fill-amber-500'} text-white`} />
                       ) : (
                         <Circle className="w-7 h-7 text-slate-300" />
                       )}
@@ -224,7 +227,7 @@ export const SkillsView: React.FC = () => {
                         className={`flex items-center gap-1 px-3 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer ${
                           isStepTimerActive
                             ? 'bg-amber-400 text-amber-950 animate-pulse'
-                            : 'bg-purple-100 hover:bg-purple-200 text-purple-900'
+                            : (isColorCoded ? 'bg-purple-100 hover:bg-purple-200 text-purple-900' : 'bg-amber-100 hover:bg-amber-200 text-amber-900')
                         }`}
                       >
                         <Timer className="w-3.5 h-3.5" />
@@ -251,13 +254,13 @@ export const SkillsView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-3xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
+      <div className="bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 rounded-3xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
         <div>
-          <span className="text-xs font-black uppercase tracking-wider text-purple-200">
+          <span className="text-xs font-black uppercase tracking-wider text-amber-100">
             {t('Independence & Habits')}
           </span>
-          <h2 className="text-xl sm:text-2xl font-black mt-1">{t('My Daily Skills')}</h2>
-          <p className="text-xs sm:text-sm text-purple-100 font-medium mt-1 max-w-md">
+          <h2 className="text-xl sm:text-2xl font-black mt-1 text-white">{t('My Daily Skills')}</h2>
+          <p className="text-xs sm:text-sm text-amber-100/90 font-medium mt-1 max-w-md">
             {t('Master everyday activities step-by-step and practice recurring daily habits at your own pace!')}
           </p>
         </div>
@@ -274,7 +277,7 @@ export const SkillsView: React.FC = () => {
           }}
           className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             skillsTab === 'missions'
-              ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-300'
+              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -290,7 +293,7 @@ export const SkillsView: React.FC = () => {
           }}
           className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             skillsTab === 'habits'
-              ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-300'
+              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -309,6 +312,17 @@ export const SkillsView: React.FC = () => {
             const totalCount = skill.steps.length;
             const isDone = totalCount > 0 && completedCount === totalCount;
 
+            const cardClass = isColorCoded
+              ? 'bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300'
+              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            const iconBoxClass = isColorCoded
+              ? 'bg-purple-50 border border-purple-200'
+              : 'bg-white/90 border border-amber-200/90';
+            const badgeClass = isColorCoded
+              ? 'text-purple-700 bg-purple-50'
+              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
+            const subtextClass = isColorCoded ? 'text-purple-600' : 'text-amber-800';
+
             return (
               <button
                 type="button"
@@ -318,9 +332,9 @@ export const SkillsView: React.FC = () => {
                   setActiveSkillId(skill.id);
                   playChime('tap');
                 }}
-                className="w-full text-left bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
-                <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
                   {(skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)) ? (
                     <img
                       src={skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)}
@@ -334,14 +348,14 @@ export const SkillsView: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
                       {t(skill.category)}
                     </span>
                   </div>
-                  <h3 className="font-black text-slate-800 text-base sm:text-lg mt-1 leading-snug">
+                  <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
                     {t(skill.title)}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
+                  <p className="text-xs text-slate-600 font-medium mt-1">
                     {totalCount} {t('steps')} • ~{skill.estimatedMin} {t('mins')}
                   </p>
 
@@ -350,7 +364,7 @@ export const SkillsView: React.FC = () => {
                       {isDone ? t('Completed! 🏆') : `${completedCount}/${totalCount} ${t('steps done')}`}
                     </span>
                     {skill.completedTimes > 0 && (
-                      <span className="text-purple-600">{t('Finished')} {skill.completedTimes}x</span>
+                      <span className={subtextClass}>{t('Finished')} {skill.completedTimes}x</span>
                     )}
                   </div>
                 </div>

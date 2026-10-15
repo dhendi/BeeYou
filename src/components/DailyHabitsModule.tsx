@@ -39,7 +39,10 @@ export const DailyHabitsModule: React.FC = () => {
     addHabit,
     deleteHabit,
     childProfile,
+    settings,
   } = useApp();
+
+  const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
@@ -82,7 +85,11 @@ export const DailyHabitsModule: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* 1. DAILY HABITS HEADER SUMMARY */}
-      <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 rounded-3xl p-5 sm:p-6 text-white shadow-md relative overflow-hidden">
+      <div className={`rounded-3xl p-5 sm:p-6 text-white shadow-md relative overflow-hidden ${
+        isColorCoded 
+          ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600' 
+          : 'bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600'
+      }`}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-3.5 text-center sm:text-left">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl shadow-sm shrink-0">
@@ -93,15 +100,15 @@ export const DailyHabitsModule: React.FC = () => {
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
                   {t('Recurring Daily Tasks')}
                 </span>
-                <span className="text-xs font-bold text-emerald-100 flex items-center gap-1">
+                <span className="text-xs font-bold text-amber-100 flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
                   {t('+1 Star per Habit')}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight">
+              <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
                 {childProfile.name} • {t('Daily Habits')}
               </h2>
-              <p className="text-xs sm:text-sm text-emerald-100/90 font-medium mt-0.5">
+              <p className="text-xs sm:text-sm text-amber-50/90 font-medium mt-0.5">
                 {t('Gentle, anytime tasks to practice independence throughout your day.')}
               </p>
             </div>
@@ -129,9 +136,13 @@ export const DailyHabitsModule: React.FC = () => {
                 setShowAddModal(true);
                 playChime('tap');
               }}
-              className="px-3.5 py-2.5 rounded-xl bg-white text-teal-900 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+              className={`px-3.5 py-2.5 rounded-xl bg-white font-black text-xs sm:text-sm shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+                isColorCoded 
+                  ? 'text-teal-900 hover:bg-emerald-50' 
+                  : 'text-amber-950 hover:bg-amber-50'
+              }`}
             >
-              <Plus className="w-4 h-4 text-teal-700" />
+              <Plus className={`w-4 h-4 ${isColorCoded ? 'text-teal-700' : 'text-amber-600'}`} />
               <span>{t('Add Habit')}</span>
             </button>
           </div>
@@ -172,7 +183,7 @@ export const DailyHabitsModule: React.FC = () => {
             }}
             className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
               activeCategory === cat.id
-                ? 'bg-teal-600 text-white shadow-xs'
+                ? (isColorCoded ? 'bg-teal-600 text-white shadow-xs' : 'bg-amber-500 text-white shadow-xs')
                 : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
             }`}
           >
@@ -190,23 +201,27 @@ export const DailyHabitsModule: React.FC = () => {
           const currentCount = habit.timesCompletedToday || 0;
           const targetCount = habit.targetTimesPerDay || 1;
 
+          const cardClass = isDone
+            ? 'bg-emerald-50/80 border-emerald-300 shadow-2xs'
+            : isColorCoded
+            ? 'bg-white hover:bg-slate-50/80 border-slate-200 shadow-xs'
+            : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)]';
+
+          const iconBoxClass = isDone
+            ? 'bg-emerald-50 border border-emerald-200'
+            : isColorCoded
+            ? 'bg-slate-50 border border-slate-200'
+            : 'bg-white/90 border border-amber-200/90';
+
           return (
             <div
               key={habit.id}
-              className={`p-4 rounded-3xl border-2 transition-all flex flex-col justify-between ${
-                isDone
-                  ? 'bg-emerald-50/80 border-emerald-300 shadow-2xs'
-                  : 'bg-white hover:bg-slate-50/80 border-slate-200 shadow-xs'
-              }`}
+              className={`p-4 rounded-3xl border-2 transition-all flex flex-col justify-between ${cardClass}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1">
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center p-1 shrink-0 shadow-2xs ${
-                      isDone
-                        ? 'bg-emerald-50 border border-emerald-200'
-                        : 'bg-slate-50 border border-slate-200'
-                    }`}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center p-1 shrink-0 shadow-2xs ${iconBoxClass}`}
                   >
                     {(habit.stickerSrc || getHabitSticker(habit.id, habit.emoji)) ? (
                       <img
