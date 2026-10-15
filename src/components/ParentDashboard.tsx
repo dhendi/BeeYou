@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 
 // Caregiver portal lazy-loaded modals
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
 const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
 const DailyRecollectionChart = lazy(() => import('./DailyRecollectionChart').then(m => ({ default: m.DailyRecollectionChart })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
@@ -72,6 +73,7 @@ import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
 import { CaregiverGuideTab } from './caregiver/CaregiverGuideTab';
 import { CaregiverMedicationsTab } from './caregiver/CaregiverMedicationsTab';
 import { CaregiverMoodJournalTab } from './caregiver/CaregiverMoodJournalTab';
+import { CaregiverCycleTrackerTab } from './caregiver/CaregiverCycleTrackerTab';
 import { CaregiverDeviceLinkTab } from './caregiver/CaregiverDeviceLinkTab';
 import { CaregiverOfflineTab } from './caregiver/CaregiverOfflineTab';
 import { CaregiverPlansChangedTab } from './caregiver/CaregiverPlansChangedTab';
@@ -109,6 +111,7 @@ export const ParentDashboard: React.FC = () => {
     updateSettings,
     showAboutMeModal,
     setShowAboutMeModal,
+    getCyclePhaseInfo,
   } = useApp();
 
   type TabType =
@@ -119,6 +122,7 @@ export const ParentDashboard: React.FC = () => {
     | 'caregiver'
     | 'medications'
     | 'mood-journal'
+    | 'cycle-tracker'
     | 'recollection'
     | 'offline'
     | 'plans-changed'
@@ -132,6 +136,7 @@ export const ParentDashboard: React.FC = () => {
     | 'settings';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const cyclePhaseInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : { currentCycleDay: 1 };
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCaregiverTour, setShowCaregiverTour] = useState(false);
   const [showTourDirectoryModal, setShowTourDirectoryModal] = useState(false);
@@ -388,6 +393,12 @@ export const ParentDashboard: React.FC = () => {
           label: 'Mood & Reflection Journal',
           icon: BookOpen,
           badge: `${moodJournalEntries.length} ${t('Entries')}`,
+        },
+        {
+          id: 'cycle-tracker',
+          label: 'Cycle & Hormonal Rhythm',
+          icon: HeartPulse,
+          badge: `${t('Day')} ${cyclePhaseInfo.currentCycleDay}`,
         },
       ],
     },
@@ -805,6 +816,13 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
+          {/* TAB: CYCLE TRACKER & HORMONAL RHYTHM */}
+          {activeTab === 'cycle-tracker' && (
+            <CaregiverCycleTrackerTab 
+              onStartTour={() => handleStartSectionTour('moodJournal')}
+            />
+          )}
+
           {/* TAB: CAREGIVER LIVE LINK & REMOTE MONITOR */}
           {activeTab === 'caregiver' && (
             <CaregiverDeviceLinkTab
@@ -920,6 +938,7 @@ export const ParentDashboard: React.FC = () => {
       <Suspense fallback={null}>
         <DailyRecollectionModal />
         <MoodJournalModal />
+        <CycleTrackerModal />
         <PlansChangedModal />
         <AboutMeIDModal
           isOpen={showAboutMeModal}

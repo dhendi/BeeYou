@@ -47,6 +47,7 @@ const RoutineStickerCelebrationModal = lazy(() => import('./RoutineStickerCelebr
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const MedicationRemindersModal = lazy(() => import('./MedicationRemindersModal').then(m => ({ default: m.MedicationRemindersModal })));
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
+const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
 const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
 const EmergencySensoryModal = lazy(() => import('./EmergencySensoryModal').then(m => ({ default: m.EmergencySensoryModal })));
 const FivePointScaleModal = lazy(() => import('./FivePointScaleModal').then(m => ({ default: m.FivePointScaleModal })));
@@ -85,6 +86,8 @@ const ChildAppContent: React.FC = () => {
     setShowAboutMeModal,
     showRecollectionModal,
     setShowRecollectionModal,
+    showCycleTrackerModal,
+    setShowCycleTrackerModal,
     settings,
     isParentMode,
     isSafeModeActive,
@@ -121,6 +124,7 @@ const ChildAppContent: React.FC = () => {
   useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
   useModalBackHandler(showAboutMeModal, () => setShowAboutMeModal(false));
   useModalBackHandler(showRecollectionModal, () => setShowRecollectionModal(false));
+  useModalBackHandler(showCycleTrackerModal, () => setShowCycleTrackerModal(false));
   useModalBackHandler(!!globalFeedbackState, () => setGlobalFeedbackState(null));
 
   useEffect(() => {
@@ -352,6 +356,9 @@ const ChildAppContent: React.FC = () => {
 
         {/* Teen & Adult Deep Mood Reflection Journal Modal */}
         <MoodJournalModal />
+
+        {/* Cycle & Hormonal Rhythm Tracker Modal */}
+        <CycleTrackerModal />
 
         {/* Daily Mood & Recollection Check-in Modal */}
         <DailyRecollectionModal />

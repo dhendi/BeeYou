@@ -421,6 +421,7 @@ export interface EnabledFeatures {
   medicationReminders: boolean;    // Medication reminders, dose tracking & inventory supply
   moodJournal: boolean;            // Reflective mood & trigger journal (teens to adults)
   dailyMoodRecollection?: boolean; // Evening reflection, daily recollection & therapist summary chart
+  cycleTracker?: boolean;          // Cycle and hormonal rhythm tracker (teens to adults)
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
   routines?: boolean;
   aac?: boolean;
@@ -443,6 +444,7 @@ export const DEFAULT_KID_FEATURES: EnabledFeatures = {
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: false,
+  cycleTracker: false,
   discreetMode: false,
 };
 
@@ -458,6 +460,7 @@ export const DEFAULT_TEEN_FEATURES: EnabledFeatures = {
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: true,
+  cycleTracker: true,
   discreetMode: false,
 };
 
@@ -473,6 +476,7 @@ export const DEFAULT_ADULT_FEATURES: EnabledFeatures = {
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: true,
+  cycleTracker: true,
   discreetMode: true,
 };
 

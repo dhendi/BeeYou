@@ -6,6 +6,7 @@ import {
   ThermometerSticker,
   MedicationSticker,
   ReadingBookSticker,
+  ConnectHeartSticker,
   SpoonSticker,
   EveningMoonSticker,
 } from './icons/JournalStickers';
@@ -18,16 +19,19 @@ export const MeView: React.FC = () => {
     medications,
     moodJournalEntries,
     dailyRecollections,
+    getCyclePhaseInfo,
     getTodaySpoonEntry,
     setShowFivePointModal,
     setShowMedicationModal,
     setShowMoodJournalModal,
+    setShowCycleTrackerModal,
     setShowSpoonModal,
     setShowRecollectionModal,
   } = useApp();
 
   const isColorCoded = settings?.colorCodedActionCards === true;
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
+  const cycleInfo = isTeenOrAdult && getCyclePhaseInfo ? getCyclePhaseInfo() : null;
   const todaySpoon = getTodaySpoonEntry();
   const nextMed = medications.find((m) => m.active);
 
@@ -76,6 +80,23 @@ export const MeView: React.FC = () => {
       show: isTeenOrAdult && enabledFeatures?.moodJournal !== false,
       action: () => {
         setShowMoodJournalModal(true);
+        playChime('tap');
+      },
+    },
+    {
+      id: 'cycle-tracker',
+      title: 'Cycle & Hormonal Rhythm',
+      desc: cycleInfo 
+        ? `Day ${cycleInfo.currentCycleDay} • ${cycleInfo.phaseLabel}. Track sensory & energy rhythms.`
+        : 'Track your hormonal cycle and sensory sensitivity changes.',
+      badge: 'Sensory Rhythm',
+      badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
+      color: 'border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950',
+      stickerBox: 'bg-white border-rose-200/90 shadow-2xs',
+      Sticker: ConnectHeartSticker,
+      show: isTeenOrAdult && enabledFeatures?.cycleTracker !== false,
+      action: () => {
+        setShowCycleTrackerModal(true);
         playChime('tap');
       },
     },

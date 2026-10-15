@@ -24,6 +24,9 @@ import {
   MedicationDoseLog,
   MoodJournalEntry,
   DailyRecollectionEntry,
+  CycleSettings,
+  CycleDailyLog,
+  CyclePhase,
   SubscriptionInfo,
   SubscriptionTier,
   BillingCycle,
@@ -67,6 +70,7 @@ import { useSensoryToolsState } from '../hooks/useSensoryToolsState';
 import { useCustomToolsState } from '../hooks/useCustomToolsState';
 import { useMedicationState } from '../hooks/useMedicationState';
 import { useMoodJournalState } from '../hooks/useMoodJournalState';
+import { useCycleTrackerState } from '../hooks/useCycleTrackerState';
 import { useRecollectionsState } from '../hooks/useRecollectionsState';
 import { useThemeState } from '../hooks/useThemeState';
 import { useFamilyCloudSync } from '../hooks/useFamilyCloudSync';
@@ -298,6 +302,25 @@ export interface AppContextType {
   deleteMoodJournalEntry: (id: string) => void;
   showMoodJournalModal: boolean;
   setShowMoodJournalModal: (val: boolean) => void;
+
+  // Cycle Tracker
+  cycleSettings: CycleSettings;
+  updateCycleSettings: (settings: Partial<CycleSettings>) => void;
+  cycleLogs: CycleDailyLog[];
+  logCycleDay: (log: Omit<CycleDailyLog, 'id'>) => void;
+  deleteCycleLog: (id: string) => void;
+  showCycleTrackerModal: boolean;
+  setShowCycleTrackerModal: (val: boolean) => void;
+  getCyclePhaseInfo: () => {
+    currentCycleDay: number;
+    currentPhase: CyclePhase;
+    phaseLabel: string;
+    phaseDescription: string;
+    sensoryInsight: string;
+    daysUntilNextPeriod: number;
+    nextPeriodDate: string;
+    isPeriodToday: boolean;
+  };
 
   // Subscription & Membership Tiering
   subscription: SubscriptionInfo;
@@ -724,7 +747,11 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     announce: speechEngine.announce,
   });
 
-
+  // 10. Cycle Tracker Hook
+  const cycleTracker = useCycleTrackerState({
+    soundEffects: settings.soundEffects,
+    announce: speechEngine.announce,
+  });
 
   // 11. Daily Recollections Hook
   const recollections = useRecollectionsState({
@@ -857,6 +884,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       socialStories: gamification.socialStories,
       dailyRecollections: recollections.dailyRecollections,
       medications: medication.medications,
+      cycleSettings: cycleTracker.cycleSettings,
       userAgeGroup,
       enabledFeatures,
       activeThemeId: themeState.activeTheme?.id || 'classic',
@@ -898,6 +926,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       if (Array.isArray(data.socialStories)) gamification.setSocialStories(data.socialStories);
       if (Array.isArray(data.dailyRecollections)) recollections.setDailyRecollections(data.dailyRecollections);
       if (Array.isArray(data.medications)) medication.setMedications(data.medications);
+      if (data.cycleSettings) cycleTracker.setCycleSettings(data.cycleSettings);
       if (data.userAgeGroup) setUserAgeGroup(data.userAgeGroup);
       if (data.enabledFeatures) updateEnabledFeatures(data.enabledFeatures);
       if (data.activeThemeId) themeState.setTheme(data.activeThemeId);
@@ -917,6 +946,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     localStorage.removeItem('beeyou_daily_recollections');
     localStorage.removeItem('beeyou_medications');
     localStorage.removeItem('beeyou_mood_journal_entries');
+    localStorage.removeItem('beeyou_cycle_settings');
+    localStorage.removeItem('beeyou_cycle_logs');
     localStorage.removeItem('beeyou_user_age_group');
     localStorage.removeItem('beeyou_enabled_features');
     localStorage.removeItem('beeyou_onboarding_completed');
@@ -1132,6 +1163,16 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     deleteMoodJournalEntry: moodJournal.deleteMoodJournalEntry,
     showMoodJournalModal: moodJournal.showMoodJournalModal,
     setShowMoodJournalModal: moodJournal.setShowMoodJournalModal,
+
+    // Cycle Tracker
+    cycleSettings: cycleTracker.cycleSettings,
+    updateCycleSettings: cycleTracker.updateCycleSettings,
+    cycleLogs: cycleTracker.cycleLogs,
+    logCycleDay: cycleTracker.logCycleDay,
+    deleteCycleLog: cycleTracker.deleteCycleLog,
+    showCycleTrackerModal: cycleTracker.showCycleTrackerModal,
+    setShowCycleTrackerModal: cycleTracker.setShowCycleTrackerModal,
+    getCyclePhaseInfo: cycleTracker.getCyclePhaseInfo,
 
     // Subscription & Membership Tiering
     subscription: subscriptionState.subscription,
