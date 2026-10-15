@@ -67,6 +67,7 @@ const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ defa
 const AvatarCreatorModal = lazy(() => import('./AvatarCreatorModal').then(m => ({ default: m.AvatarCreatorModal })));
 const MyWorldView = lazy(() => import('./MyWorldView').then(m => ({ default: m.MyWorldView })));
 const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards })));
+const StickerScrapbookView = lazy(() => import('./StickerScrapbookView').then(m => ({ default: m.StickerScrapbookView })));
 const MoreView = lazy(() => import('./MoreView').then(m => ({ default: m.MoreView })));
 
 const ChildAppContent: React.FC = () => {
@@ -242,6 +243,7 @@ const ChildAppContent: React.FC = () => {
         {childView === 'feelings' && <FeelingsView />}
         {childView === 'my-world' && <MyWorldView />}
         {childView === 'rewards' && <Rewards />}
+        {childView === 'scrapbook' && <StickerScrapbookView />}
         {childView === 'more' && <MoreView />}
       </main>
 
@@ -277,7 +279,7 @@ const ChildAppContent: React.FC = () => {
           isOpen={showCaregiverAlertModal}
           onClose={() => setShowCaregiverAlertModal(false)}
         />
-        {/* RoutineStickerCelebrationModal removed for peaceful distraction-free experience */}
+        <RoutineStickerCelebrationModal />
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
 

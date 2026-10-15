@@ -193,6 +193,14 @@ export const MoreView: React.FC = () => {
           onOpen: go('rewards'),
         },
         {
+          id: 'scrapbook',
+          title: 'Sticker Scrapbook',
+          desc: 'Decorate & arrange your earned routine stickers',
+          emoji: '🎨',
+          show: on('starsAndRewards'),
+          onOpen: () => setChildView('scrapbook'),
+        },
+        {
           id: 'my-world',
           title: 'My World',
           desc: 'Decorate your own space',
@@ -281,6 +289,8 @@ export const MoreView: React.FC = () => {
         return <Lock className="w-6 h-6 text-[#5D5045]" />;
       case 'rewards':
         return <RewardTrophySticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'scrapbook':
+        return <ArtCraftsSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'my-world':
         return <FavQuietBreakSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'avatar':

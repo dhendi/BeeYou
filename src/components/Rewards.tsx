@@ -20,6 +20,7 @@ import {
   Palette
 } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
+import { StickerScrapbookView } from './StickerScrapbookView';
 import { playChime, speakText } from '../utils/audio';
 import { RewardTrophySticker, GoldStarSticker, RoutineStickerIcon } from './icons/JournalStickers';
 
@@ -37,6 +38,7 @@ export const Rewards: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile' | 'themes'>('badges');
+  const [stickerSubTab, setStickerSubTab] = useState<'scrapbook' | 'collection'>('scrapbook');
   const [badgeFilter, setBadgeFilter] = useState<'all' | 'earned' | 'in-progress'>('all');
   const [selectedBadge, setSelectedBadge] = useState<RewardBadge | null>(null);
 
@@ -444,7 +446,43 @@ export const Rewards: React.FC = () => {
 
       {/* TAB 2: DIGITAL STICKERS ALBUM & PROFILE FLAIR */}
       {activeTab === 'stickers' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          {/* Sub-tab switcher: Interactive Scrapbook Studio vs Collection Catalog */}
+          <div className="flex items-center gap-2 bg-[#F5EFE6] p-1.5 rounded-2xl border border-[#E6DCCF]">
+            <button
+              type="button"
+              onClick={() => {
+                setStickerSubTab('scrapbook');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                stickerSubTab === 'scrapbook'
+                  ? 'bg-white text-indigo-950 shadow-xs border border-indigo-100'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>🎨 Interactive Scrapbook Studio</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStickerSubTab('collection');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                stickerSubTab === 'collection'
+                  ? 'bg-white text-indigo-950 shadow-xs border border-indigo-100'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>🗂️ Sticker Collection Catalog</span>
+            </button>
+          </div>
+
+          {stickerSubTab === 'scrapbook' ? (
+            <StickerScrapbookView />
+          ) : (
+            <div className="space-y-6">
           {/* 1. EARNED ROUTINE DIGITAL STICKERS (Sticker Book) */}
           <div className="bg-gradient-to-br from-indigo-50/70 via-sky-50/50 to-purple-50/70 border-3 border-indigo-200 rounded-3xl p-4 sm:p-6 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
@@ -710,6 +748,8 @@ export const Rewards: React.FC = () => {
               })}
             </div>
           </div>
+            </div>
+          )}
         </div>
       )}
 

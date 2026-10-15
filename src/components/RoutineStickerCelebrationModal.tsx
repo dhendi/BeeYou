@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Star, Award, ArrowRight, X } from 'lucide-react';
+import { Star, Award, ArrowRight, X, Sparkles } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 
@@ -20,6 +20,12 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
     });
     playChime('star');
     dismissStickerCelebration();
+  };
+
+  const handleGoToScrapbook = () => {
+    dismissStickerCelebration();
+    setChildView('scrapbook');
+    playChime('star');
   };
 
   const handleGoToRewards = () => {
@@ -87,25 +93,33 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
         {/* Action Buttons */}
         <div className="space-y-2 pt-2">
           <button
+            onClick={handleGoToScrapbook}
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-sm sm:text-base rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-amber-900" />
+            <span>Place in Sticker Scrapbook! ✨</span>
+          </button>
+
+          <button
             onClick={handleWearSticker}
-            className="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-sm rounded-2xl shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-2.5 px-4 bg-white hover:bg-amber-50 text-amber-900 border-2 border-amber-200 hover:border-amber-300 font-bold text-xs sm:text-sm rounded-2xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
           >
             <span>Wear as Profile Flair</span>
             <RoutineStickerIcon
               emoji={newlyAwardedSticker.emoji}
               title={newlyAwardedSticker.stickerName}
-              size={22}
-              className="w-5.5 h-5.5 object-contain"
+              size={20}
+              className="w-5 h-5 object-contain"
             />
           </button>
 
           <button
             onClick={handleGoToRewards}
-            className="w-full py-2.5 px-4 bg-white hover:bg-sky-50 text-sky-800 border-2 border-sky-200 hover:border-sky-300 font-black text-xs sm:text-sm rounded-2xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors flex items-center justify-center gap-1"
           >
-            <Award className="w-4 h-4 text-sky-600" />
-            <span>View in Sticker Album</span>
-            <ArrowRight className="w-3.5 h-3.5 text-sky-600" />
+            <Award className="w-3.5 h-3.5" />
+            <span>View Rewards Album</span>
+            <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       </div>

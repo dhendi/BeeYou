@@ -6,9 +6,10 @@ import { pushFamilyStateUpdate } from '../services/familySync';
 
 interface UseRoutinesScheduleProps {
   soundEffects: boolean;
+  onRoutineCompleted?: (routine: Routine) => void;
 }
 
-export function useRoutinesSchedule({ soundEffects }: UseRoutinesScheduleProps) {
+export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRoutinesScheduleProps) {
   const [showMyDayGuideModal, setShowMyDayGuideModal] = useState<boolean>(false);
   const [showPlansChangedModal, setShowPlansChangedModal] = useState<boolean>(false);
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
@@ -136,8 +137,15 @@ export function useRoutinesSchedule({ soundEffects }: UseRoutinesScheduleProps) 
 
       const wasAllCompleted = currentSteps.length > 0 && currentSteps.every((s) => s.completed);
       const isNowAllCompleted = newSteps.length > 0 && newSteps.every((s) => s.completed);
-      if (isNowAllCompleted && !wasAllCompleted && soundEffects) {
-        playChime('complete');
+      if (isNowAllCompleted && !wasAllCompleted) {
+        if (soundEffects) {
+          playChime('complete');
+        }
+        if (onRoutineCompleted) {
+          setTimeout(() => {
+            onRoutineCompleted(updatedRoutine);
+          }, 350);
+        }
       }
 
       return nextRoutines;

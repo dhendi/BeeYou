@@ -89,6 +89,7 @@ export type ChildViewType =
   | 'feelings'
   | 'my-world'
   | 'rewards'
+  | 'scrapbook'
   | 'more'
   | 'settings'
   | 'visual-timer'
@@ -688,6 +689,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 4. Routines & Schedule Hook
   const routinesSchedule = useRoutinesSchedule({
     soundEffects: settings.soundEffects,
+    onRoutineCompleted: (routine) => {
+      gamification.awardRoutineSticker(routine);
+    },
   });
 
   // 5. AAC Communication Hook
