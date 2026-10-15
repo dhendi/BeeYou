@@ -487,6 +487,8 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
   // 3. Resilient Polling Fallback (runs every 2s)
   let lastPollTime = Date.now() - 30000;
   const poll = async () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     try {
       const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(code)}?since=${lastPollTime}`);
       if (res.ok) {

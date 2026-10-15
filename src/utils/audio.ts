@@ -25,11 +25,22 @@ function getAudioContext(): AudioContext | null {
 
 // Mobile / Android Global User-Gesture Audio & Speech Unlocker
 if (typeof window !== 'undefined') {
+  const events = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'] as const;
+  const unbindUnlockListeners = () => {
+    events.forEach((evt) => {
+      window.removeEventListener(evt, unlockMobileAudioAndSpeech, { capture: true });
+    });
+  };
+
   const unlockMobileAudioAndSpeech = () => {
     try {
       const ctx = getAudioContext();
       if (ctx && ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
+        ctx.resume().then(() => {
+          unbindUnlockListeners();
+        }).catch(() => {});
+      } else if (ctx && ctx.state === 'running') {
+        unbindUnlockListeners();
       }
       if ('speechSynthesis' in window) {
         if (window.speechSynthesis.paused) {
@@ -39,7 +50,7 @@ if (typeof window !== 'undefined') {
     } catch (e) {}
   };
 
-  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'].forEach((evt) => {
+  events.forEach((evt) => {
     window.addEventListener(evt, unlockMobileAudioAndSpeech, { passive: true, capture: true });
   });
 }
@@ -2659,6 +2670,8 @@ export function stopSpeaking() {
     try {
       activeAudioElement.pause();
       activeAudioElement.currentTime = 0;
+      activeAudioElement.src = '';
+      activeAudioElement.load();
     } catch (e) {}
     activeAudioElement = null;
   }
@@ -2804,6 +2817,19 @@ export function playAudioUrl(src: string, originalText: string = '', rate?: numb
         audio.defaultPlaybackRate = targetRate;
       } catch (e) {}
 
+      const cleanupAudio = () => {
+        try {
+          audio.onplay = null;
+          audio.onended = null;
+          audio.onerror = null;
+          audio.src = '';
+          audio.load();
+        } catch (e) {}
+        if (activeAudioElement === audio) {
+          activeAudioElement = null;
+        }
+      };
+
       audio.onplay = () => {
         try {
           audio.playbackRate = targetRate;
@@ -2811,14 +2837,14 @@ export function playAudioUrl(src: string, originalText: string = '', rate?: numb
       };
 
       audio.onended = () => {
-        activeAudioElement = null;
+        cleanupAudio();
         notifySpeechState(false, null);
         resolve(true);
       };
 
       audio.onerror = (err) => {
         console.warn('[Audio] playAudioUrl error:', err, audio.error);
-        activeAudioElement = null;
+        cleanupAudio();
         notifySpeechState(false, null);
         resolve(false);
       };
@@ -2827,7 +2853,7 @@ export function playAudioUrl(src: string, originalText: string = '', rate?: numb
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
           console.warn('[Audio] playAudioUrl rejected:', err);
-          activeAudioElement = null;
+          cleanupAudio();
           notifySpeechState(false, null);
           resolve(false);
         });

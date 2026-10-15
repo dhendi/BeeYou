@@ -303,6 +303,12 @@ export function useFamilyCloudSync({
     subscribeToCloudChannel(code);
 
     const sendPing = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+        return;
+      }
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return;
+      }
       const snap = liveChildStatusRef.current;
       sendHeartbeat({
         role: isCaregiver ? 'caregiver' : 'child_device',
@@ -317,6 +323,18 @@ export function useFamilyCloudSync({
       });
     };
 
+    const onForegroundResume = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        sendPing();
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onForegroundResume);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', onForegroundResume);
+    }
+
     sendPing();
     const interval = setInterval(sendPing, 3500);
 
@@ -327,6 +345,12 @@ export function useFamilyCloudSync({
       unsubResolve();
       unsubConnection();
       clearInterval(interval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onForegroundResume);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', onForegroundResume);
+      }
     };
   }, [userRole, isParentMode]);
 

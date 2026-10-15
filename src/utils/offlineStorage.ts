@@ -340,3 +340,28 @@ export async function verifyOfflineIntegrity(): Promise<{
     storageEngine: indexedDbHealthy ? 'IndexedDB + LocalStorage Mirror' : 'LocalStorage Fast Index',
   };
 }
+
+/**
+ * Requests persistent storage from the browser / WebView to prevent eviction of offline AAC tiles,
+ * caregiver voice recordings, routines, and social stories during low storage pressure or iOS 7-day dormancy.
+ */
+export async function ensurePersistentStorage(): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.persist === 'function') {
+    try {
+      const isAlreadyPersisted = await navigator.storage.persisted?.();
+      if (isAlreadyPersisted) {
+        return true;
+      }
+      const granted = await navigator.storage.persist();
+      if (granted) {
+        console.info('[BeeYou Storage] Persistent storage granted by browser/WebView.');
+      }
+      return granted;
+    } catch (e) {
+      console.warn('[BeeYou Storage] Failed to request persistent storage:', e);
+      return false;
+    }
+  }
+  return false;
+}
+

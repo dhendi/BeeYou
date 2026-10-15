@@ -281,6 +281,7 @@ function notifyConnectionStatus(): void {
 // Check connection status periodically (every 3s)
 if (typeof window !== 'undefined') {
   setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     notifyConnectionStatus();
   }, 3000);
 }
@@ -573,6 +574,8 @@ export function subscribeToCloudChannel(code: string): void {
 
   // 3. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
   const pollServer = async () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);

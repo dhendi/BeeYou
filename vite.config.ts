@@ -44,7 +44,8 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,mp3,wav,ogg,webm,json}'],
+          maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
@@ -71,6 +72,34 @@ export default defineConfig(() => {
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/raw\.githubusercontent\.com\/mulberrysymbols\/mulberry-symbols\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'mulberry-symbols-cdn-cache',
+                expiration: {
+                  maxEntries: 5000,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\/api\/(tts|translate)/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'api-speech-translation-cache',
+                expiration: {
+                  maxEntries: 150,
+                  maxAgeSeconds: 60 * 60 * 24 * 30,
                 },
                 cacheableResponse: {
                   statuses: [0, 200],
