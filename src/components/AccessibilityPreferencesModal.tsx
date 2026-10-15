@@ -85,18 +85,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
       emoji: '📖',
     },
     {
-      key: 'cycleTracker',
-      title: 'Cycle & Sensory Wellness Rhythm',
-      desc: 'Hormonal cycle tracking and neurodivergent sensory sensitivity insights',
-      emoji: '🌸',
-    },
-    {
-      key: 'dailyMoodRecollection',
-      title: 'Daily Evening Reflection Chart',
-      desc: 'End-of-day summary chart of emotions and daily wins',
-      emoji: '🌙',
-    },
-    {
       key: 'socialStories',
       title: 'Social stories & scenarios',
       desc: 'Step-by-step walkthroughs for dentist, haircut, school, etc.',

@@ -285,7 +285,6 @@ export function useSensoryToolsState({ childName, soundEffects }: UseSensoryTool
   // 6. Generic Tool Modal States
   const [showPieTimerModal, setShowPieTimerModal] = useState<boolean>(false);
   const [showFidgetModal, setShowFidgetModal] = useState<boolean>(false);
-  const [showToolsHubModal, setShowToolsHubModal] = useState<boolean>(false);
   const [showAccessibilityModal, setShowAccessibilityModal] = useState<boolean>(false);
 
   return {
@@ -326,8 +325,6 @@ export function useSensoryToolsState({ childName, soundEffects }: UseSensoryTool
     setShowPieTimerModal,
     showFidgetModal,
     setShowFidgetModal,
-    showToolsHubModal,
-    setShowToolsHubModal,
     showAccessibilityModal,
     setShowAccessibilityModal,
   };

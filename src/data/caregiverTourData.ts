@@ -10,16 +10,13 @@ export type TourSectionId =
   | 'medications'
   | 'plansChanged'
   | 'aac'
-  | 'recollection'
   | 'moodJournal'
-  | 'cycleTracker'
   | 'subscription'
   | 'voice'
   | 'offline'
   | 'adventures'
   | 'skills'
   | 'profile'
-  | 'themes'
   | 'settings';
 
 export interface TourSectionMeta {
@@ -88,10 +85,10 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         mascotHint: "Give your child their unique voice! 🗣️",
       },
       {
-        targetSelector: '[data-tour="caregiver-tab-recollection"]',
-        title: '9. Mood & Therapist Reports',
-        instruction: 'Review daily mood trends, sensory patterns, and export easy summary charts for therapists and pediatricians.',
-        mascotHint: 'Great for doctor & therapy visits! 📊',
+        targetSelector: '[data-tour="caregiver-tab-mood-journal"]',
+        title: '9. Mood & Reflection Journal',
+        instruction: 'Review daily mood trends, sensory reflections, and notes on what helped your child regulate.',
+        mascotHint: 'A private space for notes & reflections! 📖',
       },
       {
         targetSelector: '[data-tour="caregiver-tab-settings"]',
@@ -344,34 +341,6 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     ],
   },
 
-  recollection: {
-    id: 'recollection',
-    title: 'Clinical Mood & Therapist Summary',
-    emoji: '📊',
-    description: 'Track daily regulation trends and export structured summary reports for therapists and IEPs.',
-    tabId: 'recollection',
-    steps: [
-      {
-        targetSelector: '[data-tour="recollection-chart-card"]',
-        title: 'Day-to-Day Summary Chart',
-        instruction: 'Visualizes daily mood fluctuations, identifying patterns in morning calm vs. evening sensory overload.',
-        mascotHint: 'Spot emotional trends across the week! 📈',
-      },
-      {
-        targetSelector: '[data-tour="recollection-metrics-grid"]',
-        title: 'Sensory & Meltdown Frequency Log',
-        instruction: 'Tracks the number of break requests, sensory overload events, and routine completions over time.',
-        mascotHint: 'Invaluable data for therapists and pediatricians! 🧠',
-      },
-      {
-        targetSelector: '[data-tour="recollection-export-btn"]',
-        title: 'Export / Print Summary Report',
-        instruction: 'Generate a clean summary report ready to share with IEP teams, speech therapists, and doctors.',
-        mascotHint: 'Print or save PDF report in 1 click! 🖨️',
-      },
-    ],
-  },
-
   moodJournal: {
     id: 'moodJournal',
     title: 'Mood & Self-Reflection Journal',
@@ -390,28 +359,6 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         title: 'Add New Journal Entry',
         instruction: 'Record notes, add audio voice recordings, and log sensory triggers from today.',
         mascotHint: 'Type or record voice reflections! 🎙️',
-      },
-    ],
-  },
-
-  cycleTracker: {
-    id: 'cycleTracker',
-    title: 'Cycle & Hormonal Rhythm',
-    emoji: '🌸',
-    description: 'Track hormonal phases and predict sensory sensitivity shifts.',
-    tabId: 'cycle-tracker',
-    steps: [
-      {
-        targetSelector: '[data-tour="cycle-phase-card"]',
-        title: 'Current Cycle Phase & Day',
-        instruction: 'Tracks current phase (Follicular, Ovulatory, Luteal, Menstrual) and predicted emotional energy levels.',
-        mascotHint: 'Understand hormonal sensory shifts! 🌙',
-      },
-      {
-        targetSelector: '[data-tour="cycle-symptoms-forecast"]',
-        title: 'Sensory Sensitivity Forecast',
-        instruction: 'Predicts heightened sensory sensitivity days so you can proactively adjust noise and schedule intensity.',
-        mascotHint: 'Helps plan calming days in advance! 🕯️',
       },
     ],
   },
@@ -562,34 +509,6 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         title: 'Personalization & Interests',
         instruction: 'Customize favorite comfort items, special interests (e.g. Dinosaurs, Trains), and preferred pronouns.',
         mascotHint: 'Personalizes themes and mascot greetings! 🦖',
-      },
-    ],
-  },
-
-  themes: {
-    id: 'themes',
-    title: 'Custom Themes & Sensory Studio',
-    emoji: '🎨',
-    description: 'Choose ready-made themes or build personalized color palettes, mascots, and AAC emojis.',
-    tabId: 'themes',
-    steps: [
-      {
-        targetSelector: '[data-tour="themes-active-card"]',
-        title: 'Currently Active Theme',
-        instruction: 'Shows the equipped theme, mascot greeting, and customized AAC button color scheme.',
-        mascotHint: 'See which mascot is currently active! 🐢',
-      },
-      {
-        targetSelector: '[data-tour="themes-catalog-grid"]',
-        title: 'Ready-Made Theme Catalog',
-        instruction: 'Choose from 14+ neurodiversity-affirming themes like Jurassic Dino, Lily Frog, and Twilight Dark Mode.',
-        mascotHint: 'Pick any theme to transform the entire app! 🌈',
-      },
-      {
-        targetSelector: '[data-tour="themes-custom-studio-tab"]',
-        title: 'Custom Theme Studio',
-        instruction: 'Create your own custom theme with favorite colors, mascots, and custom AAC emojis.',
-        mascotHint: 'Design your dream theme from scratch! ✨',
       },
     ],
   },

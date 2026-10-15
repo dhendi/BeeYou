@@ -21,7 +21,6 @@ import {
   AlertTriangle,
   RefreshCw,
   Plus,
-  Camera,
   Mail,
   Zap
 } from 'lucide-react';
@@ -45,7 +44,6 @@ import { playChime } from '../utils/audio';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
 import { QRCodeView } from './QRCodeView';
-import { CameraQRScannerModal } from './CameraQRScannerModal';
 import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 import { FamilyAuthModal } from './FamilyAuthModal';
 
@@ -119,8 +117,6 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
   const [permRoutines, setPermRoutines] = useState(emergencyContact?.permissions?.receiveRoutineUpdates ?? false);
   const [permLocation, setPermLocation] = useState(emergencyContact?.permissions?.receiveLocation ?? true);
 
-  // Camera scanner modal state
-  const [showCameraScanner, setShowCameraScanner] = useState(false);
   // Connection feedback popup state
   const [feedbackState, setFeedbackState] = useState<ConnectionFeedbackState | null>(null);
   // Family Account Modal state
@@ -281,11 +277,6 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     e.preventDefault();
     if (!inputCode.trim()) return;
     await handleProcessCodeClaim(inputCode);
-  };
-
-  const handleCameraScanSuccess = (scanned: string) => {
-    setInputCode(scanned);
-    handleProcessCodeClaim(scanned);
   };
 
   const handleSaveSupportContact = (e: React.FormEvent) => {
@@ -574,24 +565,6 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
           {/* TAB 2: FLOW B (CAREGIVER GAVE A PAIRING CODE -> ENTER CODE) */}
           {activeTab === 'enter_code' && (
             <div className="space-y-4 animate-in fade-in">
-              {/* Big Prominent Camera QR Scanner Button */}
-              <button
-                type="button"
-                onClick={() => setShowCameraScanner(true)}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2.5 border-2 border-amber-400"
-              >
-                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Camera className="w-5 h-5 text-white" />
-                </div>
-                <span>Open Camera to Scan QR Code</span>
-              </button>
-
-              <div className="flex items-center gap-3 text-xs text-slate-400 font-bold uppercase tracking-wider">
-                <div className="flex-1 h-px bg-stone-300" />
-                <span>or enter code manually</span>
-                <div className="flex-1 h-px bg-stone-300" />
-              </div>
-
               <form onSubmit={handleClaimCode} className="space-y-4">
                 <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs space-y-3.5">
                   <h3 className="text-sm font-bold text-slate-900">
@@ -611,14 +584,6 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                         className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 font-mono font-bold text-lg text-center tracking-widest focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none uppercase"
                         required
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowCameraScanner(true)}
-                        className="absolute right-2.5 p-2 rounded-xl bg-stone-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 transition cursor-pointer"
-                        title="Scan with Camera"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </button>
                     </div>
 
                     {linkedDeviceCode && (
@@ -884,20 +849,10 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
 
       </div>
 
-      {/* In-App Live Camera QR Scanner */}
-      <CameraQRScannerModal
-        isOpen={showCameraScanner}
-        onClose={() => setShowCameraScanner(false)}
-        onScan={handleCameraScanSuccess}
-        title="Scan Pairing QR Code"
-        subtitle="Point camera at the QR code displayed on the other device"
-      />
-
       {/* Connection Feedback Popup (Success / Failure) */}
       <ConnectionFeedbackModal
         state={feedbackState}
         onClose={() => setFeedbackState(null)}
-        onOpenCamera={() => setShowCameraScanner(true)}
         onRetry={() => {
           if (inputCode) handleProcessCodeClaim(inputCode);
         }}

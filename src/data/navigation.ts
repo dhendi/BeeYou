@@ -95,14 +95,6 @@ export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
     enabled: false,
   },
   {
-    id: 'cycle_tracker',
-    title: 'Cycle & Sensory Rhythm',
-    emoji: '🌸',
-    description: 'Hormonal wellness, sensory sensitivity, and period predictor',
-    category: 'wellness',
-    enabled: false,
-  },
-  {
     id: 'communication_passport',
     title: 'Communication Support Passport',
     emoji: '📋',
@@ -116,14 +108,6 @@ export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
     emoji: '🚀',
     description: 'Social story and life skills preparation walkthrough',
     category: 'core',
-    enabled: false,
-  },
-  {
-    id: 'evening_reflection',
-    title: 'Evening Mood Recollection',
-    emoji: '🌙',
-    description: 'End-of-day recollection chart and mood tracker',
-    category: 'wellness',
     enabled: false,
   },
 ];
@@ -142,8 +126,6 @@ export const WIDGET_FEATURE_GATE: Partial<Record<DashboardWidgetId, keyof Enable
   pie_timer: 'visualCountdownTimer',
   medication_tracker: 'medicationReminders',
   mood_journal: 'moodJournal',
-  cycle_tracker: 'cycleTracker',
-  evening_reflection: 'dailyMoodRecollection',
   adventure_spotlight: 'socialStories',
 };
 
@@ -178,9 +160,9 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
   { id: 'communication', title: 'Communication', emoji: '💬', blurb: 'Talk with pictures, words and phrases', keys: ['aacCommunication'] },
   { id: 'routines', title: 'Routines & schedules', emoji: '📅', blurb: 'Plan your day step by step', keys: ['firstThenSchedules', 'visualCountdownTimer'] },
   { id: 'sensory', title: 'Sensory & regulation', emoji: '🛋️', blurb: 'Calm down and reset', keys: ['sensoryBreathingPacer'] },
-  { id: 'feelings', title: 'Feelings', emoji: '💛', blurb: 'Check in and reflect', keys: ['dailyMoodRecollection', 'moodJournal'] },
+  { id: 'feelings', title: 'Feelings', emoji: '💛', blurb: 'Check in and reflect', keys: ['moodJournal'] },
   { id: 'skills', title: 'Life skills & social stories', emoji: '🚀', blurb: 'Get ready for new things', keys: ['lifeSkills', 'socialStories'] },
   { id: 'caregiver', title: 'Caregiver support', emoji: '🚨', blurb: 'Ask a trusted person for help', keys: ['emergencyAlertSOS'] },
-  { id: 'health', title: 'Health & wellness', emoji: '💊', blurb: 'Reminders and body tracking', keys: ['medicationReminders', 'cycleTracker'] },
+  { id: 'health', title: 'Health & wellness', emoji: '💊', blurb: 'Reminders and body tracking', keys: ['medicationReminders'] },
   { id: 'rewards', title: 'Rewards & motivation', emoji: '🏆', blurb: 'Badges, stickers and celebrations', keys: ['starsAndRewards'] },
 ];

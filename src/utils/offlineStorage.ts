@@ -69,7 +69,7 @@ export interface OfflineIndexPayload {
   routines: Routine[];
   socialStories: SocialStory[];
   skills: LifeSkill[];
-  habits: DailyHabit[];
+  habits?: DailyHabit[];
   childName?: string;
 }
 
@@ -88,7 +88,7 @@ export async function indexOfflineData(payload: OfflineIndexPayload): Promise<Of
       routines: payload.routines,
       socialStories: payload.socialStories,
       skills: payload.skills,
-      habits: payload.habits,
+      habits: payload.habits || [],
     };
     localStorage.setItem(LOCAL_INDEX_KEY, JSON.stringify(compactIndex));
   } catch (err) {
@@ -129,7 +129,7 @@ export async function indexOfflineData(payload: OfflineIndexPayload): Promise<Of
       // Index Habits
       const habitStore = tx.objectStore('habits');
       habitStore.clear();
-      payload.habits.forEach((habit) => habitStore.put(habit));
+      (payload.habits || []).forEach((habit) => habitStore.put(habit));
 
       // Index Metadata
       const metaStore = tx.objectStore('metadata');
@@ -141,7 +141,7 @@ export async function indexOfflineData(payload: OfflineIndexPayload): Promise<Of
         routinesCount: payload.routines.length,
         storiesCount: payload.socialStories.length,
         skillsCount: payload.skills.length,
-        habitsCount: payload.habits.length,
+        habitsCount: (payload.habits || []).length,
       });
 
       await new Promise<void>((resolve, reject) => {
@@ -164,7 +164,7 @@ export async function indexOfflineData(payload: OfflineIndexPayload): Promise<Of
     routinesCount: payload.routines.length,
     storiesCount: payload.socialStories.length,
     skillsCount: payload.skills.length,
-    habitsCount: payload.habits.length,
+    habitsCount: (payload.habits || []).length,
     storageEngine: usedEngine,
     isFullyCached: true,
     voicesCount,

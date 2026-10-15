@@ -44,8 +44,6 @@ import {
   ThermometerSticker,
   DecisionWheelSticker,
   MoodJournalSticker,
-  ConnectHeartSticker,
-  EveningMoonSticker,
   BeeMascotSticker,
   QuickPhrasesSticker,
   FavQuietBreakSticker,
@@ -71,14 +69,12 @@ export const ChildHomeView: React.FC = () => {
     setShowMorningBrief,
     setShowCaregiverModal,
     setShowCaregiverAlertModal,
-    setShowRecollectionModal,
     routines,
     adventures,
     quickPhrases,
     speak,
     setShowCopingToolkit,
     activeTheme,
-    setShowThemeModal,
     enabledFeatures,
     userAgeGroup,
     userPersona,
@@ -88,9 +84,6 @@ export const ChildHomeView: React.FC = () => {
     setShowMedicationModal,
     moodJournalEntries,
     setShowMoodJournalModal,
-    cycleSettings,
-    setShowCycleTrackerModal,
-    getCyclePhaseInfo,
     activateEmergencyMode,
     setShowFivePointModal,
     setShowPassportModal,
@@ -98,7 +91,6 @@ export const ChildHomeView: React.FC = () => {
     setShowPieTimerModal,
     setShowDecisionWheelModal,
     setShowFidgetModal,
-    setShowToolsHubModal,
     getTodaySpoonEntry,
     dashboardWidgets,
     setShowDashboardCustomizer,
@@ -106,7 +98,6 @@ export const ChildHomeView: React.FC = () => {
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
-  const cyclePhaseInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
   const latestMoodEntry = moodJournalEntries[0];
   const todaySpoonEntry = getTodaySpoonEntry();
 
@@ -277,16 +268,16 @@ export const ChildHomeView: React.FC = () => {
             </button>
           </CaregiverLockShield>
 
-          {/* Quick Tools Hub Button */}
+          {/* Quick Tools Tab Button */}
           <button
             type="button"
-            aria-label="Open Tools Hub"
+            aria-label="Open Sensory Tools"
             onClick={() => {
-              setShowToolsHubModal(true);
+              setChildView('tools');
               playChime('tap');
             }}
             className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-            title="Open Tools Hub"
+            title="Open Sensory Tools"
           >
             <LayoutGrid className="w-4 h-4 text-stone-600" aria-hidden="true" />
           </button>
@@ -698,30 +689,6 @@ export const ChildHomeView: React.FC = () => {
                 </button>
               );
 
-            case 'cycle_tracker':
-              return isTeenOrAdult ? (
-                <button
-                  key={widget.id}
-                  onClick={() => {
-                    setShowCycleTrackerModal(true);
-                    playChime('tap');
-                  }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-pink-300/80 bg-pink-50/40 hover:bg-pink-50/80 text-pink-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
-                      {t('Cycle & Rhythm Tracker')}
-                    </div>
-                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
-                      {cycleSettings.discreetMode ? t('Body rhythm tracking') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
-                    </div>
-                  </div>
-                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
-                    <ConnectHeartSticker className="w-full h-full object-contain" />
-                  </div>
-                </button>
-              ) : null;
-
             case 'communication_passport':
               return (
                 <button
@@ -775,30 +742,6 @@ export const ChildHomeView: React.FC = () => {
                   </div>
                 </button>
               ) : null;
-
-            case 'evening_reflection':
-              return (
-                <button
-                  key={widget.id}
-                  onClick={() => {
-                    setShowRecollectionModal(true);
-                    playChime('tap');
-                  }}
-                  className="w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-indigo-300/80 bg-indigo-50/40 hover:bg-indigo-50/80 text-indigo-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-sm sm:text-base leading-snug truncate">
-                      {t('Evening Reflection & Journal')}
-                    </div>
-                    <div className="text-xs opacity-75 font-medium leading-snug mt-0.5 truncate">
-                      {t('Reflect on your day & celebrate wins')}
-                    </div>
-                  </div>
-                  <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
-                    <EveningMoonSticker className="w-full h-full object-contain" />
-                  </div>
-                </button>
-              );
 
             default:
               return null;

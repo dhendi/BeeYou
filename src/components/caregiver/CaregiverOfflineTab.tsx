@@ -21,7 +21,6 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({
     routines,
     socialStories,
     skills,
-    habits,
   } = useApp();
 
   const [reindexingOffline, setReindexingOffline] = useState(false);
@@ -35,7 +34,6 @@ export const CaregiverOfflineTab: React.FC<CaregiverOfflineTabProps> = ({
         routines,
         socialStories,
         skills,
-        habits,
         childName: childProfile.name,
       });
       await verifyOfflineIntegrity();

@@ -7,14 +7,11 @@ import {
   Wind, 
   CheckCircle2, 
   Smile,
-  BarChart3,
   BookOpen,
-  HeartPulse,
   Plus,
   Volume2
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { DailyRecollectionChart } from './DailyRecollectionChart';
 import { t } from '../services/translator';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 
@@ -25,25 +22,18 @@ export const FeelingsView: React.FC = () => {
     speak,
     announce,
     setShowCopingToolkit,
-    dailyRecollections,
     activeTheme,
     userAgeGroup,
     enabledFeatures,
     moodJournalEntries,
     setShowMoodJournalModal,
-    cycleSettings,
-    cycleLogs,
-    setShowCycleTrackerModal,
-    getCyclePhaseInfo,
     setShowFivePointModal,
   } = useApp();
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const showMoodJournalTab = isTeenOrAdult && enabledFeatures?.moodJournal !== false;
-  const showCycleTab = isTeenOrAdult && enabledFeatures?.cycleTracker !== false;
-  const cyclePhaseInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
 
-  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'journal' | 'cycle' | 'recollection'>('check-in');
+  const [activeSubTab, setActiveSubTab] = useState<'check-in' | 'journal'>('check-in');
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionType | null>(currentMood);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [selectedNeed, setSelectedNeed] = useState<string | null>(null);
@@ -134,42 +124,6 @@ export const FeelingsView: React.FC = () => {
           </button>
         )}
 
-        {showCycleTab && (
-          <button
-            type="button"
-            onClick={() => {
-              setActiveSubTab('cycle');
-              playChime('tap');
-            }}
-            className={`flex-1 min-w-[110px] py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'cycle'
-                ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
-                : 'text-[#6B5E52] hover:text-[#2D241E]'
-            }`}
-          >
-            <HeartPulse className="w-4 h-4 text-[#D57B7B]" />
-            <span>
-              {cycleSettings.discreetMode ? t('Rhythm') : `${t('Day')} ${cyclePhaseInfo?.currentCycleDay || 1}`}
-            </span>
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={() => {
-            setActiveSubTab('recollection');
-            playChime('tap');
-          }}
-          className={`flex-1 min-w-[110px] py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'recollection'
-              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
-              : 'text-[#6B5E52] hover:text-[#2D241E]'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4 text-[#5B7BB2]" />
-          <span>{t('Reflections')} ({dailyRecollections.length})</span>
-        </button>
-
         <button
           type="button"
           onClick={() => {
@@ -184,9 +138,7 @@ export const FeelingsView: React.FC = () => {
         </button>
       </div>
 
-      {activeSubTab === 'recollection' ? (
-        <DailyRecollectionChart />
-      ) : activeSubTab === 'journal' ? (
+      {activeSubTab === 'journal' ? (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
@@ -255,55 +207,6 @@ export const FeelingsView: React.FC = () => {
                       {entry.notes || entry.journalText}
                     </p>
                   )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      ) : activeSubTab === 'cycle' ? (
-        <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-black text-slate-900">
-                {cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle Tracker'} 🌸
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 max-w-xl">
-                {cyclePhaseInfo?.phaseDescription || 'Log physical and sensory symptoms anytime.'}
-              </p>
-            </div>
-
-            <button
-              onClick={() => {
-                setShowCycleTrackerModal(true);
-                playChime('tap');
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
-            >
-              <HeartPulse className="w-4 h-4" />
-              <span>Log Entry</span>
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {cycleLogs.length === 0 ? (
-              <div className="bg-white p-8 rounded-3xl border border-dashed border-slate-300 text-center space-y-2">
-                <span className="text-3xl block">🌸</span>
-                <h4 className="font-bold text-slate-700 text-sm">No cycle logs recorded yet</h4>
-              </div>
-            ) : (
-              cycleLogs.slice(0, 14).map((log) => (
-                <div
-                  key={log.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-2"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-bold text-slate-800">{log.date}</span>
-                    {log.flow && (
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 capitalize">
-                        {log.flow}
-                      </span>
-                    )}
-                  </div>
                 </div>
               ))
             )}

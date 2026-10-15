@@ -5,17 +5,15 @@ import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
-import { Heart, ExternalLink, Camera, Copy, Lightbulb } from 'lucide-react';
+import { Heart, ExternalLink, Copy, Lightbulb } from 'lucide-react';
 
 interface CaregiverDeviceLinkTabProps {
   onShowNotification: (msg: string) => void;
-  onOpenScanner: () => void;
   onStartTour?: () => void;
 }
 
 export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
   onShowNotification,
-  onOpenScanner,
   onStartTour,
 }) => {
   const {
@@ -85,19 +83,6 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </p>
 
           <div className="flex items-center gap-2 pt-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => {
-                onOpenScanner();
-                playChime('tap');
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
-              title={t("Open device camera to scan pairing QR code")}
-            >
-              <Camera className="w-4 h-4" />
-              <span>{t("Scan QR with Camera")}</span>
-            </button>
-
             <button
               type="button"
               onClick={() => {

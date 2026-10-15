@@ -415,13 +415,11 @@ export interface EnabledFeatures {
   visualCountdownTimer: boolean;   // Visual activity countdown timer
   socialStories: boolean;          // Social stories preparation
   lifeSkills: boolean;             // Step-by-step life skills breakdown
-  dailyMoodRecollection: boolean;  // End-of-day reflection & therapist clinical log
   emergencyAlertSOS: boolean;      // Quick help / caregiver alert SOS button
   aacCommunication: boolean;       // AAC picture & symbol communication board
   sensoryBreathingPacer: boolean;  // Calm sensory breathing pacer & coping toolkit
   medicationReminders: boolean;    // Medication reminders, dose tracking & inventory supply
   moodJournal: boolean;            // Reflective mood & trigger journal (teens to adults)
-  cycleTracker: boolean;           // Cycle & hormonal tracking with sensory insights (teens to adults)
   discreetMode: boolean;           // Minimal text-focused mode without cartoons for adults
   routines?: boolean;
   aac?: boolean;
@@ -439,13 +437,11 @@ export const DEFAULT_KID_FEATURES: EnabledFeatures = {
   visualCountdownTimer: true,
   socialStories: true,
   lifeSkills: true,
-  dailyMoodRecollection: true,
   emergencyAlertSOS: false,
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: false,
-  cycleTracker: false,
   discreetMode: false,
 };
 
@@ -456,13 +452,11 @@ export const DEFAULT_TEEN_FEATURES: EnabledFeatures = {
   visualCountdownTimer: true,
   socialStories: true,
   lifeSkills: true,
-  dailyMoodRecollection: true,
   emergencyAlertSOS: false,
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: true,
-  cycleTracker: true,
   discreetMode: false,
 };
 
@@ -473,13 +467,11 @@ export const DEFAULT_ADULT_FEATURES: EnabledFeatures = {
   visualCountdownTimer: true,
   socialStories: false,
   lifeSkills: false,
-  dailyMoodRecollection: true,
   emergencyAlertSOS: false,
   aacCommunication: true,
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: true,
-  cycleTracker: true,
   discreetMode: true,
 };
 
@@ -846,14 +838,7 @@ export interface DailySummaryChart {
   therapyTakeaways?: string;
 }
 
-export type {
-  DayRating,
-  EnergyLevelType,
-  ChallengeType,
-  WinType,
-  SleepQualityType,
-  DailyRecollectionEntry,
-} from '../data/recollectionData';
+
 
 export type {
   AppTheme,
@@ -1021,12 +1006,10 @@ export type DashboardWidgetId =
   | 'decision_wheel'
   | 'fidget_toys'
   | 'mood_journal'
-  | 'cycle_tracker'
   | 'communication_passport'
   | 'quick_aac'
   | 'mascot_companion'
-  | 'adventure_spotlight'
-  | 'evening_reflection';
+  | 'adventure_spotlight';
 
 export interface DashboardWidgetConfig {
   id: DashboardWidgetId;

@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useApp } from '../context/AppContext';
 
 // Caregiver portal lazy-loaded modals
-const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
-const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
@@ -71,7 +69,6 @@ import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
 import { CaregiverGuideTab } from './caregiver/CaregiverGuideTab';
 import { CaregiverMedicationsTab } from './caregiver/CaregiverMedicationsTab';
 import { CaregiverMoodJournalTab } from './caregiver/CaregiverMoodJournalTab';
-import { CaregiverCycleTrackerTab } from './caregiver/CaregiverCycleTrackerTab';
 import { CaregiverDeviceLinkTab } from './caregiver/CaregiverDeviceLinkTab';
 import { CaregiverOfflineTab } from './caregiver/CaregiverOfflineTab';
 import { CaregiverPlansChangedTab } from './caregiver/CaregiverPlansChangedTab';
@@ -84,10 +81,6 @@ import { CaregiverProfileTab } from './caregiver/CaregiverProfileTab';
 import { CaregiverSettingsTab } from './caregiver/CaregiverSettingsTab';
 
 // Shared Components
-import { DailyRecollectionChart } from './DailyRecollectionChart';
-import { ThemeShopAndStudio } from './ThemeShopAndStudio';
-import { CameraQRScannerModal } from './CameraQRScannerModal';
-import { ConnectionFeedbackModal, ConnectionFeedbackState } from './ConnectionFeedbackModal';
 import { FamilyAuthModal } from './FamilyAuthModal';
 
 export const ParentDashboard: React.FC = () => {
@@ -105,7 +98,6 @@ export const ParentDashboard: React.FC = () => {
     activatePlansChanged,
     medications,
     moodJournalEntries,
-    getCyclePhaseInfo,
     subscription,
     isPremium,
     getTrialDaysRemaining,
@@ -123,8 +115,6 @@ export const ParentDashboard: React.FC = () => {
     | 'caregiver'
     | 'medications'
     | 'mood-journal'
-    | 'cycle-tracker'
-    | 'recollection'
     | 'offline'
     | 'plans-changed'
     | 'routines'
@@ -133,7 +123,6 @@ export const ParentDashboard: React.FC = () => {
     | 'adventures'
     | 'skills'
     | 'profile'
-    | 'themes'
     | 'settings';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -317,50 +306,11 @@ export const ParentDashboard: React.FC = () => {
     playChime('tap');
   };
 
-  // Camera QR Scanner Modal State & Feedback State
-  const [showCameraScanner, setShowCameraScanner] = useState(false);
-  const [feedbackState, setFeedbackState] = useState<ConnectionFeedbackState | null>(null);
-
-  const handleScanCaregiverQR = async (scanned: string) => {
-    const cleanCode = extractPairingCodeFromScan(scanned);
-    if (!cleanCode) return;
-
-    const res = await claimPairingSession({
-      pairingCode: cleanCode,
-      claimerRole: 'caregiver',
-      childName: childProfile.name || 'Leo',
-      caregiverName: 'Caregiver',
-      permissions: caregiverPermissions,
-    });
-
-    if (res.success) {
-      setFeedbackState({
-        isOpen: true,
-        type: 'success',
-        role: 'caregiver',
-        peerName: childProfile.name || 'Child',
-        pairingCode: cleanCode,
-      });
-      showNotification(`Successfully connected to ${childProfile.name}'s device!`);
-    } else {
-      setFeedbackState({
-        isOpen: true,
-        type: 'failure',
-        role: 'caregiver',
-        peerName: childProfile.name || 'Child',
-        errorMessage: res.message,
-        pairingCode: cleanCode,
-      });
-    }
-  };
-
   useEffect(() => {
     if (dashboardScrollRef.current) {
       dashboardScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [activeTab]);
-
-  const cyclePhaseInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : { currentCycleDay: 1 };
 
   const navGroups: {
     id: string;
@@ -422,22 +372,10 @@ export const ParentDashboard: React.FC = () => {
           badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? t('Low Stock') : undefined,
         },
         {
-          id: 'recollection',
-          label: 'Daily Mood Summary',
-          icon: BarChart3,
-          badge: t('Therapy'),
-        },
-        {
           id: 'mood-journal',
           label: 'Mood & Reflection Journal',
           icon: BookOpen,
           badge: `${moodJournalEntries.length} ${t('Entries')}`,
-        },
-        {
-          id: 'cycle-tracker',
-          label: 'Cycle & Hormonal Rhythm',
-          icon: HeartPulse,
-          badge: `${t('Day')} ${cyclePhaseInfo.currentCycleDay}`,
         },
       ],
     },
@@ -477,12 +415,6 @@ export const ParentDashboard: React.FC = () => {
           id: 'profile',
           label: 'Child Profile & Persona',
           icon: User,
-        },
-        {
-          id: 'themes',
-          label: 'Themes & Studio',
-          icon: Palette,
-          badge: t('Studio'),
         },
         {
           id: 'offline',
@@ -793,7 +725,6 @@ export const ParentDashboard: React.FC = () => {
               liveChildStatus={liveChildStatus}
               setAlertHistoryList={setAlertHistoryList}
               setShowFamilyAuthModal={setShowFamilyAuthModal}
-              setShowCameraScanner={setShowCameraScanner}
               setActiveTab={(tab: any) => setActiveTab(tab)}
               showNotification={showNotification}
               onStartTour={() => handleStartSectionTour('liveStatus')}
@@ -837,16 +768,6 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
-          {/* TAB: DAILY MOOD & THERAPIST RECOLLECTION SUMMARY */}
-          {activeTab === 'recollection' && (
-            <div className="space-y-6">
-              <DailyRecollectionChart 
-                isParentPortal={true}
-                onStartTour={() => handleStartSectionTour('recollection')}
-              />
-            </div>
-          )}
-
           {/* TAB: MOOD JOURNAL & SELF-REFLECTION */}
           {activeTab === 'mood-journal' && (
             <CaregiverMoodJournalTab 
@@ -854,18 +775,10 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
-          {/* TAB: CYCLE TRACKER & HORMONAL RHYTHM */}
-          {activeTab === 'cycle-tracker' && (
-            <CaregiverCycleTrackerTab 
-              onStartTour={() => handleStartSectionTour('cycleTracker')}
-            />
-          )}
-
           {/* TAB: CAREGIVER LIVE LINK & REMOTE MONITOR */}
           {activeTab === 'caregiver' && (
             <CaregiverDeviceLinkTab
               onShowNotification={showNotification}
-              onOpenScanner={() => setShowCameraScanner(true)}
               onStartTour={() => handleStartSectionTour('pairing')}
             />
           )}
@@ -940,31 +853,8 @@ export const ParentDashboard: React.FC = () => {
               onStartTour={() => handleStartSectionTour('settings')}
             />
           )}
-
-          {/* TAB: THEMES & CUSTOMIZATION STUDIO */}
-          {activeTab === 'themes' && (
-            <ThemeShopAndStudio 
-              onStartTour={() => handleStartSectionTour('themes')}
-            />
-          )}
         </main>
       </div>
-
-      {/* In-App Live Camera QR Scanner */}
-      <CameraQRScannerModal
-        isOpen={showCameraScanner}
-        onClose={() => setShowCameraScanner(false)}
-        onScan={handleScanCaregiverQR}
-        title={t("Scan Child Device QR Code")}
-        subtitle={t("Point camera at the QR code on the child's phone or tablet")}
-      />
-
-      {/* Connection Feedback Modal (Success / Failure) */}
-      <ConnectionFeedbackModal
-        state={feedbackState}
-        onClose={() => setFeedbackState(null)}
-        onOpenCamera={() => setShowCameraScanner(true)}
-      />
 
       {/* Shared Family Email & 1-Click Demo Modal */}
       <FamilyAuthModal
@@ -991,9 +881,7 @@ export const ParentDashboard: React.FC = () => {
 
       {/* Caregiver Portal Modals */}
       <Suspense fallback={null}>
-        <DailyRecollectionModal />
         <MoodJournalModal />
-        <CycleTrackerModal />
         <PlansChangedModal />
         <AboutMeIDModal
           isOpen={showAboutMeModal}

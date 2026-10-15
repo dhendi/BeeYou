@@ -16,10 +16,8 @@ import {
   Award, 
   Layers, 
   ArrowRight,
-  BookOpen,
-  Palette
+  BookOpen
 } from 'lucide-react';
-import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { StickerScrapbookView } from './StickerScrapbookView';
 import { playChime, speakText } from '../utils/audio';
 import { RewardTrophySticker, GoldStarSticker, RoutineStickerIcon } from './icons/JournalStickers';
@@ -35,7 +33,7 @@ export const Rewards: React.FC = () => {
     earnedStickers,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile' | 'themes'>('badges');
+  const [activeTab, setActiveTab] = useState<'badges' | 'stickers' | 'profile'>('badges');
   const [stickerSubTab, setStickerSubTab] = useState<'scrapbook' | 'collection'>('scrapbook');
   const [badgeFilter, setBadgeFilter] = useState<'all' | 'earned' | 'in-progress'>('all');
   const [selectedBadge, setSelectedBadge] = useState<RewardBadge | null>(null);
@@ -246,22 +244,6 @@ export const Rewards: React.FC = () => {
         >
           <User className="w-4 h-4 text-[#5B7BB2]" />
           <span>Profile Card</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab('themes');
-            playChime('tap');
-          }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'themes'
-              ? 'bg-[#FCF9F2] text-[#2D241E] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.9)]'
-              : 'text-[#6B5E52] hover:text-[#2D241E]'
-          }`}
-        >
-          <Palette className="w-4 h-4 text-[#99C2A2]" />
-          <span>Themes & Studio 🎨</span>
         </button>
       </div>
 
@@ -825,11 +807,6 @@ export const Rewards: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* TAB 4: THEMES & STUDIO */}
-      {activeTab === 'themes' && (
-        <ThemeShopAndStudio />
       )}
     </div>
   );

@@ -59,7 +59,7 @@ export const CaregiverFeatureWalkthrough: React.FC<CaregiverFeatureWalkthroughPr
     setShowFidgetModal,
     setShowSpoonModal,
     setShowPassportModal,
-    setShowToolsHubModal,
+    setChildView,
     setShowCaregiverModal,
     setShowAccessibilityModal,
   } = useApp();
@@ -255,7 +255,7 @@ export const CaregiverFeatureWalkthrough: React.FC<CaregiverFeatureWalkthroughPr
     else if (launcher === 'fidgets') setShowFidgetModal(true);
     else if (launcher === 'spoon') setShowSpoonModal(true);
     else if (launcher === 'passport') setShowPassportModal(true);
-    else if (launcher === 'tools') setShowToolsHubModal(true);
+    else if (launcher === 'tools') setChildView('tools');
     else if (launcher === 'accessibility') setShowAccessibilityModal(true);
   };
 

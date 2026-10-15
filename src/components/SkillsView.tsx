@@ -10,11 +10,9 @@ import {
   RotateCcw,
   Play,
   Pause,
-  Layers,
-  Leaf
+  Layers
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { DailyHabitsModule } from './DailyHabitsModule';
 import { t } from '../services/translator';
 import { RoutineStickerIcon, GoldStarSticker } from './icons/JournalStickers';
 
@@ -37,13 +35,10 @@ export const SkillsView: React.FC = () => {
     resetSkill,
     speak,
     announce,
-    habits,
     settings,
   } = useApp();
 
   const isColorCoded = settings?.colorCodedActionCards === true;
-
-  const [skillsTab, setSkillsTab] = useState<'missions' | 'habits'>('missions');
   const selectedSkill = skills.find((s) => s.id === activeSkillId);
 
   // Active step countdown timer
@@ -249,64 +244,24 @@ export const SkillsView: React.FC = () => {
   }
 
   // MAIN SKILLS LIST
-  const habitsDoneCount = habits.filter((h) => h.completedToday).length;
-
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 rounded-3xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
         <div>
           <span className="text-xs font-black uppercase tracking-wider text-amber-100">
-            {t('Independence & Habits')}
+            {t('Independence & Life Skills')}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 text-white">{t('My Daily Skills')}</h2>
           <p className="text-xs sm:text-sm text-amber-100/90 font-medium mt-1 max-w-md">
-            {t('Master everyday activities step-by-step and practice recurring daily habits at your own pace!')}
+            {t('Master everyday activities step-by-step at your own pace!')}
           </p>
         </div>
         <GoldStarSticker className="w-14 h-14 hidden sm:inline-block drop-shadow-md" />
       </div>
 
-      {/* Mode Switcher: Step-by-Step Missions vs Daily Habits */}
-      <div className="flex items-center gap-2 bg-white rounded-2xl p-1.5 border-2 border-slate-200 shadow-xs">
-        <button
-          type="button"
-          onClick={() => {
-            setSkillsTab('missions');
-            playChime('tap');
-          }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-            skillsTab === 'missions'
-              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>{t('Step-by-Step Missions')} ({skills.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setSkillsTab('habits');
-            playChime('tap');
-          }}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-            skillsTab === 'habits'
-              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Leaf className="w-4 h-4" />
-          <span>{t('Daily Habits')} ({habitsDoneCount}/{habits.length})</span>
-        </button>
-      </div>
-
-      {/* Render Selected Tab */}
-      {skillsTab === 'habits' ? (
-        <DailyHabitsModule />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      {/* Step-by-Step Missions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {skills.map((skill) => {
             const completedCount = skill.steps.filter((s) => s.completed).length;
             const totalCount = skill.steps.length;
@@ -372,7 +327,6 @@ export const SkillsView: React.FC = () => {
             );
           })}
         </div>
-      )}
     </div>
   );
 };

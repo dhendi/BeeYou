@@ -38,8 +38,6 @@ export const MoodJournalModal: React.FC = () => {
     speak,
     childProfile,
     userAgeGroup,
-    cycleSettings,
-    getCyclePhaseInfo,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'new' | 'history' | 'insights'>('new');
@@ -164,8 +162,6 @@ export const MoodJournalModal: React.FC = () => {
     speak(text);
   };
 
-  const cycleInfo = cycleSettings?.enabled ? getCyclePhaseInfo() : null;
-
   // Filtered entries
   const filteredEntries = moodJournalEntries.filter((e) => {
     if (filterMood === 'all') return true;
@@ -186,11 +182,6 @@ export const MoodJournalModal: React.FC = () => {
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
                   {userAgeGroup === 'adult' ? 'Personal Journal' : 'Teen Reflection'}
                 </span>
-                {cycleInfo && (
-                  <span className="text-[10px] font-bold bg-purple-500/40 text-purple-200 px-2 py-0.5 rounded-full">
-                    Cycle Day {cycleInfo.currentCycleDay} • {cycleInfo.phaseLabel.split(' ')[0]}
-                  </span>
-                )}
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
                 Mood & Emotional Journal

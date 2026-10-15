@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem, FavoriteSentence } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { getFavoriteSentenceSticker } from '../data/defaultData';
-import { AACTileArt } from './AACTileArt';
 import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
 import { AACWordEditorModal } from './AACWordEditorModal';
@@ -181,7 +180,6 @@ export const AACView: React.FC = () => {
     isSpeaking,
     stopSpeaking,
     activeTheme,
-    setShowThemeModal,
     aacActiveScene,
     setAacActiveScene,
     setShowAacKeyboardModal,
@@ -1704,15 +1702,6 @@ export const AACView: React.FC = () => {
                     hasThemedArt ? 'border-opacity-60' : ''
                   } ${getColorStyles(item.colorType)}`}
                 >
-                  {/* Themed SVG art layer */}
-                  {hasThemedArt && activeTheme && (
-                    <AACTileArt
-                      theme={activeTheme}
-                      colorType={item.colorType}
-                      label={item.label}
-                    />
-                  )}
-
                   {/* Mulberry Symbol Area */}
                   <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
                     <img

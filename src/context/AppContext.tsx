@@ -15,7 +15,6 @@ import {
   EmotionType,
   CaregiverMessage,
   EarnedRoutineSticker,
-  DailyRecollectionEntry,
   AppTheme,
   UserPersona,
   UserAgeGroup,
@@ -24,9 +23,6 @@ import {
   MedicationReminder,
   MedicationDoseLog,
   MoodJournalEntry,
-  CycleDailyLog,
-  CycleSettings,
-  CyclePhase,
   SubscriptionInfo,
   SubscriptionTier,
   BillingCycle,
@@ -70,8 +66,6 @@ import { useSensoryToolsState } from '../hooks/useSensoryToolsState';
 import { useCustomToolsState } from '../hooks/useCustomToolsState';
 import { useMedicationState } from '../hooks/useMedicationState';
 import { useMoodJournalState } from '../hooks/useMoodJournalState';
-import { useCycleTrackerState } from '../hooks/useCycleTrackerState';
-import { useRecollectionsState } from '../hooks/useRecollectionsState';
 import { useThemeState } from '../hooks/useThemeState';
 import { useFamilyCloudSync } from '../hooks/useFamilyCloudSync';
 
@@ -237,14 +231,6 @@ export interface AppContextType {
   awardRoutineSticker: (routine: Routine) => EarnedRoutineSticker;
   dismissStickerCelebration: () => void;
 
-  // Daily Mood & Recollection
-  dailyRecollections: DailyRecollectionEntry[];
-  showRecollectionModal: boolean;
-  setShowRecollectionModal: (val: boolean) => void;
-  addDailyRecollection: (entry: Omit<DailyRecollectionEntry, 'id' | 'timestamp'>) => void;
-  updateDailyRecollection: (id: string, updates: Partial<DailyRecollectionEntry>) => void;
-  deleteDailyRecollection: (id: string) => void;
-
   // Themes & Customization
   themes: AppTheme[];
   activeThemeId: string;
@@ -254,8 +240,6 @@ export interface AppContextType {
   createCustomTheme: (theme: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>) => AppTheme;
   updateCustomTheme: (id: string, updates: Partial<AppTheme>) => void;
   deleteCustomTheme: (id: string) => void;
-  showThemeModal: boolean;
-  setShowThemeModal: (val: boolean) => void;
 
   // Onboarding & Multi-Age Adaptability & Role
   userPersona: UserPersona;
@@ -298,25 +282,6 @@ export interface AppContextType {
   deleteMoodJournalEntry: (id: string) => void;
   showMoodJournalModal: boolean;
   setShowMoodJournalModal: (val: boolean) => void;
-
-  // Cycle Tracker
-  cycleSettings: CycleSettings;
-  updateCycleSettings: (settings: Partial<CycleSettings>) => void;
-  cycleLogs: CycleDailyLog[];
-  logCycleDay: (log: Omit<CycleDailyLog, 'id'>) => void;
-  deleteCycleLog: (id: string) => void;
-  showCycleTrackerModal: boolean;
-  setShowCycleTrackerModal: (val: boolean) => void;
-  getCyclePhaseInfo: () => {
-    currentCycleDay: number;
-    currentPhase: CyclePhase;
-    phaseLabel: string;
-    phaseDescription: string;
-    sensoryInsight: string;
-    daysUntilNextPeriod: number;
-    nextPeriodDate: string;
-    isPeriodToday: boolean;
-  };
 
   // Subscription & Membership Tiering
   subscription: SubscriptionInfo;
@@ -382,9 +347,7 @@ export interface AppContextType {
   showAacKeyboardModal: boolean;
   setShowAacKeyboardModal: (val: boolean) => void;
 
-  // Tools Hub & Accessibility
-  showToolsHubModal: boolean;
-  setShowToolsHubModal: (val: boolean) => void;
+  // Accessibility
   showAccessibilityModal: boolean;
   setShowAccessibilityModal: (val: boolean) => void;
 
@@ -658,8 +621,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (updates.emergencyAlertSOS !== undefined) next.caregiverMessaging = updates.emergencyAlertSOS;
     if (updates.sensoryTools !== undefined) next.sensoryBreathingPacer = updates.sensoryTools;
     if (updates.sensoryBreathingPacer !== undefined) next.sensoryTools = updates.sensoryBreathingPacer;
-    if (updates.emotions !== undefined) next.dailyMoodRecollection = updates.emotions;
-    if (updates.dailyMoodRecollection !== undefined) next.emotions = updates.dailyMoodRecollection;
     return next;
   };
 
@@ -747,20 +708,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     announce: speechEngine.announce,
   });
 
-  // 10. Cycle Tracker Hook
-  const cycleTracker = useCycleTrackerState({
-    soundEffects: settings.soundEffects,
-    announce: speechEngine.announce,
-  });
 
-  // 11. Daily Recollections Hook
-  const recollections = useRecollectionsState({
-    soundEffects: settings.soundEffects,
-    childName: childProfile.name,
-    recordEmotion: gamification.recordEmotion,
-    awardStars: gamification.awardStars,
-    speak: speechEngine.speak,
-  });
 
   // 12. Themes Hook
   const themeState = useThemeState({
@@ -882,9 +830,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       skills: gamification.skills,
       habits: gamification.habits,
       socialStories: gamification.socialStories,
-      dailyRecollections: recollections.dailyRecollections,
       medications: medication.medications,
-      cycleSettings: cycleTracker.cycleSettings,
       userAgeGroup,
       enabledFeatures,
       activeThemeId: themeState.activeTheme?.id || 'classic',
@@ -924,9 +870,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       if (Array.isArray(data.skills)) gamification.setSkills(data.skills);
       if (Array.isArray(data.habits)) gamification.setHabits(data.habits);
       if (Array.isArray(data.socialStories)) gamification.setSocialStories(data.socialStories);
-      if (Array.isArray(data.dailyRecollections)) recollections.setDailyRecollections(data.dailyRecollections);
       if (Array.isArray(data.medications)) medication.setMedications(data.medications);
-      if (data.cycleSettings) cycleTracker.setCycleSettings(data.cycleSettings);
       if (data.userAgeGroup) setUserAgeGroup(data.userAgeGroup);
       if (data.enabledFeatures) updateEnabledFeatures(data.enabledFeatures);
       if (data.activeThemeId) themeState.setTheme(data.activeThemeId);
@@ -943,11 +887,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const resetToDefaults = () => {
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('beeyou_daily_recollections');
     localStorage.removeItem('beeyou_medications');
     localStorage.removeItem('beeyou_mood_journal_entries');
-    localStorage.removeItem('beeyou_cycle_settings');
-    localStorage.removeItem('beeyou_cycle_logs');
     localStorage.removeItem('beeyou_user_age_group');
     localStorage.removeItem('beeyou_enabled_features');
     localStorage.removeItem('beeyou_onboarding_completed');
@@ -1098,14 +1039,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     awardRoutineSticker: gamification.awardRoutineSticker,
     dismissStickerCelebration: gamification.dismissStickerCelebration,
 
-    // Daily Mood & Recollection
-    dailyRecollections: recollections.dailyRecollections,
-    showRecollectionModal: recollections.showRecollectionModal,
-    setShowRecollectionModal: recollections.setShowRecollectionModal,
-    addDailyRecollection: recollections.addDailyRecollection,
-    updateDailyRecollection: recollections.updateDailyRecollection,
-    deleteDailyRecollection: recollections.deleteDailyRecollection,
-
     // Themes & Customization
     themes: themeState.themes,
     activeThemeId: themeState.activeThemeId,
@@ -1115,8 +1048,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     createCustomTheme: themeState.createCustomTheme,
     updateCustomTheme: themeState.updateCustomTheme,
     deleteCustomTheme: themeState.deleteCustomTheme,
-    showThemeModal: themeState.showThemeModal,
-    setShowThemeModal: themeState.setShowThemeModal,
 
     // Onboarding & Multi-Age Adaptability & Role
     userPersona,
@@ -1159,16 +1090,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     deleteMoodJournalEntry: moodJournal.deleteMoodJournalEntry,
     showMoodJournalModal: moodJournal.showMoodJournalModal,
     setShowMoodJournalModal: moodJournal.setShowMoodJournalModal,
-
-    // Cycle Tracker
-    cycleSettings: cycleTracker.cycleSettings,
-    updateCycleSettings: cycleTracker.updateCycleSettings,
-    cycleLogs: cycleTracker.cycleLogs,
-    logCycleDay: cycleTracker.logCycleDay,
-    deleteCycleLog: cycleTracker.deleteCycleLog,
-    showCycleTrackerModal: cycleTracker.showCycleTrackerModal,
-    setShowCycleTrackerModal: cycleTracker.setShowCycleTrackerModal,
-    getCyclePhaseInfo: cycleTracker.getCyclePhaseInfo,
 
     // Subscription & Membership Tiering
     subscription: subscriptionState.subscription,
@@ -1234,9 +1155,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     showAacKeyboardModal: aacComm.showAacKeyboardModal,
     setShowAacKeyboardModal: aacComm.setShowAacKeyboardModal,
 
-    // Tools Hub & Accessibility
-    showToolsHubModal: sensoryTools.showToolsHubModal,
-    setShowToolsHubModal: sensoryTools.setShowToolsHubModal,
+    // Accessibility
     showAccessibilityModal: sensoryTools.showAccessibilityModal,
     setShowAccessibilityModal: sensoryTools.setShowAccessibilityModal,
 

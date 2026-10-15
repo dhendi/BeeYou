@@ -29,7 +29,6 @@ interface CaregiverLiveHubTabProps {
   liveChildStatus: any;
   setAlertHistoryList: React.Dispatch<React.SetStateAction<CaregiverAlert[]>>;
   setShowFamilyAuthModal: (show: boolean) => void;
-  setShowCameraScanner: (show: boolean) => void;
   setActiveTab: (tab: any) => void;
   showNotification: (msg: string) => void;
   onStartTour?: () => void;
@@ -41,12 +40,11 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   liveChildStatus,
   setAlertHistoryList,
   setShowFamilyAuthModal,
-  setShowCameraScanner,
   setActiveTab,
   showNotification,
   onStartTour,
 }) => {
-  const { childProfile, connectionStatus, currentMood, habits, activeTheme } = useApp();
+  const { childProfile, connectionStatus, currentMood, routines, activeTheme } = useApp();
   const [customMsgText, setCustomMsgText] = useState('');
 
   const handleResolveAlert = (alertId: string) => {
@@ -141,19 +139,6 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             <button
               type="button"
               onClick={() => {
-                setShowCameraScanner(true);
-                playChime('tap');
-              }}
-              className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
-              title={t("Open device camera to scan pairing QR code")}
-            >
-              <img src="/assets/stickers/qr_scan_camera.png" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
-              <span>{t("Scan QR")}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
                 setActiveTab('caregiver');
                 playChime('tap');
               }}
@@ -197,11 +182,11 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             </span>
           </div>
 
-          <div data-tour="status-habits-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
-            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("Habits")}</span>
+          <div data-tour="status-routines-pill" className="bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-amber-200/70 flex items-center justify-between gap-1.5 min-w-0 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 truncate">{t("Routines")}</span>
             <span className="text-xs font-black text-slate-900 flex items-center gap-1 shrink-0">
               <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-              <span>{habits.filter(h => h.completedToday).length} / {habits.length}</span>
+              <span>{routines.filter(r => r.steps.every(s => s.completed)).length} / {routines.length}</span>
             </span>
           </div>
 

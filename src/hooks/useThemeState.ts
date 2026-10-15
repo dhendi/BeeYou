@@ -48,8 +48,6 @@ export function useThemeState({
     return 'theme-classic';
   });
 
-  const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
-
   useEffect(() => {
     try {
       localStorage.setItem('beeyou_themes', JSON.stringify(themes));
@@ -146,8 +144,6 @@ export function useThemeState({
     themes: resolvedThemes,
     activeThemeId,
     activeTheme,
-    showThemeModal,
-    setShowThemeModal,
     setTheme,
     buyTheme,
     createCustomTheme,

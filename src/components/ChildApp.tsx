@@ -44,13 +44,9 @@ const MorningBriefModal = lazy(() => import('./MorningBriefModal').then(m => ({ 
 const ConnectCaregiverModal = lazy(() => import('./ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
 const CaregiverAlertModal = lazy(() => import('./CaregiverAlertModal').then(m => ({ default: m.CaregiverAlertModal })));
 const RoutineStickerCelebrationModal = lazy(() => import('./RoutineStickerCelebrationModal').then(m => ({ default: m.RoutineStickerCelebrationModal })));
-const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
-const ThemeCustomizerModal = lazy(() => import('./ThemeCustomizerModal').then(m => ({ default: m.ThemeCustomizerModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const MedicationRemindersModal = lazy(() => import('./MedicationRemindersModal').then(m => ({ default: m.MedicationRemindersModal })));
 const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
-const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
-const SubscriptionModal = lazy(() => import('./SubscriptionModal').then(m => ({ default: m.SubscriptionModal })));
 const EmergencySensoryModal = lazy(() => import('./EmergencySensoryModal').then(m => ({ default: m.EmergencySensoryModal })));
 const FivePointScaleModal = lazy(() => import('./FivePointScaleModal').then(m => ({ default: m.FivePointScaleModal })));
 const DecisionWheelModal = lazy(() => import('./DecisionWheelModal').then(m => ({ default: m.DecisionWheelModal })));
@@ -59,7 +55,6 @@ const SpoonBudgetModal = lazy(() => import('./SpoonBudgetModal').then(m => ({ de
 const PieTimerModal = lazy(() => import('./PieTimerModal').then(m => ({ default: m.PieTimerModal })));
 const DigitalFidgetModal = lazy(() => import('./DigitalFidgetModal').then(m => ({ default: m.DigitalFidgetModal })));
 const AacKeyboardModal = lazy(() => import('./AacKeyboardModal').then(m => ({ default: m.AacKeyboardModal })));
-const ToolsHubModal = lazy(() => import('./ToolsHubModal').then(m => ({ default: m.ToolsHubModal })));
 const AccessibilityPreferencesModal = lazy(() => import('./AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
 const DashboardCustomizerModal = lazy(() => import('./DashboardCustomizerModal').then(m => ({ default: m.DashboardCustomizerModal })));
 const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
@@ -69,7 +64,6 @@ const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ defa
 const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards })));
 const StickerScrapbookView = lazy(() => import('./StickerScrapbookView').then(m => ({ default: m.StickerScrapbookView })));
 const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
-const MoreView = lazy(() => import('./MoreView').then(m => ({ default: m.MoreView })));
 
 const ChildAppContent: React.FC = () => {
   const { 
@@ -201,7 +195,6 @@ const ChildAppContent: React.FC = () => {
           </div>
         }>
           <ParentDashboard />
-          <SubscriptionModal />
           <ConnectCaregiverModal 
             isOpen={showCaregiverModal} 
             onClose={() => setShowCaregiverModal(false)} 
@@ -216,7 +209,6 @@ const ChildAppContent: React.FC = () => {
             isOpen={showFamilyAuthModal}
             onClose={() => setShowFamilyAuthModal(false)}
           />
-          <ThemeCustomizerModal />
           <CaregiverMessageToast />
           <OfflineIndicator />
         </Suspense>
@@ -263,7 +255,6 @@ const ChildAppContent: React.FC = () => {
         {childView === 'feelings' && <FeelingsView />}
         {childView === 'rewards' && <Rewards />}
         {childView === 'scrapbook' && <StickerScrapbookView />}
-        {childView === 'more' && <MoreView />}
       </main>
 
       {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}
@@ -299,8 +290,6 @@ const ChildAppContent: React.FC = () => {
           onClose={() => setShowCaregiverAlertModal(false)}
         />
         <RoutineStickerCelebrationModal />
-        <DailyRecollectionModal />
-        <ThemeCustomizerModal />
         <PrintScheduleModal />
 
         {/* First-Time AAC Experience Knowledge Prompt Modal ("Do you know how AAC works?") */}
@@ -358,12 +347,6 @@ const ChildAppContent: React.FC = () => {
         {/* Teen & Adult Deep Mood Reflection Journal Modal */}
         <MoodJournalModal />
 
-        {/* Teen & Adult Cycle & Hormonal Wellness Rhythm Modal */}
-        <CycleTrackerModal />
-
-        {/* BeeYou Premium Subscription & Paywall Modal */}
-        <SubscriptionModal />
-
         {/* Emergency Sensory Red Button Modal */}
         <EmergencySensoryModal />
 
@@ -387,9 +370,6 @@ const ChildAppContent: React.FC = () => {
 
         {/* Dyslexia-Friendly AAC Keyboard Modal */}
         <AacKeyboardModal />
-
-        {/* Consolidated Tools Hub Modal */}
-        <ToolsHubModal />
 
         {/* Accessibility & Sensory Preferences Hub Modal */}
         <AccessibilityPreferencesModal />

@@ -6,9 +6,7 @@ import {
   ThermometerSticker,
   MedicationSticker,
   ReadingBookSticker,
-  ConnectHeartSticker,
   SpoonSticker,
-  EveningMoonSticker,
 } from './icons/JournalStickers';
 
 export const MeView: React.FC = () => {
@@ -18,19 +16,15 @@ export const MeView: React.FC = () => {
     enabledFeatures,
     medications,
     moodJournalEntries,
-    getCyclePhaseInfo,
     getTodaySpoonEntry,
     setShowFivePointModal,
     setShowMedicationModal,
     setShowMoodJournalModal,
-    setShowCycleTrackerModal,
     setShowSpoonModal,
-    setShowRecollectionModal,
   } = useApp();
 
   const isColorCoded = settings?.colorCodedActionCards === true;
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
-  const cycleInfo = isTeenOrAdult ? getCyclePhaseInfo() : null;
   const todaySpoon = getTodaySpoonEntry();
   const nextMed = medications.find((m) => m.active);
 
@@ -83,23 +77,6 @@ export const MeView: React.FC = () => {
       },
     },
     {
-      id: 'cycle-tracker',
-      title: 'Cycle & Hormonal Rhythm',
-      desc: cycleInfo 
-        ? `Day ${cycleInfo.currentCycleDay} • ${cycleInfo.phaseLabel}. Track sensory & energy rhythms.`
-        : 'Track your hormonal cycle and sensory sensitivity changes.',
-      badge: 'Sensory Rhythm',
-      badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
-      color: 'border-2 border-rose-300/80 bg-rose-50/40 hover:bg-rose-50/80 text-rose-950',
-      stickerBox: 'bg-white border-rose-200/90 shadow-2xs',
-      Sticker: ConnectHeartSticker,
-      show: isTeenOrAdult && enabledFeatures?.cycleTracker !== false,
-      action: () => {
-        setShowCycleTrackerModal(true);
-        playChime('tap');
-      },
-    },
-    {
       id: 'spoon-budget',
       title: 'Spoon Energy Budget',
       desc: todaySpoon 
@@ -113,21 +90,6 @@ export const MeView: React.FC = () => {
       show: isTeenOrAdult,
       action: () => {
         setShowSpoonModal(true);
-        playChime('tap');
-      },
-    },
-    {
-      id: 'evening-reflection',
-      title: 'Evening Reflection & Wins',
-      desc: 'Look back on the highlights of your day, sensory wins, and how you felt.',
-      badge: 'Daily Review',
-      badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
-      color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
-      stickerBox: 'bg-white border-teal-200/90 shadow-2xs',
-      Sticker: EveningMoonSticker,
-      show: enabledFeatures?.dailyMoodRecollection !== false,
-      action: () => {
-        setShowRecollectionModal(true);
         playChime('tap');
       },
     },
