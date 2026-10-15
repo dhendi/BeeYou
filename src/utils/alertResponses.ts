@@ -5,6 +5,7 @@ export interface QuickReplyOption {
   label: string;
   text: string;
   className: string;
+  iconSrc?: string;
 }
 
 /**
@@ -20,21 +21,24 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'coming',
-        label: t("🚗 I'm On My Way"),
+        label: t("I'm On My Way"),
         text: t("I'm on my way! 🚗"),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
+        iconSrc: '/assets/stickers/car_on_my_way.png',
       },
       {
         id: 'im_here',
-        label: t("❤️ I'm Here For You"),
+        label: t("I'm Here For You"),
         text: t("I'm here for you ❤️ Take a deep breath."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
+        iconSrc: '/assets/stickers/heart_here_for_you.png',
       },
       {
         id: 'give_minutes',
-        label: t("⏳ 5 Minutes"),
+        label: t("5 Minutes"),
         text: t("Give me 5 minutes, finish what you're doing ⏳"),
         className: 'bg-slate-100 hover:bg-slate-200 text-slate-700',
+        iconSrc: '/assets/stickers/wall_clock.png',
       },
     ];
   }
@@ -286,21 +290,24 @@ export function getQuickRepliesForAlert(
   return [
     {
       id: 'coming',
-      label: t("🚗 I'm On My Way"),
+      label: t("I'm On My Way"),
       text: t("I'm on my way! 🚗 Keep breathing, help is coming."),
       className: 'bg-rose-600 hover:bg-rose-700 text-white',
+      iconSrc: '/assets/stickers/car_on_my_way.png',
     },
     {
       id: 'im_here',
-      label: t("❤️ I'm Here For You"),
+      label: t("I'm Here For You"),
       text: t("I'm here for you ❤️ Take a slow deep breath, you are safe."),
       className: 'bg-slate-900 hover:bg-slate-800 text-white',
+      iconSrc: '/assets/stickers/heart_here_for_you.png',
     },
     {
       id: 'give_minutes',
-      label: t("⏳ 5 Minutes, Stay Safe"),
+      label: t("5 Minutes, Stay Safe"),
       text: t("Give me 5 minutes, stay safe right where you are ⏳"),
       className: 'bg-amber-600 hover:bg-amber-700 text-white',
+      iconSrc: '/assets/stickers/wall_clock.png',
     },
   ];
 }

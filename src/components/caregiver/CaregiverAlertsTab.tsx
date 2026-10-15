@@ -186,8 +186,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               <div key={alert.id} className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
-                      <ShieldAlert className="w-7 h-7 text-rose-600" />
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1 shrink-0">
+                      <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -222,16 +222,23 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                     {t('Send Immediate Reassurance to')} {alert.childName}{t("'s Screen:")}
                   </span>
                   <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
-                    {getQuickRepliesForAlert(alert, t).map((reply) => (
-                      <button
-                        key={reply.id}
-                        type="button"
-                        onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
-                        className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5 transition ${reply.className}`}
-                      >
-                        <span>{reply.label}</span>
-                      </button>
-                    ))}
+                    {getQuickRepliesForAlert(alert, t).map((reply) => {
+                      const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.png' :
+                                        reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.png' :
+                                        reply.iconSrc;
+                      const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏 ]+/, '');
+                      return (
+                        <button
+                          key={reply.id}
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
+                          className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5 transition ${reply.className}`}
+                        >
+                          {replyIcon && <img src={replyIcon} alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />}
+                          <span>{cleanLabel || reply.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
