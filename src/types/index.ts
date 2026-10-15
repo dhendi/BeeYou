@@ -65,6 +65,7 @@ export interface FavoriteSentence {
   text: string;
   speechText?: string;
   emoji: string;
+  stickerSrc?: string;
   usageCount: number;
   lastUsedAt?: string;
   isParentPinned?: boolean;

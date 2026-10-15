@@ -4,6 +4,7 @@ import {
   DEFAULT_AAC_ITEMS,
   DEFAULT_QUICK_PHRASES,
   DEFAULT_FAVORITE_SENTENCES,
+  getFavoriteSentenceSticker,
 } from '../data/defaultData';
 import { playChime } from '../utils/audio';
 import { autocorrectAacGrammar } from '../utils/aacGrammar';
@@ -39,7 +40,12 @@ export function useAacCommunication({
       const saved = localStorage.getItem('beeyou_favorite_sentences');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((fav: FavoriteSentence) => ({
+            ...fav,
+            stickerSrc: fav.stickerSrc || getFavoriteSentenceSticker(fav),
+          }));
+        }
       }
     } catch (e) {}
     return DEFAULT_FAVORITE_SENTENCES;
@@ -120,6 +126,7 @@ export function useAacCommunication({
           isParentPinned:
             fav.isParentPinned !== undefined ? fav.isParentPinned : updated[existingIdx].isParentPinned,
           emoji: fav.emoji || updated[existingIdx].emoji,
+          stickerSrc: fav.stickerSrc || getFavoriteSentenceSticker(fav) || updated[existingIdx].stickerSrc,
           speechText: fav.speechText || updated[existingIdx].speechText,
           lastUsedAt: new Date().toISOString(),
         };
@@ -130,6 +137,7 @@ export function useAacCommunication({
           text: cleanText,
           speechText: fav.speechText || cleanText,
           emoji: fav.emoji || '💬',
+          stickerSrc: fav.stickerSrc || getFavoriteSentenceSticker(fav),
           usageCount: fav.usageCount || 1,
           isParentPinned: fav.isParentPinned !== undefined ? fav.isParentPinned : true,
           isCustom: true,

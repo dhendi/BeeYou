@@ -167,6 +167,20 @@ export const MoodExcitedSticker = renderStickerPng('/assets/stickers/mood_excite
 export const MoodSleepySticker = renderStickerPng('/assets/stickers/mood_sleepy.png', 'Sleepy Mood');
 export const MoodUnsureSticker = renderStickerPng('/assets/stickers/mood_unsure.png', 'Unsure Mood');
 
+// Favorite Sentences Yellow Stickers
+export const FavLegoSticker = renderStickerPng('/assets/stickers/fav_lego.png', 'Lego Blocks');
+export const FavBathSticker = renderStickerPng('/assets/stickers/fav_bath.png', 'Take a Bath');
+export const FavSandwichSticker = renderStickerPng('/assets/stickers/fav_sandwich.png', 'Sandwich Snack');
+export const FavWaterSticker = renderStickerPng('/assets/stickers/fav_water.png', 'Drink Water');
+export const FavQuietBreakSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Quiet Break');
+export const FavHelpSosSticker = renderStickerPng('/assets/stickers/fav_help_sos.png', 'Help Please');
+export const FavOutsideSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Go Outside');
+export const FavLoveHeartSticker = renderStickerPng('/assets/stickers/fav_love_heart.png', 'I Love You');
+export const FavRestTiredSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Rest and Sleep');
+export const FavMusicSticker = renderStickerPng('/assets/stickers/fav_music.png', 'Listen to Music');
+export const FavStopSticker = renderStickerPng('/assets/stickers/fav_stop.png', 'Stop Please');
+export const FavHappySticker = renderStickerPng('/assets/stickers/fav_happy.png', 'I Am Happy');
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -307,6 +321,31 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🥱' || normEmoji === '😴' || normTitle.includes('sleepy') || normTitle.includes('tired')) return <MoodSleepySticker className={className} size={size} />;
   // 😟 Unsure / worried
   if (normEmoji === '😟' || normEmoji === '😕' || normTitle.includes('unsure') || normTitle.includes('worried')) return <MoodUnsureSticker className={className} size={size} />;
+
+  // 🧱 Lego / Building Blocks
+  if (normEmoji === '🧱' || normTitle.includes('lego') || normTitle.includes('block')) return <FavLegoSticker className={className} size={size} />;
+  // 🛁 Take a Bath
+  if (normTitle.includes('take a bath')) return <FavBathSticker className={className} size={size} />;
+  // 🥪 Sandwich / Hungry snack
+  if (normTitle.includes('hungry') || (normTitle.includes('snack') && !normTitle.includes('apple'))) return <FavSandwichSticker className={className} size={size} />;
+  // 💧 Thirsty / Water
+  if (normTitle.includes('thirsty') || (normTitle.includes('water') && normTitle.includes('want'))) return <FavWaterSticker className={className} size={size} />;
+  // 🛋️ Quiet Break
+  if (normTitle.includes('quiet break') || normTitle.includes('sensory quiet')) return <FavQuietBreakSticker className={className} size={size} />;
+  // 🆘 Help Please / SOS
+  if (normEmoji === '🆘' || normTitle.includes('help me') || normTitle.includes('can you help')) return <FavHelpSosSticker className={className} size={size} />;
+  // 🌳 Go Outside / Tree
+  if (normTitle.includes('go outside') || normTitle.includes('want to go outside')) return <FavOutsideSticker className={className} size={size} />;
+  // 💖 I Love You / Heart
+  if (normEmoji === '💖' || normTitle.includes('love you') || normTitle.includes('i love')) return <FavLoveHeartSticker className={className} size={size} />;
+  // 😴 Tired / Rest
+  if ((normTitle.includes('tired') && normTitle.includes('rest')) || normTitle.includes('want to rest')) return <FavRestTiredSticker className={className} size={size} />;
+  // 🎧 Listen to Music
+  if (normTitle.includes('listen to music') || (normEmoji === '🎧' && normTitle.includes('music'))) return <FavMusicSticker className={className} size={size} />;
+  // 🛑 Stop Please / Do not want
+  if (normEmoji === '🛑' || normTitle.includes('stop please') || normTitle.includes('do not want this') || normTitle.includes('please stop')) return <FavStopSticker className={className} size={size} />;
+  // 😊 Happy
+  if (normTitle.includes('i am happy') || normTitle.includes('am happy')) return <FavHappySticker className={className} size={size} />;
 
   // Fallback to raw emoji if none match
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;

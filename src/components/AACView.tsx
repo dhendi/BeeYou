@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem, FavoriteSentence } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
+import { getFavoriteSentenceSticker } from '../data/defaultData';
 import { AACTileArt } from './AACTileArt';
 import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
@@ -1457,23 +1458,31 @@ export const AACView: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                     <span className="text-[11px] font-bold text-slate-400 mr-1">Icon:</span>
-                    {['💬', '🧱', '🛁', '🥪', '💧', '🛋️', '🆘', '🌳', '💖', '😴', '🎧', '🛑', '🍦', '🚗', '🎨'].map((em) => (
-                      <button
-                        key={em}
-                        type="button"
-                        onClick={() => {
-                          setNewFavSentenceEmoji(em);
-                          playChime('tap');
-                        }}
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center text-base cursor-pointer transition-all shrink-0 ${
-                          newFavSentenceEmoji === em ? 'bg-amber-400 scale-110 shadow-xs' : 'bg-slate-100 hover:bg-slate-200'
-                        }`}
-                      >
-                        {em}
-                      </button>
-                    ))}
+                    {['💬', '🧱', '🛁', '🥪', '💧', '🛋️', '🆘', '🌳', '💖', '😴', '🎧', '🛑', '😊', '🍦', '🚗', '🎨'].map((em) => {
+                      const stk = getFavoriteSentenceSticker({ emoji: em });
+                      return (
+                        <button
+                          key={em}
+                          type="button"
+                          onClick={() => {
+                            setNewFavSentenceEmoji(em);
+                            playChime('tap');
+                          }}
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center p-1 cursor-pointer transition-all shrink-0 ${
+                            newFavSentenceEmoji === em ? 'bg-amber-400 scale-110 shadow-xs' : 'bg-slate-100 hover:bg-slate-200'
+                          }`}
+                          title={`Select ${em}`}
+                        >
+                          {stk ? (
+                            <img src={stk} alt="" className="w-full h-full object-contain pointer-events-none drop-shadow-2xs" />
+                          ) : (
+                            <span className="text-base">{em}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -1489,6 +1498,7 @@ export const AACView: React.FC = () => {
                             text: newFavSentenceText.trim(),
                             speechText: newFavSentenceText.trim(),
                             emoji: newFavSentenceEmoji,
+                            stickerSrc: getFavoriteSentenceSticker({ emoji: newFavSentenceEmoji, text: newFavSentenceText.trim() }),
                             isParentPinned: true,
                           });
                           setNewFavSentenceText('');
@@ -1505,6 +1515,7 @@ export const AACView: React.FC = () => {
                           text: newFavSentenceText.trim(),
                           speechText: newFavSentenceText.trim(),
                           emoji: newFavSentenceEmoji,
+                          stickerSrc: getFavoriteSentenceSticker({ emoji: newFavSentenceEmoji, text: newFavSentenceText.trim() }),
                           isParentPinned: true,
                         });
                         setNewFavSentenceText('');
@@ -1552,6 +1563,7 @@ export const AACView: React.FC = () => {
                           label: t(fav.text),
                           speechText: spoken,
                           emoji: fav.emoji || '💬',
+                          photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
                           category: 'favorites',
                           colorType: 'social',
                           motorIndex: 0,
@@ -1561,9 +1573,21 @@ export const AACView: React.FC = () => {
                       title="Tap to speak sentence aloud"
                       aria-label={`Speak favorite phrase: ${t(fav.speechText || fav.text)}`}
                     >
-                      <span className="text-3xl sm:text-4xl p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform">
-                        {fav.emoji || '💬'}
-                      </span>
+                      <div className="w-13 h-13 sm:w-14 sm:h-14 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
+                        {(() => {
+                          const stickerPath = fav.stickerSrc || getFavoriteSentenceSticker(fav);
+                          if (stickerPath) {
+                            return (
+                              <img
+                                src={stickerPath}
+                                alt={fav.text}
+                                className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none"
+                              />
+                            );
+                          }
+                          return <span className="text-3xl sm:text-4xl">{fav.emoji || '💬'}</span>;
+                        })()}
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
@@ -1599,6 +1623,7 @@ export const AACView: React.FC = () => {
                             label: t(fav.text),
                             speechText: spoken,
                             emoji: fav.emoji || '💬',
+                            photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
                             category: 'favorites',
                             colorType: 'social',
                             motorIndex: 0,

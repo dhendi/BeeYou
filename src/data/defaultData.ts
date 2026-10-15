@@ -266,19 +266,45 @@ export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [
   { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false },
 ];
 
+export const getFavoriteSentenceSticker = (fav: {
+  id?: string;
+  text?: string;
+  emoji?: string;
+  stickerSrc?: string;
+}): string | undefined => {
+  if (fav.stickerSrc) return fav.stickerSrc;
+  const id = fav.id || '';
+  const text = (fav.text || '').toLowerCase();
+  const emoji = (fav.emoji || '').trim();
+
+  if (id === 'fav-1' || text.includes('lego') || emoji === '🧱') return '/assets/stickers/fav_lego.png';
+  if (id === 'fav-2' || text.includes('bath') || emoji === '🛁') return '/assets/stickers/fav_bath.png';
+  if (id === 'fav-3' || (text.includes('hungry') && text.includes('snack')) || emoji === '🥪') return '/assets/stickers/fav_sandwich.png';
+  if (id === 'fav-4' || (text.includes('thirsty') || text.includes('water')) || emoji === '💧') return '/assets/stickers/fav_water.png';
+  if (id === 'fav-5' || text.includes('quiet break') || text.includes('sensory quiet') || emoji === '🛋️') return '/assets/stickers/fav_quiet_break.png';
+  if (id === 'fav-6' || text.includes('help me') || emoji === '🆘') return '/assets/stickers/fav_help_sos.png';
+  if (id === 'fav-7' || text.includes('go outside') || emoji === '🌳') return '/assets/stickers/fav_outside.png';
+  if (id === 'fav-8' || text.includes('love you') || emoji === '💖' || emoji === '❤️') return '/assets/stickers/fav_love_heart.png';
+  if (id === 'fav-9' || (text.includes('tired') && text.includes('rest')) || emoji === '😴') return '/assets/stickers/fav_rest_tired.png';
+  if (id === 'fav-10' || text.includes('listen to music') || emoji === '🎧') return '/assets/stickers/fav_music.png';
+  if (id === 'fav-11' || text.includes('stop please') || text.includes('do not want this') || emoji === '🛑') return '/assets/stickers/fav_stop.png';
+  if (id === 'fav-12' || text.includes('happy') || emoji === '😊') return '/assets/stickers/fav_happy.png';
+  return undefined;
+};
+
 export const DEFAULT_FAVORITE_SENTENCES: FavoriteSentence[] = [
-  { id: 'fav-1', text: 'I want to play lego', speechText: 'I want to play lego', emoji: '🧱', usageCount: 14, isParentPinned: true, category: 'play' },
-  { id: 'fav-2', text: 'I want to take a bath', speechText: 'I want to take a bath', emoji: '🛁', usageCount: 11, isParentPinned: true, category: 'daily' },
-  { id: 'fav-3', text: 'I am hungry, can I have a snack?', speechText: 'I am hungry, can I have a snack please', emoji: '🥪', usageCount: 10, isParentPinned: true, category: 'requests' },
-  { id: 'fav-4', text: 'I am thirsty, I want water', speechText: 'I am thirsty, I want some water please', emoji: '💧', usageCount: 9, isParentPinned: true, category: 'requests' },
-  { id: 'fav-5', text: 'I need a sensory quiet break', speechText: 'I need a quiet break please', emoji: '🛋️', usageCount: 8, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-6', text: 'Can you help me please?', speechText: 'Can you please help me right now', emoji: '🆘', usageCount: 7, isParentPinned: true, category: 'requests' },
-  { id: 'fav-7', text: 'I want to go outside', speechText: 'I want to go outside and play', emoji: '🌳', usageCount: 6, isParentPinned: true, category: 'play' },
-  { id: 'fav-8', text: 'I love you', speechText: 'I love you', emoji: '💖', usageCount: 6, isParentPinned: true, category: 'social' },
-  { id: 'fav-9', text: 'I am tired, I want to rest', speechText: 'I am feeling tired and want to rest', emoji: '😴', usageCount: 5, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-10', text: 'I want to listen to music', speechText: 'I want to listen to calming music', emoji: '🎧', usageCount: 4, isParentPinned: true, category: 'play' },
-  { id: 'fav-11', text: 'I do not want this, stop please', speechText: 'I do not want this, please stop', emoji: '🛑', usageCount: 4, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-12', text: 'I am happy!', speechText: 'I am feeling happy and good', emoji: '😊', usageCount: 3, isParentPinned: false, category: 'feelings' },
+  { id: 'fav-1', text: 'I want to play lego', speechText: 'I want to play lego', emoji: '🧱', stickerSrc: '/assets/stickers/fav_lego.png', usageCount: 14, isParentPinned: true, category: 'play' },
+  { id: 'fav-2', text: 'I want to take a bath', speechText: 'I want to take a bath', emoji: '🛁', stickerSrc: '/assets/stickers/fav_bath.png', usageCount: 11, isParentPinned: true, category: 'daily' },
+  { id: 'fav-3', text: 'I am hungry, can I have a snack?', speechText: 'I am hungry, can I have a snack please', emoji: '🥪', stickerSrc: '/assets/stickers/fav_sandwich.png', usageCount: 10, isParentPinned: true, category: 'requests' },
+  { id: 'fav-4', text: 'I am thirsty, I want water', speechText: 'I am thirsty, I want some water please', emoji: '💧', stickerSrc: '/assets/stickers/fav_water.png', usageCount: 9, isParentPinned: true, category: 'requests' },
+  { id: 'fav-5', text: 'I need a sensory quiet break', speechText: 'I need a quiet break please', emoji: '🛋️', stickerSrc: '/assets/stickers/fav_quiet_break.png', usageCount: 8, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-6', text: 'Can you help me please?', speechText: 'Can you please help me right now', emoji: '🆘', stickerSrc: '/assets/stickers/fav_help_sos.png', usageCount: 7, isParentPinned: true, category: 'requests' },
+  { id: 'fav-7', text: 'I want to go outside', speechText: 'I want to go outside and play', emoji: '🌳', stickerSrc: '/assets/stickers/fav_outside.png', usageCount: 6, isParentPinned: true, category: 'play' },
+  { id: 'fav-8', text: 'I love you', speechText: 'I love you', emoji: '💖', stickerSrc: '/assets/stickers/fav_love_heart.png', usageCount: 6, isParentPinned: true, category: 'social' },
+  { id: 'fav-9', text: 'I am tired, I want to rest', speechText: 'I am feeling tired and want to rest', emoji: '😴', stickerSrc: '/assets/stickers/fav_rest_tired.png', usageCount: 5, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-10', text: 'I want to listen to music', speechText: 'I want to listen to calming music', emoji: '🎧', stickerSrc: '/assets/stickers/fav_music.png', usageCount: 4, isParentPinned: true, category: 'play' },
+  { id: 'fav-11', text: 'I do not want this, stop please', speechText: 'I do not want this, please stop', emoji: '🛑', stickerSrc: '/assets/stickers/fav_stop.png', usageCount: 4, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-12', text: 'I am happy!', speechText: 'I am feeling happy and good', emoji: '😊', stickerSrc: '/assets/stickers/fav_happy.png', usageCount: 3, isParentPinned: false, category: 'feelings' },
 ];
 
 export const DEFAULT_ROUTINES: Routine[] = [

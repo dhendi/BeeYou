@@ -87,6 +87,14 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'park', emoji: '🌳', label: 'Park & Nature Walk', category: 'fun', keywords: ['park', 'tree', 'walk', 'nature', 'outside', 'trail'] },
   { id: 'post', emoji: '✉️', label: 'Post Office & Mail', category: 'daily', keywords: ['mail', 'post', 'letter', 'package', 'stamp'] },
   { id: 'hotel', emoji: '🏨', label: 'Hotel & Vacation Stay', category: 'daily', keywords: ['hotel', 'motel', 'vacation', 'stay', 'trip', 'travel'] },
+
+  // Favorite Phrases & Requests
+  { id: 'lego', emoji: '🧱', label: 'Lego / Building Blocks', category: 'fun', keywords: ['lego', 'brick', 'block', 'toy', 'build', 'play'] },
+  { id: 'stop', emoji: '🛑', label: 'Stop Sign / Pause', category: 'calm', keywords: ['stop', 'halt', 'pause', 'wait', 'no', 'red'] },
+  { id: 'sos_badge', emoji: '🆘', label: 'SOS / Help Please', category: 'calm', keywords: ['help', 'sos', 'assist', 'need', 'emergency'] },
+  { id: 'tree_outside', emoji: '🌳', label: 'Go Outside / Tree', category: 'fun', keywords: ['outside', 'tree', 'nature', 'park', 'outdoor'] },
+  { id: 'tired_rest', emoji: '😴', label: 'Tired / Rest', category: 'calm', keywords: ['tired', 'rest', 'sleep', 'bed', 'nap', 'sleepy'] },
+  { id: 'happy_smile', emoji: '😊', label: 'I Am Happy', category: 'calm', keywords: ['happy', 'smile', 'joy', 'good', 'cheerful'] },
 ];
 
 export interface IconLibraryModalProps {
