@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { Eye, Save, Trash2, Plus, Sparkles, Stethoscope, CloudRain, School, MessageSquare } from 'lucide-react';
+import { Eye, Save, Trash2, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { playChime } from '../../utils/audio';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverPlansChangedTabProps {
   onShowNotification: (msg: string) => void;
@@ -49,9 +50,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Picnic Lunch & Park Swings');
       setPcCalming('It is completely normal to feel surprised or upset when plans change. Take a slow breath. You are safe, and here is our new calm plan.');
       setPcSteps([
-        { title: 'Favorite pizza or mac & cheese at home', emoji: '', time: '12:30 PM' },
-        { title: 'Play on the swings at the sunny park', emoji: '', time: '1:30 PM' },
-        { title: 'Drawing and cozy world building', emoji: '', time: '3:00 PM' },
+        { title: 'Favorite pizza lunch at home', emoji: '🍕', time: '12:30 PM' },
+        { title: 'Play at the sunny playground swings', emoji: '🛝', time: '1:30 PM' },
+        { title: 'Drawing and cozy world building', emoji: '🎨', time: '3:00 PM' },
       ]);
       setPcPhrases([
         'Why did it change?',
@@ -68,9 +69,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Indoor Blanket Fort & Movie Afternoon');
       setPcCalming('Rainy days can be frustrating when we wanted to go outside. We will build a super cozy indoor fort and have warm cocoa!');
       setPcSteps([
-        { title: 'Build living room blanket fort with pillows', emoji: '', time: '11:00 AM' },
-        { title: 'Warm cocoa and crackers snack', emoji: '', time: '12:00 PM' },
-        { title: 'Watch favorite animal movie inside the fort', emoji: '', time: '1:00 PM' },
+        { title: 'Build living room blanket fort with pillows', emoji: '🛋️', time: '11:00 AM' },
+        { title: 'Warm cocoa and crackers snack', emoji: '☕', time: '12:00 PM' },
+        { title: 'Watch favorite animal movie inside the fort', emoji: '🧸', time: '1:00 PM' },
       ]);
       setPcPhrases([
         'I wanted to see the animals.',
@@ -84,9 +85,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Early Afternoon at Home');
       setPcCalming('School finished early today. Mom/Dad picked you up and we have extra cozy time at home.');
       setPcSteps([
-        { title: 'Ride car home and unpack backpack', emoji: '', time: '12:30 PM' },
-        { title: 'Quiet sensory break with favorite toy', emoji: '', time: '1:00 PM' },
-        { title: 'Free tablet and train play', emoji: '', time: '2:00 PM' },
+        { title: 'Ride car home and unpack backpack', emoji: '🚗', time: '12:30 PM' },
+        { title: 'Quiet sensory break with favorite toy', emoji: '🧸', time: '1:00 PM' },
+        { title: 'Free tablet and train play', emoji: '📱', time: '2:00 PM' },
       ]);
       setPcPhrases([
         'Why did school finish early?',
@@ -178,27 +179,39 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <button
             onClick={() => handleApplyPreset('dentist')}
-            className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer"
+            className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
-            <Stethoscope className="w-6 h-6 text-amber-600 mb-1" />
-            <span className="font-black text-xs text-slate-800 block">{t("Dentist/Doctor Closed")}</span>
-            <span className="text-[11px] text-slate-500">{t("Pizza lunch & playground instead")}</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
+              <img src="/assets/stickers/stethoscope.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            </div>
+            <div>
+              <span className="font-black text-xs text-slate-800 block">{t("Dentist/Doctor Closed")}</span>
+              <span className="text-[11px] text-slate-500">{t("Pizza lunch & playground instead")}</span>
+            </div>
           </button>
           <button
             onClick={() => handleApplyPreset('rain')}
-            className="p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all cursor-pointer"
+            className="p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
-            <CloudRain className="w-6 h-6 text-sky-600 mb-1" />
-            <span className="font-black text-xs text-slate-800 block">{t("Rainy Day / Trip Cancelled")}</span>
-            <span className="text-[11px] text-slate-500">{t("Blanket fort & cozy movie")}</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
+              <img src="/assets/stickers/rain_cloud.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            </div>
+            <div>
+              <span className="font-black text-xs text-slate-800 block">{t("Rainy Day / Trip Cancelled")}</span>
+              <span className="text-[11px] text-slate-500">{t("Blanket fort & cozy movie")}</span>
+            </div>
           </button>
           <button
             onClick={() => handleApplyPreset('school')}
-            className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition-all cursor-pointer"
+            className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
-            <School className="w-6 h-6 text-emerald-600 mb-1" />
-            <span className="font-black text-xs text-slate-800 block">{t("School Early Dismissal")}</span>
-            <span className="text-[11px] text-slate-500">{t("Pick up early & quiet afternoon")}</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
+              <img src="/assets/stickers/school_building.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+            </div>
+            <div>
+              <span className="font-black text-xs text-slate-800 block">{t("School Early Dismissal")}</span>
+              <span className="text-[11px] text-slate-500">{t("Pick up early & quiet afternoon")}</span>
+            </div>
           </button>
         </div>
       </div>
@@ -272,11 +285,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
-                {step.emoji ? (
-                  <span className="text-xl">{step.emoji}</span>
-                ) : (
-                  <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
-                )}
+                <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                  <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 object-contain" />
+                </div>
                 <span className="flex-1 font-bold text-xs sm:text-sm text-slate-800">
                   {step.title}
                 </span>

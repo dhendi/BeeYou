@@ -153,6 +153,11 @@ export const DoctorAdventureSticker = renderStickerPng('/assets/stickers/adventu
 export const PlansChangeStorySticker = renderStickerPng('/assets/stickers/story_plans_change.png', 'When Plans Change');
 export const BirthdayStorySticker = renderStickerPng('/assets/stickers/story_birthday.png', 'Going to a Birthday Party');
 export const TakingTurnsStorySticker = renderStickerPng('/assets/stickers/story_sharing.png', 'Taking Turns with Toys');
+export const StethoscopeSticker = renderStickerPng('/assets/stickers/stethoscope.png', 'Stethoscope / Doctor');
+export const RainCloudSticker = renderStickerPng('/assets/stickers/rain_cloud.png', 'Rainy Day');
+export const SchoolBuildingSticker = renderStickerPng('/assets/stickers/school_building.png', 'School Building');
+export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
+export const PlaygroundSwingsSticker = renderStickerPng('/assets/stickers/playground_swings.png', 'Playground Swings');
 
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
@@ -167,6 +172,11 @@ export const RoutineStickerIcon: React.FC<{
 }> = ({ emoji, title, className = 'w-8 h-8', size }) => {
   const normEmoji = (emoji || '').trim();
   const normTitle = (title || '').toLowerCase();
+
+  // If already an image path or sticker asset
+  if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
+    return <img src={normEmoji} alt={title || ''} className={className} />;
+  }
 
   // ⏰ Wake up / Morning
   if (normEmoji === '⏰' || normEmoji === '🌅' || normEmoji === '🔆' || normEmoji === '☀️' || normTitle.includes('wake') || normTitle.includes('morning')) return <AlarmClockSticker className={className} size={size} />;
@@ -187,9 +197,13 @@ export const RoutineStickerIcon: React.FC<{
   // ✂️ Haircut / Scissors
   if (normEmoji === '✂️' || normTitle.includes('haircut') || normTitle.includes('scissors')) return <HaircutAdventureSticker className={className} size={size} />;
   // 🩺 Doctor / Stethoscope / Check-up
-  if (normEmoji === '🩺' || normTitle.includes('doctor') || normTitle.includes('stethoscope') || normTitle.includes('check-up')) return <DoctorAdventureSticker className={className} size={size} />;
+  if (normEmoji === '🩺' || normTitle.includes('doctor') || normTitle.includes('stethoscope') || normTitle.includes('check-up')) return <StethoscopeSticker className={className} size={size} />;
+  // 🌧️ Rain / Weather / Rainy day
+  if (normEmoji === '🌧️' || normEmoji === '🌧' || normEmoji === '☔' || normEmoji === '⛈️' || normTitle.includes('rain')) return <RainCloudSticker className={className} size={size} />;
   // 🥞 Breakfast / Food / Pancakes
   if (normEmoji === '🥞' || normTitle.includes('pancake') || normTitle.includes('breakfast')) return <PancakesSticker className={className} size={size} />;
+  // 🍕 Pizza / Lunch / Slice
+  if (normEmoji === '🍕' || normTitle.includes('pizza')) return <PizzaSliceSticker className={className} size={size} />;
   // 🍴 Cutlery / Fork & Knife
   if (normEmoji === '🍴' || normTitle.includes('cutlery') || normTitle.includes('fork') || normTitle.includes('knife')) return <CutlerySticker className={className} size={size} />;
   // 🍽️ Restaurant / Dining Out
@@ -217,8 +231,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🌬️' || normEmoji === '💨' || normTitle.includes('wind') || normTitle.includes('breeze') || normTitle.includes('fresh air')) return <WindBreezeSticker className={className} size={size} />;
   // 🎒 Backpack
   if (normEmoji === '🎒' || normTitle.includes('backpack') || normTitle.includes('pack')) return <BackpackSticker className={className} size={size} />;
-  // 🚌 School bus / ride to school / dismissal / School building
-  if (normEmoji === '🚌' || normEmoji === '🏫' || normTitle.includes('bus') || normTitle.includes('go to school') || normTitle.includes('dismissal') || normTitle.includes('head to school') || normTitle.includes('head home') || normTitle.includes('school')) return <SchoolBusSticker className={className} size={size} />;
+  // 🏫 School building / School day
+  if (normEmoji === '🏫' || (normTitle.includes('school') && !normTitle.includes('bus'))) return <SchoolBuildingSticker className={className} size={size} />;
+  // 🚌 School bus / ride to school / dismissal
+  if (normEmoji === '🚌' || normTitle.includes('bus') || normTitle.includes('go to school') || normTitle.includes('dismissal') || normTitle.includes('head to school') || normTitle.includes('head home')) return <SchoolBusSticker className={className} size={size} />;
   // 👟 Shoes
   if (normEmoji === '👟' || normTitle.includes('shoe') || normTitle.includes('sneaker')) return <SneakersSticker className={className} size={size} />;
   // 🧼 Wash hands / soap
@@ -229,8 +245,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '✏️' || normEmoji === '📝' || normEmoji === '🔢' || normTitle.includes('pencil') || normTitle.includes('write') || normTitle.includes('draw') || normTitle.includes('homework') || normTitle.includes('math')) return <PencilSticker className={className} size={size} />;
   // 🔬 Science
   if (normEmoji === '🔬' || normTitle.includes('science')) return <ScienceFlaskSticker className={className} size={size} />;
+  // 🛝 Playground swings / slide / park
+  if (normEmoji === '🛝' || normTitle.includes('swing') || normTitle.includes('playground')) return <PlaygroundSwingsSticker className={className} size={size} />;
   // 🧸 Teddy bear / toys / play / recess / cart
-  if (normEmoji === '🧸' || normEmoji === '🛒' || normEmoji === '🛝' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play') || normTitle.includes('recess')) return <TeddyBearSticker className={className} size={size} />;
+  if (normEmoji === '🧸' || normEmoji === '🛒' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play') || normTitle.includes('recess')) return <TeddyBearSticker className={className} size={size} />;
   // 📖 / 📚 Books / reading
   if (normEmoji === '📖' || normEmoji === '📚' || normTitle.includes('read') || normTitle.includes('book') || normTitle.includes('story')) return <ReadingBookSticker className={className} size={size} />;
   // 🌙 Evening / bedtime / moon
