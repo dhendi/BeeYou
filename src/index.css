@@ -74,3 +74,62 @@
   }
 }
 
+/* Printable Visual Schedules & Scrapbook Styles */
+@media print {
+  @page {
+    size: auto;
+    margin: 8mm;
+  }
+
+  html, body, #root {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+  }
+
+  /* Hide app chrome, modals backdrop, navigation, and everything outside printable area */
+  header,
+  footer,
+  nav,
+  aside,
+  .no-print,
+  #print-hide-backdrop {
+    display: none !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #beeyou-printable-document,
+  #beeyou-printable-document * {
+    visibility: visible;
+  }
+
+  #beeyou-printable-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+  }
+
+  .print-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
-import { SlidersHorizontal, Lock } from 'lucide-react';
+import { SlidersHorizontal, Lock, Printer } from 'lucide-react';
 import {
   RocketAdventureSticker,
   ToothbrushSticker,
@@ -58,6 +58,7 @@ export const MoreView: React.FC = () => {
     setShowAccessibilityModal,
     setShowToolsHubModal,
     setShowAvatarCreator,
+    openPrintSchedule,
   } = useApp();
 
   const on = (key: keyof NonNullable<typeof enabledFeatures>) => enabledFeatures?.[key] !== false;
@@ -201,6 +202,14 @@ export const MoreView: React.FC = () => {
           onOpen: () => setChildView('scrapbook'),
         },
         {
+          id: 'print-schedules',
+          title: 'Printable Schedules & PECS',
+          desc: 'Print routine checklists, PECS flashcards, and posters',
+          emoji: '🖨️',
+          show: true,
+          onOpen: () => openPrintSchedule({ mode: 'checklist' }),
+        },
+        {
           id: 'my-world',
           title: 'My World',
           desc: 'Decorate your own space',
@@ -291,6 +300,8 @@ export const MoreView: React.FC = () => {
         return <RewardTrophySticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'scrapbook':
         return <ArtCraftsSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
+      case 'print-schedules':
+        return <Printer className="w-6 h-6 text-amber-600" />;
       case 'my-world':
         return <FavQuietBreakSticker size={36} className="w-9 h-9 shrink-0 drop-shadow-xs" />;
       case 'avatar':

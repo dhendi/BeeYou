@@ -11,7 +11,8 @@ import {
   BookOpen,
   Plus,
   Check,
-  CalendarDays
+  CalendarDays,
+  Printer
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { MyDayView } from './MyDayView';
@@ -39,6 +40,7 @@ export const MyRoutineView: React.FC = () => {
     activeSkillId,
     setActiveAdventureId,
     setActiveSkillId,
+    openPrintSchedule,
   } = useApp();
 
   const isAdult = userAgeGroup === 'adult';
@@ -313,6 +315,19 @@ export const MyRoutineView: React.FC = () => {
           >
             <Sun className="w-3.5 h-3.5 text-amber-500" />
             <span className="hidden sm:inline">{t('Brief')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              openPrintSchedule({ mode: 'checklist', routineId: selectedRoutineId });
+              playChime('tap');
+            }}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black bg-stone-50 hover:bg-amber-50 text-stone-700 hover:text-amber-900 border border-stone-200 hover:border-amber-300 transition-all cursor-pointer active:scale-95 shadow-2xs"
+            title="Print Visual Schedule or PECS Flashcards"
+          >
+            <Printer className="w-3.5 h-3.5 text-amber-600" />
+            <span className="hidden sm:inline">{t('Print')}</span>
           </button>
         </div>
       </div>

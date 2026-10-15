@@ -24,7 +24,8 @@ import {
   X,
   Layers,
   Eye,
-  RefreshCw
+  RefreshCw,
+  Printer
 } from 'lucide-react';
 
 export type ScrapbookTheme = 'bedroom' | 'park' | 'starry' | 'kraft';
@@ -48,9 +49,10 @@ export interface ScrapbookPageData {
   stickers: PlacedSticker[];
 }
 
-const STORAGE_KEY = 'beeyou_sticker_scrapbook_pages_v1';
+export const SCRAPBOOK_STORAGE_KEY = 'beeyou_sticker_scrapbook_pages_v1';
+const STORAGE_KEY = SCRAPBOOK_STORAGE_KEY;
 
-const DEFAULT_PAGES: ScrapbookPageData[] = [
+export const DEFAULT_SCRAPBOOK_PAGES: ScrapbookPageData[] = [
   {
     id: 1,
     title: 'Morning Sun & Cozy Breakfast',
@@ -128,8 +130,9 @@ const DEFAULT_PAGES: ScrapbookPageData[] = [
     ],
   },
 ];
+const DEFAULT_PAGES = DEFAULT_SCRAPBOOK_PAGES;
 
-const THEME_CONFIG: Record<
+export const SCRAPBOOK_THEME_CONFIG: Record<
   ScrapbookTheme,
   {
     name: string;
@@ -168,9 +171,10 @@ const THEME_CONFIG: Record<
     icon: '📜',
   },
 };
+const THEME_CONFIG = SCRAPBOOK_THEME_CONFIG;
 
 export const StickerScrapbookView: React.FC = () => {
-  const { earnedStickers, childProfile } = useApp();
+  const { earnedStickers, childProfile, openPrintSchedule } = useApp();
 
   // Load pages from localStorage or fallback
   const [pages, setPages] = useState<ScrapbookPageData[]>(() => {
@@ -452,6 +456,20 @@ export const StickerScrapbookView: React.FC = () => {
             >
               <Eye className="w-3.5 h-3.5 text-amber-600" />
               <span>Full Poster</span>
+            </button>
+
+            {/* Print / Export Scrapbook Page */}
+            <button
+              type="button"
+              onClick={() => {
+                openPrintSchedule({ mode: 'scrapbook', pageIndex: activePageIndex });
+                playChime('tap');
+              }}
+              className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+              title="Print or export this scrapbook page"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Page</span>
             </button>
 
             {/* Clear page */}

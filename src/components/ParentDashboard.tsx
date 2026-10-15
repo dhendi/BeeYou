@@ -9,6 +9,7 @@ const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ 
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
 const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
+const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
 import {
   ArrowLeft,
   Crown,
@@ -1000,6 +1001,7 @@ export const ParentDashboard: React.FC = () => {
         />
         <EditAlertsModal />
         <EditCalmModal />
+        <PrintScheduleModal />
       </Suspense>
     </div>
   );

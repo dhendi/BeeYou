@@ -5,7 +5,7 @@ import { Routine, RoutineTemplate } from '../../types';
 import { RoutineTemplatesLibrary } from '../RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from '../RoutineCustomizerModal';
 import { playChime } from '../../utils/audio';
-import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Star, ClipboardList, Calendar } from 'lucide-react';
+import { BookOpen, Layers, Plus, Crown, Clock, Edit3, Copy, Trash2, Star, ClipboardList, Calendar, Printer } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverRoutinesTabProps {
@@ -22,6 +22,7 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
     deleteRoutine,
     isPremium,
     triggerUpgrade,
+    openPrintSchedule,
   } = useApp();
 
   const [routinesSubView, setRoutinesSubView] = useState<'library' | 'active' | 'create'>('library');
@@ -253,6 +254,19 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
               <span>{t("Create Custom")}</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              openPrintSchedule({ mode: 'checklist' });
+              playChime('tap');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs bg-amber-500 hover:bg-amber-600 text-white transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+            title="Print Visual Schedules, PECS Cards, and First-Then Boards"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>{t("Print Schedules & PECS")}</span>
+          </button>
         </div>
       </div>
 
@@ -375,6 +389,18 @@ export const CaregiverRoutinesTab: React.FC<CaregiverRoutinesTabProps> = ({ onSh
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <button
+                    onClick={() => {
+                      openPrintSchedule({ mode: 'cards', routineId: r.id });
+                      playChime('tap');
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 hover:border-amber-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs"
+                    title={t("Print visual schedule or PECS cards")}
+                  >
+                    <Printer className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{t("Print / PECS")}</span>
+                  </button>
+
                   <button
                     onClick={() => handleEditActiveRoutine(r)}
                     className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-800 border border-slate-200 hover:border-sky-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"

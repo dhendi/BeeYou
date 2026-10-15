@@ -12,7 +12,8 @@ import {
   Clock, 
   X,
   BookOpen,
-  Pause
+  Pause,
+  Printer
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -46,6 +47,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     toggleRoutineStep,
     resetRoutine,
     updateRoutine,
+    openPrintSchedule,
   } = useApp();
 
   // Filter out any legacy 20-step routines
@@ -705,11 +707,26 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                             );
                           })}
 
-                          {/* Routine Footer: Completed summary and Reset */}
-                          <div className="flex items-center justify-between pt-2 px-2 text-xs font-bold text-stone-400 border-t border-stone-100">
-                            <span>
-                              {completedCount} of {routine.steps.length} {t('completed')}
-                            </span>
+                          {/* Routine Footer: Completed summary, Print, and Reset */}
+                          <div className="flex items-center justify-between flex-wrap gap-2 pt-2 px-2 text-xs font-bold text-stone-400 border-t border-stone-100">
+                            <div className="flex items-center gap-2">
+                              <span>
+                                {completedCount} of {routine.steps.length} {t('completed')}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openPrintSchedule({ mode: 'checklist', routineId: routine.id });
+                                  playChime('tap');
+                                }}
+                                className="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200/80 cursor-pointer font-bold transition-all text-[11px] shadow-2xs"
+                                title="Print this routine or PECS cards"
+                              >
+                                <Printer className="w-3 h-3 text-amber-600" />
+                                <span>{t('Print Schedule / Cards')}</span>
+                              </button>
+                            </div>
                             {completedCount > 0 && (
                               <button
                                 type="button"

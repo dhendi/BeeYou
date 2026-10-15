@@ -68,6 +68,7 @@ const AvatarCreatorModal = lazy(() => import('./AvatarCreatorModal').then(m => (
 const MyWorldView = lazy(() => import('./MyWorldView').then(m => ({ default: m.MyWorldView })));
 const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards })));
 const StickerScrapbookView = lazy(() => import('./StickerScrapbookView').then(m => ({ default: m.StickerScrapbookView })));
+const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
 const MoreView = lazy(() => import('./MoreView').then(m => ({ default: m.MoreView })));
 
 const ChildAppContent: React.FC = () => {
@@ -282,6 +283,7 @@ const ChildAppContent: React.FC = () => {
         <RoutineStickerCelebrationModal />
         <DailyRecollectionModal />
         <ThemeCustomizerModal />
+        <PrintScheduleModal />
 
         {/* First-Time AAC Experience Knowledge Prompt Modal ("Do you know how AAC works?") */}
         <AACExperiencePromptModal

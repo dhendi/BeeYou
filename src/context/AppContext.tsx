@@ -435,6 +435,20 @@ export interface AppContextType {
   showEditCalmModal: boolean;
   setShowEditCalmModal: (val: boolean) => void;
 
+  // Printable Schedules & Scrapbook
+  showPrintScheduleModal: boolean;
+  setShowPrintScheduleModal: (val: boolean) => void;
+  printScheduleConfig: {
+    mode: 'checklist' | 'cards' | 'first-then' | 'scrapbook';
+    routineId?: string;
+    pageIndex?: number;
+  };
+  openPrintSchedule: (config?: Partial<{
+    mode: 'checklist' | 'cards' | 'first-then' | 'scrapbook';
+    routineId?: string;
+    pageIndex?: number;
+  }>) => void;
+
   // Backup & Restore
   exportProfileBackup: () => BeeYouBackupData;
   importProfileBackup: (importedJson: string | object) => { success: boolean; message: string };
@@ -476,6 +490,31 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (tab) setCopingToolkitTab(tab);
     setShowCopingToolkit(true);
   }, []);
+
+  // Printable Schedules & Scrapbook Studio State
+  const [showPrintScheduleModal, setShowPrintScheduleModal] = useState<boolean>(false);
+  const [printScheduleConfig, setPrintScheduleConfig] = useState<{
+    mode: 'checklist' | 'cards' | 'first-then' | 'scrapbook';
+    routineId?: string;
+    pageIndex?: number;
+  }>({
+    mode: 'checklist',
+  });
+
+  const openPrintSchedule = useCallback((config?: Partial<{
+    mode: 'checklist' | 'cards' | 'first-then' | 'scrapbook';
+    routineId?: string;
+    pageIndex?: number;
+  }>) => {
+    setPrintScheduleConfig((prev) => ({
+      mode: config?.mode || prev.mode || 'checklist',
+      routineId: config?.routineId ?? prev.routineId,
+      pageIndex: config?.pageIndex ?? prev.pageIndex ?? 0,
+    }));
+    setShowPrintScheduleModal(true);
+    playChime('tap');
+  }, []);
+
   const [showAboutMeModal, setShowAboutMeModal] = useState<boolean>(false);
   const [showAvatarCreator, _setShowAvatarCreator] = useState<boolean>(false);
   const [activeContextTopic, setActiveContextTopic] = useState<string | null>(null);
@@ -1270,6 +1309,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     resetBreathingConfig: customTools.resetBreathingConfig,
     showEditCalmModal: customTools.showEditCalmModal,
     setShowEditCalmModal: customTools.setShowEditCalmModal,
+
+    // Printable Schedules & Scrapbook
+    showPrintScheduleModal,
+    setShowPrintScheduleModal,
+    printScheduleConfig,
+    openPrintSchedule,
 
     // Backup & Restore
     exportProfileBackup,
