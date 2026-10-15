@@ -4,7 +4,12 @@ import {
   Volume2, 
   X, 
   Moon, 
-  Sun
+  Sun,
+  Sparkles,
+  Trees,
+  PawPrint,
+  Building2,
+  Headphones
 } from 'lucide-react';
 import { 
   playSoundscape, 
@@ -15,9 +20,12 @@ import {
 import { SoundscapeId } from '../../types';
 import { t } from '../../services/translator';
 
-interface HoneycombSoundDef {
+export type SoundGroup = 'all' | 'ambiance' | 'city' | 'animal' | 'focus';
+
+export interface HoneycombSoundDef {
   id: SoundscapeId;
   name: string;
+  category: 'ambiance' | 'city' | 'animal' | 'focus';
   type: 'wood' | 'frequency' | 'blue';
   freqHz?: string;
   icon: (active: boolean) => React.ReactNode;
@@ -25,11 +33,20 @@ interface HoneycombSoundDef {
 
 export type ChimeSoundDef = HoneycombSoundDef;
 
+export const SOUND_CATEGORIES = [
+  { id: 'all', label: 'All', icon: Sparkles },
+  { id: 'ambiance', label: 'Ambiance', icon: Trees },
+  { id: 'animal', label: 'Animal', icon: PawPrint },
+  { id: 'city', label: 'City', icon: Building2 },
+  { id: 'focus', label: 'Focus & Sleep', icon: Headphones },
+] as const;
+
 export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
-  // ── ROW 1 ──
+  // ── AMBIANCE & NATURE ──
   {
     id: 'stream',
     name: 'River',
+    category: 'ambiance',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -42,6 +59,7 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
   {
     id: 'campfire',
     name: 'Campfire',
+    category: 'ambiance',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -53,22 +71,70 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
     ),
   },
   {
-    id: 'cafe',
-    name: 'Coffee Shop',
+    id: 'rain',
+    name: 'Rain',
+    category: 'ambiance',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 10h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10z" />
-        <path d="M4 10a2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0" />
-        <path d="M10 5a1.5 1.5 0 0 1 3 0v2h-3V5z" />
-        <path d="M13 6h1a1 1 0 0 1 1 1v0a1 1 0 0 1-1 1h-1" />
-        <path d="M10 14h4v7h-4z" />
+        <path d="M6 13a4 4 0 0 1 0-8 5 5 0 0 1 9.7-1.3A4 4 0 0 1 19 11a3 3 0 0 1-1 2H6z" />
+        <path d="M8 15l-1 4" />
+        <path d="M12 15l-1 4" />
+        <path d="M16 15l-1 4" />
+      </svg>
+    ),
+  },
+  {
+    id: 'rain_roof',
+    name: 'Rain On Roof',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M3 11l9-7 9 7" />
+        <path d="M5 10v10h14V10" />
+        <path d="M10 20v-6h4v6" />
+        <path d="M6 4l-2 3" />
+        <path d="M11 2l-2 3" />
+        <path d="M18 4l-2 3" />
+      </svg>
+    ),
+  },
+  {
+    id: 'ocean',
+    name: 'Ocean',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <circle cx="16" cy="7" r="3" fill={active ? 'currentColor' : 'none'} />
+        <path d="M16 2v1" />
+        <path d="M21 7h-1" />
+        <path d="M19.5 3.5l-.7.7" />
+        <path d="M3 15c2.5-1.5 5 1.5 7.5 0s5-1.5 7.5 0" />
+        <path d="M3 19c2.5-1.5 5 1.5 7.5 0s5-1.5 7.5 0" />
+      </svg>
+    ),
+  },
+  {
+    id: 'beach',
+    name: 'Beach',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <circle cx="6" cy="6" r="2.5" fill={active ? 'currentColor' : 'none'} />
+        <path d="M2 17c3-1.5 6 1.5 9 0s6-1.5 9 0" />
+        <path d="M2 20c3-1.5 6 1.5 9 0s6-1.5 9 0" />
+        <path d="M17 6a4 4 0 0 0-7.5 0c0 1 1.5 1.5 3.5 1.5s4-.5 4-1.5z" />
+        <path d="M13 7.5v8" />
       </svg>
     ),
   },
   {
     id: 'forest',
     name: 'Walking In Woods',
+    category: 'ambiance',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -80,45 +146,64 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
     ),
   },
   {
-    id: 'brown_noise',
-    name: 'Deep Brown Noise',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M3 12h2" />
-        <path d="M7 9v6" />
-        <path d="M10 6v12" />
-        <path d="M13 4v16" />
-        <path d="M16 7v10" />
-        <path d="M19 10v4" />
-        <path d="M22 12h1" />
-      </svg>
-    ),
-  },
-  {
-    id: 'focus_20hz',
-    name: 'Focus',
-    type: 'frequency',
-    freqHz: '20',
-    icon: () => null,
-  },
-  {
-    id: 'hypnotic_words',
-    name: 'Hypnotic Words',
+    id: 'fireplace',
+    name: 'Fireplace',
+    category: 'ambiance',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M12 2v7" />
-        <circle cx="12" cy="14" r="5" />
-        <path d="M12 11.5a2.5 2.5 0 0 1 2.5 2.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5" />
-        <path d="M4 14a8 8 0 0 1 2-5" />
-        <path d="M20 14a8 8 0 0 0-2-5" />
+        <path d="M3 4h18v17H3V4z" />
+        <path d="M6 8h12v13H6V8z" />
+        <path d="M12 13c-1 1-1.5 2-1.5 3a1.5 1.5 0 0 0 3 0c0-1-.5-2-1.5-3z" fill={active ? 'currentColor' : 'none'} />
       </svg>
     ),
   },
   {
+    id: 'wind_chimes',
+    name: 'Winds',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M3 8h12a3 3 0 1 0-3-3" />
+        <path d="M3 13h15a3 3 0 1 1-3 3" />
+        <path d="M3 18h7a2 2 0 1 0-2-2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'thunderstorm',
+    name: 'Thunderstorm',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M6 12a4 4 0 0 1 0-8 5 5 0 0 1 9.7-1.3A4 4 0 0 1 19 10a3 3 0 0 1-1 2H6z" />
+        <polygon points="13 12 10 17 13 17 11 22 17 15 14 15 16 12" fill={active ? 'currentColor' : 'none'} />
+      </svg>
+    ),
+  },
+  {
+    id: 'underwater',
+    name: 'Underwater',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-2z" />
+        <path d="M10 11a2 2 0 0 1 4 0" />
+        <path d="M19 6l2-2v8a3 3 0 0 1-3 3" />
+        <circle cx="7" cy="4" r="1" />
+        <circle cx="10" cy="3" r="1.5" />
+      </svg>
+    ),
+  },
+
+  // ── ANIMALS ──
+  {
     id: 'cat_purr',
     name: 'Purring Cat',
+    category: 'animal',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -133,21 +218,10 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
       </svg>
     ),
   },
-
-  // ── ROW 2 ──
-  {
-    id: 'night_time',
-    name: 'Night',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 9 9 0 1 0 20.5 14.5z" fill={active ? 'currentColor' : 'none'} />
-      </svg>
-    ),
-  },
   {
     id: 'morning_birds',
     name: 'Birds',
+    category: 'animal',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -159,158 +233,28 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
     ),
   },
   {
-    id: 'rain',
-    name: 'Rain',
+    id: 'crickets',
+    name: 'Crickets',
+    category: 'animal',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M6 13a4 4 0 0 1 0-8 5 5 0 0 1 9.7-1.3A4 4 0 0 1 19 11a3 3 0 0 1-1 2H6z" />
-        <path d="M8 15l-1 4" />
-        <path d="M12 15l-1 4" />
-        <path d="M16 15l-1 4" />
+        <ellipse cx="12" cy="13" rx="4.5" ry="3" />
+        <circle cx="7" cy="11.5" r="1.8" />
+        <path d="M6 10L3 6" />
+        <path d="M7 10L5 5" />
+        <path d="M14 11l4-5" />
+        <path d="M16 13l4-2" />
+        <path d="M10 16l-1 4" />
+        <path d="M14 16l1 4" />
+        <path d="M19 6c1 1 1 2 0 3" />
       </svg>
     ),
-  },
-  {
-    id: 'rain_roof',
-    name: 'Rain On Roof',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M3 11l9-7 9 7" />
-        <path d="M5 10v10h14V10" />
-        <path d="M10 20v-6h4v6" />
-        <path d="M6 4l-2 3" />
-        <path d="M11 2l-2 3" />
-        <path d="M18 4l-2 3" />
-      </svg>
-    ),
-  },
-  {
-    id: 'white_noise',
-    name: 'White Noise',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 11v2" />
-        <path d="M7 8v8" />
-        <path d="M10 5v14" />
-        <path d="M13 3v18" />
-        <path d="M16 6v12" />
-        <path d="M19 9v6" />
-        <path d="M22 11v2" />
-      </svg>
-    ),
-  },
-  {
-    id: 'anxiety_396hz',
-    name: 'Anxiety Healer',
-    type: 'frequency',
-    freqHz: '396',
-    icon: () => null,
-  },
-  {
-    id: 'sleep_affirmations',
-    name: 'Sleep Affirmations',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 19l2.5-1.5H18a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v12z" />
-        <path d="M12 9c-1-1.2-2.5-1.2-3.2-.2-.7 1-.3 2.2 1.2 3.4l2 1.8 2-1.8c1.5-1.2 1.9-2.4 1.2-3.4-.7-1-2.2-1-3.2.2z" fill={active ? 'currentColor' : 'none'} />
-        <path d="M18 5l.5-1 .5 1 1 .5-1 .5-.5 1-.5-1-1-.5z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'elvish_whispers',
-    name: 'Elvish Whispers',
-    type: 'blue',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 12c3-4 6-4 8-1 2-3 5-3 8 1-3 3-5 5-8 5s-5-2-8-5z" />
-        <path d="M6 12c3 2 5 2 6 2s3 0 6-2" />
-      </svg>
-    ),
-  },
-
-  // ── ROW 3 ──
-  {
-    id: 'ocean',
-    name: 'Ocean',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <circle cx="16" cy="7" r="3" fill={active ? 'currentColor' : 'none'} />
-        <path d="M16 2v1" />
-        <path d="M21 7h-1" />
-        <path d="M19.5 3.5l-.7.7" />
-        <path d="M3 15c2.5-1.5 5 1.5 7.5 0s5-1.5 7.5 0" />
-        <path d="M3 19c2.5-1.5 5 1.5 7.5 0s5-1.5 7.5 0" />
-      </svg>
-    ),
-  },
-  {
-    id: 'space_drone',
-    name: 'Eternity',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M12 12c-2-3-4-4.5-6.5-4.5A4.5 4.5 0 0 0 1 12a4.5 4.5 0 0 0 4.5 4.5c2.5 0 4.5-1.5 6.5-4.5 2 3 4 4.5 6.5 4.5A4.5 4.5 0 0 0 23 12a4.5 4.5 0 0 0-4.5-4.5c-2.5 0-4.5 1.5-6.5 4.5z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'underwater',
-    name: 'Underwater',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-2z" />
-        <path d="M10 11a2 2 0 0 1 4 0" />
-        <path d="M19 6l2-2v8a3 3 0 0 1-3 3" />
-        <circle cx="7" cy="4" r="1" />
-        <circle cx="10" cy="3" r="1.5" />
-      </svg>
-    ),
-  },
-  {
-    id: 'wind_chimes',
-    name: 'Winds',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M3 8h12a3 3 0 1 0-3-3" />
-        <path d="M3 13h15a3 3 0 1 1-3 3" />
-        <path d="M3 18h7a2 2 0 1 0-2-2" />
-      </svg>
-    ),
-  },
-  {
-    id: 'green_noise',
-    name: 'Green Noise',
-    type: 'wood',
-    icon: (active) => (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M3 12h2" />
-        <path d="M6 10v4" />
-        <path d="M9 7v10" />
-        <path d="M12 4v16" />
-        <path d="M15 7v10" />
-        <path d="M18 10v4" />
-        <path d="M21 12h1" />
-      </svg>
-    ),
-  },
-  {
-    id: 'release_528hz',
-    name: 'Emotional Release',
-    type: 'frequency',
-    freqHz: '528',
-    icon: () => null,
   },
   {
     id: 'counting_sheep',
     name: 'Counting Sheep',
+    category: 'animal',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -327,27 +271,46 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
       </svg>
     ),
   },
+
+  // ── CITY & TRAVEL ──
   {
-    id: 'bubble_wrap',
-    name: 'Bubble Wrap',
-    type: 'blue',
+    id: 'cafe',
+    name: 'Coffee Shop',
+    category: 'city',
+    type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" />
-        <circle cx="8" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
-        <circle cx="12" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
-        <circle cx="16" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
-        <circle cx="8" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
-        <circle cx="12" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
-        <circle cx="16" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <path d="M4 10h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10z" />
+        <path d="M4 10a2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0 2 2 0 0 1 3.2 0" />
+        <path d="M10 5a1.5 1.5 0 0 1 3 0v2h-3V5z" />
+        <path d="M13 6h1a1 1 0 0 1 1 1v0a1 1 0 0 1-1 1h-1" />
+        <path d="M10 14h4v7h-4z" />
       </svg>
     ),
   },
-
-  // ── ROW 4 (Additional Favorites) ──
+  {
+    id: 'city',
+    name: 'City',
+    category: 'city',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M3 21h18" />
+        <path d="M5 21V9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v12" />
+        <path d="M11 21V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v16" />
+        <path d="M17 21v-8a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8" />
+        <circle cx="8" cy="12" r="0.8" fill="currentColor" />
+        <circle cx="8" cy="15" r="0.8" fill="currentColor" />
+        <circle cx="14" cy="8" r="0.8" fill="currentColor" />
+        <circle cx="14" cy="12" r="0.8" fill="currentColor" />
+        <circle cx="14" cy="16" r="0.8" fill="currentColor" />
+      </svg>
+    ),
+  },
   {
     id: 'train_tracks',
     name: 'Train Tracks',
+    category: 'city',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -360,20 +323,41 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
     ),
   },
   {
-    id: 'fireplace',
-    name: 'Fireplace',
+    id: 'train_chug',
+    name: 'Steam Train',
+    category: 'city',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M3 4h18v17H3V4z" />
-        <path d="M6 8h12v13H6V8z" />
-        <path d="M12 13c-1 1-1.5 2-1.5 3a1.5 1.5 0 0 0 3 0c0-1-.5-2-1.5-3z" fill={active ? 'currentColor' : 'none'} />
+        <rect x="2" y="8" width="13" height="9" rx="1" />
+        <path d="M15 11h4a2 2 0 0 1 2 2v4h-6v-6z" />
+        <circle cx="6" cy="18" r="1.8" />
+        <circle cx="11" cy="18" r="1.8" />
+        <circle cx="17" cy="18" r="1.8" />
+        <path d="M5 8V4h3v4" />
+        <path d="M2 21h20" />
+      </svg>
+    ),
+  },
+  {
+    id: 'driving',
+    name: 'Car Ride',
+    category: 'city',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 16l1.8-6.2a2 2 0 0 1 1.9-1.4h8.6a2 2 0 0 1 1.9 1.4L20 16" />
+        <path d="M3 16h18v3H3z" />
+        <circle cx="7" cy="19" r="2" />
+        <circle cx="17" cy="19" r="2" />
+        <path d="M8 12h8" />
       </svg>
     ),
   },
   {
     id: 'clock_tick',
     name: 'Clock Tick',
+    category: 'city',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
@@ -382,14 +366,159 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
       </svg>
     ),
   },
+
+  // ── FOCUS & SLEEP ──
   {
-    id: 'thunderstorm',
-    name: 'Thunderstorm',
+    id: 'focus_20hz',
+    name: 'Focus',
+    category: 'focus',
+    type: 'frequency',
+    freqHz: '20',
+    icon: () => null,
+  },
+  {
+    id: 'anxiety_396hz',
+    name: 'Anxiety Healer',
+    category: 'focus',
+    type: 'frequency',
+    freqHz: '396',
+    icon: () => null,
+  },
+  {
+    id: 'release_528hz',
+    name: 'Emotional Release',
+    category: 'focus',
+    type: 'frequency',
+    freqHz: '528',
+    icon: () => null,
+  },
+  {
+    id: 'brown_noise',
+    name: 'Deep Brown Noise',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M3 12h2" />
+        <path d="M7 9v6" />
+        <path d="M10 6v12" />
+        <path d="M13 4v16" />
+        <path d="M16 7v10" />
+        <path d="M19 10v4" />
+        <path d="M22 12h1" />
+      </svg>
+    ),
+  },
+  {
+    id: 'white_noise',
+    name: 'White Noise',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 11v2" />
+        <path d="M7 8v8" />
+        <path d="M10 5v14" />
+        <path d="M13 3v18" />
+        <path d="M16 6v12" />
+        <path d="M19 9v6" />
+        <path d="M22 11v2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'green_noise',
+    name: 'Green Noise',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M3 12h2" />
+        <path d="M6 10v4" />
+        <path d="M9 7v10" />
+        <path d="M12 4v16" />
+        <path d="M15 7v10" />
+        <path d="M18 10v4" />
+        <path d="M21 12h1" />
+      </svg>
+    ),
+  },
+  {
+    id: 'space_drone',
+    name: 'Eternity',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M12 12c-2-3-4-4.5-6.5-4.5A4.5 4.5 0 0 0 1 12a4.5 4.5 0 0 0 4.5 4.5c2.5 0 4.5-1.5 6.5-4.5 2 3 4 4.5 6.5 4.5A4.5 4.5 0 0 0 23 12a4.5 4.5 0 0 0-4.5-4.5c-2.5 0-4.5 1.5-6.5 4.5z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'night_time',
+    name: 'Night',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 9 9 0 1 0 20.5 14.5z" fill={active ? 'currentColor' : 'none'} />
+      </svg>
+    ),
+  },
+  {
+    id: 'sleep_affirmations',
+    name: 'Sleep Affirmations',
+    category: 'focus',
     type: 'wood',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
-        <path d="M6 12a4 4 0 0 1 0-8 5 5 0 0 1 9.7-1.3A4 4 0 0 1 19 10a3 3 0 0 1-1 2H6z" />
-        <polygon points="13 12 10 17 13 17 11 22 17 15 14 15 16 12" fill={active ? 'currentColor' : 'none'} />
+        <path d="M4 19l2.5-1.5H18a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v12z" />
+        <path d="M12 9c-1-1.2-2.5-1.2-3.2-.2-.7 1-.3 2.2 1.2 3.4l2 1.8 2-1.8c1.5-1.2 1.9-2.4 1.2-3.4-.7-1-2.2-1-3.2.2z" fill={active ? 'currentColor' : 'none'} />
+        <path d="M18 5l.5-1 .5 1 1 .5-1 .5-.5 1-.5-1-1-.5z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'hypnotic_words',
+    name: 'Hypnotic Words',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M12 2v7" />
+        <circle cx="12" cy="14" r="5" />
+        <path d="M12 11.5a2.5 2.5 0 0 1 2.5 2.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5" />
+        <path d="M4 14a8 8 0 0 1 2-5" />
+        <path d="M20 14a8 8 0 0 0-2-5" />
+      </svg>
+    ),
+  },
+  {
+    id: 'elvish_whispers',
+    name: 'Elvish Whispers',
+    category: 'focus',
+    type: 'blue',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 12c3-4 6-4 8-1 2-3 5-3 8 1-3 3-5 5-8 5s-5-2-8-5z" />
+        <path d="M6 12c3 2 5 2 6 2s3 0 6-2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'bubble_wrap',
+    name: 'Bubble Wrap',
+    category: 'focus',
+    type: 'blue',
+    icon: (active) => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8">
+        <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" />
+        <circle cx="8" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <circle cx="12" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <circle cx="16" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <circle cx="8" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <circle cx="12" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
+        <circle cx="16" cy="15" r="1.5" fill={active ? 'currentColor' : 'none'} />
       </svg>
     ),
   },
@@ -499,6 +628,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
 }) => {
   // Theme state: defaults to false (cozy warm cream as selected by user), with night toggle option
   const [isNightMode, setIsNightMode] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<SoundGroup>('all');
 
   const toggleSound = (id: SoundscapeId) => {
     if (activeSoundIds.includes(id)) {
@@ -508,6 +638,15 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
       playSoundscape(id, vol, isPremium);
     }
   };
+
+  const getCategoryCount = (catId: SoundGroup) => {
+    if (catId === 'all') return SOUND_HONEYCOMB_CATALOG.length;
+    return SOUND_HONEYCOMB_CATALOG.filter((s) => s.category === catId).length;
+  };
+
+  const displayedSounds = selectedCategory === 'all'
+    ? SOUND_HONEYCOMB_CATALOG
+    : SOUND_HONEYCOMB_CATALOG.filter((s) => s.category === selectedCategory);
 
   return (
     <div
@@ -558,7 +697,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
         </div>
       ) : (
         /* Active Top Sound Mixer Console */
-        <div className="mb-6 rounded-2xl p-3 sm:p-4 transition-all duration-300 border-2 bg-amber-500/10 dark:bg-white/5 border-amber-400/50 dark:border-amber-400/30 shadow-md">
+        <div className="mb-5 rounded-2xl p-3 sm:p-4 transition-all duration-300 border-2 bg-amber-500/10 dark:bg-white/5 border-amber-400/50 dark:border-amber-400/30 shadow-md">
           {/* Mixer Console Header */}
           <div className="flex items-center justify-between gap-2.5 mb-3 pb-2.5 border-b border-amber-900/10 dark:border-white/10">
             <div className="flex items-center gap-2 min-w-0">
@@ -602,7 +741,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
                 type="button"
                 onClick={() => stopSoundscape()}
                 aria-label={t('Stop All Sounds')}
-                className="px-3 py-1 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs cursor-pointer shadow-xs transition-colors flex items-center gap-1.5 shrink-0 active:scale-95"
+                className="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs cursor-pointer shadow-xs transition-colors flex items-center gap-1.5 shrink-0 active:scale-95"
               >
                 <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
                 <span>{t('Stop All')}</span>
@@ -674,9 +813,47 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
         </div>
       )}
 
+      {/* ── CATEGORY GROUP TABS (All, Ambiance, City, Animal, Focus) ── */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-3 mb-3 shrink-0 border-b border-amber-900/10 dark:border-white/10">
+        {SOUND_CATEGORIES.map((tab) => {
+          const isSelected = selectedCategory === tab.id;
+          const count = getCategoryCount(tab.id);
+          const IconComp = tab.icon;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedCategory(tab.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all flex items-center gap-1.5 shrink-0 ${
+                isSelected
+                  ? 'bg-amber-500 text-amber-950 shadow-sm ring-2 ring-amber-400/60 font-black scale-102'
+                  : isNightMode
+                  ? 'bg-white/10 text-slate-300 hover:bg-white/15 hover:text-white border border-white/10'
+                  : 'bg-amber-900/5 text-slate-700 hover:bg-amber-900/10 hover:text-slate-900 border border-amber-900/10'
+              }`}
+            >
+              <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-950' : isNightMode ? 'text-amber-400' : 'text-amber-700'}`} />
+              <span>{t(tab.label)}</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black ${
+                  isSelected
+                    ? 'bg-amber-950/20 text-amber-950'
+                    : isNightMode
+                    ? 'bg-white/10 text-slate-400'
+                    : 'bg-amber-900/10 text-slate-600'
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* ── THE HONEYCOMB PODS GRID (Zero cords, zero chimes) ── */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-3 sm:gap-x-4 gap-y-4 sm:gap-y-5 justify-items-center py-2 pb-6">
-        {SOUND_HONEYCOMB_CATALOG.map((item) => {
+        {displayedSounds.map((item) => {
           const isPlaying = activeSoundIds.includes(item.id);
 
           return (
@@ -749,4 +926,3 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
     </div>
   );
 };
-

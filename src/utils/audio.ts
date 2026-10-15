@@ -657,8 +657,9 @@ export const SOUNDSCAPE_AUDIO_FILES: Record<string, string> = {
   beach: '/sounds/beach.mp3',
   forest: '/sounds/forest.mp3',
   fireplace: '/sounds/fireplace.mp3',
+  campfire: '/sounds/fireplace.mp3',
+  cafe: '/sounds/medieval_tavern.mp3',
   medieval_tavern: '/sounds/medieval_tavern.mp3',
-  cat_purr: '/sounds/kitten.mp3',
 };
 
 export interface ActiveSoundTrack {
@@ -863,9 +864,12 @@ export function playSoundscape(id: SoundscapeId, volume?: number, isPremiumUser 
       return;
     }
 
-    // Free users: single active sound only
-    if (!isPremiumUser) {
-      stopSoundscape();
+    // Sensory room multi-sound mixing (allow up to 4 simultaneous sounds for free tier, unlimited for premium)
+    if (!isPremiumUser && activeSoundTracks.size >= 4) {
+      const oldestId = activeSoundTracks.keys().next().value;
+      if (oldestId) {
+        stopSoundscape(oldestId);
+      }
     }
 
     const track: ActiveSoundTrack = {
@@ -887,33 +891,26 @@ export function playSoundscape(id: SoundscapeId, volume?: number, isPremiumUser 
       try {
         const audio = new Audio(soundFile);
         audio.loop = true;
-        audio.volume = 0.01;
+        // Direct volume assignment avoids browser interval throttling that leaves audio silent at 0.01
+        audio.volume = targetVol;
         track.audioElement = audio;
+
+        // Fallback to procedural synthesis if file fails to load/decode or errors
+        audio.onerror = (err) => {
+          console.warn(`[BeeYou Audio] Audio file error for ${id}, switching to procedural fallback:`, err);
+          track.audioElement = null;
+          startProceduralTrack(id, targetVolume, track);
+        };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              if (!activeSoundTracks.has(id) || track.audioElement !== audio) return;
-              let cur = 0.01;
-              const step = Math.max(0.02, targetVol / 10);
-              track.fadeTimer = setInterval(() => {
-                if (!activeSoundTracks.has(id) || track.audioElement !== audio) {
-                  clearInterval(track.fadeTimer);
-                  return;
-                }
-                cur = Math.min(targetVol, cur + step);
-                try {
-                  audio.volume = cur;
-                } catch (e) {}
-                if (cur >= targetVol) {
-                  clearInterval(track.fadeTimer);
-                  track.fadeTimer = null;
-                }
-              }, 40);
+              // Audio element playing successfully
             })
             .catch((err) => {
               console.warn(`[BeeYou Audio] Audio file playback failed for ${id}, using procedural fallback:`, err);
+              track.audioElement = null;
               startProceduralTrack(id, targetVolume, track);
             });
         }
@@ -949,8 +946,8 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
     const targetVol = Math.max(0.0001, volume);
-    masterGain.gain.setValueAtTime(0.0001, now);
-    masterGain.gain.linearRampToValueAtTime(targetVol, now + 0.6);
+    masterGain.gain.setValueAtTime(targetVol * 0.3, now);
+    masterGain.gain.linearRampToValueAtTime(targetVol, now + 0.08);
     masterGain.connect(ctx.destination);
 
     track.gainNode = masterGain;
@@ -1103,27 +1100,39 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       track.nodes.push(noise, bp1, bp2);
 
     } else if (id === 'cat_purr') {
-      // Warm rhythmic sleeping cat purr
+      // Warm, realistic rhythmic sleeping cat purr
       const purrOsc = ctx.createOscillator();
       const purrHarmonic = ctx.createOscillator();
       const purrFilter = ctx.createBiquadFilter();
       const purrGain = ctx.createGain();
 
       purrOsc.type = 'triangle';
-      purrOsc.frequency.setValueAtTime(26, now);
+      purrOsc.frequency.setValueAtTime(86, now); // Audible warm purr fundamental
       purrHarmonic.type = 'sine';
-      purrHarmonic.frequency.setValueAtTime(52, now);
+      purrHarmonic.frequency.setValueAtTime(172, now); // 1st harmonic resonance
 
       purrFilter.type = 'lowpass';
-      purrFilter.frequency.setValueAtTime(130, now);
+      purrFilter.frequency.setValueAtTime(320, now);
 
-      // Tremolo flutter
+      // 24Hz laryngeal flutter tremolo
       const tremolo = ctx.createOscillator();
+      tremolo.type = 'sine';
       tremolo.frequency.setValueAtTime(24, now);
       const tremGain = ctx.createGain();
-      tremGain.gain.setValueAtTime(volume * 0.25, now);
+      tremGain.gain.setValueAtTime(0.4, now);
       tremolo.connect(tremGain);
+
+      // Slow breathing swell (0.35 Hz)
+      const breathLfo = ctx.createOscillator();
+      breathLfo.type = 'sine';
+      breathLfo.frequency.setValueAtTime(0.35, now);
+      const breathGain = ctx.createGain();
+      breathGain.gain.setValueAtTime(0.25, now);
+      breathLfo.connect(breathGain);
+
+      purrGain.gain.setValueAtTime(volume * 0.85, now);
       tremGain.connect(purrGain.gain);
+      breathGain.connect(purrGain.gain);
 
       purrOsc.connect(purrFilter);
       purrHarmonic.connect(purrFilter);
@@ -1133,7 +1142,8 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       purrOsc.start(now);
       purrHarmonic.start(now);
       tremolo.start(now);
-      track.nodes.push(purrOsc, purrHarmonic, purrFilter, purrGain, tremolo, tremGain);
+      breathLfo.start(now);
+      track.nodes.push(purrOsc, purrHarmonic, purrFilter, purrGain, tremolo, tremGain, breathLfo, breathGain);
 
     } else if (id === 'box_fan') {
       // Motor hum + steady air turbulence
@@ -1199,26 +1209,37 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
     } else if (id === 'clock_tick') {
       // Grounding wooden clock cadence
       let isTick = true;
+      const playClockBurst = (cCtx: AudioContext, cNow: number, tick: boolean) => {
+        const osc = cCtx.createOscillator();
+        const g = cCtx.createGain();
+        const bFilter = cCtx.createBiquadFilter();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(tick ? 840 : 640, cNow);
+        osc.frequency.exponentialRampToValueAtTime(140, cNow + 0.03);
+
+        bFilter.type = 'bandpass';
+        bFilter.frequency.setValueAtTime(900, cNow);
+        bFilter.Q.setValueAtTime(2.0, cNow);
+
+        g.gain.setValueAtTime(volume * 0.55, cNow);
+        g.gain.exponentialRampToValueAtTime(0.0001, cNow + 0.035);
+
+        osc.connect(bFilter);
+        bFilter.connect(g);
+        g.connect(masterGain);
+        osc.start(cNow);
+        osc.stop(cNow + 0.04);
+      };
+
+      // Play immediate tick on tap!
+      playClockBurst(ctx, now + 0.02, true);
+
       const clockTimer = setInterval(() => {
         if (!activeSoundTracks.has('clock_tick')) return;
         const cCtx = getAudioContext();
         if (!cCtx || !track.gainNode) return;
-        const cNow = cCtx.currentTime;
-
-        const osc = cCtx.createOscillator();
-        const g = cCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(isTick ? 780 : 640, cNow);
-        osc.frequency.exponentialRampToValueAtTime(140, cNow + 0.025);
-
-        g.gain.setValueAtTime(volume * 0.45, cNow);
-        g.gain.exponentialRampToValueAtTime(0.0001, cNow + 0.03);
-
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start(cNow);
-        osc.stop(cNow + 0.035);
         isTick = !isTick;
+        playClockBurst(cCtx, cCtx.currentTime, isTick);
       }, 500);
       track.timers.push(clockTimer);
 
@@ -1230,7 +1251,7 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       let last = 0;
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        data[i] = (last + 0.02 * white) / 1.02;
+        data[i] = (last + 0.025 * white) / 1.025;
         last = data[i];
       }
       const wind = ctx.createBufferSource();
@@ -1238,43 +1259,48 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       wind.loop = true;
       const windFilter = ctx.createBiquadFilter();
       windFilter.type = 'lowpass';
-      windFilter.frequency.setValueAtTime(380, now);
+      windFilter.frequency.setValueAtTime(650, now);
       wind.connect(windFilter);
       windFilter.connect(masterGain);
       wind.start(now);
       track.nodes.push(wind, windFilter);
 
-      const birdTimer = setInterval(() => {
-        if (!activeSoundTracks.has('morning_birds')) return;
-        const mCtx = getAudioContext();
-        if (!mCtx || !track.gainNode) return;
-        const mNow = mCtx.currentTime;
-        const baseFreq = 2400 + Math.random() * 600;
-
-        [0, 0.12, 0.24].forEach((offset) => {
+      const playBirdPhrase = (mCtx: AudioContext, mNow: number) => {
+        const baseFreq = 2200 + Math.random() * 700;
+        [0, 0.1, 0.22].forEach((offset) => {
           const osc = mCtx.createOscillator();
           const g = mCtx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(baseFreq, mNow + offset);
-          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.2, mNow + offset + 0.06);
-          osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.95, mNow + offset + 0.1);
-          g.gain.setValueAtTime(volume * 0.22, mNow + offset);
-          g.gain.exponentialRampToValueAtTime(0.0001, mNow + offset + 0.11);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.25, mNow + offset + 0.05);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.9, mNow + offset + 0.09);
+          g.gain.setValueAtTime(volume * 0.35, mNow + offset);
+          g.gain.exponentialRampToValueAtTime(0.0001, mNow + offset + 0.1);
           osc.connect(g);
           g.connect(masterGain);
           osc.start(mNow + offset);
-          osc.stop(mNow + offset + 0.12);
+          osc.stop(mNow + offset + 0.11);
         });
-      }, 3400);
+      };
+
+      // Play immediate bird song on start!
+      playBirdPhrase(ctx, now + 0.05);
+
+      const birdTimer = setInterval(() => {
+        if (!activeSoundTracks.has('morning_birds')) return;
+        const mCtx = getAudioContext();
+        if (!mCtx || !track.gainNode) return;
+        playBirdPhrase(mCtx, mCtx.currentTime);
+      }, 2200);
       track.timers.push(birdTimer);
 
     } else if (id === 'underwater') {
-      // Deep submerged resonance
+      // Audible submerged ocean acoustics + bubbly water resonance
       const subOsc = ctx.createOscillator();
       subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(58, now);
+      subOsc.frequency.setValueAtTime(160, now); // Audible fundamental
       const subGain = ctx.createGain();
-      subGain.gain.setValueAtTime(volume * 0.35, now);
+      subGain.gain.setValueAtTime(volume * 0.45, now);
       subOsc.connect(subGain);
       subGain.connect(masterGain);
       subOsc.start(now);
@@ -1283,18 +1309,40 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * 0.5;
+        data[i] = (Math.random() * 2 - 1) * 0.6;
       }
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(160, now);
+      filter.frequency.setValueAtTime(420, now);
+      filter.Q.setValueAtTime(1.2, now);
       noise.connect(filter);
       filter.connect(masterGain);
       noise.start(now);
       track.nodes.push(subOsc, subGain, noise, filter);
+
+      // Gentle aquatic bubbles
+      const bubbleTimer = setInterval(() => {
+        if (!activeSoundTracks.has('underwater')) return;
+        const uCtx = getAudioContext();
+        if (!uCtx || !track.gainNode) return;
+        const uNow = uCtx.currentTime;
+        const bOsc = uCtx.createOscillator();
+        const bG = uCtx.createGain();
+        bOsc.type = 'sine';
+        const startF = 380 + Math.random() * 120;
+        bOsc.frequency.setValueAtTime(startF, uNow);
+        bOsc.frequency.exponentialRampToValueAtTime(startF * 1.5, uNow + 0.06);
+        bG.gain.setValueAtTime(volume * 0.25, uNow);
+        bG.gain.exponentialRampToValueAtTime(0.0001, uNow + 0.06);
+        bOsc.connect(bG);
+        bG.connect(masterGain);
+        bOsc.start(uNow);
+        bOsc.stop(uNow + 0.07);
+      }, 550);
+      track.timers.push(bubbleTimer);
 
     } else if (id === 'cafe') {
       // Cozy Raindrop Cafe
@@ -1338,13 +1386,13 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       track.nodes.push(room, filter);
 
     } else if (id === 'campfire') {
-      // Night Pine Campfire
+      // Night Pine Campfire with rich warmth and popping embers
       const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
       const fireData = fireBuffer.getChannelData(0);
       let lastFire = 0;
       for (let i = 0; i < ctx.sampleRate * 3; i++) {
         const white = Math.random() * 2 - 1;
-        fireData[i] = (lastFire + 0.025 * white) / 1.025;
+        fireData[i] = (lastFire + 0.035 * white) / 1.035;
         lastFire = fireData[i];
       }
       const fireSrc = ctx.createBufferSource();
@@ -1352,30 +1400,33 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       fireSrc.loop = true;
       const fireFilter = ctx.createBiquadFilter();
       fireFilter.type = 'lowpass';
-      fireFilter.frequency.setValueAtTime(240, now);
+      fireFilter.frequency.setValueAtTime(460, now);
+      const fireGain = ctx.createGain();
+      fireGain.gain.setValueAtTime(volume * 0.7, now);
       fireSrc.connect(fireFilter);
-      fireFilter.connect(masterGain);
+      fireFilter.connect(fireGain);
+      fireGain.connect(masterGain);
       fireSrc.start(now);
-      track.nodes.push(fireSrc, fireFilter);
+      track.nodes.push(fireSrc, fireFilter, fireGain);
 
       const crackleTimer = setInterval(() => {
         if (!activeSoundTracks.has('campfire')) return;
         const cCtx = getAudioContext();
         if (!cCtx || !track.gainNode) return;
         const cNow = cCtx.currentTime;
-        if (Math.random() > 0.35) {
+        if (Math.random() > 0.25) {
           const pop = cCtx.createOscillator();
           const g = cCtx.createGain();
           pop.type = 'triangle';
-          pop.frequency.setValueAtTime(1400 + Math.random() * 1200, cNow);
-          g.gain.setValueAtTime(volume * 0.35, cNow);
+          pop.frequency.setValueAtTime(1200 + Math.random() * 1400, cNow);
+          g.gain.setValueAtTime(volume * 0.45, cNow);
           g.gain.exponentialRampToValueAtTime(0.0001, cNow + 0.03);
           pop.connect(g);
           g.connect(masterGain);
           pop.start(cNow);
           pop.stop(cNow + 0.035);
         }
-      }, 250);
+      }, 190);
       track.timers.push(crackleTimer);
 
     } else if (id === 'ocean') {
@@ -1834,10 +1885,10 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       });
 
     } else if (id === 'focus_20hz') {
-      // 160Hz carrier with 20Hz beta-wave amplitude modulation
+      // 216Hz Carrier with 20Hz Beta-Wave Amplitude Modulation & Warm Focus Undertone
       const carrier = ctx.createOscillator();
       carrier.type = 'sine';
-      carrier.frequency.setValueAtTime(160, now);
+      carrier.frequency.setValueAtTime(216, now);
 
       const modGain = ctx.createGain();
       modGain.gain.setValueAtTime(0.5, now);
@@ -1855,25 +1906,25 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       track.nodes.push(carrier, lfo, modGain);
 
     } else if (id === 'anxiety_396hz') {
-      // Solfeggio 396Hz pure sine with gentle 0.1Hz breathing envelope
+      // Solfeggio 396Hz Liberation Tone with 0.1Hz Calming Breathing Envelope
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(396, now);
 
       const osc2 = ctx.createOscillator();
       osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(792, now);
+      osc2.frequency.setValueAtTime(792, now); // 1st Harmonic
 
       const gain2 = ctx.createGain();
-      gain2.gain.setValueAtTime(0.15, now);
+      gain2.gain.setValueAtTime(0.2, now);
       osc2.connect(gain2);
 
       const tremolo = ctx.createOscillator();
       tremolo.type = 'sine';
-      tremolo.frequency.setValueAtTime(0.12, now);
+      tremolo.frequency.setValueAtTime(0.1, now); // 10-second slow breathing wave
 
       const tremoloGain = ctx.createGain();
-      tremoloGain.gain.setValueAtTime(0.7, now);
+      tremoloGain.gain.setValueAtTime(0.75, now);
       tremolo.connect(tremoloGain.gain);
 
       osc.connect(tremoloGain);
@@ -1886,7 +1937,7 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       track.nodes.push(osc, osc2, gain2, tremolo, tremoloGain);
 
     } else if (id === 'release_528hz') {
-      // Solfeggio 528Hz Transformation tone with warm harmonic resonance
+      // Solfeggio 528Hz Miracle Tone with Crystal Singing Bowl Overtones
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(528, now);
@@ -1896,12 +1947,12 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       oscHarmonic.frequency.setValueAtTime(1056, now);
 
       const harmGain = ctx.createGain();
-      harmGain.gain.setValueAtTime(0.18, now);
+      harmGain.gain.setValueAtTime(0.22, now);
       oscHarmonic.connect(harmGain);
 
       const filter = ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1200, now);
+      filter.frequency.setValueAtTime(1400, now);
 
       osc.connect(filter);
       harmGain.connect(filter);
@@ -1912,7 +1963,7 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       track.nodes.push(osc, oscHarmonic, harmGain, filter);
 
     } else if (id === 'rain_roof') {
-      // Filtered noise simulating rain on tin / attic roof
+      // Crisp Rain Tapping on Rooftop: Rain Bed + Rhythmic Droplet Impacts
       const bufferSize = ctx.sampleRate * 2;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1928,64 +1979,100 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
 
       const bp = ctx.createBiquadFilter();
       bp.type = 'bandpass';
-      bp.frequency.setValueAtTime(1400, now);
-      bp.Q.setValueAtTime(1.8, now);
+      bp.frequency.setValueAtTime(1100, now);
+      bp.Q.setValueAtTime(1.2, now);
+
+      const rainBedGain = ctx.createGain();
+      rainBedGain.gain.setValueAtTime(volume * 0.8, now);
 
       noise.connect(bp);
-      bp.connect(masterGain);
+      bp.connect(rainBedGain);
+      rainBedGain.connect(masterGain);
       noise.start(now);
-      track.nodes.push(noise, bp);
+      track.nodes.push(noise, bp, rainBedGain);
+
+      // Droplet rooftop impacts
+      const roofTimer = setInterval(() => {
+        if (!activeSoundTracks.has('rain_roof')) return;
+        const rCtx = getAudioContext();
+        if (!rCtx || !track.gainNode) return;
+        const rNow = rCtx.currentTime;
+        const drop = rCtx.createOscillator();
+        const dG = rCtx.createGain();
+        drop.type = 'triangle';
+        const dFreq = 750 + Math.random() * 950;
+        drop.frequency.setValueAtTime(dFreq, rNow);
+        drop.frequency.exponentialRampToValueAtTime(160, rNow + 0.03);
+        dG.gain.setValueAtTime(volume * 0.35, rNow);
+        dG.gain.exponentialRampToValueAtTime(0.0001, rNow + 0.035);
+        drop.connect(dG);
+        dG.connect(masterGain);
+        drop.start(rNow);
+        drop.stop(rNow + 0.04);
+      }, 120);
+      track.timers.push(roofTimer);
 
     } else if (id === 'hypnotic_words') {
-      // Rhythmic resonant formant drone
-      const f1 = ctx.createOscillator();
-      f1.type = 'triangle';
-      f1.frequency.setValueAtTime(220, now);
+      // Ethereal Multi-Formant Vocal Meditation Drone (Calming Aum/Shh Resonant Formants)
+      const droneOsc = ctx.createOscillator();
+      droneOsc.type = 'triangle';
+      droneOsc.frequency.setValueAtTime(110, now); // A2 vocal fundamental
 
-      const f2 = ctx.createOscillator();
-      f2.type = 'sine';
-      f2.frequency.setValueAtTime(330, now);
+      const form1 = ctx.createBiquadFilter();
+      form1.type = 'bandpass';
+      form1.frequency.setValueAtTime(350, now); // F1 vowel formant
+      form1.Q.setValueAtTime(3.5, now);
 
-      const lpf = ctx.createBiquadFilter();
-      lpf.type = 'lowpass';
-      lpf.frequency.setValueAtTime(480, now);
+      const form2 = ctx.createBiquadFilter();
+      form2.type = 'bandpass';
+      form2.frequency.setValueAtTime(850, now); // F2 vowel formant
+      form2.Q.setValueAtTime(4.0, now);
 
-      f1.connect(lpf);
-      f2.connect(lpf);
-      lpf.connect(masterGain);
+      const vocalGain = ctx.createGain();
+      vocalGain.gain.setValueAtTime(volume * 0.65, now);
 
-      f1.start(now);
-      f2.start(now);
-      track.nodes.push(f1, f2, lpf);
+      // Slow 0.08Hz vocal breathing sweep
+      const breathMod = ctx.createOscillator();
+      breathMod.type = 'sine';
+      breathMod.frequency.setValueAtTime(0.08, now);
+      const breathModGain = ctx.createGain();
+      breathModGain.gain.setValueAtTime(140, now);
+      breathMod.connect(breathModGain);
+      breathModGain.connect(form1.frequency);
+
+      droneOsc.connect(form1);
+      droneOsc.connect(form2);
+      form1.connect(vocalGain);
+      form2.connect(vocalGain);
+      vocalGain.connect(masterGain);
+
+      droneOsc.start(now);
+      breathMod.start(now);
+      track.nodes.push(droneOsc, form1, form2, vocalGain, breathMod, breathModGain);
 
     } else if (id === 'sleep_affirmations') {
-      // Dreamy 432Hz ambient lullaby pad
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(432, now);
+      // Celestial 432Hz Ambient Sleep Sanctuary Pad
+      const notes = [432, 540, 648, 810]; // 432Hz Major-7th chord
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq + (idx % 2 === 0 ? 0.3 : -0.2), now);
+        g.gain.setValueAtTime(volume * 0.22, now);
 
-      const osc5 = ctx.createOscillator();
-      osc5.type = 'sine';
-      osc5.frequency.setValueAtTime(648, now);
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(650, now);
 
-      const gain5 = ctx.createGain();
-      gain5.gain.setValueAtTime(0.2, now);
-      osc5.connect(gain5);
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(700, now);
-
-      osc.connect(filter);
-      gain5.connect(filter);
-      filter.connect(masterGain);
-
-      osc.start(now);
-      osc5.start(now);
-      track.nodes.push(osc, osc5, gain5, filter);
+        osc.connect(filter);
+        filter.connect(g);
+        g.connect(masterGain);
+        osc.start(now);
+        track.nodes.push(osc, filter, g);
+      });
 
     } else if (id === 'elvish_whispers') {
-      // Whispering breeze filtered pink noise
+      // Ethereal Pentatonic Crystal Chimes & Whispering Breeze
       const bufferSize = ctx.sampleRate * 2;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -1995,23 +2082,45 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
         b0 = 0.99886 * b0 + white * 0.0555179;
         b1 = 0.99332 * b1 + white * 0.0750759;
         b2 = 0.96900 * b2 + white * 0.1538520;
-        data[i] = (b0 + b1 + b2) * 0.18;
+        data[i] = (b0 + b1 + b2) * 0.25;
       }
       const noise = ctx.createBufferSource();
       noise.buffer = buffer;
       noise.loop = true;
 
-      const hp = ctx.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.setValueAtTime(1800, now);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(950, now);
+      bp.Q.setValueAtTime(1.5, now);
 
-      noise.connect(hp);
-      hp.connect(masterGain);
+      noise.connect(bp);
+      bp.connect(masterGain);
       noise.start(now);
-      track.nodes.push(noise, hp);
+      track.nodes.push(noise, bp);
+
+      // Magical pentatonic bell sparkles
+      const chimeTimer = setInterval(() => {
+        if (!activeSoundTracks.has('elvish_whispers')) return;
+        const eCtx = getAudioContext();
+        if (!eCtx || !track.gainNode) return;
+        const eNow = eCtx.currentTime;
+        const pentatonic = [440.0, 523.25, 659.25, 783.99, 880.0];
+        const pitch = pentatonic[Math.floor(Math.random() * pentatonic.length)];
+        const bell = eCtx.createOscillator();
+        const bG = eCtx.createGain();
+        bell.type = 'sine';
+        bell.frequency.setValueAtTime(pitch, eNow);
+        bG.gain.setValueAtTime(volume * 0.3, eNow);
+        bG.gain.exponentialRampToValueAtTime(0.0001, eNow + 1.8);
+        bell.connect(bG);
+        bG.connect(masterGain);
+        bell.start(eNow);
+        bell.stop(eNow + 1.9);
+      }, 1400);
+      track.timers.push(chimeTimer);
 
     } else if (id === 'counting_sheep') {
-      // Night meadow drone with periodic gentle pentatonic chime
+      // Bedtime Music Box Lullaby: Gentle Music Box Notes Over Night Meadow Drone
       const drone = ctx.createOscillator();
       drone.type = 'sine';
       drone.frequency.setValueAtTime(130.81, now);
@@ -2020,64 +2129,70 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
       droneFilter.type = 'lowpass';
       droneFilter.frequency.setValueAtTime(220, now);
 
-      drone.connect(droneFilter);
-      droneFilter.connect(masterGain);
-      drone.start(now);
-      track.nodes.push(drone, droneFilter);
+      const dG = ctx.createGain();
+      dG.gain.setValueAtTime(volume * 0.35, now);
 
+      drone.connect(droneFilter);
+      droneFilter.connect(dG);
+      dG.connect(masterGain);
+      drone.start(now);
+      track.nodes.push(drone, droneFilter, dG);
+
+      const playMusicBoxNote = (sCtx: AudioContext, sNow: number, noteFreq: number) => {
+        const bell = sCtx.createOscillator();
+        const bellGain = sCtx.createGain();
+        bell.type = 'sine';
+        bell.frequency.setValueAtTime(noteFreq, sNow);
+        bellGain.gain.setValueAtTime(volume * 0.45, sNow);
+        bellGain.gain.exponentialRampToValueAtTime(0.0001, sNow + 1.8);
+        bell.connect(bellGain);
+        bellGain.connect(masterGain);
+        bell.start(sNow);
+        bell.stop(sNow + 1.9);
+      };
+
+      // Play immediate first note on tap!
+      playMusicBoxNote(ctx, now + 0.05, 523.25);
+
+      const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25];
+      let noteIdx = 0;
       const sheepTimer = setInterval(() => {
         if (!activeSoundTracks.has('counting_sheep')) return;
         const sCtx = getAudioContext();
         if (!sCtx || !track.gainNode) return;
         const sNow = sCtx.currentTime;
-        const notes = [261.63, 329.63, 392.00, 523.25];
-        const note = notes[Math.floor(Math.random() * notes.length)];
-        const bell = sCtx.createOscillator();
-        const bellGain = sCtx.createGain();
-        bell.type = 'sine';
-        bell.frequency.setValueAtTime(note, sNow);
-        bellGain.gain.setValueAtTime(0.0001, sNow);
-        bellGain.gain.linearRampToValueAtTime(0.08, sNow + 0.08);
-        bellGain.gain.exponentialRampToValueAtTime(0.0001, sNow + 2.4);
-        bell.connect(bellGain);
-        bellGain.connect(track.gainNode);
-        bell.start(sNow);
-        bell.stop(sNow + 2.5);
-      }, 3500);
+        playMusicBoxNote(sCtx, sNow, notes[noteIdx % notes.length]);
+        noteIdx++;
+      }, 1800);
       track.timers.push(sheepTimer);
 
     } else if (id === 'bubble_wrap') {
-      // Tactile gentle bubble wrap popping impulses
+      // Tactile, Satisfying Bubble Wrap Popping Impulses
+      const playPop = (pCtx: AudioContext, pNow: number) => {
+        const popOsc = pCtx.createOscillator();
+        const popGain = pCtx.createGain();
+        const baseFreq = 420 + Math.random() * 220;
+        popOsc.type = 'triangle';
+        popOsc.frequency.setValueAtTime(baseFreq, pNow);
+        popOsc.frequency.exponentialRampToValueAtTime(110, pNow + 0.03);
+        popGain.gain.setValueAtTime(volume * 0.6, pNow);
+        popGain.gain.exponentialRampToValueAtTime(0.0001, pNow + 0.035);
+        popOsc.connect(popGain);
+        popGain.connect(masterGain);
+        popOsc.start(pNow);
+        popOsc.stop(pNow + 0.04);
+      };
+
+      // Immediate pop on tap!
+      playPop(ctx, now + 0.02);
+
       const popTimer = setInterval(() => {
         if (!activeSoundTracks.has('bubble_wrap')) return;
         const pCtx = getAudioContext();
         if (!pCtx || !track.gainNode) return;
-        const pNow = pCtx.currentTime;
-        const popOsc = pCtx.createOscillator();
-        const popGain = pCtx.createGain();
-        const baseFreq = 480 + (Math.random() * 120 - 60);
-        popOsc.type = 'sine';
-        popOsc.frequency.setValueAtTime(baseFreq, pNow);
-        popOsc.frequency.exponentialRampToValueAtTime(90, pNow + 0.04);
-        popGain.gain.setValueAtTime(0.0001, pNow);
-        popGain.gain.linearRampToValueAtTime(0.35, pNow + 0.005);
-        popGain.gain.exponentialRampToValueAtTime(0.0001, pNow + 0.045);
-        popOsc.connect(popGain);
-        popGain.connect(track.gainNode);
-        popOsc.start(pNow);
-        popOsc.stop(pNow + 0.05);
-      }, 480);
+        playPop(pCtx, pCtx.currentTime);
+      }, 320);
       track.timers.push(popTimer);
-      const osc = ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(120, now);
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(250, now);
-      osc.connect(filter);
-      filter.connect(masterGain);
-      osc.start(now);
-      track.nodes.push(osc, filter);
     }
   } catch (e) {
     console.error('Error starting procedural track:', e);
