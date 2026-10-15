@@ -17,6 +17,19 @@ import {
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { t } from '../services/translator';
+import { RoutineStickerIcon } from './icons/JournalStickers';
+
+const getHabitSticker = (id: string, emoji?: string): string | undefined => {
+  if (id === 'habit-water' || emoji === '💧') return '/assets/stickers/drink_water.png';
+  if (id === 'habit-shoes' || emoji === '👟') return '/assets/stickers/sneaker_shoes.png';
+  if (id === 'habit-jacket' || emoji === '🧥') return '/assets/stickers/clothes_dressed.png';
+  if (id === 'habit-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.png';
+  if (id === 'habit-hamper' || emoji === '🧺') return '/assets/stickers/clothes_dressed.png';
+  if (id === 'habit-breath' || emoji === '🧘') return '/assets/stickers/breathing_cloud.png';
+  if (id === 'habit-kindness' || emoji === '🪴') return '/assets/stickers/reward_trophy.png';
+  if (id === 'habit-snack' || emoji === '🍎') return '/assets/stickers/apple_snack.png';
+  return undefined;
+};
 
 export const DailyHabitsModule: React.FC = () => {
   const {
@@ -144,11 +157,11 @@ export const DailyHabitsModule: React.FC = () => {
       {/* 2. CATEGORY FILTER TABS */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
         {[
-          { id: 'all', label: 'All Habits', emoji: '🌟' },
-          { id: 'health', label: 'Health & Body', emoji: '💧' },
-          { id: 'organization', label: 'Organization & Space', emoji: '👟' },
-          { id: 'self-care', label: 'Self-Care', emoji: '🧘' },
-          { id: 'kindness', label: 'Kindness & Home', emoji: '🪴' },
+          { id: 'all', label: 'All Habits', iconSrc: '/assets/stickers/purple_stars.png' },
+          { id: 'health', label: 'Health & Body', iconSrc: '/assets/stickers/drink_water.png' },
+          { id: 'organization', label: 'Organization & Space', iconSrc: '/assets/stickers/sneaker_shoes.png' },
+          { id: 'self-care', label: 'Self-Care', iconSrc: '/assets/stickers/breathing_cloud.png' },
+          { id: 'kindness', label: 'Kindness & Home', iconSrc: '/assets/stickers/reward_trophy.png' },
         ].map((cat) => (
           <button
             key={cat.id}
@@ -163,7 +176,7 @@ export const DailyHabitsModule: React.FC = () => {
                 : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
             }`}
           >
-            <span>{cat.emoji}</span>
+            <img src={cat.iconSrc} alt="" className="w-4 h-4 object-contain shrink-0" />
             <span>{t(cat.label)}</span>
           </button>
         ))}
@@ -189,13 +202,21 @@ export const DailyHabitsModule: React.FC = () => {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1">
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-2xs ${
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center p-1 shrink-0 shadow-2xs ${
                       isDone
-                        ? 'bg-emerald-100 border border-emerald-200'
-                        : 'bg-slate-100 border border-slate-200'
+                        ? 'bg-emerald-50 border border-emerald-200'
+                        : 'bg-slate-50 border border-slate-200'
                     }`}
                   >
-                    {habit.emoji}
+                    {(habit.stickerSrc || getHabitSticker(habit.id, habit.emoji)) ? (
+                      <img
+                        src={habit.stickerSrc || getHabitSticker(habit.id, habit.emoji)}
+                        alt=""
+                        className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                      />
+                    ) : (
+                      <RoutineStickerIcon emoji={habit.emoji} title={habit.title} className="w-8 h-8" />
+                    )}
                   </div>
 
                   <div className="flex-1">

@@ -182,6 +182,7 @@ export interface LifeSkill {
   id: string;
   title: string;
   emoji: string;
+  stickerSrc?: string;
   category: 'hygiene' | 'dressing' | 'chores' | 'eating' | 'preparation';
   estimatedMin: number;
   steps: LifeSkillStep[];
@@ -193,6 +194,7 @@ export interface DailyHabit {
   id: string;
   title: string;
   emoji: string;
+  stickerSrc?: string;
   category: 'health' | 'organization' | 'self-care' | 'kindness';
   completedToday: boolean;
   streakDays: number;

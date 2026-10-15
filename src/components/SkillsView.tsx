@@ -16,6 +16,16 @@ import {
 import { playChime } from '../utils/audio';
 import { DailyHabitsModule } from './DailyHabitsModule';
 import { t } from '../services/translator';
+import { RoutineStickerIcon } from './icons/JournalStickers';
+
+const getSkillSticker = (id: string, emoji?: string): string | undefined => {
+  if (id === 'skill-teeth' || emoji === '🪥') return '/assets/stickers/toothbrush.png';
+  if (id === 'skill-hands' || emoji === '🧼') return '/assets/stickers/soap_wash_hands.png';
+  if (id === 'skill-dressed' || emoji === '👕') return '/assets/stickers/clothes_dressed.png';
+  if (id === 'skill-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.png';
+  if (id === 'skill-snack' || emoji === '🍏' || emoji === '🍎') return '/assets/stickers/apple_snack.png';
+  return undefined;
+};
 
 export const SkillsView: React.FC = () => {
   const {
@@ -94,8 +104,16 @@ export const SkillsView: React.FC = () => {
 
         {/* Skill Hero Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-purple-100 border-2 border-purple-200 flex items-center justify-center text-5xl shrink-0">
-            {selectedSkill.emoji}
+          <div className="w-20 h-20 rounded-3xl bg-purple-50 border-2 border-purple-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
+            {(selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)) ? (
+              <img
+                src={selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)}
+                alt=""
+                className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
+              />
+            ) : (
+              <span className="text-5xl">{selectedSkill.emoji}</span>
+            )}
           </div>
           <div className="flex-1 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -166,7 +184,7 @@ export const SkillsView: React.FC = () => {
                       )}
                     </span>
 
-                    <span className="text-3xl shrink-0" aria-hidden="true">{step.emoji}</span>
+                    <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 shrink-0" />
 
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -306,8 +324,17 @@ export const SkillsView: React.FC = () => {
                 }}
                 className="w-full text-left bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300 rounded-3xl p-4 sm:p-5 shadow-xs transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
               >
-                <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-4xl shrink-0 shadow-xs" aria-hidden="true">
-                  {skill.emoji}
+                <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center p-1.5 shrink-0 shadow-xs" aria-hidden="true">
+                  {(skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)) ? (
+                    <img
+                      src={skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)}
+                      alt=""
+                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-4xl">{skill.emoji}</span>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">

@@ -7,6 +7,15 @@ interface CaregiverSkillsTabProps {
   onStartTour?: () => void;
 }
 
+const getSkillSticker = (id: string, emoji?: string): string | undefined => {
+  if (id === 'skill-teeth' || emoji === '🪥') return '/assets/stickers/toothbrush.png';
+  if (id === 'skill-hands' || emoji === '🧼') return '/assets/stickers/soap_wash_hands.png';
+  if (id === 'skill-dressed' || emoji === '👕') return '/assets/stickers/clothes_dressed.png';
+  if (id === 'skill-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.png';
+  if (id === 'skill-snack' || emoji === '🍏' || emoji === '🍎') return '/assets/stickers/apple_snack.png';
+  return undefined;
+};
+
 export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartTour }) => {
   const { skills } = useApp();
 
@@ -35,7 +44,15 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
         {skills.map((sk, i) => (
           <div key={sk.id} className="p-4 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{sk.emoji}</span>
+              {(sk.stickerSrc || getSkillSticker(sk.id, sk.emoji)) ? (
+                <img
+                  src={sk.stickerSrc || getSkillSticker(sk.id, sk.emoji)}
+                  alt=""
+                  className="w-10 h-10 object-contain drop-shadow-2xs shrink-0"
+                />
+              ) : (
+                <span className="text-3xl">{sk.emoji}</span>
+              )}
               <div>
                 <h4 className="font-black text-slate-800">{sk.title}</h4>
                 <span data-tour={i === 0 ? "skills-reward-badge" : undefined} className="text-xs text-purple-700 font-bold">
