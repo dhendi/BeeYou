@@ -584,7 +584,7 @@ const PixelFaceEmotion: React.FC<{
           {/* Laughing cheering mouth */}
           <Px x="13" y="17" c="#991b1b" w="6" h="4" />
           <Px x="14" y="19" c="#f43f5e" w="4" h="2" />
-          {/* Energy sparkles */}
+          {/* Energy stars */}
           <Px x="7" y="4" c="#facc15" />
           <Px x="25" y="4" c="#facc15" />
         </g>

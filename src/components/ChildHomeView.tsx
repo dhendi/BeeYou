@@ -375,9 +375,8 @@ export const ChildHomeView: React.FC = () => {
                       <h2 className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight leading-none truncate">
                         {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`} 🐝
                       </h2>
-                      <p className="text-xs text-[#7A6C60] font-semibold mt-1 flex items-center gap-1.5 truncate">
-                        <span className="text-amber-600">✨</span>
-                        <span>{t("Let's have a calm, wonderful day!")}</span>
+                      <p className="text-xs text-[#7A6C60] font-semibold mt-1 truncate">
+                        {t("Let's have a calm, wonderful day!")}
                       </p>
                     </div>
                   </div>

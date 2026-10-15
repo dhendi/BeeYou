@@ -388,7 +388,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             }`}
           >
             <Palette className="w-4 h-4 text-emerald-600" />
-            <span>Create Custom Theme ✨</span>
+            <span>Create Custom Theme</span>
             {!isPremium && <Crown className="w-3.5 h-3.5 text-amber-300" />}
           </button>
         </div>
@@ -464,7 +464,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           <div className="bg-slate-50/90 rounded-3xl p-4 sm:p-5 border-2 border-slate-200/80 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xl">✨</span>
+                <Palette className="w-5 h-5 text-indigo-600" />
                 <div>
                   <h3 className="font-black text-slate-900 text-sm sm:text-base">
                     3 Signature Interface Design Systems
@@ -492,7 +492,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-2xl p-1.5 rounded-xl bg-gradient-to-br from-[#FFE7D6] via-[#F4EBFA] to-[#E3EBFC] border border-slate-200">
-                    ✨
+                    🎨
                   </span>
                   {activeThemeId === 'theme-classic' && (
                     <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white font-black text-[10px] uppercase">
@@ -670,7 +670,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                             </h4>
                             {theme.id === 'theme-classic' && (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
-                                ✨ Default Theme
+                                Default Theme
                               </span>
                             )}
                             {theme.isCustom && (
@@ -936,12 +936,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 { id: 'turtle_shell', label: '🐢 Turtle Shell' },
                 { id: 'dino_footprints', label: '🦖 Dino Tracks' },
                 { id: 'lily_pads', label: '🐸 Lily Pads' },
-                { id: 'cosmic_stars', label: '✨ Cosmic Stars' },
+                { id: 'cosmic_stars', label: '⭐ Cosmic Stars' },
                 { id: 'bubbles', label: '🫧 Bubbles' },
                 { id: 'railroad', label: '🚂 Railroad' },
                 { id: 'ocean_waves', label: '🌊 Ocean Waves' },
                 { id: 'zen_botanical', label: '🌿 Zen Botanical' },
-                { id: 'sparkles', label: '✨ Star' },
+                { id: 'sparkles', label: '⭐ Calm Star' },
                 { id: 'none', label: '🧼 Clean Solid' },
               ].map((wp) => (
                 <button
@@ -1025,7 +1025,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-white/40 text-[10px] font-bold">
-                  ✨ Custom Theme
+                  Custom Theme
                 </span>
               </div>
 

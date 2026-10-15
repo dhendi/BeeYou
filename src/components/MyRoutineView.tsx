@@ -118,7 +118,7 @@ export const MyRoutineView: React.FC = () => {
 
     setSelectedRoutineId(newRoutine.id);
     playChime('complete');
-    showToast(`✨ ${t('Imported')} "${template.title}" ${t('into your routines!')}`);
+    showToast(`${t('Imported')} "${template.title}" ${t('into your routines!')}`);
     setActiveSubTab('schedules');
   };
 

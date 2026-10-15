@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Star, Award, ArrowRight, X, Sparkles } from 'lucide-react';
+import { Star, Award, ArrowRight, X, BookOpen } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 
@@ -96,8 +96,8 @@ export const RoutineStickerCelebrationModal: React.FC = () => {
             onClick={handleGoToScrapbook}
             className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-sm sm:text-base rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
           >
-            <Sparkles className="w-4 h-4 text-amber-900" />
-            <span>Place in Sticker Scrapbook! ✨</span>
+            <BookOpen className="w-4 h-4 text-amber-900" />
+            <span>Place in Sticker Scrapbook</span>
           </button>
 
           <button

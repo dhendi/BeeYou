@@ -15,7 +15,6 @@ import {
   Clock, 
   Check, 
   Layers,
-  Sparkles,
   Sun,
   Smile
 } from 'lucide-react';
@@ -411,7 +410,7 @@ export const PrintScheduleModal: React.FC = () => {
                       {selectedRoutine.title}
                     </h1>
                     <p className="text-xs text-stone-500 font-medium">
-                      Scheduled for: <strong>{selectedRoutine.time || 'Daily'}</strong> • One step at a time! ✨
+                      Scheduled for: <strong>{selectedRoutine.time || 'Daily'}</strong> • One step at a time!
                     </p>
                   </div>
                 </div>
@@ -815,7 +814,7 @@ export const PrintScheduleModal: React.FC = () => {
                 {/* Empty page state notice */}
                 {activeScrapbookPage.stickers.length === 0 && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400">
-                    <Sparkles className="w-8 h-8 mb-2 opacity-50" />
+                    <Star className="w-8 h-8 mb-2 opacity-50" />
                     <span className="text-sm font-bold">This page is waiting for your stickers!</span>
                   </div>
                 )}

@@ -33,7 +33,7 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'quiet', emoji: '🛋️', label: 'Quiet Break', category: 'calm', keywords: ['break', 'quiet', 'couch', 'relax', 'fort', 'chill', 'sofa'] },
   { id: 'bubbles', emoji: '🫧', label: 'Fidget Bubbles', category: 'calm', keywords: ['fidget', 'bubble', 'sensory', 'squishy', 'pop'] },
   { id: 'headphones', emoji: '🎧', label: 'Headphones', category: 'calm', keywords: ['headphone', 'audio', 'earmuffs', 'calm', 'decompress'] },
-  { id: 'sparkles', emoji: '⭐', label: 'Mindful Calm', category: 'calm', keywords: ['sparkle', 'magic', 'mindful', 'reset', 'star'] },
+  { id: 'star', emoji: '⭐', label: 'Mindful Calm', category: 'calm', keywords: ['star', 'calm', 'mindful', 'reset', 'peaceful'] },
   { id: 'breathe', emoji: '🌬️', label: 'Deep Breathing', category: 'calm', keywords: ['breathe', 'wind', 'air', 'inhale', 'exhale'] },
   { id: 'rest', emoji: '🌙', label: 'Evening Rest', category: 'calm', keywords: ['rest', 'night', 'moon', 'relax', 'bedtime'] },
   { id: 'bed', emoji: '🛏️', label: 'Bed & Nap', category: 'calm', keywords: ['sleep', 'nap', 'bed', 'blanket', 'lie down'] },

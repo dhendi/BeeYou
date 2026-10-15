@@ -8,7 +8,6 @@ import { RoutineStickerIcon } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { 
-  Sparkles, 
   RotateCw, 
   Trash2, 
   Maximize2, 
@@ -193,7 +192,7 @@ export const StickerScrapbookView: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [drawerCategory, setDrawerCategory] = useState<'all' | 'routine' | 'daily' | 'adventures' | 'calm'>('all');
   const [isPresentMode, setIsPresentMode] = useState(false);
-  const [sparkleStickerId, setSparkleStickerId] = useState<string | null>(null);
+  const [celebrateStickerId, setCelebrateStickerId] = useState<string | null>(null);
 
   // Dragging state
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -248,9 +247,9 @@ export const StickerScrapbookView: React.FC = () => {
     setSelectedStickerId(newSticker.id);
     playChime('star');
 
-    // Trigger brief sparkle animation
-    setSparkleStickerId(newSticker.id);
-    setTimeout(() => setSparkleStickerId(null), 1200);
+    // Trigger brief celebration animation
+    setCelebrateStickerId(newSticker.id);
+    setTimeout(() => setCelebrateStickerId(null), 1200);
   };
 
   // Remove sticker from page
@@ -308,11 +307,11 @@ export const StickerScrapbookView: React.FC = () => {
     playChime('tap');
   };
 
-  // Trigger sparkle effect
-  const handleSparkleSticker = (stickerId: string) => {
-    setSparkleStickerId(stickerId);
+  // Trigger star cheer effect
+  const handleCelebrateSticker = (stickerId: string) => {
+    setCelebrateStickerId(stickerId);
     playChime('star');
-    setTimeout(() => setSparkleStickerId(null), 1200);
+    setTimeout(() => setCelebrateStickerId(null), 1200);
   };
 
   // Switch Theme for current page
@@ -573,7 +572,7 @@ export const StickerScrapbookView: React.FC = () => {
         {/* Placed Stickers */}
         {activePage.stickers.map((sticker) => {
           const isSelected = selectedStickerId === sticker.id && !isPresentMode;
-          const isSparkling = sparkleStickerId === sticker.id;
+          const isCelebrating = celebrateStickerId === sticker.id;
 
           const baseSize = 64;
           const pixelSize = Math.round(baseSize * sticker.sizeMultiplier);
@@ -621,10 +620,10 @@ export const StickerScrapbookView: React.FC = () => {
                   />
                 )}
 
-                {/* Sparkle Burst Animation */}
-                {isSparkling && (
+                {/* Star Cheer Burst Animation */}
+                {isCelebrating && (
                   <div className="absolute -inset-3 flex items-center justify-center pointer-events-none animate-in zoom-in-50 fade-in duration-300">
-                    <span className="text-xl animate-ping absolute -top-1 -right-1">✨</span>
+                    <span className="text-xl animate-ping absolute -top-1 -right-1">⭐</span>
                     <span className="text-lg animate-ping absolute -bottom-1 -left-1 delay-100">⭐</span>
                   </div>
                 )}
@@ -660,14 +659,14 @@ export const StickerScrapbookView: React.FC = () => {
                     )}
                   </button>
 
-                  {/* Sparkle */}
+                  {/* Star Cheer */}
                   <button
                     type="button"
-                    title="Sparkle Magic"
-                    onClick={() => handleSparkleSticker(sticker.id)}
+                    title="Star Cheer"
+                    onClick={() => handleCelebrateSticker(sticker.id)}
                     className="w-7 h-7 rounded-xl bg-yellow-50 hover:bg-yellow-100 text-yellow-800 flex items-center justify-center transition-all cursor-pointer active:scale-90"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Star className="w-3.5 h-3.5" />
                   </button>
 
                   {/* Peel Off / Delete */}
@@ -689,7 +688,7 @@ export const StickerScrapbookView: React.FC = () => {
         {activePage.stickers.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
             <div className="w-16 h-16 rounded-3xl bg-white/70 backdrop-blur-xs flex items-center justify-center text-3xl shadow-sm mb-3">
-              ✨
+              🎨
             </div>
             <p className="font-black text-sm text-slate-700">This scrapbook page is ready for stickers!</p>
             <p className="text-xs text-slate-500 mt-1 max-w-xs">

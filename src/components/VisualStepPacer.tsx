@@ -11,7 +11,6 @@ import {
   X, 
   Volume2, 
   VolumeX, 
-  Sparkles,
   Wind,
   Clock,
   HeartHandshake,
@@ -159,10 +158,10 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
   // Gentle transition banner message
   const getTransitionMessage = () => {
     if (secondsLeft === 0) {
-      return { text: t('Step complete! Great job! ✨'), tone: 'emerald' };
+      return { text: t('Step complete! Great job! 🎉'), tone: 'emerald' };
     }
     if (secondsLeft <= 30) {
-      return { text: t('Almost time to switch! Finishing up ✨'), tone: 'amber' };
+      return { text: t('Almost time to switch! Finishing up'), tone: 'amber' };
     }
     if (secondsLeft <= 120) {
       return { text: t('2 minutes left — you are doing wonderful! 💛'), tone: 'blue' };
@@ -284,7 +283,7 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
               : 'bg-sky-500/20 border-sky-500/40 text-sky-200'
           }`}
         >
-          <Sparkles className="w-4 h-4 shrink-0" />
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{transitionBanner.text}</span>
         </div>
       )}
@@ -525,7 +524,7 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
               {breathPhase === 'inhale'
                 ? t('🌬️ Breathe in gently...')
                 : breathPhase === 'hold'
-                ? t('✨ Hold softly...')
+                ? t('🫧 Hold softly...')
                 : t('🍃 Breathe out slowly...')}
             </span>
           </div>

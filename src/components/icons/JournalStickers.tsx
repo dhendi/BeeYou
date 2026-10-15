@@ -492,8 +492,8 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📓' || normTitle.includes('homework') || normTitle.includes('study')) return <HomeworkStudySticker className={className} size={size} />;
   // 🎨 Art / crafts / drawing
   if (normEmoji === '🎨' || normEmoji === '🖍️' || normTitle.includes('art') || normTitle.includes('paint') || normTitle.includes('craft')) return <ArtCraftsSticker className={className} size={size} />;
-  // ✨ Star / calm mindfulness
-  if (normEmoji === '✨' || normTitle.includes('sparkle') || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
+  // ⭐ Star / calm mindfulness
+  if (normEmoji === '⭐' || normEmoji === '✨' || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
   // 🏆 Trophy / reward / milestone
   if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;
   // 🛁 Bath time / tub

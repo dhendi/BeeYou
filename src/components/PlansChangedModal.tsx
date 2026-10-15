@@ -67,7 +67,7 @@ const REPLACEMENT_PRESETS = [
   },
 ];
 
-const QUICK_EMOJIS = ['🍕', '🛝', '🎨', '🛋️', '🧸', '☕', '🎧', '📱', '📚', '🫧', '🚗', '🍎', '🧩', '🪥', '🥪', '✨'];
+const QUICK_EMOJIS = ['🍕', '🛝', '🎨', '🛋️', '🧸', '☕', '🎧', '📱', '📚', '🫧', '🚗', '🍎', '🧩', '🪥', '🥪', '⭐'];
 
 export const PlansChangedModal: React.FC = () => {
   const {
@@ -94,7 +94,7 @@ export const PlansChangedModal: React.FC = () => {
 
   // Inputs for adding a step
   const [newStepTitle, setNewStepTitle] = useState<string>('');
-  const [newStepEmoji, setNewStepEmoji] = useState<string>('✨');
+  const [newStepEmoji, setNewStepEmoji] = useState<string>('⭐');
   const [newStepTime, setNewStepTime] = useState<string>('');
   const [showIconLibrary, setShowIconLibrary] = useState<boolean>(false);
   const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);

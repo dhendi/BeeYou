@@ -1385,7 +1385,7 @@ export const AACView: React.FC = () => {
               <div className="p-4 rounded-3xl bg-white border-2 border-amber-300 space-y-3 shadow-md animate-in fade-in">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <h4 className="font-black text-xs sm:text-sm text-slate-900 flex items-center gap-2">
-                    <span>✨ Add Custom Favorite Sentence</span>
+                    <span>Add Custom Favorite Sentence</span>
                   </h4>
                   <button
                     type="button"
@@ -1957,7 +1957,7 @@ export const AACView: React.FC = () => {
             symbolId: sym.symbolId,
             symbolSource: sym.symbolSource || 'mulberry',
             arasaacId: sym.arasaacId,
-            emoji: sym.emoji || '✨',
+            emoji: sym.emoji || '💬',
             category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
             colorType: sym.colorType || 'noun',
             isFavorite: true,

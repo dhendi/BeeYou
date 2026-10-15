@@ -200,7 +200,7 @@ export const PRESET_THEMES: AppTheme[] = [
         'Water': '💧',
         'Jump': '🦗',
         'Break': '🛋️',
-        'Good': '✨',
+        'Good': '👍',
       },
     },
     soundTheme: 'frog',

@@ -5,7 +5,7 @@ import {
   X, 
   Moon, 
   Sun,
-  Sparkles,
+  LayoutGrid,
   Trees,
   PawPrint,
   Building2,
@@ -58,7 +58,7 @@ export interface HoneycombSoundDef {
 export type ChimeSoundDef = HoneycombSoundDef;
 
 export const SOUND_CATEGORIES = [
-  { id: 'all', label: 'All', icon: Sparkles },
+  { id: 'all', label: 'All', icon: LayoutGrid },
   { id: 'ambiance', label: 'Ambiance', icon: Trees },
   { id: 'animal', label: 'Animal', icon: PawPrint },
   { id: 'city', label: 'City', icon: Building2 },

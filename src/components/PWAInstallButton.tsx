@@ -93,8 +93,8 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
             <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-800">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg">
-                    ✨
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500 flex items-center justify-center text-white font-black text-lg">
+                    🐝
                   </div>
                   <div>
                     <h3 className="text-base font-black text-slate-900">Install on iPhone / iPad</h3>

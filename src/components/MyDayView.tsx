@@ -362,7 +362,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                 <span>{group.routines.length}</span>
                 {isCurrentPeriod && (
                   <span className="ml-1.5 px-2 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-[10px] font-black border border-amber-300 flex items-center gap-1 shadow-2xs">
-                    <span>✨</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block" />
                     <span>{t('Now')}</span>
                   </span>
                 )}
@@ -418,8 +418,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                 </div>
                               </h3>
                               {isCurrentRoutine && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-black border border-amber-500/70 flex items-center gap-1 shadow-2xs shrink-0 animate-pulse">
-                                  <span>✨</span>
+                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-black border border-amber-500/70 flex items-center gap-1 shadow-2xs shrink-0">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-stone-950 inline-block animate-ping" />
                                   <span>{t('Current Now')}</span>
                                 </span>
                               )}

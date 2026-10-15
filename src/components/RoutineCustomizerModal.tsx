@@ -15,7 +15,7 @@ import {
   MicOff,
   Play,
   Square,
-  Wand2
+  ListTree
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
@@ -31,7 +31,7 @@ interface RoutineCustomizerModalProps {
 const COMMON_EMOJIS = [
   '🌅', '🏫', '🌙', '🎒', '🛏️', '💧', '🐕', '🎵', '☀️', 
   '📓', '🎨', '🏆', '🛁', '🦷', '🧩', '🛒', '🥞', '🧸', 
-  '🚿', '🪥', '👕', '🥪', '🛝', '📖', '✨', '👟', '🚌'
+  '🚿', '🪥', '👕', '🥪', '🛝', '📖', '⭐', '👟', '🚌'
 ];
 
 export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
@@ -58,7 +58,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepInstruction, setNewStepInstruction] = useState('');
   const [newStepDuration, setNewStepDuration] = useState(5);
-  const [newStepEmoji, setNewStepEmoji] = useState('✨');
+  const [newStepEmoji, setNewStepEmoji] = useState('⭐');
   const [newStepSensoryNote, setNewStepSensoryNote] = useState('');
 
   // Voice Recording per step (all hooks must be declared at the top level)
@@ -510,13 +510,13 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                         className="p-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer" title="Move down">
                         <ChevronDown className="w-4 h-4" />
                       </button>
-                      {/* ✨ Magic Breakdown */}
+                      {/* Micro-steps Breakdown */}
                       <button type="button"
                         aria-label={st.microSteps ? 'Remove micro-steps' : 'Break step into micro-steps'}
                         onClick={() => st.microSteps ? handleRemoveMicroSteps(idx) : handleBreakdown(idx)}
                         className={`p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-md cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none ${st.microSteps ? 'text-purple-600 hover:text-red-500' : 'text-slate-400 hover:text-purple-600'}`}
-                        title={st.microSteps ? 'Remove micro-steps' : '✨ Break this into micro-steps'}>
-                        <Wand2 className="w-4 h-4" aria-hidden="true" />
+                        title={st.microSteps ? 'Remove micro-steps' : 'Break this into micro-steps'}>
+                        <ListTree className="w-4 h-4" aria-hidden="true" />
                       </button>
                       {/* 🎤 Voice Recording */}
                       {!st.audioDataUrl ? (
@@ -557,7 +557,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                   {/* Micro-steps breakdown */}
                   {st.microSteps && st.microSteps.length > 0 && (
                     <div className="pl-8 space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-wider text-purple-600">✨ Micro-steps:</p>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-purple-600">Micro-steps:</p>
                       {st.microSteps.map((ms) => (
                         <div key={ms.id} className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-xl px-3 py-1.5">
                           <RoutineStickerIcon emoji={ms.emoji} title={ms.title} className="w-4 h-4 shrink-0 object-contain" />

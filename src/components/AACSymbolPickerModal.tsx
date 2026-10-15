@@ -648,7 +648,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                     1-Tap install high-frequency vocabulary designed for clinical AAC devices.
                   </p>
                 </div>
-                <span className="text-2xl">✨</span>
+                <span className="text-2xl">📦</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">

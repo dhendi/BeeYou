@@ -26,8 +26,7 @@ import {
   Search,
   Check,
   AlertCircle,
-  Smile,
-  Sparkles
+  Smile
 } from 'lucide-react';
 import { playChime, playAudioUrl, speakText } from '../utils/audio';
 import { AACSymbolPickerModal } from './AACSymbolPickerModal';
@@ -77,7 +76,7 @@ const POPULAR_EMOJIS = [
   '🍕', '🧀', '🍎', '🥪', '🍌', '🍪', '🍓', '💧', '🧃', '🥛', '📱', '🛝', '📖', '🖍️',
   '🎵', '🧱', '🧩', '🌳', '🏠', '🏫', '🌲', '🦷', '🩺', '🚗', '👩', '👨', '🧑‍🏫', '🤝',
   '🔊', '☀️', '🎧', '🛏️', '🤫', '🧸', '😊', '😢', '😌', '🥱', '😠', '😨', '🤕', '🚽',
-  '✨', '💬', '🎉', '💡', '🌈', '🫂', '🧘', '😴', '💊', '🧃', '🥪', '🍦', '🎈', '🎨'
+  '🌻', '💬', '🎉', '💡', '🌈', '🫂', '🧘', '😴', '💊', '🧃', '🥪', '🍦', '🎈', '🎨'
 ];
 
 const SPEAKER_PRESETS = [
@@ -910,7 +909,7 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
                 { id: 'photo', label: '📷 Real Photo', icon: Camera },
                 { id: 'draw', label: '🎨 Draw Doodle', icon: PenTool },
                 { id: 'symbol', label: '🔍 Mulberry Symbols', icon: Search },
-                { id: 'emoji', label: '✨ Emoji', icon: Smile },
+                { id: 'emoji', label: '😀 Emoji', icon: Smile },
               ].map((tab) => {
                 const TabIcon = tab.icon;
                 return (
