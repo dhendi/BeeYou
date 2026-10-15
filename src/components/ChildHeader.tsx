@@ -21,7 +21,6 @@ export const ChildHeader: React.FC = () => {
     settings,
     updateSettings,
     childProfile,
-    worldState,
     setShowPinModal,
     setIsParentMode,
     setShowCaregiverModal,

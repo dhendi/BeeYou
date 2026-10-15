@@ -10,8 +10,6 @@ import {
   SocialStory,
   ChildProfile,
   AppSettings,
-  AvatarConfig,
-  MyWorldState,
   PlansChangedState,
   EmotionRecord,
   EmotionType,
@@ -134,8 +132,6 @@ export interface AppContextType {
   setShowFamilyAuthModal: (val: boolean) => void;
   showAboutMeModal: boolean;
   setShowAboutMeModal: (val: boolean) => void;
-  showAvatarCreator?: boolean;
-  setShowAvatarCreator?: (val: boolean) => void;
   incomingCaregiverMessage: CaregiverMessage | null;
   dismissIncomingCaregiverMessage: () => void;
   activeContextTopic: string | null;
@@ -227,14 +223,6 @@ export interface AppContextType {
   socialStories: SocialStory[];
   addSocialStory: (story: Omit<SocialStory, 'id'>) => void;
 
-  // My World & Avatar
-  worldState: MyWorldState;
-  avatar: AvatarConfig;
-  updateAvatar: (avatar: Partial<AvatarConfig>) => void;
-  buyWorldItem: (itemId: string) => boolean;
-  placeWorldItem: (itemId: string, room: 'bedroom' | 'playroom' | 'yard', x?: number, y?: number) => void;
-  removePlacedItem: (placedId: string) => void;
-  setCurrentRoom: (room: 'bedroom' | 'playroom' | 'yard') => void;
   awardStars: (amount: number) => void;
 
   // Profile & Settings
@@ -466,14 +454,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   initialRole,
 }) => {
   // Navigation & View Modals
-  const [childView, _setChildView] = useState<ChildViewType>('home');
-  const setChildView = useCallback((view: ChildViewType) => {
-    if ((view as any) === 'my-world') {
-      _setChildView('home');
-      return;
-    }
-    _setChildView(view);
-  }, []);
+  const [childView, setChildView] = useState<ChildViewType>('home');
   const [activeAdventureId, setActiveAdventureId] = useState<string | null>(null);
   const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
@@ -712,9 +693,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 2. Subscription Hook
   const subscriptionState = useSubscriptionState();
 
-  const setShowAvatarCreator = () => {};
-  const showAvatarCreator = false;
-
   // 3. Gamification Hook
   const gamification = useGamificationState({
     childName: childProfile.name,
@@ -787,7 +765,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 12. Themes Hook
   const themeState = useThemeState({
     isPremium: subscriptionState.isPremium,
-    stars: gamification.worldState.stars,
+    stars: gamification.earnedStickers.length,
     soundEffects: settings.soundEffects,
     spokenAnnouncements: !!settings.spokenAnnouncements,
     triggerUpgrade: subscriptionState.triggerUpgrade,
@@ -802,7 +780,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     childName: childProfile.name,
     currentMood: gamification.currentMood,
     childView,
-    stars: gamification.worldState.stars,
+    stars: gamification.earnedStickers.length,
     habitsCompletedToday: gamification.habits.filter((h) => h.completedToday).length,
     totalHabits: gamification.habits.length,
     routines: routinesSchedule.routines,
@@ -833,8 +811,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         socialStories: gamification.socialStories,
         emotionHistory: gamification.emotionHistory,
         currentMood: gamification.currentMood,
-        worldState: gamification.worldState,
-        avatar: gamification.avatar,
         childProfile,
         settings,
       };
@@ -867,7 +843,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
             ? 'Feelings Check-in'
             : 'BeeYou'
         }`,
-        stars: gamification.worldState.stars,
+        stars: gamification.earnedStickers.length,
         isOffline: speechEngine.isOffline,
       });
     } catch (e) {
@@ -884,8 +860,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     gamification.socialStories,
     gamification.emotionHistory,
     gamification.currentMood,
-    gamification.worldState,
-    gamification.avatar,
+    gamification.earnedStickers.length,
     childProfile,
     settings,
     childView,
@@ -899,7 +874,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       exportedAt: new Date().toISOString(),
       app: 'BeeYou',
       childProfile,
-      avatar: gamification.avatar,
       settings,
       aacItems: aacComm.aacItems,
       quickPhrases: aacComm.quickPhrases,
@@ -907,7 +881,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       adventures: gamification.adventures,
       skills: gamification.skills,
       habits: gamification.habits,
-      worldState: gamification.worldState,
       socialStories: gamification.socialStories,
       dailyRecollections: recollections.dailyRecollections,
       medications: medication.medications,
@@ -943,7 +916,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       }
 
       if (data.childProfile) setChildProfile(data.childProfile);
-      if (data.avatar) gamification.setAvatar(data.avatar);
       if (data.settings) setSettings(data.settings);
       if (Array.isArray(data.aacItems) && data.aacItems.length > 0) aacComm.setAacItems(data.aacItems);
       if (Array.isArray(data.quickPhrases)) aacComm.setQuickPhrases(data.quickPhrases);
@@ -951,7 +923,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       if (Array.isArray(data.adventures)) gamification.setAdventures(data.adventures);
       if (Array.isArray(data.skills)) gamification.setSkills(data.skills);
       if (Array.isArray(data.habits)) gamification.setHabits(data.habits);
-      if (data.worldState) gamification.setWorldState(data.worldState);
       if (Array.isArray(data.socialStories)) gamification.setSocialStories(data.socialStories);
       if (Array.isArray(data.dailyRecollections)) recollections.setDailyRecollections(data.dailyRecollections);
       if (Array.isArray(data.medications)) medication.setMedications(data.medications);
@@ -1022,8 +993,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setShowFamilyAuthModal: familyCloudSync.setShowFamilyAuthModal,
     showAboutMeModal,
     setShowAboutMeModal,
-    showAvatarCreator,
-    setShowAvatarCreator,
     incomingCaregiverMessage: familyCloudSync.incomingCaregiverMessage,
     dismissIncomingCaregiverMessage: familyCloudSync.dismissIncomingCaregiverMessage,
     activeContextTopic,
@@ -1115,14 +1084,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     socialStories: gamification.socialStories,
     addSocialStory: gamification.addSocialStory,
 
-    // My World & Avatar
-    worldState: gamification.worldState,
-    avatar: gamification.avatar,
-    updateAvatar: gamification.updateAvatar,
-    buyWorldItem: gamification.buyWorldItem,
-    placeWorldItem: gamification.placeWorldItem,
-    removePlacedItem: gamification.removePlacedItem,
-    setCurrentRoom: gamification.setCurrentRoom,
     awardStars: gamification.awardStars,
 
     // Profile & Settings

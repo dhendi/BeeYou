@@ -253,46 +253,6 @@ export interface EmotionRecord {
   need?: string;
 }
 
-export interface AvatarConfig {
-  skinTone: string;
-  hairStyle: 'short' | 'curly' | 'pigtails' | 'spiky' | 'braids' | 'wavy' | 'afro' | 'bob' | 'ponytail' | 'buzz';
-  hairColor: string;
-  shirtColor: string;
-  pantsColor: string;
-  clothingStyle?: 'tshirt' | 'hoodie' | 'dino_hoodie' | 'sailor_hoodie' | 'turtle_hoodie' | 'frog_hoodie' | 'space_suit' | 'overalls';
-  expression?: 'happy' | 'smile' | 'calm' | 'excited' | 'wink';
-  gender?: 'boy' | 'girl' | 'neutral';
-  accessory: 'none' | 'glasses' | 'sunglasses' | 'hearing_aids' | 'cochlear' | 'sensory_headphones' | 'cap' | 'beanie';
-  accessoryColor?: string;
-  mobilityAid: 'none' | 'wheelchair' | 'stroller_walker' | 'cane' | 'service_dog';
-  companionDevice: 'none' | 'aac_tablet' | 'communication_ring' | 'squishy_fidget' | 'comfort_plush' | 'star_wand';
-  avatarFrame?: 'none' | 'stars' | 'bubbles' | 'sunburst' | 'rainbow' | 'space';
-}
-
-export interface WorldItem {
-  id: string;
-  name: string;
-  emoji: string;
-  category: 'furniture' | 'pet' | 'toy' | 'decoration' | 'comfort';
-  costStars: number;
-  description: string;
-}
-
-export interface PlacedWorldItem {
-  id: string;
-  itemId: string;
-  room: 'bedroom' | 'playroom' | 'yard';
-  x: number;
-  y: number;
-}
-
-export interface MyWorldState {
-  stars: number;
-  unlockedItemIds: string[];
-  placedItems: PlacedWorldItem[];
-  currentRoom: 'bedroom' | 'playroom' | 'yard';
-}
-
 export type UserPersona = 'child' | 'teen' | 'adult';
 export type UserAgeGroup = 'kid' | 'child' | 'teen' | 'adult';
 
@@ -451,7 +411,7 @@ export interface CycleSettings {
 export interface EnabledFeatures {
   starsAndRewards: boolean;       // Star coins, badges, routine stickers (gamification)
   firstThenSchedules: boolean;     // Visual first/then routine cards
-  mascotCompanion: boolean;        // Playful mascot avatar greeting and cheering
+  mascotCompanion: boolean;        // Playful mascot greeting and cheering
   visualCountdownTimer: boolean;   // Visual activity countdown timer
   socialStories: boolean;          // Social stories preparation
   lifeSkills: boolean;             // Step-by-step life skills breakdown
@@ -1083,7 +1043,6 @@ export interface BeeYouBackupData {
   exportedAt: string;
   app: 'BeeYou' | 'Lumina'; // 'Lumina' = backups made before the rebrand
   childProfile: ChildProfile;
-  avatar: AvatarConfig;
   settings: AppSettings;
   aacItems: AACItem[];
   quickPhrases: QuickPhrase[];
@@ -1091,8 +1050,9 @@ export interface BeeYouBackupData {
   adventures: LifeAdventure[];
   skills: LifeSkill[];
   habits: DailyHabit[];
-  worldState: MyWorldState;
   socialStories: SocialStory[];
+  avatar?: any;
+  worldState?: any;
   dailyRecollections?: any[];
   medications?: any[];
   cycleSettings?: any;

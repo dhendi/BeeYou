@@ -392,7 +392,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       {t('Child (Ages 3–11)')}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      {t('Warm honey palette, claymorphism cards, friendly bee mascot avatar, playful icons.')}
+                      {t('Warm honey palette, claymorphism cards, friendly bee mascot, playful icons.')}
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-3 uppercase tracking-wider">

@@ -760,11 +760,9 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
   hairColor,
   className = 'w-16 h-16',
 }) => {
-  const { avatar } = useApp();
-
-  const effectiveHairStyle = hairStyle ?? avatar?.hairStyle ?? 'short';
-  const effectiveSkin = skinTone ?? avatar?.skinTone ?? '#fed7aa';
-  const effectiveHair = hairColor ?? avatar?.hairColor ?? '#451a03';
+  const effectiveHairStyle = hairStyle ?? 'short';
+  const effectiveSkin = skinTone ?? '#fed7aa';
+  const effectiveHair = hairColor ?? '#451a03';
 
   const normalizedId = emotionId.toLowerCase().trim();
   const category = theme?.category;

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import {
-  MyWorldState,
-  AvatarConfig,
   EarnedRoutineSticker,
   LifeAdventure,
   LifeSkill,
@@ -12,13 +10,10 @@ import {
   Routine,
 } from '../types';
 import {
-  INITIAL_WORLD_STATE,
-  INITIAL_AVATAR,
   DEFAULT_ADVENTURES,
   DEFAULT_SKILLS,
   DEFAULT_DAILY_HABITS,
   DEFAULT_SOCIAL_STORIES,
-  WORLD_ITEMS_CATALOG,
 } from '../data/defaultData';
 import { getStickerForRoutine } from '../data/rewardsData';
 import { playChime } from '../utils/audio';
@@ -39,8 +34,6 @@ export function useGamificationState({
   triggerUpgrade,
   speak,
 }: UseGamificationStateProps) {
-  const [worldState, setWorldState] = useState<MyWorldState>(INITIAL_WORLD_STATE);
-  const [avatar, setAvatar] = useState<AvatarConfig>(INITIAL_AVATAR);
   const [adventures, setAdventures] = useState<LifeAdventure[]>(() => {
     try {
       const saved = localStorage.getItem('beeyou_adventures');
@@ -65,62 +58,6 @@ export function useGamificationState({
 
   const awardStars = (_amount: number) => {
     // Star coins economy removed per user request
-  };
-
-  const updateAvatar = (partial: Partial<AvatarConfig>) => {
-    if (!isPremium) {
-      triggerUpgrade(
-        'Avatar Customizer Studio is a BeeYou Premium feature! Start your 15-day free trial to customize hair, colors, and accessories.'
-      );
-      return;
-    }
-    setAvatar((prev) => ({ ...prev, ...partial }));
-    if (soundEffects) playChime('tap');
-  };
-
-  const buyWorldItem = (itemId: string): boolean => {
-    const item = WORLD_ITEMS_CATALOG.find((i) => i.id === itemId);
-    if (!item) return false;
-    if (worldState.unlockedItemIds.includes(itemId)) return true;
-
-    setWorldState((prev) => ({
-      ...prev,
-      unlockedItemIds: [...prev.unlockedItemIds, itemId],
-    }));
-    if (soundEffects) playChime('complete');
-    return true;
-  };
-
-  const placeWorldItem = (
-    itemId: string,
-    room: 'bedroom' | 'playroom' | 'yard',
-    x = 50,
-    y = 50
-  ) => {
-    const newPlaced = {
-      id: `placed-${Date.now()}`,
-      itemId,
-      room,
-      x,
-      y,
-    };
-    setWorldState((prev) => ({
-      ...prev,
-      placedItems: [...prev.placedItems, newPlaced],
-    }));
-    if (soundEffects) playChime('tap');
-  };
-
-  const removePlacedItem = (placedId: string) => {
-    setWorldState((prev) => ({
-      ...prev,
-      placedItems: prev.placedItems.filter((i) => i.id !== placedId),
-    }));
-  };
-
-  const setCurrentRoom = (room: 'bedroom' | 'playroom' | 'yard') => {
-    setWorldState((prev) => ({ ...prev, currentRoom: room }));
-    if (soundEffects) playChime('tap');
   };
 
   const awardRoutineSticker = (routine: Routine): EarnedRoutineSticker => {
@@ -381,15 +318,6 @@ export function useGamificationState({
   };
 
   return {
-    worldState,
-    setWorldState,
-    avatar,
-    setAvatar,
-    updateAvatar,
-    buyWorldItem,
-    placeWorldItem,
-    removePlacedItem,
-    setCurrentRoom,
     awardStars,
 
     earnedStickers,

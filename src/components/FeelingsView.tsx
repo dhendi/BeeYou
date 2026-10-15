@@ -27,7 +27,6 @@ export const FeelingsView: React.FC = () => {
     setShowCopingToolkit,
     dailyRecollections,
     activeTheme,
-    avatar,
     userAgeGroup,
     enabledFeatures,
     moodJournalEntries,
@@ -351,7 +350,6 @@ export const FeelingsView: React.FC = () => {
                   <ThemedEmotionFace
                     emotionId={emo.id}
                     theme={activeTheme}
-                    skinTone={avatar.skinTone}
                     className="w-14 h-14 sm:w-16 sm:h-16 mb-2 transition-transform hover:scale-105"
                   />
                   <span
