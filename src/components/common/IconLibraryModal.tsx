@@ -3,13 +3,13 @@ import { Search, X, Palette, Check } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { playChime } from '../../utils/audio';
 import { useApp } from '../../context/AppContext';
-import { DINO_KINGDOM_ICONS } from '../../data/themedIconsData';
+import { DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS } from '../../data/themedIconsData';
 
 export interface LibraryIconItem {
   id: string;
   emoji: string;
   label: string;
-  category: 'fun' | 'calm' | 'food' | 'daily' | 'turtle' | 'dinosaur';
+  category: 'fun' | 'calm' | 'food' | 'daily' | 'turtle' | 'dinosaur' | 'frog';
   keywords: string[];
 }
 
@@ -235,6 +235,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
     category: 'dinosaur' as const,
     keywords: d.keywords,
   })),
+
+  // 🐸 Ribbit Pond Themed Stickers
+  ...RIBBIT_POND_ICONS.map((f) => ({
+    id: f.id,
+    emoji: f.value,
+    label: f.label,
+    category: 'frog' as const,
+    keywords: f.keywords,
+  })),
 ];
 
 export interface IconLibraryModalProps {
@@ -243,7 +252,7 @@ export interface IconLibraryModalProps {
   onSelectIcon: (emoji: string, label: string) => void;
   selectedEmoji?: string;
   title?: string;
-  initialTab?: 'all' | 'turtle' | 'dinosaur' | 'fun' | 'calm' | 'food' | 'daily';
+  initialTab?: 'all' | 'turtle' | 'dinosaur' | 'frog' | 'fun' | 'calm' | 'food' | 'daily';
 }
 
 export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
@@ -257,8 +266,9 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
   const { activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'turtle' | 'dinosaur' | 'fun' | 'calm' | 'food' | 'daily'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'turtle' | 'dinosaur' | 'frog' | 'fun' | 'calm' | 'food' | 'daily'>('all');
   const [customInput, setCustomInput] = useState('');
 
   useEffect(() => {
@@ -269,11 +279,13 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         setActiveTab('turtle');
       } else if (isDinoTheme) {
         setActiveTab('dinosaur');
+      } else if (isFrogTheme) {
+        setActiveTab('frog');
       } else {
         setActiveTab('all');
       }
     }
-  }, [isOpen, initialTab, isTurtleTheme, isDinoTheme]);
+  }, [isOpen, initialTab, isTurtleTheme, isDinoTheme, isFrogTheme]);
 
   const filteredIcons = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -312,18 +324,18 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
       aria-label={title}
       className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] animate-in fade-in"
     >
-      <div className={`bg-white border-3 ${isTurtleTheme ? 'border-emerald-400' : isDinoTheme ? 'border-emerald-500' : (activeTheme?.palette?.primaryBorder || 'border-amber-300')} w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-2rem)]`}>
+      <div className={`bg-white border-3 ${isTurtleTheme ? 'border-emerald-400' : isDinoTheme ? 'border-emerald-500' : isFrogTheme ? 'border-lime-500' : (activeTheme?.palette?.primaryBorder || 'border-amber-300')} w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-2rem)]`}>
         {/* Header */}
-        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white' : isDinoTheme ? 'bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white' : (activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white` : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950')} p-4 sm:p-5 flex items-center justify-between shrink-0`}>
+        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white' : isDinoTheme ? 'bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white' : isFrogTheme ? 'bg-gradient-to-r from-lime-600 via-emerald-600 to-teal-600 text-white' : (activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white` : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950')} p-4 sm:p-5 flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl ${isTurtleTheme || isDinoTheme ? 'bg-white/20 text-white' : 'bg-white/80 text-amber-700'} shadow-xs flex items-center justify-center text-xl shrink-0`}>
-              {isTurtleTheme ? <span className="text-2xl">🐢</span> : isDinoTheme ? <span className="text-2xl">🦖</span> : <Palette className="w-5 h-5 text-amber-700" />}
+            <div className={`w-10 h-10 rounded-2xl ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'bg-white/20 text-white' : 'bg-white/80 text-amber-700'} shadow-xs flex items-center justify-center text-xl shrink-0`}>
+              {isTurtleTheme ? <span className="text-2xl">🐢</span> : isDinoTheme ? <span className="text-2xl">🦖</span> : isFrogTheme ? <span className="text-2xl">🐸</span> : <Palette className="w-5 h-5 text-amber-700" />}
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-black leading-tight">
                 {title}
               </h3>
-              <p className={`text-xs font-semibold ${isTurtleTheme || isDinoTheme ? 'text-emerald-100' : 'text-amber-900/80'} mt-0.5`}>
+              <p className={`text-xs font-semibold ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'text-emerald-100' : 'text-amber-900/80'} mt-0.5`}>
                 Pick a matching sticker icon for this routine or step
               </p>
             </div>
@@ -332,7 +344,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-xl ${isTurtleTheme || isDinoTheme ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-white/50 hover:bg-white/80 text-amber-950'} transition-all cursor-pointer`}
+            className={`p-2 rounded-xl ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-white/50 hover:bg-white/80 text-amber-950'} transition-all cursor-pointer`}
             aria-label="Close icon library"
           >
             <X className="w-5 h-5" />
@@ -340,7 +352,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         </div>
 
         {/* Search & Tabs */}
-        <div className={`p-3 sm:p-4 border-b border-slate-200 ${isTurtleTheme || isDinoTheme ? 'bg-emerald-50/40' : (activeTheme?.palette?.primaryLight || 'bg-amber-50/40')} space-y-3 shrink-0`}>
+        <div className={`p-3 sm:p-4 border-b border-slate-200 ${isTurtleTheme || isDinoTheme ? 'bg-emerald-50/40' : isFrogTheme ? 'bg-lime-50/40' : (activeTheme?.palette?.primaryLight || 'bg-amber-50/40')} space-y-3 shrink-0`}>
           {/* Search bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -348,8 +360,8 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search icons (e.g. dinosaur, rex, turtle, pizza, art, quiet, stone, water)..."
-              className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme || isDinoTheme ? 'focus:ring-emerald-400' : (activeTheme?.palette?.primaryBorder || 'focus:ring-amber-400')}`}
+              placeholder="Search icons (e.g. dinosaur, rex, frog, lily, turtle, pizza, art, quiet, stone, water)..."
+              className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme || isDinoTheme ? 'focus:ring-emerald-400' : isFrogTheme ? 'focus:ring-lime-400' : (activeTheme?.palette?.primaryBorder || 'focus:ring-amber-400')}`}
             />
             {search && (
               <button
@@ -369,6 +381,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
               { id: 'all', label: 'All Icons' },
               { id: 'turtle', label: '🐢 Turtle Sanctuary' },
               { id: 'dinosaur', label: `🦖 Dino Kingdom (${DINO_KINGDOM_ICONS.length})` },
+              { id: 'frog', label: `🐸 Ribbit Pond (${RIBBIT_POND_ICONS.length})` },
               { id: 'fun', label: 'Fun & Play' },
               { id: 'calm', label: 'Calm & Rest' },
               { id: 'food', label: 'Food & Drinks' },
@@ -387,9 +400,13 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                     isActive
                       ? isTurtleTheme || isDinoTheme
                         ? 'bg-emerald-600 text-white shadow-xs'
+                        : isFrogTheme
+                        ? 'bg-lime-600 text-white shadow-xs'
                         : `${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white shadow-xs`
                       : isTurtleTheme || isDinoTheme
                       ? 'bg-white hover:bg-emerald-50 text-slate-600 border border-slate-200'
+                      : isFrogTheme
+                      ? 'bg-white hover:bg-lime-50 text-slate-600 border border-slate-200'
                       : 'bg-white hover:bg-amber-100/60 text-slate-600 border border-slate-200'
                   }`}
                 >
@@ -420,9 +437,13 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       isSelected
                         ? isTurtleTheme || isDinoTheme
                           ? 'bg-emerald-100 border-emerald-500 ring-2 ring-emerald-300 text-emerald-950 shadow-xs'
+                          : isFrogTheme
+                          ? 'bg-lime-100 border-lime-500 ring-2 ring-lime-300 text-lime-950 shadow-xs'
                           : `${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} ring-2 ring-amber-300 ${activeTheme?.palette?.textAccent || 'text-amber-950'} shadow-xs`
                         : isTurtleTheme || isDinoTheme
                         ? 'bg-white hover:bg-emerald-50/70 border-slate-200 hover:border-emerald-300 text-slate-700'
+                        : isFrogTheme
+                        ? 'bg-white hover:bg-lime-50/70 border-slate-200 hover:border-lime-300 text-slate-700'
                         : 'bg-white hover:bg-amber-50/60 border-slate-200 hover:border-amber-300 text-slate-700'
                     }`}
                   >
@@ -430,6 +451,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       <RoutineStickerIcon
                         emoji={item.emoji}
                         title={item.label}
+                        loading="lazy"
                         className="w-10 h-10 object-contain drop-shadow-2xs"
                       />
                     </div>
@@ -437,7 +459,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       {item.label}
                     </span>
                     {isSelected && (
-                      <span className={`mt-1 w-4 h-4 rounded-full ${isTurtleTheme || isDinoTheme ? 'bg-emerald-600' : (activeTheme?.palette?.primaryBg || 'bg-amber-500')} text-white flex items-center justify-center`}>
+                      <span className={`mt-1 w-4 h-4 rounded-full ${isTurtleTheme || isDinoTheme ? 'bg-emerald-600' : isFrogTheme ? 'bg-lime-600' : (activeTheme?.palette?.primaryBg || 'bg-amber-500')} text-white flex items-center justify-center`}>
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
                     )}

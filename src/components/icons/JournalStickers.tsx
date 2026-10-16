@@ -9,6 +9,7 @@ if (typeof window !== 'undefined') {
 interface StickerProps {
   className?: string;
   size?: number;
+  loading?: 'lazy' | 'eager';
 }
 
 function checkActiveThemeCategory(): string {
@@ -66,7 +67,7 @@ export function useIsFrogTheme(): boolean {
 }
 
 const renderStickerPng = (src: string, alt: string) => {
-  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = src;
     if (theme === 'turtle' && TURTLE_STICKER_SWAPS[src]) {
@@ -82,8 +83,8 @@ const renderStickerPng = (src: string, alt: string) => {
         alt={alt}
         className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
         style={size ? { width: size, height: size } : undefined}
-        loading="eager"
-        decoding="auto"
+        loading={loading}
+        decoding="async"
       />
     );
   };
@@ -91,7 +92,7 @@ const renderStickerPng = (src: string, alt: string) => {
 };
 
 const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string) => {
-  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = defaultSrc;
     if (theme === 'turtle') {
@@ -107,8 +108,8 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
         alt={alt}
         className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
         style={size ? { width: size, height: size } : undefined}
-        loading="eager"
-        decoding="auto"
+        loading={loading}
+        decoding="async"
       />
     );
   };
@@ -1261,7 +1262,8 @@ export const RoutineStickerIcon: React.FC<{
   title?: string;
   className?: string;
   size?: number;
-}> = ({ emoji, title, className = 'w-8 h-8', size }) => {
+  loading?: 'lazy' | 'eager';
+}> = ({ emoji, title, className = 'w-8 h-8', size, loading = 'lazy' }) => {
   const normEmoji = (emoji || '').trim();
   const normTitle = (title || '').toLowerCase();
   const activeTheme = useActiveThemeCategory();
@@ -1285,7 +1287,7 @@ export const RoutineStickerIcon: React.FC<{
         alt={title || ''}
         className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
         style={size ? { width: size, height: size } : undefined}
-        loading="eager"
+        loading={loading}
         decoding="async"
       />
     );

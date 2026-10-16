@@ -57,23 +57,23 @@ export function preloadStickerUrls(urls: string[], immediate = false) {
  */
 export function preloadTurtleThemeStickers() {
   const turtleUrls = TURTLE_SANCTUARY_ICONS.map((i) => i.value);
-  preloadStickerUrls(turtleUrls, true);
+  preloadStickerUrls(turtleUrls, false);
 }
 
 /**
- * Preloads all Dino Kingdom stickers immediately into the browser's cache.
+ * Preloads all Dino Kingdom stickers into the browser's cache during idle cycles.
  */
 export function preloadDinoThemeStickers() {
   const dinoUrls = DINO_KINGDOM_ICONS.map((i) => i.value);
-  preloadStickerUrls(dinoUrls, true);
+  preloadStickerUrls(dinoUrls, false);
 }
 
 /**
- * Preloads all Ribbit Pond stickers immediately into the browser's cache.
+ * Preloads all Ribbit Pond stickers into the browser's cache during idle cycles.
  */
 export function preloadFrogThemeStickers() {
   const frogUrls = RIBBIT_POND_ICONS.map((i) => i.value);
-  preloadStickerUrls(frogUrls, true);
+  preloadStickerUrls(frogUrls, false);
 }
 
 /**
