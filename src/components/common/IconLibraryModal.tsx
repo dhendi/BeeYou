@@ -195,6 +195,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_herbal_tea_mug', emoji: '/assets/stickers/turtle_herbal_tea_mug.png', label: 'Carved Wooden Herbal Tea Mug', category: 'turtle', keywords: ['mug', 'tea', 'cocoa', 'warm', 'drink', 'cozy', 'chamomile'] },
   { id: 'turtle_reed_laundry_basket', emoji: '/assets/stickers/turtle_reed_laundry_basket.png', label: 'Woven Reed Laundry Basket', category: 'turtle', keywords: ['laundry', 'hamper', 'basket', 'clothes', 'chores', 'tidy', 'towel'] },
   { id: 'turtle_bamboo_calendar', emoji: '/assets/stickers/turtle_bamboo_calendar.png', label: 'Hanging Bamboo Checklist Board', category: 'turtle', keywords: ['schedule', 'calendar', 'plan', 'routine', 'checklist', 'bamboo'] },
+  { id: 'turtle_lagoon_breeze_breath', emoji: '/assets/stickers/turtle_lagoon_breeze_breath.png', label: 'Lagoon Mist & Lotus Breeze', category: 'turtle', keywords: ['breathe', 'breathing', 'wind', 'breeze', 'calm', 'air', 'lagoon'] },
+  { id: 'turtle_moss_bed_sleep', emoji: '/assets/stickers/turtle_moss_bed_sleep.png', label: 'Cozy Wooden Leaf-Blanket Bed', category: 'turtle', keywords: ['bed', 'sleep', 'bedtime', 'nap', 'blanket', 'rest', 'night'] },
+  { id: 'turtle_reed_explorer_shoes', emoji: '/assets/stickers/turtle_reed_explorer_shoes.png', label: 'Woven Reed Explorer Slip-On Shoes', category: 'turtle', keywords: ['shoes', 'sneakers', 'slip-on', 'footwear', 'feet', 'walk', 'explorer'] },
+  { id: 'turtle_bamboo_cutlery', emoji: '/assets/stickers/turtle_bamboo_cutlery.png', label: 'Carved Bamboo Fork & Spoon Set', category: 'turtle', keywords: ['fork', 'knife', 'spoon', 'cutlery', 'utensils', 'eat', 'dinner', 'bamboo'] },
+  { id: 'turtle_berry_honey_treat', emoji: '/assets/stickers/turtle_berry_honey_treat.png', label: 'Wrapped Leaf-Berry Sweet Snack', category: 'turtle', keywords: ['candy', 'treat', 'snack', 'sweet', 'leaf', 'dessert', 'reward'] },
+  { id: 'turtle_shell_wall_clock', emoji: '/assets/stickers/turtle_shell_wall_clock.png', label: 'Turtle-Shell Wall Clock with Leaf Hands', category: 'turtle', keywords: ['clock', 'time', 'wall clock', 'hour', 'minute', 'schedule', 'turtle'] },
+  { id: 'turtle_pond_ripple_wave', emoji: '/assets/stickers/turtle_pond_ripple_wave.png', label: 'Gentle Pond Ripple & Lily Pad', category: 'turtle', keywords: ['wave', 'ocean', 'ripple', 'pond', 'overwhelmed', 'water', 'calm', 'lily pad'] },
+  { id: 'turtle_bamboo_energy_meter', emoji: '/assets/stickers/turtle_bamboo_energy_meter.png', label: 'Bamboo Energy Tube Gauge', category: 'turtle', keywords: ['battery', 'meter', 'energy', 'stamina', 'gauge', 'bamboo', 'level'] },
+  { id: 'turtle_whispering_reed_quiet', emoji: '/assets/stickers/turtle_whispering_reed_quiet.png', label: 'Peaceful Whispering Reeds & Ripples', category: 'turtle', keywords: ['quiet', 'voice', 'whisper', 'soft', 'silence', 'cattail', 'reed', 'calm'] },
 ];
 
 export interface IconLibraryModalProps {
