@@ -9,6 +9,7 @@ import {
   ThermometerSticker,
   MusicSensorySticker,
   ConnectHeartSticker,
+  EyeSeeSticker,
   SpoonSticker,
   TurtlePondReedsSticker,
   TurtleRiverStoneSticker,
@@ -110,7 +111,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Sensory Grounding',
       badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-200',
       color: 'border-2 border-cyan-300/80 bg-cyan-50/40 hover:bg-cyan-50/80 text-cyan-950',
-      Sticker: isTurtleTheme ? TurtleRiverStoneSticker : ConnectHeartSticker,
+      Sticker: EyeSeeSticker,
       action: () => openCopingToolkit('grounding'),
     },
 

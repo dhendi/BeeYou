@@ -27,7 +27,7 @@ import {
 import { SoundscapeId } from '../types';
 import { t } from '../services/translator';
 import { SoundChimeGrid } from './soundscapes/SoundChimeGrid';
-import { RoutineStickerIcon } from './icons/JournalStickers';
+import { RoutineStickerIcon, TURTLE_STICKER_SWAPS, DINO_STICKER_SWAPS } from './icons/JournalStickers';
 
 export const CopingToolkitModal: React.FC = () => {
   const {
@@ -186,12 +186,18 @@ export const CopingToolkitModal: React.FC = () => {
     return t(phase);
   };
 
+  const getThemedStickerSrc = (src: string) => {
+    if (isTurtleTheme && TURTLE_STICKER_SWAPS[src]) return TURTLE_STICKER_SWAPS[src];
+    if (isDinoTheme && DINO_STICKER_SWAPS[src]) return DINO_STICKER_SWAPS[src];
+    return src;
+  };
+
   const groundingItems = [
     {
       step: 5,
       title: 'Look Around: 5 things you can see',
       prompt: 'Notice colors, shapes, or lights in the room.',
-      stickerSrc: '/assets/stickers/eye_see.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.png'),
       fallbackIcon: Eye,
     },
     {
@@ -219,7 +225,7 @@ export const CopingToolkitModal: React.FC = () => {
       step: 1,
       title: 'Taste / Sip: 1 cool sip of water',
       prompt: 'Take a gentle swallow or relax your jaw.',
-      stickerSrc: '/assets/stickers/drink_water.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.png'),
       fallbackIcon: Droplets,
     },
   ];
@@ -229,31 +235,31 @@ export const CopingToolkitModal: React.FC = () => {
       title: 'Sensory Room Soundscapes',
       subtitle: 'Procedural acoustic masking & soothing sensory frequencies',
       icon: Volume2,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_pond_reeds.png' : '/assets/stickers/music_sensory.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_pond_reeds.png' : getThemedStickerSrc('/assets/stickers/music_sensory.png'),
     },
     breathing: {
       title: 'Sensory Breathing Pacer',
       subtitle: 'Follow the gentle bubble to pause, breathe, and reset',
       icon: Wind,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_lagoon_breeze_breath.png' : '/assets/stickers/breathing_cloud.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/breathing_cloud.png'),
     },
     grounding: {
       title: '5-4-3-2-1 Grounding',
       subtitle: 'Sensory countdown to reset during overwhelm',
       icon: Eye,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_river_stone.png' : '/assets/stickers/eye_see.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.png'),
     },
     timer: {
       title: 'Break Timer',
       subtitle: 'Gentle visual timer to pause and reset',
       icon: Timer,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_sand_timer.png' : '/assets/stickers/timer_clock.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/timer_clock.png'),
     },
     strategies: {
       title: 'Calming Coping Strategies',
       subtitle: 'Personalized regulation and comfort strategies',
       icon: Heart,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : '/assets/stickers/fav_love_heart.png',
+      stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.png'),
     },
   };
 
@@ -265,10 +271,10 @@ export const CopingToolkitModal: React.FC = () => {
   const HeaderIcon = headerInfo.icon;
 
   const quickNeeds = [
-    { text: 'I want a glass of water.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_bamboo_drink_cup.png' : '/assets/stickers/drink_water.png', fallbackIcon: Droplets },
-    { text: 'Can I have a hug?', stickerSrc: '/assets/stickers/fav_love_heart.png', fallbackIcon: Heart },
-    { text: 'I want to sit quietly.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_whispering_reed_quiet.png' : '/assets/stickers/fav_quiet_break.png', fallbackIcon: VolumeX },
-    { text: 'I want my comfort item.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : '/assets/stickers/teddy_bear.png', fallbackIcon: Star },
+    { text: 'I want a glass of water.', stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.png'), fallbackIcon: Droplets },
+    { text: 'Can I have a hug?', stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.png'), fallbackIcon: Heart },
+    { text: 'I want to sit quietly.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_whispering_reed_quiet.png' : getThemedStickerSrc('/assets/stickers/fav_quiet_break.png'), fallbackIcon: VolumeX },
+    { text: 'I want my comfort item.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : getThemedStickerSrc('/assets/stickers/toy_box.png'), fallbackIcon: Star },
     { text: 'Can we go home?', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_moss_cottage_home.png' : '/assets/stickers/home_house.png', fallbackIcon: Home },
   ];
 
@@ -309,8 +315,6 @@ export const CopingToolkitModal: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
               {isFrogTheme && activeTab !== 'sound' && activeTab !== 'grounding' ? (
                 <span className="text-2xl select-none leading-none">🐸</span>
-              ) : isDinoTheme && activeTab !== 'sound' && activeTab !== 'grounding' ? (
-                <span className="text-2xl select-none leading-none">🦖</span>
               ) : headerInfo.stickerSrc ? (
                 <img
                   src={headerInfo.stickerSrc}
@@ -323,7 +327,7 @@ export const CopingToolkitModal: React.FC = () => {
                   }}
                 />
               ) : null}
-              <HeaderIcon className={`w-6 h-6 text-white header-fallback-icon ${(isFrogTheme || isDinoTheme) && activeTab !== 'sound' && activeTab !== 'grounding' ? 'hidden' : headerInfo.stickerSrc ? 'hidden' : 'block'}`} aria-hidden="true" />
+              <HeaderIcon className={`w-6 h-6 text-white header-fallback-icon ${isFrogTheme && activeTab !== 'sound' && activeTab !== 'grounding' ? 'hidden' : headerInfo.stickerSrc ? 'hidden' : 'block'}`} aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-2xs">{t(headerInfo.title)}</h2>
@@ -385,7 +389,7 @@ export const CopingToolkitModal: React.FC = () => {
                   }`}
                 >
                   <img
-                    src={tab.stickerSrc}
+                    src={getThemedStickerSrc(tab.stickerSrc)}
                     alt={tab.label}
                     className="w-5 h-5 object-contain select-none pointer-events-none drop-shadow-2xs"
                     onError={(e) => {

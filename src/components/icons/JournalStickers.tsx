@@ -979,11 +979,15 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/soap_wash_hands.png': '/assets/stickers/turtle_leaf_soap_wash.png',
   '/assets/stickers/spoons_energy.png': '/assets/stickers/turtle_bamboo_spoons.png',
   '/assets/stickers/tablet_ipad.png': '/assets/stickers/turtle_bamboo_tablet.png',
+  '/assets/stickers/caregiver_heart.png': '/assets/stickers/turtle_shell_heart.png',
+  '/assets/stickers/eye_see.png': '/assets/stickers/turtle_river_stone.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
   // Batch 1: Core Routines & Favorites
   '/assets/stickers/routine_water_drink.png': '/assets/stickers/dino_stone_tumbler_water.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
   '/assets/stickers/fav_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
   '/assets/stickers/drink_cup.png': '/assets/stickers/dino_stone_tumbler_water.png',
   '/assets/stickers/bedtime_sleep.png': '/assets/stickers/dino_fern_nest_sleep.png',
@@ -1044,6 +1048,23 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/fidget_bubbles.png': '/assets/stickers/dino_spring_sensory_bubbles.png',
   '/assets/stickers/decision_wheel.png': '/assets/stickers/dino_stone_decision_wheel.png',
   '/assets/stickers/clock_time.png': '/assets/stickers/dino_ammonite_spiral_clock.png',
+  // Batch 4: Communication Hubs, Outings & Daily Activities
+  '/assets/stickers/about_id.png': '/assets/stickers/dino_explorer_id_badge.png',
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/dino_trex_tooth_care.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/dino_volcano_thermometer.png',
+  '/assets/stickers/timer_clock.png': '/assets/stickers/dino_stone_stopwatch.png',
+  '/assets/stickers/aac_core.png': '/assets/stickers/dino_amber_star_core.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/dino_amber_star_core.png',
+  '/assets/stickers/passport_book.png': '/assets/stickers/dino_expedition_log_book.png',
+  '/assets/stickers/quick_phrases.png': '/assets/stickers/dino_jungle_speech_bubbles.png',
+  '/assets/stickers/keyboard.png': '/assets/stickers/dino_carved_slate_keyboard.png',
+  '/assets/stickers/caregiver_heart.png': '/assets/stickers/dino_caregiver_heart.png',
+  '/assets/stickers/eye_see.png': '/assets/stickers/dino_sensory_eye_stone.png',
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/dino_herbal_tea_mug.png',
+  '/assets/stickers/laundry_hamper.png': '/assets/stickers/dino_reed_laundry_basket.png',
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/dino_seed_honey_bar.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/dino_expedition_timber_trunk.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/dino_whispering_baby_shh.png',
 };
 
 /**
