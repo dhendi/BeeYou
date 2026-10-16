@@ -264,6 +264,14 @@ export const FavMusicSticker = renderStickerPng('/assets/stickers/fav_music.png'
 export const FavStopSticker = renderStickerPng('/assets/stickers/fav_stop.png', 'Stop Please');
 export const FavHappySticker = renderStickerPng('/assets/stickers/fav_happy.png', 'I Am Happy');
 
+// User Provided Grounding, Cooking & Caregiver Response Stickers
+export const EyeSeeSticker = renderStickerPng('/assets/stickers/eye_see.png', 'Look Around Eye');
+export const GroundingTouchHandSticker = renderStickerPng('/assets/stickers/grounding_touch_hand.png', 'Touch Hand');
+export const GroundingHearEarSticker = renderStickerPng('/assets/stickers/grounding_hear_ear.png', 'Hear Ear');
+export const GroundingSmellNoseSticker = renderStickerPng('/assets/stickers/grounding_smell_nose.png', 'Smell Nose');
+export const CookingPotSticker = renderStickerPng('/assets/stickers/cooking_pot.png', 'Cooking Pan');
+export const CaregiverResponseOkaySticker = renderStickerPng('/assets/stickers/caregiver_response_okay.png', 'Caregiver Okay Thumbs Up');
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -580,19 +588,19 @@ export const RoutineStickerIcon: React.FC<{
   // 🎧 Listen to Music / Noise-Cancelling Headphones
   if (normTitle.includes('listen to music') || (normEmoji === '🎧' && normTitle.includes('music'))) return <FavMusicSticker className={className} size={size} />;
   if (normEmoji === '🎧' || normTitle.includes('headphone')) return <TeenHeadphonesSticker className={className} size={size} />;
+  // 🍳 Cooking / Cook / Pot
+  if (normEmoji === '🍳' || normEmoji === '🍲' || normTitle.includes('cooking') || normTitle.includes('cook')) return <CookingPotSticker className={className} size={size} />;
+  // 🖐️ Touch Gently / Feel
+  if (normEmoji === '🖐️' || normEmoji === '✋' || normEmoji === '🤚' || normTitle.includes('touch') || (normTitle.includes('feel') && !normTitle.includes('feeling'))) return <GroundingTouchHandSticker className={className} size={size} />;
+  // 👂 Listen Closely / Hear / Ear
+  if (normEmoji === '👂' || (normTitle.includes('listen') && !normTitle.includes('music')) || normTitle.includes('hear')) return <GroundingHearEarSticker className={className} size={size} />;
+  // 👃 Smell / Scent / Nose
+  if (normEmoji === '👃' || normTitle.includes('smell') || normTitle.includes('scent') || normTitle.includes('nose')) return <GroundingSmellNoseSticker className={className} size={size} />;
+  // 👍 Caregiver Okay / Thumbs Up
+  if (normEmoji === '👍' || normTitle.includes('thumbs up') || normTitle.includes('okay') || normTitle.includes("i'm okay") || normTitle.includes('feeling okay')) return <CaregiverResponseOkaySticker className={className} size={size} />;
   // 👀 / 👁️ 5-4-3-2-1 Grounding / Look Around
-  if (normEmoji === '👀' || normEmoji === '👁️' || normTitle.includes('grounding') || normTitle.includes('5-4-3-2-1')) {
-    return (
-      <img
-        src="/assets/stickers/eye_see.png"
-        alt={title || 'Grounding Senses'}
-        className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
-        style={size ? { width: size, height: size } : undefined}
-        onError={(e) => {
-          (e.currentTarget as HTMLElement).style.display = 'none';
-        }}
-      />
-    );
+  if (normEmoji === '👀' || normEmoji === '👁️' || normTitle.includes('grounding') || normTitle.includes('5-4-3-2-1') || normTitle.includes('look around') || normTitle.includes('see')) {
+    return <EyeSeeSticker className={className} size={size} />;
   }
   // 🛑 Stop Please / Do not want
   if (normEmoji === '🛑' || normTitle.includes('stop please') || normTitle.includes('do not want this') || normTitle.includes('please stop')) return <FavStopSticker className={className} size={size} />;

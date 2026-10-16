@@ -475,13 +475,17 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               {/* Caregiver Response Banner */}
               {caregiverResponse ? (
                 <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-rose-50 border-2 border-amber-300 text-slate-900 flex items-start gap-3.5 animate-in slide-in-from-top-2 shadow-md">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF2D4] border border-[#FED676] flex items-center justify-center shrink-0 shadow-xs">
                     {caregiverResponse.responseId === 'coming' ? (
-                      <Car className="w-6 h-6 text-white" />
+                      <Car className="w-6 h-6 text-amber-900" />
                     ) : caregiverResponse.responseId === 'im_here' ? (
-                      <Heart className="w-6 h-6 text-white fill-white" />
+                      <Heart className="w-6 h-6 text-rose-600 fill-rose-600" />
                     ) : (
-                      <ThumbsUp className="w-6 h-6 text-white" />
+                      <img
+                        src="/assets/stickers/caregiver_response_okay.png"
+                        alt="Caregiver Okay"
+                        className="w-10 h-10 object-contain drop-shadow-xs"
+                      />
                     )}
                   </div>
                   <div className="flex-1">

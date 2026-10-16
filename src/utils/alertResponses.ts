@@ -215,6 +215,7 @@ export function getQuickRepliesForAlert(
         label: t("👍 Got It, Go Ahead"),
         text: t("Got your message! Go ahead to the restroom 👍"),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
+        iconSrc: '/assets/stickers/caregiver_response_okay.png',
       },
     ];
   }
@@ -241,6 +242,7 @@ export function getQuickRepliesForAlert(
         label: t("👍 Great Choice to Rest"),
         text: t("Great job listening to your body and taking a break 👍"),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+        iconSrc: '/assets/stickers/caregiver_response_okay.png',
       },
       {
         id: 'im_here',

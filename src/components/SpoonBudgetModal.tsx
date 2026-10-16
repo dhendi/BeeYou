@@ -24,7 +24,7 @@ const TASK_PRESETS: TaskPreset[] = [
   { label: 'Doctor / dentist', stickerSrc: '/assets/stickers/adventure_doctor_checkup.png', cost: 3 },
   { label: 'Short errand', stickerSrc: '/assets/stickers/shopping_cart.png', cost: 2 },
   { label: 'Exercise', stickerSrc: '/assets/stickers/sneaker_shoes.png', cost: 2 },
-  { label: 'Cooking', stickerSrc: '/assets/stickers/dinner_bowl.png', cost: 2 },
+  { label: 'Cooking', stickerSrc: '/assets/stickers/cooking_pot.png', cost: 2 },
   { label: 'Commuting', stickerSrc: '/assets/stickers/car_ride.png', cost: 2 },
   { label: 'Rest / nap', stickerSrc: '/assets/stickers/bedtime_sleep.png', cost: 1 },
   { label: 'Phone call', stickerSrc: '/assets/stickers/caregiver_phone.png', cost: 2 },

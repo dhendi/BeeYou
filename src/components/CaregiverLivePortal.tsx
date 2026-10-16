@@ -64,11 +64,12 @@ const PREDEFINED_RESPONSES: Array<{
   text: string;
   emoji: string;
   label: string;
+  stickerSrc?: string;
 }> = [
-  { id: 'im_here', text: "I'm here for you ❤️", emoji: '❤️', label: "I'm here" },
-  { id: 'coming', text: "I'm on my way 🚗", emoji: '🚗', label: "I'm coming" },
-  { id: 'okay', text: "Okay, got your message 👍", emoji: '👍', label: "Okay" },
-  { id: 'give_minutes', text: "Give me a few minutes ⏳", emoji: '⏳', label: "Give me a few minutes" },
+  { id: 'im_here', text: "I'm here for you ❤️", emoji: '❤️', label: "I'm here", stickerSrc: '/assets/stickers/heart_here_for_you.png' },
+  { id: 'coming', text: "I'm on my way 🚗", emoji: '🚗', label: "I'm coming", stickerSrc: '/assets/stickers/car_on_my_way.png' },
+  { id: 'okay', text: "Okay, got your message 👍", emoji: '👍', label: "Okay", stickerSrc: '/assets/stickers/caregiver_response_okay.png' },
+  { id: 'give_minutes', text: "Give me a few minutes ⏳", emoji: '⏳', label: "Give me a few minutes", stickerSrc: '/assets/stickers/wall_clock.png' },
 ];
 
 export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({ 
@@ -340,7 +341,11 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                   onClick={() => handleSendPredefinedResponse(resp)}
                   className="p-3 rounded-2xl bg-amber-50/80 hover:bg-amber-100/90 border border-amber-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs"
                 >
-                  <span className="text-base">{resp.emoji}</span>
+                  {resp.stickerSrc ? (
+                    <img src={resp.stickerSrc} alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
+                  ) : (
+                    <span className="text-base">{resp.emoji}</span>
+                  )}
                   <span>{resp.label}</span>
                 </button>
               ))}

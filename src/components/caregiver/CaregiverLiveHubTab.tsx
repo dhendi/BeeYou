@@ -285,8 +285,9 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                   {getQuickRepliesForAlert(alert, t).map((reply) => {
                     const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.png' :
                                       reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.png' :
+                                      reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.png' :
                                       reply.iconSrc;
-                    const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏 ]+/, '');
+                    const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                     return (
                       <button
                         key={reply.id}
