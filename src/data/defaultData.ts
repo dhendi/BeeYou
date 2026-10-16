@@ -139,6 +139,7 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   vibrationAlerts: true,
   hapticsEnabled: false,
   spokenAlerts: false,
+  temperatureUnit: 'F',
 };
 
 // Helper for official Mulberry Symbols CDN (CC BY-SA Straight Street / Paxtoncrafts Charitable Trust)

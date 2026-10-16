@@ -382,6 +382,50 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   })}
                 </div>
               </div>
+
+              {/* Weather Temperature Unit */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                    Weather Temperature Unit
+                  </h4>
+                  <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                    Display weather and sensory comfort tips in Fahrenheit (°F) or Celsius (°C).
+                  </p>
+                </div>
+                <div className="flex items-center bg-[#EFE8DC] rounded-xl p-1 gap-1 text-xs font-black shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateSettings({ temperatureUnit: 'F' });
+                      try {
+                        localStorage.setItem('beeyou_temperature_unit', 'F');
+                      } catch {}
+                      playChime('tap');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      (settings.temperatureUnit || 'F') === 'F' ? 'bg-[#FED676] text-amber-950 shadow-2xs font-black' : 'text-[#7A6C60] hover:text-[#2D241E]'
+                    }`}
+                  >
+                    °F
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateSettings({ temperatureUnit: 'C' });
+                      try {
+                        localStorage.setItem('beeyou_temperature_unit', 'C');
+                      } catch {}
+                      playChime('tap');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      settings.temperatureUnit === 'C' ? 'bg-[#FED676] text-amber-950 shadow-2xs font-black' : 'text-[#7A6C60] hover:text-[#2D241E]'
+                    }`}
+                  >
+                    °C
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

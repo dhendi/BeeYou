@@ -14,11 +14,22 @@ import {
   Heart, 
   Smile, 
   Compass,
-  RefreshCw
+  RefreshCw,
+  Edit2
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { EmotionType } from '../types';
-import { fetchLiveWeather, LiveWeatherData, DEFAULT_WEATHER_DATA } from '../utils/weather';
+import { 
+  fetchLiveWeather, 
+  LiveWeatherData, 
+  DEFAULT_WEATHER_DATA,
+  TemperatureUnit,
+  fahrenheitToCelsius,
+  celsiusToFahrenheit,
+  getTemperatureDescription,
+  formatTemperatureDisplay,
+  getSensoryTip
+} from '../utils/weather';
 import { 
   MoodHappySticker, 
   MoodCalmSticker, 
@@ -50,12 +61,37 @@ export const MorningBriefModal: React.FC = () => {
     adventures,
     recordEmotion,
     setChildView,
+    settings,
+    updateSettings,
   } = useApp();
 
-  const [weatherData, setWeatherData] = useState<LiveWeatherData>(DEFAULT_WEATHER_DATA);
+  const [tempUnit, setTempUnit] = useState<TemperatureUnit>(() => {
+    return settings?.temperatureUnit || (localStorage.getItem('beeyou_temperature_unit') as TemperatureUnit) || 'F';
+  });
+  const [isEditingTemp, setIsEditingTemp] = useState<boolean>(false);
+  const [tempInputValue, setTempInputValue] = useState<string>('');
+
+  const [weatherData, setWeatherData] = useState<LiveWeatherData>(() => ({
+    ...DEFAULT_WEATHER_DATA,
+    tempDisplay: formatTemperatureDisplay(
+      DEFAULT_WEATHER_DATA.tempF,
+      settings?.temperatureUnit || (localStorage.getItem('beeyou_temperature_unit') as TemperatureUnit) || 'F'
+    ),
+  }));
   const [isRefreshingWeather, setIsRefreshingWeather] = useState<boolean>(false);
   const [selectedMood, setSelectedMood] = useState<EmotionType | null>(null);
   const [moodFeedback, setMoodFeedback] = useState<string | null>(null);
+
+  // Keep tempUnit in sync if settings update externally
+  useEffect(() => {
+    if (settings?.temperatureUnit && settings.temperatureUnit !== tempUnit) {
+      setTempUnit(settings.temperatureUnit);
+      setWeatherData((prev) => ({
+        ...prev,
+        tempDisplay: formatTemperatureDisplay(prev.tempF, settings.temperatureUnit!),
+      }));
+    }
+  }, [settings?.temperatureUnit]);
 
   // Sync live weather when brief opens
   const loadWeather = async (force: boolean = false) => {
@@ -64,13 +100,67 @@ export const MorningBriefModal: React.FC = () => {
       if (force) {
         localStorage.removeItem('beeyou_live_weather_cache');
       }
-      const data = await fetchLiveWeather();
+      const data = await fetchLiveWeather(tempUnit);
       setWeatherData(data);
     } catch (err) {
       console.warn('Weather sync fallback', err);
     } finally {
       setIsRefreshingWeather(false);
     }
+  };
+
+  const handleUnitChange = (newUnit: TemperatureUnit) => {
+    if (newUnit === tempUnit) return;
+    setTempUnit(newUnit);
+    playChime('tap');
+    try {
+      localStorage.setItem('beeyou_temperature_unit', newUnit);
+    } catch {}
+    if (updateSettings) {
+      updateSettings({ temperatureUnit: newUnit });
+    }
+    setWeatherData((prev) => ({
+      ...prev,
+      tempDisplay: formatTemperatureDisplay(prev.tempF, newUnit),
+    }));
+  };
+
+  const handleSaveCustomTemp = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = parseFloat(tempInputValue);
+    if (isNaN(val)) {
+      setIsEditingTemp(false);
+      return;
+    }
+
+    playChime('tap');
+    let newTempF = Math.round(val);
+    if (tempUnit === 'C') {
+      newTempF = celsiusToFahrenheit(val);
+    }
+
+    const newTempC = fahrenheitToCelsius(newTempF);
+    const newDisplay = formatTemperatureDisplay(newTempF, tempUnit);
+    const newSensoryTip = getSensoryTip(newTempF, weatherData.weatherCode ?? 0, weatherData.windMph);
+
+    setWeatherData((prev) => {
+      const updated: LiveWeatherData = {
+        ...prev,
+        tempF: newTempF,
+        tempC: newTempC,
+        tempDisplay: newDisplay,
+        sensoryTip: newSensoryTip,
+      };
+      try {
+        localStorage.setItem(
+          'beeyou_live_weather_cache',
+          JSON.stringify({ timestamp: Date.now(), data: updated })
+        );
+      } catch {}
+      return updated;
+    });
+
+    setIsEditingTemp(false);
   };
 
   useEffect(() => {
@@ -144,7 +234,10 @@ export const MorningBriefModal: React.FC = () => {
 
   const handleHearBrief = () => {
     playChime('speak');
-    const briefText = `${greetingTitle} Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${weatherData.tempDisplay}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
+    const tempValue = tempUnit === 'C' ? fahrenheitToCelsius(weatherData.tempF) : weatherData.tempF;
+    const tempUnitWord = tempUnit === 'C' ? 'degrees Celsius' : 'degrees Fahrenheit';
+    const tempDesc = getTemperatureDescription(weatherData.tempF);
+    const briefText = `${greetingTitle} Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${tempValue} ${tempUnitWord}, ${tempDesc}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
     speakText(briefText);
   };
 
@@ -269,7 +362,7 @@ export const MorningBriefModal: React.FC = () => {
                 )}
               </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <h3 className="font-black text-slate-900 text-base sm:text-lg leading-tight">
                       {weatherData.condition}
@@ -278,9 +371,87 @@ export const MorningBriefModal: React.FC = () => {
                       {weatherData.locationName} • Updated {weatherData.lastUpdated}
                     </p>
                   </div>
-                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-white/90 text-slate-800 shadow-2xs border border-slate-200/60">
-                    {weatherData.tempDisplay}
-                  </span>
+
+                  {/* Interactive Editable Temperature Pill (Fahrenheit <-> Celsius) */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 text-slate-800 shadow-2xs border border-amber-200/90 hover:border-amber-400 transition-all self-start sm:self-center shrink-0">
+                    {isEditingTemp ? (
+                      <form onSubmit={handleSaveCustomTemp} className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="number"
+                          value={tempInputValue}
+                          onChange={(e) => setTempInputValue(e.target.value)}
+                          className="w-14 px-1.5 py-0.5 text-xs font-black text-center bg-amber-50 border border-amber-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          autoFocus
+                          min={tempUnit === 'C' ? -40 : -40}
+                          max={tempUnit === 'C' ? 60 : 140}
+                        />
+                        <span className="text-[11px] font-black text-slate-600">°{tempUnit}</span>
+                        <button
+                          type="submit"
+                          className="p-1 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white transition-colors cursor-pointer shadow-2xs active:scale-95"
+                          title="Save temperature"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingTemp(false)}
+                          className="p-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 transition-colors cursor-pointer active:scale-95"
+                          title="Cancel"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </form>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentVal = tempUnit === 'C' ? fahrenheitToCelsius(weatherData.tempF) : weatherData.tempF;
+                          setTempInputValue(String(currentVal));
+                          setIsEditingTemp(true);
+                        }}
+                        className="group flex items-center gap-1 text-xs font-black text-slate-800 hover:text-amber-900 cursor-pointer transition-colors"
+                        title="Click to edit temperature value"
+                      >
+                        <span>
+                          {tempUnit === 'C' ? `${fahrenheitToCelsius(weatherData.tempF)}°C` : `${weatherData.tempF}°F`} • {getTemperatureDescription(weatherData.tempF)}
+                        </span>
+                        <Edit2 className="w-2.5 h-2.5 text-slate-400 group-hover:text-amber-600 opacity-60 group-hover:opacity-100 transition-all" />
+                      </button>
+                    )}
+
+                    <span className="w-px h-3.5 bg-slate-200" />
+
+                    {/* F to C Unit Switcher */}
+                    <div className="flex items-center bg-slate-100/90 rounded-full p-0.5 text-[10px] font-black">
+                      <button
+                        type="button"
+                        onClick={() => handleUnitChange('F')}
+                        className={`px-1.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          tempUnit === 'F'
+                            ? 'bg-amber-400 text-amber-950 shadow-2xs font-black'
+                            : 'text-slate-500 hover:text-slate-800 font-bold'
+                        }`}
+                        title="Switch to Fahrenheit (°F)"
+                        aria-label="Fahrenheit"
+                      >
+                        °F
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUnitChange('C')}
+                        className={`px-1.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          tempUnit === 'C'
+                            ? 'bg-amber-400 text-amber-950 shadow-2xs font-black'
+                            : 'text-slate-500 hover:text-slate-800 font-bold'
+                        }`}
+                        title="Switch to Celsius (°C)"
+                        aria-label="Celsius"
+                      >
+                        °C
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-2.5 p-2 rounded-xl bg-white/80 border border-amber-100/80">
                   <p className="text-xs text-slate-700 font-medium leading-relaxed">

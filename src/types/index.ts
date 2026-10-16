@@ -610,6 +610,7 @@ export interface AppSettings {
   vibrationAlerts?: boolean;
   hapticsEnabled?: boolean;
   spokenAlerts?: boolean;
+  temperatureUnit?: 'F' | 'C';
 }
 
 export type UserAccountRole = 

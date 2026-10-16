@@ -5,9 +5,37 @@
  * Non-editable, automatically synced.
  */
 
+export type TemperatureUnit = 'F' | 'C';
+
+export function fahrenheitToCelsius(tempF: number): number {
+  return Math.round(((tempF - 32) * 5) / 9);
+}
+
+export function celsiusToFahrenheit(tempC: number): number {
+  return Math.round((tempC * 9) / 5 + 32);
+}
+
+export function getTemperatureDescription(tempF: number): string {
+  if (tempF >= 82) return 'Warm';
+  if (tempF >= 68) return 'Mild';
+  if (tempF >= 55) return 'Cool';
+  if (tempF < 45) return 'Cold';
+  return 'Comfortable';
+}
+
+export function formatTemperatureDisplay(tempF: number, unit: TemperatureUnit = 'F'): string {
+  const desc = getTemperatureDescription(tempF);
+  if (unit === 'C') {
+    const tempC = fahrenheitToCelsius(tempF);
+    return `${tempC}°C • ${desc}`;
+  }
+  return `${tempF}°F • ${desc}`;
+}
+
 export interface LiveWeatherData {
   condition: string;
   tempF: number;
+  tempC: number;
   tempDisplay: string;
   emoji: string;
   stickerSrc: string;
@@ -17,6 +45,7 @@ export interface LiveWeatherData {
   isLive: boolean;
   lastUpdated: string;
   windMph: number;
+  weatherCode?: number;
 }
 
 // Approximate coordinates based on common timezones as instant offline fallbacks
@@ -86,7 +115,7 @@ function parseWmoCode(code: number, windMph: number = 0): { condition: string; e
   return { condition: 'Mild & Calm', emoji: '🌤️', bgGradient: 'from-amber-50 via-sky-50 to-indigo-50', stickerSrc: '/assets/stickers/partly_cloudy.png' };
 }
 
-function getSensoryTip(tempF: number, code: number, windMph: number): string {
+export function getSensoryTip(tempF: number, code: number = 0, windMph: number = 5): string {
   if (code >= 95) {
     return 'Loud sounds outside. Ear defenders or cozy noise-cancelling headphones will help you feel calm inside.';
   }
@@ -114,6 +143,7 @@ function getSensoryTip(tempF: number, code: number, windMph: number): string {
 export const DEFAULT_WEATHER_DATA: LiveWeatherData = {
   condition: 'Sunny & Pleasant',
   tempF: 72,
+  tempC: 22,
   tempDisplay: '72°F • Mild',
   emoji: '☀️',
   stickerSrc: '/assets/stickers/outdoor_sun.png',
@@ -123,18 +153,23 @@ export const DEFAULT_WEATHER_DATA: LiveWeatherData = {
   isLive: false,
   lastUpdated: 'Synchronizing...',
   windMph: 5,
+  weatherCode: 0,
 };
 
 const WEATHER_CACHE_KEY = 'beeyou_live_weather_cache';
 
-export async function fetchLiveWeather(): Promise<LiveWeatherData> {
+export async function fetchLiveWeather(unit: TemperatureUnit = 'F'): Promise<LiveWeatherData> {
   // First, check if cached weather is less than 30 minutes old
   try {
     const cached = localStorage.getItem(WEATHER_CACHE_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-        return parsed.data;
+        const data = parsed.data as LiveWeatherData;
+        return {
+          ...data,
+          tempDisplay: formatTemperatureDisplay(data.tempF, unit),
+        };
       }
     }
   } catch (e) {}
@@ -179,17 +214,14 @@ export async function fetchLiveWeather(): Promise<LiveWeatherData> {
 
     const { condition, emoji, bgGradient, stickerSrc } = parseWmoCode(code, windMph);
     const sensoryTip = getSensoryTip(tempF, code, windMph);
-
-    let tempDesc = 'Comfortable';
-    if (tempF >= 82) tempDesc = 'Warm';
-    else if (tempF >= 68) tempDesc = 'Mild';
-    else if (tempF >= 55) tempDesc = 'Cool';
-    else if (tempF < 45) tempDesc = 'Cold';
+    const tempC = fahrenheitToCelsius(tempF);
+    const tempDisplay = formatTemperatureDisplay(tempF, unit);
 
     const liveData: LiveWeatherData = {
       condition,
       tempF,
-      tempDisplay: `${tempF}°F • ${tempDesc}`,
+      tempC,
+      tempDisplay,
       emoji,
       stickerSrc,
       bgGradient,
@@ -198,6 +230,7 @@ export async function fetchLiveWeather(): Promise<LiveWeatherData> {
       isLive: true,
       lastUpdated: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
       windMph,
+      weatherCode: code,
     };
 
     // Cache locally
@@ -211,12 +244,17 @@ export async function fetchLiveWeather(): Promise<LiveWeatherData> {
     try {
       const cached = localStorage.getItem(WEATHER_CACHE_KEY);
       if (cached) {
-        return JSON.parse(cached).data;
+        const data = JSON.parse(cached).data as LiveWeatherData;
+        return {
+          ...data,
+          tempDisplay: formatTemperatureDisplay(data.tempF, unit),
+        };
       }
     } catch (e) {}
 
     return {
       ...DEFAULT_WEATHER_DATA,
+      tempDisplay: formatTemperatureDisplay(DEFAULT_WEATHER_DATA.tempF, unit),
       locationName: city,
       lastUpdated: 'Offline mode',
     };

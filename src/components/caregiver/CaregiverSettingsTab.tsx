@@ -582,6 +582,49 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               <option value={400}>{t("Medium (400 ms)")}</option>
             </select>
           </div>
+
+          {/* Temperature Unit (Fahrenheit vs Celsius) */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
+                <img src="/assets/stickers/outdoor_sun.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-slate-800">{t("Weather Temperature Unit")}</h4>
+                <p className="text-[11px] text-slate-500 font-medium">{t("Display temperature in Fahrenheit (°F) or Celsius (°C).")}</p>
+              </div>
+            </div>
+            <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1 text-xs font-black">
+              <button
+                type="button"
+                onClick={() => {
+                  updateSettings({ temperatureUnit: 'F' });
+                  try {
+                    localStorage.setItem('beeyou_temperature_unit', 'F');
+                  } catch {}
+                }}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  (settings.temperatureUnit || 'F') === 'F' ? 'bg-amber-400 text-amber-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                °F
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  updateSettings({ temperatureUnit: 'C' });
+                  try {
+                    localStorage.setItem('beeyou_temperature_unit', 'C');
+                  } catch {}
+                }}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  settings.temperatureUnit === 'C' ? 'bg-amber-400 text-amber-950 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                °C
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
