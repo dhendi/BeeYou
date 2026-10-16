@@ -12,6 +12,7 @@ import {
   SpoonSticker,
   TurtlePondReedsSticker,
   TurtleRiverStoneSticker,
+  TurtlePottedFernSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
@@ -68,7 +69,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Breathing Pacer',
       badgeClass: 'bg-teal-100 text-teal-800 border-teal-200',
       color: 'border-2 border-teal-300/80 bg-teal-50/40 hover:bg-teal-50/80 text-teal-950',
-      Sticker: BreathingCloudSticker,
+      Sticker: isTurtleTheme ? TurtlePottedFernSticker : BreathingCloudSticker,
       action: () => openCopingToolkit('breathing'),
     },
 

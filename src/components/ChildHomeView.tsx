@@ -53,6 +53,8 @@ import {
   OutdoorSunSticker,
   TurtleLilyPadsSticker,
   TurtleWelcomeSignSticker,
+  TurtleArchedBridgeSticker,
+  TurtleSeedlingSticker,
 } from './icons/JournalStickers';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
@@ -348,7 +350,11 @@ export const ChildHomeView: React.FC = () => {
           className="w-full text-left bg-amber-100/95 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3">
-            <PlansChangeStorySticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
+            {isTurtleTheme ? (
+              <TurtleArchedBridgeSticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
+            ) : (
+              <PlansChangeStorySticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
@@ -728,7 +734,11 @@ export const ChildHomeView: React.FC = () => {
                     </div>
                   </div>
                   <div className="w-13 h-13 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-110 transition-transform">
-                    <MoodJournalSticker className="w-full h-full object-contain" />
+                    {isTurtleTheme ? (
+                      <TurtleSeedlingSticker className="w-full h-full object-contain" />
+                    ) : (
+                      <MoodJournalSticker className="w-full h-full object-contain" />
+                    )}
                   </div>
                 </button>
               );

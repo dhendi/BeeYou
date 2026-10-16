@@ -126,6 +126,12 @@ export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_
 export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
 export const TurtleWaterDropSticker = renderStickerPng('/assets/stickers/turtle_leaf_water_drop.png', 'Leaf with Water Dewdrop');
 export const TurtleWelcomeSignSticker = renderStickerPng('/assets/stickers/turtle_welcome_sign.png', 'Welcome Sign with Vines');
+export const TurtlePottedFernSticker = renderStickerPng('/assets/stickers/turtle_potted_fern.png', 'Potted Fern Fronds');
+export const TurtleArchedBridgeSticker = renderStickerPng('/assets/stickers/turtle_arched_bridge.png', 'Arched Garden Bridge');
+export const TurtleTracksSticker = renderStickerPng('/assets/stickers/turtle_tracks.png', 'Webbed Turtle Footprints');
+export const TurtleSeedlingSticker = renderStickerPng('/assets/stickers/turtle_sprouting_seedling.png', 'Sprouting Seedling in Soil');
+export const TurtleEggNestSticker = renderStickerPng('/assets/stickers/turtle_egg_nest.png', 'Speckled Egg in Sand Nest');
+export const TurtleSwimmingSticker = renderStickerPng('/assets/stickers/turtle_swimming.png', 'Swimming Turtle (Pacing)');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -301,8 +307,21 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📅' || normTitle.includes('visual schedule') || normTitle.includes('schedule & routine') || normTitle.includes('calendar')) return <ScheduleCalendarSticker className={className} size={size} />;
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
-  // 🐢 Turtle Mascot Companion
-  if (normEmoji === '🐢' || normTitle.includes('turtle') || normTitle.includes('shelly')) return <TurtleMascotSticker className={className} size={size} />;
+  // 🐢 Turtle Sanctuary Themed Stickers
+  if (normEmoji === '🐢' || normTitle.includes('turtle') || normTitle.includes('shelly')) {
+    if (normTitle.includes('swim') || normTitle.includes('pacing') || normTitle.includes('slow down')) return <TurtleSwimmingSticker className={className} size={size} />;
+    if (normTitle.includes('fern') || normTitle.includes('plant')) return <TurtlePottedFernSticker className={className} size={size} />;
+    if (normTitle.includes('bridge') || normTitle.includes('transition')) return <TurtleArchedBridgeSticker className={className} size={size} />;
+    if (normTitle.includes('track') || normTitle.includes('step') || normTitle.includes('footprint')) return <TurtleTracksSticker className={className} size={size} />;
+    if (normTitle.includes('seedling') || normTitle.includes('sprout') || normTitle.includes('grow')) return <TurtleSeedlingSticker className={className} size={size} />;
+    if (normTitle.includes('egg') || normTitle.includes('nest')) return <TurtleEggNestSticker className={className} size={size} />;
+    if (normTitle.includes('lily') || normTitle.includes('pad')) return <TurtleLilyPadsSticker className={className} size={size} />;
+    if (normTitle.includes('pond') || normTitle.includes('reed') || normTitle.includes('lagoon')) return <TurtlePondReedsSticker className={className} size={size} />;
+    if (normTitle.includes('stone') || normTitle.includes('rock') || normTitle.includes('worry')) return <TurtleRiverStoneSticker className={className} size={size} />;
+    if (normTitle.includes('water') || normTitle.includes('drop')) return <TurtleWaterDropSticker className={className} size={size} />;
+    if (normTitle.includes('welcome')) return <TurtleWelcomeSignSticker className={className} size={size} />;
+    return <TurtleMascotSticker className={className} size={size} />;
+  }
   // 🚀 Today's Adventure Spotlight / Rocket
   if (normEmoji === '🚀' || normTitle.includes('adventure spotlight') || normTitle.includes('rocket')) return <RocketAdventureSticker className={className} size={size} />;
   // 🌡️ Incredible 5-Point Scale / Thermometer
