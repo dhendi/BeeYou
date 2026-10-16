@@ -773,7 +773,8 @@ export const HaircutAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_haircut_salon.png',
   '/assets/stickers/turtle_grooming_comb_mirror.png',
   'Getting a Haircut',
-  '/assets/stickers/dino_bone_comb_mirror.png'
+  '/assets/stickers/dino_bone_comb_mirror.png',
+  '/assets/stickers/frog_grooming_comb_mirror.png'
 );
 export const DoctorAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_doctor_checkup.png',
@@ -1208,6 +1209,26 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/medications_health.png': '/assets/stickers/frog_herbal_wellness_vial.png',
   '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/frog_herbal_wellness_vial.png',
   '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
+  // Batch 5: Adventures, Sensory & Wellness
+  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/frog_grooming_comb_mirror.png',
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/frog_canopy_reed_tent.png',
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/frog_spring_lagoon_pool.png',
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/frog_shadow_puppet_theater.png',
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/frog_sound_softening_shell.png',
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/frog_shaded_leaf_sun_hat.png',
+  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/frog_willow_hollow_retreat.png',
+  '/assets/stickers/bone_treat.png': '/assets/stickers/frog_water_chestnut_treat.png',
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/frog_woven_gathering_cart.png',
+  '/assets/stickers/airplane_flight.png': '/assets/stickers/frog_dragonfly_glider.png',
+  '/assets/stickers/shower_wash.png': '/assets/stickers/frog_warm_spring_bath.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/frog_warm_spring_bath.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/frog_warm_spring_bath.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/frog_warm_spring_bath.png',
+  '/assets/stickers/teddy_bear.png': '/assets/stickers/frog_plush_toy_doll.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/frog_tadpole_pet_feed_bowl.png',
+  '/assets/stickers/outdoor_sun.png': '/assets/stickers/frog_meadow_sunshine.png',
+  '/assets/stickers/fav_outside.png': '/assets/stickers/frog_meadow_sunshine.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/frog_lotus_reward_trophy.png',
 };
 
 /**
