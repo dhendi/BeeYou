@@ -55,6 +55,7 @@ export const FivePointScaleModal: React.FC = () => {
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
@@ -109,11 +110,18 @@ export const FivePointScaleModal: React.FC = () => {
                 🦖
               </div>
             )}
+            {isFrogTheme && (
+              <div className="w-9 h-9 rounded-xl bg-lime-100 border border-lime-400 flex items-center justify-center p-1 shadow-xs shrink-0 text-xl select-none">
+                🐸
+              </div>
+            )}
             <div>
               <p className={`text-[10px] font-black uppercase tracking-widest ${
-                isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-slate-400 dark:text-slate-500'
+                isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-slate-400 dark:text-slate-500'
               }`}>
-                {isTurtleTheme
+                {isFrogTheme
+                  ? t('Ribbit Pond Calming Scale')
+                  : isTurtleTheme
                   ? t('Wise Turtle Regulation Scale')
                   : isDinoTheme
                     ? t('Dino Kingdom Energy & Volcano Scale')
@@ -127,7 +135,13 @@ export const FivePointScaleModal: React.FC = () => {
             aria-label={t('Close emotional scale modal')}
             onClick={() => setShowFivePointModal(false)}
             className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer active:scale-95 focus-visible:ring-4 ${
-              isTurtleTheme ? 'focus-visible:ring-emerald-500/70' : isDinoTheme ? 'focus-visible:ring-green-500/70' : 'focus-visible:ring-amber-500/70'
+              isFrogTheme
+                ? 'focus-visible:ring-lime-500/70'
+                : isTurtleTheme
+                ? 'focus-visible:ring-emerald-500/70'
+                : isDinoTheme
+                  ? 'focus-visible:ring-green-500/70'
+                  : 'focus-visible:ring-amber-500/70'
             } focus-visible:outline-none`}
           >
             <X className="w-5 h-5 text-slate-600 dark:text-slate-300" aria-hidden="true" />

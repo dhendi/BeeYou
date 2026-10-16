@@ -322,7 +322,7 @@ const triggerHaptic = (ms = 25, enabled = true) => {
 };
 
 // ── TOY 1: Multi-Shape Pop-It Bubble Wrap ─────────────────────────────────────
-type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb' | 'turtle_shell' | 'dino_footprint';
+type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb' | 'turtle_shell' | 'dino_footprint' | 'lily_pad';
 
 const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
   grid: [
@@ -371,6 +371,13 @@ const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
     [0, 0, 1, 1, 1, 0, 0],
     [0, 0, 0, 1, 0, 0, 0],
   ],
+  lily_pad: [
+    [0, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1],
+    [1, 1, 0, 0, 1, 1],
+    [1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 0],
+  ],
 };
 
 const ROW_COLORS = [
@@ -392,7 +399,10 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
   const { activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
-  const [shape, setShape] = useState<PopShape>(isDinoTheme ? 'dino_footprint' : isTurtleTheme ? 'turtle_shell' : 'grid');
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
+  const [shape, setShape] = useState<PopShape>(
+    isFrogTheme ? 'lily_pad' : isDinoTheme ? 'dino_footprint' : isTurtleTheme ? 'turtle_shell' : 'grid'
+  );
   const [popped, setPopped] = useState<Set<string>>(new Set());
   const [totalPopCount, setTotalPopCount] = useState<number>(0);
 
@@ -461,6 +471,7 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
             { id: 'honeycomb' as const, label: 'Hex', icon: Layers },
             { id: 'turtle_shell' as const, label: 'Shell', icon: CircleDot },
             { id: 'dino_footprint' as const, label: 'Dino', icon: Zap },
+            { id: 'lily_pad' as const, label: 'Pond', icon: Waves },
           ].map((s) => {
             const Icon = s.icon;
             return (
@@ -469,7 +480,9 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
                 onClick={() => { setShape(s.id); setPopped(new Set()); triggerHaptic(15, hapticEnabled); }}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   shape === s.id
-                    ? isDinoTheme
+                    ? isFrogTheme
+                      ? 'bg-lime-600 text-white shadow-sm'
+                      : isDinoTheme
                       ? 'bg-green-600 text-white shadow-sm'
                       : isTurtleTheme
                         ? 'bg-emerald-600 text-white shadow-sm'
@@ -486,7 +499,9 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
 
         <div className="text-right">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('Pops')}</p>
-          <p className={`text-sm font-black ${isDinoTheme ? 'text-green-700' : isTurtleTheme ? 'text-emerald-700' : 'text-indigo-600'}`}>
+          <p className={`text-sm font-black ${
+            isFrogTheme ? 'text-lime-700' : isDinoTheme ? 'text-green-700' : isTurtleTheme ? 'text-emerald-700' : 'text-indigo-600'
+          }`}>
             {popped.size} / {totalBubbles}
           </p>
         </div>
@@ -541,7 +556,9 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
         <button
           onClick={handlePopAll}
           className={`flex-1 py-2 px-3 rounded-xl ${
-            isDinoTheme
+            isFrogTheme
+              ? 'bg-lime-50 hover:bg-lime-100 text-lime-700'
+              : isDinoTheme
               ? 'bg-green-50 hover:bg-green-100 text-green-700'
               : isTurtleTheme
                 ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
@@ -1406,6 +1423,7 @@ export const DigitalFidgetModal: React.FC = () => {
   const { showFidgetModal, setShowFidgetModal, settings, updateSettings, activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
   const [activeFidget, setActiveFidget] = useState<FidgetCategory>('pop');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [hapticEnabled, setHapticEnabled] = useState<boolean>(true);
@@ -1455,11 +1473,18 @@ export const DigitalFidgetModal: React.FC = () => {
                 🦖
               </div>
             )}
+            {isFrogTheme && (
+              <div className="w-9 h-9 rounded-xl bg-lime-100 border border-lime-400 flex items-center justify-center shadow-xs shrink-0 text-xl select-none">
+                🐸
+              </div>
+            )}
             <div>
               <p className={`text-[10px] font-black uppercase tracking-widest ${
-                isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-indigo-500'
+                isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-indigo-500'
               }`}>
-                {isTurtleTheme
+                {isFrogTheme
+                  ? t('Ribbit Pond Sensory Lily Pad')
+                  : isTurtleTheme
                   ? t('Wise Turtle Sensory Pond')
                   : isDinoTheme
                     ? t('Dino Kingdom Sensory Excavation')
@@ -1526,7 +1551,9 @@ export const DigitalFidgetModal: React.FC = () => {
                 title={t(c.desc)}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                   activeFidget === c.id
-                    ? isDinoTheme
+                    ? isFrogTheme
+                      ? 'bg-lime-600 border-lime-600 text-white shadow-sm'
+                      : isDinoTheme
                       ? 'bg-green-600 border-green-600 text-white shadow-sm'
                       : isTurtleTheme
                         ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'

@@ -44,6 +44,7 @@ export const MoodJournalModal: React.FC = () => {
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const MOOD_TO_EMOTION_MAP: Record<string, string> = {
     peaceful: 'calm',
@@ -197,11 +198,19 @@ export const MoodJournalModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
       <div className={`bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 overflow-hidden ${
-        isTurtleTheme ? 'border-emerald-300' : isDinoTheme ? 'border-green-400' : 'border-indigo-100'
+        isFrogTheme
+          ? 'border-lime-400'
+          : isTurtleTheme
+          ? 'border-emerald-300'
+          : isDinoTheme
+          ? 'border-green-400'
+          : 'border-indigo-100'
       }`}>
         {/* Header */}
         <div className={`p-4 sm:p-5 text-white flex items-center justify-between shrink-0 ${
-          isTurtleTheme
+          isFrogTheme
+            ? 'bg-gradient-to-r from-lime-700 via-emerald-800 to-teal-900 border-b border-lime-600'
+            : isTurtleTheme
             ? 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-900 border-b border-emerald-600'
             : isDinoTheme
               ? 'bg-gradient-to-r from-green-800 via-emerald-800 to-amber-900 border-b border-green-600'
@@ -209,7 +218,9 @@ export const MoodJournalModal: React.FC = () => {
         }`}>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner backdrop-blur-xs p-1">
-              {isTurtleTheme ? (
+              {isFrogTheme ? (
+                <span className="text-2xl select-none leading-none">🐸</span>
+              ) : isTurtleTheme ? (
                 <TurtleRiverStoneSticker className="w-8 h-8 object-contain" />
               ) : isDinoTheme ? (
                 <span className="text-2xl select-none leading-none">🦖</span>
@@ -220,7 +231,9 @@ export const MoodJournalModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {isTurtleTheme
+                  {isFrogTheme
+                    ? 'Ribbit Pond Reflection'
+                    : isTurtleTheme
                     ? 'Turtle Sanctuary Reflection'
                     : isDinoTheme
                       ? 'Dino Kingdom Reflection'
@@ -230,7 +243,9 @@ export const MoodJournalModal: React.FC = () => {
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
-                {isTurtleTheme
+                {isFrogTheme
+                  ? 'Ribbit Pond Reflection Journal'
+                  : isTurtleTheme
                   ? 'Wise Turtle Sanctuary Journal'
                   : isDinoTheme
                     ? 'Dino Kingdom Reflection Journal'
@@ -262,7 +277,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'new'
-                ? isDinoTheme
+                ? isFrogTheme
+                  ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
+                  : isDinoTheme
                   ? 'bg-white text-green-800 shadow-xs border border-green-400'
                   : isTurtleTheme
                     ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
@@ -282,7 +299,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'history'
-                ? isDinoTheme
+                ? isFrogTheme
+                  ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
+                  : isDinoTheme
                   ? 'bg-white text-green-800 shadow-xs border border-green-400'
                   : isTurtleTheme
                     ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
@@ -302,7 +321,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'insights'
-                ? isDinoTheme
+                ? isFrogTheme
+                  ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
+                  : isDinoTheme
                   ? 'bg-white text-green-800 shadow-xs border border-green-400'
                   : isTurtleTheme
                     ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
@@ -325,11 +346,11 @@ export const MoodJournalModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <span>1. Primary Emotional State</span>
-                    <span className={isTurtleTheme ? 'text-emerald-600' : 'text-purple-600'}>*</span>
+                    <span className={isFrogTheme ? 'text-lime-600' : isTurtleTheme ? 'text-emerald-600' : 'text-purple-600'}>*</span>
                   </label>
                   <span className="text-xs font-bold text-slate-500 inline-flex items-center gap-1.5">
                     Selected: {moodOptions.find((m) => m.id === selectedMood)?.label}
-                    {(isTurtleTheme || isDinoTheme) && MOOD_TO_EMOTION_MAP[selectedMood] ? (
+                    {(isTurtleTheme || isDinoTheme || isFrogTheme) && MOOD_TO_EMOTION_MAP[selectedMood] ? (
                       <ThemedEmotionFace emotionId={MOOD_TO_EMOTION_MAP[selectedMood] as any} theme={activeTheme} className="w-5 h-5 inline-block" />
                     ) : (
                       <RoutineStickerIcon emoji={moodOptions.find((m) => m.id === selectedMood)?.emoji || '😊'} className="w-4 h-4 object-contain inline-block" />
@@ -350,7 +371,9 @@ export const MoodJournalModal: React.FC = () => {
                         }}
                         className={`p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer text-center ${
                           isSelected
-                            ? isDinoTheme
+                            ? isFrogTheme
+                              ? 'bg-lime-50 border-lime-500 ring-2 ring-lime-500 text-lime-950 scale-102 shadow-xs font-black'
+                              : isDinoTheme
                               ? 'bg-green-50 border-green-500 ring-2 ring-green-500 text-green-950 scale-102 shadow-xs font-black'
                               : isTurtleTheme
                                 ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500 text-emerald-950 scale-102 shadow-xs font-black'
@@ -359,7 +382,7 @@ export const MoodJournalModal: React.FC = () => {
                         }`}
                       >
                         <div className="w-8 h-8 flex items-center justify-center">
-                          {(isTurtleTheme || isDinoTheme) && MOOD_TO_EMOTION_MAP[opt.id] ? (
+                          {(isTurtleTheme || isDinoTheme || isFrogTheme) && MOOD_TO_EMOTION_MAP[opt.id] ? (
                             <ThemedEmotionFace emotionId={MOOD_TO_EMOTION_MAP[opt.id] as any} theme={activeTheme} className="w-8 h-8" />
                           ) : (
                             <RoutineStickerIcon emoji={opt.emoji} className="w-8 h-8 object-contain" />
@@ -561,14 +584,16 @@ export const MoodJournalModal: React.FC = () => {
                 <button
                   type="submit"
                   className={`px-6 py-2.5 rounded-2xl active:scale-95 text-white font-black text-sm shadow-md cursor-pointer transition-all flex items-center gap-2 ${
-                    isDinoTheme
+                    isFrogTheme
+                      ? 'bg-lime-600 hover:bg-lime-700 shadow-lime-200'
+                      : isDinoTheme
                       ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
                       : isTurtleTheme
                         ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
                         : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'
                   }`}
                 >
-                  <Star className={`w-4 h-4 ${isDinoTheme ? 'fill-green-200' : isTurtleTheme ? 'fill-emerald-200' : 'fill-indigo-200'}`} />
+                  <Star className={`w-4 h-4 ${isFrogTheme ? 'fill-lime-200' : isDinoTheme ? 'fill-green-200' : isTurtleTheme ? 'fill-emerald-200' : 'fill-indigo-200'}`} />
                   <span>Save Journal Entry</span>
                 </button>
               </div>

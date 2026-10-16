@@ -26,6 +26,7 @@ export const DecisionWheelModal: React.FC = () => {
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const [, setLangVersion] = useState(0);
   useEffect(() => {
@@ -141,9 +142,16 @@ export const DecisionWheelModal: React.FC = () => {
                 🦖
               </div>
             )}
+            {isFrogTheme && (
+              <div className="w-9 h-9 rounded-xl bg-lime-100 border border-lime-400 flex items-center justify-center p-1 shadow-xs shrink-0 text-xl select-none">
+                🐸
+              </div>
+            )}
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                {isTurtleTheme
+                {isFrogTheme
+                  ? t('Ribbit Pond Peaceful Spinner')
+                  : isTurtleTheme
                   ? t('Wise Turtle Sanctuary Spinner')
                   : isDinoTheme
                     ? t('Dino Kingdom Jurassic Spinner')
@@ -157,7 +165,9 @@ export const DecisionWheelModal: React.FC = () => {
               onClick={() => setEditMode((v) => !v)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                 editMode 
-                  ? isDinoTheme
+                  ? isFrogTheme
+                    ? 'bg-lime-600 text-white border-lime-500'
+                    : isDinoTheme
                     ? 'bg-green-600 text-white border-green-500'
                     : isTurtleTheme
                       ? 'bg-emerald-600 text-white border-emerald-500'
@@ -235,14 +245,16 @@ export const DecisionWheelModal: React.FC = () => {
         {/* Winner reveal */}
         {winner && !spinning && (
           <div className={`text-center px-5 py-4 rounded-3xl ${
-            isTurtleTheme
+            isFrogTheme
+              ? 'bg-gradient-to-br from-lime-50 via-emerald-50 to-teal-100 border-2 border-lime-400'
+              : isTurtleTheme
               ? 'bg-gradient-to-br from-emerald-50 to-teal-100 border-2 border-emerald-300'
               : isDinoTheme
                 ? 'bg-gradient-to-br from-green-50 via-emerald-50 to-amber-100 border-2 border-green-400'
                 : 'bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300'
           } w-full`}>
             <p className={`text-xs font-black uppercase tracking-widest ${
-              isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-amber-700'
+              isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-amber-700'
             } mb-1`}>{t('The wheel chose!')}</p>
             <h3 className="text-2xl font-black text-slate-800">{t(winner.label)}</h3>
           </div>
@@ -253,7 +265,9 @@ export const DecisionWheelModal: React.FC = () => {
           onClick={spin}
           disabled={spinning || count < 2}
           className={`w-full py-4 rounded-3xl ${
-            isTurtleTheme
+            isFrogTheme
+              ? 'bg-gradient-to-r from-lime-600 via-emerald-600 to-teal-600 shadow-lime-300/50'
+              : isTurtleTheme
               ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 shadow-emerald-300/50'
               : isDinoTheme
                 ? 'bg-gradient-to-r from-green-600 via-emerald-600 to-amber-600 shadow-green-300/50'
@@ -282,7 +296,13 @@ export const DecisionWheelModal: React.FC = () => {
             {options.map((opt, i) => (
               <div key={opt.id} className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200">
                 <span className={`w-7 h-7 rounded-full ${
-                  isDinoTheme ? 'bg-green-100 text-green-800' : isTurtleTheme ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'
+                  isFrogTheme
+                    ? 'bg-lime-100 text-lime-800'
+                    : isDinoTheme
+                    ? 'bg-green-100 text-green-800'
+                    : isTurtleTheme
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-indigo-100 text-indigo-800'
                 } font-bold text-xs flex items-center justify-center shrink-0`}>
                   {opt.emoji || `${i + 1}`}
                 </span>
@@ -317,7 +337,9 @@ export const DecisionWheelModal: React.FC = () => {
                 aria-label={t('Add option to decision wheel')}
                 onClick={addOption}
                 className={`px-3.5 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl ${
-                  isDinoTheme
+                  isFrogTheme
+                    ? 'bg-lime-600 hover:bg-lime-700 focus-visible:ring-lime-400'
+                    : isDinoTheme
                     ? 'bg-green-600 hover:bg-green-700 focus-visible:ring-green-400'
                     : isTurtleTheme
                       ? 'bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-400'

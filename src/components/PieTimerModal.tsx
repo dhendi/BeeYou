@@ -26,6 +26,7 @@ export const PieTimerModal: React.FC = () => {
   const { showPieTimerModal, setShowPieTimerModal, announce, activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const [, setLangVersion] = useState(0);
   useEffect(() => {
@@ -73,18 +74,18 @@ export const PieTimerModal: React.FC = () => {
 
   // Status colors based on remaining percentage
   const getColor = useCallback(() => {
-    if (isFinished) return isDinoTheme ? '#16a34a' : '#10b981'; // Green celebrate
-    if (pct > 0.5) return isDinoTheme ? '#15803d' : '#059669'; // Emerald / Jurassic Green
-    if (pct > 0.2) return isDinoTheme ? '#d97706' : isTurtleTheme ? '#0d9488' : '#f59e0b'; // Amber / Teal
+    if (isFinished) return isFrogTheme ? '#84cc16' : isDinoTheme ? '#16a34a' : '#10b981'; // Lime / Green celebrate
+    if (pct > 0.5) return isFrogTheme ? '#65a30d' : isDinoTheme ? '#15803d' : '#059669'; // Fresh Pond Lime / Emerald
+    if (pct > 0.2) return isFrogTheme ? '#14b8a6' : isDinoTheme ? '#d97706' : isTurtleTheme ? '#0d9488' : '#f59e0b'; // Pond Teal / Amber
     return '#ef4444'; // Red
-  }, [isFinished, pct, isTurtleTheme, isDinoTheme]);
+  }, [isFinished, pct, isTurtleTheme, isDinoTheme, isFrogTheme]);
 
   const getGradientId = useCallback(() => {
-    if (isFinished) return isDinoTheme ? 'url(#pie-grad-dino-green)' : 'url(#pie-grad-green)';
-    if (pct > 0.5) return isDinoTheme ? 'url(#pie-grad-dino-green)' : 'url(#pie-grad-green)';
-    if (pct > 0.2) return isDinoTheme ? 'url(#pie-grad-amber)' : isTurtleTheme ? 'url(#pie-grad-green)' : 'url(#pie-grad-amber)';
+    if (isFinished) return isFrogTheme ? 'url(#pie-grad-frog-lime)' : isDinoTheme ? 'url(#pie-grad-dino-green)' : 'url(#pie-grad-green)';
+    if (pct > 0.5) return isFrogTheme ? 'url(#pie-grad-frog-lime)' : isDinoTheme ? 'url(#pie-grad-dino-green)' : 'url(#pie-grad-green)';
+    if (pct > 0.2) return isFrogTheme ? 'url(#pie-grad-frog-lime)' : isDinoTheme ? 'url(#pie-grad-amber)' : isTurtleTheme ? 'url(#pie-grad-green)' : 'url(#pie-grad-amber)';
     return 'url(#pie-grad-red)';
-  }, [isFinished, pct, isTurtleTheme, isDinoTheme]);
+  }, [isFinished, pct, isTurtleTheme, isDinoTheme, isFrogTheme]);
 
   const getPhaseKey = useCallback(() => {
     if (pct > 0.5) return 'plenty';
@@ -206,13 +207,17 @@ export const PieTimerModal: React.FC = () => {
         <div className="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl ${
-              isTurtleTheme
+              isFrogTheme
+                ? 'bg-lime-100 border-lime-400'
+                : isTurtleTheme
                 ? 'bg-emerald-50 border-emerald-300'
                 : isDinoTheme
                   ? 'bg-green-100 border-green-400'
                   : 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800'
             } border flex items-center justify-center p-1 shadow-xs`}>
-              {isTurtleTheme ? (
+              {isFrogTheme ? (
+                <span className="text-xl select-none leading-none">🐸</span>
+              ) : isTurtleTheme ? (
                 <TurtleSandTimerSticker className="w-full h-full object-contain" />
               ) : isDinoTheme ? (
                 <span className="text-xl select-none leading-none">🦖</span>
@@ -222,7 +227,9 @@ export const PieTimerModal: React.FC = () => {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                {isTurtleTheme
+                {isFrogTheme
+                  ? t('Ribbit Pond Peaceful Timer')
+                  : isTurtleTheme
                   ? t('Wise Turtle Sanctuary Timer')
                   : isDinoTheme
                     ? t('Dino Kingdom Jurassic Timer')
@@ -241,7 +248,9 @@ export const PieTimerModal: React.FC = () => {
             }}
             aria-label={t('Close Pie Clock')}
             className={`w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 ${
-              isTurtleTheme
+              isFrogTheme
+                ? 'focus-visible:ring-lime-500/70'
+                : isTurtleTheme
                 ? 'focus-visible:ring-emerald-500/70'
                 : isDinoTheme
                   ? 'focus-visible:ring-green-500/70'
@@ -285,6 +294,12 @@ export const PieTimerModal: React.FC = () => {
                   <linearGradient id="pie-grad-dino-green" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#4ade80" />
                     <stop offset="100%" stopColor="#15803d" />
+                  </linearGradient>
+
+                  {/* Frog Lime Gradient */}
+                  <linearGradient id="pie-grad-frog-lime" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#a3e635" />
+                    <stop offset="100%" stopColor="#65a30d" />
                   </linearGradient>
 
                   {/* Honey Amber Gradient (20% - 50%) */}
@@ -483,15 +498,21 @@ export const PieTimerModal: React.FC = () => {
                   style={{
                     background: isRunning
                       ? pct > 0.5
-                        ? isDinoTheme
+                        ? isFrogTheme
+                          ? 'linear-gradient(135deg, #a3e635, #65a30d)'
+                          : isDinoTheme
                           ? 'linear-gradient(135deg, #22c55e, #15803d)'
                           : 'linear-gradient(135deg, #10b981, #059669)'
                         : pct > 0.2
-                        ? isDinoTheme
+                        ? isFrogTheme
+                          ? 'linear-gradient(135deg, #2dd4bf, #0d9488)'
+                          : isDinoTheme
                           ? 'linear-gradient(135deg, #f59e0b, #d97706)'
                           : 'linear-gradient(135deg, #f59e0b, #d97706)'
                         : 'linear-gradient(135deg, #ef4444, #dc2626)'
-                      : isDinoTheme
+                      : isFrogTheme
+                        ? 'linear-gradient(135deg, #84cc16, #65a30d)'
+                        : isDinoTheme
                         ? 'linear-gradient(135deg, #16a34a, #15803d)'
                         : 'linear-gradient(135deg, #0d9488, #0f766e)',
                     boxShadow: `0 10px 25px -4px ${getColor()}66`,
@@ -516,10 +537,16 @@ export const PieTimerModal: React.FC = () => {
                   aria-label={chimeEnabled ? t('Mute chime') : t('Enable chime')}
                   title={chimeEnabled ? t('Chime Sound: ON') : t('Chime Sound: MUTED')}
                   className={`w-14 h-14 rounded-2xl border-2 shadow-sm flex items-center justify-center cursor-pointer transition-all active:translate-y-0.5 active:scale-95 focus-visible:ring-4 ${
-                    isDinoTheme ? 'focus-visible:ring-green-500/70' : 'focus-visible:ring-amber-500/70'
+                    isFrogTheme
+                      ? 'focus-visible:ring-lime-500/70'
+                      : isDinoTheme
+                      ? 'focus-visible:ring-green-500/70'
+                      : 'focus-visible:ring-amber-500/70'
                   } focus-visible:outline-none ${
                     chimeEnabled
-                      ? isDinoTheme
+                      ? isFrogTheme
+                        ? 'bg-lime-50 hover:bg-lime-100 border-lime-300 text-lime-700'
+                        : isDinoTheme
                         ? 'bg-green-50 hover:bg-green-100 border-green-300 text-green-700'
                         : 'bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-700'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-400'

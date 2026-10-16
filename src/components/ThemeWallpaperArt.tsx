@@ -130,6 +130,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
   wallpaperUrl,
   className = '',
 }) => {
+  // Check if Ribbit Pond is active (by wallpaperUrl, category, or pattern)
+  const isRibbitPond =
+    wallpaperUrl?.includes('frog') ||
+    wallpaperUrl?.includes('ribbit') ||
+    category === 'frog' ||
+    pattern === 'lily_pads';
+
   // Check if Dino Kingdom is active (by wallpaperUrl, category, or pattern)
   const isDinoKingdom =
     wallpaperUrl?.includes('dino') ||
@@ -151,17 +158,19 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
 
   const effectiveWallpaper =
     wallpaperUrl ||
-    (isDinoKingdom
-      ? '/assets/wallpapers/dino_kingdom_bg.webp'
-      : isTurtleSanctuary
-        ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
-        : isHoneyClassic
-          ? '/assets/wallpapers/default_honey_theme_bg.webp'
-          : undefined);
+    (isRibbitPond
+      ? '/assets/wallpapers/ribbit_pond_bg.webp'
+      : isDinoKingdom
+        ? '/assets/wallpapers/dino_kingdom_bg.webp'
+        : isTurtleSanctuary
+          ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
+          : isHoneyClassic
+            ? '/assets/wallpapers/default_honey_theme_bg.webp'
+            : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
-  const bgColor = isDinoKingdom ? '#FAF6EC' : isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
+  const bgColor = isRibbitPond ? '#FAF7EE' : isDinoKingdom ? '#FAF6EC' : isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
 
   return (
     <div

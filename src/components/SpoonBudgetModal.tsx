@@ -51,6 +51,7 @@ export const SpoonBudgetModal: React.FC = () => {
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const today = new Date().toISOString().split('T')[0];
   const todayEntry = getTodaySpoonEntry();
@@ -111,13 +112,21 @@ export const SpoonBudgetModal: React.FC = () => {
     >
       <div
         className={`bg-white w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${
-          isTurtleTheme ? 'border-emerald-300' : isDinoTheme ? 'border-green-400' : 'border-amber-300'
+          isFrogTheme
+            ? 'border-lime-400'
+            : isTurtleTheme
+            ? 'border-emerald-300'
+            : isDinoTheme
+            ? 'border-green-400'
+            : 'border-amber-300'
         } overflow-hidden flex flex-col animate-in zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className={`${
-          isTurtleTheme
+          isFrogTheme
+            ? 'bg-gradient-to-r from-lime-600 via-emerald-700 to-teal-800'
+            : isTurtleTheme
             ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800'
             : isDinoTheme
               ? 'bg-gradient-to-r from-green-700 via-emerald-800 to-amber-900'
@@ -125,7 +134,9 @@ export const SpoonBudgetModal: React.FC = () => {
         } p-4 sm:p-5 text-white flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center p-1 shadow-inner border border-white/30 shrink-0">
-              {isDinoTheme ? (
+              {isFrogTheme ? (
+                <span className="text-2xl select-none leading-none">🐸</span>
+              ) : isDinoTheme ? (
                 <span className="text-2xl select-none leading-none">🦖</span>
               ) : (
                 <img
@@ -138,7 +149,7 @@ export const SpoonBudgetModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {isTurtleTheme ? t('Turtle Sanctuary') : isDinoTheme ? t('Dino Kingdom') : t('Spoon Theory')}
+                  {isFrogTheme ? t('Ribbit Pond') : isTurtleTheme ? t('Turtle Sanctuary') : isDinoTheme ? t('Dino Kingdom') : t('Spoon Theory')}
                 </span>
                 <span className="text-xs text-white/90 font-medium">
                   {t('Stamina & Energy')}
@@ -168,14 +179,16 @@ export const SpoonBudgetModal: React.FC = () => {
           {phase === 'checkin' && !todayEntry && (
             <div className="space-y-6">
               <div className={`rounded-2xl ${
-                isTurtleTheme
+                isFrogTheme
+                  ? 'bg-gradient-to-br from-lime-50 via-emerald-50/60 to-teal-50 border-lime-300'
+                  : isTurtleTheme
                   ? 'bg-gradient-to-br from-emerald-50 via-teal-50/60 to-emerald-50 border-emerald-300'
                   : isDinoTheme
                     ? 'bg-gradient-to-br from-green-50 via-emerald-50/60 to-amber-50 border-green-300'
                     : 'bg-gradient-to-br from-amber-50 via-yellow-50/60 to-amber-50 border-amber-300'
               } border-2 p-5 shadow-2xs`}>
                 <p className={`text-xs font-black uppercase tracking-wider ${
-                  isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-amber-800'
+                  isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-amber-800'
                 } mb-1`}>{t('Morning Check-in')}</p>
                 <h3 className="text-xl font-black text-slate-900 mb-1">{t('How many spoons do you have today?')}</h3>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
@@ -196,14 +209,18 @@ export const SpoonBudgetModal: React.FC = () => {
                       setSelectedSpoons(n);
                     }}
                     className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl text-lg font-black border-2 transition-all cursor-pointer focus-visible:ring-4 ${
-                      isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
+                      isFrogTheme ? 'focus-visible:ring-lime-400' : isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
                     } focus-visible:outline-none ${
                       selectedSpoons === n
-                        ? isTurtleTheme
+                        ? isFrogTheme
+                          ? 'bg-lime-600 border-lime-700 text-white shadow-md scale-110'
+                          : isTurtleTheme
                           ? 'bg-emerald-600 border-emerald-700 text-white shadow-md scale-110'
                           : isDinoTheme
                             ? 'bg-green-600 border-green-700 text-white shadow-md scale-110'
                             : 'bg-amber-500 border-amber-600 text-white shadow-md scale-110'
+                        : isFrogTheme
+                        ? 'bg-lime-50 border-lime-200 text-lime-950 hover:bg-lime-100'
                         : isTurtleTheme
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100'
                         : isDinoTheme
@@ -220,7 +237,9 @@ export const SpoonBudgetModal: React.FC = () => {
                 <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-xs mx-auto py-2" aria-hidden="true">
                   {Array.from({ length: selectedSpoons }).map((_, i) => (
                     <div key={i} className={`w-8 h-8 rounded-full ${
-                      isTurtleTheme
+                      isFrogTheme
+                        ? 'bg-lime-100 border-lime-300 text-lime-950'
+                        : isTurtleTheme
                         ? 'bg-emerald-100 border-emerald-300 text-emerald-950'
                         : isDinoTheme
                           ? 'bg-green-100 border-green-300 text-green-950'
@@ -231,7 +250,7 @@ export const SpoonBudgetModal: React.FC = () => {
                   ))}
                 </div>
                 <p className={`text-xs sm:text-sm font-black ${
-                  isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
+                  isFrogTheme ? 'text-lime-950' : isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
                 }`}>
                   {selectedSpoons <= 3 ? t('Low day — be gentle with yourself.') :
                    selectedSpoons <= 6 ? t('Moderate — pick activities carefully.') :
@@ -244,13 +263,15 @@ export const SpoonBudgetModal: React.FC = () => {
                 type="button"
                 onClick={handleStartDay}
                 className={`w-full min-h-[52px] py-4 rounded-2xl ${
-                  isTurtleTheme
+                  isFrogTheme
+                    ? 'bg-lime-600 hover:bg-lime-700 text-white shadow-lime-200'
+                    : isTurtleTheme
                     ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
                     : isDinoTheme
                       ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-200'
                       : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
                 } font-black text-base sm:text-lg shadow-md cursor-pointer active:scale-95 transition-all focus-visible:ring-4 ${
-                  isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
+                  isFrogTheme ? 'focus-visible:ring-lime-400' : isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
                 } focus-visible:outline-none`}
               >
                 {t('Start My Day with')} {selectedSpoons} {t('Spoons')}
@@ -262,7 +283,9 @@ export const SpoonBudgetModal: React.FC = () => {
             <div className="space-y-4">
               {/* Energy Bar */}
               <div className={`rounded-2xl border-2 ${
-                isTurtleTheme
+                isFrogTheme
+                  ? 'border-lime-200/90 bg-gradient-to-br from-lime-50/80 via-emerald-50/50 to-teal-50/60'
+                  : isTurtleTheme
                   ? 'border-emerald-200/90 bg-gradient-to-br from-emerald-50/80 via-teal-50/50 to-emerald-50/80'
                   : isDinoTheme
                     ? 'border-green-200/90 bg-gradient-to-br from-green-50/80 via-emerald-50/50 to-amber-50/60'
@@ -271,10 +294,10 @@ export const SpoonBudgetModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <span className={`text-[11px] font-black uppercase tracking-wider ${
-                      isTurtleTheme ? 'text-emerald-900' : isDinoTheme ? 'text-green-900' : 'text-amber-900'
+                      isFrogTheme ? 'text-lime-900' : isTurtleTheme ? 'text-emerald-900' : isDinoTheme ? 'text-green-900' : 'text-amber-900'
                     } block`}>{t('Energy Remaining')}</span>
                     <span className={`text-xs font-black ${
-                      isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
+                      isFrogTheme ? 'text-lime-950' : isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
                     } flex items-center gap-1.5 mt-0.5`}>
                       <span className={`w-2 h-2 rounded-full ${pct > 60 ? 'bg-emerald-500 animate-pulse' : pct > 30 ? 'bg-amber-500' : remaining > 0 ? 'bg-rose-500' : 'bg-rose-700'}`} />
                       {pct > 60 ? t('High Energy') : pct > 30 ? t('Moderate Energy') : remaining > 0 ? t('Low Energy') : t('Empty / Rest Needed')}
@@ -283,18 +306,20 @@ export const SpoonBudgetModal: React.FC = () => {
                   <div className="text-right">
                     <span className={`font-black text-2xl ${getBatteryColor(remaining, current.totalSpoons)}`}>
                       {remaining} <span className={`text-base ${
-                        isTurtleTheme ? 'text-emerald-900/60' : isDinoTheme ? 'text-green-900/60' : 'text-amber-900/60'
+                        isFrogTheme ? 'text-lime-900/60' : isTurtleTheme ? 'text-emerald-900/60' : isDinoTheme ? 'text-green-900/60' : 'text-amber-900/60'
                       } font-bold`}>/ {current.totalSpoons}</span>
                     </span>
                     <p className={`text-[10px] font-black uppercase tracking-wider ${
-                      isTurtleTheme ? 'text-emerald-900/70' : isDinoTheme ? 'text-green-900/70' : 'text-amber-900/70'
+                      isFrogTheme ? 'text-lime-900/70' : isTurtleTheme ? 'text-emerald-900/70' : isDinoTheme ? 'text-green-900/70' : 'text-amber-900/70'
                     }`}>
                       {remaining} {t('Spoons Remaining')}
                     </p>
                   </div>
                 </div>
                 <div className={`h-3.5 ${
-                  isTurtleTheme
+                  isFrogTheme
+                    ? 'bg-lime-100/90 border-lime-200/60'
+                    : isTurtleTheme
                     ? 'bg-emerald-100/90 border-emerald-200/60'
                     : isDinoTheme
                       ? 'bg-green-100/90 border-green-200/60'

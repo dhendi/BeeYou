@@ -191,6 +191,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-lime-50 via-emerald-50 to-teal-50',
       headerBg: 'bg-lime-100/90 border-lime-300',
       navActiveBg: 'bg-lime-500 text-white shadow-md ring-2 ring-lime-600',
+      wallpaperUrl: '/assets/wallpapers/ribbit_pond_bg.webp',
     },
     wallpaperPattern: 'lily_pads',
     aacStyling: {

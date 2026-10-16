@@ -119,6 +119,65 @@ export const PREBUILT_ROUTINE_TEMPLATES: RoutineTemplate[] = [
     ],
   },
 
+  // --- RIBBIT POND LILY PAD TEMPLATE ---
+  {
+    id: 'template-ribbit-pond-calm',
+    title: 'Ribbit Pond Gentle Day',
+    category: 'special',
+    emoji: '🐸',
+    time: '8:00 AM',
+    description: 'A soothing water-lily pond routine with peaceful sensory hops, cool hydration, and rhythmic breathing like a happy frog on a lily pad.',
+    recommendedFor: 'Children who love nature, amphibians, water themes, or need rhythmic, sensory-calming transitions.',
+    firstThen: {
+      first: 'Pond wake-up stretch & fresh water sip',
+      firstEmoji: '🐸',
+      then: 'Peaceful lily pad playtime or favorite special interest',
+      thenEmoji: '🪷',
+    },
+    steps: [
+      {
+        title: 'Lily Pad Frog Stretch',
+        instruction: 'Squat low and rise up gently with a peaceful frog stretch. Reach your hands wide like open lily pads.',
+        durationMin: 5,
+        emoji: '🐸',
+        sensoryNote: 'Gentle squatting and reaching activates vestibular and proprioceptive inputs for natural focus.',
+        communicationShortcutPhrases: ['Good morning', 'Stretching like a frog', 'Feeling calm'],
+      },
+      {
+        title: 'Dewdrop Water Sip',
+        instruction: 'Drink a glass of cool water just like fresh morning dewdrops on a green leaf.',
+        durationMin: 3,
+        emoji: '💧',
+        sensoryNote: 'Sipping cool water grounds oral motor systems and signals safety to the vagus nerve.',
+        communicationShortcutPhrases: ['Cold water feels good', 'All hydrated'],
+      },
+      {
+        title: 'Cozy Pond Clothes',
+        instruction: 'Choose your comfortable, tagless clothes and soft socks for your day.',
+        durationMin: 7,
+        emoji: '👕',
+        sensoryNote: 'Check for seam and texture preferences to prevent tactile defensiveness.',
+        communicationShortcutPhrases: ['Shirt is soft', 'Dressed and ready', 'Feels comfortable'],
+      },
+      {
+        title: 'Nutritious Pond Breakfast',
+        instruction: 'Sit down comfortably and enjoy a warm, balanced breakfast.',
+        durationMin: 15,
+        emoji: '🥞',
+        sensoryNote: 'Predictable crunch or smooth textures give oral regulating input.',
+        communicationShortcutPhrases: ['Yummy breakfast', 'Eating nicely', 'All full'],
+      },
+      {
+        title: 'Sparkling Lily Pad Teeth Brushing',
+        instruction: 'Brush teeth gently with circular motions for 2 whole minutes.',
+        durationMin: 2,
+        emoji: '🪥',
+        sensoryNote: 'Vibrating or soft silicone brushes can decrease oral hypersensitivity.',
+        communicationShortcutPhrases: ['Brushing clean', 'Teeth are sparkling'],
+      },
+    ],
+  },
+
   // --- MORNING TEMPLATES ---
   {
     id: 'template-morning-calm',

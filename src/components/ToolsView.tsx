@@ -41,6 +41,7 @@ export const ToolsView: React.FC = () => {
   const isColorCoded = settings?.colorCodedActionCards === true;
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
 
@@ -60,8 +61,10 @@ export const ToolsView: React.FC = () => {
       title: 'Digital Fidget Toys',
       desc: 'Tactile bubble popping with haptics, sensory sand ripples, and smooth marble rolling.',
       badge: 'Fidget & Play',
-      badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      color: 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950',
+      badgeClass: isFrogTheme ? 'bg-lime-100 text-lime-800 border-lime-300' : 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      color: isFrogTheme
+        ? 'border-2 border-lime-400/90 bg-lime-50/50 hover:bg-lime-50/90 text-lime-950'
+        : 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950',
       Sticker: isTurtleTheme ? TurtlePondFidgetBubblesSticker : FidgetBubblesSticker,
       action: () => setShowFidgetModal(true),
     },
@@ -86,12 +89,14 @@ export const ToolsView: React.FC = () => {
       title: 'Visual Countdown Timer',
       desc: 'Tactile circular Time Timer countdown clock to clearly visualize remaining time and transitions.',
       badge: 'Visual Clock',
-      badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
-      color: isDinoTheme
-        ? 'border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950'
-        : isTurtleTheme
-          ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
-          : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
+      badgeClass: isFrogTheme ? 'bg-lime-100 text-lime-800 border-lime-300' : 'bg-amber-100 text-amber-800 border-amber-200',
+      color: isFrogTheme
+        ? 'border-2 border-lime-400/90 bg-lime-50/50 hover:bg-lime-50/90 text-lime-950'
+        : isDinoTheme
+          ? 'border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950'
+          : isTurtleTheme
+            ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
+            : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
       Sticker: isTurtleTheme ? TurtleSandTimerSticker : CountdownTimerSticker,
       action: () => setShowPieTimerModal(true),
     },
@@ -155,12 +160,14 @@ export const ToolsView: React.FC = () => {
       title: 'Spoon Theory Stamina Budget',
       desc: 'Track daily physical and social energy spoons to pace yourself and prevent burnout.',
       badge: 'Energy Tracker',
-      badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
-      color: isDinoTheme
-        ? 'border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950'
-        : isTurtleTheme
-          ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
-          : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
+      badgeClass: isFrogTheme ? 'bg-lime-100 text-lime-800 border-lime-300' : 'bg-amber-100 text-amber-800 border-amber-200',
+      color: isFrogTheme
+        ? 'border-2 border-lime-400/90 bg-lime-50/50 hover:bg-lime-50/90 text-lime-950'
+        : isDinoTheme
+          ? 'border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950'
+          : isTurtleTheme
+            ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
+            : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
       Sticker: isTurtleTheme ? TurtleBambooSpoonsSticker : SpoonSticker,
       action: () => setShowSpoonModal(true),
     },
@@ -202,14 +209,16 @@ export const ToolsView: React.FC = () => {
               aria-selected={isSelected}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-black whitespace-nowrap transition-all cursor-pointer min-h-[42px] flex items-center gap-1.5 active:scale-95 border-2 focus-visible:ring-4 ${
-                isDinoTheme ? 'focus-visible:ring-green-500/70' : isTurtleTheme ? 'focus-visible:ring-emerald-500/70' : 'focus-visible:ring-amber-500/70'
+                isFrogTheme ? 'focus-visible:ring-lime-500/70' : isDinoTheme ? 'focus-visible:ring-green-500/70' : isTurtleTheme ? 'focus-visible:ring-emerald-500/70' : 'focus-visible:ring-amber-500/70'
               } focus-visible:outline-none ${
                 isSelected
-                  ? isDinoTheme
-                    ? 'bg-green-700 text-white border-green-700 shadow-sm'
-                    : isTurtleTheme
-                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                      : 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                  ? isFrogTheme
+                    ? 'bg-lime-700 text-white border-lime-700 shadow-sm'
+                    : isDinoTheme
+                      ? 'bg-green-700 text-white border-green-700 shadow-sm'
+                      : isTurtleTheme
+                        ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                        : 'bg-slate-900 text-white border-slate-900 shadow-sm'
                   : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300'
               }`}
             >
