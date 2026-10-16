@@ -147,6 +147,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-emerald-50 via-teal-50 to-green-100',
       headerBg: 'bg-emerald-100/90 border-emerald-300',
       navActiveBg: 'bg-emerald-500 text-white shadow-md ring-2 ring-emerald-600',
+      wallpaperUrl: '/assets/wallpapers/dino_kingdom_bg.webp',
     },
     wallpaperPattern: 'dino_footprints',
     aacStyling: {

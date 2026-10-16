@@ -130,6 +130,12 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
   wallpaperUrl,
   className = '',
 }) => {
+  // Check if Dino Kingdom is active (by wallpaperUrl, category, or pattern)
+  const isDinoKingdom =
+    wallpaperUrl?.includes('dino') ||
+    category === 'dinosaur' ||
+    pattern === 'dino_footprints';
+
   // Check if Turtle Sanctuary is active (by wallpaperUrl, category, or pattern)
   const isTurtleSanctuary =
     wallpaperUrl?.includes('turtle') ||
@@ -145,15 +151,17 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
 
   const effectiveWallpaper =
     wallpaperUrl ||
-    (isTurtleSanctuary
-      ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
-      : isHoneyClassic
-        ? '/assets/wallpapers/default_honey_theme_bg.webp'
-        : undefined);
+    (isDinoKingdom
+      ? '/assets/wallpapers/dino_kingdom_bg.webp'
+      : isTurtleSanctuary
+        ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
+        : isHoneyClassic
+          ? '/assets/wallpapers/default_honey_theme_bg.webp'
+          : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
-  const bgColor = isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
+  const bgColor = isDinoKingdom ? '#FAF6EC' : isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
 
   return (
     <div
