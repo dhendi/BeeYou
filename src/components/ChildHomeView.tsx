@@ -454,11 +454,7 @@ export const ChildHomeView: React.FC = () => {
                     }}
                     className={themeStyles.quickAacCalm}
                   >
-                    {isTurtleTheme ? (
-                      <TurtleLilyPadsSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
-                    ) : (
-                      <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
-                    )}
+                    <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
                     <span>{t('Calm down')}</span>
                   </button>
                   <button
