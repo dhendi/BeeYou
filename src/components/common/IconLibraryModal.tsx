@@ -78,6 +78,8 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'snow', emoji: '❄️', label: 'Snow & Flurries', category: 'daily', keywords: ['snow', 'flurry', 'winter', 'cold', 'weather'] },
   { id: 'thunderstorm', emoji: '🌩️', label: 'Thunderstorm', category: 'daily', keywords: ['thunder', 'storm', 'lightning', 'rain', 'weather'] },
   { id: 'windy', emoji: '💨', label: 'Windy Weather', category: 'daily', keywords: ['wind', 'windy', 'breeze', 'weather', 'air'] },
+  { id: 'fog_mist', emoji: '🌫️', label: 'Fog & Mist', category: 'daily', keywords: ['fog', 'mist', 'haze', 'quiet', 'weather'] },
+  { id: 'rainbow_weather', emoji: '🌈', label: 'Rainbow Sky', category: 'daily', keywords: ['rainbow', 'sky', 'calm', 'weather', 'sun'] },
   { id: 'folder', emoji: '📁', label: 'Folder / Binder', category: 'daily', keywords: ['folder', 'binder', 'homework', 'papers'] },
   { id: 'writing', emoji: '✏️', label: 'Writing Class', category: 'daily', keywords: ['pencil', 'write', 'draw', 'homework', 'math'] },
   { id: 'meds', emoji: '💊', label: 'Medication', category: 'daily', keywords: ['medicine', 'medication', 'pill', 'vitamin', 'health'] },

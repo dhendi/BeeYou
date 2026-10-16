@@ -234,6 +234,8 @@ export const CloudyWeatherSticker = renderStickerPng('/assets/stickers/cloudy_we
 export const SnowWeatherSticker = renderStickerPng('/assets/stickers/snow_weather.png', 'Snow & Flurries');
 export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thunderstorm_weather.png', 'Thunderstorm');
 export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.png', 'Windy Breeze');
+export const FogMistWeatherSticker = renderStickerPng('/assets/stickers/fog_mist_weather.png', 'Fog & Mist Weather');
+export const RainbowWeatherSticker = renderStickerPng('/assets/stickers/rainbow_weather.png', 'Rainbow Weather');
 export const HomeHouseSticker = renderStickerPng('/assets/stickers/home_house.png', 'Home House');
 export const TaskDoneSticker = renderStickerPng('/assets/stickers/task_done.png', 'Task Done Checkmark');
 export const TherapyBrainSticker = renderStickerPng('/assets/stickers/therapy_brain.png', 'Therapy & Sensory Brain');
@@ -318,8 +320,9 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🪄' || normTitle.includes('wand') || normTitle.includes('magic')) return <MagicWandSticker className={className} size={size} />;
   // 🚂 Golden Locomotive / Steam Train
   if (normEmoji === '🚂' || normTitle.includes('train') || normTitle.includes('locomotive')) return <GoldenTrainSticker className={className} size={size} />;
-  // 🌈 Rainbow Heart / Feelings Explorer
-  if (normEmoji === '🌈' || normTitle.includes('rainbow heart') || (normTitle.includes('rainbow') && normTitle.includes('heart'))) return <RainbowHeartSticker className={className} size={size} />;
+  // 🌈 Rainbow Heart / Feelings Explorer vs Weather Rainbow
+  if (normTitle.includes('rainbow heart') || (normTitle.includes('rainbow') && normTitle.includes('heart')) || normTitle.includes('feelings explorer')) return <RainbowHeartSticker className={className} size={size} />;
+  if (normEmoji === '🌈' || normTitle.includes('rainbow')) return <RainbowWeatherSticker className={className} size={size} />;
   // 🌅 Morning Sun / Sunrise / Morning Superstar
   if (normEmoji === '🌅' || normTitle.includes('morning sun') || normTitle.includes('sunrise') || normTitle.includes('morning superstar')) return <MorningSunriseSticker className={className} size={size} />;
 
@@ -434,8 +437,10 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🩺' || normTitle.includes('doctor') || normTitle.includes('stethoscope') || normTitle.includes('check-up')) return <StethoscopeSticker className={className} size={size} />;
   // ⛅ Partly Cloudy
   if (normEmoji === '⛅' || normEmoji === '🌤️' || normEmoji === '🌤' || normTitle.includes('partly cloudy')) return <PartlyCloudySticker className={className} size={size} />;
-  // ☁️ Cloudy / Overcast / Fog
-  if (normEmoji === '☁️' || normEmoji === '☁' || normEmoji === '🌫️' || normEmoji === '🌫' || normTitle.includes('cloudy') || normTitle.includes('overcast') || normTitle.includes('fog')) return <CloudyWeatherSticker className={className} size={size} />;
+  // 🌫️ Fog & Mist
+  if (normEmoji === '🌫️' || normEmoji === '🌫' || normTitle.includes('fog') || normTitle.includes('mist')) return <FogMistWeatherSticker className={className} size={size} />;
+  // ☁️ Cloudy / Overcast
+  if (normEmoji === '☁️' || normEmoji === '☁' || normTitle.includes('cloudy') || normTitle.includes('overcast')) return <CloudyWeatherSticker className={className} size={size} />;
   // ❄️ Snow / Flurries
   if (normEmoji === '❄️' || normEmoji === '❄' || normEmoji === '🌨️' || normEmoji === '🌨' || normTitle.includes('snow') || normTitle.includes('flurr')) return <SnowWeatherSticker className={className} size={size} />;
   // 🌩️ Thunderstorm / Lightning

@@ -65,7 +65,7 @@ function parseWmoCode(code: number, windMph: number = 0): { condition: string; e
   }
   // Fog
   if (code === 45 || code === 48) {
-    return { condition: 'Foggy & Gentle Quiet', emoji: '🌫️', bgGradient: 'from-slate-100 via-teal-50 to-sky-50', stickerSrc: '/assets/stickers/cloudy_weather.png' };
+    return { condition: 'Foggy & Gentle Quiet', emoji: '🌫️', bgGradient: 'from-slate-100 via-teal-50 to-sky-50', stickerSrc: '/assets/stickers/fog_mist_weather.png' };
   }
   // High winds with clear/overcast sky
   if (windMph >= 18 && code <= 3) {
