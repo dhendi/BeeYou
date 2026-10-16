@@ -103,17 +103,30 @@ function useViewportZoom(): number {
  */
 export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
   pattern,
+  category,
   wallpaperUrl,
   className = '',
 }) => {
-  const isDefaultOrHoneycomb =
-    pattern === 'honeycomb_clouds' || (!wallpaperUrl && (!pattern || pattern === 'none'));
+  // Check if Turtle Sanctuary is active (by wallpaperUrl, category, or pattern)
+  const isTurtleSanctuary =
+    wallpaperUrl?.includes('turtle') ||
+    category === 'turtle' ||
+    pattern === 'turtle_shell';
+
+  // Check if Default Honey Theme is active
+  const isHoneyClassic =
+    wallpaperUrl?.includes('honey') ||
+    category === 'classic' ||
+    pattern === 'honeycomb_clouds' ||
+    (!wallpaperUrl && (!pattern || pattern === 'none') && !category);
 
   const effectiveWallpaper =
     wallpaperUrl ||
-    (isDefaultOrHoneycomb
-      ? '/assets/wallpapers/default_honey_theme_bg.webp'
-      : undefined);
+    (isTurtleSanctuary
+      ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
+      : isHoneyClassic
+        ? '/assets/wallpapers/default_honey_theme_bg.webp'
+        : undefined);
 
   const zoomFactor = useViewportZoom();
 
@@ -124,6 +137,8 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
   // Counter-scale tile size so background elements never magnify on zoom
   const computedTileSize = `${Math.round((tileWidth / zoomFactor) * 10) / 10}px ${Math.round((tileHeight / zoomFactor) * 10) / 10}px`;
 
+  const bgColor = isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
+
   return (
     <div
       aria-hidden="true"
@@ -131,13 +146,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
       style={
         effectiveWallpaper
           ? {
-              backgroundColor: '#FEF9F1',
+              backgroundColor: bgColor,
               backgroundImage: `url('${effectiveWallpaper}')`,
               backgroundRepeat: 'repeat',
               backgroundPosition: 'center center',
               backgroundSize: computedTileSize,
             }
-          : { backgroundColor: '#FEF9F1' }
+          : undefined
       }
     >
       {/* Subtle ambient lighting overlay to ensure clean card readability and low glare */}

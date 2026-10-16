@@ -80,6 +80,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-teal-50 via-emerald-50/50 to-green-100',
       headerBg: 'bg-emerald-100/90 border-emerald-300',
       navActiveBg: 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400',
+      wallpaperUrl: '/assets/wallpapers/turtle_sanctuary_bg.webp',
     },
     wallpaperPattern: 'turtle_shell',
     aacStyling: {
