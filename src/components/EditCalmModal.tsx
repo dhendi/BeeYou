@@ -73,48 +73,53 @@ export const EditCalmModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[220] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-[#FFFDF7] rounded-3xl shadow-2xl border-2 border-amber-300 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 px-6 py-4.5 text-white flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
-              <Wind className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs">
+              <img src="/assets/stickers/breathing_cloud.png" alt="Calm Tools" className="w-8 h-8 object-contain drop-shadow-xs" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Customization</p>
-              <h2 className="text-xl font-black text-slate-800">Customize Calm Down Tools 🫁</h2>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Customization</p>
+              <h2 className="text-lg sm:text-xl font-black text-white leading-tight">Customize Calm Down Tools</h2>
             </div>
           </div>
           <button
-            onClick={() => setShowEditCalmModal(false)}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer"
+            onClick={() => {
+              playChime('tap');
+              setShowEditCalmModal(false);
+            }}
+            className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer transition-all active:scale-95"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 px-6 pt-3 pb-2 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex gap-2 px-6 pt-3 pb-2.5 border-b-2 border-amber-200/80 bg-[#FFF9EE]">
           {[
             { id: 'pacer' as const, label: 'Breathing Pacer Timings', icon: Wind },
             { id: 'strategies' as const, label: 'Coping Strategies Catalog', icon: Heart, count: calmStrategies.length },
           ].map((tab) => {
             const Icon = tab.icon;
+            const isTabActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); playChime('tap'); }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100'
+                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer active:scale-95 ${
+                  isTabActive
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs ring-2 ring-amber-300'
+                    : 'bg-white/80 hover:bg-amber-100/70 text-slate-700 border border-amber-200/70'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                    activeTab === tab.id ? 'bg-white/30 text-white' : 'bg-slate-200 text-slate-700'
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                    isTabActive ? 'bg-amber-700/60 text-white' : 'bg-amber-100 text-amber-950'
                   }`}>
                     {tab.count}
                   </span>
@@ -130,12 +135,12 @@ export const EditCalmModal: React.FC = () => {
           {activeTab === 'pacer' && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-slate-500">
+                <p className="text-xs font-bold text-slate-600">
                   Select a clinical breathing pattern or customize the exact second intervals
                 </p>
                 <button
                   onClick={() => { resetBreathingConfig(); playChime('complete'); }}
-                  className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 font-bold cursor-pointer"
+                  className="text-xs text-amber-900 hover:text-amber-950 flex items-center gap-1 font-bold cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" /> Reset Pacer
                 </button>
@@ -165,16 +170,16 @@ export const EditCalmModal: React.FC = () => {
                       }}
                       className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-teal-50 border-teal-500 text-teal-950 shadow-sm'
-                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                          ? 'bg-[#FFF2D4] border-amber-400 text-amber-950 shadow-xs ring-2 ring-amber-300'
+                          : 'bg-white border-amber-200/80 hover:border-amber-300 text-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-black">{preset.name}</span>
-                        {isSelected && <Check className="w-4 h-4 text-teal-600 font-bold" />}
+                        {isSelected && <Check className="w-4 h-4 text-amber-800 font-bold" />}
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-1">{preset.desc}</p>
-                      <div className="flex gap-2 mt-2 text-[10px] font-mono font-bold text-teal-700">
+                      <p className="text-[11px] text-slate-600 mt-1 font-medium">{preset.desc}</p>
+                      <div className="flex gap-2 mt-2 text-[10px] font-mono font-bold text-amber-800">
                         <span>Inhale: {preset.inhale}s</span>
                         <span>Hold: {preset.hold}s</span>
                         <span>Exhale: {preset.exhale}s</span>
@@ -185,15 +190,15 @@ export const EditCalmModal: React.FC = () => {
               </div>
 
               {/* Custom Interval Sliders */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-                <h3 className="text-xs font-black text-slate-700 uppercase tracking-wider">Custom Second Timers</h3>
+              <div className="p-4 rounded-2xl bg-amber-50/60 border-2 border-amber-200 space-y-4">
+                <h3 className="text-xs font-black text-amber-950 uppercase tracking-wider">Custom Second Timers</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Inhale */}
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Inhale</span>
-                      <span className="text-teal-600 font-mono">{breathingConfig.inhaleSec}s</span>
+                      <span className="text-amber-800 font-mono font-black">{breathingConfig.inhaleSec}s</span>
                     </div>
                     <input
                       type="range"
@@ -201,7 +206,7 @@ export const EditCalmModal: React.FC = () => {
                       max="10"
                       value={breathingConfig.inhaleSec}
                       onChange={(e) => updateBreathingConfig({ inhaleSec: Number(e.target.value), pattern: 'custom' })}
-                      className="w-full accent-teal-600"
+                      className="w-full accent-amber-500"
                     />
                   </div>
 
@@ -209,7 +214,7 @@ export const EditCalmModal: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Hold</span>
-                      <span className="text-teal-600 font-mono">{breathingConfig.holdSec}s</span>
+                      <span className="text-amber-800 font-mono font-black">{breathingConfig.holdSec}s</span>
                     </div>
                     <input
                       type="range"
@@ -217,7 +222,7 @@ export const EditCalmModal: React.FC = () => {
                       max="10"
                       value={breathingConfig.holdSec}
                       onChange={(e) => updateBreathingConfig({ holdSec: Number(e.target.value), pattern: 'custom' })}
-                      className="w-full accent-teal-600"
+                      className="w-full accent-amber-500"
                     />
                   </div>
 
@@ -225,7 +230,7 @@ export const EditCalmModal: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Exhale</span>
-                      <span className="text-teal-600 font-mono">{breathingConfig.exhaleSec}s</span>
+                      <span className="text-amber-800 font-mono font-black">{breathingConfig.exhaleSec}s</span>
                     </div>
                     <input
                       type="range"
@@ -233,7 +238,7 @@ export const EditCalmModal: React.FC = () => {
                       max="12"
                       value={breathingConfig.exhaleSec}
                       onChange={(e) => updateBreathingConfig({ exhaleSec: Number(e.target.value), pattern: 'custom' })}
-                      className="w-full accent-teal-600"
+                      className="w-full accent-amber-500"
                     />
                   </div>
                 </div>
@@ -245,19 +250,22 @@ export const EditCalmModal: React.FC = () => {
           {activeTab === 'strategies' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-slate-500">
+                <p className="text-xs font-bold text-slate-600">
                   Manage personal calm strategies displayed in the Coping Toolkit
                 </p>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { resetCalmStrategies(); playChime('complete'); }}
-                    className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 font-bold cursor-pointer"
+                    className="text-xs text-amber-900 hover:text-amber-950 flex items-center gap-1 font-bold cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" /> Reset
                   </button>
                   <button
-                    onClick={() => setShowAddStrategyForm(!showAddStrategyForm)}
-                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    onClick={() => {
+                      playChime('tap');
+                      setShowAddStrategyForm(!showAddStrategyForm);
+                    }}
+                    className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-white rounded-xl text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Strategy
                   </button>
@@ -266,51 +274,51 @@ export const EditCalmModal: React.FC = () => {
 
               {/* Add New Strategy Form */}
               {showAddStrategyForm && (
-                <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200 space-y-3 animate-in fade-in">
-                  <h3 className="text-xs font-black text-teal-900 uppercase tracking-wider">New Calm Coping Strategy</h3>
+                <div className="p-4 rounded-2xl bg-[#FFF2D4]/70 border-2 border-amber-300 space-y-3 animate-in fade-in">
+                  <h3 className="text-xs font-black text-amber-950 uppercase tracking-wider">New Calm Coping Strategy</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Strategy Name *</label>
+                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Strategy Name *</label>
                       <input
                         type="text"
                         placeholder="e.g. Squeeze Squishy Dino"
                         value={newStrategy.title}
                         onChange={(e) => setNewStrategy({ ...newStrategy, title: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-teal-600"
+                        className="w-full px-3 py-2 rounded-xl border border-amber-200 text-sm focus:outline-amber-500 bg-white"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Emoji Icon</label>
+                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Emoji Icon</label>
                       <input
                         type="text"
                         placeholder="e.g. 🦕, 🎧, 🧊, 🧘"
                         value={newStrategy.emoji}
                         onChange={(e) => setNewStrategy({ ...newStrategy, emoji: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-teal-600"
+                        className="w-full px-3 py-2 rounded-xl border border-amber-200 text-sm focus:outline-amber-500 bg-white"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Gentle Instructions / Prompts</label>
+                      <label className="text-[11px] font-bold text-slate-700 block mb-1">Gentle Instructions / Prompts</label>
                       <input
                         type="text"
                         placeholder="e.g. Hold the dinosaur across lap and take 3 deep belly breaths"
                         value={newStrategy.instruction}
                         onChange={(e) => setNewStrategy({ ...newStrategy, instruction: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-teal-600"
+                        className="w-full px-3 py-2 rounded-xl border border-amber-200 text-sm focus:outline-amber-500 bg-white"
                       />
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <button
                       onClick={() => setShowAddStrategyForm(false)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-amber-100 cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSaveNewStrategy}
                       disabled={!newStrategy.title.trim()}
-                      className="px-4 py-1.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white cursor-pointer"
+                      className="px-4 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 disabled:opacity-50 text-white cursor-pointer shadow-xs"
                     >
                       Save Strategy
                     </button>
@@ -323,34 +331,40 @@ export const EditCalmModal: React.FC = () => {
                 {calmStrategies.map((strat) => (
                   <div
                     key={strat.id}
-                    className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 shadow-sm flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-2xl bg-white border-2 border-amber-200/80 hover:border-amber-300 shadow-2xs flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-2xl p-2 rounded-xl bg-slate-100 flex-shrink-0">{strat.emoji}</span>
+                      <span className="text-2xl p-2 rounded-2xl bg-[#FFF2D4] border border-[#FED676] flex-shrink-0">{strat.emoji}</span>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-black text-slate-800 truncate">{strat.title}</p>
                           {strat.isCustom && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-700 text-[10px] font-black">
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-950 border border-amber-300 text-[10px] font-black">
                               Custom
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 truncate">{strat.instruction}</p>
+                        <p className="text-xs text-slate-500 truncate font-medium">{strat.instruction}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
-                        onClick={() => speak(strat.instruction || strat.title)}
-                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer"
+                        onClick={() => {
+                          speak(strat.instruction || strat.title);
+                          playChime('tap');
+                        }}
+                        className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 flex items-center justify-center cursor-pointer active:scale-95"
                         title="Read instruction"
                       >
                         <Volume2 className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => deleteCalmStrategy(strat.id)}
-                        className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center cursor-pointer"
+                        onClick={() => {
+                          deleteCalmStrategy(strat.id);
+                          playChime('tap');
+                        }}
+                        className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center cursor-pointer active:scale-95"
                         title="Delete strategy"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -364,11 +378,14 @@ export const EditCalmModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-xs text-slate-500">Settings are saved automatically to your device.</p>
+        <div className="px-6 py-4 bg-[#FFF9EE] border-t-2 border-amber-200/80 flex items-center justify-between">
+          <p className="text-xs text-amber-900 font-medium">Settings are saved automatically to your device.</p>
           <button
-            onClick={() => setShowEditCalmModal(false)}
-            className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs cursor-pointer shadow-sm"
+            onClick={() => {
+              playChime('tap');
+              setShowEditCalmModal(false);
+            }}
+            className="px-6 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-white font-black text-xs sm:text-sm cursor-pointer shadow-xs active:scale-95"
           >
             Done
           </button>

@@ -182,38 +182,73 @@ export const CopingToolkitModal: React.FC = () => {
   };
 
   const groundingItems = [
-    { title: 'Look Around: 5 things you can see', icon: Eye, prompt: 'Notice colors, shapes, or lights in the room.' },
-    { title: 'Touch Gently: 4 things you can feel', icon: Hand, prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.' },
-    { title: 'Listen Closely: 3 things you can hear', icon: Volume2, prompt: 'Listen to the quiet hum, birds outside, or your own breath.' },
-    { title: 'Smell: 2 scents around you', icon: Wind, prompt: 'Take a soft breath through your nose.' },
-    { title: 'Taste / Sip: 1 cool sip of water', icon: Droplets, prompt: 'Take a gentle swallow or relax your jaw.' },
+    {
+      step: 5,
+      title: 'Look Around: 5 things you can see',
+      prompt: 'Notice colors, shapes, or lights in the room.',
+      stickerSrc: '/assets/stickers/eye_see.png',
+      fallbackIcon: Eye,
+    },
+    {
+      step: 4,
+      title: 'Touch Gently: 4 things you can feel',
+      prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.',
+      stickerSrc: '/assets/stickers/teddy_bear.png',
+      fallbackIcon: Hand,
+    },
+    {
+      step: 3,
+      title: 'Listen Closely: 3 things you can hear',
+      prompt: 'Listen to the quiet hum, birds outside, or your own breath.',
+      stickerSrc: '/assets/stickers/teen_headphones.png',
+      fallbackIcon: Volume2,
+    },
+    {
+      step: 2,
+      title: 'Smell: 2 scents around you',
+      prompt: 'Take a soft breath through your nose.',
+      stickerSrc: '/assets/stickers/calm_wind.png',
+      fallbackIcon: Wind,
+    },
+    {
+      step: 1,
+      title: 'Taste / Sip: 1 cool sip of water',
+      prompt: 'Take a gentle swallow or relax your jaw.',
+      stickerSrc: '/assets/stickers/drink_water.png',
+      fallbackIcon: Droplets,
+    },
   ];
 
-  const toolHeaderConfig: Record<string, { title: string; subtitle: string; icon: any }> = {
+  const toolHeaderConfig: Record<string, { title: string; subtitle: string; icon: any; stickerSrc?: string }> = {
     sound: {
       title: 'Sensory Room Soundscapes',
       subtitle: 'Procedural acoustic masking & soothing sensory frequencies',
       icon: Volume2,
+      stickerSrc: '/assets/stickers/music_sensory.png',
     },
     breathing: {
       title: 'Sensory Breathing Pacer',
       subtitle: 'Follow the gentle bubble to pause, breathe, and reset',
       icon: Wind,
+      stickerSrc: '/assets/stickers/breathing_cloud.png',
     },
     grounding: {
       title: '5-4-3-2-1 Grounding',
       subtitle: 'Sensory countdown to reset during overwhelm',
       icon: Eye,
+      stickerSrc: '/assets/stickers/eye_see.png',
     },
     timer: {
       title: 'Break Timer',
       subtitle: 'Gentle visual timer to pause and reset',
       icon: Timer,
+      stickerSrc: '/assets/stickers/timer_clock.png',
     },
     strategies: {
       title: 'Calming Coping Strategies',
       subtitle: 'Personalized regulation and comfort strategies',
       icon: Heart,
+      stickerSrc: '/assets/stickers/fav_love_heart.png',
     },
   };
 
@@ -223,6 +258,14 @@ export const CopingToolkitModal: React.FC = () => {
     icon: Star,
   };
   const HeaderIcon = headerInfo.icon;
+
+  const quickNeeds = [
+    { text: 'I want a glass of water.', stickerSrc: '/assets/stickers/drink_water.png', fallbackIcon: Droplets },
+    { text: 'Can I have a hug?', stickerSrc: '/assets/stickers/fav_love_heart.png', fallbackIcon: Heart },
+    { text: 'I want to sit quietly.', stickerSrc: '/assets/stickers/fav_quiet_break.png', fallbackIcon: VolumeX },
+    { text: 'I want my comfort item.', stickerSrc: '/assets/stickers/teddy_bear.png', fallbackIcon: Star },
+    { text: 'Can we go home?', stickerSrc: '/assets/stickers/home_house.png', fallbackIcon: Home },
+  ];
 
   return (
     <div
@@ -236,27 +279,40 @@ export const CopingToolkitModal: React.FC = () => {
       }}
     >
       <div
-        className={`bg-white dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
+        className={`bg-[#FFFDF7] dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 border-amber-300 dark:border-amber-500/60 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-teal-50 border-b border-teal-100 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-teal-100/80 border border-teal-200 flex items-center justify-center text-teal-800 shrink-0 shadow-2xs">
-              <HeaderIcon className="w-5 h-5 text-teal-700" aria-hidden="true" />
+        {/* Header - Theme Signature Amber Gradient */}
+        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+              {headerInfo.stickerSrc ? (
+                <img
+                  src={headerInfo.stickerSrc}
+                  alt={headerInfo.title}
+                  className="w-9 h-9 object-contain drop-shadow-xs select-none pointer-events-none"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                    const iconElem = e.currentTarget.parentElement?.querySelector('.header-fallback-icon') as HTMLElement;
+                    if (iconElem) iconElem.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <HeaderIcon className={`w-6 h-6 text-white header-fallback-icon ${headerInfo.stickerSrc ? 'hidden' : 'block'}`} aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-teal-950">{t(headerInfo.title)}</h2>
-              <p className="text-xs text-teal-700 font-medium">{t(headerInfo.subtitle)}</p>
+              <h2 className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-2xs">{t(headerInfo.title)}</h2>
+              <p className="text-xs text-amber-100 font-medium">{t(headerInfo.subtitle)}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => {
+              playChime('tap');
               stopSoundscape();
               setShowCopingToolkit(false);
             }}
-            className="w-10 h-10 min-w-[48px] min-h-[48px] rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-800 active:scale-95 transition-all cursor-pointer flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-2xl bg-white/20 hover:bg-white/30 text-white active:scale-95 transition-all cursor-pointer flex items-center justify-center backdrop-blur-xs focus-visible:ring-4 focus-visible:ring-amber-300 focus-visible:outline-none"
             aria-label="Close"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -265,51 +321,43 @@ export const CopingToolkitModal: React.FC = () => {
 
         {/* Tab Selector - only shown when not on sound tool */}
         {activeTab !== 'sound' && (
-          <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
-            <button
-              onClick={() => selectTab('breathing')}
-              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-                activeTab === 'breathing'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <Wind className="w-4 h-4 shrink-0" />
-              <span>{t('Deep Breathing')}</span>
-            </button>
-            <button
-              onClick={() => selectTab('strategies')}
-              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-                activeTab === 'strategies'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <Heart className="w-4 h-4 shrink-0" />
-              <span>{t('Calm Tools')}</span>
-            </button>
-            <button
-              onClick={() => selectTab('timer')}
-              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-                activeTab === 'timer'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <Timer className="w-4 h-4 shrink-0" />
-              <span>{t('Break Timer')}</span>
-            </button>
-            <button
-              onClick={() => selectTab('grounding')}
-              className={`py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[40px] ${
-                activeTab === 'grounding'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <Eye className="w-4 h-4 shrink-0" />
-              <span>{t('5-4-3-2-1')}</span>
-            </button>
+          <div className="flex border-b-2 border-amber-200/80 bg-[#FFF9EE] p-2 gap-2 overflow-x-auto shrink-0 scrollbar-none">
+            {[
+              { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.png', icon: Wind },
+              { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.png', icon: Heart },
+              { id: 'timer', label: 'Break Timer', stickerSrc: '/assets/stickers/timer_clock.png', icon: Timer },
+              { id: 'grounding', label: '5-4-3-2-1', stickerSrc: '/assets/stickers/eye_see.png', icon: Eye },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    playChime('tap');
+                    selectTab(tab.id as any);
+                  }}
+                  className={`py-2 px-3 sm:px-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[44px] active:scale-95 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm ring-2 ring-amber-300'
+                      : 'bg-white/80 hover:bg-amber-100/70 text-slate-700 border border-amber-200/70'
+                  }`}
+                >
+                  <img
+                    src={tab.stickerSrc}
+                    alt={tab.label}
+                    className="w-5 h-5 object-contain select-none pointer-events-none drop-shadow-2xs"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                      const icon = e.currentTarget.parentElement?.querySelector('.tab-fallback-icon');
+                      if (icon) (icon as HTMLElement).style.display = 'block';
+                    }}
+                  />
+                  <TabIcon className="w-4 h-4 shrink-0 tab-fallback-icon hidden" />
+                  <span>{t(tab.label)}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -321,39 +369,52 @@ export const CopingToolkitModal: React.FC = () => {
           {activeTab === 'breathing' && (
             <div className="flex flex-col items-center justify-center py-4 w-full">
               <div
-                className="w-44 h-44 rounded-full bg-gradient-to-tr from-teal-300 via-cyan-200 to-sky-300 flex items-center justify-center shadow-lg transition-transform duration-1000 ease-in-out border-4 border-white"
+                className="w-48 h-48 rounded-full bg-gradient-to-tr from-amber-300 via-amber-200 to-yellow-300 flex items-center justify-center shadow-lg transition-transform duration-1000 ease-in-out border-4 border-white ring-8 ring-amber-200/50"
                 style={{ transform: `scale(${breatheScale})` }}
               >
-                <div className="w-32 h-32 rounded-full bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center p-2 text-teal-900 shadow-inner">
-                  <Wind className="w-8 h-8 text-teal-600 mb-1" />
-                  <span className="font-black text-sm sm:text-base tracking-tight leading-tight">
+                <div className="w-34 h-34 rounded-full bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-amber-950 shadow-inner">
+                  <img
+                    src="/assets/stickers/calm_wind.png"
+                    alt="Breathe"
+                    className="w-10 h-10 object-contain drop-shadow-2xs select-none pointer-events-none mb-1 animate-pulse"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <span className="font-black text-sm sm:text-base tracking-tight leading-tight text-center text-amber-950">
                     {getBreathePhaseText(breathePhase)}
                   </span>
                 </div>
               </div>
-              <p className="text-slate-600 font-medium text-xs sm:text-sm mt-6 max-w-xs">
+              <p className="text-slate-700 font-medium text-xs sm:text-sm mt-6 max-w-xs text-center leading-relaxed">
                 {t('Follow the gentle bubble. Breathe in slowly through your nose, hold, and breathe out like blowing a dandelion.')}
               </p>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setShowEditCalmModal(true)}
-                  className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200 flex items-center gap-1.5 transition-all cursor-pointer"
+                  onClick={() => {
+                    playChime('tap');
+                    setShowEditCalmModal(true);
+                  }}
+                  className="px-3.5 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-black border-2 border-amber-200/90 flex items-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-95"
                 >
-                  <Sliders className="w-3.5 h-3.5" />
+                  <Sliders className="w-3.5 h-3.5 text-amber-800" />
                   <span>{t('Customize Pace')} ({inhaleSec}s - {holdSec}s - {exhaleSec}s)</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setBreathingAudioEnabled((prev) => !prev)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                  onClick={() => {
+                    playChime('tap');
+                    setBreathingAudioEnabled((prev) => !prev);
+                  }}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-black border-2 flex items-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-95 ${
                     breathingAudioEnabled
-                      ? 'bg-teal-600 text-white border-teal-700 shadow-xs'
-                      : 'bg-teal-50 hover:bg-teal-100 text-teal-800 border-teal-200'
+                      ? 'bg-amber-500 hover:bg-amber-600 text-amber-950 border-amber-600 shadow-xs ring-2 ring-amber-300'
+                      : 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-200/90'
                   }`}
                   aria-label={breathingAudioEnabled ? t('Mute chime cue') : t('Enable chime cue')}
                 >
-                  {breathingAudioEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  {breathingAudioEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-950" /> : <VolumeX className="w-3.5 h-3.5 text-amber-800" />}
                   <span>{breathingAudioEnabled ? t('Chime Sound: On') : t('Chime Sound: Off')}</span>
                 </button>
               </div>
@@ -365,15 +426,18 @@ export const CopingToolkitModal: React.FC = () => {
             <div className="w-full flex flex-col gap-3.5 text-left animate-in fade-in">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800">{t('Calming Coping Strategies')}</h3>
-                  <p className="text-[11px] text-slate-500">{t('Pick a comforting activity to regulate your nervous system')}</p>
+                  <h3 className="text-sm sm:text-base font-black text-[#2D241E]">{t('Calming Coping Strategies')}</h3>
+                  <p className="text-xs text-[#7A4D05] font-semibold">{t('Pick a comforting activity to regulate your nervous system')}</p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowEditCalmModal(true)}
-                  className="px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 text-[11px] font-bold border border-teal-200 flex items-center gap-1 cursor-pointer"
+                  onClick={() => {
+                    playChime('tap');
+                    setShowEditCalmModal(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-black border-2 border-amber-300 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
                 >
-                  <Sliders className="w-3 h-3" />
+                  <Sliders className="w-3.5 h-3.5 text-amber-800" />
                   <span>{t('Customize')}</span>
                 </button>
               </div>
@@ -382,36 +446,36 @@ export const CopingToolkitModal: React.FC = () => {
                 {calmStrategies.map((strat) => (
                   <div
                     key={strat.id}
-                    className="p-3.5 rounded-2xl bg-slate-50 hover:bg-teal-50/70 border border-slate-200 hover:border-teal-300 transition-all flex flex-col justify-between gap-2 shadow-xs group"
+                    className="p-3.5 rounded-2xl bg-white hover:bg-amber-50/50 border-2 border-amber-200/80 hover:border-amber-300 transition-all flex flex-col justify-between gap-2.5 shadow-2xs group"
                   >
                     <div className="flex items-start gap-2.5">
-                      <div className="p-1 rounded-xl bg-white shadow-xs group-hover:scale-105 transition shrink-0 flex items-center justify-center">
+                      <div className="w-11 h-11 p-1 rounded-2xl bg-[#FFF2D4] border border-[#FED676] shadow-2xs group-hover:scale-105 transition shrink-0 flex items-center justify-center">
                         <RoutineStickerIcon emoji={strat.emoji} title={strat.title} className="w-8 h-8 object-contain" />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-black text-slate-800 truncate">{t(strat.title)}</p>
+                          <p className="text-xs sm:text-sm font-black text-slate-800 truncate">{t(strat.title)}</p>
                           {strat.durationMin && (
-                            <span className="text-[9px] font-bold text-teal-700 bg-teal-100 px-1.5 py-0.2 rounded-md">
+                            <span className="text-[10px] font-black text-amber-950 bg-amber-100/90 border border-amber-300/80 px-2 py-0.5 rounded-md shrink-0">
                               {strat.durationMin}m
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2 leading-tight">
+                        <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2 leading-tight font-medium">
                           {t(strat.instruction)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-200/60">
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-amber-100">
                       <button
                         onClick={() => {
                           speak(strat.instruction ? t(strat.instruction) : t(strat.title));
                           playChime('tap');
                         }}
-                        className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[10px] font-bold hover:bg-slate-100 flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95"
                       >
-                        <Volume2 className="w-3 h-3 text-teal-600" />
+                        <Volume2 className="w-3.5 h-3.5 text-amber-700" />
                         <span>{t('Read')}</span>
                       </button>
                       {strat.durationMin && (
@@ -420,9 +484,9 @@ export const CopingToolkitModal: React.FC = () => {
                             startBreakTimer(strat.durationMin || 3);
                             selectTab('timer');
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-white text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                         >
-                          <Timer className="w-3 h-3" />
+                          <Timer className="w-3.5 h-3.5 text-white" />
                           <span>{t('Start')} {strat.durationMin}m {t('Timer')}</span>
                         </button>
                       )}
@@ -436,15 +500,15 @@ export const CopingToolkitModal: React.FC = () => {
           {/* TAB 2: VISUAL BREAK TIMER */}
           {activeTab === 'timer' && (
             <div className="w-full flex flex-col items-center">
-              <div className="text-5xl sm:text-6xl font-black text-slate-800 my-4 font-mono tracking-wider">
+              <div className="text-5xl sm:text-6xl font-black text-[#2D241E] my-4 font-mono tracking-wider drop-shadow-2xs">
                 {Math.floor(timerSecondsLeft / 60)}:
                 {String(timerSecondsLeft % 60).padStart(2, '0')}
               </div>
 
               {/* Progress bar */}
-              <div className="w-full max-w-xs bg-slate-200 h-4 rounded-full overflow-hidden mb-6 border border-slate-300">
+              <div className="w-full max-w-xs bg-amber-100/80 h-4 rounded-full overflow-hidden mb-6 border-2 border-amber-300 shadow-inner">
                 <div
-                  className="bg-teal-500 h-full transition-all duration-1000 rounded-full"
+                  className="bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 h-full transition-all duration-1000 rounded-full"
                   style={{
                     width: `${((timerMinutes * 60 - timerSecondsLeft) / (timerMinutes * 60)) * 100}%`,
                   }}
@@ -457,10 +521,10 @@ export const CopingToolkitModal: React.FC = () => {
                   <button
                     key={mins}
                     onClick={() => startBreakTimer(mins)}
-                    className={`px-4 py-2 rounded-xl font-bold text-sm border-2 transition-all cursor-pointer ${
+                    className={`px-4 py-2 rounded-2xl font-black text-sm border-2 transition-all cursor-pointer active:scale-95 ${
                       timerMinutes === mins && isTimerRunning
-                        ? 'bg-teal-500 text-white border-teal-600 shadow-sm'
-                        : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                        ? 'bg-[#FED676] text-[#2D241E] border-amber-400 shadow-xs ring-2 ring-amber-300'
+                        : 'bg-white hover:bg-amber-50 text-slate-700 border-amber-200/90'
                     }`}
                   >
                     {mins} {t('min')}
@@ -470,21 +534,25 @@ export const CopingToolkitModal: React.FC = () => {
 
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  className={`px-6 py-2.5 rounded-2xl font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer ${
+                  onClick={() => {
+                    playChime('tap');
+                    setIsTimerRunning(!isTimerRunning);
+                  }}
+                  className={`px-6 py-2.5 rounded-2xl font-black text-sm shadow-[0_3px_0_0_#B45309] transition-all active:translate-y-0.5 active:shadow-none cursor-pointer ${
                     isTimerRunning
-                      ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
-                      : 'bg-teal-600 hover:bg-teal-700 text-white'
+                      ? 'bg-amber-400 hover:bg-amber-500 text-amber-950 border border-amber-500'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-white'
                   }`}
                 >
                   {isTimerRunning ? t('Pause Timer') : t('Start Timer')}
                 </button>
                 <button
                   onClick={() => {
+                    playChime('tap');
                     setIsTimerRunning(false);
                     setTimerSecondsLeft(timerMinutes * 60);
                   }}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm cursor-pointer"
+                  className="px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-black text-sm border-2 border-amber-200/90 cursor-pointer active:scale-95"
                 >
                   {t('Reset')}
                 </button>
@@ -493,10 +561,13 @@ export const CopingToolkitModal: React.FC = () => {
               {/* Quick shortcut to open Full Visual Pie Clock */}
               <button
                 type="button"
-                onClick={() => setShowPieTimerModal(true)}
-                className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
+                onClick={() => {
+                  playChime('tap');
+                  setShowPieTimerModal(true);
+                }}
+                className="mt-6 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#FFF2D4] hover:bg-[#FED676]/60 border-2 border-[#FED676] text-amber-950 text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                <Clock className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
+                <img src="/assets/stickers/timer_clock.png" alt="Pie Clock" className="w-5 h-5 object-contain drop-shadow-2xs select-none" />
                 <span>{t('Open Full Pie Clock')}</span>
               </button>
             </div>
@@ -504,29 +575,46 @@ export const CopingToolkitModal: React.FC = () => {
 
           {/* TAB 3: GROUNDING */}
           {activeTab === 'grounding' && (
-            <div className="w-full max-w-md flex flex-col items-center">
-              <div className="w-16 h-16 rounded-3xl bg-teal-100 border-2 border-teal-300 text-teal-800 flex items-center justify-center mb-3 shadow-xs">
-                {React.createElement(groundingItems[groundingStep].icon, { className: 'w-8 h-8 text-teal-700' })}
+            <div className="w-full max-w-md flex flex-col items-center mx-auto text-center py-2">
+              <div className="w-20 h-20 rounded-3xl bg-[#FFF2D4] border-2 border-[#FED676] flex items-center justify-center p-2 mb-3 shadow-xs">
+                {groundingItems[groundingStep].stickerSrc ? (
+                  <img
+                    src={groundingItems[groundingStep].stickerSrc}
+                    alt={groundingItems[groundingStep].title}
+                    className="w-14 h-14 object-contain drop-shadow-xs select-none pointer-events-none"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                      const iconElem = e.currentTarget.parentElement?.querySelector('.grounding-fallback-icon') as HTMLElement;
+                      if (iconElem) iconElem.style.display = 'block';
+                    }}
+                  />
+                ) : null}
+                {React.createElement(groundingItems[groundingStep].fallbackIcon, {
+                  className: `w-10 h-10 text-amber-800 grounding-fallback-icon ${groundingItems[groundingStep].stickerSrc ? 'hidden' : 'block'}`
+                })}
               </div>
-              <h3 className="text-lg font-black text-slate-800 mb-1">
+              <h3 className="text-lg font-black text-[#2D241E] mb-1">
                 {t(groundingItems[groundingStep].title)}
               </h3>
-              <p className="text-slate-600 text-sm font-medium mb-6">
+              <p className="text-slate-600 text-xs sm:text-sm font-medium mb-6 max-w-sm leading-relaxed">
                 {t(groundingItems[groundingStep].prompt)}
               </p>
 
-              <div className="flex items-center gap-2 mb-6">
-                {groundingItems.map((_, idx) => (
+              <div className="flex items-center gap-2.5 mb-6">
+                {groundingItems.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setGroundingStep(idx)}
-                    className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                    onClick={() => {
+                      playChime('tap');
+                      setGroundingStep(idx);
+                    }}
+                    className={`w-9 h-9 rounded-full font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                       groundingStep === idx
-                        ? 'bg-teal-600 text-white ring-2 ring-teal-400'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-amber-500 text-amber-950 ring-2 ring-amber-400 shadow-xs'
+                        : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
                     }`}
                   >
-                    {5 - idx}
+                    {item.step}
                   </button>
                 ))}
               </div>
@@ -542,7 +630,7 @@ export const CopingToolkitModal: React.FC = () => {
                     setGroundingStep(0);
                   }
                 }}
-                className="px-6 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md cursor-pointer"
+                className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-[0_4px_0_0_#B45309] active:translate-y-0.5 active:shadow-none cursor-pointer transition-all"
               >
                 {groundingStep < groundingItems.length - 1 ? t('Next Step') : t('All Finished!')}
               </button>
@@ -566,32 +654,36 @@ export const CopingToolkitModal: React.FC = () => {
 
         {/* Quick Communication Strip - hidden on dedicated sound tool */}
         {activeTab !== 'sound' && (
-          <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200">
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
+          <div className="bg-[#FFF9EE] p-3 sm:p-4 border-t-2 border-amber-200/80">
+            <div className="text-[11px] font-black text-amber-950 uppercase tracking-wider mb-2 text-center">
               {t('Things you can ask for right now:')}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {[
-                { text: 'I want a glass of water.', icon: Droplets },
-                { text: 'Can I have a hug?', icon: Heart },
-                { text: 'I want to sit quietly.', icon: VolumeX },
-                { text: 'I want my comfort item.', icon: Star },
-                { text: 'Can we go home?', icon: Home },
-              ].map((need, idx) => {
-                const IconComp = need.icon;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    aria-label={`Speak phrase: ${need.text}`}
-                    onClick={() => speak(t(need.text))}
-                    className="px-3 py-1.5 min-h-[48px] rounded-xl bg-white hover:bg-teal-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-xs active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
-                  >
-                    <IconComp className="w-4 h-4 text-teal-700 shrink-0" aria-hidden="true" />
-                    <span>{t(need.text)}</span>
-                  </button>
-                );
-              })}
+              {quickNeeds.map((need, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  aria-label={`Speak phrase: ${need.text}`}
+                  onClick={() => {
+                    speak(t(need.text));
+                    playChime('tap');
+                  }}
+                  className="px-3.5 py-2 min-h-[48px] rounded-2xl bg-white hover:bg-amber-100/70 border-2 border-amber-200/90 text-[#2D241E] font-black text-xs sm:text-sm shadow-2xs hover:shadow-xs hover:border-amber-400 active:scale-95 cursor-pointer flex items-center gap-2.5 transition-all focus-visible:ring-4 focus-visible:ring-amber-400 focus-visible:outline-none"
+                >
+                  <img
+                    src={need.stickerSrc}
+                    alt={need.text}
+                    className="w-6 h-6 object-contain drop-shadow-2xs shrink-0 select-none pointer-events-none"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                      const icon = e.currentTarget.parentElement?.querySelector('.need-fallback-icon');
+                      if (icon) (icon as HTMLElement).style.display = 'block';
+                    }}
+                  />
+                  <need.fallbackIcon className="w-4 h-4 text-amber-700 shrink-0 need-fallback-icon hidden" aria-hidden="true" />
+                  <span>{t(need.text)}</span>
+                </button>
+              ))}
             </div>
           </div>
         )}

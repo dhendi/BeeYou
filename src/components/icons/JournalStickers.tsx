@@ -577,8 +577,23 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🦕' || normTitle.includes('comfort item') || normTitle.includes('comfort toy')) return <TeddyBearSticker className={className} size={size} />;
   // 😴 Tired / Rest
   if ((normTitle.includes('tired') && normTitle.includes('rest')) || normTitle.includes('want to rest')) return <FavRestTiredSticker className={className} size={size} />;
-  // 🎧 Listen to Music
+  // 🎧 Listen to Music / Noise-Cancelling Headphones
   if (normTitle.includes('listen to music') || (normEmoji === '🎧' && normTitle.includes('music'))) return <FavMusicSticker className={className} size={size} />;
+  if (normEmoji === '🎧' || normTitle.includes('headphone')) return <TeenHeadphonesSticker className={className} size={size} />;
+  // 👀 / 👁️ 5-4-3-2-1 Grounding / Look Around
+  if (normEmoji === '👀' || normEmoji === '👁️' || normTitle.includes('grounding') || normTitle.includes('5-4-3-2-1')) {
+    return (
+      <img
+        src="/assets/stickers/eye_see.png"
+        alt={title || 'Grounding Senses'}
+        className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
+        style={size ? { width: size, height: size } : undefined}
+        onError={(e) => {
+          (e.currentTarget as HTMLElement).style.display = 'none';
+        }}
+      />
+    );
+  }
   // 🛑 Stop Please / Do not want
   if (normEmoji === '🛑' || normTitle.includes('stop please') || normTitle.includes('do not want this') || normTitle.includes('please stop')) return <FavStopSticker className={className} size={size} />;
   // 😊 Happy
