@@ -18,6 +18,7 @@ import { RoutineTemplate, Routine } from '../types';
 import { PREBUILT_ROUTINE_TEMPLATES } from '../data/routineTemplates';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { useApp } from '../context/AppContext';
 
 interface RoutineTemplatesLibraryProps {
   onQuickImport: (template: RoutineTemplate) => void;
@@ -30,12 +31,16 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
   onCustomizeTemplate,
   existingRoutineTitles,
 }) => {
+  const { activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(null);
 
   const categories = [
     { id: 'all', label: 'All Templates', emoji: '⭐' },
+    ...(isTurtleTheme ? [{ id: 'special', label: 'Turtle Sanctuary', emoji: '🐢' }] : []),
     { id: 'morning', label: 'Morning', emoji: '🌅' },
     { id: 'school', label: 'School Day', emoji: '🏫' },
     { id: 'bedtime', label: 'Bedtime', emoji: '🌙' },
@@ -60,16 +65,24 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
   };
 
   return (
-    <div className="bg-gradient-to-b from-amber-50/60 to-white border-2 border-amber-200/90 rounded-3xl p-5 sm:p-6 space-y-5">
+    <div className={`border-2 rounded-3xl p-5 sm:p-6 space-y-5 ${
+      isTurtleTheme
+        ? 'bg-gradient-to-b from-emerald-50/70 to-white border-emerald-200/90'
+        : 'bg-gradient-to-b from-amber-50/60 to-white border-amber-200/90'
+    }`}>
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 pb-4">
+      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 ${
+        isTurtleTheme ? 'border-emerald-100' : 'border-amber-100'
+      }`}>
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
-              <Star className="w-5 h-5" />
+            <div className={`w-8 h-8 rounded-xl text-white flex items-center justify-center font-black shadow-xs ${
+              isTurtleTheme ? 'bg-emerald-600' : 'bg-amber-500'
+            }`}>
+              {isTurtleTheme ? '🐢' : <Star className="w-5 h-5" />}
             </div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900">
-              Pre-Built Routine Templates Library
+              {isTurtleTheme ? 'Wise Turtle Sanctuary Routine Library' : 'Pre-Built Routine Templates Library'}
             </h3>
           </div>
           <p className="text-xs text-slate-600 font-medium mt-1">
@@ -86,7 +99,11 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search templates..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:outline-amber-500 focus:border-amber-400"
+            className={`w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs text-slate-800 placeholder:font-normal placeholder:text-slate-400 ${
+              isTurtleTheme
+                ? 'focus:outline-emerald-500 focus:border-emerald-400'
+                : 'focus:outline-amber-500 focus:border-amber-400'
+            }`}
           />
         </div>
       </div>
@@ -104,8 +121,12 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs shrink-0 transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-amber-500 text-white shadow-xs scale-102'
-                  : 'bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300'
+                  ? isTurtleTheme
+                    ? 'bg-emerald-600 text-white shadow-xs scale-102'
+                    : 'bg-amber-500 text-white shadow-xs scale-102'
+                  : isTurtleTheme
+                    ? 'bg-white text-slate-600 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-300'
+                    : 'bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300'
               }`}
             >
               <RoutineStickerIcon emoji={cat.emoji} title={cat.label} className="w-4 h-4 object-contain" />
@@ -261,7 +282,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                     className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
                     title="Customize steps, times, and First/Then before importing"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                    <Edit3 className={`w-3.5 h-3.5 ${isTurtleTheme ? 'text-emerald-600' : 'text-amber-600'}`} />
                     <span>Customize</span>
                   </button>
 
@@ -274,7 +295,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                     className={`px-3.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer ${
                       isAlreadyImported
                         ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                        : 'bg-amber-500 hover:bg-amber-600 text-white'
+                        : isTurtleTheme
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                          : 'bg-amber-500 hover:bg-amber-600 text-white'
                     }`}
                     title="Add directly to child active routines"
                   >

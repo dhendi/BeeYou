@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { TurtleBambooThermometerSticker } from './icons/JournalStickers';
 
 const getLevelIcon = (level: number) => {
   switch (level) {
@@ -49,7 +50,10 @@ export const FivePointScaleModal: React.FC = () => {
     activateEmergencyMode,
     speak,
     announce,
+    activeTheme,
   } = useApp();
+
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
@@ -93,15 +97,24 @@ export const FivePointScaleModal: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{t('Incredible 5-Point Scale')}</p>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white">{t('How do I feel right now?')}</h2>
+          <div className="flex items-center gap-2.5">
+            {isTurtleTheme && (
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-center p-1 shadow-xs shrink-0">
+                <TurtleBambooThermometerSticker className="w-full h-full object-contain" />
+              </div>
+            )}
+            <div>
+              <p className={`text-[10px] font-black uppercase tracking-widest ${isTurtleTheme ? 'text-emerald-800' : 'text-slate-400 dark:text-slate-500'}`}>
+                {isTurtleTheme ? t('Wise Turtle Regulation Scale') : t('Incredible 5-Point Scale')}
+              </p>
+              <h2 className="text-xl font-black text-slate-800 dark:text-white">{t('How do I feel right now?')}</h2>
+            </div>
           </div>
           <button
             type="button"
             aria-label={t('Close emotional scale modal')}
             onClick={() => setShowFivePointModal(false)}
-            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer active:scale-95 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer active:scale-95 focus-visible:ring-4 ${isTurtleTheme ? 'focus-visible:ring-emerald-500/70' : 'focus-visible:ring-amber-500/70'} focus-visible:outline-none`}
           >
             <X className="w-5 h-5 text-slate-600 dark:text-slate-300" aria-hidden="true" />
           </button>

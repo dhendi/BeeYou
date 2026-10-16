@@ -45,7 +45,10 @@ export const CopingToolkitModal: React.FC = () => {
     copingToolkitTab,
     setCopingToolkitTab,
     settings,
+    activeTheme,
   } = useApp();
+
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const activeTab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound' = copingToolkitTab || 'breathing';
 
@@ -224,31 +227,31 @@ export const CopingToolkitModal: React.FC = () => {
       title: 'Sensory Room Soundscapes',
       subtitle: 'Procedural acoustic masking & soothing sensory frequencies',
       icon: Volume2,
-      stickerSrc: '/assets/stickers/music_sensory.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_pond_reeds.png' : '/assets/stickers/music_sensory.png',
     },
     breathing: {
       title: 'Sensory Breathing Pacer',
       subtitle: 'Follow the gentle bubble to pause, breathe, and reset',
       icon: Wind,
-      stickerSrc: '/assets/stickers/breathing_cloud.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_lagoon_breeze_breath.png' : '/assets/stickers/breathing_cloud.png',
     },
     grounding: {
       title: '5-4-3-2-1 Grounding',
       subtitle: 'Sensory countdown to reset during overwhelm',
       icon: Eye,
-      stickerSrc: '/assets/stickers/eye_see.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_river_stone.png' : '/assets/stickers/eye_see.png',
     },
     timer: {
       title: 'Break Timer',
       subtitle: 'Gentle visual timer to pause and reset',
       icon: Timer,
-      stickerSrc: '/assets/stickers/timer_clock.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_sand_timer.png' : '/assets/stickers/timer_clock.png',
     },
     strategies: {
       title: 'Calming Coping Strategies',
       subtitle: 'Personalized regulation and comfort strategies',
       icon: Heart,
-      stickerSrc: '/assets/stickers/fav_love_heart.png',
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : '/assets/stickers/fav_love_heart.png',
     },
   };
 
@@ -260,11 +263,11 @@ export const CopingToolkitModal: React.FC = () => {
   const HeaderIcon = headerInfo.icon;
 
   const quickNeeds = [
-    { text: 'I want a glass of water.', stickerSrc: '/assets/stickers/drink_water.png', fallbackIcon: Droplets },
+    { text: 'I want a glass of water.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_bamboo_drink_cup.png' : '/assets/stickers/drink_water.png', fallbackIcon: Droplets },
     { text: 'Can I have a hug?', stickerSrc: '/assets/stickers/fav_love_heart.png', fallbackIcon: Heart },
-    { text: 'I want to sit quietly.', stickerSrc: '/assets/stickers/fav_quiet_break.png', fallbackIcon: VolumeX },
-    { text: 'I want my comfort item.', stickerSrc: '/assets/stickers/teddy_bear.png', fallbackIcon: Star },
-    { text: 'Can we go home?', stickerSrc: '/assets/stickers/home_house.png', fallbackIcon: Home },
+    { text: 'I want to sit quietly.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_whispering_reed_quiet.png' : '/assets/stickers/fav_quiet_break.png', fallbackIcon: VolumeX },
+    { text: 'I want my comfort item.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : '/assets/stickers/teddy_bear.png', fallbackIcon: Star },
+    { text: 'Can we go home?', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_moss_cottage_home.png' : '/assets/stickers/home_house.png', fallbackIcon: Home },
   ];
 
   return (
@@ -279,11 +282,11 @@ export const CopingToolkitModal: React.FC = () => {
       }}
     >
       <div
-        className={`bg-[#FFFDF7] dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 border-amber-300 dark:border-amber-500/60 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
+        className={`bg-[#FFFDF7] dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${isTurtleTheme ? 'border-emerald-300 dark:border-emerald-500/60' : 'border-amber-300 dark:border-amber-500/60'} overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Theme Signature Amber Gradient */}
-        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-xs">
+        {/* Header */}
+        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800' : 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500'} p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-xs`}>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
               {headerInfo.stickerSrc ? (

@@ -1,6 +1,65 @@
 import { RoutineTemplate } from '../types';
 
 export const PREBUILT_ROUTINE_TEMPLATES: RoutineTemplate[] = [
+  // --- WISE TURTLE SANCTUARY TEMPLATE ---
+  {
+    id: 'template-wise-turtle-calm',
+    title: 'Wise Turtle Sanctuary Calm Routine',
+    category: 'special',
+    emoji: '🐢',
+    time: '8:30 AM',
+    description: 'A slow-paced, grounding sensory flow inspired by the Wise Turtle Sanctuary to soothe nervous systems and regulate energy.',
+    recommendedFor: 'Anyone feeling hurried, overwhelmed, or needing mindful pacing and deep body grounding.',
+    firstThen: {
+      first: 'Turtle Lagoon deep breath & water sip',
+      firstEmoji: '🐢',
+      then: 'Cozy sanctuary quiet time',
+      thenEmoji: '🍵',
+    },
+    steps: [
+      {
+        title: 'Morning Lagoon Stretch',
+        instruction: 'Slowly uncurl your shell, stretch your arms out wide like warm flippers, and yawn gently.',
+        durationMin: 5,
+        emoji: '🐢',
+        sensoryNote: 'Move at your own gentle pace. No rush, no timers counting down loudly.',
+        communicationShortcutPhrases: ['Taking my time', 'Moving slowly', 'Feeling calm'],
+      },
+      {
+        title: 'Sip Cool Fresh Water',
+        instruction: 'Drink a calming cup of clean water from your bamboo cup. Feel the cool sensation in your throat.',
+        durationMin: 3,
+        emoji: '🍵',
+        sensoryNote: 'Room temperature or cool water helps activate the soothing vagal nerve response.',
+        communicationShortcutPhrases: ['Water tastes refreshing', 'Drinking slowly'],
+      },
+      {
+        title: 'Slow Deep Turtle Breath',
+        instruction: 'Inhale through your nose like sweet morning pond breeze... hold... and gently exhale like ripples on the lake.',
+        durationMin: 4,
+        emoji: '🍃',
+        sensoryNote: '4-second inhale, 4-second hold, 6-second exhale. Repeat 3 soothing cycles.',
+        communicationShortcutPhrases: ['Breathing with the turtle', 'My body is relaxed'],
+      },
+      {
+        title: 'River Stone Grounding',
+        instruction: 'Hold a smooth stone or sensory fidget in both hands. Feel its solid weight anchoring you to the earth.',
+        durationMin: 5,
+        emoji: '🪨',
+        sensoryNote: 'Tactile sensory weight helps quiet busy thoughts and nervous fluttering.',
+        communicationShortcutPhrases: ['Holding my calm stone', 'Safe and steady'],
+      },
+      {
+        title: 'Step Into the Day with Steady Paces',
+        instruction: 'Put on your soft socks and shoes. Stand tall and take slow, steady turtle steps into your day.',
+        durationMin: 5,
+        emoji: '👟',
+        sensoryNote: 'Remember: Slow and steady builds the most peaceful day.',
+        communicationShortcutPhrases: ['I am ready', 'One step at a time'],
+      },
+    ],
+  },
+
   // --- MORNING TEMPLATES ---
   {
     id: 'template-morning-calm',

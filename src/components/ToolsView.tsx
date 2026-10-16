@@ -13,6 +13,11 @@ import {
   TurtlePondReedsSticker,
   TurtleRiverStoneSticker,
   TurtlePottedFernSticker,
+  TurtlePondFidgetBubblesSticker,
+  TurtleSandTimerSticker,
+  TurtleWoodenWheelSticker,
+  TurtleBambooSpoonsSticker,
+  TurtleBambooThermometerSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
@@ -56,7 +61,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Fidget & Play',
       badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
       color: 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950',
-      Sticker: FidgetBubblesSticker,
+      Sticker: isTurtleTheme ? TurtlePondFidgetBubblesSticker : FidgetBubblesSticker,
       action: () => setShowFidgetModal(true),
     },
 
@@ -81,8 +86,8 @@ export const ToolsView: React.FC = () => {
       desc: 'Tactile circular Time Timer countdown clock to clearly visualize remaining time and transitions.',
       badge: 'Visual Clock',
       badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
-      color: 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
-      Sticker: CountdownTimerSticker,
+      color: isTurtleTheme ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950' : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
+      Sticker: isTurtleTheme ? TurtleSandTimerSticker : CountdownTimerSticker,
       action: () => setShowPieTimerModal(true),
     },
 
@@ -121,7 +126,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Choice Spinner',
       badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
       color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
-      Sticker: DecisionWheelSticker,
+      Sticker: isTurtleTheme ? TurtleWoodenWheelSticker : DecisionWheelSticker,
       action: () => setShowDecisionWheelModal(true),
     },
 
@@ -134,7 +139,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Emotion Scale',
       badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
       color: 'border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950',
-      Sticker: ThermometerSticker,
+      Sticker: isTurtleTheme ? TurtleBambooThermometerSticker : ThermometerSticker,
       action: () => setShowFivePointModal(true),
     },
 
@@ -146,8 +151,8 @@ export const ToolsView: React.FC = () => {
       desc: 'Track daily physical and social energy spoons to pace yourself and prevent burnout.',
       badge: 'Energy Tracker',
       badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
-      color: 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
-      Sticker: SpoonSticker,
+      color: isTurtleTheme ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950' : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
+      Sticker: isTurtleTheme ? TurtleBambooSpoonsSticker : SpoonSticker,
       action: () => setShowSpoonModal(true),
     },
   ];

@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, Play, Pause, RotateCcw, Plus, Minus, Volume2, VolumeX, Star, Clock } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { TurtleSandTimerSticker } from './icons/JournalStickers';
 
 const PRESETS = [
   { minutes: 1, seconds: 60 },
@@ -22,7 +23,8 @@ function formatTime(s: number) {
 }
 
 export const PieTimerModal: React.FC = () => {
-  const { showPieTimerModal, setShowPieTimerModal, announce } = useApp();
+  const { showPieTimerModal, setShowPieTimerModal, announce, activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const [, setLangVersion] = useState(0);
   useEffect(() => {
@@ -71,17 +73,17 @@ export const PieTimerModal: React.FC = () => {
   // Status colors based on remaining percentage
   const getColor = useCallback(() => {
     if (isFinished) return '#10b981'; // Green celebrate
-    if (pct > 0.5) return '#10b981'; // Emerald
-    if (pct > 0.2) return '#f59e0b'; // Amber
+    if (pct > 0.5) return '#059669'; // Emerald
+    if (pct > 0.2) return isTurtleTheme ? '#0d9488' : '#f59e0b'; // Teal/Amber
     return '#ef4444'; // Red
-  }, [isFinished, pct]);
+  }, [isFinished, pct, isTurtleTheme]);
 
   const getGradientId = useCallback(() => {
     if (isFinished) return 'url(#pie-grad-green)';
     if (pct > 0.5) return 'url(#pie-grad-green)';
-    if (pct > 0.2) return 'url(#pie-grad-amber)';
+    if (pct > 0.2) return isTurtleTheme ? 'url(#pie-grad-green)' : 'url(#pie-grad-amber)';
     return 'url(#pie-grad-red)';
-  }, [isFinished, pct]);
+  }, [isFinished, pct, isTurtleTheme]);
 
   const getPhaseKey = useCallback(() => {
     if (pct > 0.5) return 'plenty';
@@ -202,12 +204,16 @@ export const PieTimerModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
-              <Clock className="w-5 h-5" aria-hidden="true" />
+            <div className={`w-9 h-9 rounded-xl ${isTurtleTheme ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800'} border flex items-center justify-center p-1 shadow-xs`}>
+              {isTurtleTheme ? (
+                <TurtleSandTimerSticker className="w-full h-full object-contain" />
+              ) : (
+                <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+              )}
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                {t('Visual Time Timer')}
+                {isTurtleTheme ? t('Wise Turtle Sanctuary Timer') : t('Visual Time Timer')}
               </p>
               <h2 id="pie-timer-title" className="text-lg font-black text-slate-800 dark:text-slate-100">
                 {t('Pie Clock')}
@@ -221,7 +227,7 @@ export const PieTimerModal: React.FC = () => {
               setIsRunning(false);
             }}
             aria-label={t('Close Pie Clock')}
-            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+            className={`w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all active:scale-95 focus-visible:ring-4 ${isTurtleTheme ? 'focus-visible:ring-emerald-500/70' : 'focus-visible:ring-amber-500/70'} focus-visible:outline-none`}
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>

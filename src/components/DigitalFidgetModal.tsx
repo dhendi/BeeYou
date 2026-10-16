@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { TurtlePondFidgetBubblesSticker } from './icons/JournalStickers';
 
 // ── Web Audio Synthesizer for Realistic Tactile Feedback ───────────────────────
 class FidgetAudioEngine {
@@ -321,7 +322,7 @@ const triggerHaptic = (ms = 25, enabled = true) => {
 };
 
 // ── TOY 1: Multi-Shape Pop-It Bubble Wrap ─────────────────────────────────────
-type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb';
+type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb' | 'turtle_shell';
 
 const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
   grid: [
@@ -353,6 +354,14 @@ const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
     [1, 1, 1, 1, 1],
     [1, 1, 1, 1, 1],
     [0, 1, 1, 1, 0],
+  ],
+  turtle_shell: [
+    [0, 0, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 0, 0],
   ],
 };
 
@@ -439,6 +448,7 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
             { id: 'heart' as const, label: 'Heart', icon: Heart },
             { id: 'star' as const, label: 'Star', icon: Star },
             { id: 'honeycomb' as const, label: 'Hex', icon: Layers },
+            { id: 'turtle_shell' as const, label: 'Shell', icon: CircleDot },
           ].map((s) => {
             const Icon = s.icon;
             return (
@@ -1367,7 +1377,8 @@ const FidgetCubeWorryStoneToy: React.FC<FidgetCubeProps> = ({ soundEnabled, hapt
 type FidgetCategory = 'pop' | 'bubblewrap' | 'switches' | 'spinner' | 'toggles' | 'slime' | 'starlight' | 'cube';
 
 export const DigitalFidgetModal: React.FC = () => {
-  const { showFidgetModal, setShowFidgetModal, settings, updateSettings } = useApp();
+  const { showFidgetModal, setShowFidgetModal, settings, updateSettings, activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const [activeFidget, setActiveFidget] = useState<FidgetCategory>('pop');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [hapticEnabled, setHapticEnabled] = useState<boolean>(true);
@@ -1406,9 +1417,18 @@ export const DigitalFidgetModal: React.FC = () => {
       >
         {/* Top Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('Tappy-Style Sensory Hub')}</p>
-            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">{t('Tactile Fidget Toys')}</h2>
+          <div className="flex items-center gap-2.5">
+            {isTurtleTheme && (
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-center p-1 shadow-xs shrink-0">
+                <TurtlePondFidgetBubblesSticker className="w-full h-full object-contain" />
+              </div>
+            )}
+            <div>
+              <p className={`text-[10px] font-black uppercase tracking-widest ${isTurtleTheme ? 'text-emerald-800' : 'text-indigo-500'}`}>
+                {isTurtleTheme ? t('Wise Turtle Sensory Pond') : t('Tappy-Style Sensory Hub')}
+              </p>
+              <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">{t('Tactile Fidget Toys')}</h2>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5">

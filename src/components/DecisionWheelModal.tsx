@@ -4,6 +4,7 @@ import { X, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { DecisionWheelOption } from '../types';
 import { t } from '../services/translator';
+import { TurtleWoodenWheelSticker } from './icons/JournalStickers';
 
 function polarToXY(cx: number, cy: number, r: number, angle: number) {
   return {
@@ -20,7 +21,10 @@ export const DecisionWheelModal: React.FC = () => {
     updateDecisionWheelConfig,
     speak,
     announce,
+    activeTheme,
   } = useApp();
+
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const [, setLangVersion] = useState(0);
   useEffect(() => {
@@ -125,15 +129,26 @@ export const DecisionWheelModal: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-slate-100 shrink-0">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('Choice Paralysis Helper')}</p>
-            <h2 className="text-xl font-black text-slate-800">{t('Decision Wheel')}</h2>
+          <div className="flex items-center gap-2.5">
+            {isTurtleTheme && (
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-center p-1 shadow-xs shrink-0">
+                <TurtleWoodenWheelSticker className="w-full h-full object-contain" />
+              </div>
+            )}
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                {isTurtleTheme ? t('Wise Turtle Sanctuary Spinner') : t('Choice Paralysis Helper')}
+              </p>
+              <h2 className="text-xl font-black text-slate-800">{t('Decision Wheel')}</h2>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setEditMode((v) => !v)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                editMode ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-100 text-slate-700 border-slate-200'
+                editMode 
+                  ? isTurtleTheme ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-indigo-600 text-white border-indigo-500' 
+                  : 'bg-slate-100 text-slate-700 border-slate-200'
               }`}
             >
               {editMode ? t('Done') : t('Edit')}
@@ -205,8 +220,8 @@ export const DecisionWheelModal: React.FC = () => {
 
         {/* Winner reveal */}
         {winner && !spinning && (
-          <div className="text-center px-5 py-4 rounded-3xl bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 w-full">
-            <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-1">{t('The wheel chose!')}</p>
+          <div className={`text-center px-5 py-4 rounded-3xl ${isTurtleTheme ? 'bg-gradient-to-br from-emerald-50 to-teal-100 border-2 border-emerald-300' : 'bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300'} w-full`}>
+            <p className={`text-xs font-black uppercase tracking-widest ${isTurtleTheme ? 'text-emerald-800' : 'text-amber-700'} mb-1`}>{t('The wheel chose!')}</p>
             <h3 className="text-2xl font-black text-slate-800">{t(winner.label)}</h3>
           </div>
         )}
@@ -215,7 +230,7 @@ export const DecisionWheelModal: React.FC = () => {
         <button
           onClick={spin}
           disabled={spinning || count < 2}
-          className="w-full py-4 rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl shadow-lg shadow-indigo-300/50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+          className={`w-full py-4 rounded-3xl ${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 shadow-emerald-300/50' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-indigo-300/50'} text-white font-black text-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2`}
         >
           <RotateCcw className={`w-6 h-6 ${spinning ? 'animate-spin' : ''}`} />
           <span>{spinning ? t('Spinning...') : t('Spin the Wheel!')}</span>

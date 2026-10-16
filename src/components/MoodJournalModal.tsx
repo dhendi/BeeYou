@@ -25,7 +25,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { RoutineStickerIcon } from './icons/JournalStickers';
+import { RoutineStickerIcon, TurtleRiverStoneSticker } from './icons/JournalStickers';
+import { ThemedEmotionFace } from './ThemedEmotionFace';
 import { MoodJournalEmotion, MoodTriggerCategory, CopingStrategyUsed, MoodJournalEntry } from '../types';
 
 export const MoodJournalModal: React.FC = () => {
@@ -38,7 +39,31 @@ export const MoodJournalModal: React.FC = () => {
     speak,
     childProfile,
     userAgeGroup,
+    activeTheme,
   } = useApp();
+
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+
+  const MOOD_TO_EMOTION_MAP: Record<string, string> = {
+    peaceful: 'calm',
+    content: 'happy',
+    inspired: 'excited',
+    energized: 'excited',
+    confident: 'happy',
+    grateful: 'happy',
+    focused: 'calm',
+    reflective: 'calm',
+    melancholic: 'sad',
+    sensitive: 'worried',
+    spacey: 'confused',
+    anxious: 'worried',
+    overwhelmed: 'overwhelmed',
+    irritable: 'angry',
+    exhausted: 'tired',
+    sad: 'sad',
+    lonely: 'sad',
+    frustrated: 'frustrated',
+  };
 
   const [activeTab, setActiveTab] = useState<'new' | 'history' | 'insights'>('new');
   const [selectedMood, setSelectedMood] = useState<MoodJournalEmotion>('reflective');
@@ -170,21 +195,31 @@ export const MoodJournalModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 border-indigo-100 overflow-hidden">
+      <div className={`bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 overflow-hidden ${
+        isTurtleTheme ? 'border-emerald-200' : 'border-indigo-100'
+      }`}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-slate-900 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
+        <div className={`p-4 sm:p-5 text-white flex items-center justify-between shrink-0 ${
+          isTurtleTheme
+            ? 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-900 border-b border-emerald-600'
+            : 'bg-gradient-to-r from-purple-700 via-indigo-700 to-slate-900'
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner backdrop-blur-xs">
-              📖
+            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner backdrop-blur-xs p-1">
+              {isTurtleTheme ? (
+                <TurtleRiverStoneSticker className="w-8 h-8 object-contain" />
+              ) : (
+                '📖'
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {userAgeGroup === 'adult' ? 'Personal Journal' : 'Teen Reflection'}
+                  {isTurtleTheme ? 'Turtle Sanctuary Reflection' : userAgeGroup === 'adult' ? 'Personal Journal' : 'Teen Reflection'}
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
-                Mood & Emotional Journal
+                {isTurtleTheme ? 'Wise Turtle Sanctuary Journal' : 'Mood & Emotional Journal'}
               </h2>
             </div>
           </div>
@@ -212,7 +247,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'new'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
+                ? isTurtleTheme
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
+                  : 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
@@ -228,7 +265,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
+                ? isTurtleTheme
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
+                  : 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
@@ -244,7 +283,9 @@ export const MoodJournalModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'insights'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
+                ? isTurtleTheme
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-300'
+                  : 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
@@ -263,11 +304,15 @@ export const MoodJournalModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <span>1. Primary Emotional State</span>
-                    <span className="text-purple-600">*</span>
+                    <span className={isTurtleTheme ? 'text-emerald-600' : 'text-purple-600'}>*</span>
                   </label>
                   <span className="text-xs font-bold text-slate-500 inline-flex items-center gap-1.5">
                     Selected: {moodOptions.find((m) => m.id === selectedMood)?.label}
-                    <RoutineStickerIcon emoji={moodOptions.find((m) => m.id === selectedMood)?.emoji || '😊'} className="w-4 h-4 object-contain inline-block" />
+                    {isTurtleTheme && MOOD_TO_EMOTION_MAP[selectedMood] ? (
+                      <ThemedEmotionFace emotionId={MOOD_TO_EMOTION_MAP[selectedMood] as any} theme={activeTheme} className="w-5 h-5 inline-block" />
+                    ) : (
+                      <RoutineStickerIcon emoji={moodOptions.find((m) => m.id === selectedMood)?.emoji || '😊'} className="w-4 h-4 object-contain inline-block" />
+                    )}
                   </span>
                 </div>
 
@@ -284,12 +329,18 @@ export const MoodJournalModal: React.FC = () => {
                         }}
                         className={`p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer text-center ${
                           isSelected
-                            ? `${opt.bg} ring-2 ring-indigo-500 scale-102 shadow-xs font-black`
+                            ? isTurtleTheme
+                              ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500 text-emerald-950 scale-102 shadow-xs font-black'
+                              : `${opt.bg} ring-2 ring-indigo-500 scale-102 shadow-xs font-black`
                             : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold'
                         }`}
                       >
                         <div className="w-8 h-8 flex items-center justify-center">
-                          <RoutineStickerIcon emoji={opt.emoji} className="w-8 h-8 object-contain" />
+                          {isTurtleTheme && MOOD_TO_EMOTION_MAP[opt.id] ? (
+                            <ThemedEmotionFace emotionId={MOOD_TO_EMOTION_MAP[opt.id] as any} theme={activeTheme} className="w-8 h-8" />
+                          ) : (
+                            <RoutineStickerIcon emoji={opt.emoji} className="w-8 h-8 object-contain" />
+                          )}
                         </div>
                         <span className="text-xs truncate w-full">{opt.label}</span>
                       </button>
@@ -486,9 +537,13 @@ export const MoodJournalModal: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-sm shadow-md shadow-indigo-200 cursor-pointer transition-all flex items-center gap-2"
+                  className={`px-6 py-2.5 rounded-2xl active:scale-95 text-white font-black text-sm shadow-md cursor-pointer transition-all flex items-center gap-2 ${
+                    isTurtleTheme
+                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+                      : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'
+                  }`}
                 >
-                  <Star className="w-4 h-4 fill-indigo-200" />
+                  <Star className={`w-4 h-4 ${isTurtleTheme ? 'fill-emerald-200' : 'fill-indigo-200'}`} />
                   <span>Save Journal Entry</span>
                 </button>
               </div>
