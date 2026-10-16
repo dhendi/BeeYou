@@ -9,13 +9,23 @@ export interface ThemeWallpaperArtProps {
   wallpaperUrl?: string;
 }
 
+interface ViewportZoomState {
+  zoomFactor: number;
+  pinchLeft: number;
+  pinchTop: number;
+}
+
 /**
  * useViewportZoom — Clean, reliable zoom detector.
  * Tracks desktop page zoom (Ctrl +/- / Cmd +/-) via relative devicePixelRatio
  * and mobile/tablet pinch-to-zoom via VisualViewport scale.
  */
-function useViewportZoom(): number {
-  const [zoomFactor, setZoomFactor] = useState(1);
+function useViewportZoom(): ViewportZoomState {
+  const [zoomState, setZoomState] = useState<ViewportZoomState>({
+    zoomFactor: 1,
+    pinchLeft: 0,
+    pinchTop: 0,
+  });
   const baseDprRef = useRef<number>(1);
 
   useEffect(() => {
@@ -33,13 +43,20 @@ function useViewportZoom(): number {
       } catch {}
     }
 
-    const computeZoom = () => {
+    const computeZoom = (): ViewportZoomState => {
       const dpr = window.devicePixelRatio || 1;
       const base = baseDprRef.current || 1;
       const pageZoom = base > 0 ? dpr / base : 1;
-      const pinchZoom = window.visualViewport?.scale || 1;
+      const vv = window.visualViewport;
+      const pinchZoom = vv?.scale || 1;
+      const pinchLeft = vv && pinchZoom > 1.01 ? vv.offsetLeft : 0;
+      const pinchTop = vv && pinchZoom > 1.01 ? vv.offsetTop : 0;
       const total = Math.max(0.33, Math.min(4.0, pageZoom * pinchZoom));
-      return Math.round(total * 1000) / 1000;
+      return {
+        zoomFactor: Math.round(total * 1000) / 1000,
+        pinchLeft: Math.round(pinchLeft),
+        pinchTop: Math.round(pinchTop),
+      };
     };
 
     let rafId: number;
@@ -47,7 +64,13 @@ function useViewportZoom(): number {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         const next = computeZoom();
-        setZoomFactor((prev) => (Math.abs(prev - next) > 0.005 ? next : prev));
+        setZoomState((prev) =>
+          Math.abs(prev.zoomFactor - next.zoomFactor) > 0.005 ||
+          Math.abs(prev.pinchLeft - next.pinchLeft) > 1 ||
+          Math.abs(prev.pinchTop - next.pinchTop) > 1
+            ? next
+            : prev
+        );
       });
     };
 
@@ -87,7 +110,7 @@ function useViewportZoom(): number {
     };
   }, []);
 
-  return zoomFactor;
+  return zoomState;
 }
 
 /**
@@ -96,10 +119,10 @@ function useViewportZoom(): number {
  * and cognitive clutter for neurodivergent and sensory-sensitive users.
  *
  * Features:
- * 1. Clean, authentic Japanese oat-milk paper artwork with delicate doodle honeycombs, clouds, and stars.
- * 2. High-definition seamless repeating wallpaper: avoids stretching blur on 1080p, 1440p, 4K, and Retina displays.
+ * 1. Single Ultra-HD full-screen background (NO repeating tiles or vertical seams).
+ * 2. 4K Ultra-HD resolution asset (4096x2284) with crisp, authentic hand-drawn watercolor details.
  * 3. Invariant zoom scaling: When zooming in (browser zoom Ctrl +/- or pinch zoom),
- *    the background size dynamically counter-scales so the wallpaper remains at true 1:1 physical scale and does not zoom in.
+ *    the background dynamically counter-scales so the wallpaper does NOT zoom in.
  */
 export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
   pattern,
@@ -128,14 +151,7 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
         ? '/assets/wallpapers/default_honey_theme_bg.webp'
         : undefined);
 
-  const zoomFactor = useViewportZoom();
-
-  // Native tile dimensions of the clean artwork
-  const tileWidth = 1024;
-  const tileHeight = 571;
-
-  // Counter-scale tile size so background elements never magnify on zoom
-  const computedTileSize = `${Math.round((tileWidth / zoomFactor) * 10) / 10}px ${Math.round((tileHeight / zoomFactor) * 10) / 10}px`;
+  const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
   const bgColor = isTurtleSanctuary ? '#F7F2E2' : '#FEF9F1';
 
@@ -143,18 +159,28 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     <div
       aria-hidden="true"
       className={`fixed inset-0 pointer-events-none select-none overflow-hidden z-0 ${className}`}
-      style={
-        effectiveWallpaper
-          ? {
-              backgroundColor: bgColor,
-              backgroundImage: `url('${effectiveWallpaper}')`,
-              backgroundRepeat: 'repeat',
-              backgroundPosition: 'center center',
-              backgroundSize: computedTileSize,
-            }
-          : undefined
-      }
+      style={effectiveWallpaper ? { backgroundColor: bgColor } : undefined}
     >
+      {effectiveWallpaper && (
+        <div
+          className="absolute pointer-events-none select-none will-change-transform"
+          style={{
+            top: '50%',
+            left: '50%',
+            width: `${100 * zoomFactor}%`,
+            height: `${100 * zoomFactor}%`,
+            minWidth: `${100 * zoomFactor}%`,
+            minHeight: `${100 * zoomFactor}%`,
+            transform: `translate(calc(-50% + ${pinchLeft}px), calc(-50% + ${pinchTop}px)) scale(${1 / zoomFactor})`,
+            transformOrigin: 'center center',
+            backgroundImage: `url('${effectiveWallpaper}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+
       {/* Subtle ambient lighting overlay to ensure clean card readability and low glare */}
       <div className="absolute inset-0 bg-radial from-white/30 via-transparent to-black/[0.02] pointer-events-none" />
     </div>
