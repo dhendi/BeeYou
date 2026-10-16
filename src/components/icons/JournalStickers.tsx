@@ -234,6 +234,9 @@ export const CloudyWeatherSticker = renderStickerPng('/assets/stickers/cloudy_we
 export const SnowWeatherSticker = renderStickerPng('/assets/stickers/snow_weather.png', 'Snow & Flurries');
 export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thunderstorm_weather.png', 'Thunderstorm');
 export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.png', 'Windy Breeze');
+export const HomeHouseSticker = renderStickerPng('/assets/stickers/home_house.png', 'Home House');
+export const TaskDoneSticker = renderStickerPng('/assets/stickers/task_done.png', 'Task Done Checkmark');
+export const TherapyBrainSticker = renderStickerPng('/assets/stickers/therapy_brain.png', 'Therapy & Sensory Brain');
 export const SchoolBuildingSticker = renderStickerPng('/assets/stickers/school_building.png', 'School Building');
 export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
 export const PlaygroundSwingsSticker = renderStickerPng('/assets/stickers/playground_swings.png', 'Playground Swings');
@@ -508,8 +511,14 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '⏱️' || normEmoji === '⏳') return <CountdownTimerSticker className={className} size={size} />;
   // 🫧 Fidget bubbles / puzzle / circle / stars
   if (normEmoji === '🫧' || normEmoji === '🧩' || normEmoji === '⭕' || normTitle.includes('fidget') || normTitle.includes('puzzle')) return <FidgetBubblesSticker className={className} size={size} />;
-  // 🛋️ Quiet / break / Home / Afternoon
-  if (normEmoji === '🛋️' || normEmoji === '🌬️' || normEmoji === '🏡' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet') || normTitle.includes('home')) return <BreathingCloudSticker className={className} size={size} />;
+  // 🏠 / 🏡 Home / House
+  if (normEmoji === '🏠' || normEmoji === '🏡' || normTitle.includes('home') || normTitle.includes('house')) return <HomeHouseSticker className={className} size={size} />;
+  // ✅ / ✔️ Task Done / Finished / Checkmark
+  if (normEmoji === '✅' || normEmoji === '✔️' || normEmoji === '✔' || normTitle.includes('task done') || normTitle.includes('all done') || normTitle.includes('finished')) return <TaskDoneSticker className={className} size={size} />;
+  // 🧠 Therapy / Sensory Brain / OT
+  if (normEmoji === '🧠' || normTitle.includes('therapy') || normTitle.includes('brain')) return <TherapyBrainSticker className={className} size={size} />;
+  // 🛋️ Quiet / break / Afternoon
+  if (normEmoji === '🛋️' || normEmoji === '🌬️' || normTitle.includes('break') || normTitle.includes('decompress') || normTitle.includes('quiet')) return <BreathingCloudSticker className={className} size={size} />;
   // 🛏️ Bed / Sleep
   if (normEmoji === '🛏️' || normTitle.includes('bed') || normTitle.includes('wind down') || normTitle.includes('sleep')) return <BedtimeSleepSticker className={className} size={size} />;
   // 💧 Drink water / Hydration

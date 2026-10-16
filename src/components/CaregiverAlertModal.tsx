@@ -155,7 +155,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Finished My Task!',
     sublabel: 'Done with my routine or schedule',
     icon: CheckCircle2,
-    stickerSrc: '/assets/stickers/reward_trophy.png',
+    stickerSrc: '/assets/stickers/task_done.png',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -564,9 +564,9 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 <div className="grid grid-cols-4 gap-2">
                   {[
                     { id: 'school', label: 'School', icon: School, stickerSrc: '/assets/stickers/school_building.png' },
-                    { id: 'therapy', label: 'Therapy', icon: Activity, stickerSrc: '/assets/stickers/adventure_doctor.png' },
+                    { id: 'therapy', label: 'Therapy', icon: Activity, stickerSrc: '/assets/stickers/therapy_brain.png' },
                     { id: 'bus', label: 'Transit', icon: Bus, stickerSrc: '/assets/stickers/school_bus.png' },
-                    { id: 'home', label: 'Home', icon: Home },
+                    { id: 'home', label: 'Home', icon: Home, stickerSrc: '/assets/stickers/home_house.png' },
                   ].map((loc) => {
                     const LocIcon = loc.icon;
                     const isSelected = selectedLocation === loc.id;

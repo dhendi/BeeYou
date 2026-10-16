@@ -243,7 +243,7 @@ export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [
   { id: 'qp-2', text: 'Please help me.', emoji: '🆘', isEmergency: true, stickerSrc: '/assets/stickers/fav_help_sos.png' },
   { id: 'qp-3', text: "I don't like that.", emoji: '👎', isEmergency: false },
   { id: 'qp-4', text: 'Stop.', emoji: '🛑', isEmergency: true, stickerSrc: '/assets/stickers/fav_stop.png' },
-  { id: 'qp-5', text: 'I want to go home.', emoji: '🏠', isEmergency: false },
+  { id: 'qp-5', text: 'I want to go home.', emoji: '🏠', isEmergency: false, stickerSrc: '/assets/stickers/home_house.png' },
   { id: 'qp-6', text: "I'm hungry.", emoji: '🥪', isEmergency: false, stickerSrc: '/assets/stickers/fav_sandwich.png' },
   { id: 'qp-7', text: "I'm tired.", emoji: '🥱', isEmergency: false, stickerSrc: '/assets/stickers/fav_rest_tired.png' },
   { id: 'qp-8', text: 'Something hurts.', emoji: '🩹', isEmergency: true, stickerSrc: '/assets/stickers/caregiver_heart.png' },
@@ -273,6 +273,9 @@ export const getQuickPhraseSticker = (phrase: {
   if (id === 'qp-4' || text.includes('stop') || emoji === '🛑') {
     return '/assets/stickers/fav_stop.png';
   }
+  if (id === 'qp-5' || text.includes('home') || text.includes('house') || emoji === '🏠' || emoji === '🏡') {
+    return '/assets/stickers/home_house.png';
+  }
   if (id === 'qp-6' || text.includes('hungry') || text.includes('snack') || text.includes('eat') || emoji === '🥪') {
     return '/assets/stickers/fav_sandwich.png';
   }
@@ -293,6 +296,12 @@ export const getQuickPhraseSticker = (phrase: {
   }
   if (id === 'qp-12' || text.includes('wait') || emoji === '🖐️' || emoji === '⏰') {
     return '/assets/stickers/clock_time.png';
+  }
+  if (text.includes('done') || text.includes('finish') || emoji === '✅' || emoji === '✔️') {
+    return '/assets/stickers/task_done.png';
+  }
+  if (text.includes('therapy') || emoji === '🧠') {
+    return '/assets/stickers/therapy_brain.png';
   }
   if (text.includes('water') || text.includes('drink')) return '/assets/stickers/fav_water.png';
   if (text.includes('music')) return '/assets/stickers/fav_music.png';
@@ -324,6 +333,9 @@ export const getFavoriteSentenceSticker = (fav: {
   if (id === 'fav-10' || text.includes('listen to music') || emoji === '🎧') return '/assets/stickers/fav_music.png';
   if (id === 'fav-11' || text.includes('stop please') || text.includes('do not want this') || emoji === '🛑') return '/assets/stickers/fav_stop.png';
   if (id === 'fav-12' || text.includes('happy') || emoji === '😊') return '/assets/stickers/fav_happy.png';
+  if (text.includes('home') || emoji === '🏠' || emoji === '🏡') return '/assets/stickers/home_house.png';
+  if (text.includes('done') || text.includes('finish') || emoji === '✅') return '/assets/stickers/task_done.png';
+  if (text.includes('therapy') || emoji === '🧠') return '/assets/stickers/therapy_brain.png';
   return undefined;
 };
 
