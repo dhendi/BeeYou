@@ -300,7 +300,16 @@ export const RoutineStickerIcon: React.FC<{
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
-    return <img src={normEmoji} alt={title || ''} className={className} />;
+    return (
+      <img
+        src={normEmoji}
+        alt={title || ''}
+        className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
+        style={size ? { width: size, height: size } : undefined}
+        loading="eager"
+        decoding="async"
+      />
+    );
   }
 
   // 📅 Visual Schedule & Routine / Calendar
@@ -308,18 +317,18 @@ export const RoutineStickerIcon: React.FC<{
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
   // 🐢 Turtle Sanctuary Themed Stickers
-  if (normEmoji === '🐢' || normTitle.includes('turtle') || normTitle.includes('shelly')) {
-    if (normTitle.includes('swim') || normTitle.includes('pacing') || normTitle.includes('slow down')) return <TurtleSwimmingSticker className={className} size={size} />;
-    if (normTitle.includes('fern') || normTitle.includes('plant')) return <TurtlePottedFernSticker className={className} size={size} />;
-    if (normTitle.includes('bridge') || normTitle.includes('transition')) return <TurtleArchedBridgeSticker className={className} size={size} />;
-    if (normTitle.includes('track') || normTitle.includes('step') || normTitle.includes('footprint')) return <TurtleTracksSticker className={className} size={size} />;
-    if (normTitle.includes('seedling') || normTitle.includes('sprout') || normTitle.includes('grow')) return <TurtleSeedlingSticker className={className} size={size} />;
-    if (normTitle.includes('egg') || normTitle.includes('nest')) return <TurtleEggNestSticker className={className} size={size} />;
-    if (normTitle.includes('lily') || normTitle.includes('pad')) return <TurtleLilyPadsSticker className={className} size={size} />;
-    if (normTitle.includes('pond') || normTitle.includes('reed') || normTitle.includes('lagoon')) return <TurtlePondReedsSticker className={className} size={size} />;
-    if (normTitle.includes('stone') || normTitle.includes('rock') || normTitle.includes('worry')) return <TurtleRiverStoneSticker className={className} size={size} />;
-    if (normTitle.includes('water') || normTitle.includes('drop')) return <TurtleWaterDropSticker className={className} size={size} />;
-    if (normTitle.includes('welcome')) return <TurtleWelcomeSignSticker className={className} size={size} />;
+  if (normEmoji === '🐢' || normEmoji.includes('turtle') || normTitle.includes('turtle') || normTitle.includes('shelly')) {
+    if (normEmoji.includes('swim') || normTitle.includes('swim') || normTitle.includes('pacing') || normTitle.includes('slow down')) return <TurtleSwimmingSticker className={className} size={size} />;
+    if (normEmoji.includes('fern') || normTitle.includes('fern') || normTitle.includes('plant')) return <TurtlePottedFernSticker className={className} size={size} />;
+    if (normEmoji.includes('bridge') || normTitle.includes('bridge') || normTitle.includes('transition')) return <TurtleArchedBridgeSticker className={className} size={size} />;
+    if (normEmoji.includes('track') || normTitle.includes('track') || normTitle.includes('step') || normTitle.includes('footprint')) return <TurtleTracksSticker className={className} size={size} />;
+    if (normEmoji.includes('seedling') || normEmoji.includes('sprout') || normTitle.includes('seedling') || normTitle.includes('sprout') || normTitle.includes('grow')) return <TurtleSeedlingSticker className={className} size={size} />;
+    if (normEmoji.includes('egg') || normEmoji.includes('nest') || normTitle.includes('egg') || normTitle.includes('nest')) return <TurtleEggNestSticker className={className} size={size} />;
+    if (normEmoji.includes('lily') || normEmoji.includes('pad') || normTitle.includes('lily') || normTitle.includes('pad')) return <TurtleLilyPadsSticker className={className} size={size} />;
+    if (normEmoji.includes('pond') || normEmoji.includes('reed') || normTitle.includes('pond') || normTitle.includes('reed') || normTitle.includes('lagoon')) return <TurtlePondReedsSticker className={className} size={size} />;
+    if (normEmoji.includes('stone') || normEmoji.includes('rock') || normTitle.includes('stone') || normTitle.includes('rock') || normTitle.includes('worry')) return <TurtleRiverStoneSticker className={className} size={size} />;
+    if (normEmoji.includes('water') || normEmoji.includes('leaf') || normTitle.includes('water') || normTitle.includes('drop')) return <TurtleWaterDropSticker className={className} size={size} />;
+    if (normEmoji.includes('welcome') || normTitle.includes('welcome')) return <TurtleWelcomeSignSticker className={className} size={size} />;
     return <TurtleMascotSticker className={className} size={size} />;
   }
   // 🚀 Today's Adventure Spotlight / Rocket

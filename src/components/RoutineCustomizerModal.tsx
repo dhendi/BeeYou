@@ -15,11 +15,17 @@ import {
   MicOff,
   Play,
   Square,
-  ListTree
+  ListTree,
+  Search,
+  Palette,
+  Sparkles
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { TURTLE_SANCTUARY_ICONS } from '../data/themedIconsData';
+import { useApp } from '../context/AppContext';
+import { IconLibraryModal } from './common/IconLibraryModal';
 
 interface RoutineCustomizerModalProps {
   isOpen: boolean;
@@ -40,10 +46,20 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   initialRoutine,
   onSave,
 }) => {
+  const { activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Routine['category']>('morning');
   const [emoji, setEmoji] = useState('🌅');
   const [time, setTime] = useState('8:00 AM');
+  
+  // Themed icon filter tab: 'turtle' | 'classic' | 'all'
+  const [iconFilterTab, setIconFilterTab] = useState<'turtle' | 'classic' | 'all'>('turtle');
+
+  // Full Icon Library Modal State
+  const [showIconLibrary, setShowIconLibrary] = useState(false);
+  const [iconPickerTarget, setIconPickerTarget] = useState<'routine' | 'first' | 'then' | 'newStep' | number | null>(null);
   
   // First/Then
   const [firstTask, setFirstTask] = useState('Brush teeth');
@@ -98,22 +114,34 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
     } else {
       // Default template when creating a brand new routine from scratch
       setTitle('');
-      setCategory('school');
-      setEmoji('🎒');
+      setCategory(isTurtleTheme ? 'morning' : 'school');
+      setEmoji(isTurtleTheme ? '/assets/stickers/turtle_mascot.png' : '🎒');
       setTime('8:30 AM');
-      setFirstTask('Unpack backpack');
-      setFirstEmoji('🎒');
-      setThenTask('Free play & break');
-      setThenEmoji('🛝');
-      setSteps([
-        { id: `step-${Date.now()}-1`, title: 'Arrive & unpack cubby', instruction: 'Hang up jacket and put lunchbox in bin', durationMin: 5, completed: false, emoji: '🎒' },
-        { id: `step-${Date.now()}-2`, title: 'Morning circle & greeting', instruction: 'Sit calmly with classmates', durationMin: 15, completed: false, emoji: '⭕' },
-        { id: `step-${Date.now()}-3`, title: 'Learning activity', instruction: 'Focus on today tasks step by step', durationMin: 25, completed: false, emoji: '📖' },
-        { id: `step-${Date.now()}-4`, title: 'Recess & snack time', instruction: 'Take a break, move around, and enjoy a healthy snack', durationMin: 20, completed: false, emoji: '🛝' },
-        { id: `step-${Date.now()}-5`, title: 'Pack bag & celebrate all done', instruction: 'Zip backpack, line up calmly', durationMin: 5, completed: false, emoji: '👟' },
-      ]);
+      setFirstTask(isTurtleTheme ? 'Mindful arrival & settle in' : 'Unpack backpack');
+      setFirstEmoji(isTurtleTheme ? '/assets/stickers/turtle_welcome_sign.png' : '🎒');
+      setThenTask(isTurtleTheme ? 'Quiet break by lily pond' : 'Free play & break');
+      setThenEmoji(isTurtleTheme ? '/assets/stickers/turtle_lily_pads.png' : '🛝');
+      setNewStepEmoji(isTurtleTheme ? '/assets/stickers/turtle_tracks.png' : '⭐');
+      setSteps(
+        isTurtleTheme
+          ? [
+              { id: `step-${Date.now()}-1`, title: 'Arrive calmly & welcome day', instruction: 'Take a deep breath and settle into space', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_welcome_sign.png' },
+              { id: `step-${Date.now()}-2`, title: 'Drink cool fresh water', instruction: 'Hydrate body and stretch gently', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_leaf_water_drop.png' },
+              { id: `step-${Date.now()}-3`, title: 'Steady focus learning session', instruction: 'One step at a time at your own comfortable pace', durationMin: 20, completed: false, emoji: '/assets/stickers/turtle_sprouting_seedling.png' },
+              { id: `step-${Date.now()}-4`, title: 'Quiet break on lily pads', instruction: 'Rest eyes and recharge your sensory battery', durationMin: 15, completed: false, emoji: '/assets/stickers/turtle_lily_pads.png' },
+              { id: `step-${Date.now()}-5`, title: 'Pack up & celebrate steady progress', instruction: 'Slow and steady wins the race!', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_mascot.png' },
+            ]
+          : [
+              { id: `step-${Date.now()}-1`, title: 'Arrive & unpack cubby', instruction: 'Hang up jacket and put lunchbox in bin', durationMin: 5, completed: false, emoji: '🎒' },
+              { id: `step-${Date.now()}-2`, title: 'Morning circle & greeting', instruction: 'Sit calmly with classmates', durationMin: 15, completed: false, emoji: '⭕' },
+              { id: `step-${Date.now()}-3`, title: 'Learning activity', instruction: 'Focus on today tasks step by step', durationMin: 25, completed: false, emoji: '📖' },
+              { id: `step-${Date.now()}-4`, title: 'Recess & snack time', instruction: 'Take a break, move around, and enjoy a healthy snack', durationMin: 20, completed: false, emoji: '🛝' },
+              { id: `step-${Date.now()}-5`, title: 'Pack bag & celebrate all done', instruction: 'Zip backpack, line up calmly', durationMin: 5, completed: false, emoji: '👟' },
+            ]
+      );
     }
-  }, [initialRoutine, isOpen]);
+    setIconFilterTab(isTurtleTheme ? 'turtle' : 'classic');
+  }, [initialRoutine, isOpen, isTurtleTheme]);
 
   const handleAddStep = () => {
     if (!newStepTitle.trim()) return;
@@ -383,22 +411,147 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
             </div>
 
             {/* Quick Icon Bar */}
-            <div className="sm:col-span-4">
-              <label className="text-[11px] font-bold text-slate-500 block mb-1.5">Pick an icon:</label>
-              <div className="flex flex-wrap gap-1.5 items-center">
-                {COMMON_EMOJIS.map((em) => (
+            <div className="sm:col-span-4 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="text-[11px] font-bold text-slate-500 block">Pick an icon:</label>
+                
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {/* Category Filter Pills */}
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIconFilterTab('turtle');
+                        playChime('tap');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                        iconFilterTab === 'turtle'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-emerald-800'
+                      }`}
+                    >
+                      <span>🐢</span>
+                      <span>Turtle Sanctuary ({TURTLE_SANCTUARY_ICONS.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIconFilterTab('classic');
+                        playChime('tap');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                        iconFilterTab === 'classic'
+                          ? 'bg-amber-500 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-amber-800'
+                      }`}
+                    >
+                      Classic ({COMMON_EMOJIS.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIconFilterTab('all');
+                        playChime('tap');
+                      }}
+                      className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        iconFilterTab === 'all'
+                          ? 'bg-slate-800 text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      All
+                    </button>
+                  </div>
+
+                  {/* Full Library Button */}
                   <button
-                    key={em}
                     type="button"
-                    onClick={() => setEmoji(em)}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all p-1 cursor-pointer ${
-                      emoji === em ? 'bg-sky-100 ring-2 ring-sky-500 scale-105 shadow-xs' : 'bg-white hover:bg-slate-100 border border-slate-200'
-                    }`}
+                    onClick={() => {
+                      setIconPickerTarget('routine');
+                      setShowIconLibrary(true);
+                      playChime('tap');
+                    }}
+                    className={`px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 ${isTurtleTheme ? 'text-emerald-800 border-emerald-300 hover:bg-emerald-50' : 'text-slate-600 border-slate-200'} border text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-2xs`}
+                    title="Browse complete icon library"
                   >
-                    <RoutineStickerIcon emoji={em} className="w-6 h-6 object-contain" />
+                    <Search className={`w-3 h-3 ${isTurtleTheme ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <span>More...</span>
                   </button>
-                ))}
+                </div>
               </div>
+
+              {/* 1. Turtle Sanctuary Icons Grid (Visible when tab is 'turtle' or 'all', or when turtle theme is chosen) */}
+              {(iconFilterTab === 'turtle' || iconFilterTab === 'all' || isTurtleTheme) && (
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                      <span className="text-sm">🐢</span>
+                      Wise Turtle Sanctuary Themed Icons
+                    </span>
+                    {isTurtleTheme && (
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/90 px-2 py-0.5 rounded-full">
+                        Active Theme
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    {TURTLE_SANCTUARY_ICONS.map((tIcon) => {
+                      const isSelected = emoji === tIcon.value;
+                      return (
+                        <button
+                          key={tIcon.id}
+                          type="button"
+                          onClick={() => {
+                            setEmoji(tIcon.value);
+                            playChime('tap');
+                          }}
+                          title={tIcon.label}
+                          className={`p-1.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer text-center ${
+                            isSelected
+                              ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
+                              : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-102'
+                          }`}
+                        >
+                          <RoutineStickerIcon emoji={tIcon.value} title={tIcon.label} className="w-8 h-8 object-contain" />
+                          <span className="text-[9px] font-black text-emerald-950 truncate max-w-full leading-tight">
+                            {tIcon.shortLabel}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Classic Icons (Visible when tab is 'classic' or 'all') */}
+              {(iconFilterTab === 'classic' || iconFilterTab === 'all') && (
+                <div className="space-y-1">
+                  {(iconFilterTab === 'all' || isTurtleTheme) && (
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Standard Routine Icons:
+                    </span>
+                  )}
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    {COMMON_EMOJIS.map((em) => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => {
+                          setEmoji(em);
+                          playChime('tap');
+                        }}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all p-1 cursor-pointer ${
+                          emoji === em
+                            ? 'bg-sky-100 ring-2 ring-sky-500 scale-105 shadow-xs'
+                            : 'bg-white hover:bg-slate-100 border border-slate-200'
+                        }`}
+                      >
+                        <RoutineStickerIcon emoji={em} className="w-6 h-6 object-contain" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -420,9 +573,18 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                   1. FIRST (Demand / Task):
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-xl border border-indigo-200 bg-indigo-50/50 flex items-center justify-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIconPickerTarget('first');
+                      setShowIconLibrary(true);
+                      playChime('tap');
+                    }}
+                    className="w-9 h-9 rounded-xl border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-2xs hover:scale-105"
+                    title="Tap to change First Task icon"
+                  >
                     <RoutineStickerIcon emoji={firstEmoji} title={firstTask} className="w-6 h-6 object-contain" />
-                  </div>
+                  </button>
                   <input
                     type="text"
                     value={firstTask}
@@ -438,9 +600,18 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                   2. THEN (Reward / Motivation):
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-xl border border-purple-200 bg-purple-50/50 flex items-center justify-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIconPickerTarget('then');
+                      setShowIconLibrary(true);
+                      playChime('tap');
+                    }}
+                    className="w-9 h-9 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-100 flex items-center justify-center shrink-0 cursor-pointer transition-all shadow-2xs hover:scale-105"
+                    title="Tap to change Then Task icon"
+                  >
                     <RoutineStickerIcon emoji={thenEmoji} title={thenTask} className="w-6 h-6 object-contain" />
-                  </div>
+                  </button>
                   <input
                     type="text"
                     value={thenTask}
@@ -478,9 +649,18 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-800 text-xs font-black flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-white rounded-lg border border-slate-200 p-0.5 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIconPickerTarget(idx);
+                          setShowIconLibrary(true);
+                          playChime('tap');
+                        }}
+                        className="w-8 h-8 flex items-center justify-center shrink-0 bg-white hover:bg-sky-50 rounded-lg border border-slate-200 hover:border-sky-400 p-0.5 shadow-2xs cursor-pointer transition-all hover:scale-105"
+                        title="Tap to change step icon"
+                      >
                         <RoutineStickerIcon emoji={st.emoji} title={st.title} className="w-7 h-7 object-contain" />
-                      </div>
+                      </button>
                       <div className="flex-1 min-w-0">
                         <input
                           type="text"
@@ -584,7 +764,18 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
               <span className="text-xs font-black text-sky-900 block">Add Step:</span>
               <div className="grid grid-cols-1 sm:grid-cols-6 gap-2">
                 <div className="sm:col-span-1 flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1">
-                  <RoutineStickerIcon emoji={newStepEmoji} title={newStepTitle} className="w-5 h-5 shrink-0 object-contain" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIconPickerTarget('newStep');
+                      setShowIconLibrary(true);
+                      playChime('tap');
+                    }}
+                    className="w-6 h-6 flex items-center justify-center shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                    title="Tap to choose step icon from library"
+                  >
+                    <RoutineStickerIcon emoji={newStepEmoji} title={newStepTitle} className="w-5 h-5 shrink-0 object-contain" />
+                  </button>
                   <input
                     type="text"
                     value={newStepEmoji}
@@ -649,6 +840,46 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Full Icon Library Modal */}
+      <IconLibraryModal
+        isOpen={showIconLibrary}
+        onClose={() => {
+          setShowIconLibrary(false);
+          setIconPickerTarget(null);
+        }}
+        initialTab={isTurtleTheme ? 'turtle' : 'all'}
+        selectedEmoji={
+          iconPickerTarget === 'routine'
+            ? emoji
+            : iconPickerTarget === 'first'
+            ? firstEmoji
+            : iconPickerTarget === 'then'
+            ? thenEmoji
+            : iconPickerTarget === 'newStep'
+            ? newStepEmoji
+            : typeof iconPickerTarget === 'number'
+            ? steps[iconPickerTarget]?.emoji
+            : undefined
+        }
+        onSelectIcon={(chosenEmoji) => {
+          if (iconPickerTarget === 'routine') {
+            setEmoji(chosenEmoji);
+          } else if (iconPickerTarget === 'first') {
+            setFirstEmoji(chosenEmoji);
+          } else if (iconPickerTarget === 'then') {
+            setThenEmoji(chosenEmoji);
+          } else if (iconPickerTarget === 'newStep') {
+            setNewStepEmoji(chosenEmoji);
+          } else if (typeof iconPickerTarget === 'number') {
+            const updated = [...steps];
+            updated[iconPickerTarget] = { ...updated[iconPickerTarget], emoji: chosenEmoji };
+            setSteps(updated);
+          }
+          setShowIconLibrary(false);
+          setIconPickerTarget(null);
+        }}
+      />
     </div>
   );
 };

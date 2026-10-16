@@ -1,13 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, X, Palette, Check } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { playChime } from '../../utils/audio';
+import { useApp } from '../../context/AppContext';
 
 export interface LibraryIconItem {
   id: string;
   emoji: string;
   label: string;
-  category: 'fun' | 'calm' | 'food' | 'daily';
+  category: 'fun' | 'calm' | 'food' | 'daily' | 'turtle';
   keywords: string[];
 }
 
@@ -134,6 +135,20 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'tree_outside', emoji: '🌳', label: 'Go Outside / Tree', category: 'fun', keywords: ['outside', 'tree', 'nature', 'park', 'outdoor'] },
   { id: 'tired_rest', emoji: '😴', label: 'Tired / Rest', category: 'calm', keywords: ['tired', 'rest', 'sleep', 'bed', 'nap', 'sleepy'] },
   { id: 'happy_smile', emoji: '😊', label: 'I Am Happy', category: 'calm', keywords: ['happy', 'smile', 'joy', 'good', 'cheerful'] },
+
+  // 🐢 Wise Turtle Sanctuary Themed Stickers
+  { id: 'turtle_mascot', emoji: '/assets/stickers/turtle_mascot.png', label: 'Shelly the Wise Turtle (Mascot)', category: 'turtle', keywords: ['turtle', 'shelly', 'mascot', 'calm', 'guide', 'companion', 'peaceful'] },
+  { id: 'turtle_swimming', emoji: '/assets/stickers/turtle_swimming.png', label: 'Swimming Turtle (Pacing & Movement)', category: 'turtle', keywords: ['swim', 'swimming', 'turtle', 'pacing', 'slow', 'steady', 'exercise', 'movement'] },
+  { id: 'turtle_lily_pads', emoji: '/assets/stickers/turtle_lily_pads.png', label: 'Quiet Break Lily Pads', category: 'turtle', keywords: ['lily', 'pad', 'break', 'quiet', 'rest', 'pond', 'relax', 'calm'] },
+  { id: 'turtle_pond_reeds', emoji: '/assets/stickers/turtle_pond_reeds.png', label: 'Serene Lagoon & Reeds', category: 'turtle', keywords: ['reed', 'reeds', 'pond', 'lagoon', 'nature', 'sound', 'ambient', 'music', 'water'] },
+  { id: 'turtle_river_stone', emoji: '/assets/stickers/turtle_river_stone.png', label: 'Smooth River Worry Stone', category: 'turtle', keywords: ['stone', 'river', 'rock', 'worry', 'grounding', 'tactile', 'fidget', 'calm'] },
+  { id: 'turtle_leaf_water_drop', emoji: '/assets/stickers/turtle_leaf_water_drop.png', label: 'Leaf with Water Dewdrop', category: 'turtle', keywords: ['leaf', 'water', 'dewdrop', 'drop', 'drink', 'hydrate', 'thirst', 'nature'] },
+  { id: 'turtle_welcome_sign', emoji: '/assets/stickers/turtle_welcome_sign.png', label: 'Welcome Sign with Vines', category: 'turtle', keywords: ['welcome', 'sign', 'morning', 'arrival', 'start', 'door', 'greeting', 'vine'] },
+  { id: 'turtle_potted_fern', emoji: '/assets/stickers/turtle_potted_fern.png', label: 'Potted Fern Fronds', category: 'turtle', keywords: ['fern', 'potted', 'plant', 'breathe', 'breathing', 'care', 'nature', 'calm'] },
+  { id: 'turtle_arched_bridge', emoji: '/assets/stickers/turtle_arched_bridge.png', label: 'Arched Garden Bridge', category: 'turtle', keywords: ['bridge', 'transition', 'garden', 'walk', 'path', 'next', 'step', 'change'] },
+  { id: 'turtle_tracks', emoji: '/assets/stickers/turtle_tracks.png', label: 'Webbed Turtle Footprints', category: 'turtle', keywords: ['track', 'tracks', 'footprint', 'footprints', 'step', 'walk', 'path', 'shoes'] },
+  { id: 'turtle_sprouting_seedling', emoji: '/assets/stickers/turtle_sprouting_seedling.png', label: 'Sprouting Seedling in Soil', category: 'turtle', keywords: ['seedling', 'sprout', 'grow', 'soil', 'learn', 'study', 'school', 'growth'] },
+  { id: 'turtle_egg_nest', emoji: '/assets/stickers/turtle_egg_nest.png', label: 'Speckled Egg in Sand Nest', category: 'turtle', keywords: ['egg', 'nest', 'sand', 'bed', 'cozy', 'sleep', 'home', 'night', 'rest'] },
 ];
 
 export interface IconLibraryModalProps {
@@ -142,6 +157,7 @@ export interface IconLibraryModalProps {
   onSelectIcon: (emoji: string, label: string) => void;
   selectedEmoji?: string;
   title?: string;
+  initialTab?: 'all' | 'turtle' | 'fun' | 'calm' | 'food' | 'daily';
 }
 
 export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
@@ -150,10 +166,25 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
   onSelectIcon,
   selectedEmoji,
   title = 'BeeYou Icon Library',
+  initialTab,
 }) => {
+  const { activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'fun' | 'calm' | 'food' | 'daily'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'turtle' | 'fun' | 'calm' | 'food' | 'daily'>('all');
   const [customInput, setCustomInput] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialTab) {
+        setActiveTab(initialTab);
+      } else if (isTurtleTheme) {
+        setActiveTab('turtle');
+      } else {
+        setActiveTab('all');
+      }
+    }
+  }, [isOpen, initialTab, isTurtleTheme]);
 
   const filteredIcons = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -192,19 +223,19 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
       aria-label={title}
       className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] animate-in fade-in"
     >
-      <div className="bg-white border-3 border-amber-300 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-2rem)]">
+      <div className={`bg-white border-3 ${isTurtleTheme ? 'border-emerald-400' : 'border-amber-300'} w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-2rem)]`}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 p-4 sm:p-5 text-amber-950 flex items-center justify-between shrink-0">
+        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white' : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950'} p-4 sm:p-5 flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-xl shrink-0">
-              <Palette className="w-5 h-5 text-amber-700" />
+            <div className={`w-10 h-10 rounded-2xl ${isTurtleTheme ? 'bg-white/20 text-white' : 'bg-white/80 text-amber-700'} shadow-xs flex items-center justify-center text-xl shrink-0`}>
+              {isTurtleTheme ? <span className="text-2xl">🐢</span> : <Palette className="w-5 h-5 text-amber-700" />}
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-black leading-tight">
                 {title}
               </h3>
-              <p className="text-xs font-semibold text-amber-900/80 mt-0.5">
-                Pick a matching sticker icon for this activity step
+              <p className={`text-xs font-semibold ${isTurtleTheme ? 'text-emerald-100' : 'text-amber-900/80'} mt-0.5`}>
+                Pick a matching sticker icon for this routine or step
               </p>
             </div>
           </div>
@@ -212,7 +243,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/50 hover:bg-white/80 text-amber-950 transition-all cursor-pointer"
+            className={`p-2 rounded-xl ${isTurtleTheme ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-white/50 hover:bg-white/80 text-amber-950'} transition-all cursor-pointer`}
             aria-label="Close icon library"
           >
             <X className="w-5 h-5" />
@@ -220,7 +251,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         </div>
 
         {/* Search & Tabs */}
-        <div className="p-3 sm:p-4 border-b border-slate-200 bg-amber-50/40 space-y-3 shrink-0">
+        <div className={`p-3 sm:p-4 border-b border-slate-200 ${isTurtleTheme ? 'bg-emerald-50/40' : 'bg-amber-50/40'} space-y-3 shrink-0`}>
           {/* Search bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -228,8 +259,8 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search icons (e.g. pizza, art, quiet, brush, car)..."
-              className="w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              placeholder="Search icons (e.g. turtle, pizza, art, quiet, stone, water)..."
+              className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme ? 'focus:ring-emerald-400' : 'focus:ring-amber-400'}`}
             />
             {search && (
               <button
@@ -247,6 +278,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
             {[
               { id: 'all', label: 'All Icons' },
+              { id: 'turtle', label: '🐢 Turtle Sanctuary (12)' },
               { id: 'fun', label: 'Fun & Play' },
               { id: 'calm', label: 'Calm & Rest' },
               { id: 'food', label: 'Food & Drinks' },
@@ -263,7 +295,11 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-amber-400 text-amber-950 shadow-xs'
+                      ? isTurtleTheme
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-amber-400 text-amber-950 shadow-xs'
+                      : isTurtleTheme
+                      ? 'bg-white hover:bg-emerald-50 text-slate-600 border border-slate-200'
                       : 'bg-white hover:bg-amber-100/60 text-slate-600 border border-slate-200'
                   }`}
                 >
@@ -292,7 +328,11 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                     onClick={() => handlePick(item.emoji, item.label)}
                     className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 group ${
                       isSelected
-                        ? 'bg-amber-100 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-xs'
+                        ? isTurtleTheme
+                          ? 'bg-emerald-100 border-emerald-500 ring-2 ring-emerald-300 text-emerald-950 shadow-xs'
+                          : 'bg-amber-100 border-amber-400 ring-2 ring-amber-300 text-amber-950 shadow-xs'
+                        : isTurtleTheme
+                        ? 'bg-white hover:bg-emerald-50/70 border-slate-200 hover:border-emerald-300 text-slate-700'
                         : 'bg-white hover:bg-amber-50/60 border-slate-200 hover:border-amber-300 text-slate-700'
                     }`}
                   >
@@ -307,7 +347,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       {item.label}
                     </span>
                     {isSelected && (
-                      <span className="mt-1 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center">
+                      <span className={`mt-1 w-4 h-4 rounded-full ${isTurtleTheme ? 'bg-emerald-600' : 'bg-amber-500'} text-white flex items-center justify-center`}>
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
                     )}
