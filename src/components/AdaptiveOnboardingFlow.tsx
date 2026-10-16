@@ -273,7 +273,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           {/* ════════════════ STEP 1: WELCOME TO BEEYOU ════════════════ */}
           {step === 1 && (
             <div className="space-y-6 text-center py-2 sm:py-4 animate-in fade-in">
-              <div className="mx-auto w-fit rounded-3xl bg-white px-6 py-4 shadow-md border-2 border-amber-200">
+              <div className="mx-auto w-fit rounded-3xl bg-white px-6 py-4">
                 <img src="/logo.png" alt="BeeYou" className="h-20 sm:h-28 w-auto object-contain" draggable={false} />
               </div>
 
