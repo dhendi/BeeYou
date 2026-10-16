@@ -6,7 +6,7 @@
   --beeyou-navy: #1E293B;
   --beeyou-sage: #5B8266;
   --beeyou-sage-light: #E8F0EB;
-  --beeyou-cream: #FAF8F5;
+  --beeyou-cream: #FEF9F1;
   --beeyou-card: #FFFFFF;
 }
 
@@ -17,7 +17,7 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #FAF8F5;
+    background-color: #FEF9F1;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }

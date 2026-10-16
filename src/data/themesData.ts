@@ -14,6 +14,7 @@ export interface ThemePalette {
   cardBg?: string;           // Card surface styling class
   cardInnerBg?: string;      // Inner nested container styling class
   designStyle?: 'glassmorphism' | 'neumorphism' | 'twilight' | 'standard';
+  wallpaperUrl?: string;     // URL for background wallpaper image
 }
 
 export type WallpaperPattern = 
@@ -26,6 +27,7 @@ export type WallpaperPattern =
   | 'sparkles' 
   | 'ocean_waves'
   | 'zen_botanical'
+  | 'honeycomb_clouds'
   | 'none';
 
 export interface AppTheme {
@@ -341,14 +343,15 @@ export const PRESET_THEMES: AppTheme[] = [
       primaryBorder: 'border-amber-300',
       textAccent: 'text-amber-950',
       badgeBg: 'bg-amber-100 text-amber-950 border border-amber-300',
-      appBg: 'bg-amber-50/40 text-amber-950',
+      appBg: 'bg-[#FEF9F1] text-amber-950',
       headerBg: 'bg-amber-50/90 backdrop-blur-md border-b border-amber-300/80 shadow-2xs',
       navActiveBg: 'bg-amber-500 text-white shadow-md ring-2 ring-amber-400',
-      cardBg: 'bg-amber-50/40 border-2 border-amber-300/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)]',
+      cardBg: 'bg-white/80 border-2 border-amber-300/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)]',
       cardInnerBg: 'bg-amber-100/70 border border-amber-300/80 shadow-2xs',
       designStyle: 'neumorphism',
+      wallpaperUrl: '/assets/wallpapers/default_honey_theme_bg.jpg',
     },
-    wallpaperPattern: 'none',
+    wallpaperPattern: 'honeycomb_clouds',
     aacStyling: {
       tileBorderRadius: 'rounded-2xl',
       tileBorderWidth: 'border-2',

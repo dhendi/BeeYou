@@ -239,6 +239,7 @@ const ChildAppContent: React.FC = () => {
       <ThemeWallpaperArt
         pattern={activeTheme?.wallpaperPattern}
         category={activeTheme?.category}
+        wallpaperUrl={activeTheme?.palette?.wallpaperUrl}
         reduceMotion={settings.reduceMotion}
       />
 

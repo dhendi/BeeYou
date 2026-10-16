@@ -10,6 +10,7 @@ import { setActiveDeviceView } from '../services/authService';
 
 import { useModalBackHandler } from '../services/modalBackHandler';
 import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
+import { ThemeWallpaperArt } from './ThemeWallpaperArt';
 
 const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ default: m.ParentDashboard })));
 const ConnectCaregiverModal = lazy(() => import('./ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
@@ -51,12 +52,18 @@ const CaregiverAppContent: React.FC = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen w-full ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-300`}>
-      <Suspense fallback={
-        <div className={`h-screen w-screen flex items-center justify-center ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} text-amber-600 font-bold text-lg`}>
-          Loading Caregiver Controller Hub...
-        </div>
-      }>
+    <div className={`min-h-screen w-full ${activeTheme?.palette?.appBg || 'bg-[#FEF9F1]'} text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-300 relative`}>
+      <ThemeWallpaperArt
+        pattern={activeTheme?.wallpaperPattern}
+        category={activeTheme?.category}
+        wallpaperUrl={activeTheme?.palette?.wallpaperUrl}
+      />
+      <div className="relative z-10">
+        <Suspense fallback={
+          <div className={`h-screen w-screen flex items-center justify-center ${activeTheme?.palette?.appBg || 'bg-[#FEF9F1]'} text-amber-600 font-bold text-lg`}>
+            Loading Caregiver Controller Hub...
+          </div>
+        }>
         <ParentDashboard />
         <ConnectCaregiverModal 
           isOpen={showCaregiverModal} 
@@ -73,6 +80,7 @@ const CaregiverAppContent: React.FC = () => {
           onClose={() => setShowFamilyAuthModal(false)}
         />
       </Suspense>
+      </div>
     </div>
   );
 };

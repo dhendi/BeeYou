@@ -968,6 +968,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {[
+                { id: 'honeycomb_clouds', label: '🐝 Honeycomb & Clouds' },
                 { id: 'sparkles', label: '⭐ Calm Star' },
                 { id: 'turtle_shell', label: '🐢 Turtle Shell' },
                 { id: 'dino_footprints', label: '🦖 Dino Tracks' },
