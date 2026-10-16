@@ -50,7 +50,6 @@ export interface AppTheme {
   aacStyling: {
     tileBorderRadius: 'rounded-2xl' | 'rounded-3xl' | 'rounded-xl';
     tileBorderWidth: 'border-2' | 'border-3';
-    customWordEmojis?: Record<string, string>;
   };
 
   soundTheme: 'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic';
@@ -86,40 +85,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-3',
-      customWordEmojis: {
-        'I / Me': '🐢',
-        'I': '🐢',
-        'You': '👉',
-        'We': '🐢👥',
-        'My / Mine': '🐢🤲',
-        'Want': '🤲',
-        'Need': '❗',
-        'Like': '💚',
-        'Go': '🐢💨',
-        'See / Look': '👀',
-        'Feel': '💖',
-        'Eat': '🥬',
-        'Drink': '🌊',
-        'Play': '🏝️',
-        'Help': '🛟',
-        'Stop': '🛑',
-        'Wait': '⏳',
-        'More': '➕',
-        'All Done': '🏁',
-        'Don\'t / Not': '❌',
-        'Yes': '✅',
-        'No': '⛔',
-        'Break': '🧘',
-        'Please': '🙏',
-        'What Next?': '❓',
-        'Water': '🌊',
-        'Apple': '🍏',
-        'Sandwich': '🥪',
-        'Cookie': '🍪',
-        'Milk': '🥛',
-        'Good': '🐢✨',
-        'Happy': '🐢💚',
-      },
     },
     soundTheme: 'turtle',
   },
@@ -153,17 +118,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-3',
-      customWordEmojis: {
-        'I want': '🦖',
-        'Help': '🌋',
-        'Play': '🦕',
-        'Eat': '🌿',
-        'Water': '💧',
-        'Stop': '🛑',
-        'Like': '👍',
-        'Break': '🏕️',
-        'Good': '🌟',
-      },
     },
     soundTheme: 'dino',
   },
@@ -197,16 +151,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-3',
-      customWordEmojis: {
-        'I want': '🐸',
-        'Help': '🛟',
-        'Play': '🪷',
-        'Eat': '🪰',
-        'Water': '💧',
-        'Jump': '🦗',
-        'Break': '🛋️',
-        'Good': '👍',
-      },
     },
     soundTheme: 'frog',
   },
@@ -239,13 +183,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-2xl',
       tileBorderWidth: 'border-2',
-      customWordEmojis: {
-        'I want': '🚂',
-        'Help': '🚨',
-        'Play': '🚃',
-        'Stop': '🛑',
-        'Go': '🟢',
-      },
     },
     soundTheme: 'train',
   },
@@ -278,12 +215,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-2',
-      customWordEmojis: {
-        'I want': '🚀',
-        'Help': '🛸',
-        'Play': '🪐',
-        'Break': '🌙',
-      },
     },
     soundTheme: 'space',
   },
@@ -316,11 +247,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-2',
-      customWordEmojis: {
-        'I want': '🐬',
-        'Water': '🌊',
-        'Play': '🐢',
-      },
     },
     soundTheme: 'classic',
   },
@@ -390,12 +316,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-2xl',
       tileBorderWidth: 'border-3',
-      customWordEmojis: {
-        'I want': '🏎️',
-        'Help': '🏁',
-        'Go': '🟢',
-        'Stop': '🛑',
-      },
     },
     soundTheme: 'train',
   },
@@ -428,11 +348,6 @@ export const PRESET_THEMES: AppTheme[] = [
     aacStyling: {
       tileBorderRadius: 'rounded-3xl',
       tileBorderWidth: 'border-2',
-      customWordEmojis: {
-        'I want': '🦄',
-        'Help': '🪄',
-        'Play': '🏰',
-      },
     },
     soundTheme: 'magic',
   },
@@ -444,21 +359,7 @@ export const PRESET_THEMES: AppTheme[] = [
 export function getThemedAacEmoji(item: AACItem, theme?: AppTheme): string {
   if (!theme) return item.emoji;
 
-  // 1. Explicit word overrides in theme customWordEmojis
-  if (theme.aacStyling?.customWordEmojis) {
-    if (theme.aacStyling.customWordEmojis[item.label]) {
-      return theme.aacStyling.customWordEmojis[item.label];
-    }
-    if (item.speechText && theme.aacStyling.customWordEmojis[item.speechText]) {
-      return theme.aacStyling.customWordEmojis[item.speechText];
-    }
-    const labelLower = item.label.toLowerCase();
-    for (const [key, val] of Object.entries(theme.aacStyling.customWordEmojis)) {
-      if (key.toLowerCase() === labelLower) return val;
-    }
-  }
-
-  // 2. Dynamic theme-wide visual adaptation across all AAC tiles (strict exact matching only)
+  // Dynamic theme-wide visual adaptation across all AAC tiles (strict exact matching only)
   const l = item.label.toLowerCase().trim();
 
   if (theme.category === 'turtle') {

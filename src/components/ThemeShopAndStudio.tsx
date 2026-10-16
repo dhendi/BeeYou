@@ -265,15 +265,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   const [selectedBorderRadius, setSelectedBorderRadius] = useState<'rounded-2xl' | 'rounded-3xl' | 'rounded-xl'>('rounded-3xl');
   const [selectedSoundTheme, setSelectedSoundTheme] = useState<'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic'>('classic');
 
-  // AAC button icons mapping
-  const [customWordIcons, setCustomWordIcons] = useState<Record<string, string>>({
-    'I want': '🐝',
-    'Help': '🛟',
-    'Play': '🧩',
-    'Eat': '🥪',
-    'Water': '💧',
-  });
-
   // Handle external editingThemeId from context if passed
   useEffect(() => {
     if (contextEditingThemeId) {
@@ -295,10 +286,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setSelectedWallpaper(target.wallpaperPattern || 'none');
     setSelectedBorderRadius(target.aacStyling?.tileBorderRadius || 'rounded-3xl');
     setSelectedSoundTheme(target.soundTheme || 'classic');
-
-    if (target.aacStyling?.customWordEmojis) {
-      setCustomWordIcons({ ...target.aacStyling.customWordEmojis });
-    }
 
     // Try finding matching palette index, else set custom hex
     const pIdx = PALETTE_PRESETS.findIndex((p) => p.palette.primary.toLowerCase() === target.palette.primary.toLowerCase());
@@ -332,13 +319,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     playChime('tap');
   };
 
-  const handleCustomWordChange = (word: string, icon: string) => {
-    setCustomWordIcons((prev) => ({
-      ...prev,
-      [word]: icon,
-    }));
-  };
-
   const getEffectivePalette = (): ThemePalette => {
     if (useCustomHex) {
       return buildCustomPalette(customPrimaryColor);
@@ -368,7 +348,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         aacStyling: {
           tileBorderRadius: selectedBorderRadius,
           tileBorderWidth: 'border-3',
-          customWordEmojis: customWordIcons,
         },
         soundTheme: selectedSoundTheme,
       });
@@ -394,7 +373,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         aacStyling: {
           tileBorderRadius: selectedBorderRadius,
           tileBorderWidth: 'border-3',
-          customWordEmojis: customWordIcons,
         },
         soundTheme: selectedSoundTheme,
       });
@@ -739,20 +717,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                         </div>
                       </div>
 
-                      {/* AAC Preview Tiles */}
-                      {theme.aacStyling?.customWordEmojis && (
-                        <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-bold text-slate-400">Sample AAC:</span>
-                          {Object.entries(theme.aacStyling.customWordEmojis).slice(0, 3).map(([word, icon]) => (
-                            <span
-                              key={word}
-                              className="text-[11px] font-bold bg-white text-slate-800 px-2 py-0.5 rounded-lg border border-slate-200"
-                            >
-                              {icon} {word}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+
                     </div>
                   </div>
 
@@ -1001,46 +966,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </div>
           </div>
 
-          {/* Studio Step 4: Customizable AAC Button Emojis */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                4. Customize AAC Communication Tiles
-              </label>
-              <span className="text-[11px] font-bold text-amber-800">
-                Mascots on communication buttons!
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-              {[
-                { word: 'I want', defaultIcon: '🐝', label: 'I want' },
-                { word: 'Help', defaultIcon: '🛟', label: 'Help' },
-                { word: 'Play', defaultIcon: '🧩', label: 'Play' },
-                { word: 'Eat', defaultIcon: '🥪', label: 'Eat' },
-                { word: 'Water', defaultIcon: '💧', label: 'Water' },
-              ].map((item) => (
-                <div key={item.word} className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-                  <span className="text-[11px] font-black text-slate-700 block mb-1">
-                    "{item.word}" Tile
-                  </span>
-                  <input
-                    type="text"
-                    value={customWordIcons[item.word] || item.defaultIcon}
-                    onChange={(e) => handleCustomWordChange(item.word, e.target.value)}
-                    className="w-full text-center text-xl py-1 rounded-xl border border-slate-200 bg-white font-bold focus:border-amber-500 focus:outline-hidden"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Studio Step 5: Live Real-Time Preview */}
+          {/* Studio Step 4: Live Real-Time Preview */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-slate-500" />
               <label className="text-xs font-black uppercase tracking-wider text-slate-700">
-                5. Live Theme Preview
+                4. Live Theme Preview
               </label>
             </div>
 
@@ -1070,31 +1001,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </div>
 
               {/* Greeting Mockup */}
-              <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 mb-3 shadow-2xs flex items-center gap-2">
+              <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 shadow-2xs flex items-center gap-2">
                 <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-5 h-5 object-contain shrink-0" />
                 <p className="text-xs font-bold text-slate-800 truncate">
                   {mascotName}: "{greetingMessage}"
                 </p>
-              </div>
-
-              {/* Sample AAC Tiles Mockup */}
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { word: 'I want', bg: 'bg-amber-100 border-amber-300 text-amber-950' },
-                  { word: 'Help', bg: 'bg-rose-100 border-rose-300 text-rose-950' },
-                  { word: 'Play', bg: 'bg-emerald-100 border-emerald-300 text-emerald-950' },
-                  { word: 'Eat', bg: 'bg-orange-100 border-orange-300 text-orange-950' },
-                ].map((tile) => (
-                  <div
-                    key={tile.word}
-                    className={`p-2 rounded-2xl border-2 text-center shadow-xs ${tile.bg}`}
-                  >
-                    <span className="text-2xl block mb-0.5">
-                      {customWordIcons[tile.word] || mascotEmoji}
-                    </span>
-                    <span className="text-[10px] font-black">{tile.word}</span>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
