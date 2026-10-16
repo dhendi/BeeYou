@@ -177,6 +177,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_leaf_vitamins', emoji: '/assets/stickers/turtle_leaf_vitamins.png', label: 'Leaf Dish & Vitamins', category: 'turtle', keywords: ['medication', 'medicine', 'pill', 'vitamin', 'health', 'leaf'] },
   { id: 'turtle_guardian_shield_sos', emoji: '/assets/stickers/turtle_guardian_shield_sos.png', label: 'Guardian Turtle Shell Shield (SOS)', category: 'turtle', keywords: ['sos', 'help', 'shield', 'alert', 'emergency', 'guardian', 'shell'] },
   { id: 'turtle_wooden_id_badge', emoji: '/assets/stickers/turtle_wooden_id_badge.png', label: 'Wooden Explorer ID Badge', category: 'turtle', keywords: ['id', 'badge', 'about me', 'card', 'passport', 'profile', 'turtle'] },
+  { id: 'turtle_bamboo_tablet', emoji: '/assets/stickers/turtle_bamboo_tablet.png', label: 'Bamboo Tablet & Star Screen', category: 'turtle', keywords: ['tablet', 'ipad', 'device', 'screen', 'game', 'aac', 'bamboo'] },
+  { id: 'turtle_leaf_speech_bubbles', emoji: '/assets/stickers/turtle_leaf_speech_bubbles.png', label: 'Leaf & Pebble Speech Bubbles', category: 'turtle', keywords: ['speech', 'bubble', 'talk', 'phrase', 'say', 'voice', 'aac', 'leaf'] },
+  { id: 'turtle_bamboo_keyboard', emoji: '/assets/stickers/turtle_bamboo_keyboard.png', label: 'Carved Bamboo & Stone Keyboard', category: 'turtle', keywords: ['keyboard', 'type', 'typing', 'keys', 'write', 'bamboo', 'stone'] },
+  { id: 'turtle_pond_fidget_bubbles', emoji: '/assets/stickers/turtle_pond_fidget_bubbles.png', label: 'Shimmering Pond Fidget Bubbles', category: 'turtle', keywords: ['fidget', 'bubble', 'bubbles', 'pop', 'sensory', 'pond', 'calm'] },
+  { id: 'turtle_botanical_folder', emoji: '/assets/stickers/turtle_botanical_folder.png', label: 'Botanical Field Notebook Folder', category: 'turtle', keywords: ['folder', 'notebook', 'binder', 'schoolwork', 'homework', 'notes', 'botanical'] },
+  { id: 'turtle_terrarium_science', emoji: '/assets/stickers/turtle_terrarium_science.png', label: 'Glass Terrarium & Magnifying Glass', category: 'turtle', keywords: ['science', 'terrarium', 'plant', 'nature', 'magnifying', 'discover', 'experiment'] },
+  { id: 'turtle_bamboo_wind_chimes', emoji: '/assets/stickers/turtle_bamboo_wind_chimes.png', label: 'Bamboo Wind Chimes & Melody', category: 'turtle', keywords: ['music', 'chimes', 'wind', 'sound', 'melody', 'song', 'sensory', 'bamboo'] },
+  { id: 'turtle_wooden_puzzle', emoji: '/assets/stickers/turtle_wooden_puzzle.png', label: 'Carved Wooden Leaf & Shell Puzzle', category: 'turtle', keywords: ['puzzle', 'jigsaw', 'game', 'play', 'wooden', 'leaf', 'shell'] },
+  { id: 'turtle_leaf_checkmark', emoji: '/assets/stickers/turtle_leaf_checkmark.png', label: 'Fresh Leaf Stamp Checkmark', category: 'turtle', keywords: ['done', 'check', 'checkmark', 'complete', 'finish', 'task', 'leaf'] },
 ];
 
 export interface IconLibraryModalProps {
