@@ -1006,6 +1006,24 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/help_sos.png': '/assets/stickers/dino_ankylosaurus_shield_sos.png',
   '/assets/stickers/schedule_calendar.png': '/assets/stickers/dino_slate_checklist_tablet.png',
   '/assets/stickers/locker_schedule.png': '/assets/stickers/dino_slate_checklist_tablet.png',
+  // Batch 2: Moods, Personas, School & Hubs
+  '/assets/stickers/mood_happy.png': '/assets/stickers/dino_mood_happy.png',
+  '/assets/stickers/fav_happy.png': '/assets/stickers/dino_mood_happy.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/dino_mood_calm.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/dino_mood_excited.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/dino_mood_sleepy.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/dino_mood_unsure.png',
+  '/assets/stickers/fav_stop.png': '/assets/stickers/dino_stop_stamp.png',
+  '/assets/stickers/fav_music.png': '/assets/stickers/dino_bamboo_flute_music.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/dino_bamboo_flute_music.png',
+  '/assets/stickers/fav_sandwich.png': '/assets/stickers/dino_flatbread_sandwich.png',
+  '/assets/stickers/child_persona.png': '/assets/stickers/dino_child_persona_rex.png',
+  '/assets/stickers/teen_headphones.png': '/assets/stickers/dino_ammonite_headphones.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/dino_expedition_satchel_briefcase.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/dino_slate_phone_caregiver.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/dino_pangea_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/dino_golden_amber_crown.png',
+  '/assets/stickers/refresh_repeat.png': '/assets/stickers/dino_footprint_loop.png',
 };
 
 /**
