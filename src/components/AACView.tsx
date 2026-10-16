@@ -1842,7 +1842,7 @@ export const AACView: React.FC = () => {
             const isMasked = maskedItemIds.includes(item.id);
             const inflections = getWordInflections(item.label, item.colorType);
             const hasInflections = inflections.length > 1;
-            const hasThemedArt = activeTheme && !['classic', 'minimal', 'executive', 'dark', 'cyber'].includes(activeTheme.category) && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
+            const hasThemedArt = activeTheme && activeTheme.category !== 'classic' && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
 
             // When masked and not in masking mode, render as a fixed blank placeholder (Debossed well)
             if (isMasked && !isMaskingMode) {

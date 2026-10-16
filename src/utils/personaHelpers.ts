@@ -112,7 +112,7 @@ export function getPersonaTokens(persona: UserPersona): PersonaThemeTokens {
         cardRadius: 'rounded-xl',
         hasClaymorphism: false,
         hasMascot: false,
-        suggestedThemeId: 'theme-sage',
+        suggestedThemeId: 'theme-classic',
       };
 
     case 'teen':
@@ -130,7 +130,7 @@ export function getPersonaTokens(persona: UserPersona): PersonaThemeTokens {
         cardRadius: 'rounded-2xl',
         hasClaymorphism: false,
         hasMascot: false,
-        suggestedThemeId: 'theme-lofi',
+        suggestedThemeId: 'theme-dino',
       };
 
     case 'child':
