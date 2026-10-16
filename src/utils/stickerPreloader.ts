@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS } from '../data/themedIconsData';
 
 const loadedCache = new Set<string>();
 
@@ -69,6 +69,14 @@ export function preloadDinoThemeStickers() {
 }
 
 /**
+ * Preloads all Ribbit Pond stickers immediately into the browser's cache.
+ */
+export function preloadFrogThemeStickers() {
+  const frogUrls = RIBBIT_POND_ICONS.map((i) => i.value);
+  preloadStickerUrls(frogUrls, true);
+}
+
+/**
  * Preloads stickers for a specific theme ID.
  */
 export function preloadThemeStickers(themeId?: string) {
@@ -77,6 +85,8 @@ export function preloadThemeStickers(themeId?: string) {
     preloadTurtleThemeStickers();
   } else if (themeId === 'theme-dino' || themeId === 'dinosaur') {
     preloadDinoThemeStickers();
+  } else if (themeId === 'theme-frog' || themeId === 'frog') {
+    preloadFrogThemeStickers();
   }
 }
 

@@ -61,6 +61,10 @@ function useIsDinoTheme(): boolean {
   return useActiveThemeCategory() === 'dinosaur';
 }
 
+export function useIsFrogTheme(): boolean {
+  return useActiveThemeCategory() === 'frog';
+}
+
 const renderStickerPng = (src: string, alt: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
     const theme = useActiveThemeCategory();
@@ -69,6 +73,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = TURTLE_STICKER_SWAPS[src];
     } else if (theme === 'dinosaur' && DINO_STICKER_SWAPS[src]) {
       currentSrc = DINO_STICKER_SWAPS[src];
+    } else if (theme === 'frog' && FROG_STICKER_SWAPS[src]) {
+      currentSrc = FROG_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -84,7 +90,7 @@ const renderStickerPng = (src: string, alt: string) => {
   return Component;
 };
 
-const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string) => {
+const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = defaultSrc;
@@ -92,6 +98,8 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
       currentSrc = turtleSrc || TURTLE_STICKER_SWAPS[defaultSrc] || defaultSrc;
     } else if (theme === 'dinosaur') {
       currentSrc = dinoSrc || DINO_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'frog') {
+      currentSrc = frogSrc || FROG_STICKER_SWAPS[defaultSrc] || defaultSrc;
     }
     return (
       <img
@@ -1116,6 +1124,34 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/story_sharing.png': '/assets/stickers/dino_wooden_stacking_blocks.png',
 };
 
+export const FROG_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1: Core Daily Routines, Hubs & Wellness
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  '/assets/stickers/drink_cup.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/frog_lily_bed_sleep.png',
+  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/frog_lily_bed_sleep.png',
+  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/frog_willow_retreat_calm.png',
+  '/assets/stickers/breathing_cloud.png': '/assets/stickers/frog_willow_retreat_calm.png',
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/frog_lotus_bell_clock.png',
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/frog_raincoat_hoodie.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/frog_lily_pad_soap.png',
+  '/assets/stickers/toothbrush.png': '/assets/stickers/frog_bamboo_toothbrush.png',
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/frog_pond_harvest_bowl.png',
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/frog_pond_harvest_bowl.png',
+  '/assets/stickers/backpack_school.png': '/assets/stickers/frog_explorer_backpack.png',
+  '/assets/stickers/help_sos.png': '/assets/stickers/frog_leaf_shield_sos.png',
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/frog_leaf_shield_sos.png',
+  '/assets/stickers/schedule_calendar.png': '/assets/stickers/frog_reed_checklist_board.png',
+  '/assets/stickers/locker_schedule.png': '/assets/stickers/frog_reed_checklist_board.png',
+  '/assets/stickers/quick_phrases.png': '/assets/stickers/frog_lily_speech_bubbles.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/frog_cattail_thermometer.png',
+  '/assets/stickers/timer_clock.png': '/assets/stickers/frog_lily_stopwatch.png',
+  '/assets/stickers/aac_core.png': '/assets/stickers/frog_lotus_star_core.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/frog_lotus_star_core.png',
+};
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -1132,6 +1168,7 @@ export const RoutineStickerIcon: React.FC<{
   const activeTheme = useActiveThemeCategory();
   const isTurtle = activeTheme === 'turtle';
   const isDino = activeTheme === 'dinosaur';
+  const isFrog = activeTheme === 'frog';
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
@@ -1140,6 +1177,8 @@ export const RoutineStickerIcon: React.FC<{
       finalSrc = TURTLE_STICKER_SWAPS[normEmoji];
     } else if (isDino && DINO_STICKER_SWAPS[normEmoji]) {
       finalSrc = DINO_STICKER_SWAPS[normEmoji];
+    } else if (isFrog && FROG_STICKER_SWAPS[normEmoji]) {
+      finalSrc = FROG_STICKER_SWAPS[normEmoji];
     }
     return (
       <img

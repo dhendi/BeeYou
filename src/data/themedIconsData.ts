@@ -3,7 +3,7 @@ export interface ThemedIconItem {
   value: string;
   label: string;
   shortLabel: string;
-  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'space' | 'magic' | 'train' | 'rocker' | 'all';
+  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'frog' | 'space' | 'magic' | 'train' | 'rocker' | 'all';
   keywords: string[];
 }
 
@@ -877,6 +877,24 @@ export const DINO_KINGDOM_ICONS: ThemedIconItem[] = [
   { id: 'dino_mood_unsure', value: '/assets/stickers/dino_mood_unsure.png', label: 'Unsure Dino Wondering', shortLabel: 'Unsure Dino', themeCategory: 'dinosaur', keywords: ['mood', 'unsure', 'wonder', 'hesitant', 'dino'] },
 ];
 
+export const RIBBIT_POND_ICONS: ThemedIconItem[] = [
+  { id: 'frog_dewdrop_bamboo_cup', value: '/assets/stickers/frog_dewdrop_bamboo_cup.png', label: 'Dewdrop Bamboo Cup', shortLabel: 'Bamboo Cup', themeCategory: 'frog', keywords: ['water', 'drink', 'cup', 'dewdrop', 'bamboo', 'mint', 'frog'] },
+  { id: 'frog_lily_bed_sleep', value: '/assets/stickers/frog_lily_bed_sleep.png', label: 'Lily Pad Baby Frog Bed', shortLabel: 'Lily Bed', themeCategory: 'frog', keywords: ['bed', 'sleep', 'bedtime', 'rest', 'lily', 'pad', 'frog'] },
+  { id: 'frog_willow_retreat_calm', value: '/assets/stickers/frog_willow_retreat_calm.png', label: 'Weeping Willow Quiet Retreat', shortLabel: 'Willow Retreat', themeCategory: 'frog', keywords: ['quiet', 'break', 'calm', 'retreat', 'willow', 'breathe', 'mist', 'frog'] },
+  { id: 'frog_lotus_bell_clock', value: '/assets/stickers/frog_lotus_bell_clock.png', label: 'Lotus Blossom Alarm Clock', shortLabel: 'Lotus Clock', themeCategory: 'frog', keywords: ['alarm', 'clock', 'time', 'wakeup', 'morning', 'lotus', 'frog'] },
+  { id: 'frog_raincoat_hoodie', value: '/assets/stickers/frog_raincoat_hoodie.png', label: 'Froggy Raincoat Hoodie', shortLabel: 'Froggy Hoodie', themeCategory: 'frog', keywords: ['clothes', 'dress', 'dressed', 'hoodie', 'raincoat', 'frog'] },
+  { id: 'frog_lily_pad_soap', value: '/assets/stickers/frog_lily_pad_soap.png', label: 'Water-Mint Lily Pad Soap', shortLabel: 'Lily Pad Soap', themeCategory: 'frog', keywords: ['soap', 'wash', 'hands', 'clean', 'sink', 'lily pad', 'frog'] },
+  { id: 'frog_bamboo_toothbrush', value: '/assets/stickers/frog_bamboo_toothbrush.png', label: 'Bamboo Foamy Toothbrush', shortLabel: 'Bamboo Toothbrush', themeCategory: 'frog', keywords: ['toothbrush', 'teeth', 'brush', 'morning', 'night', 'bamboo', 'frog'] },
+  { id: 'frog_pond_harvest_bowl', value: '/assets/stickers/frog_pond_harvest_bowl.png', label: 'Pond Harvest Feast Bowl', shortLabel: 'Harvest Bowl', themeCategory: 'frog', keywords: ['breakfast', 'dinner', 'food', 'meal', 'bowl', 'berries', 'frog'] },
+  { id: 'frog_explorer_backpack', value: '/assets/stickers/frog_explorer_backpack.png', label: 'Pond Explorer Backpack', shortLabel: 'Pond Backpack', themeCategory: 'frog', keywords: ['backpack', 'school', 'bag', 'pack', 'explorer', 'frog'] },
+  { id: 'frog_leaf_shield_sos', value: '/assets/stickers/frog_leaf_shield_sos.png', label: 'Lily Leaf Shield SOS', shortLabel: 'Leaf Shield SOS', themeCategory: 'frog', keywords: ['help', 'sos', 'shield', 'emergency', 'safe', 'leaf', 'frog'] },
+  { id: 'frog_reed_checklist_board', value: '/assets/stickers/frog_reed_checklist_board.png', label: 'Bamboo Checklist Board', shortLabel: 'Bamboo Schedule', themeCategory: 'frog', keywords: ['schedule', 'calendar', 'checklist', 'plan', 'routine', 'bamboo', 'frog'] },
+  { id: 'frog_lily_speech_bubbles', value: '/assets/stickers/frog_lily_speech_bubbles.png', label: 'Lily Pad Speech Bubbles', shortLabel: 'Speech Bubbles', themeCategory: 'frog', keywords: ['quick', 'phrases', 'speech', 'talk', 'chat', 'bubble', 'frog'] },
+  { id: 'frog_cattail_thermometer', value: '/assets/stickers/frog_cattail_thermometer.png', label: 'Cattail Emotion Scale', shortLabel: 'Cattail Scale', themeCategory: 'frog', keywords: ['thermometer', 'feelings', 'scale', 'gauge', 'mood', 'cattail', 'frog'] },
+  { id: 'frog_lily_stopwatch', value: '/assets/stickers/frog_lily_stopwatch.png', label: 'Lily Pad Water Stopwatch', shortLabel: 'Water Stopwatch', themeCategory: 'frog', keywords: ['timer', 'clock', 'stopwatch', 'countdown', 'time', 'lily pad', 'frog'] },
+  { id: 'frog_lotus_star_core', value: '/assets/stickers/frog_lotus_star_core.png', label: 'Golden Lotus Star Badge', shortLabel: 'Lotus Star', themeCategory: 'frog', keywords: ['star', 'core', 'lotus', 'reward', 'favorite', 'aac', 'frog'] },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -886,6 +904,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isDino = themeCategoryOrId === 'dinosaur' || themeCategoryOrId === 'theme-dino';
   if (isDino) {
     return DINO_KINGDOM_ICONS;
+  }
+  const isFrog = themeCategoryOrId === 'frog' || themeCategoryOrId === 'theme-frog';
+  if (isFrog) {
+    return RIBBIT_POND_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)

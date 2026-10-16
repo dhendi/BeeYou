@@ -347,6 +347,18 @@ export const AACView: React.FC = () => {
     'folder-sensory': '/assets/stickers/dino_ammonite_ear_defenders.png',
   };
 
+  const FROG_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/frog_lotus_star_core.png',
+    favorite_sentences: '/assets/stickers/frog_lily_speech_bubbles.png',
+    food: '/assets/stickers/frog_pond_harvest_bowl.png',
+    drinks: '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  };
+
+  const FROG_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/frog_pond_harvest_bowl.png',
+    'folder-drinks': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+  };
+
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
     { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.png' },
     { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.png' },
@@ -1175,7 +1187,9 @@ export const AACView: React.FC = () => {
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
               .map((cat) => {
-                const iconSrc = isDinoTheme && DINO_CATEGORY_ICONS[cat.id]
+                const iconSrc = isFrogTheme && FROG_CATEGORY_ICONS[cat.id]
+                  ? FROG_CATEGORY_ICONS[cat.id]
+                  : isDinoTheme && DINO_CATEGORY_ICONS[cat.id]
                   ? DINO_CATEGORY_ICONS[cat.id]
                   : isTurtleTheme && TURTLE_CATEGORY_ICONS[cat.id]
                   ? TURTLE_CATEGORY_ICONS[cat.id]
@@ -1802,7 +1816,9 @@ export const AACView: React.FC = () => {
         >
           {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
           {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
-            const stickerSrc = isDinoTheme && DINO_FOLDER_STICKERS[folder.id]
+            const stickerSrc = isFrogTheme && FROG_FOLDER_STICKERS[folder.id]
+              ? FROG_FOLDER_STICKERS[folder.id]
+              : isDinoTheme && DINO_FOLDER_STICKERS[folder.id]
               ? DINO_FOLDER_STICKERS[folder.id]
               : isTurtleTheme && TURTLE_FOLDER_STICKERS[folder.id]
               ? TURTLE_FOLDER_STICKERS[folder.id]
