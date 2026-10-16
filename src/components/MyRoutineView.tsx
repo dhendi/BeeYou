@@ -24,6 +24,7 @@ import { RoutineCustomizerModal } from './RoutineCustomizerModal';
 import { Routine, RoutineTemplate } from '../types';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { t } from '../services/translator';
+import { TurtleArchedBridgeSticker } from './icons/JournalStickers';
 
 export const MyRoutineView: React.FC = () => {
   const {
@@ -373,11 +374,17 @@ export const MyRoutineView: React.FC = () => {
             <div className={`flex items-center justify-between ${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} p-3 sm:p-4 rounded-2xl`}>
               <div>
                 <h3 className={`font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-sm sm:text-base flex items-center gap-1.5`}>
-                  <BookOpen className="w-4 h-4 opacity-80" />
-                  <span>{t('Pre-Built Routine Templates Library')}</span>
+                  {activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle' ? (
+                    <TurtleArchedBridgeSticker className="w-5 h-5 object-contain inline-block" />
+                  ) : (
+                    <BookOpen className="w-4 h-4 opacity-80" />
+                  )}
+                  <span>{activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle' ? 'Wise Turtle Sanctuary Routine Library' : t('Pre-Built Routine Templates Library')}</span>
                 </h3>
                 <p className={`text-xs ${activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-900/80'} font-medium mt-0.5`}>
-                  {t('Click "1-Tap Import" to add any routine directly to your schedule, or "Customize" to tailor steps.')}
+                  {activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle'
+                    ? 'Click "1-Tap Import" to add calm sanctuary flows directly to your schedule, or "Customize" to adjust steps.'
+                    : t('Click "1-Tap Import" to add any routine directly to your schedule, or "Customize" to tailor steps.')}
                 </p>
               </div>
               <button
