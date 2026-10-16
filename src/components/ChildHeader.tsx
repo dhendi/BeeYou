@@ -32,38 +32,15 @@ export const ChildHeader: React.FC = () => {
     activeTheme,
     enabledFeatures,
     userAgeGroup,
-    setShowAboutMeModal,
   } = useApp();
 
   return (
     <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
-      {/* Left: Monogram Badge + Name */}
+      {/* Left: Child Name */}
       <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-        <button 
-          type="button"
-          onClick={() => {
-            setShowAboutMeModal(true);
-            playChime('tap');
-          }}
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border border-amber-300 shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
-          title="About Me ID Card"
-          aria-label="About Me ID Card"
-        >
-          {childProfile.name ? childProfile.name.charAt(0).toUpperCase() : 'B'}
-        </button>
-
-        <div className="flex items-center gap-2 min-w-0">
-          <h1 
-            onClick={() => {
-              setShowAboutMeModal(true);
-              playChime('tap');
-            }}
-            className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none truncate cursor-pointer hover:text-[#D97706] transition-colors"
-            title="About Me ID Card"
-          >
-            {childProfile.name}
-          </h1>
-        </div>
+        <h1 className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none truncate">
+          {childProfile.name}
+        </h1>
       </div>
 
       {/* Center: Plans Changed Alert Indicator (if active) */}
