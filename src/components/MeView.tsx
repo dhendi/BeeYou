@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import {
   ThermometerSticker,
   MedicationSticker,
@@ -27,8 +28,10 @@ export const MeView: React.FC = () => {
     setShowCycleTrackerModal,
     setShowSpoonModal,
     setShowRecollectionModal,
+    activeTheme,
   } = useApp();
 
+  const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const cycleInfo = isTeenOrAdult && getCyclePhaseInfo ? getCyclePhaseInfo() : null;
@@ -154,25 +157,25 @@ export const MeView: React.FC = () => {
           const Sticker = card.Sticker;
           const cardClass = isColorCoded
             ? card.color
-            : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            : `${themeStyles.card} !p-4 sm:!p-5 !rounded-2xl`;
           const badgeClass = isColorCoded
             ? card.badgeClass
-            : 'border border-amber-300/80 bg-amber-100 text-amber-900';
+            : themeStyles.adventureTag;
 
           return (
             <button
               key={card.id}
               onClick={card.action}
-              className={`w-full text-left p-4 sm:p-5 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${cardClass}`}
+              className={`w-full text-left p-4 sm:p-5 rounded-2xl active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${cardClass}`}
             >
               <div className="min-w-0 flex-1">
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md inline-block mb-1 ${badgeClass}`}>
+                <span className={badgeClass}>
                   {t(card.badge)}
                 </span>
-                <h3 className="font-bold text-sm sm:text-base leading-snug truncate">
+                <h3 className={`font-bold text-sm sm:text-base leading-snug truncate ${isColorCoded ? 'text-slate-900' : themeStyles.headerText}`}>
                   {t(card.title)}
                 </h3>
-                <p className="text-xs opacity-75 font-medium leading-snug mt-0.5 line-clamp-1">
+                <p className={`text-xs font-medium leading-snug mt-0.5 line-clamp-1 ${isColorCoded ? 'opacity-75 text-slate-600' : themeStyles.headerSubtext}`}>
                   {t(card.desc)}
                 </p>
               </div>

@@ -14,6 +14,7 @@ import {
 import { Routine } from '../types';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { useApp } from '../context/AppContext';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 
@@ -40,6 +41,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
   setIsParentMode,
   isAdult,
 }) => {
+  const { activeTheme } = useApp();
   // Current week offset (0 = current week, -1 = last week, +1 = next week)
   const [weekOffset, setWeekOffset] = useState(0);
   const [showDayManager, setShowDayManager] = useState(false);
@@ -105,7 +107,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#EBE3D5]">
         {/* Month & Week Navigation */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-black shadow-xs shrink-0">
+          <div className={`w-7 h-7 rounded-lg ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white flex items-center justify-center font-black shadow-xs shrink-0`}>
             <CalendarIcon className="w-3.5 h-3.5" />
           </div>
           <div className="flex items-center gap-2">
@@ -120,7 +122,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                   onSelectDate(new Date());
                   playChime('tap');
                 }}
-                className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black hover:bg-amber-200 transition-all cursor-pointer"
+                className={`px-2 py-0.5 rounded-full ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-900'} text-[10px] font-black hover:opacity-80 transition-all cursor-pointer`}
               >
                 {t('Today')}
               </button>
@@ -177,7 +179,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               onOpenCustomizer();
               playChime('tap');
             }}
-            className="px-2.5 py-1.5 rounded-xl bg-[#F5B865] hover:bg-[#EEAC53] text-stone-950 font-black text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95 border border-[#E2A44E]"
+            className={`px-2.5 py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white hover:opacity-90` : 'bg-[#F5B865] hover:bg-[#EEAC53] text-stone-950'} font-black text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95 border ${activeTheme?.palette?.primaryBorder || 'border-[#E2A44E]'}`}
             title="Create a new routine from scratch"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -248,6 +250,10 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           const dayIndex = dayDate.getDay();
           const count = routines.filter((r) => isRoutineOnDay(r, dayIndex)).length;
 
+          const selectedDayTextColor = activeTheme?.palette?.primaryBorder
+            ? activeTheme.palette.primaryBorder.replace('border-', 'text-').replace('-400', '-300').replace('-500', '-300')
+            : 'text-amber-300';
+
           return (
             <button
               key={dayDate.toISOString()}
@@ -258,16 +264,20 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               }}
               className={`py-2 px-1 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border min-h-[58px] sm:min-h-[64px] ${
                 isSelected
-                  ? 'bg-stone-900 text-white border-stone-900 shadow-md ring-2 ring-amber-400 scale-[1.02]'
+                  ? 'bg-stone-900 text-white border-stone-900 shadow-md ring-2 scale-[1.02]'
                   : isToday
-                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-300 shadow-2xs'
+                  ? `${activeTheme?.palette?.primaryLight || 'bg-amber-100'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-950'} ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs`
                   : 'bg-[#F5EFE6] hover:bg-white text-stone-800 border-[#E8DFC2] shadow-2xs'
               }`}
+              style={{
+                borderColor: isSelected ? (activeTheme?.palette?.primary || '#f59e0b') : undefined,
+                boxShadow: isSelected ? `0 0 0 2px ${activeTheme?.palette?.primary || '#f59e0b'}` : undefined,
+              }}
             >
               {/* Day name */}
               <span
                 className={`text-[10px] font-black uppercase tracking-wider ${
-                  isSelected ? 'text-amber-300' : isToday ? 'text-amber-800' : 'text-stone-500'
+                  isSelected ? selectedDayTextColor : isToday ? (activeTheme?.palette?.textAccent || 'text-amber-800') : 'text-stone-500'
                 }`}
               >
                 {dayNamesShort[dayIndex]}
@@ -281,7 +291,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               {/* Minimalist dot indicator */}
               <div className="flex items-center justify-center gap-1 text-[9px] font-bold">
                 {isToday ? (
-                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-stone-950 font-black text-[7px] tracking-tight">
+                  <span className={`px-1.5 py-0.2 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white font-black text-[7px] tracking-tight`}>
                     TODAY
                   </span>
                 ) : count > 0 ? (
@@ -299,20 +309,20 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
 
       {/* 3. Collapsible Day Manager Drawer (When Unlocked) */}
       {(isParentMode || isAdult) && showDayManager && (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 border-2 border-amber-300 space-y-3 animate-in fade-in mt-2">
-          <div className="flex items-center justify-between pb-2 border-b border-amber-200">
+        <div className={`p-3.5 sm:p-4 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50/80'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} space-y-3 animate-in fade-in mt-2`}>
+          <div className={`flex items-center justify-between pb-2 border-b ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}>
             <div>
-              <h4 className="font-black text-amber-950 text-xs sm:text-sm">
+              <h4 className={`font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-xs sm:text-sm`}>
                 {t('Assign Routines to')} {dayNamesShort[selectedDayIndex]} ({selectedDayFormatted})
               </h4>
-              <p className="text-[11px] font-semibold text-amber-800">
+              <p className={`text-[11px] font-semibold ${activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-800'}`}>
                 {t('Check the routines that should run on this day of the week.')}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowDayManager(false)}
-              className="text-amber-800 hover:text-amber-950 font-black text-xs cursor-pointer px-2 py-1 bg-white rounded-lg border border-amber-200"
+              className={`${activeTheme?.palette?.textAccent || 'text-amber-800'} hover:opacity-80 font-black text-xs cursor-pointer px-2 py-1 bg-white rounded-lg border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}
             >
               {t('Done')}
             </button>
@@ -328,7 +338,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                   key={routine.id}
                   className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
                     isActiveToday
-                      ? 'bg-white border-amber-300 text-stone-900 shadow-2xs'
+                      ? `bg-white ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} text-stone-900 shadow-2xs`
                       : 'bg-white/60 border-stone-200 text-stone-500'
                   }`}
                 >

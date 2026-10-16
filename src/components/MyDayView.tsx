@@ -49,6 +49,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     resetRoutine,
     updateRoutine,
     openPrintSchedule,
+    activeTheme,
   } = useApp();
 
   // Filter out any legacy 20-step routines
@@ -323,7 +324,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
       {/* Empty State when no routines are scheduled for this day */}
       {categorizedGroups.length === 0 && (
         <div className="bg-white rounded-[2.5rem] p-8 sm:p-12 border-2 border-stone-200 text-center space-y-3 shadow-xs">
-          <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl">
+          <div className={`w-16 h-16 mx-auto rounded-3xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-center text-3xl`}>
             ☀️
           </div>
           <h4 className="text-base sm:text-lg font-black text-stone-900">
@@ -361,8 +362,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                 <span>·</span>
                 <span>{group.routines.length}</span>
                 {isCurrentPeriod && (
-                  <span className="ml-1.5 px-2 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-[10px] font-black border border-amber-300 flex items-center gap-1 shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block" />
+                  <span className={`ml-1.5 px-2 py-0.5 rounded-full ${activeTheme?.palette?.badgeBg || 'bg-amber-100/90'} ${activeTheme?.palette?.textAccent || 'text-amber-800'} text-[10px] font-black border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} flex items-center gap-1 shadow-2xs`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-600'} inline-block`} />
                     <span>{t('Now')}</span>
                   </span>
                 )}
@@ -393,9 +394,13 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                       key={routine.id}
                       className={`bg-white rounded-[2rem] sm:rounded-[2.4rem] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border transition-all ${
                         isCurrentRoutine
-                          ? 'border-amber-400 ring-2 ring-amber-200/70 shadow-md'
+                          ? `${activeTheme?.palette?.primaryBorder || 'border-amber-400'} ring-2 shadow-md`
                           : 'border-stone-200/80'
                       }`}
+                      style={{
+                        borderColor: isCurrentRoutine ? (activeTheme?.palette?.primary || '#f59e0b') : undefined,
+                        boxShadow: isCurrentRoutine ? `0 0 0 2px ${activeTheme?.palette?.primary || '#f59e0b'}33, 0 4px 20px rgba(0,0,0,0.05)` : undefined,
+                      }}
                     >
                       {/* Collapsed Routine Header: Chevron, Title, Subtitle, Play Button */}
                       <div
@@ -418,8 +423,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                 </div>
                               </h3>
                               {isCurrentRoutine && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-black border border-amber-500/70 flex items-center gap-1 shadow-2xs shrink-0">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-stone-950 inline-block animate-ping" />
+                                <span className={`px-2 py-0.5 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white text-[10px] sm:text-[11px] font-black border ${activeTheme?.palette?.primaryBorder || 'border-amber-500/70'} flex items-center gap-1 shadow-2xs shrink-0`}>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-white inline-block animate-ping" />
                                   <span>{t('Current Now')}</span>
                                 </span>
                               )}
@@ -428,7 +433,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                               {routine.time && (
                                 <>
                                   <span className="flex items-center gap-1 text-stone-700 font-bold bg-stone-100 px-2 py-0.5 rounded-md text-[11px] sm:text-xs">
-                                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <Clock className="w-3.5 h-3.5 text-stone-500 shrink-0" />
                                     <span>{routine.time}</span>
                                   </span>
                                   <span>·</span>
@@ -471,26 +476,26 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                 onClick={() => handleSelectStepForTimer(routine, stepIdx)}
                                 className={`flex items-center justify-between gap-3 py-2 px-3 rounded-2xl cursor-pointer select-none transition-all group ${
                                   isStepActiveOnTimer
-                                    ? 'bg-amber-50/90 border-2 border-amber-400 shadow-xs'
+                                    ? `${activeTheme?.palette?.primaryLight || 'bg-amber-50/90'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} shadow-xs`
                                     : 'hover:bg-stone-50 border-2 border-transparent'
                                 }`}
                                 title={t('Click to put on top timer')}
                               >
                                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                                  {/* Status indicator: Gold checkmark badge when done, amber play icon when on timer, hollow gray circle otherwise */}
+                                  {/* Status indicator: Gold checkmark badge when done, themed play icon when on timer, hollow gray circle otherwise */}
                                   <div
                                     className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
                                       step.completed
                                         ? 'bg-[#FACC15] text-stone-950 shadow-xs'
                                         : isStepActiveOnTimer
-                                        ? 'bg-amber-400 text-stone-950 ring-2 ring-amber-400/50 shadow-xs animate-pulse'
+                                        ? `${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white ring-2 ring-black/10 shadow-xs animate-pulse`
                                         : 'border-2 border-stone-300 group-hover:border-stone-400 bg-transparent'
                                     }`}
                                   >
                                     {step.completed ? (
                                       <Check className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3] text-stone-950" />
                                     ) : isStepActiveOnTimer ? (
-                                      <Play className="w-3.5 h-3.5 fill-stone-950 text-stone-950 ml-0.5" />
+                                      <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
                                     ) : null}
                                   </div>
 
@@ -503,7 +508,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                     />
                                   </div>
 
-                                  {/* Title & timer badge: Strikethrough when done, amber highlight when active on timer, dark clean when pending */}
+                                  {/* Title & timer badge: Strikethrough when done, theme highlight when active on timer, dark clean when pending */}
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <span
@@ -511,7 +516,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                           step.completed
                                             ? 'line-through text-stone-400 font-medium'
                                             : isStepActiveOnTimer
-                                            ? 'text-amber-950 font-bold'
+                                            ? `${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold`
                                             : 'text-stone-800'
                                         }`}
                                       >
@@ -526,8 +531,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                       {isStepActiveOnTimer && (
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide shrink-0 ${
                                           step.completed
-                                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                                            : 'bg-amber-200/80 text-amber-900'
+                                            ? `${activeTheme?.palette?.primaryLight || 'bg-amber-100'} ${activeTheme?.palette?.textAccent || 'text-amber-900'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'}`
+                                            : `${activeTheme?.palette?.badgeBg || 'bg-amber-200/80'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`
                                         }`}>
                                           {t('On Timer')}
                                         </span>
@@ -535,7 +540,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                     </div>
                                     {isStepActiveOnTimer && (
                                       <p className={`text-[11px] font-medium mt-0.5 flex items-center gap-1 ${
-                                        step.completed ? 'text-emerald-700 font-bold' : 'text-amber-700'
+                                        step.completed ? 'text-emerald-700 font-bold' : (activeTheme?.palette?.textAccent || 'text-amber-700')
                                       }`}>
                                         {step.completed ? (
                                           <>
@@ -552,8 +557,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
 
                                 {/* Duration on the right */}
                                 {isStepActiveOnTimer ? (
-                                  <div className="flex items-center gap-1.5 shrink-0 bg-amber-400 text-stone-950 px-2.5 py-1 rounded-full font-black text-xs shadow-xs animate-pulse">
-                                    <Clock className="w-3 h-3 text-stone-900" />
+                                  <div className={`flex items-center gap-1.5 shrink-0 ${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white px-2.5 py-1 rounded-full font-black text-xs shadow-xs animate-pulse`}>
+                                    <Clock className="w-3 h-3 text-white" />
                                     <span>{Math.floor(timerSecondsLeft / 60)}:{String(timerSecondsLeft % 60).padStart(2, '0')}</span>
                                   </div>
                                 ) : (
@@ -578,10 +583,10 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                   openPrintSchedule({ mode: 'checklist', routineId: routine.id });
                                   playChime('tap');
                                 }}
-                                className="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200/80 cursor-pointer font-bold transition-all text-[11px] shadow-2xs"
+                                className={`inline-flex items-center gap-1 ${activeTheme?.palette?.textAccent || 'text-amber-700'} hover:opacity-80 ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 px-2 py-0.5 rounded-lg border ${activeTheme?.palette?.primaryBorder || 'border-amber-200/80'} cursor-pointer font-bold transition-all text-[11px] shadow-2xs`}
                                 title="Print this routine or PECS cards"
                               >
-                                <Printer className="w-3 h-3 text-amber-600" />
+                                <Printer className="w-3 h-3 opacity-80" />
                                 <span>{t('Print Schedule / Cards')}</span>
                               </button>
                             </div>
@@ -615,9 +620,9 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
           <button
             type="button"
             onClick={onOpenTemplatesLibrary}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-black text-xs transition-all shadow-2xs cursor-pointer active:scale-95"
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-900'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200/80'} font-black text-xs transition-all shadow-2xs cursor-pointer active:scale-95`}
           >
-            <BookOpen className="w-4 h-4 text-amber-700" />
+            <BookOpen className="w-4 h-4 opacity-80" />
             <span>{t('Browse Pre-Built Routine Templates Library')} ➔</span>
           </button>
         </div>

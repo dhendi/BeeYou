@@ -94,12 +94,12 @@ export const ChildHeader: React.FC = () => {
               playChime('tap');
               window.dispatchEvent(new CustomEvent('beeyou_open_caregiver_help_hub'));
             }}
-            className="flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-black text-[10px] sm:text-xs border border-amber-300 shadow-2xs active:scale-95 transition-all cursor-pointer"
+            className={`flex items-center gap-1 px-2 py-1 rounded-xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-black text-[10px] sm:text-xs border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs active:scale-95 transition-all cursor-pointer`}
             title="Caregiver Help Hub (Quick Guides & Ergonomics)"
             aria-label="Caregiver Help Hub"
           >
             <span className="text-sm">🐝</span>
-            <span className="hidden sm:inline font-bold text-amber-800">{t('Help')}</span>
+            <span className={`hidden sm:inline font-bold ${activeTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Help')}</span>
           </button>
         </div>
 
@@ -121,7 +121,7 @@ export const ChildHeader: React.FC = () => {
               window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
           }}
-          className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] sm:text-xs active:scale-95 transition-all cursor-pointer shadow-xs border border-amber-600"
+          className={`flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-[11px] sm:text-xs active:scale-95 transition-all cursor-pointer shadow-xs border ${activeTheme?.palette?.primaryBorder || 'border-amber-600'}`}
           title="Open Caregiver Hub"
         >
           <Crown className="w-3 h-3" />

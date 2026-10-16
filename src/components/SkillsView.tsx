@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import { RoutineStickerIcon, GoldStarSticker } from './icons/JournalStickers';
 
 const getSkillSticker = (id: string, emoji?: string): string | undefined => {
@@ -36,8 +37,10 @@ export const SkillsView: React.FC = () => {
     speak,
     announce,
     settings,
+    activeTheme,
   } = useApp();
 
+  const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
   const selectedSkill = skills.find((s) => s.id === activeSkillId);
 
@@ -102,7 +105,7 @@ export const SkillsView: React.FC = () => {
 
         {/* Skill Hero Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center p-2 shrink-0 shadow-xs ${isColorCoded ? 'bg-purple-50 border-2 border-purple-200' : 'bg-amber-50/70 border-2 border-amber-200'}`}>
+          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center p-2 shrink-0 shadow-xs ${isColorCoded ? 'bg-purple-50 border-2 border-purple-200' : `${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}`}>
             {(selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)) ? (
               <img
                 src={selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)}
@@ -115,7 +118,7 @@ export const SkillsView: React.FC = () => {
           </div>
           <div className="flex-1 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${isColorCoded ? 'text-purple-700 bg-purple-100' : 'text-amber-900 bg-amber-100 border border-amber-300/80'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${isColorCoded ? 'text-purple-700 bg-purple-100' : `${activeTheme?.palette?.textAccent || 'text-amber-900'} ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300/80'}`}`}>
                 {t('Mission')}
               </span>
             </div>
@@ -129,7 +132,7 @@ export const SkillsView: React.FC = () => {
             {/* Progress bar */}
             <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200 mt-3">
               <div
-                className={`h-full transition-all duration-500 rounded-full ${isColorCoded ? 'bg-purple-500' : 'bg-amber-500'}`}
+                className={`h-full transition-all duration-500 rounded-full ${isColorCoded ? 'bg-purple-500' : (activeTheme?.palette?.primaryBg || 'bg-amber-500')}`}
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
@@ -221,8 +224,8 @@ export const SkillsView: React.FC = () => {
                         }}
                         className={`flex items-center gap-1 px-3 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer ${
                           isStepTimerActive
-                            ? 'bg-amber-400 text-amber-950 animate-pulse'
-                            : (isColorCoded ? 'bg-purple-100 hover:bg-purple-200 text-purple-900' : 'bg-amber-100 hover:bg-amber-200 text-amber-900')
+                            ? `${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white animate-pulse`
+                            : (isColorCoded ? 'bg-purple-100 hover:bg-purple-200 text-purple-900' : `${activeTheme?.palette?.badgeBg || 'bg-amber-100'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-900'}`)
                         }`}
                       >
                         <Timer className="w-3.5 h-3.5" />
@@ -247,13 +250,13 @@ export const SkillsView: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 rounded-3xl p-5 sm:p-6 text-white shadow-md flex items-center justify-between">
+      <div className={`${activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white` : 'bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 text-white'} rounded-3xl p-5 sm:p-6 shadow-md flex items-center justify-between`}>
         <div>
-          <span className="text-xs font-black uppercase tracking-wider text-amber-100">
+          <span className="text-xs font-black uppercase tracking-wider opacity-90">
             {t('Independence & Life Skills')}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 text-white">{t('My Daily Skills')}</h2>
-          <p className="text-xs sm:text-sm text-amber-100/90 font-medium mt-1 max-w-md">
+          <p className="text-xs sm:text-sm opacity-90 font-medium mt-1 max-w-md">
             {t('Master everyday activities step-by-step at your own pace!')}
           </p>
         </div>
@@ -269,14 +272,14 @@ export const SkillsView: React.FC = () => {
 
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-purple-50/40 border-2 border-slate-200 hover:border-purple-300'
-              : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+              : `${themeStyles.card} !p-4 sm:!p-5 !rounded-3xl`;
             const iconBoxClass = isColorCoded
               ? 'bg-purple-50 border border-purple-200'
-              : 'bg-white/90 border border-amber-200/90';
+              : `bg-white/90 border ${activeTheme?.palette?.primaryBorder || 'border-amber-200/90'}`;
             const badgeClass = isColorCoded
               ? 'text-purple-700 bg-purple-50'
-              : 'text-amber-900 bg-amber-100 border border-amber-300/80';
-            const subtextClass = isColorCoded ? 'text-purple-600' : 'text-amber-800';
+              : themeStyles.adventureTag;
+            const subtextClass = isColorCoded ? 'text-purple-600' : (activeTheme?.palette?.textAccent || 'text-amber-800');
 
             return (
               <button
@@ -287,7 +290,7 @@ export const SkillsView: React.FC = () => {
                   setActiveSkillId(skill.id);
                   playChime('tap');
                 }}
-                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+                className={`w-full text-left rounded-3xl p-4 sm:p-5 transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
                   {(skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)) ? (

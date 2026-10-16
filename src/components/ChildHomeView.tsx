@@ -273,10 +273,10 @@ export const ChildHomeView: React.FC = () => {
             <button
               type="button"
               aria-label="Customize and reorder dashboard widgets"
-              className="px-4 py-2.5 min-h-[44px] rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 border border-amber-500/80 font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+              className={`px-4 py-2.5 min-h-[44px] rounded-xl ${activeTheme?.palette?.badgeBg || 'bg-amber-400'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-950'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-500/80'} font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:outline-none`}
               title="Customize and reorder dashboard widgets (Protected)"
             >
-              <SlidersHorizontal className="w-4 h-4 text-amber-950" aria-hidden="true" />
+              <SlidersHorizontal className="w-4 h-4 opacity-80" aria-hidden="true" />
               <span>{t('Customize Dashboard')}</span>
             </button>
           </CaregiverLockShield>
@@ -347,7 +347,7 @@ export const ChildHomeView: React.FC = () => {
           type="button"
           aria-label={`Plans changed. New Plan: ${t(plansChanged.newPlanTitle)}. Tap to see calm plan.`}
           onClick={() => setShowPlansChangedModal(true)}
-          className="w-full text-left bg-amber-100/95 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+          className={`w-full text-left ${activeTheme?.palette?.primaryLight || 'bg-amber-100/95'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:outline-none`}
         >
           <div className="flex items-center gap-3">
             {isTurtleTheme ? (
@@ -357,12 +357,12 @@ export const ChildHomeView: React.FC = () => {
             )}
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
+                <span className={`px-2.5 py-0.5 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white font-black text-[10px] uppercase tracking-wider`}>
                   {t('Plans Changed')}
                 </span>
-                <span className="text-xs font-bold text-amber-900">{t('Tap to see calm plan')}</span>
+                <span className={`text-xs font-bold ${activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-900'}`}>{t('Tap to see calm plan')}</span>
               </div>
-              <h2 className="text-base sm:text-lg font-black text-amber-950 mt-0.5">
+              <h2 className={`text-base sm:text-lg font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} mt-0.5`}>
                 {t('New Plan')}: {t(plansChanged.newPlanTitle)}
               </h2>
             </div>

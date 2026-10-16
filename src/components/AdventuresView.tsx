@@ -22,6 +22,7 @@ import {
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 import { t } from '../services/translator';
+import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 
 const getAdventureSticker = (id: string): string | undefined => {
   if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
@@ -56,8 +57,10 @@ export const AdventuresView: React.FC = () => {
     announce,
     completeAdventure,
     setChildView,
+    activeTheme,
   } = useApp();
 
+  const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
 
   const [activeTab, setActiveTab] = useState<'adventures' | 'stories'>('adventures');
@@ -239,7 +242,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('steps')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'steps'
-                ? 'bg-amber-500 text-white shadow-sm'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -249,7 +252,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('sensory')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'sensory'
-                ? 'bg-amber-500 text-white shadow-sm'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -259,7 +262,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('say')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'say'
-                ? 'bg-amber-500 text-white shadow-sm'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -269,7 +272,7 @@ export const AdventuresView: React.FC = () => {
             onClick={() => setAdventureSubTab('practice')}
             className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               adventureSubTab === 'practice'
-                ? 'bg-amber-500 text-white shadow-sm'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
@@ -553,9 +556,7 @@ export const AdventuresView: React.FC = () => {
           onClick={() => setActiveTab('adventures')}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeTab === 'adventures'
-              ? isColorCoded
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-amber-500 text-white shadow-sm'
+              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -566,9 +567,7 @@ export const AdventuresView: React.FC = () => {
           onClick={() => setActiveTab('stories')}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             activeTab === 'stories'
-              ? isColorCoded
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-amber-500 text-white shadow-sm'
+              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -582,14 +581,14 @@ export const AdventuresView: React.FC = () => {
           {adventures.map((adventure) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300'
-              : 'border-2 border-amber-300/90 hover:border-amber-400 bg-amber-100/90 hover:bg-amber-100 text-slate-900';
+              : `${themeStyles.card} !p-4 sm:!p-5 !rounded-3xl`;
             const iconBoxClass = isColorCoded
               ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-emerald-50 border border-emerald-200'
-              : 'w-16 h-16 flex items-center justify-center p-1 shrink-0';
+              : `w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`;
             const badgeClass = isColorCoded
               ? 'text-emerald-700 bg-emerald-50'
-              : 'text-amber-950 bg-white/90 border border-amber-300/80 shadow-2xs';
-            const subtextClass = isColorCoded ? 'text-emerald-700' : 'text-amber-900';
+              : themeStyles.adventureTag;
+            const subtextClass = isColorCoded ? 'text-emerald-700' : (activeTheme?.palette?.textAccent || 'text-amber-900');
 
             return (
               <button
@@ -602,7 +601,7 @@ export const AdventuresView: React.FC = () => {
                   setCurrentStepIndex(0);
                   playChime('tap');
                 }}
-                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+                className={`w-full text-left rounded-3xl p-4 sm:p-5 transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
                 <div className={iconBoxClass} aria-hidden="true">
                   {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
@@ -649,14 +648,14 @@ export const AdventuresView: React.FC = () => {
           {socialStories.map((story) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300'
-              : 'border-2 border-amber-300/90 hover:border-amber-400 bg-amber-100/90 hover:bg-amber-100 text-slate-900';
+              : `${themeStyles.card} !p-4 sm:!p-5 !rounded-3xl`;
             const iconBoxClass = isColorCoded
               ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-indigo-50 border border-indigo-200'
-              : 'w-16 h-16 flex items-center justify-center p-1 shrink-0';
+              : `w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`;
             const badgeClass = isColorCoded
               ? 'text-indigo-700 bg-indigo-50'
-              : 'text-amber-950 bg-white/90 border border-amber-300/80 shadow-2xs';
-            const subtextClass = isColorCoded ? 'text-indigo-700' : 'text-amber-900';
+              : themeStyles.adventureTag;
+            const subtextClass = isColorCoded ? 'text-indigo-700' : (activeTheme?.palette?.textAccent || 'text-amber-900');
 
             return (
               <button

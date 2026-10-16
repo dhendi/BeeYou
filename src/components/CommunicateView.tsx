@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Volume2 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import {
   ShieldSosSticker,
   ConnectHeartSticker,
@@ -26,9 +27,10 @@ export const CommunicateView: React.FC = () => {
     setShowAacKeyboardModal,
     speak,
     quickPhrases,
-    activeTheme: _activeTheme,
+    activeTheme,
   } = useApp();
 
+  const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
   const [customText, setCustomText] = useState('');
 
@@ -144,7 +146,7 @@ export const CommunicateView: React.FC = () => {
             value={customText}
             onChange={(e) => setCustomText(e.target.value)}
             placeholder={t('Type anything to speak out loud...')}
-            className="w-full pl-4 pr-10 py-2.5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-amber-400 focus:bg-white text-slate-900 font-bold text-xs sm:text-sm outline-none transition-all"
+            className={`w-full pl-4 pr-10 py-2.5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:bg-white text-slate-900 font-bold text-xs sm:text-sm outline-none transition-all ${activeTheme?.palette?.primaryBorder ? `focus:${activeTheme.palette.primaryBorder}` : 'focus:border-amber-400'}`}
           />
           {customText && (
             <button
@@ -159,7 +161,7 @@ export const CommunicateView: React.FC = () => {
         <button
           type="submit"
           disabled={!customText.trim()}
-          className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+          className={`px-5 py-2.5 rounded-2xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} disabled:opacity-50 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
         >
           <Volume2 className="w-4 h-4" />
           <span>{t('Speak')}</span>
@@ -172,25 +174,25 @@ export const CommunicateView: React.FC = () => {
           const Sticker = card.Sticker;
           const cardClass = isColorCoded
             ? card.color
-            : 'border-2 border-amber-200/90 hover:border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 text-slate-900';
+            : `${themeStyles.card} !p-4 sm:!p-5 !rounded-2xl`;
           const badgeClass = isColorCoded
             ? card.badgeClass
-            : 'border border-amber-300/80 bg-amber-100 text-amber-900';
+            : themeStyles.adventureTag;
 
           return (
             <button
               key={card.id}
               onClick={card.action}
-              className={`w-full text-left p-4 sm:p-5 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${cardClass}`}
+              className={`w-full text-left p-4 sm:p-5 rounded-2xl active:scale-[0.98] cursor-pointer transition-all flex items-center justify-between gap-4 group ${cardClass}`}
             >
               <div className="min-w-0 flex-1">
-                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block mb-1 ${badgeClass}`}>
+                <span className={badgeClass}>
                   {t(card.badge)}
                 </span>
-                <h3 className="font-bold text-sm sm:text-base leading-snug truncate text-slate-900">
+                <h3 className={`font-bold text-sm sm:text-base leading-snug truncate ${isColorCoded ? 'text-slate-900' : themeStyles.headerText}`}>
                   {t(card.title)}
                 </h3>
-                <p className="text-xs text-slate-600 font-medium leading-snug mt-0.5 line-clamp-1">
+                <p className={`text-xs font-medium leading-snug mt-0.5 line-clamp-1 ${isColorCoded ? 'text-slate-600' : themeStyles.headerSubtext}`}>
                   {t(card.desc)}
                 </p>
               </div>

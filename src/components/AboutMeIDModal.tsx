@@ -210,7 +210,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 md:p-6 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl border-4 border-amber-300 overflow-hidden text-slate-800">
+      <div className={`bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl border-4 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} overflow-hidden text-slate-800`}>
         
         {/* HEADER BADGE */}
         <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
@@ -237,7 +237,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
             <button
               onClick={() => setIsWalletView(!isWalletView)}
               className={`p-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
-                isWalletView ? 'bg-amber-300 text-amber-950' : 'bg-white/20 hover:bg-white/30 text-white'
+                isWalletView ? `${activeTheme?.palette?.badgeBg || 'bg-amber-300'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}` : 'bg-white/20 hover:bg-white/30 text-white'
               }`}
               title="Toggle Wallet Badge Card View"
             >
@@ -258,11 +258,11 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
         </div>
 
         {/* MODAL ACTION STRIP */}
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between shrink-0">
+        <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-b ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} px-4 py-2 flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-2">
             <button
               onClick={handleReadAloud}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+              className={`px-3.5 py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all`}
               title="Speak ID Card introduction aloud"
             >
               <Volume2 className="w-4 h-4" />
@@ -307,10 +307,10 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
 
           {/* 1. WALLET CARD COMPACT VIEW (If enabled) */}
           {isWalletView && !isEditing && (
-            <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl border-3 border-amber-400 space-y-4 animate-in fade-in">
+            <div className={`bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl border-3 ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} space-y-4 animate-in fade-in`}>
               <div className="flex items-center justify-between border-b border-indigo-800 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center text-3xl font-black shadow-md">
+                  <div className={`w-14 h-14 rounded-2xl ${activeTheme?.palette?.primaryBg || 'bg-amber-400'} text-white flex items-center justify-center text-3xl font-black shadow-md`}>
                     {childProfile.name?.[0] || 'L'}
                   </div>
                   <div>
@@ -323,18 +323,18 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[10px] uppercase tracking-wider text-amber-300 font-black block">Blood Type</span>
+                  <span className={`text-[10px] uppercase tracking-wider ${activeTheme?.palette?.primaryBorder ? activeTheme.palette.primaryBorder.replace('border-', 'text-').replace('-400', '-300') : 'text-amber-300'} font-black block`}>Blood Type</span>
                   <span className="text-lg font-black text-white">{aboutMe.bloodType || 'O+'}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="bg-indigo-900/60 p-3 rounded-2xl border border-indigo-700/60">
-                  <span className="font-bold text-amber-300 block mb-1">Diagnoses / Needs:</span>
+                  <span className={`font-bold ${activeTheme?.palette?.primaryBorder ? activeTheme.palette.primaryBorder.replace('border-', 'text-').replace('-400', '-300') : 'text-amber-300'} block mb-1`}>Diagnoses / Needs:</span>
                   <p className="text-indigo-100 font-medium">{aboutMe.conditions.join(' • ')}</p>
                 </div>
                 <div className="bg-indigo-900/60 p-3 rounded-2xl border border-indigo-700/60">
-                  <span className="font-bold text-amber-300 block mb-1">Key Communication Rule:</span>
+                  <span className={`font-bold ${activeTheme?.palette?.primaryBorder ? activeTheme.palette.primaryBorder.replace('border-', 'text-').replace('-400', '-300') : 'text-amber-300'} block mb-1`}>Key Communication Rule:</span>
                   <p className="text-indigo-100 font-medium">Please allow 10–15 seconds to reply. I understand you clearly.</p>
                 </div>
               </div>

@@ -41,6 +41,7 @@ export const MyRoutineView: React.FC = () => {
     setActiveAdventureId,
     setActiveSkillId,
     openPrintSchedule,
+    activeTheme,
   } = useApp();
 
   const isAdult = userAgeGroup === 'adult';
@@ -206,7 +207,7 @@ export const MyRoutineView: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
               activeSubTab === 'schedules'
-                ? 'bg-amber-500 text-white shadow-xs'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -224,7 +225,7 @@ export const MyRoutineView: React.FC = () => {
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
               activeSubTab === 'templates'
-                ? 'bg-amber-500 text-white shadow-xs'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -242,7 +243,7 @@ export const MyRoutineView: React.FC = () => {
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
                 activeSubTab === 'adventures'
-                  ? 'bg-amber-500 text-white shadow-xs'
+                  ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
@@ -261,7 +262,7 @@ export const MyRoutineView: React.FC = () => {
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
                 activeSubTab === 'skills'
-                  ? 'bg-amber-500 text-white shadow-xs'
+                  ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
@@ -281,12 +282,12 @@ export const MyRoutineView: React.FC = () => {
             }}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer active:scale-95 ${
               plansChanged.active
-                ? 'bg-amber-500 text-white border-amber-600 animate-pulse shadow-xs'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white ${activeTheme?.palette?.primaryBorder || 'border-amber-600'} animate-pulse shadow-xs`
                 : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
             }`}
             title="Plans Changed transition tool"
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+            <AlertTriangle className={`w-3.5 h-3.5 ${plansChanged.active ? 'text-white' : activeTheme?.palette?.textAccent ? 'text-amber-500' : 'text-amber-500'}`} />
             <span className="hidden sm:inline">{t('Plans Changed')}</span>
             <span className="sm:hidden">{t('Plans')}</span>
           </button>
@@ -369,13 +370,13 @@ export const MyRoutineView: React.FC = () => {
         {/* PRE-BUILT ROUTINE TEMPLATES LIBRARY */}
         {activeSubTab === 'templates' && (
           <div className="space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between bg-amber-50/70 border border-amber-200 p-3 sm:p-4 rounded-2xl">
+            <div className={`flex items-center justify-between ${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} p-3 sm:p-4 rounded-2xl`}>
               <div>
-                <h3 className="font-black text-amber-950 text-sm sm:text-base flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-amber-700" />
+                <h3 className={`font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-sm sm:text-base flex items-center gap-1.5`}>
+                  <BookOpen className="w-4 h-4 opacity-80" />
                   <span>{t('Pre-Built Routine Templates Library')}</span>
                 </h3>
-                <p className="text-xs text-amber-900/80 font-medium mt-0.5">
+                <p className={`text-xs ${activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-900/80'} font-medium mt-0.5`}>
                   {t('Click "1-Tap Import" to add any routine directly to your schedule, or "Customize" to tailor steps.')}
                 </p>
               </div>
@@ -385,7 +386,7 @@ export const MyRoutineView: React.FC = () => {
                   setActiveSubTab('schedules');
                   playChime('tap');
                 }}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100/70 text-amber-950 border border-amber-300 font-black text-xs transition-all cursor-pointer shadow-2xs"
+                className={`px-3 py-1.5 rounded-xl bg-white hover:bg-black/5 ${activeTheme?.palette?.textAccent || 'text-amber-950'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} font-black text-xs transition-all cursor-pointer shadow-2xs`}
               >
                 ← {t('Back to Schedule')}
               </button>
