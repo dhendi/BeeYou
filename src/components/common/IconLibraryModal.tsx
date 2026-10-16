@@ -204,6 +204,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_pond_ripple_wave', emoji: '/assets/stickers/turtle_pond_ripple_wave.png', label: 'Gentle Pond Ripple & Lily Pad', category: 'turtle', keywords: ['wave', 'ocean', 'ripple', 'pond', 'overwhelmed', 'water', 'calm', 'lily pad'] },
   { id: 'turtle_bamboo_energy_meter', emoji: '/assets/stickers/turtle_bamboo_energy_meter.png', label: 'Bamboo Energy Tube Gauge', category: 'turtle', keywords: ['battery', 'meter', 'energy', 'stamina', 'gauge', 'bamboo', 'level'] },
   { id: 'turtle_whispering_reed_quiet', emoji: '/assets/stickers/turtle_whispering_reed_quiet.png', label: 'Peaceful Whispering Reeds & Ripples', category: 'turtle', keywords: ['quiet', 'voice', 'whisper', 'soft', 'silence', 'cattail', 'reed', 'calm'] },
+  { id: 'turtle_honey_seed_bar', emoji: '/assets/stickers/turtle_honey_seed_bar.png', label: 'Honey & Seed Snack Bar', category: 'turtle', keywords: ['chocolate', 'bar', 'snack', 'seed', 'honey', 'treat', 'food'] },
+  { id: 'turtle_lotus_floating_lantern', emoji: '/assets/stickers/turtle_lotus_floating_lantern.png', label: 'Hanging Lotus Blossom Lantern', category: 'turtle', keywords: ['balloon', 'celebration', 'party', 'lantern', 'lotus', 'float', 'joy'] },
+  { id: 'turtle_woven_gathering_cart', emoji: '/assets/stickers/turtle_woven_gathering_cart.png', label: 'Woven Gathering Cart on Wheels', category: 'turtle', keywords: ['cart', 'shopping', 'supermarket', 'grocery', 'basket', 'gathering', 'wheels'] },
+  { id: 'turtle_dragonfly_glide', emoji: '/assets/stickers/turtle_dragonfly_glide.png', label: 'Soaring Dragonfly over Reeds', category: 'turtle', keywords: ['airplane', 'flight', 'fly', 'plane', 'travel', 'trip', 'dragonfly'] },
+  { id: 'turtle_timber_explorer_trunk', emoji: '/assets/stickers/turtle_timber_explorer_trunk.png', label: 'Explorer Timber Travel Trunk', category: 'turtle', keywords: ['luggage', 'suitcase', 'travel', 'trunk', 'chest', 'pack', 'vacation'] },
+  { id: 'turtle_wooden_token_pass', emoji: '/assets/stickers/turtle_wooden_token_pass.png', label: 'Carved Wooden Token Pass', category: 'turtle', keywords: ['ticket', 'boarding', 'pass', 'admission', 'token', 'wooden', 'leaf'] },
+  { id: 'turtle_shaded_canopy_lamp', emoji: '/assets/stickers/turtle_shaded_canopy_lamp.png', label: 'Shaded Firefly Canopy Lamp', category: 'turtle', keywords: ['lights', 'bright', 'sensory', 'lamp', 'firefly', 'canopy', 'calm'] },
+  { id: 'turtle_sound_softening_shell', emoji: '/assets/stickers/turtle_sound_softening_shell.png', label: 'Sound-Softening Spiral Shell', category: 'turtle', keywords: ['noise', 'loud', 'sensory', 'shell', 'sound', 'conch', 'calm'] },
+  { id: 'turtle_cozy_shell_retreat', emoji: '/assets/stickers/turtle_cozy_shell_retreat.png', label: 'Cozy Shell Retreat', category: 'turtle', keywords: ['masking', 'social', 'fatigue', 'retreat', 'shell', 'turtle', 'rest', 'break'] },
 ];
 
 export interface IconLibraryModalProps {

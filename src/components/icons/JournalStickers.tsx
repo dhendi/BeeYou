@@ -429,6 +429,15 @@ export const TurtleShellWallClockSticker = renderStickerPng('/assets/stickers/tu
 export const TurtlePondRippleWaveSticker = renderStickerPng('/assets/stickers/turtle_pond_ripple_wave.png', 'Gentle Pond Ripple & Lily Pad');
 export const TurtleBambooEnergyMeterSticker = renderStickerPng('/assets/stickers/turtle_bamboo_energy_meter.png', 'Bamboo Energy Tube Gauge');
 export const TurtleWhisperingReedQuietSticker = renderStickerPng('/assets/stickers/turtle_whispering_reed_quiet.png', 'Peaceful Whispering Reeds & Ripples');
+export const TurtleHoneySeedBarSticker = renderStickerPng('/assets/stickers/turtle_honey_seed_bar.png', 'Honey & Seed Snack Bar');
+export const TurtleLotusFloatingLanternSticker = renderStickerPng('/assets/stickers/turtle_lotus_floating_lantern.png', 'Hanging Lotus Blossom Lantern');
+export const TurtleWovenGatheringCartSticker = renderStickerPng('/assets/stickers/turtle_woven_gathering_cart.png', 'Woven Gathering Cart on Wheels');
+export const TurtleDragonflyGlideSticker = renderStickerPng('/assets/stickers/turtle_dragonfly_glide.png', 'Soaring Dragonfly over Reeds');
+export const TurtleTimberExplorerTrunkSticker = renderStickerPng('/assets/stickers/turtle_timber_explorer_trunk.png', 'Explorer Timber Travel Trunk');
+export const TurtleWoodenTokenPassSticker = renderStickerPng('/assets/stickers/turtle_wooden_token_pass.png', 'Carved Wooden Token Pass');
+export const TurtleShadedCanopyLampSticker = renderStickerPng('/assets/stickers/turtle_shaded_canopy_lamp.png', 'Shaded Firefly Canopy Lamp');
+export const TurtleSoundSofteningShellSticker = renderStickerPng('/assets/stickers/turtle_sound_softening_shell.png', 'Sound-Softening Spiral Shell');
+export const TurtleCozyShellRetreatSticker = renderStickerPng('/assets/stickers/turtle_cozy_shell_retreat.png', 'Cozy Shell Retreat');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -487,12 +496,36 @@ export const LaundryHamperSticker = renderThemedStickerPng(
   '/assets/stickers/turtle_reed_laundry_basket.png',
   'Laundry Hamper'
 );
-export const ChocolateBarSticker = renderStickerPng('/assets/stickers/chocolate_bar.png', 'Comfort Chocolate Bar');
-export const RedBalloonSticker = renderStickerPng('/assets/stickers/red_balloon.png', 'Red Balloon');
-export const ShoppingCartSticker = renderStickerPng('/assets/stickers/shopping_cart.png', 'Supermarket Shopping Cart');
-export const AirplaneFlightSticker = renderStickerPng('/assets/stickers/airplane_flight.png', 'Passenger Airplane Flight');
-export const TravelLuggageSticker = renderStickerPng('/assets/stickers/travel_luggage.png', 'Travel Rolling Luggage');
-export const BoardingTicketSticker = renderStickerPng('/assets/stickers/boarding_ticket.png', 'Boarding Pass Ticket');
+export const ChocolateBarSticker = renderThemedStickerPng(
+  '/assets/stickers/chocolate_bar.png',
+  '/assets/stickers/turtle_honey_seed_bar.png',
+  'Comfort Chocolate Bar'
+);
+export const RedBalloonSticker = renderThemedStickerPng(
+  '/assets/stickers/red_balloon.png',
+  '/assets/stickers/turtle_lotus_floating_lantern.png',
+  'Red Balloon'
+);
+export const ShoppingCartSticker = renderThemedStickerPng(
+  '/assets/stickers/shopping_cart.png',
+  '/assets/stickers/turtle_woven_gathering_cart.png',
+  'Supermarket Shopping Cart'
+);
+export const AirplaneFlightSticker = renderThemedStickerPng(
+  '/assets/stickers/airplane_flight.png',
+  '/assets/stickers/turtle_dragonfly_glide.png',
+  'Passenger Airplane Flight'
+);
+export const TravelLuggageSticker = renderThemedStickerPng(
+  '/assets/stickers/travel_luggage.png',
+  '/assets/stickers/turtle_timber_explorer_trunk.png',
+  'Travel Rolling Luggage'
+);
+export const BoardingTicketSticker = renderThemedStickerPng(
+  '/assets/stickers/boarding_ticket.png',
+  '/assets/stickers/turtle_wooden_token_pass.png',
+  'Boarding Pass Ticket'
+);
 export const QuietVoiceSticker = renderThemedStickerPng(
   '/assets/stickers/quiet_voice.png',
   '/assets/stickers/turtle_whispering_reed_quiet.png',
@@ -510,9 +543,21 @@ export const JigsawPuzzleSticker = renderThemedStickerPng(
 );
 
 // Table C Sensory Triggers, Daily Care & Community Adventures (User Provided Sheets)
-export const BrightLightsSticker = renderStickerPng('/assets/stickers/sensory_bright_lights.png', 'Bright Lights Sensory Trigger');
-export const LoudNoiseSticker = renderStickerPng('/assets/stickers/sensory_loud_noise.png', 'Loud Noise Sensitivity Trigger');
-export const SocialMaskingSticker = renderStickerPng('/assets/stickers/sensory_social_masking.png', 'Social Masking Fatigue');
+export const BrightLightsSticker = renderThemedStickerPng(
+  '/assets/stickers/sensory_bright_lights.png',
+  '/assets/stickers/turtle_shaded_canopy_lamp.png',
+  'Bright Lights Sensory Trigger'
+);
+export const LoudNoiseSticker = renderThemedStickerPng(
+  '/assets/stickers/sensory_loud_noise.png',
+  '/assets/stickers/turtle_sound_softening_shell.png',
+  'Loud Noise Sensitivity Trigger'
+);
+export const SocialMaskingSticker = renderThemedStickerPng(
+  '/assets/stickers/sensory_social_masking.png',
+  '/assets/stickers/turtle_cozy_shell_retreat.png',
+  'Social Masking Fatigue'
+);
 export const LungsBreathingStickerNew = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs Pacer');
 export const WritingJournalSticker = renderStickerPng('/assets/stickers/routine_writing_journal.png', 'Writing & Journaling');
 export const MedicinePillSticker = renderThemedStickerPng(
