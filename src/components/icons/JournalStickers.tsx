@@ -1065,6 +1065,24 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/chocolate_bar.png': '/assets/stickers/dino_seed_honey_bar.png',
   '/assets/stickers/travel_luggage.png': '/assets/stickers/dino_expedition_timber_trunk.png',
   '/assets/stickers/quiet_voice.png': '/assets/stickers/dino_whispering_baby_shh.png',
+  // Batch 5: Outings, Routines, Health & Sensory Triggers
+  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/dino_stone_washroom_basin.png',
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/dino_trail_explorer_boots.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/dino_prehistoric_moon.png',
+  '/assets/stickers/medications_health.png': '/assets/stickers/dino_herbal_wellness_vial.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
+  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/dino_bone_comb_mirror.png',
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/dino_expedition_camp_tent.png',
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/dino_geothermal_spring_pool.png',
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/dino_shadow_puppet_lantern.png',
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/dino_ammonite_ear_defenders.png',
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/dino_sun_hat_shades.png',
+  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/dino_secret_cavern_den.png',
+  '/assets/stickers/bone_treat.png': '/assets/stickers/dino_fossil_bone_treat.png',
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/dino_wooden_gathering_wagon.png',
+  '/assets/stickers/airplane_flight.png': '/assets/stickers/dino_pterodactyl_flight.png',
+  '/assets/stickers/shower_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
 };
 
 /**
