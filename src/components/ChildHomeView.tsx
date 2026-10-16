@@ -59,8 +59,10 @@ import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { getGrammaticalCategoryLabel } from './AACView';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
+import { IconLibraryModal } from './common/IconLibraryModal';
 
 export const ChildHomeView: React.FC = () => {
+  const [showMascotIconPicker, setShowMascotIconPicker] = useState(false);
   const {
     settings,
     childProfile,
@@ -98,6 +100,7 @@ export const ChildHomeView: React.FC = () => {
     dashboardWidgets,
     setShowDashboardCustomizer,
     updateRoutine,
+    updateTheme,
   } = useApp();
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
@@ -375,15 +378,25 @@ export const ChildHomeView: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div 
-                      className={themeStyles.mascotBadge}
-                      aria-hidden="true"
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowMascotIconPicker(true);
+                        playChime('tap');
+                      }}
+                      className={`${themeStyles.mascotBadge} cursor-pointer hover:scale-105 active:scale-95 transition-all p-1`}
+                      title={t("Change mascot companion icon from Icon Library")}
+                      aria-label={t("Change mascot companion icon from Icon Library")}
                     >
-                      {activeTheme?.mascotEmoji || '🐝'}
-                    </div>
+                      <RoutineStickerIcon
+                        emoji={activeTheme?.mascotEmoji || '🐝'}
+                        title={activeTheme?.mascotName || 'Bee Mascot'}
+                        className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-2xs"
+                      />
+                    </button>
                     <div className="min-w-0">
                       <h2 className={`text-xl sm:text-2xl font-black ${themeStyles.headerText} tracking-tight leading-none truncate`}>
-                        {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`} {activeTheme?.mascotEmoji || '🐝'}
+                        {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`}
                       </h2>
                       <p className={`text-xs ${themeStyles.headerSubtext} font-semibold mt-1 truncate`}>
                         {activeTheme?.greetingMessage ? t(activeTheme.greetingMessage) : t("Let's have a calm, wonderful day!")}
@@ -911,6 +924,22 @@ export const ChildHomeView: React.FC = () => {
         );
       })()}
 
+      {showMascotIconPicker && (
+        <IconLibraryModal
+          isOpen={showMascotIconPicker}
+          onClose={() => setShowMascotIconPicker(false)}
+          selectedEmoji={activeTheme?.mascotEmoji || '🐝'}
+          title={t("Choose Companion Mascot Icon")}
+          onSelectIcon={(emoji, label) => {
+            updateTheme(activeTheme.id, {
+              mascotEmoji: emoji,
+              mascotName: label,
+            });
+            setShowMascotIconPicker(false);
+            playChime('star');
+          }}
+        />
+      )}
     </div>
   );
 };

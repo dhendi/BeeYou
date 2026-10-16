@@ -12,6 +12,7 @@ import {
   Palette,
   Settings as SettingsIcon
 } from 'lucide-react';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverSettingsTabProps {
   onShowNotification: (msg: string) => void;
@@ -283,8 +284,12 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 p-3.5 rounded-2xl border border-amber-200/70">
           <div className="flex items-center gap-3">
-            <span className="text-3xl p-1.5 rounded-xl bg-amber-100 border border-amber-200 shrink-0">
-              {activeTheme.mascotEmoji || activeTheme.emoji}
+            <span className="w-12 h-12 p-1 rounded-xl bg-amber-100 border border-amber-200 shrink-0 flex items-center justify-center">
+              <RoutineStickerIcon
+                emoji={activeTheme.mascotEmoji || activeTheme.emoji}
+                title={activeTheme.mascotName}
+                className="w-9 h-9 object-contain drop-shadow-2xs"
+              />
             </span>
             <div>
               <div className="text-xs font-black text-slate-800">

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { PRESET_THEMES } from '../data/themesData';
+import { RoutineStickerIcon } from './icons/JournalStickers';
 
 // Pre-packaged color presets for theme customizer
 const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] = [
@@ -543,8 +544,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           {/* Currently Active Theme Highlight */}
           <div className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-amber-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span className="text-4xl sm:text-5xl p-2 rounded-2xl bg-amber-100/70 border border-amber-200 shrink-0">
-                {activeTheme.mascotEmoji || activeTheme.emoji}
+              <span className="w-14 h-14 sm:w-16 sm:h-16 p-2 rounded-2xl bg-amber-100/70 border border-amber-200 shrink-0 flex items-center justify-center">
+                <RoutineStickerIcon
+                  emoji={activeTheme.mascotEmoji || activeTheme.emoji}
+                  title={activeTheme.mascotName}
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-2xs"
+                />
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -830,14 +835,14 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     setSelectedSoundTheme(m.sound);
                     playChime('tap');
                   }}
-                  className={`p-2.5 rounded-2xl text-2xl shrink-0 border-2 transition-all cursor-pointer ${
+                  className={`p-2 rounded-2xl w-12 h-12 shrink-0 border-2 transition-all cursor-pointer flex items-center justify-center ${
                     mascotEmoji === m.emoji
                       ? 'border-amber-500 bg-amber-50 scale-105 shadow-sm'
                       : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
                   }`}
                   title={m.name}
                 >
-                  {m.emoji}
+                  <RoutineStickerIcon emoji={m.emoji} title={m.name} className="w-7 h-7 object-contain drop-shadow-2xs" />
                 </button>
               ))}
             </div>
@@ -1044,7 +1049,9 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 className={`p-3 rounded-2xl mb-3 flex items-center justify-between shadow-xs ${getEffectivePalette().headerBg}`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{mascotEmoji}</span>
+                  <div className="w-8 h-8 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center shrink-0 shadow-2xs">
+                    <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-6 h-6 object-contain" />
+                  </div>
                   <div>
                     <h5 className="font-black text-xs leading-none">
                       {themeName} Preview
@@ -1060,9 +1067,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </div>
 
               {/* Greeting Mockup */}
-              <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 mb-3 shadow-2xs">
-                <p className="text-xs font-bold text-slate-800">
-                  {mascotEmoji} {mascotName}: "{greetingMessage}"
+              <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 mb-3 shadow-2xs flex items-center gap-2">
+                <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-5 h-5 object-contain shrink-0" />
+                <p className="text-xs font-bold text-slate-800 truncate">
+                  {mascotName}: "{greetingMessage}"
                 </p>
               </div>
 

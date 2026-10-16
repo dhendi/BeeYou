@@ -287,6 +287,8 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '📅' || normTitle.includes('visual schedule') || normTitle.includes('schedule & routine') || normTitle.includes('calendar')) return <ScheduleCalendarSticker className={className} size={size} />;
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
+  // 🐢 Turtle Mascot Companion
+  if (normEmoji === '🐢' || normTitle.includes('turtle')) return <img src="/assets/emotions/turtle/calm.png" alt={title || 'Wise Turtle'} className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`} style={size ? { width: size, height: size } : undefined} />;
   // 🚀 Today's Adventure Spotlight / Rocket
   if (normEmoji === '🚀' || normTitle.includes('adventure spotlight') || normTitle.includes('rocket')) return <RocketAdventureSticker className={className} size={size} />;
   // 🌡️ Incredible 5-Point Scale / Thermometer
