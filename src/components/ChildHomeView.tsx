@@ -55,6 +55,7 @@ import {
   TurtleWelcomeSignSticker,
   TurtleArchedBridgeSticker,
   TurtleSeedlingSticker,
+  DinoRexSticker,
 } from './icons/JournalStickers';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
@@ -109,6 +110,7 @@ export const ChildHomeView: React.FC = () => {
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const latestMoodEntry = moodJournalEntries[0];
@@ -322,7 +324,7 @@ export const ChildHomeView: React.FC = () => {
             className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
             title="Themes & Visual Customizer"
           >
-            <Palette className={`w-4 h-4 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'}`} aria-hidden="true" />
+            <Palette className={`w-4 h-4 ${isTurtleTheme ? 'text-emerald-700' : isDinoTheme ? 'text-amber-800' : (activeTheme?.palette?.textAccent || 'text-amber-600')}`} aria-hidden="true" />
           </button>
 
           {/* Caregiver Alert / Connect */}
@@ -350,7 +352,9 @@ export const ChildHomeView: React.FC = () => {
           className={`w-full text-left ${isTurtleTheme ? 'bg-emerald-100/90 border-emerald-400' : (activeTheme?.palette?.primaryLight || 'bg-amber-100/95')} border-2 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:outline-none`}
         >
           <div className="flex items-center gap-3">
-            {isTurtleTheme ? (
+            {isDinoTheme ? (
+              <DinoRexSticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
+            ) : isTurtleTheme ? (
               <TurtleArchedBridgeSticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
             ) : (
               <PlansChangeStorySticker size={42} className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-sm" />
@@ -367,7 +371,7 @@ export const ChildHomeView: React.FC = () => {
               </h2>
             </div>
           </div>
-          <ArrowRight className={`w-6 h-6 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-700'} shrink-0`} aria-hidden="true" />
+          <ArrowRight className={`w-6 h-6 ${isTurtleTheme ? 'text-emerald-700' : (activeTheme?.palette?.textAccent || 'text-amber-700')} shrink-0`} aria-hidden="true" />
         </button>
       )}
 
@@ -410,6 +414,9 @@ export const ChildHomeView: React.FC = () => {
                         </h2>
                         {isTurtleTheme && (
                           <TurtleWelcomeSignSticker size={28} className="w-7 h-7 shrink-0 object-contain drop-shadow-2xs" />
+                        )}
+                        {isDinoTheme && (
+                          <DinoRexSticker size={28} className="w-7 h-7 shrink-0 object-contain drop-shadow-2xs" />
                         )}
                       </div>
                       <p className={`text-xs ${themeStyles.headerSubtext} font-semibold mt-1 truncate`}>

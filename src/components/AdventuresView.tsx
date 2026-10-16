@@ -96,15 +96,11 @@ export const AdventuresView: React.FC = () => {
 
         <div className="bg-white rounded-3xl border-3 border-indigo-200 shadow-md p-6 sm:p-8 flex flex-col items-center text-center">
           <div className="flex items-center gap-2 mb-2">
-            {(selectedStory.stickerSrc || getStorySticker(selectedStory.id)) ? (
-              <img
-                src={selectedStory.stickerSrc || getStorySticker(selectedStory.id)}
-                alt=""
-                className="w-10 h-10 object-contain drop-shadow-xs shrink-0"
-              />
-            ) : (
-              <RoutineStickerIcon emoji={selectedStory.emoji} className="w-10 h-10 object-contain drop-shadow-xs shrink-0" />
-            )}
+            <RoutineStickerIcon
+              emoji={selectedStory.stickerSrc || getStorySticker(selectedStory.id) || selectedStory.emoji}
+              title={selectedStory.title}
+              className="w-10 h-10 object-contain drop-shadow-xs shrink-0"
+            />
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">{t(selectedStory.title)}</h2>
           </div>
 
@@ -192,23 +188,19 @@ export const AdventuresView: React.FC = () => {
             <span>{t('All Adventures')}</span>
           </button>
 
-          <span className="text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300/80 px-3 py-1 rounded-full">
+          <span className={`text-xs font-bold ${activeTheme?.palette?.textAccent || 'text-amber-900'} ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300/80'} px-3 py-1 rounded-full`}>
             {t(selectedAdventure.category)}
           </span>
         </div>
 
         {/* Adventure Header Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center p-2 shrink-0 shadow-xs">
-            {(selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)) ? (
-              <img
-                src={selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id)}
-                alt=""
-                className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
-              />
-            ) : (
-              <RoutineStickerIcon emoji={selectedAdventure.emoji} className="w-16 h-16 object-contain" />
-            )}
+          <div className={`w-20 h-20 rounded-3xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-center p-2 shrink-0 shadow-xs`}>
+            <RoutineStickerIcon
+              emoji={selectedAdventure.stickerSrc || getAdventureSticker(selectedAdventure.id) || selectedAdventure.emoji}
+              title={selectedAdventure.title}
+              className="w-16 h-16 object-contain"
+            />
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">
@@ -227,7 +219,7 @@ export const AdventuresView: React.FC = () => {
               </button>
               <button
                 onClick={() => setChildView('aac')}
-                className="px-3 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                className={`px-3 py-1 rounded-xl ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-900'} font-bold text-xs flex items-center gap-1.5 cursor-pointer`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>{t('Open Context AAC')}</span>
@@ -283,11 +275,11 @@ export const AdventuresView: React.FC = () => {
         {/* SUB-TAB 1: INTERACTIVE STEP WALKTHROUGH */}
         {adventureSubTab === 'steps' && (
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-7 shadow-sm flex flex-col items-center text-center">
-            <div className="text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-300/80 px-3 py-1 rounded-full mb-4">
+            <div className={`text-xs font-black uppercase tracking-wider ${activeTheme?.palette?.textAccent || 'text-amber-900'} ${activeTheme?.palette?.primaryLight || 'bg-amber-100'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-300/80'} px-3 py-1 rounded-full mb-4`}>
               {t('Step')} {currentStepIndex + 1} {t('of')} {selectedAdventure.steps.length}
             </div>
 
-            <div className="w-28 h-28 rounded-3xl bg-amber-50 border-2 border-amber-200/80 flex items-center justify-center p-3 mb-4 shadow-inner">
+            <div className={`w-28 h-28 rounded-3xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200/80'} flex items-center justify-center p-3 mb-4 shadow-inner`}>
               <RoutineStickerIcon emoji={step.emoji} className="w-20 h-20 object-contain" />
             </div>
 
@@ -302,8 +294,8 @@ export const AdventuresView: React.FC = () => {
             )}
 
             {step.sensoryTip && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-semibold text-amber-900 max-w-sm mb-6 flex items-center gap-2 text-left">
-                <Ear className="w-4 h-4 text-amber-600 shrink-0" />
+              <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} rounded-xl px-3 py-2 text-xs font-semibold ${activeTheme?.palette?.textAccent || 'text-amber-900'} max-w-sm mb-6 flex items-center gap-2 text-left`}>
+                <Ear className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'} shrink-0`} />
                 <span>{t(step.sensoryTip)}</span>
               </div>
             )}
@@ -344,7 +336,7 @@ export const AdventuresView: React.FC = () => {
                     completeAdventure(selectedAdventure.id);
                   }
                 }}
-                className="flex-1 py-2.5 rounded-2xl font-black text-xs sm:text-sm bg-amber-500 hover:bg-amber-600 text-white shadow-md active:scale-95 transition-all cursor-pointer"
+                className={`flex-1 py-2.5 rounded-2xl font-black text-xs sm:text-sm ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} hover:opacity-90 text-white shadow-md active:scale-95 transition-all cursor-pointer`}
               >
                 {isLastStep ? t('Complete Adventure! ⭐') : `${t('Next Step')} →`}
               </button>
@@ -357,7 +349,7 @@ export const AdventuresView: React.FC = () => {
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-600" />
+                <Star className={`w-5 h-5 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
                 <span>{t('Sensory Guide for')} {t(selectedAdventure.title)}</span>
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -427,11 +419,11 @@ export const AdventuresView: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 mt-2">
-              <span className="text-xs font-black text-amber-900 uppercase tracking-wider block mb-1">
+            <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} rounded-2xl p-4 mt-2`}>
+              <span className={`text-xs font-black ${activeTheme?.palette?.textAccent || 'text-amber-900'} uppercase tracking-wider block mb-1`}>
                 {t('What Happens Afterward:')}
               </span>
-              <p className="text-xs sm:text-sm text-amber-950 font-bold leading-relaxed">
+              <p className={`text-xs sm:text-sm ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold leading-relaxed`}>
                 {t(selectedAdventure.whatHappensAfter)}
               </p>
             </div>
@@ -450,10 +442,10 @@ export const AdventuresView: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => speak(t(phrase))}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 text-amber-950 font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left"
+                    className={`flex items-center justify-between p-3 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left`}
                   >
                     <span>💬 {t(phrase)}</span>
-                    <Volume2 className="w-4 h-4 text-amber-600 shrink-0" />
+                    <Volume2 className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'} shrink-0`} />
                   </button>
                 ))}
               </div>
@@ -532,11 +524,11 @@ export const AdventuresView: React.FC = () => {
             </div>
 
             {practiceFeedback && (
-              <div className="w-full max-w-lg bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-4 animate-in fade-in zoom-in-95">
-                <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 block mb-1">
+              <div className={`w-full max-w-lg ${activeTheme?.palette?.primaryLight || 'bg-amber-50/80'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} rounded-2xl p-4 animate-in fade-in zoom-in-95`}>
+                <span className={`text-[11px] font-black uppercase tracking-wider ${activeTheme?.palette?.textAccent || 'text-amber-900'} block mb-1`}>
                   {t('How caregiver/doctor responds:')}
                 </span>
-                <p className="text-sm font-bold text-amber-950 leading-relaxed">
+                <p className={`text-sm font-bold ${activeTheme?.palette?.textAccent || 'text-amber-950'} leading-relaxed`}>
                   "{practiceFeedback}"
                 </p>
               </div>
@@ -604,16 +596,11 @@ export const AdventuresView: React.FC = () => {
                 className={`w-full text-left rounded-3xl p-4 sm:p-5 transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
                 <div className={iconBoxClass} aria-hidden="true">
-                  {(adventure.stickerSrc || getAdventureSticker(adventure.id)) ? (
-                    <img
-                      src={adventure.stickerSrc || getAdventureSticker(adventure.id)}
-                      alt=""
-                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <RoutineStickerIcon emoji={adventure.emoji} className="w-12 h-12 object-contain" />
-                  )}
+                  <RoutineStickerIcon
+                    emoji={adventure.stickerSrc || getAdventureSticker(adventure.id) || adventure.emoji}
+                    title={adventure.title}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
                 <div className="flex-1">
                   <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
@@ -670,16 +657,11 @@ export const AdventuresView: React.FC = () => {
                 className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
                 <div className={iconBoxClass} aria-hidden="true">
-                  {(story.stickerSrc || getStorySticker(story.id)) ? (
-                    <img
-                      src={story.stickerSrc || getStorySticker(story.id)}
-                      alt=""
-                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <RoutineStickerIcon emoji={story.emoji} className="w-12 h-12 object-contain" />
-                  )}
+                  <RoutineStickerIcon
+                    emoji={story.stickerSrc || getStorySticker(story.id) || story.emoji}
+                    title={story.title}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
                 <div className="flex-1">
                   <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>

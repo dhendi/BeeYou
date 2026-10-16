@@ -323,6 +323,30 @@ export const AACView: React.FC = () => {
     'folder-sensory': '/assets/stickers/turtle_shell_headphones.png',
   };
 
+  const DINO_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/dino_amber_star_core.png',
+    favorite_sentences: '/assets/stickers/dino_jungle_speech_bubbles.png',
+    favorites: '/assets/stickers/dino_amber_fossil_trophy.png',
+    food: '/assets/stickers/dino_forager_feast_bowl.png',
+    drinks: '/assets/stickers/dino_stone_tumbler_water.png',
+    activities: '/assets/stickers/dino_woven_moss_play_ball.png',
+    places: '/assets/stickers/dino_expedition_camp_tent.png',
+    people: '/assets/stickers/dino_hatchling_pet_bowl.png',
+    feelings: '/assets/stickers/dino_sensory_eye_stone.png',
+    sensory: '/assets/stickers/dino_ammonite_ear_defenders.png',
+    all: '/assets/stickers/dino_palm_leaf_folio.png',
+  };
+
+  const DINO_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/dino_forager_feast_bowl.png',
+    'folder-drinks': '/assets/stickers/dino_stone_tumbler_water.png',
+    'folder-activities': '/assets/stickers/dino_woven_moss_play_ball.png',
+    'folder-places': '/assets/stickers/dino_expedition_camp_tent.png',
+    'folder-people': '/assets/stickers/dino_hatchling_pet_bowl.png',
+    'folder-feelings': '/assets/stickers/dino_sensory_eye_stone.png',
+    'folder-sensory': '/assets/stickers/dino_ammonite_ear_defenders.png',
+  };
+
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
     { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.png' },
     { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.png' },
@@ -1151,7 +1175,11 @@ export const AACView: React.FC = () => {
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
               .map((cat) => {
-                const iconSrc = isTurtleTheme && TURTLE_CATEGORY_ICONS[cat.id] ? TURTLE_CATEGORY_ICONS[cat.id] : cat.iconSrc;
+                const iconSrc = isDinoTheme && DINO_CATEGORY_ICONS[cat.id]
+                  ? DINO_CATEGORY_ICONS[cat.id]
+                  : isTurtleTheme && TURTLE_CATEGORY_ICONS[cat.id]
+                  ? TURTLE_CATEGORY_ICONS[cat.id]
+                  : cat.iconSrc;
                 const isActive = !activeSceneData && activeCategory === cat.id;
 
                 let activeStyle = '';
@@ -1774,7 +1802,9 @@ export const AACView: React.FC = () => {
         >
           {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
           {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
-            const stickerSrc = isTurtleTheme && TURTLE_FOLDER_STICKERS[folder.id]
+            const stickerSrc = isDinoTheme && DINO_FOLDER_STICKERS[folder.id]
+              ? DINO_FOLDER_STICKERS[folder.id]
+              : isTurtleTheme && TURTLE_FOLDER_STICKERS[folder.id]
               ? TURTLE_FOLDER_STICKERS[folder.id]
               : (folder.stickerSrc || resolveAacImageUrl(folder));
 

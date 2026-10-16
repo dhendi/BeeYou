@@ -740,14 +740,6 @@ export const OTHER_THEMED_ICONS: ThemedIconItem[] = [
     keywords: ['rainbow', 'heart', 'feelings', 'love', 'kindness'],
   },
   {
-    id: 'dino_rex',
-    value: '/assets/stickers/dino_rex.png',
-    label: 'Friendly Dinosaur Rex',
-    shortLabel: 'Dino Rex',
-    themeCategory: 'dinosaur',
-    keywords: ['dino', 'dinosaur', 'rex', 'jurassic'],
-  },
-  {
     id: 'astronaut_helmet',
     value: '/assets/stickers/astronaut_helmet.png',
     label: 'Cosmic Astronaut Helmet',
@@ -789,13 +781,114 @@ export const OTHER_THEMED_ICONS: ThemedIconItem[] = [
   },
 ];
 
+export const DINO_KINGDOM_ICONS: ThemedIconItem[] = [
+  { id: 'dino_rex', value: '/assets/stickers/dino_rex.png', label: 'Rex the T-Rex (Mascot)', shortLabel: 'Rex Mascot', themeCategory: 'dinosaur', keywords: ['dino', 'dinosaur', 'rex', 'jurassic', 'mascot', 'companion'] },
+  { id: 'dino_child_persona_rex', value: '/assets/stickers/dino_child_persona_rex.png', label: 'Baby Rex Hatchling', shortLabel: 'Baby Rex', themeCategory: 'dinosaur', keywords: ['dino', 'child', 'baby', 'hatchling', 'persona'] },
+  { id: 'dino_expedition_backpack', value: '/assets/stickers/dino_expedition_backpack.png', label: 'Dino Expedition Backpack', shortLabel: 'Dino Backpack', themeCategory: 'dinosaur', keywords: ['backpack', 'school', 'bag', 'pack', 'dino'] },
+  { id: 'dino_bone_toothbrush', value: '/assets/stickers/dino_bone_toothbrush.png', label: 'Carved Bone Toothbrush', shortLabel: 'Bone Toothbrush', themeCategory: 'dinosaur', keywords: ['toothbrush', 'teeth', 'brush', 'morning', 'night', 'dino'] },
+  { id: 'dino_amber_soap', value: '/assets/stickers/dino_amber_soap.png', label: 'Prehistoric Amber Soap', shortLabel: 'Amber Soap', themeCategory: 'dinosaur', keywords: ['soap', 'wash', 'hands', 'sink', 'clean', 'dino'] },
+  { id: 'dino_spike_hoodie', value: '/assets/stickers/dino_spike_hoodie.png', label: 'Stego Spiked Hoodie', shortLabel: 'Spike Hoodie', themeCategory: 'dinosaur', keywords: ['clothes', 'dress', 'dressed', 'hoodie', 'shirt', 'dino'] },
+  { id: 'dino_starfruit_apple_snack', value: '/assets/stickers/dino_starfruit_apple_snack.png', label: 'Starfruit & Fern Apple Snack', shortLabel: 'Fern Snack', themeCategory: 'dinosaur', keywords: ['apple', 'snack', 'fruit', 'food', 'dino'] },
+  { id: 'dino_forager_feast_bowl', value: '/assets/stickers/dino_forager_feast_bowl.png', label: 'Forager Feast Bowl', shortLabel: 'Feast Bowl', themeCategory: 'dinosaur', keywords: ['breakfast', 'dinner', 'food', 'meal', 'bowl', 'dino'] },
+  { id: 'dino_flatbread_sandwich', value: '/assets/stickers/dino_flatbread_sandwich.png', label: 'Prehistoric Flatbread Sandwich', shortLabel: 'Flatbread', themeCategory: 'dinosaur', keywords: ['sandwich', 'lunch', 'food', 'snack', 'dino'] },
+  { id: 'dino_stone_tumbler_water', value: '/assets/stickers/dino_stone_tumbler_water.png', label: 'Carved Stone Water Tumbler', shortLabel: 'Stone Tumbler', themeCategory: 'dinosaur', keywords: ['water', 'drink', 'cup', 'hydrate', 'thirst', 'dino'] },
+  { id: 'dino_herbal_tea_mug', value: '/assets/stickers/dino_herbal_tea_mug.png', label: 'Prehistoric Herbal Tea Mug', shortLabel: 'Herbal Mug', themeCategory: 'dinosaur', keywords: ['tea', 'mug', 'hot', 'cocoa', 'drink', 'warm', 'dino'] },
+  { id: 'dino_seed_honey_bar', value: '/assets/stickers/dino_seed_honey_bar.png', label: 'Ancient Honey Seed Bar', shortLabel: 'Honey Bar', themeCategory: 'dinosaur', keywords: ['chocolate', 'candy', 'bar', 'snack', 'sweet', 'dino'] },
+  { id: 'dino_leaf_berry_treat', value: '/assets/stickers/dino_leaf_berry_treat.png', label: 'Wrapped Leaf Berry Treat', shortLabel: 'Berry Treat', themeCategory: 'dinosaur', keywords: ['treat', 'candy', 'berry', 'snack', 'dino'] },
+  { id: 'dino_bone_cutlery_fork_spoon', value: '/assets/stickers/dino_bone_cutlery_fork_spoon.png', label: 'Carved Bone Fork & Spoon', shortLabel: 'Bone Cutlery', themeCategory: 'dinosaur', keywords: ['fork', 'knife', 'spoon', 'cutlery', 'eat', 'meal', 'dino'] },
+  { id: 'dino_sundial_clock', value: '/assets/stickers/dino_sundial_clock.png', label: 'Jungle Sundial Alarm Clock', shortLabel: 'Sundial Clock', themeCategory: 'dinosaur', keywords: ['alarm', 'clock', 'time', 'wakeup', 'morning', 'dino'] },
+  { id: 'dino_ammonite_spiral_clock', value: '/assets/stickers/dino_ammonite_spiral_clock.png', label: 'Ammonite Fossil Clock', shortLabel: 'Fossil Clock', themeCategory: 'dinosaur', keywords: ['clock', 'time', 'wall', 'ammonite', 'dino'] },
+  { id: 'dino_stone_stopwatch', value: '/assets/stickers/dino_stone_stopwatch.png', label: 'Carved Stone Stopwatch Timer', shortLabel: 'Stone Timer', themeCategory: 'dinosaur', keywords: ['timer', 'clock', 'stopwatch', 'countdown', 'time', 'dino'] },
+  { id: 'dino_slate_checklist_tablet', value: '/assets/stickers/dino_slate_checklist_tablet.png', label: 'Slate Checklist Tablet', shortLabel: 'Slate Schedule', themeCategory: 'dinosaur', keywords: ['schedule', 'calendar', 'checklist', 'plan', 'routine', 'dino'] },
+  { id: 'dino_palm_leaf_folio', value: '/assets/stickers/dino_palm_leaf_folio.png', label: 'Palm Leaf Folio Binder', shortLabel: 'Palm Folio', themeCategory: 'dinosaur', keywords: ['folder', 'binder', 'schoolwork', 'homework', 'dino'] },
+  { id: 'dino_bone_stylus_pencil', value: '/assets/stickers/dino_bone_stylus_pencil.png', label: 'Bone Stylus Pencil', shortLabel: 'Bone Stylus', themeCategory: 'dinosaur', keywords: ['pencil', 'write', 'draw', 'stylus', 'study', 'dino'] },
+  { id: 'dino_safari_wagon_bus', value: '/assets/stickers/dino_safari_wagon_bus.png', label: 'Dino Safari Expedition Wagon', shortLabel: 'Safari Wagon', themeCategory: 'dinosaur', keywords: ['bus', 'wagon', 'school', 'travel', 'ride', 'commute', 'dino'] },
+  { id: 'dino_wooden_cart_ride', value: '/assets/stickers/dino_wooden_cart_ride.png', label: 'Prehistoric Wooden Cart Ride', shortLabel: 'Wooden Cart', themeCategory: 'dinosaur', keywords: ['car', 'ride', 'cart', 'travel', 'trip', 'dino'] },
+  { id: 'dino_volcano_flask_science', value: '/assets/stickers/dino_volcano_flask_science.png', label: 'Volcano Experiment Flask', shortLabel: 'Volcano Flask', themeCategory: 'dinosaur', keywords: ['science', 'flask', 'experiment', 'lab', 'volcano', 'dino'] },
+  { id: 'dino_slate_art_palette', value: '/assets/stickers/dino_slate_art_palette.png', label: 'Slate Mineral Paint Palette', shortLabel: 'Mineral Palette', themeCategory: 'dinosaur', keywords: ['art', 'palette', 'paint', 'craft', 'color', 'dino'] },
+  { id: 'dino_brachiosaurus_slide_swings', value: '/assets/stickers/dino_brachiosaurus_slide_swings.png', label: 'Brachiosaurus Neck Slide & Swings', shortLabel: 'Brachio Slide', themeCategory: 'dinosaur', keywords: ['playground', 'swings', 'slide', 'recess', 'play', 'dino'] },
+  { id: 'dino_cycad_palm_tree', value: '/assets/stickers/dino_cycad_palm_tree.png', label: 'Primeval Cycad Palm Tree', shortLabel: 'Cycad Palm', themeCategory: 'dinosaur', keywords: ['tree', 'palm', 'outside', 'nature', 'park', 'dino'] },
+  { id: 'dino_primeval_sun_canopy', value: '/assets/stickers/dino_primeval_sun_canopy.png', label: 'Primeval Sun Canopy', shortLabel: 'Sun Canopy', themeCategory: 'dinosaur', keywords: ['sun', 'outside', 'weather', 'warm', 'day', 'dino'] },
+  { id: 'dino_fern_nest_sleep', value: '/assets/stickers/dino_fern_nest_sleep.png', label: 'Cozy Fern Nest Bed', shortLabel: 'Fern Nest', themeCategory: 'dinosaur', keywords: ['bed', 'sleep', 'bedtime', 'nest', 'rest', 'cozy', 'dino'] },
+  { id: 'dino_starry_pajamas_sleep', value: '/assets/stickers/dino_starry_pajamas_sleep.png', label: 'Dino Track Bedtime Pajamas', shortLabel: 'Track Pajamas', themeCategory: 'dinosaur', keywords: ['pajamas', 'sleep', 'bedtime', 'clothes', 'dino'] },
+  { id: 'dino_prehistoric_moon', value: '/assets/stickers/dino_prehistoric_moon.png', label: 'Ancient Crater Moon', shortLabel: 'Crater Moon', themeCategory: 'dinosaur', keywords: ['moon', 'evening', 'night', 'sleep', 'calm', 'dino'] },
+  { id: 'dino_warm_spring_bath', value: '/assets/stickers/dino_warm_spring_bath.png', label: 'Geothermal Mineral Bath', shortLabel: 'Mineral Bath', themeCategory: 'dinosaur', keywords: ['bath', 'shower', 'wash', 'clean', 'spring', 'water', 'dino'] },
+  { id: 'dino_stone_washroom_basin', value: '/assets/stickers/dino_stone_washroom_basin.png', label: 'Carved Stone Washroom Basin', shortLabel: 'Washroom Basin', themeCategory: 'dinosaur', keywords: ['toilet', 'restroom', 'washroom', 'basin', 'potty', 'dino'] },
+  { id: 'dino_reed_laundry_basket', value: '/assets/stickers/dino_reed_laundry_basket.png', label: 'Woven Reed Laundry Hamper', shortLabel: 'Reed Hamper', themeCategory: 'dinosaur', keywords: ['laundry', 'hamper', 'basket', 'clothes', 'tidy', 'dino'] },
+  { id: 'dino_cavern_retreat', value: '/assets/stickers/dino_cavern_retreat.png', label: 'Quiet Cavern Sanctuary Retreat', shortLabel: 'Cavern Retreat', themeCategory: 'dinosaur', keywords: ['quiet', 'break', 'cavern', 'retreat', 'calm', 'breathe', 'dino'] },
+  { id: 'dino_secret_cavern_den', value: '/assets/stickers/dino_secret_cavern_den.png', label: 'Secret Cavern Sensory Den', shortLabel: 'Sensory Den', themeCategory: 'dinosaur', keywords: ['sensory', 'masking', 'retreat', 'den', 'quiet', 'rest', 'dino'] },
+  { id: 'dino_ankylosaurus_shield_sos', value: '/assets/stickers/dino_ankylosaurus_shield_sos.png', label: 'Ankylosaurus Armor Shield SOS', shortLabel: 'Anklyo Shield SOS', themeCategory: 'dinosaur', keywords: ['help', 'sos', 'shield', 'armor', 'emergency', 'safe', 'dino'] },
+  { id: 'dino_caregiver_heart', value: '/assets/stickers/dino_caregiver_heart.png', label: 'T-Rex Caregiver Heart', shortLabel: 'Caregiver Heart', themeCategory: 'dinosaur', keywords: ['heart', 'caregiver', 'love', 'support', 'connect', 'dino'] },
+  { id: 'dino_triceratops_frill_heart', value: '/assets/stickers/dino_triceratops_frill_heart.png', label: 'Triceratops Frill Heart', shortLabel: 'Frill Heart', themeCategory: 'dinosaur', keywords: ['heart', 'love', 'kindness', 'frill', 'dino'] },
+  { id: 'dino_ammonite_headphones', value: '/assets/stickers/dino_ammonite_headphones.png', label: 'Ammonite Fossil Ear Defenders', shortLabel: 'Ammonite Ear Defenders', themeCategory: 'dinosaur', keywords: ['headphones', 'ear', 'noise', 'sensory', 'defenders', 'sound', 'dino'] },
+  { id: 'dino_ammonite_ear_defenders', value: '/assets/stickers/dino_ammonite_ear_defenders.png', label: 'Loud Noise Ammonite Defenders', shortLabel: 'Noise Defenders', themeCategory: 'dinosaur', keywords: ['noise', 'loud', 'sensory', 'sound', 'ear', 'defenders', 'dino'] },
+  { id: 'dino_sun_hat_shades', value: '/assets/stickers/dino_sun_hat_shades.png', label: 'Sun Hat & Glare Shades', shortLabel: 'Glare Shades', themeCategory: 'dinosaur', keywords: ['lights', 'bright', 'glare', 'sensory', 'shades', 'sun', 'dino'] },
+  { id: 'dino_spring_sensory_bubbles', value: '/assets/stickers/dino_spring_sensory_bubbles.png', label: 'Geothermal Mineral Bubbles', shortLabel: 'Mineral Bubbles', themeCategory: 'dinosaur', keywords: ['bubbles', 'fidget', 'sensory', 'calm', 'pop', 'dino'] },
+  { id: 'dino_stone_decision_wheel', value: '/assets/stickers/dino_stone_decision_wheel.png', label: 'Carved Stone Decision Wheel', shortLabel: 'Decision Wheel', themeCategory: 'dinosaur', keywords: ['decision', 'wheel', 'spinner', 'choice', 'game', 'dino'] },
+  { id: 'dino_volcano_thermometer', value: '/assets/stickers/dino_volcano_thermometer.png', label: 'Volcanic Scale Thermometer', shortLabel: 'Volcano Gauge', themeCategory: 'dinosaur', keywords: ['thermometer', 'feelings', 'scale', 'gauge', 'mood', 'dino'] },
+  { id: 'dino_bone_stamina_spoons', value: '/assets/stickers/dino_bone_stamina_spoons.png', label: 'Carved Bone Stamina Spoons', shortLabel: 'Stamina Spoons', themeCategory: 'dinosaur', keywords: ['spoon', 'energy', 'budget', 'stamina', 'spoons', 'dino'] },
+  { id: 'dino_amber_energy_gauge', value: '/assets/stickers/dino_amber_energy_gauge.png', label: 'Amber Crystal Energy Battery', shortLabel: 'Amber Battery', themeCategory: 'dinosaur', keywords: ['battery', 'energy', 'stamina', 'power', 'amber', 'dino'] },
+  { id: 'dino_whispering_baby_shh', value: '/assets/stickers/dino_whispering_baby_shh.png', label: 'Whispering Baby Dino (Shh)', shortLabel: 'Whispering Dino', themeCategory: 'dinosaur', keywords: ['quiet', 'voice', 'shh', 'whisper', 'soft', 'dino'] },
+  { id: 'dino_tidal_ripple_wave', value: '/assets/stickers/dino_tidal_ripple_wave.png', label: 'Prehistoric Tidal Wave', shortLabel: 'Tidal Wave', themeCategory: 'dinosaur', keywords: ['wave', 'ocean', 'water', 'tidal', 'overwhelm', 'calm', 'dino'] },
+  { id: 'dino_sensory_eye_stone', value: '/assets/stickers/dino_sensory_eye_stone.png', label: 'Grounding Eye Fossil Stone', shortLabel: 'Eye Stone', themeCategory: 'dinosaur', keywords: ['eye', 'grounding', 'sensory', 'look', 'stone', 'fossil', 'dino'] },
+  { id: 'dino_wooden_stacking_blocks', value: '/assets/stickers/dino_wooden_stacking_blocks.png', label: 'Primeval Wooden Stacking Blocks', shortLabel: 'Stacking Blocks', themeCategory: 'dinosaur', keywords: ['lego', 'blocks', 'toy', 'build', 'play', 'stack', 'dino'] },
+  { id: 'dino_vine_toy_box', value: '/assets/stickers/dino_vine_toy_box.png', label: 'Woven Vine Toy Box', shortLabel: 'Vine Toy Box', themeCategory: 'dinosaur', keywords: ['toy', 'box', 'chest', 'cleanup', 'play', 'dino'] },
+  { id: 'dino_plush_stego_toy', value: '/assets/stickers/dino_plush_stego_toy.png', label: 'Plush Stegosaurus Comfort Toy', shortLabel: 'Plush Stego', themeCategory: 'dinosaur', keywords: ['teddy', 'bear', 'plush', 'toy', 'comfort', 'stego', 'dino'] },
+  { id: 'dino_fossil_puzzle_piece', value: '/assets/stickers/dino_fossil_puzzle_piece.png', label: 'Fossil Stone Puzzle Piece', shortLabel: 'Fossil Puzzle', themeCategory: 'dinosaur', keywords: ['puzzle', 'jigsaw', 'fossil', 'piece', 'play', 'dino'] },
+  { id: 'dino_woven_moss_play_ball', value: '/assets/stickers/dino_woven_moss_play_ball.png', label: 'Woven Moss Fetch Play Ball', shortLabel: 'Moss Play Ball', themeCategory: 'dinosaur', keywords: ['ball', 'tennis', 'play', 'fetch', 'game', 'moss', 'dino'] },
+  { id: 'dino_bamboo_flute_music', value: '/assets/stickers/dino_bamboo_flute_music.png', label: 'Ancient Bamboo Flute Music', shortLabel: 'Bamboo Flute', themeCategory: 'dinosaur', keywords: ['music', 'song', 'flute', 'sound', 'listen', 'audio', 'dino'] },
+  { id: 'dino_hatchling_pet_bowl', value: '/assets/stickers/dino_hatchling_pet_bowl.png', label: 'Hatchling Pet Feed Bowl', shortLabel: 'Hatchling Pet Care', themeCategory: 'dinosaur', keywords: ['pet', 'feed', 'care', 'hatchling', 'bowl', 'animal', 'dino'] },
+  { id: 'dino_fossil_bone_treat', value: '/assets/stickers/dino_fossil_bone_treat.png', label: 'Fossil Bone Dog Treat', shortLabel: 'Fossil Bone', themeCategory: 'dinosaur', keywords: ['bone', 'treat', 'dog', 'pet', 'feed', 'dino'] },
+  { id: 'dino_track_paw_print', value: '/assets/stickers/dino_track_paw_print.png', label: 'Three-Toed Dino Track Stamp', shortLabel: 'Dino Track Stamp', themeCategory: 'dinosaur', keywords: ['paw', 'track', 'print', 'footprint', 'stamp', 'pet', 'dino'] },
+  { id: 'dino_fern_log_planter', value: '/assets/stickers/dino_fern_log_planter.png', label: 'Prehistoric Fern Log Planter', shortLabel: 'Fern Planter', themeCategory: 'dinosaur', keywords: ['plant', 'potted', 'fern', 'log', 'nature', 'care', 'dino'] },
+  { id: 'dino_amber_fossil_trophy', value: '/assets/stickers/dino_amber_fossil_trophy.png', label: 'Golden Amber Fossil Trophy', shortLabel: 'Amber Trophy', themeCategory: 'dinosaur', keywords: ['trophy', 'reward', 'star', 'complete', 'win', 'done', 'dino'] },
+  { id: 'dino_amber_star_core', value: '/assets/stickers/dino_amber_star_core.png', label: 'Glowing Amber Core Star', shortLabel: 'Amber Star', themeCategory: 'dinosaur', keywords: ['star', 'core', 'amber', 'reward', 'favorite', 'dino'] },
+  { id: 'dino_golden_amber_crown', value: '/assets/stickers/dino_golden_amber_crown.png', label: 'Golden Amber Royal Crown', shortLabel: 'Amber Crown', themeCategory: 'dinosaur', keywords: ['crown', 'trial', 'royal', 'gold', 'amber', 'dino'] },
+  { id: 'dino_pangea_globe', value: '/assets/stickers/dino_pangea_globe.png', label: 'Prehistoric Pangaea World Globe', shortLabel: 'Pangaea Globe', themeCategory: 'dinosaur', keywords: ['globe', 'world', 'language', 'earth', 'pangaea', 'dino'] },
+  { id: 'dino_explorer_id_badge', value: '/assets/stickers/dino_explorer_id_badge.png', label: 'Expedition Field ID Badge', shortLabel: 'Field ID Badge', themeCategory: 'dinosaur', keywords: ['about', 'id', 'badge', 'card', 'passport', 'dino'] },
+  { id: 'dino_expedition_log_book', value: '/assets/stickers/dino_expedition_log_book.png', label: 'Leather Expedition Logbook', shortLabel: 'Expedition Log', themeCategory: 'dinosaur', keywords: ['book', 'read', 'passport', 'story', 'journal', 'log', 'dino'] },
+  { id: 'dino_jungle_speech_bubbles', value: '/assets/stickers/dino_jungle_speech_bubbles.png', label: 'Jungle Speech Bubbles', shortLabel: 'Speech Bubbles', themeCategory: 'dinosaur', keywords: ['quick', 'phrases', 'speech', 'talk', 'chat', 'bubble', 'dino'] },
+  { id: 'dino_carved_slate_keyboard', value: '/assets/stickers/dino_carved_slate_keyboard.png', label: 'Carved Slate Stone Keyboard', shortLabel: 'Slate Keyboard', themeCategory: 'dinosaur', keywords: ['keyboard', 'type', 'speak', 'write', 'letters', 'dino'] },
+  { id: 'dino_slate_tablet_ipad', value: '/assets/stickers/dino_slate_tablet_ipad.png', label: 'Slate Touchscreen Tablet', shortLabel: 'Slate Tablet', themeCategory: 'dinosaur', keywords: ['tablet', 'ipad', 'screen', 'device', 'game', 'dino'] },
+  { id: 'dino_slate_phone_caregiver', value: '/assets/stickers/dino_slate_phone_caregiver.png', label: 'Carved Slate Caregiver Phone', shortLabel: 'Slate Phone', themeCategory: 'dinosaur', keywords: ['phone', 'caregiver', 'call', 'message', 'dino'] },
+  { id: 'dino_expedition_satchel_briefcase', value: '/assets/stickers/dino_expedition_satchel_briefcase.png', label: 'Expedition Leather Satchel', shortLabel: 'Expedition Satchel', themeCategory: 'dinosaur', keywords: ['briefcase', 'adult', 'work', 'satchel', 'bag', 'dino'] },
+  { id: 'dino_expedition_timber_trunk', value: '/assets/stickers/dino_expedition_timber_trunk.png', label: 'Expedition Timber Trunk', shortLabel: 'Timber Trunk', themeCategory: 'dinosaur', keywords: ['luggage', 'suitcase', 'trunk', 'travel', 'trip', 'pack', 'dino'] },
+  { id: 'dino_wooden_gathering_wagon', value: '/assets/stickers/dino_wooden_gathering_wagon.png', label: 'Gathering Cart on Wheels', shortLabel: 'Gathering Cart', themeCategory: 'dinosaur', keywords: ['cart', 'shopping', 'grocery', 'wagon', 'store', 'market', 'dino'] },
+  { id: 'dino_pterodactyl_flight', value: '/assets/stickers/dino_pterodactyl_flight.png', label: 'Soaring Pterodactyl Flight', shortLabel: 'Pterodactyl Flight', themeCategory: 'dinosaur', keywords: ['plane', 'airplane', 'flight', 'travel', 'trip', 'pterodactyl', 'dino'] },
+  { id: 'dino_stop_stamp', value: '/assets/stickers/dino_stop_stamp.png', label: 'Carved Stone Stop Stamp', shortLabel: 'Stop Stamp', themeCategory: 'dinosaur', keywords: ['stop', 'halt', 'pause', 'wait', 'red', 'dino'] },
+  { id: 'dino_footprint_loop', value: '/assets/stickers/dino_footprint_loop.png', label: 'Dino Footprint Repeat Loop', shortLabel: 'Footprint Loop', themeCategory: 'dinosaur', keywords: ['repeat', 'loop', 'refresh', 'again', 'cycle', 'dino'] },
+  { id: 'dino_trail_explorer_boots', value: '/assets/stickers/dino_trail_explorer_boots.png', label: 'Trail Explorer Tough Boots', shortLabel: 'Explorer Boots', themeCategory: 'dinosaur', keywords: ['shoes', 'sneaker', 'boots', 'feet', 'outside', 'walk', 'dino'] },
+  { id: 'dino_herbal_wellness_vial', value: '/assets/stickers/dino_herbal_wellness_vial.png', label: 'Herbal Wellness Tonic Vial', shortLabel: 'Wellness Vial', themeCategory: 'dinosaur', keywords: ['medication', 'medicine', 'pill', 'vitamin', 'health', 'dino'] },
+  // Dino Outings & Adventures
+  { id: 'dino_trex_tooth_care', value: '/assets/stickers/dino_trex_tooth_care.png', label: 'T-Rex Dental Tooth Care Station', shortLabel: 'T-Rex Dentist', themeCategory: 'dinosaur', keywords: ['dentist', 'dental', 'teeth', 'tooth', 'clinic', 'adventure', 'dino'] },
+  { id: 'dino_healer_stethoscope_bag', value: '/assets/stickers/dino_healer_stethoscope_bag.png', label: 'Expedition Healer Checkup Kit', shortLabel: 'Healer Checkup', themeCategory: 'dinosaur', keywords: ['doctor', 'checkup', 'stethoscope', 'healer', 'clinic', 'adventure', 'dino'] },
+  { id: 'dino_bone_comb_mirror', value: '/assets/stickers/dino_bone_comb_mirror.png', label: 'Carved Bone Grooming Comb & Mirror', shortLabel: 'Bone Comb Salon', themeCategory: 'dinosaur', keywords: ['haircut', 'salon', 'comb', 'mirror', 'grooming', 'hair', 'adventure', 'dino'] },
+  { id: 'dino_geothermal_spring_pool', value: '/assets/stickers/dino_geothermal_spring_pool.png', label: 'Geothermal Mineral Spring Pool', shortLabel: 'Spring Pool', themeCategory: 'dinosaur', keywords: ['pool', 'swimming', 'water', 'spring', 'geothermal', 'adventure', 'dino'] },
+  { id: 'dino_shadow_puppet_lantern', value: '/assets/stickers/dino_shadow_puppet_lantern.png', label: 'Prehistoric Shadow Puppet Theater', shortLabel: 'Shadow Puppet Cinema', themeCategory: 'dinosaur', keywords: ['movie', 'cinema', 'theater', 'film', 'puppet', 'show', 'adventure', 'dino'] },
+  { id: 'dino_stone_pebble_bowling', value: '/assets/stickers/dino_stone_pebble_bowling.png', label: 'Stone Pebble Bowling Alley', shortLabel: 'Pebble Bowling', themeCategory: 'dinosaur', keywords: ['bowling', 'pins', 'pebble', 'game', 'play', 'strike', 'adventure', 'dino'] },
+  { id: 'dino_expedition_camp_tent', value: '/assets/stickers/dino_expedition_camp_tent.png', label: 'Jungle Canopy Expedition Tent', shortLabel: 'Expedition Camp', themeCategory: 'dinosaur', keywords: ['camping', 'tent', 'camp', 'outdoors', 'nature', 'adventure', 'dino'] },
+  { id: 'dino_amber_museum_archive', value: '/assets/stickers/dino_amber_museum_archive.png', label: 'Amber Fossil Museum Pavilion', shortLabel: 'Amber Museum', themeCategory: 'dinosaur', keywords: ['museum', 'archive', 'fossil', 'amber', 'history', 'adventure', 'dino'] },
+  { id: 'dino_feast_table_pavilion', value: '/assets/stickers/dino_feast_table_pavilion.png', label: 'Primeval Feast Table Pavilion', shortLabel: 'Feast Pavilion', themeCategory: 'dinosaur', keywords: ['restaurant', 'eating', 'food', 'meal', 'table', 'dinner', 'adventure', 'dino'] },
+  // Dino Moods
+  { id: 'dino_mood_happy', value: '/assets/stickers/dino_mood_happy.png', label: 'Happy Dino Rex Smile', shortLabel: 'Happy Dino', themeCategory: 'dinosaur', keywords: ['mood', 'happy', 'smile', 'joy', 'good', 'dino'] },
+  { id: 'dino_mood_calm', value: '/assets/stickers/dino_mood_calm.png', label: 'Calm Dino Nestling', shortLabel: 'Calm Dino', themeCategory: 'dinosaur', keywords: ['mood', 'calm', 'peaceful', 'relaxed', 'dino'] },
+  { id: 'dino_mood_excited', value: '/assets/stickers/dino_mood_excited.png', label: 'Excited Dino Roar', shortLabel: 'Excited Dino', themeCategory: 'dinosaur', keywords: ['mood', 'excited', 'energy', 'playful', 'dino'] },
+  { id: 'dino_mood_sleepy', value: '/assets/stickers/dino_mood_sleepy.png', label: 'Sleepy Dino Snuggled', shortLabel: 'Sleepy Dino', themeCategory: 'dinosaur', keywords: ['mood', 'sleepy', 'tired', 'nap', 'bedtime', 'dino'] },
+  { id: 'dino_mood_unsure', value: '/assets/stickers/dino_mood_unsure.png', label: 'Unsure Dino Wondering', shortLabel: 'Unsure Dino', themeCategory: 'dinosaur', keywords: ['mood', 'unsure', 'wonder', 'hesitant', 'dino'] },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
   if (isTurtle) {
     return TURTLE_SANCTUARY_ICONS;
   }
+  const isDino = themeCategoryOrId === 'dinosaur' || themeCategoryOrId === 'theme-dino';
+  if (isDino) {
+    return DINO_KINGDOM_ICONS;
+  }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)
   );
 }
+

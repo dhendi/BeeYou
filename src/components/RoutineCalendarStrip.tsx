@@ -196,7 +196,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               }}
               className={`px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer border ${
                 showDayManager
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600'
+                  ? `${activeTheme?.palette?.primaryBg || 'bg-amber-600'} hover:opacity-90 text-white ${activeTheme?.palette?.primaryBorder || 'border-amber-600'}`
                   : 'bg-[#F5EFE6] hover:bg-white text-stone-800 border-[#E8DFC2]'
               }`}
               title="Manage which routines run on this day"
@@ -213,7 +213,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               }}
               className={`px-2.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer border ${
                 showDayManager
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600'
+                  ? `${activeTheme?.palette?.primaryBg || 'bg-amber-600'} hover:opacity-90 text-white ${activeTheme?.palette?.primaryBorder || 'border-amber-600'}`
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'
               }`}
             >
@@ -379,7 +379,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           </div>
 
           {/* Quick Preset */}
-          <div className="flex items-center gap-2 pt-2 border-t border-amber-200 flex-wrap text-xs font-bold text-amber-900">
+          <div className={`flex items-center gap-2 pt-2 border-t ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex-wrap text-xs font-bold ${activeTheme?.palette?.textAccent || 'text-amber-900'}`}>
             <span>{t('Quick Presets')}:</span>
             <button
               type="button"
@@ -390,7 +390,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                 });
                 playChime('complete');
               }}
-              className="px-2.5 py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100 text-stone-800 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg bg-white border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} hover:opacity-90 text-stone-800 cursor-pointer`}
             >
               {t('All Active Today')}
             </button>

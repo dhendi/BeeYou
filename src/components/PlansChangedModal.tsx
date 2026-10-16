@@ -79,7 +79,11 @@ export const PlansChangedModal: React.FC = () => {
     routines,
     speak,
     setShowCopingToolkit,
+    activeTheme,
   } = useApp();
+
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -244,27 +248,27 @@ export const PlansChangedModal: React.FC = () => {
       onClick={() => setShowPlansChangedModal(false)}
     >
       <div
-        className="bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl overflow-hidden border-4 border-amber-300"
+        className={`bg-white rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col shadow-2xl overflow-hidden border-4 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-amber-100 px-4 sm:px-6 py-4 border-b border-amber-200 flex items-center justify-between gap-3">
+        <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-100'} px-4 sm:px-6 py-4 border-b ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-between gap-3`}>
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-amber-200/80 flex items-center justify-center shrink-0 text-amber-900 shadow-2xs">
+            <div className={`w-10 h-10 rounded-2xl ${activeTheme?.palette?.badgeBg || 'bg-amber-200/80'} flex items-center justify-center shrink-0 ${activeTheme?.palette?.textAccent || 'text-amber-900'} shadow-2xs`}>
               <RotateCcw className="w-6 h-6" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-2xl font-black text-amber-950 truncate">
+                <h2 className={`text-lg sm:text-2xl font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} truncate`}>
                   {t('Plans Changed')}
                 </h2>
                 {isEditing && (
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white px-2 py-0.5 rounded-full shrink-0">
+                  <span className={`text-[10px] font-black uppercase tracking-wider ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white px-2 py-0.5 rounded-full shrink-0`}>
                     {t('Editing Mode')}
                   </span>
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-amber-800 font-semibold truncate">
+              <p className={`text-xs sm:text-sm ${activeTheme?.palette?.textAccent || 'text-amber-800'} font-semibold truncate`}>
                 {isEditing
                   ? t('Customize which routine changed and what should be the replacement.')
                   : t('It is okay to feel surprised. Here is what is happening next.')}
@@ -281,8 +285,8 @@ export const PlansChangedModal: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 border ${
                 isEditing
-                  ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-600'
-                  : 'bg-white hover:bg-amber-50 text-amber-900 border-amber-300'
+                  ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} hover:opacity-90 text-white ${activeTheme?.palette?.primaryBorder || 'border-amber-600'}`
+                  : `bg-white hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-900'} ${activeTheme?.palette?.primaryBorder || 'border-amber-300'}`
               }`}
               title={isEditing ? t('View Preview') : t('Edit Plan Change')}
             >
@@ -293,7 +297,7 @@ export const PlansChangedModal: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                  <Edit3 className={`w-3.5 h-3.5 ${activeTheme?.palette?.textAccent || 'text-amber-700'}`} />
                   <span>{t('Edit Plan')}</span>
                 </>
               )}
@@ -301,7 +305,7 @@ export const PlansChangedModal: React.FC = () => {
 
             <button
               onClick={() => setShowPlansChangedModal(false)}
-              className="p-2 rounded-xl bg-amber-200/80 hover:bg-amber-300 text-amber-950 active:scale-95 transition-all cursor-pointer"
+              className={`p-2 rounded-xl ${activeTheme?.palette?.badgeBg || 'bg-amber-200/80'} hover:opacity-80 ${activeTheme?.palette?.textAccent || 'text-amber-950'} active:scale-95 transition-all cursor-pointer`}
               aria-label={t('Close')}
             >
               <X className="w-5 h-5" />
@@ -710,22 +714,22 @@ export const PlansChangedModal: React.FC = () => {
                 </div>
 
                 {/* Why it changed */}
-                <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 relative group">
+                <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} rounded-2xl p-4 relative group`}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-black text-amber-700 uppercase tracking-wider block">
+                    <span className={`text-xs font-black ${activeTheme?.palette?.textAccent || 'text-amber-700'} uppercase tracking-wider block`}>
                       {t('What Happened')}
                     </span>
                     <button
                       type="button"
                       onClick={() => setIsEditing(true)}
-                      className="opacity-70 group-hover:opacity-100 p-1 rounded-md hover:bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all"
+                      className={`opacity-70 group-hover:opacity-100 p-1 rounded-md hover:opacity-100 ${activeTheme?.palette?.textAccent || 'text-amber-800'} text-xs font-bold flex items-center gap-1 cursor-pointer transition-all`}
                       title={t('Edit reason')}
                     >
                       <Edit3 className="w-3 h-3" />
                       <span className="text-[10px]">{t('Edit')}</span>
                     </button>
                   </div>
-                  <p className="font-bold text-amber-950 text-sm leading-snug">
+                  <p className={`font-bold ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-sm leading-snug`}>
                     {plansChanged.reason}
                   </p>
                 </div>

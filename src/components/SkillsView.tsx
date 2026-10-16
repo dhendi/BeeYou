@@ -106,15 +106,11 @@ export const SkillsView: React.FC = () => {
         {/* Skill Hero Card */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-4">
           <div className={`w-20 h-20 rounded-3xl flex items-center justify-center p-2 shrink-0 shadow-xs ${isColorCoded ? 'bg-purple-50 border-2 border-purple-200' : `${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`}`}>
-            {(selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)) ? (
-              <img
-                src={selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji)}
-                alt=""
-                className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
-              />
-            ) : (
-              <span className="text-5xl">{selectedSkill.emoji}</span>
-            )}
+            <RoutineStickerIcon
+              emoji={selectedSkill.stickerSrc || getSkillSticker(selectedSkill.id, selectedSkill.emoji) || selectedSkill.emoji}
+              title={selectedSkill.title}
+              className="w-16 h-16 object-contain"
+            />
           </div>
           <div className="flex-1 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -141,10 +137,10 @@ export const SkillsView: React.FC = () => {
 
         {/* All Steps Completed Celebration Box */}
         {isAllDone && (
-          <div className="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 border-3 border-amber-300 rounded-3xl p-5 text-center shadow-md animate-in fade-in zoom-in-95">
+          <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-100'} border-3 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} rounded-3xl p-5 text-center shadow-md animate-in fade-in zoom-in-95`}>
             <span className="text-5xl">🏆</span>
-            <h3 className="text-xl font-black text-amber-950 mt-2">{t('Mission Accomplished!')}</h3>
-            <p className="text-xs sm:text-sm font-bold text-amber-800 mt-1">
+            <h3 className={`text-xl font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} mt-2`}>{t('Mission Accomplished!')}</h3>
+            <p className={`text-xs sm:text-sm font-bold ${activeTheme?.palette?.textAccent || 'text-amber-800'} mt-1`}>
               {t('You completed')} "{t(selectedSkill.title)}" {t('independently!')}
             </p>
           </div>
@@ -161,7 +157,7 @@ export const SkillsView: React.FC = () => {
                 key={step.id}
                 className={`p-4 rounded-3xl border-2 transition-all shadow-xs ${
                   step.completed
-                    ? (isColorCoded ? 'bg-purple-50/70 border-purple-300' : 'bg-amber-50/70 border-amber-300')
+                    ? (isColorCoded ? 'bg-purple-50/70 border-purple-300' : `${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} ${activeTheme?.palette?.primaryBorder || 'border-amber-300'}`)
                     : 'bg-white hover:bg-slate-50 border-slate-200'
                 }`}
               >
@@ -171,11 +167,11 @@ export const SkillsView: React.FC = () => {
                     aria-label={`Skill step ${idx + 1}: ${t(step.title)}. ${step.completed ? 'Completed' : 'Not completed'}`}
                     aria-pressed={step.completed}
                     onClick={() => toggleSkillStep(selectedSkill.id, step.id)}
-                    className="flex items-start sm:items-center gap-3 flex-1 cursor-pointer select-none text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px]"
+                    className={`flex items-start sm:items-center gap-3 flex-1 cursor-pointer select-none text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none min-h-[48px]`}
                   >
-                    <span className={`${isColorCoded ? 'text-purple-600' : 'text-amber-600'} transition-transform hover:scale-110 mt-0.5 sm:mt-0 shrink-0 pointer-events-none`} aria-hidden="true">
+                    <span className={`${isColorCoded ? 'text-purple-600' : (activeTheme?.palette?.textAccent || 'text-amber-600')} transition-transform hover:scale-110 mt-0.5 sm:mt-0 shrink-0 pointer-events-none`} aria-hidden="true">
                       {step.completed ? (
-                        <CheckCircle2 className={`w-7 h-7 ${isColorCoded ? 'fill-purple-500' : 'fill-amber-500'} text-white`} />
+                        <CheckCircle2 className={`w-7 h-7 ${isColorCoded ? 'fill-purple-500' : (activeTheme?.palette?.primaryBg ? activeTheme.palette.primaryBg.replace('bg-', 'fill-') : 'fill-amber-500')} text-white`} />
                       ) : (
                         <Circle className="w-7 h-7 text-slate-300" />
                       )}
@@ -293,16 +289,11 @@ export const SkillsView: React.FC = () => {
                 className={`w-full text-left rounded-3xl p-4 sm:p-5 transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
               >
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${iconBoxClass}`} aria-hidden="true">
-                  {(skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)) ? (
-                    <img
-                      src={skill.stickerSrc || getSkillSticker(skill.id, skill.emoji)}
-                      alt=""
-                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="text-4xl">{skill.emoji}</span>
-                  )}
+                  <RoutineStickerIcon
+                    emoji={skill.stickerSrc || getSkillSticker(skill.id, skill.emoji) || skill.emoji}
+                    title={skill.title}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">

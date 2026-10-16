@@ -982,6 +982,10 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/caregiver_heart.png': '/assets/stickers/turtle_shell_heart.png',
   '/assets/stickers/eye_see.png': '/assets/stickers/turtle_river_stone.png',
   '/assets/stickers/drink_water.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
+  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/turtle_arched_bridge.png',
+  '/assets/stickers/story_birthday.png': '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/turtle_zen_balancing_stones.png',
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
@@ -1099,6 +1103,9 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/dino_amber_museum_archive.png',
   '/assets/stickers/adventure_restaurant.png': '/assets/stickers/dino_feast_table_pavilion.png',
   '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/dino_fossil_puzzle_piece.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/dino_footprint_loop.png',
+  '/assets/stickers/story_birthday.png': '/assets/stickers/dino_forager_feast_bowl.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/dino_wooden_stacking_blocks.png',
 };
 
 /**

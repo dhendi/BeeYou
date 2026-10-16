@@ -23,7 +23,7 @@ import {
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
-import { TURTLE_SANCTUARY_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS } from '../data/themedIconsData';
 import { useApp } from '../context/AppContext';
 import { IconLibraryModal } from './common/IconLibraryModal';
 
@@ -48,14 +48,15 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
 }) => {
   const { activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Routine['category']>('morning');
   const [emoji, setEmoji] = useState('🌅');
   const [time, setTime] = useState('8:00 AM');
   
-  // Themed icon filter tab: 'turtle' | 'classic' | 'all'
-  const [iconFilterTab, setIconFilterTab] = useState<'turtle' | 'classic' | 'all'>('turtle');
+  // Themed icon filter tab: 'turtle' | 'dinosaur' | 'classic' | 'all'
+  const [iconFilterTab, setIconFilterTab] = useState<'turtle' | 'dinosaur' | 'classic' | 'all'>('turtle');
 
   // Full Icon Library Modal State
   const [showIconLibrary, setShowIconLibrary] = useState(false);
@@ -114,16 +115,24 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
     } else {
       // Default template when creating a brand new routine from scratch
       setTitle('');
-      setCategory(isTurtleTheme ? 'morning' : 'school');
-      setEmoji(isTurtleTheme ? '/assets/stickers/turtle_mascot.png' : '🎒');
+      setCategory(isDinoTheme ? 'morning' : isTurtleTheme ? 'morning' : 'school');
+      setEmoji(isDinoTheme ? '/assets/stickers/dino_rex.png' : isTurtleTheme ? '/assets/stickers/turtle_mascot.png' : '🎒');
       setTime('8:30 AM');
-      setFirstTask(isTurtleTheme ? 'Mindful arrival & settle in' : 'Unpack backpack');
-      setFirstEmoji(isTurtleTheme ? '/assets/stickers/turtle_welcome_sign.png' : '🎒');
-      setThenTask(isTurtleTheme ? 'Quiet break by lily pond' : 'Free play & break');
-      setThenEmoji(isTurtleTheme ? '/assets/stickers/turtle_lily_pads.png' : '🛝');
-      setNewStepEmoji(isTurtleTheme ? '/assets/stickers/turtle_tracks.png' : '⭐');
+      setFirstTask(isDinoTheme ? 'Expedition arrival & check gear' : isTurtleTheme ? 'Mindful arrival & settle in' : 'Unpack backpack');
+      setFirstEmoji(isDinoTheme ? '/assets/stickers/dino_expedition_backpack.png' : isTurtleTheme ? '/assets/stickers/turtle_welcome_sign.png' : '🎒');
+      setThenTask(isDinoTheme ? 'Cavern rest & recharge' : isTurtleTheme ? 'Quiet break by lily pond' : 'Free play & break');
+      setThenEmoji(isDinoTheme ? '/assets/stickers/dino_cavern_retreat.png' : isTurtleTheme ? '/assets/stickers/turtle_lily_pads.png' : '🛝');
+      setNewStepEmoji(isDinoTheme ? '/assets/stickers/dino_footprint_loop.png' : isTurtleTheme ? '/assets/stickers/turtle_tracks.png' : '⭐');
       setSteps(
-        isTurtleTheme
+        isDinoTheme
+          ? [
+              { id: `step-${Date.now()}-1`, title: 'Arrive at expedition & unpack pack', instruction: 'Set down backpack and check field supplies', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_expedition_backpack.png' },
+              { id: `step-${Date.now()}-2`, title: 'Drink fresh water from stone tumbler', instruction: 'Hydrate stamina for the adventure ahead', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_stone_tumbler_water.png' },
+              { id: `step-${Date.now()}-3`, title: 'Dino discovery & focus learning', instruction: 'Tackle tasks step by step like a paleontologist', durationMin: 20, completed: false, emoji: '/assets/stickers/dino_bone_stylus_pencil.png' },
+              { id: `step-${Date.now()}-4`, title: 'Cavern break & sensory recharge', instruction: 'Rest in the quiet den to recharge your stamina battery', durationMin: 15, completed: false, emoji: '/assets/stickers/dino_cavern_retreat.png' },
+              { id: `step-${Date.now()}-5`, title: 'Pack up gear & celebrate expedition victory', instruction: 'Roar! Another great day accomplished!', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_rex.png' },
+            ]
+          : isTurtleTheme
           ? [
               { id: `step-${Date.now()}-1`, title: 'Arrive calmly & welcome day', instruction: 'Take a deep breath and settle into space', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_welcome_sign.png' },
               { id: `step-${Date.now()}-2`, title: 'Drink cool fresh water', instruction: 'Hydrate body and stretch gently', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_leaf_water_drop.png' },
@@ -140,8 +149,8 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
             ]
       );
     }
-    setIconFilterTab(isTurtleTheme ? 'turtle' : 'classic');
-  }, [initialRoutine, isOpen, isTurtleTheme]);
+    setIconFilterTab(isDinoTheme ? 'dinosaur' : isTurtleTheme ? 'turtle' : 'classic');
+  }, [initialRoutine, isOpen, isTurtleTheme, isDinoTheme]);
 
   const handleAddStep = () => {
     if (!newStepTitle.trim()) return;
@@ -431,7 +440,22 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       }`}
                     >
                       <span>🐢</span>
-                      <span>Turtle Sanctuary ({TURTLE_SANCTUARY_ICONS.length})</span>
+                      <span>Turtle ({TURTLE_SANCTUARY_ICONS.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIconFilterTab('dinosaur');
+                        playChime('tap');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all flex items-center gap-1 cursor-pointer ${
+                        iconFilterTab === 'dinosaur'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-emerald-800'
+                      }`}
+                    >
+                      <span>🦖</span>
+                      <span>Dino ({DINO_KINGDOM_ICONS.length})</span>
                     </button>
                     <button
                       type="button"
@@ -471,10 +495,10 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       setShowIconLibrary(true);
                       playChime('tap');
                     }}
-                    className={`px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 ${isTurtleTheme ? 'text-emerald-800 border-emerald-300 hover:bg-emerald-50' : 'text-slate-600 border-slate-200'} border text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-2xs`}
+                    className={`px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 ${isTurtleTheme || isDinoTheme ? 'text-emerald-800 border-emerald-300 hover:bg-emerald-50' : 'text-slate-600 border-slate-200'} border text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-2xs`}
                     title="Browse complete icon library"
                   >
-                    <Search className={`w-3 h-3 ${isTurtleTheme ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <Search className={`w-3 h-3 ${isTurtleTheme || isDinoTheme ? 'text-emerald-600' : 'text-slate-400'}`} />
                     <span>More...</span>
                   </button>
                 </div>
@@ -523,10 +547,53 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                 </div>
               )}
 
+              {/* Dino Kingdom Icons Grid (Visible when tab is 'dinosaur' or 'all', or when dinosaur theme is chosen) */}
+              {(iconFilterTab === 'dinosaur' || iconFilterTab === 'all' || isDinoTheme) && (
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-green-50/70 to-emerald-50 border-2 border-emerald-400 shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                      <span className="text-sm">🦖</span>
+                      Dino Kingdom Themed Icons
+                      <span className="text-[10px] font-normal text-emerald-700">({DINO_KINGDOM_ICONS.length})</span>
+                    </span>
+                    {isDinoTheme && (
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/90 px-2 py-0.5 rounded-full">
+                        Active Theme
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
+                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+                      {DINO_KINGDOM_ICONS.map((dIcon) => {
+                        const isSelected = emoji === dIcon.value;
+                        return (
+                          <button
+                            key={dIcon.id}
+                            type="button"
+                            onClick={() => {
+                              setEmoji(dIcon.value);
+                              playChime('tap');
+                            }}
+                            title={dIcon.label}
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
+                                : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-105'
+                            }`}
+                          >
+                            <RoutineStickerIcon emoji={dIcon.value} title={dIcon.label} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* 2. Classic Icons (Visible when tab is 'classic' or 'all') */}
               {(iconFilterTab === 'classic' || iconFilterTab === 'all') && (
                 <div className="space-y-1">
-                  {(iconFilterTab === 'all' || isTurtleTheme) && (
+                  {(iconFilterTab === 'all' || isTurtleTheme || isDinoTheme) && (
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                       Standard Routine Icons:
                     </span>
@@ -848,7 +915,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
           setShowIconLibrary(false);
           setIconPickerTarget(null);
         }}
-        initialTab={isTurtleTheme ? 'turtle' : 'all'}
+        initialTab={isDinoTheme ? 'dinosaur' : isTurtleTheme ? 'turtle' : 'all'}
         selectedEmoji={
           iconPickerTarget === 'routine'
             ? emoji
