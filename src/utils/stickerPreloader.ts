@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS } from '../data/themedIconsData';
 
 const loadedCache = new Set<string>();
 
@@ -20,6 +20,7 @@ export function preloadStickerUrls(urls: string[], immediate = false) {
     // Immediate pre-warm
     pending.forEach((url) => {
       const img = new Image();
+      img.decoding = 'async';
       img.src = url;
     });
     return;
@@ -35,6 +36,7 @@ export function preloadStickerUrls(urls: string[], immediate = false) {
 
     slice.forEach((url) => {
       const img = new Image();
+      img.decoding = 'async';
       img.src = url;
     });
 
@@ -59,17 +61,63 @@ export function preloadTurtleThemeStickers() {
 }
 
 /**
+ * Preloads all Dino Kingdom stickers immediately into the browser's cache.
+ */
+export function preloadDinoThemeStickers() {
+  const dinoUrls = DINO_KINGDOM_ICONS.map((i) => i.value);
+  preloadStickerUrls(dinoUrls, true);
+}
+
+/**
+ * Preloads stickers for a specific theme ID.
+ */
+export function preloadThemeStickers(themeId?: string) {
+  if (!themeId) return;
+  if (themeId === 'theme-turtle' || themeId === 'turtle') {
+    preloadTurtleThemeStickers();
+  } else if (themeId === 'theme-dino' || themeId === 'dinosaur') {
+    preloadDinoThemeStickers();
+  }
+}
+
+/**
  * Preloads all core app stickers when the app initializes.
+ * Pre-warms the active theme and critical dashboard icons immediately,
+ * and schedules the remaining icon library during idle cycles.
  */
 export function preloadAllStickersOnIdle() {
   if (typeof window === 'undefined') return;
 
-  const turtleUrls = TURTLE_SANCTUARY_ICONS.map((i) => i.value);
+  // 1. Critical common dashboard stickers needed on first paint
+  const immediateCommonUrls = [
+    // Mascots & Greetings
+    '/assets/stickers/bee_mascot.png',
+    '/assets/stickers/turtle_mascot.png',
+    '/assets/stickers/dino_rex_mascot.png',
+    '/assets/stickers/dino_rex.png',
+    '/assets/stickers/turtle_welcome_sign.png',
 
-  // Common high-frequency default stickers
-  const commonUrls = [
+    // Dashboard Tools & Badges
+    '/assets/stickers/about_id.png',
+    '/assets/stickers/fidget_bubbles.png',
+    '/assets/stickers/timer_clock.png',
+    '/assets/stickers/feelings_thermometer.png',
+    '/assets/stickers/spoons_energy.png',
+    '/assets/stickers/decision_wheel.png',
+    '/assets/stickers/medications_health.png',
+    '/assets/stickers/passport_book.png',
+    '/assets/stickers/story_plans_change.png',
+    '/assets/stickers/turtle_arched_bridge.png',
+    '/assets/stickers/dino_footprint_loop.png',
+    '/assets/stickers/turtle_seedling.png',
+    '/assets/stickers/turtle_lily_pads.png',
+
+    // Core High-Frequency Routines & Steps
     '/assets/stickers/alarm_clock.png',
     '/assets/stickers/routine_toilet_restroom.png',
+    '/assets/stickers/toothbrush.png',
+    '/assets/stickers/soap_wash_hands.png',
+    '/assets/stickers/clothes_dressed.png',
     '/assets/stickers/pancakes_breakfast.png',
     '/assets/stickers/backpack_school.png',
     '/assets/stickers/sneaker_shoes.png',
@@ -79,32 +127,35 @@ export function preloadAllStickersOnIdle() {
     '/assets/stickers/teddy_bear.png',
     '/assets/stickers/shower_wash.png',
     '/assets/stickers/school_bus.png',
-    '/assets/stickers/science_flask.png',
-    '/assets/stickers/home_house.png',
-    '/assets/stickers/car_ride.png',
-    '/assets/stickers/outdoor_sun.png',
-    '/assets/stickers/pet_care.png',
-    '/assets/stickers/fav_sandwich.png',
-    '/assets/stickers/drink_cup.png',
-    '/assets/stickers/hot_cocoa.png',
-    '/assets/stickers/laundry_hamper.png',
-    '/assets/stickers/schedule_calendar.png',
-    '/assets/stickers/breathing_cloud.png',
     '/assets/stickers/bedtime_sleep.png',
-    '/assets/stickers/fork_knife.png',
-    '/assets/stickers/candy_treat.png',
-    '/assets/stickers/clock_time.png',
-    '/assets/stickers/ocean_wave.png',
-    '/assets/stickers/battery_meter.png',
-    '/assets/stickers/quiet_voice.png',
-    '/assets/stickers/bee_mascot.png',
-    '/assets/stickers/turtle_mascot.png',
+    '/assets/stickers/breathing_cloud.png',
+    '/assets/stickers/drink_water.png',
+    '/assets/stickers/drink_cup.png',
+    '/assets/stickers/fav_quiet_break.png',
+    '/assets/stickers/help_sos.png',
     '/assets/stickers/task_done.png',
+    '/assets/stickers/adventure_dentist.png',
+    '/assets/stickers/turtle_mineral_polishing_basin.png',
+    '/assets/stickers/dino_trex_tooth_care.png',
   ];
 
-  // Load common stickers immediately
-  preloadStickerUrls(commonUrls, true);
+  // Immediately warm up the critical common stickers
+  preloadStickerUrls(immediateCommonUrls, true);
 
-  // Pre-cache all turtle stickers so theme switches are instant
+  // Check which theme is currently active and immediately pre-warm its collection
+  try {
+    const savedThemeId = localStorage.getItem('beeyou_active_theme_id');
+    if (savedThemeId === 'theme-turtle' || savedThemeId === 'turtle') {
+      preloadTurtleThemeStickers();
+    } else if (savedThemeId === 'theme-dino' || savedThemeId === 'dinosaur') {
+      preloadDinoThemeStickers();
+    }
+  } catch (e) {}
+
+  // Background idle pre-warming for remaining theme collections so subsequent switches are instant
+  const turtleUrls = TURTLE_SANCTUARY_ICONS.map((i) => i.value);
+  const dinoUrls = DINO_KINGDOM_ICONS.map((i) => i.value);
+
   preloadStickerUrls(turtleUrls, false);
+  preloadStickerUrls(dinoUrls, false);
 }

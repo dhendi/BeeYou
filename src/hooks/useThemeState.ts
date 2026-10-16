@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AppTheme } from '../types';
 import { PRESET_THEMES } from '../data/themesData';
 import { playChime } from '../utils/audio';
+import { preloadThemeStickers } from '../utils/stickerPreloader';
 
 interface UseThemeStateProps {
   isPremium: boolean;
@@ -101,6 +102,7 @@ export function useThemeState({
     const target = resolvedThemes.find((t) => t.id === id);
     if (target) {
       setActiveThemeId(id);
+      preloadThemeStickers(id);
       if (soundEffects) playChime('tap');
     }
   };

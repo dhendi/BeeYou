@@ -1,13 +1,15 @@
 import './utils/migrateLegacyStorage';
 import { ensurePersistentStorage } from './utils/offlineStorage';
+import { preloadAllStickersOnIdle } from './utils/stickerPreloader';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// Request persistent storage to protect custom AAC tiles and caregiver voice clips from OS/browser eviction
+// Request persistent storage and pre-warm sticker cache for 0ms instantaneous icon rendering
 if (typeof window !== 'undefined') {
   ensurePersistentStorage().catch(() => {});
+  preloadAllStickersOnIdle();
 }
 
 // Automatically check and activate the latest PWA bundle on load
