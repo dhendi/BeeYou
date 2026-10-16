@@ -75,8 +75,12 @@ export const FidgetBubblesSticker = renderStickerPng('/assets/stickers/fidget_bu
 // 🌬️ Calm Breathing (Watercolor breathing cloud with soft swirl)
 export const BreathingCloudSticker = renderStickerPng('/assets/stickers/breathing_cloud.png', 'Calm Breathing Cloud');
 
-// 🎡 Decision Wheel (Vintage carnival ferris wheel with pastel gondolas)
-export const DecisionWheelSticker = renderStickerPng('/assets/stickers/decision_wheel.png', 'Decision Wheel');
+// 🎡 Decision Wheel (Swaps to Wooden Lotus Spinner Wheel in Turtle Sanctuary theme)
+export const DecisionWheelSticker = renderThemedStickerPng(
+  '/assets/stickers/decision_wheel.png',
+  '/assets/stickers/turtle_wooden_wheel.png',
+  'Decision Wheel'
+);
 
 // ⏱️ Countdown Timer / Pie Clock (Swaps to Sanctuary Sand Timer in Turtle Sanctuary theme)
 export const CountdownTimerSticker = renderThemedStickerPng(
@@ -85,14 +89,22 @@ export const CountdownTimerSticker = renderThemedStickerPng(
   'Countdown Timer Clock'
 );
 
-// 🚨 Ask for Help (SOS) (Watercolor emergency shield badge from reference)
-export const ShieldSosSticker = renderStickerPng('/assets/stickers/help_sos.png', 'Help SOS Shield');
+// 🚨 Ask for Help (SOS) (Swaps to Guardian Turtle Shell Shield in Turtle Sanctuary theme)
+export const ShieldSosSticker = renderThemedStickerPng(
+  '/assets/stickers/help_sos.png',
+  '/assets/stickers/turtle_guardian_shield_sos.png',
+  'Help SOS Shield'
+);
 
 // 🔗 Connect Caregiver (Warm pink watercolor heart with bandaid from reference)
 export const ConnectHeartSticker = renderStickerPng('/assets/stickers/caregiver_heart.png', 'Caregiver Heart');
 
-// 🪪 About Me ID Card (Hand-drawn lanyard ID badge from reference)
-export const IdCardSticker = renderStickerPng('/assets/stickers/about_id.png', 'About Me ID');
+// 🪪 About Me ID Card (Swaps to Wooden Explorer ID Badge in Turtle Sanctuary theme)
+export const IdCardSticker = renderThemedStickerPng(
+  '/assets/stickers/about_id.png',
+  '/assets/stickers/turtle_wooden_id_badge.png',
+  'About Me ID'
+);
 
 // 📖 Passport / Reading Book (Swaps to Firefly Lantern & Scroll in Turtle Sanctuary theme)
 export const ReadingBookSticker = renderThemedStickerPng(
@@ -107,14 +119,26 @@ export const QuickPhrasesSticker = renderStickerPng('/assets/stickers/quick_phra
 // ⌨️ Type to Speak Keyboard (Retro cream keyboard with L-enter key from reference)
 export const KeyboardSticker = renderStickerPng('/assets/stickers/keyboard.png', 'Keyboard');
 
-// 🌡️ Feelings & Thermometer (Golden heart with cute thermometer)
-export const ThermometerSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feelings Thermometer');
+// 🌡️ Feelings & Thermometer (Swaps to Bamboo Gauge & Heart in Turtle Sanctuary theme)
+export const ThermometerSticker = renderThemedStickerPng(
+  '/assets/stickers/feelings_thermometer.png',
+  '/assets/stickers/turtle_bamboo_thermometer.png',
+  'Feelings Thermometer'
+);
 
-// 💊 Medications & Health (Pastel pink and blue medicine capsules)
-export const MedicationSticker = renderStickerPng('/assets/stickers/medications_health.png', 'Medications Health');
+// 💊 Medications & Health (Swaps to Leaf Dish & Vitamins in Turtle Sanctuary theme)
+export const MedicationSticker = renderThemedStickerPng(
+  '/assets/stickers/medications_health.png',
+  '/assets/stickers/turtle_leaf_vitamins.png',
+  'Medications Health'
+);
 
-// 🌙 Evening Reflection (Smiling lavender crescent moon and night star)
-export const EveningMoonSticker = renderStickerPng('/assets/stickers/evening_moon.png', 'Evening Moon');
+// 🌙 Evening Reflection (Swaps to Crescent Moon Over Lagoon in Turtle Sanctuary theme)
+export const EveningMoonSticker = renderThemedStickerPng(
+  '/assets/stickers/evening_moon.png',
+  '/assets/stickers/turtle_lagoon_moon.png',
+  'Evening Moon'
+);
 
 // Routine, Wellness & Activity stickers
 export const ToothbrushSticker = renderThemedStickerPng(
@@ -152,7 +176,11 @@ export const AlarmClockSticker = renderThemedStickerPng(
   '/assets/stickers/turtle_dawn_bell_clock.png',
   'Wake Up Alarm Clock'
 );
-export const ToiletSticker = renderStickerPng('/assets/stickers/routine_toilet_restroom.png', 'Toilet Restroom');
+export const ToiletSticker = renderThemedStickerPng(
+  '/assets/stickers/routine_toilet_restroom.png',
+  '/assets/stickers/turtle_bamboo_restroom.png',
+  'Toilet Restroom'
+);
 export const PancakesSticker = renderThemedStickerPng(
   '/assets/stickers/pancakes_breakfast.png',
   '/assets/stickers/turtle_clover_berry_feast.png',
@@ -222,7 +250,11 @@ export const ArtCraftsSticker = renderThemedStickerPng(
   'Art Crafts'
 );
 export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Star');
-export const RewardTrophySticker = renderStickerPng('/assets/stickers/reward_trophy.png', 'Reward Trophy');
+export const RewardTrophySticker = renderThemedStickerPng(
+  '/assets/stickers/reward_trophy.png',
+  '/assets/stickers/turtle_lotus_trophy.png',
+  'Reward Trophy'
+);
 export const BathTimeSticker = renderThemedStickerPng(
   '/assets/stickers/bath_time.png',
   '/assets/stickers/turtle_warm_spring_bath.png',
@@ -248,7 +280,11 @@ export const LaptopExecutionSticker = renderStickerPng('/assets/stickers/laptop_
 export const ClipboardShutdownSticker = renderStickerPng('/assets/stickers/clipboard_shutdown.png', 'Daily Shutdown Prep');
 export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.png', 'Gold Star');
 export const LockerScheduleSticker = renderStickerPng('/assets/stickers/locker_schedule.png', 'Locker & Daily Schedule');
-export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_shorts.png', 'Put on Pajamas');
+export const PajamasShortsSticker = renderThemedStickerPng(
+  '/assets/stickers/pajamas_shorts.png',
+  '/assets/stickers/turtle_starry_pajamas.png',
+  'Put on Pajamas'
+);
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
 export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
 export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
@@ -281,6 +317,15 @@ export const TurtleBambooPencilSticker = renderStickerPng('/assets/stickers/turt
 export const TurtleShellHeadphonesSticker = renderStickerPng('/assets/stickers/turtle_shell_headphones.png', 'Turtle Shell Ear Defenders');
 export const TurtleSandTimerSticker = renderStickerPng('/assets/stickers/turtle_sand_timer.png', 'Sanctuary Sand Timer');
 export const TurtleBambooSpoonsSticker = renderStickerPng('/assets/stickers/turtle_bamboo_spoons.png', 'Three Bamboo Spoons');
+export const TurtleLotusTrophySticker = renderStickerPng('/assets/stickers/turtle_lotus_trophy.png', 'Golden Lotus & Shell Trophy');
+export const TurtleBambooRestroomSticker = renderStickerPng('/assets/stickers/turtle_bamboo_restroom.png', 'Bamboo Washroom & Stones');
+export const TurtleStarryPajamasSticker = renderStickerPng('/assets/stickers/turtle_starry_pajamas.png', 'Cozy Starry Turtle Pajamas');
+export const TurtleLagoonMoonSticker = renderStickerPng('/assets/stickers/turtle_lagoon_moon.png', 'Crescent Moon Over Lagoon');
+export const TurtleWoodenWheelSticker = renderStickerPng('/assets/stickers/turtle_wooden_wheel.png', 'Wooden Lotus Spinner Wheel');
+export const TurtleBambooThermometerSticker = renderStickerPng('/assets/stickers/turtle_bamboo_thermometer.png', 'Bamboo Gauge & Heart');
+export const TurtleLeafVitaminsSticker = renderStickerPng('/assets/stickers/turtle_leaf_vitamins.png', 'Leaf Dish & Vitamins');
+export const TurtleGuardianShieldSosSticker = renderStickerPng('/assets/stickers/turtle_guardian_shield_sos.png', 'Guardian Turtle Shell Shield');
+export const TurtleWoodenIdBadgeSticker = renderStickerPng('/assets/stickers/turtle_wooden_id_badge.png', 'Wooden Explorer ID Badge');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -339,8 +384,16 @@ export const LoudNoiseSticker = renderStickerPng('/assets/stickers/sensory_loud_
 export const SocialMaskingSticker = renderStickerPng('/assets/stickers/sensory_social_masking.png', 'Social Masking Fatigue');
 export const LungsBreathingStickerNew = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs Pacer');
 export const WritingJournalSticker = renderStickerPng('/assets/stickers/routine_writing_journal.png', 'Writing & Journaling');
-export const MedicinePillSticker = renderStickerPng('/assets/stickers/routine_medicine_pill.png', 'Daily Medication Pill');
-export const ToiletRestroomSticker = renderStickerPng('/assets/stickers/routine_toilet_restroom.png', 'Toilet Restroom');
+export const MedicinePillSticker = renderThemedStickerPng(
+  '/assets/stickers/routine_medicine_pill.png',
+  '/assets/stickers/turtle_leaf_vitamins.png',
+  'Daily Medication Pill'
+);
+export const ToiletRestroomSticker = renderThemedStickerPng(
+  '/assets/stickers/routine_toilet_restroom.png',
+  '/assets/stickers/turtle_bamboo_restroom.png',
+  'Toilet Restroom'
+);
 export const WaterDropSticker = renderStickerPng('/assets/stickers/routine_water_drink.png', 'Water Hydration Tracker');
 export const HaircutSalonSticker = renderStickerPng('/assets/stickers/adventure_haircut_salon.png', 'Hair Salon Haircut');
 export const DoctorCheckupSticker = renderStickerPng('/assets/stickers/adventure_doctor_checkup.png', 'Doctor Check-Up');
@@ -433,7 +486,11 @@ export const FavBathSticker = renderThemedStickerPng(
 export const FavSandwichSticker = renderStickerPng('/assets/stickers/fav_sandwich.png', 'Sandwich Snack');
 export const FavWaterSticker = renderStickerPng('/assets/stickers/fav_water.png', 'Drink Water');
 export const FavQuietBreakSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Quiet Break');
-export const FavHelpSosSticker = renderStickerPng('/assets/stickers/fav_help_sos.png', 'Help Please');
+export const FavHelpSosSticker = renderThemedStickerPng(
+  '/assets/stickers/fav_help_sos.png',
+  '/assets/stickers/turtle_guardian_shield_sos.png',
+  'Help Please'
+);
 export const FavOutsideSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Go Outside');
 export const FavLoveHeartSticker = renderStickerPng('/assets/stickers/fav_love_heart.png', 'I Love You');
 export const FavRestTiredSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Rest and Sleep');

@@ -168,6 +168,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_shell_headphones', emoji: '/assets/stickers/turtle_shell_headphones.png', label: 'Turtle Shell Ear Defenders', category: 'turtle', keywords: ['headphones', 'ear', 'quiet', 'sensory', 'sound', 'music', 'calm'] },
   { id: 'turtle_sand_timer', emoji: '/assets/stickers/turtle_sand_timer.png', label: 'Sanctuary Sand Timer', category: 'turtle', keywords: ['timer', 'hourglass', 'sand', 'countdown', 'clock', 'wait', 'time'] },
   { id: 'turtle_bamboo_spoons', emoji: '/assets/stickers/turtle_bamboo_spoons.png', label: 'Three Bamboo Spoons', category: 'turtle', keywords: ['spoon', 'spoons', 'energy', 'budget', 'stamina', 'bamboo'] },
+  { id: 'turtle_lotus_trophy', emoji: '/assets/stickers/turtle_lotus_trophy.png', label: 'Golden Lotus & Shell Trophy', category: 'turtle', keywords: ['trophy', 'reward', 'milestone', 'win', 'lotus', 'gold', 'star'] },
+  { id: 'turtle_bamboo_restroom', emoji: '/assets/stickers/turtle_bamboo_restroom.png', label: 'Bamboo Washroom & Stones', category: 'turtle', keywords: ['toilet', 'restroom', 'bathroom', 'potty', 'washroom', 'bamboo'] },
+  { id: 'turtle_starry_pajamas', emoji: '/assets/stickers/turtle_starry_pajamas.png', label: 'Cozy Starry Turtle Pajamas', category: 'turtle', keywords: ['pajamas', 'pajama', 'sleepwear', 'shorts', 'bedtime', 'night', 'clothes'] },
+  { id: 'turtle_lagoon_moon', emoji: '/assets/stickers/turtle_lagoon_moon.png', label: 'Crescent Moon Over Lagoon', category: 'turtle', keywords: ['moon', 'evening', 'night', 'bedtime', 'sleep', 'lagoon', 'stars'] },
+  { id: 'turtle_wooden_wheel', emoji: '/assets/stickers/turtle_wooden_wheel.png', label: 'Wooden Lotus Spinner Wheel', category: 'turtle', keywords: ['wheel', 'decision', 'spinner', 'choice', 'wooden', 'lotus'] },
+  { id: 'turtle_bamboo_thermometer', emoji: '/assets/stickers/turtle_bamboo_thermometer.png', label: 'Bamboo Feelings Gauge & Heart', category: 'turtle', keywords: ['thermometer', 'scale', 'feelings', '5-point', 'heart', 'gauge', 'bamboo'] },
+  { id: 'turtle_leaf_vitamins', emoji: '/assets/stickers/turtle_leaf_vitamins.png', label: 'Leaf Dish & Vitamins', category: 'turtle', keywords: ['medication', 'medicine', 'pill', 'vitamin', 'health', 'leaf'] },
+  { id: 'turtle_guardian_shield_sos', emoji: '/assets/stickers/turtle_guardian_shield_sos.png', label: 'Guardian Turtle Shell Shield (SOS)', category: 'turtle', keywords: ['sos', 'help', 'shield', 'alert', 'emergency', 'guardian', 'shell'] },
+  { id: 'turtle_wooden_id_badge', emoji: '/assets/stickers/turtle_wooden_id_badge.png', label: 'Wooden Explorer ID Badge', category: 'turtle', keywords: ['id', 'badge', 'about me', 'card', 'passport', 'profile', 'turtle'] },
 ];
 
 export interface IconLibraryModalProps {
