@@ -170,7 +170,7 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
-  const bgColor = isRibbitPond ? '#FAF7EE' : isDinoKingdom ? '#FAF7EE' : isTurtleSanctuary ? '#FAF7EE' : '#FEF9F1';
+  const bgColor = '#FAF7EE';
 
   return (
     <div
