@@ -1083,6 +1083,22 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/airplane_flight.png': '/assets/stickers/dino_pterodactyl_flight.png',
   '/assets/stickers/shower_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
   '/assets/stickers/bathtub_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
+  // Batch 6: Activities, Rewards, Pets & Outings
+  '/assets/stickers/teddy_bear.png': '/assets/stickers/dino_plush_stego_toy.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/dino_hatchling_pet_bowl.png',
+  '/assets/stickers/outdoor_sun.png': '/assets/stickers/dino_primeval_sun_canopy.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/dino_amber_fossil_trophy.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/dino_leaf_berry_treat.png',
+  '/assets/stickers/fork_knife.png': '/assets/stickers/dino_bone_cutlery_fork_spoon.png',
+  '/assets/stickers/ocean_wave.png': '/assets/stickers/dino_tidal_ripple_wave.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/dino_amber_energy_gauge.png',
+  '/assets/stickers/paw_print.png': '/assets/stickers/dino_track_paw_print.png',
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/dino_woven_moss_play_ball.png',
+  '/assets/stickers/potted_plant.png': '/assets/stickers/dino_fern_log_planter.png',
+  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/dino_stone_pebble_bowling.png',
+  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/dino_amber_museum_archive.png',
+  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/dino_feast_table_pavilion.png',
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/dino_fossil_puzzle_piece.png',
 };
 
 /**
