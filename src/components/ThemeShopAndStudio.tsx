@@ -19,6 +19,7 @@ import {
 import { playChime, speakText } from '../utils/audio';
 import { PRESET_THEMES } from '../data/themesData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
+import { getThemeCustomizerHeaderStyles } from '../utils/themeWidgetHelper';
 
 // Pre-packaged color presets for theme customizer
 const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] = [
@@ -417,20 +418,21 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   });
 
   const editingThemeObject = targetEditingThemeId ? themes.find((t) => t.id === targetEditingThemeId) : null;
+  const headerStyles = getThemeCustomizerHeaderStyles(activeTheme);
 
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto space-y-4">
       {/* 1. Header Banner & Mode Switcher */}
-      <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 rounded-3xl p-4 sm:p-6 text-amber-950 shadow-md border-2 border-amber-300">
+      <div className={`${headerStyles.bannerGradient} rounded-3xl p-4 sm:p-6 shadow-md border-2 ${headerStyles.bannerBorder} transition-all duration-300`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
               <span className="text-2xl sm:text-3xl p-1.5 rounded-2xl bg-white/80 shadow-xs">🎨</span>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+              <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${headerStyles.bannerText}`}>
                 Themes & Visual Customizer
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-amber-950/80 mt-1 max-w-xl font-semibold leading-relaxed">
+            <p className={`text-xs sm:text-sm ${headerStyles.bannerSubtext} mt-1 max-w-xl font-semibold leading-relaxed`}>
               Transform BeeYou to match passions and sensory needs! Pick ready-made themes (like 🐝 <strong>Bee Classic</strong> or 🐢 <strong>Wise Turtle</strong>), or edit and create your own themes with custom colors and mascots.
             </p>
           </div>
@@ -454,12 +456,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               }}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xs active:scale-95 ${
                 activeThemeId === 'theme-classic'
-                  ? 'bg-amber-950/20 text-amber-950 border border-amber-950/30 ring-1 ring-amber-950/20 cursor-default'
-                  : 'bg-white text-amber-950 hover:bg-amber-50 border border-amber-300'
+                  ? 'bg-black/15 text-current border border-white/40 ring-1 ring-white/20 cursor-default'
+                  : 'bg-white text-slate-900 hover:bg-slate-50 border border-white/60'
               }`}
               title="Reset BeeYou to default honey yellow theme"
             >
-              <RotateCcw className={`w-3.5 h-3.5 ${activeThemeId === 'theme-classic' ? 'text-amber-900' : 'text-amber-600'}`} />
+              <RotateCcw className={`w-3.5 h-3.5 ${activeThemeId === 'theme-classic' ? 'text-current opacity-80' : 'text-slate-600'}`} />
               <span>Default Theme</span>
               {activeThemeId === 'theme-classic' && (
                 <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider">
@@ -470,8 +472,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
             {/* Premium Status Pill */}
             {isPremium ? (
-              <div className="flex items-center gap-1.5 bg-white/40 px-3.5 py-2 rounded-2xl border border-white/60 shrink-0 text-amber-950">
-                <Crown className="w-4 h-4 text-amber-600 fill-amber-500" />
+              <div className="flex items-center gap-1.5 bg-white/30 px-3.5 py-2 rounded-2xl border border-white/50 shrink-0 text-current">
+                <Crown className="w-4 h-4 fill-amber-300 text-amber-300 drop-shadow-2xs" />
                 <span className="text-xs font-black tracking-wide">
                   All Unlocked
                 </span>
@@ -480,7 +482,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               <button
                 type="button"
                 onClick={() => triggerUpgrade('Unlock all 14+ themes and the custom Theme Studio with BeeYou Premium!')}
-                className="flex items-center gap-1.5 bg-amber-900 hover:bg-amber-950 text-white px-3.5 py-2 rounded-2xl border border-amber-800 shrink-0 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                className="flex items-center gap-1.5 bg-black/30 hover:bg-black/40 text-white px-3.5 py-2 rounded-2xl border border-white/40 shrink-0 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
               >
                 <Crown className="w-4 h-4 fill-amber-300 text-amber-300" />
                 <span>15-Day Free Trial</span>
@@ -490,7 +492,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         </div>
 
         {/* Tab Buttons: Themes Catalog vs Theme Studio / Editor */}
-        <div className="mt-5 flex items-center gap-2 bg-amber-950/15 p-1.5 rounded-2xl">
+        <div className={`mt-5 flex items-center gap-2 ${headerStyles.tabContainerBg} p-1.5 rounded-2xl`}>
           <button
             type="button"
             onClick={() => {
@@ -499,8 +501,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             }}
             className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'shop'
-                ? 'bg-white text-amber-950 shadow-sm'
-                : 'text-amber-950/80 hover:bg-white/20'
+                ? headerStyles.activeTabStyle
+                : headerStyles.inactiveTabStyle
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -519,8 +521,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             }}
             className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeTab === 'studio'
-                ? 'bg-white text-amber-950 shadow-sm'
-                : 'text-amber-950/80 hover:bg-white/20'
+                ? headerStyles.activeTabStyle
+                : headerStyles.inactiveTabStyle
             }`}
           >
             {targetEditingThemeId ? (
@@ -542,9 +544,9 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
       {activeTab === 'shop' && (
         <div className="space-y-4">
           {/* Currently Active Theme Highlight */}
-          <div className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-amber-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className={`bg-white rounded-3xl p-4 sm:p-5 border-2 ${headerStyles.equippedCardBorder} shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300`}>
             <div className="flex items-center gap-3.5 min-w-0">
-              <span className="w-14 h-14 sm:w-16 sm:h-16 p-2 rounded-2xl bg-amber-100/70 border border-amber-200 shrink-0 flex items-center justify-center">
+              <span className={`w-14 h-14 sm:w-16 sm:h-16 p-2 rounded-2xl ${headerStyles.equippedBadgeBg} shrink-0 flex items-center justify-center`}>
                 <RoutineStickerIcon
                   emoji={activeTheme.mascotEmoji || activeTheme.emoji}
                   title={activeTheme.mascotName}

@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { preloadTurtleThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
+
+// Immediately initiate background pre-caching of all sticker images
+if (typeof window !== 'undefined') {
+  preloadAllStickersOnIdle();
+}
 
 interface StickerProps {
   className?: string;
@@ -25,7 +31,13 @@ function useIsTurtleTheme(): boolean {
   const [isTurtle, setIsTurtle] = useState<boolean>(() => checkIsTurtleThemeActive());
 
   useEffect(() => {
-    const sync = () => setIsTurtle(checkIsTurtleThemeActive());
+    const sync = () => {
+      const active = checkIsTurtleThemeActive();
+      setIsTurtle(active);
+      if (active) {
+        preloadTurtleThemeStickers();
+      }
+    };
     sync();
     window.addEventListener('beeyou-theme-change', sync);
     window.addEventListener('storage', sync);
@@ -46,7 +58,7 @@ const renderStickerPng = (src: string, alt: string) => {
       className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
       style={size ? { width: size, height: size } : undefined}
       loading="eager"
-      decoding="async"
+      decoding="auto"
     />
   );
   return Component;
@@ -62,7 +74,7 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
         className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
         style={size ? { width: size, height: size } : undefined}
         loading="eager"
-        decoding="async"
+        decoding="auto"
       />
     );
   };

@@ -535,3 +535,123 @@ export function getThemeWidgetStyles(theme?: AppTheme | null): ThemeWidgetStyles
     feedbackStrip: 'flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-300/80 text-xs text-amber-900 font-bold transition-all',
   };
 }
+
+export interface ThemeCustomizerHeaderStyles {
+  modalBorder: string;
+  topBarGradient: string;
+  topBarBorder: string;
+  topBarText: string;
+  topBarSubtext: string;
+  bannerGradient: string;
+  bannerBorder: string;
+  bannerText: string;
+  bannerSubtext: string;
+  tabContainerBg: string;
+  activeTabStyle: string;
+  inactiveTabStyle: string;
+  equippedCardBorder: string;
+  equippedBadgeBg: string;
+}
+
+export function getThemeCustomizerHeaderStyles(theme?: AppTheme | null): ThemeCustomizerHeaderStyles {
+  const themeId = theme?.id || 'theme-classic';
+  const category = theme?.category || 'classic';
+
+  // 1. TURTLE SANCTUARY (Emerald / Teal)
+  if (themeId === 'theme-turtle' || category === 'turtle') {
+    return {
+      modalBorder: 'border-emerald-300',
+      topBarGradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white',
+      topBarBorder: 'border-emerald-400',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-emerald-100',
+      bannerGradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white',
+      bannerBorder: 'border-emerald-400',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-emerald-100',
+      tabContainerBg: 'bg-emerald-950/25',
+      activeTabStyle: 'bg-white text-emerald-950 shadow-sm',
+      inactiveTabStyle: 'text-emerald-100 hover:bg-white/15',
+      equippedCardBorder: 'border-emerald-300',
+      equippedBadgeBg: 'bg-emerald-100/70 border-emerald-300',
+    };
+  }
+
+  // 2. DINOSAUR KINGDOM (Jungle Green / Amber)
+  if (themeId === 'theme-dino' || category === 'dinosaur') {
+    return {
+      modalBorder: 'border-green-400',
+      topBarGradient: 'bg-gradient-to-r from-green-600 via-emerald-600 to-lime-600 text-white',
+      topBarBorder: 'border-green-400',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-green-100',
+      bannerGradient: 'bg-gradient-to-r from-green-600 via-emerald-600 to-lime-600 text-white',
+      bannerBorder: 'border-green-400',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-green-100',
+      tabContainerBg: 'bg-green-950/25',
+      activeTabStyle: 'bg-white text-green-950 shadow-sm',
+      inactiveTabStyle: 'text-green-100 hover:bg-white/15',
+      equippedCardBorder: 'border-green-300',
+      equippedBadgeBg: 'bg-green-100/70 border-green-300',
+    };
+  }
+
+  // 3. COSMIC SPACE (Deep Indigo / Violet)
+  if (themeId === 'theme-space' || category === 'space') {
+    return {
+      modalBorder: 'border-indigo-400',
+      topBarGradient: 'bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white',
+      topBarBorder: 'border-indigo-700',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-indigo-200',
+      bannerGradient: 'bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white',
+      bannerBorder: 'border-indigo-600',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-indigo-200',
+      tabContainerBg: 'bg-slate-950/40',
+      activeTabStyle: 'bg-white text-indigo-950 shadow-sm',
+      inactiveTabStyle: 'text-indigo-200 hover:bg-white/15',
+      equippedCardBorder: 'border-indigo-300',
+      equippedBadgeBg: 'bg-indigo-100/70 border-indigo-300',
+    };
+  }
+
+  // 4. OCEAN LAGOON (Cyan / Teal)
+  if (themeId === 'theme-ocean' || category === 'ocean') {
+    return {
+      modalBorder: 'border-cyan-300',
+      topBarGradient: 'bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 text-white',
+      topBarBorder: 'border-cyan-400',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-cyan-100',
+      bannerGradient: 'bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 text-white',
+      bannerBorder: 'border-cyan-400',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-cyan-100',
+      tabContainerBg: 'bg-cyan-950/25',
+      activeTabStyle: 'bg-white text-cyan-950 shadow-sm',
+      inactiveTabStyle: 'text-cyan-100 hover:bg-white/15',
+      equippedCardBorder: 'border-cyan-300',
+      equippedBadgeBg: 'bg-cyan-100/70 border-cyan-300',
+    };
+  }
+
+  // 5. DEFAULT BEE CLASSIC (Sunny Amber / Yellow)
+  return {
+    modalBorder: 'border-amber-200',
+    topBarGradient: 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950',
+    topBarBorder: 'border-amber-300/80',
+    topBarText: 'text-amber-950',
+    topBarSubtext: 'text-amber-900/80',
+    bannerGradient: 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-amber-950',
+    bannerBorder: 'border-amber-300',
+    bannerText: 'text-amber-950',
+    bannerSubtext: 'text-amber-950/80',
+    tabContainerBg: 'bg-amber-950/15',
+    activeTabStyle: 'bg-white text-amber-950 shadow-sm',
+    inactiveTabStyle: 'text-amber-950/80 hover:bg-white/20',
+    equippedCardBorder: 'border-amber-200/90',
+    equippedBadgeBg: 'bg-amber-100/70 border-amber-200',
+  };
+}
