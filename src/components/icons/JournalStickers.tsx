@@ -1150,6 +1150,25 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/timer_clock.png': '/assets/stickers/frog_lily_stopwatch.png',
   '/assets/stickers/aac_core.png': '/assets/stickers/frog_lotus_star_core.png',
   '/assets/stickers/star_gold.png': '/assets/stickers/frog_lotus_star_core.png',
+  // Batch 2: Moods, Personas, School & Hubs
+  '/assets/stickers/mood_happy.png': '/assets/stickers/frog_mood_happy.png',
+  '/assets/stickers/fav_happy.png': '/assets/stickers/frog_mood_happy.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/frog_mood_calm.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/frog_mood_excited.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/frog_mood_sleepy.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/frog_mood_unsure.png',
+  '/assets/stickers/fav_stop.png': '/assets/stickers/frog_stop_flipper.png',
+  '/assets/stickers/fav_music.png': '/assets/stickers/frog_bamboo_wind_chimes.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/frog_bamboo_wind_chimes.png',
+  '/assets/stickers/fav_sandwich.png': '/assets/stickers/frog_garden_sandwich.png',
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/frog_garden_sandwich.png',
+  '/assets/stickers/child_persona.png': '/assets/stickers/frog_child_persona.png',
+  '/assets/stickers/teen_headphones.png': '/assets/stickers/frog_pebble_headphones.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/frog_bamboo_satchel.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/frog_wood_phone_caregiver.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/frog_pond_biome_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/frog_golden_lotus_crown.png',
+  '/assets/stickers/refresh_repeat.png': '/assets/stickers/frog_tadpole_swim_loop.png',
 };
 
 /**

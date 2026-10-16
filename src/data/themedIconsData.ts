@@ -893,6 +893,22 @@ export const RIBBIT_POND_ICONS: ThemedIconItem[] = [
   { id: 'frog_cattail_thermometer', value: '/assets/stickers/frog_cattail_thermometer.png', label: 'Cattail Emotion Scale', shortLabel: 'Cattail Scale', themeCategory: 'frog', keywords: ['thermometer', 'feelings', 'scale', 'gauge', 'mood', 'cattail', 'frog'] },
   { id: 'frog_lily_stopwatch', value: '/assets/stickers/frog_lily_stopwatch.png', label: 'Lily Pad Water Stopwatch', shortLabel: 'Water Stopwatch', themeCategory: 'frog', keywords: ['timer', 'clock', 'stopwatch', 'countdown', 'time', 'lily pad', 'frog'] },
   { id: 'frog_lotus_star_core', value: '/assets/stickers/frog_lotus_star_core.png', label: 'Golden Lotus Star Badge', shortLabel: 'Lotus Star', themeCategory: 'frog', keywords: ['star', 'core', 'lotus', 'reward', 'favorite', 'aac', 'frog'] },
+  // Batch 2: Moods, Personas, School & Hubs
+  { id: 'frog_mood_happy', value: '/assets/stickers/frog_mood_happy.png', label: 'Happy Frog Smile', shortLabel: 'Happy Frog', themeCategory: 'frog', keywords: ['mood', 'happy', 'smile', 'joy', 'frog'] },
+  { id: 'frog_mood_calm', value: '/assets/stickers/frog_mood_calm.png', label: 'Calm Lily Frog', shortLabel: 'Calm Frog', themeCategory: 'frog', keywords: ['mood', 'calm', 'peaceful', 'relaxed', 'frog'] },
+  { id: 'frog_mood_excited', value: '/assets/stickers/frog_mood_excited.png', label: 'Excited Leaping Frog', shortLabel: 'Excited Frog', themeCategory: 'frog', keywords: ['mood', 'excited', 'energy', 'playful', 'frog'] },
+  { id: 'frog_mood_sleepy', value: '/assets/stickers/frog_mood_sleepy.png', label: 'Sleepy Snuggled Frog', shortLabel: 'Sleepy Frog', themeCategory: 'frog', keywords: ['mood', 'sleepy', 'tired', 'nap', 'bedtime', 'frog'] },
+  { id: 'frog_mood_unsure', value: '/assets/stickers/frog_mood_unsure.png', label: 'Unsure Wondering Frog', shortLabel: 'Unsure Frog', themeCategory: 'frog', keywords: ['mood', 'unsure', 'wonder', 'hesitant', 'frog'] },
+  { id: 'frog_stop_flipper', value: '/assets/stickers/frog_stop_flipper.png', label: 'Webbed Stop Palm', shortLabel: 'Stop Palm', themeCategory: 'frog', keywords: ['stop', 'halt', 'pause', 'wait', 'flipper', 'frog'] },
+  { id: 'frog_bamboo_wind_chimes', value: '/assets/stickers/frog_bamboo_wind_chimes.png', label: 'Bamboo Wind Chimes Music', shortLabel: 'Wind Chimes', themeCategory: 'frog', keywords: ['music', 'song', 'chimes', 'sound', 'listen', 'audio', 'frog'] },
+  { id: 'frog_garden_sandwich', value: '/assets/stickers/frog_garden_sandwich.png', label: 'Fresh Garden Sandwich', shortLabel: 'Garden Sandwich', themeCategory: 'frog', keywords: ['sandwich', 'lunch', 'food', 'snack', 'frog'] },
+  { id: 'frog_child_persona', value: '/assets/stickers/frog_child_persona.png', label: 'Baby Frog Explorer Persona', shortLabel: 'Baby Frog', themeCategory: 'frog', keywords: ['child', 'baby', 'persona', 'avatar', 'explorer', 'frog'] },
+  { id: 'frog_pebble_headphones', value: '/assets/stickers/frog_pebble_headphones.png', label: 'River Pebble Headphones', shortLabel: 'Pebble Headphones', themeCategory: 'frog', keywords: ['headphones', 'ear', 'noise', 'sensory', 'defenders', 'sound', 'frog'] },
+  { id: 'frog_bamboo_satchel', value: '/assets/stickers/frog_bamboo_satchel.png', label: 'Woven Reed Satchel Briefcase', shortLabel: 'Reed Satchel', themeCategory: 'frog', keywords: ['briefcase', 'adult', 'work', 'satchel', 'bag', 'frog'] },
+  { id: 'frog_wood_phone_caregiver', value: '/assets/stickers/frog_wood_phone_caregiver.png', label: 'Carved Bamboo Caregiver Phone', shortLabel: 'Caregiver Phone', themeCategory: 'frog', keywords: ['phone', 'caregiver', 'call', 'message', 'frog'] },
+  { id: 'frog_pond_biome_globe', value: '/assets/stickers/frog_pond_biome_globe.png', label: 'Pond Ecosystem World Globe', shortLabel: 'Pond Globe', themeCategory: 'frog', keywords: ['globe', 'world', 'language', 'earth', 'pond', 'frog'] },
+  { id: 'frog_golden_lotus_crown', value: '/assets/stickers/frog_golden_lotus_crown.png', label: 'Golden Lotus Blossom Crown', shortLabel: 'Lotus Crown', themeCategory: 'frog', keywords: ['crown', 'trial', 'royal', 'gold', 'lotus', 'frog'] },
+  { id: 'frog_tadpole_swim_loop', value: '/assets/stickers/frog_tadpole_swim_loop.png', label: 'Swimming Tadpole Repeat Loop', shortLabel: 'Tadpole Loop', themeCategory: 'frog', keywords: ['repeat', 'loop', 'refresh', 'again', 'cycle', 'tadpole', 'frog'] },
 ];
 
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
