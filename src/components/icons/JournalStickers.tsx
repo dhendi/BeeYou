@@ -120,6 +120,7 @@ export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.png'
 export const LockerScheduleSticker = renderStickerPng('/assets/stickers/locker_schedule.png', 'Locker & Daily Schedule');
 export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_shorts.png', 'Put on Pajamas');
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
+export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -296,7 +297,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
   // 🐢 Turtle Mascot Companion
-  if (normEmoji === '🐢' || normTitle.includes('turtle')) return <img src="/assets/emotions/turtle/calm.png" alt={title || 'Wise Turtle'} className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`} style={size ? { width: size, height: size } : undefined} />;
+  if (normEmoji === '🐢' || normTitle.includes('turtle') || normTitle.includes('shelly')) return <TurtleMascotSticker className={className} size={size} />;
   // 🚀 Today's Adventure Spotlight / Rocket
   if (normEmoji === '🚀' || normTitle.includes('adventure spotlight') || normTitle.includes('rocket')) return <RocketAdventureSticker className={className} size={size} />;
   // 🌡️ Incredible 5-Point Scale / Thermometer
