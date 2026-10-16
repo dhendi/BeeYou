@@ -767,7 +767,8 @@ export const RestaurantAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_restaurant.png',
   '/assets/stickers/turtle_clover_berry_feast.png',
   'Eating at a Restaurant',
-  '/assets/stickers/dino_feast_table_pavilion.png'
+  '/assets/stickers/dino_feast_table_pavilion.png',
+  '/assets/stickers/frog_feast_table_pavilion.png'
 );
 export const HaircutAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_haircut_salon.png',
@@ -1229,6 +1230,24 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/outdoor_sun.png': '/assets/stickers/frog_meadow_sunshine.png',
   '/assets/stickers/fav_outside.png': '/assets/stickers/frog_meadow_sunshine.png',
   '/assets/stickers/reward_trophy.png': '/assets/stickers/frog_lotus_reward_trophy.png',
+  // Batch 6: Outings, Social Stories, Dining & Toys
+  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/frog_feast_table_pavilion.png',
+  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/frog_pebble_bowling_alley.png',
+  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/frog_heritage_archive_pavilion.png',
+  '/assets/stickers/fork_knife.png': '/assets/stickers/frog_bamboo_cutlery.png',
+  '/assets/stickers/cutlery.png': '/assets/stickers/frog_bamboo_cutlery.png',
+  '/assets/stickers/ocean_wave.png': '/assets/stickers/frog_pond_ripple_wave.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/frog_bamboo_energy_gauge.png',
+  '/assets/stickers/paw_print.png': '/assets/stickers/frog_webbed_footprint_stamp.png',
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/frog_woven_moss_play_ball.png',
+  '/assets/stickers/potted_plant.png': '/assets/stickers/frog_driftwood_lotus_planter.png',
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/frog_lotus_puzzle_piece.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/frog_arched_willow_bridge.png',
+  '/assets/stickers/story_birthday.png': '/assets/stickers/frog_pond_birthday_feast.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/frog_zen_balancing_stones.png',
+  '/assets/stickers/fav_lego.png': '/assets/stickers/frog_zen_balancing_stones.png',
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/frog_lily_pad_heart.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/frog_mascot.png',
 };
 
 /**

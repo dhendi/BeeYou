@@ -350,13 +350,25 @@ export const AACView: React.FC = () => {
   const FROG_CATEGORY_ICONS: Record<string, string> = {
     core: '/assets/stickers/frog_lotus_star_core.png',
     favorite_sentences: '/assets/stickers/frog_lily_speech_bubbles.png',
+    favorites: '/assets/stickers/frog_lotus_reward_trophy.png',
     food: '/assets/stickers/frog_pond_harvest_bowl.png',
     drinks: '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+    activities: '/assets/stickers/frog_woven_moss_play_ball.png',
+    places: '/assets/stickers/frog_canopy_reed_tent.png',
+    people: '/assets/stickers/frog_tadpole_pet_feed_bowl.png',
+    feelings: '/assets/stickers/frog_sensory_eye_stone.png',
+    sensory: '/assets/stickers/frog_sound_softening_shell.png',
+    all: '/assets/stickers/frog_reed_school_folder.png',
   };
 
   const FROG_FOLDER_STICKERS: Record<string, string> = {
     'folder-food': '/assets/stickers/frog_pond_harvest_bowl.png',
     'folder-drinks': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
+    'folder-activities': '/assets/stickers/frog_woven_moss_play_ball.png',
+    'folder-places': '/assets/stickers/frog_canopy_reed_tent.png',
+    'folder-people': '/assets/stickers/frog_tadpole_pet_feed_bowl.png',
+    'folder-feelings': '/assets/stickers/frog_sensory_eye_stone.png',
+    'folder-sensory': '/assets/stickers/frog_sound_softening_shell.png',
   };
 
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
