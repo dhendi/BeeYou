@@ -487,6 +487,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                     <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
                       <span className="text-sm">🐢</span>
                       Wise Turtle Sanctuary Themed Icons
+                      <span className="text-[10px] font-normal text-emerald-700">({TURTLE_SANCTUARY_ICONS.length})</span>
                     </span>
                     {isTurtleTheme && (
                       <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/90 px-2 py-0.5 rounded-full">
@@ -494,31 +495,30 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                    {TURTLE_SANCTUARY_ICONS.map((tIcon) => {
-                      const isSelected = emoji === tIcon.value;
-                      return (
-                        <button
-                          key={tIcon.id}
-                          type="button"
-                          onClick={() => {
-                            setEmoji(tIcon.value);
-                            playChime('tap');
-                          }}
-                          title={tIcon.label}
-                          className={`p-1.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer text-center ${
-                            isSelected
-                              ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
-                              : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-102'
-                          }`}
-                        >
-                          <RoutineStickerIcon emoji={tIcon.value} title={tIcon.label} className="w-8 h-8 object-contain" />
-                          <span className="text-[9px] font-black text-emerald-950 truncate max-w-full leading-tight">
-                            {tIcon.shortLabel}
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
+                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+                      {TURTLE_SANCTUARY_ICONS.map((tIcon) => {
+                        const isSelected = emoji === tIcon.value;
+                        return (
+                          <button
+                            key={tIcon.id}
+                            type="button"
+                            onClick={() => {
+                              setEmoji(tIcon.value);
+                              playChime('tap');
+                            }}
+                            title={tIcon.label}
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
+                                : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-105'
+                            }`}
+                          >
+                            <RoutineStickerIcon emoji={tIcon.value} title={tIcon.label} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
