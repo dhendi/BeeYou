@@ -1024,6 +1024,26 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/language_globe.png': '/assets/stickers/dino_pangea_globe.png',
   '/assets/stickers/trial_crown.png': '/assets/stickers/dino_golden_amber_crown.png',
   '/assets/stickers/refresh_repeat.png': '/assets/stickers/dino_footprint_loop.png',
+  // Batch 3: School, Coping Tools & Activities
+  '/assets/stickers/school_bus.png': '/assets/stickers/dino_safari_wagon_bus.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/dino_volcano_flask_science.png',
+  '/assets/stickers/art_palette.png': '/assets/stickers/dino_slate_art_palette.png',
+  '/assets/stickers/art_crafts.png': '/assets/stickers/dino_slate_art_palette.png',
+  '/assets/stickers/pencil_write.png': '/assets/stickers/dino_bone_stylus_pencil.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/dino_bone_stylus_pencil.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/dino_palm_leaf_folio.png',
+  '/assets/stickers/playground_swings.png': '/assets/stickers/dino_brachiosaurus_slide_swings.png',
+  '/assets/stickers/playground_recess.png': '/assets/stickers/dino_brachiosaurus_slide_swings.png',
+  '/assets/stickers/apple_snack.png': '/assets/stickers/dino_starfruit_apple_snack.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/dino_starry_pajamas_sleep.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/dino_starry_pajamas_sleep.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/dino_wooden_cart_ride.png',
+  '/assets/stickers/tablet_ipad.png': '/assets/stickers/dino_slate_tablet_ipad.png',
+  '/assets/stickers/toy_box.png': '/assets/stickers/dino_vine_toy_box.png',
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/dino_bone_stamina_spoons.png',
+  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/dino_spring_sensory_bubbles.png',
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/dino_stone_decision_wheel.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/dino_ammonite_spiral_clock.png',
 };
 
 /**
