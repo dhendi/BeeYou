@@ -159,6 +159,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_firefly_lantern_book', emoji: '/assets/stickers/turtle_firefly_lantern_book.png', label: 'Firefly Lantern & Scroll', category: 'turtle', keywords: ['read', 'reading', 'book', 'story', 'scroll', 'firefly', 'lantern'] },
   { id: 'turtle_pebble_paint_palette', emoji: '/assets/stickers/turtle_pebble_paint_palette.png', label: 'River Pebble Paint Palette', category: 'turtle', keywords: ['art', 'paint', 'craft', 'draw', 'palette', 'pebble', 'color'] },
   { id: 'turtle_hollow_log_slide', emoji: '/assets/stickers/turtle_hollow_log_slide.png', label: 'Hollow Log Slide', category: 'turtle', keywords: ['playground', 'recess', 'slide', 'log', 'play', 'park', 'outside'] },
+  { id: 'turtle_dawn_bell_clock', emoji: '/assets/stickers/turtle_dawn_bell_clock.png', label: 'Bamboo Dawn Bell & Sun', category: 'turtle', keywords: ['wake', 'alarm', 'clock', 'bell', 'morning', 'dawn', 'sun', 'time'] },
+  { id: 'turtle_leaf_soap_wash', emoji: '/assets/stickers/turtle_leaf_soap_wash.png', label: 'Herbal Leaf Soap & Stone Basin', category: 'turtle', keywords: ['wash', 'hands', 'soap', 'clean', 'leaf', 'bubbles', 'basin'] },
+  { id: 'turtle_lotus_dinner_bowl', emoji: '/assets/stickers/turtle_lotus_dinner_bowl.png', label: 'Lotus Leaf Soup Bowl', category: 'turtle', keywords: ['dinner', 'lunch', 'bowl', 'soup', 'meal', 'eat', 'food', 'lotus'] },
+  { id: 'turtle_garden_fruit_snack', emoji: '/assets/stickers/turtle_garden_fruit_snack.png', label: 'Sanctuary Fruit Basket', category: 'turtle', keywords: ['apple', 'snack', 'fruit', 'basket', 'berry', 'healthy', 'eat'] },
+  { id: 'turtle_seagrass_toy_box', emoji: '/assets/stickers/turtle_seagrass_toy_box.png', label: 'Seagrass Basket & Plush Turtle', category: 'turtle', keywords: ['toy', 'box', 'basket', 'clean up', 'plush', 'play', 'blocks'] },
+  { id: 'turtle_bamboo_pencil', emoji: '/assets/stickers/turtle_bamboo_pencil.png', label: 'Bamboo Pencil & Leaf Pad', category: 'turtle', keywords: ['pencil', 'write', 'writing', 'homework', 'note', 'draw', 'pad'] },
+  { id: 'turtle_shell_headphones', emoji: '/assets/stickers/turtle_shell_headphones.png', label: 'Turtle Shell Ear Defenders', category: 'turtle', keywords: ['headphones', 'ear', 'quiet', 'sensory', 'sound', 'music', 'calm'] },
+  { id: 'turtle_sand_timer', emoji: '/assets/stickers/turtle_sand_timer.png', label: 'Sanctuary Sand Timer', category: 'turtle', keywords: ['timer', 'hourglass', 'sand', 'countdown', 'clock', 'wait', 'time'] },
+  { id: 'turtle_bamboo_spoons', emoji: '/assets/stickers/turtle_bamboo_spoons.png', label: 'Three Bamboo Spoons', category: 'turtle', keywords: ['spoon', 'spoons', 'energy', 'budget', 'stamina', 'bamboo'] },
 ];
 
 export interface IconLibraryModalProps {
