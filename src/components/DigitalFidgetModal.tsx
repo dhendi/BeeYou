@@ -322,7 +322,7 @@ const triggerHaptic = (ms = 25, enabled = true) => {
 };
 
 // ── TOY 1: Multi-Shape Pop-It Bubble Wrap ─────────────────────────────────────
-type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb' | 'turtle_shell';
+type PopShape = 'grid' | 'heart' | 'star' | 'honeycomb' | 'turtle_shell' | 'dino_footprint';
 
 const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
   grid: [
@@ -363,6 +363,14 @@ const SHAPE_PATTERNS: Record<PopShape, number[][]> = {
     [0, 1, 1, 1, 1, 0],
     [0, 0, 1, 1, 0, 0],
   ],
+  dino_footprint: [
+    [0, 1, 0, 1, 0, 1, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0],
+  ],
 };
 
 const ROW_COLORS = [
@@ -381,7 +389,10 @@ interface PopItProps {
 }
 
 const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
-  const [shape, setShape] = useState<PopShape>('grid');
+  const { activeTheme } = useApp();
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
+  const [shape, setShape] = useState<PopShape>(isDinoTheme ? 'dino_footprint' : isTurtleTheme ? 'turtle_shell' : 'grid');
   const [popped, setPopped] = useState<Set<string>>(new Set());
   const [totalPopCount, setTotalPopCount] = useState<number>(0);
 
@@ -449,14 +460,21 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
             { id: 'star' as const, label: 'Star', icon: Star },
             { id: 'honeycomb' as const, label: 'Hex', icon: Layers },
             { id: 'turtle_shell' as const, label: 'Shell', icon: CircleDot },
+            { id: 'dino_footprint' as const, label: 'Dino', icon: Zap },
           ].map((s) => {
             const Icon = s.icon;
             return (
               <button
                 key={s.id}
                 onClick={() => { setShape(s.id); setPopped(new Set()); triggerHaptic(15, hapticEnabled); }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                  shape === s.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  shape === s.id
+                    ? isDinoTheme
+                      ? 'bg-green-600 text-white shadow-sm'
+                      : isTurtleTheme
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-white text-indigo-600 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -468,7 +486,9 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
 
         <div className="text-right">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('Pops')}</p>
-          <p className="text-sm font-black text-indigo-600">{popped.size} / {totalBubbles}</p>
+          <p className={`text-sm font-black ${isDinoTheme ? 'text-green-700' : isTurtleTheme ? 'text-emerald-700' : 'text-indigo-600'}`}>
+            {popped.size} / {totalBubbles}
+          </p>
         </div>
       </div>
 
@@ -520,7 +540,13 @@ const PopItToy: React.FC<PopItProps> = ({ soundEnabled, hapticEnabled }) => {
         </button>
         <button
           onClick={handlePopAll}
-          className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+          className={`flex-1 py-2 px-3 rounded-xl ${
+            isDinoTheme
+              ? 'bg-green-50 hover:bg-green-100 text-green-700'
+              : isTurtleTheme
+                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'
+          } text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer`}
         >
           <Star className="w-3.5 h-3.5" />
           <span>{t('Pop All')}</span>
@@ -1379,6 +1405,7 @@ type FidgetCategory = 'pop' | 'bubblewrap' | 'switches' | 'spinner' | 'toggles' 
 export const DigitalFidgetModal: React.FC = () => {
   const { showFidgetModal, setShowFidgetModal, settings, updateSettings, activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const [activeFidget, setActiveFidget] = useState<FidgetCategory>('pop');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [hapticEnabled, setHapticEnabled] = useState<boolean>(true);
@@ -1423,9 +1450,20 @@ export const DigitalFidgetModal: React.FC = () => {
                 <TurtlePondFidgetBubblesSticker className="w-full h-full object-contain" />
               </div>
             )}
+            {isDinoTheme && (
+              <div className="w-9 h-9 rounded-xl bg-green-100 border border-green-400 flex items-center justify-center shadow-xs shrink-0 text-xl select-none">
+                🦖
+              </div>
+            )}
             <div>
-              <p className={`text-[10px] font-black uppercase tracking-widest ${isTurtleTheme ? 'text-emerald-800' : 'text-indigo-500'}`}>
-                {isTurtleTheme ? t('Wise Turtle Sensory Pond') : t('Tappy-Style Sensory Hub')}
+              <p className={`text-[10px] font-black uppercase tracking-widest ${
+                isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-indigo-500'
+              }`}>
+                {isTurtleTheme
+                  ? t('Wise Turtle Sensory Pond')
+                  : isDinoTheme
+                    ? t('Dino Kingdom Sensory Excavation')
+                    : t('Tappy-Style Sensory Hub')}
               </p>
               <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">{t('Tactile Fidget Toys')}</h2>
             </div>
@@ -1488,7 +1526,11 @@ export const DigitalFidgetModal: React.FC = () => {
                 title={t(c.desc)}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                   activeFidget === c.id
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                    ? isDinoTheme
+                      ? 'bg-green-600 border-green-600 text-white shadow-sm'
+                      : isTurtleTheme
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+                        : 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
               >

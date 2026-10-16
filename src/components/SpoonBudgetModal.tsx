@@ -50,6 +50,7 @@ export const SpoonBudgetModal: React.FC = () => {
   } = useApp();
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const today = new Date().toISOString().split('T')[0];
   const todayEntry = getTodaySpoonEntry();
@@ -109,23 +110,35 @@ export const SpoonBudgetModal: React.FC = () => {
       onClick={() => setShowSpoonModal(false)}
     >
       <div
-        className={`bg-white w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${isTurtleTheme ? 'border-emerald-300' : 'border-amber-300'} overflow-hidden flex flex-col animate-in zoom-in-95 duration-150`}
+        className={`bg-white w-full max-w-lg max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${
+          isTurtleTheme ? 'border-emerald-300' : isDinoTheme ? 'border-green-400' : 'border-amber-300'
+        } overflow-hidden flex flex-col animate-in zoom-in-95 duration-150`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800' : 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500'} p-4 sm:p-5 text-white flex items-center justify-between shrink-0`}>
+        <div className={`${
+          isTurtleTheme
+            ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800'
+            : isDinoTheme
+              ? 'bg-gradient-to-r from-green-700 via-emerald-800 to-amber-900'
+              : 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500'
+        } p-4 sm:p-5 text-white flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center p-1 shadow-inner border border-white/30 shrink-0">
-              <img
-                src={isTurtleTheme ? '/assets/stickers/turtle_bamboo_spoons.png' : '/assets/stickers/spoons_energy.png'}
-                alt="Spoons"
-                className="w-8 h-8 object-contain drop-shadow-2xs select-none pointer-events-none"
-              />
+              {isDinoTheme ? (
+                <span className="text-2xl select-none leading-none">🦖</span>
+              ) : (
+                <img
+                  src={isTurtleTheme ? '/assets/stickers/turtle_bamboo_spoons.png' : '/assets/stickers/spoons_energy.png'}
+                  alt="Spoons"
+                  className="w-8 h-8 object-contain drop-shadow-2xs select-none pointer-events-none"
+                />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {isTurtleTheme ? t('Turtle Sanctuary') : t('Spoon Theory')}
+                  {isTurtleTheme ? t('Turtle Sanctuary') : isDinoTheme ? t('Dino Kingdom') : t('Spoon Theory')}
                 </span>
                 <span className="text-xs text-white/90 font-medium">
                   {t('Stamina & Energy')}
@@ -154,8 +167,16 @@ export const SpoonBudgetModal: React.FC = () => {
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 space-y-4">
           {phase === 'checkin' && !todayEntry && (
             <div className="space-y-6">
-              <div className={`rounded-2xl ${isTurtleTheme ? 'bg-gradient-to-br from-emerald-50 via-teal-50/60 to-emerald-50 border-emerald-300' : 'bg-gradient-to-br from-amber-50 via-yellow-50/60 to-amber-50 border-amber-300'} border-2 p-5 shadow-2xs`}>
-                <p className={`text-xs font-black uppercase tracking-wider ${isTurtleTheme ? 'text-emerald-800' : 'text-amber-800'} mb-1`}>{t('Morning Check-in')}</p>
+              <div className={`rounded-2xl ${
+                isTurtleTheme
+                  ? 'bg-gradient-to-br from-emerald-50 via-teal-50/60 to-emerald-50 border-emerald-300'
+                  : isDinoTheme
+                    ? 'bg-gradient-to-br from-green-50 via-emerald-50/60 to-amber-50 border-green-300'
+                    : 'bg-gradient-to-br from-amber-50 via-yellow-50/60 to-amber-50 border-amber-300'
+              } border-2 p-5 shadow-2xs`}>
+                <p className={`text-xs font-black uppercase tracking-wider ${
+                  isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-amber-800'
+                } mb-1`}>{t('Morning Check-in')}</p>
                 <h3 className="text-xl font-black text-slate-900 mb-1">{t('How many spoons do you have today?')}</h3>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                   {t('Spoons = units of energy. A full day = 12. A rough day might start with 5. Be honest with yourself.')}
@@ -174,13 +195,19 @@ export const SpoonBudgetModal: React.FC = () => {
                       playChime('tap');
                       setSelectedSpoons(n);
                     }}
-                    className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl text-lg font-black border-2 transition-all cursor-pointer focus-visible:ring-4 ${isTurtleTheme ? 'focus-visible:ring-emerald-400' : 'focus-visible:ring-amber-400'} focus-visible:outline-none ${
+                    className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl text-lg font-black border-2 transition-all cursor-pointer focus-visible:ring-4 ${
+                      isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
+                    } focus-visible:outline-none ${
                       selectedSpoons === n
                         ? isTurtleTheme
                           ? 'bg-emerald-600 border-emerald-700 text-white shadow-md scale-110'
-                          : 'bg-amber-500 border-amber-600 text-white shadow-md scale-110'
+                          : isDinoTheme
+                            ? 'bg-green-600 border-green-700 text-white shadow-md scale-110'
+                            : 'bg-amber-500 border-amber-600 text-white shadow-md scale-110'
                         : isTurtleTheme
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100'
+                        : isDinoTheme
+                        ? 'bg-green-50 border-green-200 text-green-950 hover:bg-green-100'
                         : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
                     }`}
                   >
@@ -192,12 +219,20 @@ export const SpoonBudgetModal: React.FC = () => {
               <div className="text-center space-y-3">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-xs mx-auto py-2" aria-hidden="true">
                   {Array.from({ length: selectedSpoons }).map((_, i) => (
-                    <div key={i} className={`w-8 h-8 rounded-full ${isTurtleTheme ? 'bg-emerald-100 border-emerald-300 text-emerald-950' : 'bg-amber-100 border-amber-300 text-amber-950'} border font-black text-xs flex items-center justify-center shadow-2xs`}>
+                    <div key={i} className={`w-8 h-8 rounded-full ${
+                      isTurtleTheme
+                        ? 'bg-emerald-100 border-emerald-300 text-emerald-950'
+                        : isDinoTheme
+                          ? 'bg-green-100 border-green-300 text-green-950'
+                          : 'bg-amber-100 border-amber-300 text-amber-950'
+                    } border font-black text-xs flex items-center justify-center shadow-2xs`}>
                       {i + 1}
                     </div>
                   ))}
                 </div>
-                <p className={`text-xs sm:text-sm font-black ${isTurtleTheme ? 'text-emerald-950' : 'text-amber-950'}`}>
+                <p className={`text-xs sm:text-sm font-black ${
+                  isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
+                }`}>
                   {selectedSpoons <= 3 ? t('Low day — be gentle with yourself.') :
                    selectedSpoons <= 6 ? t('Moderate — pick activities carefully.') :
                    selectedSpoons <= 9 ? t('Pretty good day!') :
@@ -208,7 +243,15 @@ export const SpoonBudgetModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleStartDay}
-                className={`w-full min-h-[52px] py-4 rounded-2xl ${isTurtleTheme ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'} font-black text-base sm:text-lg shadow-md cursor-pointer active:scale-95 transition-all focus-visible:ring-4 ${isTurtleTheme ? 'focus-visible:ring-emerald-400' : 'focus-visible:ring-amber-400'} focus-visible:outline-none`}
+                className={`w-full min-h-[52px] py-4 rounded-2xl ${
+                  isTurtleTheme
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+                    : isDinoTheme
+                      ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-200'
+                      : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
+                } font-black text-base sm:text-lg shadow-md cursor-pointer active:scale-95 transition-all focus-visible:ring-4 ${
+                  isTurtleTheme ? 'focus-visible:ring-emerald-400' : isDinoTheme ? 'focus-visible:ring-green-400' : 'focus-visible:ring-amber-400'
+                } focus-visible:outline-none`}
               >
                 {t('Start My Day with')} {selectedSpoons} {t('Spoons')}
               </button>
@@ -218,25 +261,45 @@ export const SpoonBudgetModal: React.FC = () => {
           {(phase === 'tracker' || todayEntry) && current && (
             <div className="space-y-4">
               {/* Energy Bar */}
-              <div className={`rounded-2xl border-2 ${isTurtleTheme ? 'border-emerald-200/90 bg-gradient-to-br from-emerald-50/80 via-teal-50/50 to-emerald-50/80' : 'border-amber-200/90 bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-amber-50/80'} p-4 shadow-2xs`} role="region" aria-label="Energy budget summary">
+              <div className={`rounded-2xl border-2 ${
+                isTurtleTheme
+                  ? 'border-emerald-200/90 bg-gradient-to-br from-emerald-50/80 via-teal-50/50 to-emerald-50/80'
+                  : isDinoTheme
+                    ? 'border-green-200/90 bg-gradient-to-br from-green-50/80 via-emerald-50/50 to-amber-50/60'
+                    : 'border-amber-200/90 bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-amber-50/80'
+              } p-4 shadow-2xs`} role="region" aria-label="Energy budget summary">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <span className={`text-[11px] font-black uppercase tracking-wider ${isTurtleTheme ? 'text-emerald-900' : 'text-amber-900'} block`}>{t('Energy Remaining')}</span>
-                    <span className={`text-xs font-black ${isTurtleTheme ? 'text-emerald-950' : 'text-amber-950'} flex items-center gap-1.5 mt-0.5`}>
+                    <span className={`text-[11px] font-black uppercase tracking-wider ${
+                      isTurtleTheme ? 'text-emerald-900' : isDinoTheme ? 'text-green-900' : 'text-amber-900'
+                    } block`}>{t('Energy Remaining')}</span>
+                    <span className={`text-xs font-black ${
+                      isTurtleTheme ? 'text-emerald-950' : isDinoTheme ? 'text-green-950' : 'text-amber-950'
+                    } flex items-center gap-1.5 mt-0.5`}>
                       <span className={`w-2 h-2 rounded-full ${pct > 60 ? 'bg-emerald-500 animate-pulse' : pct > 30 ? 'bg-amber-500' : remaining > 0 ? 'bg-rose-500' : 'bg-rose-700'}`} />
                       {pct > 60 ? t('High Energy') : pct > 30 ? t('Moderate Energy') : remaining > 0 ? t('Low Energy') : t('Empty / Rest Needed')}
                     </span>
                   </div>
                   <div className="text-right">
                     <span className={`font-black text-2xl ${getBatteryColor(remaining, current.totalSpoons)}`}>
-                      {remaining} <span className={`text-base ${isTurtleTheme ? 'text-emerald-900/60' : 'text-amber-900/60'} font-bold`}>/ {current.totalSpoons}</span>
+                      {remaining} <span className={`text-base ${
+                        isTurtleTheme ? 'text-emerald-900/60' : isDinoTheme ? 'text-green-900/60' : 'text-amber-900/60'
+                      } font-bold`}>/ {current.totalSpoons}</span>
                     </span>
-                    <p className={`text-[10px] font-black uppercase tracking-wider ${isTurtleTheme ? 'text-emerald-900/70' : 'text-amber-900/70'}`}>
+                    <p className={`text-[10px] font-black uppercase tracking-wider ${
+                      isTurtleTheme ? 'text-emerald-900/70' : isDinoTheme ? 'text-green-900/70' : 'text-amber-900/70'
+                    }`}>
                       {remaining} {t('Spoons Remaining')}
                     </p>
                   </div>
                 </div>
-                <div className={`h-3.5 ${isTurtleTheme ? 'bg-emerald-100/90 border-emerald-200/60' : 'bg-amber-100/90 border-amber-200/60'} rounded-full p-0.5 border overflow-hidden`} role="progressbar" aria-valuenow={remaining} aria-valuemin={0} aria-valuemax={current.totalSpoons} aria-label={`${remaining} spoons out of ${current.totalSpoons} remaining`}>
+                <div className={`h-3.5 ${
+                  isTurtleTheme
+                    ? 'bg-emerald-100/90 border-emerald-200/60'
+                    : isDinoTheme
+                      ? 'bg-green-100/90 border-green-200/60'
+                      : 'bg-amber-100/90 border-amber-200/60'
+                } rounded-full p-0.5 border overflow-hidden`} role="progressbar" aria-valuenow={remaining} aria-valuemin={0} aria-valuemax={current.totalSpoons} aria-label={`${remaining} spoons out of ${current.totalSpoons} remaining`}>
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-500' : 'bg-rose-500'

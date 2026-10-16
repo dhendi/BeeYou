@@ -296,6 +296,7 @@ export const AACView: React.FC = () => {
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const TURTLE_CATEGORY_ICONS: Record<string, string> = {
     core: '/assets/stickers/turtle_lily_pads.png',
@@ -851,7 +852,11 @@ export const AACView: React.FC = () => {
             data-tour="aac-sentence-strip"
             aria-label="Sentence builder"
             className={`w-full ${
-              isTurtleTheme ? 'bg-emerald-50/70 border-emerald-300/80' : 'bg-[#FCF9F2] border-[#E0D8CB]'
+              isDinoTheme
+                ? 'bg-green-50/70 border-green-300/80'
+                : isTurtleTheme
+                ? 'bg-emerald-50/70 border-emerald-300/80'
+                : 'bg-[#FCF9F2] border-[#E0D8CB]'
             } rounded-3xl border-2 shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150`}
           >
             <div className="flex items-center gap-2">
@@ -861,16 +866,26 @@ export const AACView: React.FC = () => {
                 onClick={sentence.length > 0 ? speakSentence : undefined}
                 aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence, settings.language)}` : 'Sentence builder. Tap words below to build sentence'}
                 className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] ${
-                  isTurtleTheme ? 'bg-emerald-100/50 border-emerald-300/60' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+                  isDinoTheme
+                    ? 'bg-green-100/50 border-green-300/60'
+                    : isTurtleTheme
+                    ? 'bg-emerald-100/50 border-emerald-300/60'
+                    : 'bg-[#EFE9DF] border-[#E0D8CB]'
                 } border-2 rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:outline-none ${
-                  sentence.length > 0 ? (isTurtleTheme ? 'cursor-pointer hover:bg-emerald-100/70' : 'cursor-pointer hover:bg-[#EAE3D7]') : ''
+                  sentence.length > 0
+                    ? isDinoTheme
+                      ? 'cursor-pointer hover:bg-green-100/70'
+                      : isTurtleTheme
+                      ? 'cursor-pointer hover:bg-emerald-100/70'
+                      : 'cursor-pointer hover:bg-[#EAE3D7]'
+                    : ''
                 }`}
                 title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
               >
                 {sentence.length === 0 ? (
-                  <div className={`flex items-center gap-2 ${isTurtleTheme ? 'text-emerald-800/70' : 'text-[#8C7E72]'} text-xs sm:text-sm font-semibold px-2 select-none truncate`}>
+                  <div className={`flex items-center gap-2 ${isDinoTheme ? 'text-green-800/70' : isTurtleTheme ? 'text-emerald-800/70' : 'text-[#8C7E72]'} text-xs sm:text-sm font-semibold px-2 select-none truncate`}>
                     {instantSpeakMode ? (
-                      <span className={`${isTurtleTheme ? 'text-emerald-800' : 'text-[#A76318]'} font-bold flex items-center gap-1`}>
+                      <span className={`${isDinoTheme ? 'text-green-800' : isTurtleTheme ? 'text-emerald-800' : 'text-[#A76318]'} font-bold flex items-center gap-1`}>
                         <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
                       </span>
                     ) : (
@@ -909,8 +924,14 @@ export const AACView: React.FC = () => {
                       </div>
                     ))}
                     {sentence.length > 1 && (
-                      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${isTurtleTheme ? 'bg-emerald-500/15 border-emerald-300 text-emerald-950' : 'bg-amber-500/15 border-amber-300 text-amber-950'} border font-black text-xs shrink-0 animate-in fade-in select-none`}>
-                        <Lightbulb className={`w-3.5 h-3.5 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'} shrink-0`} />
+                      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${
+                        isDinoTheme
+                          ? 'bg-green-500/15 border-green-300 text-green-950'
+                          : isTurtleTheme
+                          ? 'bg-emerald-500/15 border-emerald-300 text-emerald-950'
+                          : 'bg-amber-500/15 border-amber-300 text-amber-950'
+                      } border font-black text-xs shrink-0 animate-in fade-in select-none`}>
+                        <Lightbulb className={`w-3.5 h-3.5 ${isDinoTheme ? 'text-green-700' : isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'} shrink-0`} />
                         <span>&quot;{autocorrectAacGrammar(sentence, settings.language)}&quot;</span>
                       </div>
                     )}
@@ -924,7 +945,13 @@ export const AACView: React.FC = () => {
                   <>
                     <button
                       onClick={removeLastFromSentence}
-                      className={`p-2.5 rounded-2xl ${isTurtleTheme ? 'bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border-[#E0D8CB]'} border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer`}
+                      className={`p-2.5 rounded-2xl ${
+                        isDinoTheme
+                          ? 'bg-green-100/70 hover:bg-green-100 text-green-900 border-green-300'
+                          : isTurtleTheme
+                          ? 'bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 border-emerald-300'
+                          : 'bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border-[#E0D8CB]'
+                      } border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer`}
                       title="Remove last word"
                       aria-label="Backspace"
                     >
@@ -941,7 +968,13 @@ export const AACView: React.FC = () => {
                     <button
                       type="button"
                       onClick={saveSentenceAsQuickPhrase}
-                      className={`p-2.5 rounded-2xl ${isTurtleTheme ? 'bg-emerald-100/50 hover:bg-emerald-100 text-emerald-950 border-emerald-300' : 'bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border-[#CBD2D9]'} border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:outline-none`}
+                      className={`p-2.5 rounded-2xl ${
+                        isDinoTheme
+                          ? 'bg-green-100/50 hover:bg-green-100 text-green-950 border-green-300'
+                          : isTurtleTheme
+                          ? 'bg-emerald-100/50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
+                          : 'bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border-[#CBD2D9]'
+                      } border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:outline-none`}
                       title="Save to quick phrases"
                       aria-label="Save current sentence to quick phrases"
                     >
@@ -969,9 +1002,13 @@ export const AACView: React.FC = () => {
                     disabled={sentence.length === 0}
                     className={`flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
                       sentence.length > 0
-                        ? isTurtleTheme
+                        ? isDinoTheme
+                          ? 'bg-green-600 hover:bg-green-700 text-white border-2 border-green-700 shadow-[0_4px_12px_rgba(22,163,74,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                          : isTurtleTheme
                           ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
                           : 'bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                        : isDinoTheme
+                        ? 'bg-green-100/60 text-green-800/50 border border-green-200 cursor-not-allowed'
                         : isTurtleTheme
                         ? 'bg-emerald-100/60 text-emerald-800/50 border border-emerald-200 cursor-not-allowed'
                         : 'bg-[#EAE4D9] text-[#A89C8F] border border-[#DCD3C4] cursor-not-allowed'
@@ -1086,7 +1123,11 @@ export const AACView: React.FC = () => {
           
           {/* Category Navigation Pills */}
           <div data-tour="aac-categories" className={`flex items-center gap-2 sm:gap-2.5 shrink-0 ${
-            isTurtleTheme ? 'bg-emerald-100/70 border-emerald-300/80' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+            isDinoTheme
+              ? 'bg-green-100/70 border-green-300/80'
+              : isTurtleTheme
+              ? 'bg-emerald-100/70 border-emerald-300/80'
+              : 'bg-[#EFE9DF] border-[#E0D8CB]'
           } p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 shadow-xs`}>
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
@@ -1096,7 +1137,15 @@ export const AACView: React.FC = () => {
 
                 let activeStyle = '';
                 if (isActive) {
-                  if (isTurtleTheme) {
+                  if (isDinoTheme) {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-green-600 text-white border-2 border-green-700 shadow-[0_4px_12px_rgba(22,163,74,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-amber-600 text-white border-2 border-amber-700 shadow-[0_4px_12px_rgba(217,119,6,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-green-800 text-white border-2 border-green-900 shadow-[0_4px_12px_rgba(20,83,45,0.3)]';
+                    }
+                  } else if (isTurtleTheme) {
                     if (cat.id === 'core') {
                       activeStyle = 'bg-emerald-600 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
                     } else if (cat.id === 'favorites') {
@@ -1114,7 +1163,9 @@ export const AACView: React.FC = () => {
                     }
                   }
                 } else {
-                  activeStyle = isTurtleTheme
+                  activeStyle = isDinoTheme
+                    ? 'bg-green-50/70 hover:bg-green-50 text-green-900 hover:text-green-950 border-2 border-green-200/80 hover:border-green-300 shadow-2xs'
+                    : isTurtleTheme
                     ? 'bg-emerald-50/70 hover:bg-emerald-50 text-emerald-900 hover:text-emerald-950 border-2 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
                     : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs';
                 }
@@ -1680,7 +1731,11 @@ export const AACView: React.FC = () => {
           className={`grid ${gridColsClass} ${
             buttonSize === 'small' ? 'gap-1.5 sm:gap-2.5' : buttonSize === 'large' ? 'gap-3.5 sm:gap-5' : 'gap-2.5 sm:gap-3.5'
           } pb-10 ${
-            isTurtleTheme ? 'bg-emerald-100/50 border-emerald-300/70' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+            isDinoTheme
+              ? 'bg-green-100/50 border-green-300/70'
+              : isTurtleTheme
+              ? 'bg-emerald-100/50 border-emerald-300/70'
+              : 'bg-[#EFE9DF] border-[#E0D8CB]'
           } ${
             buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3.5 sm:p-6' : 'p-2.5 sm:p-4'
           } rounded-3xl border-2 shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
@@ -1701,14 +1756,20 @@ export const AACView: React.FC = () => {
                     playChime('tap');
                   }}
                   className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
-                    isTurtleTheme
+                    isDinoTheme
+                      ? 'bg-green-50/80 hover:bg-green-50 border-green-300 text-green-950 shadow-[0_4px_10px_rgba(22,163,74,0.08)]'
+                      : isTurtleTheme
                       ? 'bg-emerald-50/80 hover:bg-emerald-50 border-emerald-300 text-emerald-950 shadow-[0_4px_10px_rgba(5,150,105,0.08)]'
                       : 'bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]'
                   }`}
                 >
                   {/* Folder Top-Right Corner Tab / Badge */}
                   <div className={`absolute ${buttonSizeStyles.folderBadge} z-20 ${
-                    isTurtleTheme ? 'bg-emerald-800 text-white' : 'bg-[#4A3E34] text-white'
+                    isDinoTheme
+                      ? 'bg-green-800 text-white'
+                      : isTurtleTheme
+                      ? 'bg-emerald-800 text-white'
+                      : 'bg-[#4A3E34] text-white'
                   } font-black flex items-center shadow-2xs pointer-events-none`}>
                     <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
                     <span>{t('Folder')}</span>
@@ -1726,7 +1787,11 @@ export const AACView: React.FC = () => {
 
                   {/* Label */}
                   <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none ${
-                    isTurtleTheme ? 'text-emerald-950' : 'text-[#2D241E]'
+                    isDinoTheme
+                      ? 'text-green-950'
+                      : isTurtleTheme
+                      ? 'text-emerald-950'
+                      : 'text-[#2D241E]'
                   } drop-shadow-xs w-full mt-1 ${buttonSizeStyles.folderFont}`}>
                     {t(folder.label)}
                   </span>

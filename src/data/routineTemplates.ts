@@ -60,6 +60,65 @@ export const PREBUILT_ROUTINE_TEMPLATES: RoutineTemplate[] = [
     ],
   },
 
+  // --- DINO KINGDOM PREHISTORIC TEMPLATE ---
+  {
+    id: 'template-dino-kingdom-calm',
+    title: 'Dino Kingdom Prehistoric Day',
+    category: 'special',
+    emoji: '🦖',
+    time: '8:00 AM',
+    description: 'An adventurous yet grounded prehistoric routine to awaken gentle energy, explore sensory interests, and stay steady like a Brachiosaurus.',
+    recommendedFor: 'Dinosaur lovers, energetic explorers, and neurodivergent kids who thrive with themed, imaginative structure.',
+    firstThen: {
+      first: 'Dino wake-up stretch & hydration',
+      firstEmoji: '🦖',
+      then: 'Prehistoric excavation play or favorite book',
+      thenEmoji: '🦕',
+    },
+    steps: [
+      {
+        title: 'Gentle Dino Wake-Up Stretch',
+        instruction: 'Reach your arms up high like a tall Brachiosaurus neck, stretch side to side, and take a big warm yawn.',
+        durationMin: 5,
+        emoji: '🦕',
+        sensoryNote: 'Full-body upward stretching provides gentle proprioceptive feedback to organize the nervous system.',
+        communicationShortcutPhrases: ['Good morning', 'Stretching tall', 'Feeling awake'],
+      },
+      {
+        title: 'Fresh Water Oasis Sip',
+        instruction: 'Drink a cup of cool water to replenish your dino reserves and hydrate your vocal cords.',
+        durationMin: 3,
+        emoji: '💧',
+        sensoryNote: 'Cool hydration regulates oral sensory seekers and calms morning dry-mouth.',
+        communicationShortcutPhrases: ['Water is refreshing', 'All hydrated'],
+      },
+      {
+        title: 'Three-Toed Footprint Walk',
+        instruction: 'Put on soft socks and comfortable shoes. Step with firm, grounded feet across your Jurassic trail.',
+        durationMin: 5,
+        emoji: '👟',
+        sensoryNote: 'Heavy heel-to-toe footfalls provide deep calming joint pressure.',
+        communicationShortcutPhrases: ['Shoes are on', 'Walking steady', 'Ready to explore'],
+      },
+      {
+        title: 'Herbivore Power Breakfast',
+        instruction: 'Enjoy your nutritious morning meal with preferred safe textures to fuel your day.',
+        durationMin: 15,
+        emoji: '🥞',
+        sensoryNote: 'Provide familiar, low-stress foods to maintain steady blood sugar.',
+        communicationShortcutPhrases: ['Breakfast is good', 'I am full', 'More please'],
+      },
+      {
+        title: 'Stegosaurus Teeth Brushing',
+        instruction: 'Brush teeth gently on top, bottom, and back chewing surfaces for 2 full minutes.',
+        durationMin: 2,
+        emoji: '🪥',
+        sensoryNote: 'Use child-preferred non-foaming or fruit flavors if mint creates sensory discomfort.',
+        communicationShortcutPhrases: ['Teeth are sparkling', 'All done brushing'],
+      },
+    ],
+  },
+
   // --- MORNING TEMPLATES ---
   {
     id: 'template-morning-calm',

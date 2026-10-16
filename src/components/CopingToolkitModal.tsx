@@ -49,6 +49,7 @@ export const CopingToolkitModal: React.FC = () => {
   } = useApp();
 
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const activeTab: 'breathing' | 'strategies' | 'timer' | 'grounding' | 'sound' = copingToolkitTab || 'breathing';
 
@@ -282,14 +283,28 @@ export const CopingToolkitModal: React.FC = () => {
       }}
     >
       <div
-        className={`bg-[#FFFDF7] dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${isTurtleTheme ? 'border-emerald-300 dark:border-emerald-500/60' : 'border-amber-300 dark:border-amber-500/60'} overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
+        className={`bg-[#FFFDF7] dark:bg-slate-900 w-full ${activeTab === 'sound' ? 'max-w-4xl' : 'max-w-lg'} max-h-[calc(100dvh-2.5rem)] rounded-3xl shadow-2xl border-2 ${
+          isTurtleTheme
+            ? 'border-emerald-300 dark:border-emerald-500/60'
+            : isDinoTheme
+              ? 'border-green-400 dark:border-green-500/60'
+              : 'border-amber-300 dark:border-amber-500/60'
+        } overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 transition-all`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800' : 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500'} p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-xs`}>
+        <div className={`${
+          isTurtleTheme
+            ? 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800'
+            : isDinoTheme
+              ? 'bg-gradient-to-r from-green-700 via-emerald-800 to-amber-900'
+              : 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500'
+        } p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-xs`}>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
-              {headerInfo.stickerSrc ? (
+              {isDinoTheme && activeTab !== 'sound' && activeTab !== 'grounding' ? (
+                <span className="text-2xl select-none leading-none">🦖</span>
+              ) : headerInfo.stickerSrc ? (
                 <img
                   src={headerInfo.stickerSrc}
                   alt={headerInfo.title}
@@ -301,7 +316,7 @@ export const CopingToolkitModal: React.FC = () => {
                   }}
                 />
               ) : null}
-              <HeaderIcon className={`w-6 h-6 text-white header-fallback-icon ${headerInfo.stickerSrc ? 'hidden' : 'block'}`} aria-hidden="true" />
+              <HeaderIcon className={`w-6 h-6 text-white header-fallback-icon ${isDinoTheme && activeTab !== 'sound' && activeTab !== 'grounding' ? 'hidden' : headerInfo.stickerSrc ? 'hidden' : 'block'}`} aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-black text-white leading-tight drop-shadow-2xs">{t(headerInfo.title)}</h2>
@@ -315,7 +330,9 @@ export const CopingToolkitModal: React.FC = () => {
               stopSoundscape();
               setShowCopingToolkit(false);
             }}
-            className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-2xl bg-white/20 hover:bg-white/30 text-white active:scale-95 transition-all cursor-pointer flex items-center justify-center backdrop-blur-xs focus-visible:ring-4 focus-visible:ring-amber-300 focus-visible:outline-none"
+            className={`w-10 h-10 min-w-[44px] min-h-[44px] rounded-2xl bg-white/20 hover:bg-white/30 text-white active:scale-95 transition-all cursor-pointer flex items-center justify-center backdrop-blur-xs focus-visible:ring-4 ${
+              isDinoTheme ? 'focus-visible:ring-green-300' : isTurtleTheme ? 'focus-visible:ring-emerald-300' : 'focus-visible:ring-amber-300'
+            } focus-visible:outline-none`}
             aria-label="Close"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -324,7 +341,9 @@ export const CopingToolkitModal: React.FC = () => {
 
         {/* Tab Selector - only shown when not on sound tool */}
         {activeTab !== 'sound' && (
-          <div className="flex border-b-2 border-amber-200/80 bg-[#FFF9EE] p-2 gap-2 overflow-x-auto shrink-0 scrollbar-none">
+          <div className={`flex border-b-2 ${
+            isDinoTheme ? 'border-green-200/80 bg-[#F2F8F1]' : isTurtleTheme ? 'border-emerald-200/80 bg-[#EEF7F2]' : 'border-amber-200/80 bg-[#FFF9EE]'
+          } p-2 gap-2 overflow-x-auto shrink-0 scrollbar-none`}>
             {[
               { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.png', icon: Wind },
               { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.png', icon: Heart },
@@ -342,8 +361,16 @@ export const CopingToolkitModal: React.FC = () => {
                   }}
                   className={`py-2 px-3 sm:px-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 whitespace-nowrap min-h-[44px] active:scale-95 ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm ring-2 ring-amber-300'
-                      : 'bg-white/80 hover:bg-amber-100/70 text-slate-700 border border-amber-200/70'
+                      ? isDinoTheme
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-sm ring-2 ring-green-400'
+                        : isTurtleTheme
+                          ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-sm ring-2 ring-emerald-400'
+                          : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm ring-2 ring-amber-300'
+                      : isDinoTheme
+                        ? 'bg-white/80 hover:bg-green-100/70 text-slate-700 border border-green-200/70'
+                        : isTurtleTheme
+                          ? 'bg-white/80 hover:bg-emerald-100/70 text-slate-700 border border-emerald-200/70'
+                          : 'bg-white/80 hover:bg-amber-100/70 text-slate-700 border border-amber-200/70'
                   }`}
                 >
                   <img
@@ -657,8 +684,14 @@ export const CopingToolkitModal: React.FC = () => {
 
         {/* Quick Communication Strip - hidden on dedicated sound tool */}
         {activeTab !== 'sound' && (
-          <div className="bg-[#FFF9EE] p-3 sm:p-4 border-t-2 border-amber-200/80">
-            <div className="text-[11px] font-black text-amber-950 uppercase tracking-wider mb-2 text-center">
+          <div className={`p-3 sm:p-4 border-t-2 ${
+            isDinoTheme
+              ? 'bg-[#F2F8F1] border-green-200/80 text-green-950'
+              : isTurtleTheme
+                ? 'bg-[#EEF7F2] border-emerald-200/80 text-emerald-950'
+                : 'bg-[#FFF9EE] border-amber-200/80 text-amber-950'
+          }`}>
+            <div className="text-[11px] font-black uppercase tracking-wider mb-2 text-center">
               {t('Things you can ask for right now:')}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -671,7 +704,13 @@ export const CopingToolkitModal: React.FC = () => {
                     speak(t(need.text));
                     playChime('tap');
                   }}
-                  className="px-3.5 py-2 min-h-[48px] rounded-2xl bg-white hover:bg-amber-100/70 border-2 border-amber-200/90 text-[#2D241E] font-black text-xs sm:text-sm shadow-2xs hover:shadow-xs hover:border-amber-400 active:scale-95 cursor-pointer flex items-center gap-2.5 transition-all focus-visible:ring-4 focus-visible:ring-amber-400 focus-visible:outline-none"
+                  className={`px-3.5 py-2 min-h-[48px] rounded-2xl bg-white ${
+                    isDinoTheme
+                      ? 'hover:bg-green-100/70 border-2 border-green-200/90 hover:border-green-400 focus-visible:ring-green-400'
+                      : isTurtleTheme
+                        ? 'hover:bg-emerald-100/70 border-2 border-emerald-200/90 hover:border-emerald-400 focus-visible:ring-emerald-400'
+                        : 'hover:bg-amber-100/70 border-2 border-amber-200/90 hover:border-amber-400 focus-visible:ring-amber-400'
+                  } text-[#2D241E] font-black text-xs sm:text-sm shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer flex items-center gap-2.5 transition-all focus-visible:ring-4 focus-visible:outline-none`}
                 >
                   <img
                     src={need.stickerSrc}

@@ -33,14 +33,16 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
 }) => {
   const { activeTheme } = useApp();
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+  const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(null);
 
   const categories = [
-    { id: 'all', label: 'All Templates', emoji: isTurtleTheme ? '🐢' : '⭐' },
+    { id: 'all', label: 'All Templates', emoji: isTurtleTheme ? '🐢' : isDinoTheme ? '🦖' : '⭐' },
     ...(isTurtleTheme ? [{ id: 'special', label: 'Turtle Sanctuary', emoji: '🐢' }] : []),
+    ...(isDinoTheme ? [{ id: 'special', label: 'Dino Kingdom', emoji: '🦖' }] : []),
     { id: 'morning', label: 'Morning', emoji: '🌅' },
     { id: 'school', label: 'School Day', emoji: '🏫' },
     { id: 'bedtime', label: 'Bedtime', emoji: '🌙' },
@@ -68,27 +70,45 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
     <div className={`border-2 rounded-3xl p-5 sm:p-6 space-y-5 transition-all ${
       isTurtleTheme
         ? 'bg-gradient-to-b from-emerald-50/70 via-white to-teal-50/30 border-emerald-300 shadow-[0_4px_20px_rgba(5,150,105,0.08)]'
-        : `${activeTheme?.palette?.primaryLight || 'bg-gradient-to-b from-amber-50/60 to-white'} ${activeTheme?.palette?.primaryBorder || 'border-amber-200/90'}`
+        : isDinoTheme
+          ? 'bg-gradient-to-b from-green-50/70 via-white to-amber-50/30 border-green-400 shadow-[0_4px_20px_rgba(22,163,74,0.08)]'
+          : `${activeTheme?.palette?.primaryLight || 'bg-gradient-to-b from-amber-50/60 to-white'} ${activeTheme?.palette?.primaryBorder || 'border-amber-200/90'}`
     }`}>
       {/* Section Header */}
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 ${
-        isTurtleTheme ? 'border-emerald-200/80' : 'border-amber-100'
+        isTurtleTheme ? 'border-emerald-200/80' : isDinoTheme ? 'border-green-200/80' : 'border-amber-100'
       }`}>
         <div>
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center font-black shadow-xs p-1 ${
-              isTurtleTheme ? 'bg-emerald-600' : (activeTheme?.palette?.primaryBg || 'bg-amber-500')
+              isTurtleTheme
+                ? 'bg-emerald-600'
+                : isDinoTheme
+                  ? 'bg-green-600'
+                  : (activeTheme?.palette?.primaryBg || 'bg-amber-500')
             }`}>
-              {isTurtleTheme ? <TurtleWebbedPawStampSticker className="w-7 h-7 object-contain" /> : <Star className="w-5 h-5" />}
+              {isTurtleTheme ? (
+                <TurtleWebbedPawStampSticker className="w-7 h-7 object-contain" />
+              ) : isDinoTheme ? (
+                <span className="text-xl select-none leading-none">🦖</span>
+              ) : (
+                <Star className="w-5 h-5" />
+              )}
             </div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900">
-              {isTurtleTheme ? 'Wise Turtle Sanctuary Routine Library' : 'Pre-Built Routine Templates Library'}
+              {isTurtleTheme
+                ? 'Wise Turtle Sanctuary Routine Library'
+                : isDinoTheme
+                  ? 'Dino Kingdom Routine Library'
+                  : 'Pre-Built Routine Templates Library'}
             </h3>
           </div>
           <p className="text-xs text-slate-600 font-medium mt-1">
             {isTurtleTheme
               ? 'Clinically backed, slow & sensory-paced schedules for peaceful mornings, mindful transitions, and turtle lagoon decompression.'
-              : 'Clinically backed, sensory-friendly schedules for Morning, School, Bedtime, Therapy, and Outings. Import with 1 tap or customize for your child.'}
+              : isDinoTheme
+                ? 'Clinically backed, sensory-friendly prehistoric routines for adventurous mornings, structured transitions, and calm dinosaur energy regulation.'
+                : 'Clinically backed, sensory-friendly schedules for Morning, School, Bedtime, Therapy, and Outings. Import with 1 tap or customize for your child.'}
           </p>
         </div>
 
@@ -103,7 +123,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
             className={`w-full pl-9 pr-3 py-2 rounded-xl bg-white border font-bold text-xs text-slate-800 placeholder:font-normal placeholder:text-slate-400 ${
               isTurtleTheme
                 ? 'border-emerald-200 focus:outline-emerald-500 focus:border-emerald-400'
-                : 'border-slate-300 focus:outline-amber-500 focus:border-amber-400'
+                : isDinoTheme
+                  ? 'border-green-200 focus:outline-green-500 focus:border-green-400'
+                  : 'border-slate-300 focus:outline-amber-500 focus:border-amber-400'
             }`}
           />
         </div>
@@ -124,10 +146,14 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                 isActive
                   ? isTurtleTheme
                     ? 'bg-emerald-600 text-white shadow-xs scale-102 ring-2 ring-emerald-600/30'
-                    : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs scale-102`
+                    : isDinoTheme
+                      ? 'bg-green-600 text-white shadow-xs scale-102 ring-2 ring-green-600/30'
+                      : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs scale-102`
                   : isTurtleTheme
                     ? 'bg-white text-slate-700 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300'
-                    : 'bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300'
+                    : isDinoTheme
+                      ? 'bg-white text-slate-700 hover:bg-green-50/70 border border-slate-200 hover:border-green-300'
+                      : 'bg-white text-slate-600 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300'
               }`}
             >
               <RoutineStickerIcon emoji={cat.emoji} title={cat.label} className="w-4 h-4 object-contain" />
@@ -152,10 +178,14 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                 isAlreadyImported 
                   ? isTurtleTheme
                     ? 'border-emerald-300 ring-2 ring-emerald-400/40 bg-emerald-50/20'
-                    : 'border-emerald-200 ring-1 ring-emerald-300/60 bg-emerald-50/10' 
+                    : isDinoTheme
+                      ? 'border-green-300 ring-2 ring-green-400/40 bg-green-50/20'
+                      : 'border-emerald-200 ring-1 ring-emerald-300/60 bg-emerald-50/10' 
                   : isTurtleTheme
                     ? 'border-emerald-200/90 hover:border-emerald-400 hover:shadow-md'
-                    : 'border-slate-200 hover:border-amber-400 hover:shadow-md'
+                    : isDinoTheme
+                      ? 'border-green-200/90 hover:border-green-400 hover:shadow-md'
+                      : 'border-slate-200 hover:border-amber-400 hover:shadow-md'
               }`}
             >
               <div className="p-4 sm:p-5 space-y-3">
@@ -165,7 +195,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                     <div className={`w-12 h-12 p-1 rounded-2xl border flex items-center justify-center shrink-0 ${
                       isTurtleTheme
                         ? 'bg-emerald-50 border-emerald-200'
-                        : 'bg-amber-50 border-amber-200/80'
+                        : isDinoTheme
+                          ? 'bg-green-50 border-green-200'
+                          : 'bg-amber-50 border-amber-200/80'
                     }`}>
                       <RoutineStickerIcon emoji={template.emoji} title={template.title} className="w-9 h-9 object-contain" />
                     </div>
@@ -183,7 +215,7 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                       </div>
                       <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold mt-0.5">
                         <span className="flex items-center gap-1 text-slate-600">
-                          <Clock className={`w-3 h-3 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'}`} />
+                          <Clock className={`w-3 h-3 ${isTurtleTheme ? 'text-emerald-700' : isDinoTheme ? 'text-green-700' : 'text-amber-600'}`} />
                           {template.time || 'Flexible'}
                         </span>
                         <span>•</span>
@@ -296,13 +328,21 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
 
               {/* Action Buttons Footer */}
               <div className={`p-3 border-t rounded-b-2xl flex items-center justify-between gap-2 ${
-                isTurtleTheme ? 'bg-emerald-50/40 border-emerald-100' : 'bg-slate-50 border-slate-100'
+                isTurtleTheme
+                  ? 'bg-emerald-50/40 border-emerald-100'
+                  : isDinoTheme
+                    ? 'bg-green-50/40 border-green-100'
+                    : 'bg-slate-50 border-slate-100'
               }`}>
                 <button
                   type="button"
                   onClick={() => toggleExpand(template.id)}
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer ${
-                    isTurtleTheme ? 'text-emerald-900 hover:text-emerald-950 hover:bg-emerald-100/50' : 'text-slate-600 hover:text-slate-900'
+                    isTurtleTheme
+                      ? 'text-emerald-900 hover:text-emerald-950 hover:bg-emerald-100/50'
+                      : isDinoTheme
+                        ? 'text-green-900 hover:text-green-950 hover:bg-green-100/50'
+                        : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <span>{isExpanded ? 'Hide Steps' : 'Preview Steps'}</span>
@@ -319,11 +359,13 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                     className={`px-3 py-1.5 rounded-xl border font-bold text-xs flex items-center gap-1.5 transition cursor-pointer ${
                       isTurtleTheme
                         ? 'bg-white hover:bg-emerald-50 border-emerald-200 text-emerald-950'
-                        : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700'
+                        : isDinoTheme
+                          ? 'bg-white hover:bg-green-50 border-green-200 text-green-950'
+                          : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700'
                     }`}
                     title="Customize steps, times, and First/Then before importing"
                   >
-                    <Edit3 className={`w-3.5 h-3.5 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'}`} />
+                    <Edit3 className={`w-3.5 h-3.5 ${isTurtleTheme ? 'text-emerald-700' : isDinoTheme ? 'text-green-700' : 'text-amber-600'}`} />
                     <span>Customize</span>
                   </button>
 
@@ -338,7 +380,9 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
                         ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                         : isTurtleTheme
                           ? 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-emerald-200'
-                          : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white`
+                          : isDinoTheme
+                            ? 'bg-gradient-to-r from-green-600 via-emerald-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white shadow-green-200'
+                            : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white`
                     }`}
                     title="Add directly to child active routines"
                   >
