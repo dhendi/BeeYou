@@ -322,7 +322,7 @@ export const ChildHomeView: React.FC = () => {
             className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
             title="Themes & Visual Customizer"
           >
-            <Palette className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            <Palette className={`w-4 h-4 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'}`} aria-hidden="true" />
           </button>
 
           {/* Caregiver Alert / Connect */}
@@ -333,7 +333,7 @@ export const ChildHomeView: React.FC = () => {
               setShowCaregiverModal(true);
               playChime('tap');
             }}
-            className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
+            className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:outline-none`}
             title="Caregiver Pairing & Connect"
           >
             <Heart className="w-4 h-4 text-rose-500" aria-hidden="true" />
@@ -347,7 +347,7 @@ export const ChildHomeView: React.FC = () => {
           type="button"
           aria-label={`Plans changed. New Plan: ${t(plansChanged.newPlanTitle)}. Tap to see calm plan.`}
           onClick={() => setShowPlansChangedModal(true)}
-          className={`w-full text-left ${activeTheme?.palette?.primaryLight || 'bg-amber-100/95'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:outline-none`}
+          className={`w-full text-left ${isTurtleTheme ? 'bg-emerald-100/90 border-emerald-400' : (activeTheme?.palette?.primaryLight || 'bg-amber-100/95')} border-2 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-md cursor-pointer transition-all active:scale-98 animate-in fade-in focus-visible:ring-4 focus-visible:outline-none`}
         >
           <div className="flex items-center gap-3">
             {isTurtleTheme ? (
@@ -357,17 +357,17 @@ export const ChildHomeView: React.FC = () => {
             )}
             <div>
               <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-0.5 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white font-black text-[10px] uppercase tracking-wider`}>
+                <span className={`px-2.5 py-0.5 rounded-full ${isTurtleTheme ? 'bg-emerald-700' : (activeTheme?.palette?.primaryBg || 'bg-amber-500')} text-white font-black text-[10px] uppercase tracking-wider`}>
                   {t('Plans Changed')}
                 </span>
-                <span className={`text-xs font-bold ${activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-900'}`}>{t('Tap to see calm plan')}</span>
+                <span className={`text-xs font-bold ${isTurtleTheme ? 'text-emerald-800' : (activeTheme?.palette?.textAccent ? 'opacity-80' : 'text-amber-900')}`}>{t('Tap to see calm plan')}</span>
               </div>
-              <h2 className={`text-base sm:text-lg font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} mt-0.5`}>
+              <h2 className={`text-base sm:text-lg font-black ${isTurtleTheme ? 'text-emerald-950' : (activeTheme?.palette?.textAccent || 'text-amber-950')} mt-0.5`}>
                 {t('New Plan')}: {t(plansChanged.newPlanTitle)}
               </h2>
             </div>
           </div>
-          <ArrowRight className="w-6 h-6 text-amber-700 shrink-0" aria-hidden="true" />
+          <ArrowRight className={`w-6 h-6 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-700'} shrink-0`} aria-hidden="true" />
         </button>
       )}
 

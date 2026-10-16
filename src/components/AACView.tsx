@@ -295,6 +295,32 @@ export const AACView: React.FC = () => {
   const isDentistDay = true;
   const dentistAdventure = adventures.find((a) => a.id === 'adv-dentist');
 
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
+
+  const TURTLE_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/turtle_lily_pads.png',
+    favorite_sentences: '/assets/stickers/turtle_leaf_speech_bubbles.png',
+    favorites: '/assets/stickers/turtle_lotus_trophy.png',
+    food: '/assets/stickers/turtle_clover_berry_feast.png',
+    drinks: '/assets/stickers/turtle_bamboo_drink_cup.png',
+    activities: '/assets/stickers/turtle_moss_play_ball.png',
+    places: '/assets/stickers/turtle_moss_cottage_home.png',
+    people: '/assets/stickers/turtle_hatchling_pet_care.png',
+    feelings: '/assets/stickers/turtle_river_stone.png',
+    sensory: '/assets/stickers/turtle_shell_headphones.png',
+    all: '/assets/stickers/turtle_botanical_folder.png',
+  };
+
+  const TURTLE_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/turtle_clover_berry_feast.png',
+    'folder-drinks': '/assets/stickers/turtle_bamboo_drink_cup.png',
+    'folder-activities': '/assets/stickers/turtle_moss_play_ball.png',
+    'folder-places': '/assets/stickers/turtle_moss_cottage_home.png',
+    'folder-people': '/assets/stickers/turtle_hatchling_pet_care.png',
+    'folder-feelings': '/assets/stickers/turtle_river_stone.png',
+    'folder-sensory': '/assets/stickers/turtle_shell_headphones.png',
+  };
+
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
     { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.png' },
     { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.png' },
@@ -824,7 +850,9 @@ export const AACView: React.FC = () => {
           <section
             data-tour="aac-sentence-strip"
             aria-label="Sentence builder"
-            className="w-full bg-[#FCF9F2] rounded-3xl border-2 border-[#E0D8CB] shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150"
+            className={`w-full ${
+              isTurtleTheme ? 'bg-emerald-50/70 border-emerald-300/80' : 'bg-[#FCF9F2] border-[#E0D8CB]'
+            } rounded-3xl border-2 shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150`}
           >
             <div className="flex items-center gap-2">
               {/* Sentence Display Area (Debossed Silicone Slot) */}
@@ -832,15 +860,17 @@ export const AACView: React.FC = () => {
                 type="button"
                 onClick={sentence.length > 0 ? speakSentence : undefined}
                 aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence, settings.language)}` : 'Sentence builder. Tap words below to build sentence'}
-                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] bg-[#EFE9DF] border-2 border-[#E0D8CB] rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${
-                  sentence.length > 0 ? 'cursor-pointer hover:bg-[#EAE3D7]' : ''
+                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] ${
+                  isTurtleTheme ? 'bg-emerald-100/50 border-emerald-300/60' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+                } border-2 rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:outline-none ${
+                  sentence.length > 0 ? (isTurtleTheme ? 'cursor-pointer hover:bg-emerald-100/70' : 'cursor-pointer hover:bg-[#EAE3D7]') : ''
                 }`}
                 title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
               >
                 {sentence.length === 0 ? (
-                  <div className="flex items-center gap-2 text-[#8C7E72] text-xs sm:text-sm font-semibold px-2 select-none truncate">
+                  <div className={`flex items-center gap-2 ${isTurtleTheme ? 'text-emerald-800/70' : 'text-[#8C7E72]'} text-xs sm:text-sm font-semibold px-2 select-none truncate`}>
                     {instantSpeakMode ? (
-                      <span className="text-[#A76318] font-bold flex items-center gap-1">
+                      <span className={`${isTurtleTheme ? 'text-emerald-800' : 'text-[#A76318]'} font-bold flex items-center gap-1`}>
                         <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
                       </span>
                     ) : (
@@ -879,8 +909,8 @@ export const AACView: React.FC = () => {
                       </div>
                     ))}
                     {sentence.length > 1 && (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-950 font-black text-xs shrink-0 animate-in fade-in select-none">
-                        <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${isTurtleTheme ? 'bg-emerald-500/15 border-emerald-300 text-emerald-950' : 'bg-amber-500/15 border-amber-300 text-amber-950'} border font-black text-xs shrink-0 animate-in fade-in select-none`}>
+                        <Lightbulb className={`w-3.5 h-3.5 ${isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'} shrink-0`} />
                         <span>&quot;{autocorrectAacGrammar(sentence, settings.language)}&quot;</span>
                       </div>
                     )}
@@ -894,7 +924,7 @@ export const AACView: React.FC = () => {
                   <>
                     <button
                       onClick={removeLastFromSentence}
-                      className="p-2.5 rounded-2xl bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border border-[#E0D8CB] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer"
+                      className={`p-2.5 rounded-2xl ${isTurtleTheme ? 'bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border-[#E0D8CB]'} border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer`}
                       title="Remove last word"
                       aria-label="Backspace"
                     >
@@ -911,7 +941,7 @@ export const AACView: React.FC = () => {
                     <button
                       type="button"
                       onClick={saveSentenceAsQuickPhrase}
-                      className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                      className={`p-2.5 rounded-2xl ${isTurtleTheme ? 'bg-emerald-100/50 hover:bg-emerald-100 text-emerald-950 border-emerald-300' : 'bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border-[#CBD2D9]'} border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:outline-none`}
                       title="Save to quick phrases"
                       aria-label="Save current sentence to quick phrases"
                     >
@@ -939,7 +969,11 @@ export const AACView: React.FC = () => {
                     disabled={sentence.length === 0}
                     className={`flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
                       sentence.length > 0
-                        ? 'bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                        ? isTurtleTheme
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                          : 'bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
+                        : isTurtleTheme
+                        ? 'bg-emerald-100/60 text-emerald-800/50 border border-emerald-200 cursor-not-allowed'
                         : 'bg-[#EAE4D9] text-[#A89C8F] border border-[#DCD3C4] cursor-not-allowed'
                     }`}
                   >
@@ -1051,38 +1085,62 @@ export const AACView: React.FC = () => {
         <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-1 scrollbar-thin">
           
           {/* Category Navigation Pills */}
-          <div data-tour="aac-categories" className="flex items-center gap-2 sm:gap-2.5 shrink-0 bg-[#EFE9DF] p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 border-[#E0D8CB] shadow-xs">
+          <div data-tour="aac-categories" className={`flex items-center gap-2 sm:gap-2.5 shrink-0 ${
+            isTurtleTheme ? 'bg-emerald-100/70 border-emerald-300/80' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+          } p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 shadow-xs`}>
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
-              .map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setAacActiveScene(null);
-                  setActiveCategory(cat.id);
-                  setSearchQuery('');
-                  playChime('tap');
-                }}
-                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${
-                  !activeSceneData && activeCategory === cat.id
-                    ? cat.id === 'core'
-                      ? 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]'
-                      : cat.id === 'favorites'
-                      ? 'bg-[#E68E8E] text-[#4A1616] border-2 border-[#D57B7B] shadow-[0_4px_12px_rgba(230,142,142,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]'
-                      : 'bg-[#4A3E34] text-white border-2 border-[#382F27] shadow-[0_4px_12px_rgba(74,62,52,0.3)]'
-                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs'
-                }`}
-              >
-                <img
-                  src={cat.iconSrc}
-                  alt=""
-                  aria-hidden="true"
-                  className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none drop-shadow-2xs select-none shrink-0"
-                  loading="eager"
-                />
-                <span className="whitespace-nowrap tracking-tight">{cat.label}</span>
-              </button>
-            ))}
+              .map((cat) => {
+                const iconSrc = isTurtleTheme && TURTLE_CATEGORY_ICONS[cat.id] ? TURTLE_CATEGORY_ICONS[cat.id] : cat.iconSrc;
+                const isActive = !activeSceneData && activeCategory === cat.id;
+
+                let activeStyle = '';
+                if (isActive) {
+                  if (isTurtleTheme) {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-emerald-600 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-emerald-700 text-white border-2 border-emerald-800 shadow-[0_4px_12px_rgba(4,120,87,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-emerald-800 text-white border-2 border-emerald-900 shadow-[0_4px_12px_rgba(6,78,59,0.3)]';
+                    }
+                  } else {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-[#E68E8E] text-[#4A1616] border-2 border-[#D57B7B] shadow-[0_4px_12px_rgba(230,142,142,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-[#4A3E34] text-white border-2 border-[#382F27] shadow-[0_4px_12px_rgba(74,62,52,0.3)]';
+                    }
+                  }
+                } else {
+                  activeStyle = isTurtleTheme
+                    ? 'bg-emerald-50/70 hover:bg-emerald-50 text-emerald-900 hover:text-emerald-950 border-2 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
+                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs';
+                }
+
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setAacActiveScene(null);
+                      setActiveCategory(cat.id);
+                      setSearchQuery('');
+                      playChime('tap');
+                    }}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${activeStyle}`}
+                  >
+                    <img
+                      src={iconSrc}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none drop-shadow-2xs select-none shrink-0"
+                      loading="eager"
+                    />
+                    <span className="whitespace-nowrap tracking-tight">{cat.label}</span>
+                  </button>
+                );
+              })}
           </div>
 
           {/* Clinical AAC Tools: Quick-Chat, Masking Mode, Instant Speak, Add Word, Symbol Picker */}
@@ -1621,45 +1679,61 @@ export const AACView: React.FC = () => {
         <main
           className={`grid ${gridColsClass} ${
             buttonSize === 'small' ? 'gap-1.5 sm:gap-2.5' : buttonSize === 'large' ? 'gap-3.5 sm:gap-5' : 'gap-2.5 sm:gap-3.5'
-          } pb-10 bg-[#EFE9DF] ${
+          } pb-10 ${
+            isTurtleTheme ? 'bg-emerald-100/50 border-emerald-300/70' : 'bg-[#EFE9DF] border-[#E0D8CB]'
+          } ${
             buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3.5 sm:p-6' : 'p-2.5 sm:p-4'
-          } rounded-3xl border-2 border-[#E0D8CB] shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
+          } rounded-3xl border-2 shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
           aria-label="Vocabulary grid"
         >
           {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
-          {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => (
-            <div key={folder.id} className="relative group aspect-square">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveCategory(folder.category);
-                  playChime('tap');
-                }}
-                className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]`}
-              >
-                {/* Folder Top-Right Corner Tab / Badge */}
-                <div className={`absolute ${buttonSizeStyles.folderBadge} z-20 bg-[#4A3E34] text-white font-black flex items-center shadow-2xs pointer-events-none`}>
-                  <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
-                  <span>{t('Folder')}</span>
-                </div>
+          {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
+            const stickerSrc = isTurtleTheme && TURTLE_FOLDER_STICKERS[folder.id]
+              ? TURTLE_FOLDER_STICKERS[folder.id]
+              : (folder.stickerSrc || resolveAacImageUrl(folder));
 
-                {/* Mulberry Symbol Area */}
-                <div className={`relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 ${buttonSizeStyles.folderSymbolArea}`}>
-                  <img
-                    src={folder.stickerSrc || resolveAacImageUrl(folder)}
-                    alt={folder.label}
-                    className="w-full h-full object-contain rounded-lg pointer-events-none"
-                    loading="lazy"
-                  />
-                </div>
+            return (
+              <div key={folder.id} className="relative group aspect-square">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory(folder.category);
+                    playChime('tap');
+                  }}
+                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
+                    isTurtleTheme
+                      ? 'bg-emerald-50/80 hover:bg-emerald-50 border-emerald-300 text-emerald-950 shadow-[0_4px_10px_rgba(5,150,105,0.08)]'
+                      : 'bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]'
+                  }`}
+                >
+                  {/* Folder Top-Right Corner Tab / Badge */}
+                  <div className={`absolute ${buttonSizeStyles.folderBadge} z-20 ${
+                    isTurtleTheme ? 'bg-emerald-800 text-white' : 'bg-[#4A3E34] text-white'
+                  } font-black flex items-center shadow-2xs pointer-events-none`}>
+                    <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
+                    <span>{t('Folder')}</span>
+                  </div>
 
-                {/* Label */}
-                <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${buttonSizeStyles.folderFont}`}>
-                  {t(folder.label)}
-                </span>
-              </button>
-            </div>
-          ))}
+                  {/* Symbol Area */}
+                  <div className={`relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 ${buttonSizeStyles.folderSymbolArea}`}>
+                    <img
+                      src={stickerSrc}
+                      alt={folder.label}
+                      className="w-full h-full object-contain rounded-lg pointer-events-none"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Label */}
+                  <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none ${
+                    isTurtleTheme ? 'text-emerald-950' : 'text-[#2D241E]'
+                  } drop-shadow-xs w-full mt-1 ${buttonSizeStyles.folderFont}`}>
+                    {t(folder.label)}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
 
           {/* MAIN VOCABULARY TILES */}
           {displayedItems.map((item) => {
