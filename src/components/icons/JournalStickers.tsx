@@ -11,30 +11,33 @@ interface StickerProps {
   size?: number;
 }
 
-function checkIsTurtleThemeActive(): boolean {
+function checkActiveThemeCategory(): string {
   try {
     if (typeof document !== 'undefined') {
       const cat = document.documentElement.dataset.themeCategory;
       const id = document.documentElement.dataset.themeId;
-      if (cat === 'turtle' || id === 'theme-turtle') return true;
-      if (id && id !== 'theme-turtle' && cat !== 'turtle') return false;
+      if (cat === 'turtle' || id === 'theme-turtle') return 'turtle';
+      if (cat === 'dinosaur' || id === 'theme-dino') return 'dinosaur';
+      if (cat === 'frog' || id === 'theme-frog') return 'frog';
     }
     if (typeof localStorage !== 'undefined') {
       const savedId = localStorage.getItem('beeyou_active_theme_id');
-      if (savedId === 'theme-turtle') return true;
+      if (savedId === 'theme-turtle') return 'turtle';
+      if (savedId === 'theme-dino') return 'dinosaur';
+      if (savedId === 'theme-frog') return 'frog';
     }
   } catch (e) {}
-  return false;
+  return 'default';
 }
 
-function useIsTurtleTheme(): boolean {
-  const [isTurtle, setIsTurtle] = useState<boolean>(() => checkIsTurtleThemeActive());
+function useActiveThemeCategory(): string {
+  const [theme, setTheme] = useState<string>(() => checkActiveThemeCategory());
 
   useEffect(() => {
     const sync = () => {
-      const active = checkIsTurtleThemeActive();
-      setIsTurtle(active);
-      if (active) {
+      const active = checkActiveThemeCategory();
+      setTheme(active);
+      if (active === 'turtle') {
         preloadTurtleThemeStickers();
       }
     };
@@ -47,29 +50,52 @@ function useIsTurtleTheme(): boolean {
     };
   }, []);
 
-  return isTurtle;
+  return theme;
+}
+
+function useIsTurtleTheme(): boolean {
+  return useActiveThemeCategory() === 'turtle';
+}
+
+function useIsDinoTheme(): boolean {
+  return useActiveThemeCategory() === 'dinosaur';
 }
 
 const renderStickerPng = (src: string, alt: string) => {
-  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => (
-    <img
-      src={src}
-      alt={alt}
-      className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
-      style={size ? { width: size, height: size } : undefined}
-      loading="eager"
-      decoding="auto"
-    />
-  );
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
+    const theme = useActiveThemeCategory();
+    let currentSrc = src;
+    if (theme === 'turtle' && TURTLE_STICKER_SWAPS[src]) {
+      currentSrc = TURTLE_STICKER_SWAPS[src];
+    } else if (theme === 'dinosaur' && DINO_STICKER_SWAPS[src]) {
+      currentSrc = DINO_STICKER_SWAPS[src];
+    }
+    return (
+      <img
+        src={currentSrc}
+        alt={alt}
+        className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
+        style={size ? { width: size, height: size } : undefined}
+        loading="eager"
+        decoding="auto"
+      />
+    );
+  };
   return Component;
 };
 
-const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string) => {
+const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
-    const isTurtle = useIsTurtleTheme();
+    const theme = useActiveThemeCategory();
+    let currentSrc = defaultSrc;
+    if (theme === 'turtle') {
+      currentSrc = turtleSrc || TURTLE_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'dinosaur') {
+      currentSrc = dinoSrc || DINO_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    }
     return (
       <img
-        src={isTurtle ? turtleSrc : defaultSrc}
+        src={currentSrc}
         alt={alt}
         className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
         style={size ? { width: size, height: size } : undefined}
@@ -955,6 +981,33 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/tablet_ipad.png': '/assets/stickers/turtle_bamboo_tablet.png',
 };
 
+export const DINO_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1: Core Routines & Favorites
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/dino_stone_tumbler_water.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
+  '/assets/stickers/drink_cup.png': '/assets/stickers/dino_stone_tumbler_water.png',
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/dino_fern_nest_sleep.png',
+  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/dino_fern_nest_sleep.png',
+  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/dino_cavern_retreat.png',
+  '/assets/stickers/breathing_cloud.png': '/assets/stickers/dino_cavern_retreat.png',
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/dino_sundial_clock.png',
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/dino_spike_hoodie.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/dino_amber_soap.png',
+  '/assets/stickers/toothbrush.png': '/assets/stickers/dino_bone_toothbrush.png',
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/dino_forager_feast_bowl.png',
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/dino_forager_feast_bowl.png',
+  '/assets/stickers/backpack_school.png': '/assets/stickers/dino_expedition_backpack.png',
+  '/assets/stickers/fav_lego.png': '/assets/stickers/dino_wooden_stacking_blocks.png',
+  '/assets/stickers/fav_outside.png': '/assets/stickers/dino_cycad_palm_tree.png',
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/dino_triceratops_frill_heart.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/dino_warm_spring_bath.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/dino_warm_spring_bath.png',
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/dino_ankylosaurus_shield_sos.png',
+  '/assets/stickers/help_sos.png': '/assets/stickers/dino_ankylosaurus_shield_sos.png',
+  '/assets/stickers/schedule_calendar.png': '/assets/stickers/dino_slate_checklist_tablet.png',
+  '/assets/stickers/locker_schedule.png': '/assets/stickers/dino_slate_checklist_tablet.png',
+};
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -968,11 +1021,18 @@ export const RoutineStickerIcon: React.FC<{
 }> = ({ emoji, title, className = 'w-8 h-8', size }) => {
   const normEmoji = (emoji || '').trim();
   const normTitle = (title || '').toLowerCase();
-  const isTurtle = useIsTurtleTheme();
+  const activeTheme = useActiveThemeCategory();
+  const isTurtle = activeTheme === 'turtle';
+  const isDino = activeTheme === 'dinosaur';
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
-    const finalSrc = (isTurtle && TURTLE_STICKER_SWAPS[normEmoji]) ? TURTLE_STICKER_SWAPS[normEmoji] : normEmoji;
+    let finalSrc = normEmoji;
+    if (isTurtle && TURTLE_STICKER_SWAPS[normEmoji]) {
+      finalSrc = TURTLE_STICKER_SWAPS[normEmoji];
+    } else if (isDino && DINO_STICKER_SWAPS[normEmoji]) {
+      finalSrc = DINO_STICKER_SWAPS[normEmoji];
+    }
     return (
       <img
         src={finalSrc}
