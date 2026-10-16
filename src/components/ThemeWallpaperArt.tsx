@@ -149,6 +149,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     category === 'turtle' ||
     pattern === 'turtle_shell';
 
+  // Check if Steam Express is active (by wallpaperUrl, category, or pattern)
+  const isSteamExpress =
+    wallpaperUrl?.includes('train') ||
+    wallpaperUrl?.includes('steam') ||
+    category === 'train' ||
+    pattern === 'railroad';
+
   // Check if Default Honey Theme is active
   const isHoneyClassic =
     wallpaperUrl?.includes('honey') ||
@@ -164,9 +171,11 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
         ? '/assets/wallpapers/dino_kingdom_bg.webp'
         : isTurtleSanctuary
           ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
-          : isHoneyClassic
-            ? '/assets/wallpapers/default_honey_theme_bg.webp'
-            : undefined);
+          : isSteamExpress
+            ? '/assets/wallpapers/steam_express_bg.webp'
+            : isHoneyClassic
+              ? '/assets/wallpapers/default_honey_theme_bg.webp'
+              : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 

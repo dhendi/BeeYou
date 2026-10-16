@@ -178,6 +178,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-sky-50 via-slate-50 to-amber-50',
       headerBg: 'bg-sky-100/90 border-sky-300',
       navActiveBg: 'bg-sky-500 text-white shadow-md ring-2 ring-sky-600',
+      wallpaperUrl: '/assets/wallpapers/steam_express_bg.webp',
     },
     wallpaperPattern: 'railroad',
     aacStyling: {
