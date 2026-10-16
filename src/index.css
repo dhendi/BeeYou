@@ -164,15 +164,21 @@
     print-color-adjust: exact !important;
   }
 
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
   #beeyou-printable-document {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
     width: 100% !important;
     max-width: 100% !important;
     min-height: 0 !important;
-    margin: 0 !important;
-    padding: 8mm !important;
+    margin: 0 auto !important;
+    padding: 6mm !important;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;

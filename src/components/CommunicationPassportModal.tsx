@@ -41,7 +41,10 @@ export const CommunicationPassportModal: React.FC = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    playChime('star');
+    setTimeout(() => {
+      window.print();
+    }, 60);
   };
 
   const SectionCard: React.FC<{
@@ -54,91 +57,103 @@ export const CommunicationPassportModal: React.FC = () => {
   }> = ({ title, emoji, sectionKey, items, bg, border }) => {
     const isOpen = expanded[sectionKey] !== false;
     return (
-      <div className={`rounded-2xl border-2 ${border} ${bg} overflow-hidden`}>
+      <div className={`rounded-2xl border-2 ${border} ${bg} overflow-hidden print-avoid-break print:border print:border-slate-300 print:bg-white`}>
         <button
+          type="button"
           onClick={() => setExpanded((p) => ({ ...p, [sectionKey]: !isOpen }))}
-          className="w-full flex items-center justify-between p-3.5 cursor-pointer"
+          className="w-full flex items-center justify-between p-3.5 cursor-pointer text-left"
         >
           <div className="flex items-center gap-2.5">
             <RoutineStickerIcon emoji={emoji} title={title} className="w-6 h-6 object-contain shrink-0" />
             <span className="font-black text-sm text-slate-800">{title}</span>
             <span className="text-xs text-slate-500 font-medium">({items.length})</span>
           </div>
-          {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          <span className="no-print">
+            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </span>
         </button>
 
-        {isOpen && (
-          <div className="px-3.5 pb-3.5 space-y-2">
-            {items.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-white/80 rounded-xl px-3 py-2">
+        <div className={`px-3.5 pb-3.5 space-y-2 ${isOpen ? 'block' : 'hidden print:block'}`}>
+          {items.length === 0 ? (
+            <p className="text-xs text-slate-400 italic px-2">No items listed yet.</p>
+          ) : (
+            items.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 bg-white/80 rounded-xl px-3 py-2 print:bg-white print:border print:border-slate-200">
                 <span className="flex-1 text-sm font-medium text-slate-700">{item}</span>
                 <button
+                  type="button"
                   onClick={() => removeItem(sectionKey, idx)}
-                  className="text-slate-300 hover:text-red-400 transition-colors cursor-pointer"
+                  className="text-slate-300 hover:text-red-400 transition-colors cursor-pointer no-print"
+                  title="Remove item"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ))}
-            <div className="flex gap-2 mt-2">
-              <input
-                type="text"
-                value={editingSection === sectionKey ? newItem : ''}
-                onFocus={() => { setEditingSection(sectionKey); setNewItem(''); }}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder={`Add ${title.toLowerCase()}...`}
-                className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium"
-                onKeyDown={(e) => e.key === 'Enter' && editingSection === sectionKey && addItem(sectionKey)}
-              />
-              <button
-                onClick={() => editingSection === sectionKey && addItem(sectionKey)}
-                className="px-3 py-2 rounded-xl bg-slate-700 text-white text-xs font-bold cursor-pointer hover:bg-slate-800 transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            ))
+          )}
+          <div className="flex gap-2 mt-2 no-print">
+            <input
+              type="text"
+              value={editingSection === sectionKey ? newItem : ''}
+              onFocus={() => { setEditingSection(sectionKey); setNewItem(''); }}
+              onChange={(e) => setNewItem(e.target.value)}
+              placeholder={`Add ${title.toLowerCase()}...`}
+              className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium"
+              onKeyDown={(e) => e.key === 'Enter' && editingSection === sectionKey && addItem(sectionKey)}
+            />
+            <button
+              type="button"
+              onClick={() => editingSection === sectionKey && addItem(sectionKey)}
+              className="px-3 py-2 rounded-xl bg-slate-700 text-white text-xs font-bold cursor-pointer hover:bg-slate-800 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
           </div>
-        )}
+        </div>
       </div>
     );
   };
 
   return (
-    <>
-      {/* Print styles */}
-      <style>{`
-        @media print {
-          body > *:not(.passport-print-root) { display: none !important; }
-          .passport-print-root { display: block !important; position: fixed; inset: 0; z-index: 99999; background: white; }
-          .no-print { display: none !important; }
-        }
-      `}</style>
-
-      <div className="fixed inset-0 z-[200] flex flex-col bg-white/95 backdrop-blur-sm overflow-y-auto passport-print-root">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white border-b border-slate-100 z-10 no-print">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Communication Passport</p>
-            <h2 className="text-xl font-black text-slate-800">How to Support {childProfile.name}</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold cursor-pointer hover:bg-slate-900 transition-all"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print / Save PDF</span>
-            </button>
-            <button
-              onClick={() => setShowPassportModal(false)}
-              className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
-            >
-              <X className="w-4 h-4 text-slate-600" />
-            </button>
-          </div>
+    <div 
+      id="beeyou-print-modal-backdrop" 
+      className="fixed inset-0 z-[200] flex flex-col bg-white/95 backdrop-blur-sm overflow-y-auto print-schedule-root"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-5 pb-3 sticky top-0 bg-white border-b border-slate-100 z-10 no-print">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Communication Passport</p>
+          <h2 className="text-xl font-black text-slate-800">How to Support {childProfile.name}</h2>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold cursor-pointer hover:bg-slate-900 transition-all shadow-xs active:scale-95"
+            title="Print or Save as PDF"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Print / Save PDF</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowPassportModal(false);
+              playChime('tap');
+            }}
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-all"
+            title="Close"
+          >
+            <X className="w-4 h-4 text-slate-600" />
+          </button>
+        </div>
+      </div>
 
-        <div ref={printRef} className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-4">
+      <div 
+        ref={printRef} 
+        id="beeyou-printable-document" 
+        className="flex-1 px-4 py-5 max-w-xl mx-auto w-full space-y-4 print:p-0 print:m-0 print:max-w-none print:w-full"
+      >
           {/* Identity Card */}
           <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-5 text-white">
             <div className="flex items-center gap-4">
@@ -154,7 +169,7 @@ export const CommunicationPassportModal: React.FC = () => {
           </div>
 
           {/* Communication Style */}
-          <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4">
+          <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 print-avoid-break print:border print:border-slate-300 print:bg-white">
             <div className="flex items-center gap-2 mb-2">
               <RoutineStickerIcon emoji="💬" title="How I Communicate" className="w-6 h-6 object-contain shrink-0" />
               <span className="font-black text-sm text-slate-800">How I Communicate</span>
@@ -162,10 +177,13 @@ export const CommunicationPassportModal: React.FC = () => {
             <textarea
               value={communicationPassport.communicationStyle}
               onChange={(e) => updateCommunicationPassport({ communicationStyle: e.target.value })}
-              className="w-full bg-white/80 border border-blue-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 resize-none"
+              className="w-full bg-white/80 border border-blue-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 resize-none no-print"
               rows={3}
               placeholder="Describe your communication style..."
             />
+            <div className="hidden print:block bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 whitespace-pre-wrap">
+              {communicationPassport.communicationStyle || 'No notes specified.'}
+            </div>
           </div>
 
           <SectionCard
@@ -205,7 +223,7 @@ export const CommunicationPassportModal: React.FC = () => {
           />
 
           {/* Emergency Note */}
-          <div className="rounded-2xl border-2 border-rose-200 bg-rose-50 p-4">
+          <div className="rounded-2xl border-2 border-rose-200 bg-rose-50 p-4 print-avoid-break print:border print:border-slate-300 print:bg-white">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl">🚨</span>
               <span className="font-black text-sm text-slate-800">Emergency Note</span>
@@ -213,10 +231,13 @@ export const CommunicationPassportModal: React.FC = () => {
             <textarea
               value={communicationPassport.emergencyNote || ''}
               onChange={(e) => updateCommunicationPassport({ emergencyNote: e.target.value })}
-              className="w-full bg-white/80 border border-rose-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 resize-none"
+              className="w-full bg-white/80 border border-rose-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 resize-none no-print"
               rows={2}
               placeholder="e.g. If overwhelmed, please call Mom: 555-1234"
             />
+            <div className="hidden print:block bg-white border border-rose-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 whitespace-pre-wrap">
+              {communicationPassport.emergencyNote || 'None specified.'}
+            </div>
           </div>
 
           {/* Footer */}
@@ -225,6 +246,5 @@ export const CommunicationPassportModal: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
