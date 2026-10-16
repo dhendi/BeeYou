@@ -449,6 +449,7 @@ export const PajamasShortsSticker = renderThemedStickerPng(
 );
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
 export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
+export const FrogMascotSticker = renderStickerPng('/assets/stickers/frog_mascot.png', 'Hoppy the Tree Frog');
 export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
 export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.png', 'Serene Lagoon & Reeds');
 export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
@@ -1292,6 +1293,16 @@ export const RoutineStickerIcon: React.FC<{
 
   // 📅 Visual Schedule & Routine / Calendar
   if (normEmoji === '📅' || normTitle.includes('visual schedule') || normTitle.includes('schedule & routine') || normTitle.includes('calendar')) return <ScheduleCalendarSticker className={className} size={size} />;
+  // 🐸 Frog / Ribbit Pond Themed Mascot & Stickers
+  if (
+    normEmoji === '🐸' ||
+    normEmoji.includes('frog') ||
+    normTitle.includes('frog') ||
+    normTitle.includes('hoppy') ||
+    (isFrog && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+  ) {
+    return <FrogMascotSticker className={className} size={size} />;
+  }
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
   // 🐢 Turtle Sanctuary Themed Stickers
