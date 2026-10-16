@@ -51,6 +51,8 @@ import {
   PlansChangeStorySticker,
   RoutineStickerIcon,
   OutdoorSunSticker,
+  TurtleLilyPadsSticker,
+  TurtleWelcomeSignSticker,
 } from './icons/JournalStickers';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
@@ -104,6 +106,7 @@ export const ChildHomeView: React.FC = () => {
   } = useApp();
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const latestMoodEntry = moodJournalEntries[0];
@@ -395,9 +398,14 @@ export const ChildHomeView: React.FC = () => {
                       />
                     </button>
                     <div className="min-w-0">
-                      <h2 className={`text-xl sm:text-2xl font-black ${themeStyles.headerText} tracking-tight leading-none truncate`}>
-                        {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`}
-                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className={`text-xl sm:text-2xl font-black ${themeStyles.headerText} tracking-tight leading-none truncate`}>
+                          {displayName ? `${t('Hi')}, ${displayName}!` : `${t('Welcome to BeeYou')}!`}
+                        </h2>
+                        {isTurtleTheme && (
+                          <TurtleWelcomeSignSticker size={28} className="w-7 h-7 shrink-0 object-contain drop-shadow-2xs" />
+                        )}
+                      </div>
                       <p className={`text-xs ${themeStyles.headerSubtext} font-semibold mt-1 truncate`}>
                         {activeTheme?.greetingMessage ? t(activeTheme.greetingMessage) : t("Let's have a calm, wonderful day!")}
                       </p>
@@ -440,7 +448,11 @@ export const ChildHomeView: React.FC = () => {
                     }}
                     className={themeStyles.quickAacCalm}
                   >
-                    <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
+                    {isTurtleTheme ? (
+                      <TurtleLilyPadsSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
+                    ) : (
+                      <FavQuietBreakSticker size={24} className="w-6 h-6 shrink-0 drop-shadow-xs" />
+                    )}
                     <span>{t('Calm down')}</span>
                   </button>
                   <button

@@ -121,6 +121,11 @@ export const LockerScheduleSticker = renderStickerPng('/assets/stickers/locker_s
 export const PajamasShortsSticker = renderStickerPng('/assets/stickers/pajamas_shorts.png', 'Put on Pajamas');
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
 export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
+export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
+export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.png', 'Serene Lagoon & Reeds');
+export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
+export const TurtleWaterDropSticker = renderStickerPng('/assets/stickers/turtle_leaf_water_drop.png', 'Leaf with Water Dewdrop');
+export const TurtleWelcomeSignSticker = renderStickerPng('/assets/stickers/turtle_welcome_sign.png', 'Welcome Sign with Vines');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges

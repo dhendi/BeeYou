@@ -10,6 +10,8 @@ import {
   MusicSensorySticker,
   ConnectHeartSticker,
   SpoonSticker,
+  TurtlePondReedsSticker,
+  TurtleRiverStoneSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
@@ -31,6 +33,7 @@ export const ToolsView: React.FC = () => {
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
 
@@ -91,7 +94,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Sensory Grounding',
       badgeClass: 'bg-cyan-100 text-cyan-800 border-cyan-200',
       color: 'border-2 border-cyan-300/80 bg-cyan-50/40 hover:bg-cyan-50/80 text-cyan-950',
-      Sticker: ConnectHeartSticker,
+      Sticker: isTurtleTheme ? TurtleRiverStoneSticker : ConnectHeartSticker,
       action: () => openCopingToolkit('grounding'),
     },
 
@@ -104,7 +107,7 @@ export const ToolsView: React.FC = () => {
       badge: 'Soundscapes',
       badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
       color: 'border-2 border-indigo-300/80 bg-indigo-50/40 hover:bg-indigo-50/80 text-indigo-950',
-      Sticker: MusicSensorySticker,
+      Sticker: isTurtleTheme ? TurtlePondReedsSticker : MusicSensorySticker,
       action: () => openCopingToolkit('sound'),
     },
 
