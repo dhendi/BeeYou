@@ -1169,6 +1169,26 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/language_globe.png': '/assets/stickers/frog_pond_biome_globe.png',
   '/assets/stickers/trial_crown.png': '/assets/stickers/frog_golden_lotus_crown.png',
   '/assets/stickers/refresh_repeat.png': '/assets/stickers/frog_tadpole_swim_loop.png',
+  // Batch 3: School, Play & Daily Tools
+  '/assets/stickers/school_bus.png': '/assets/stickers/frog_bamboo_ferry_bus.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/frog_terrarium_science_flask.png',
+  '/assets/stickers/art_palette.png': '/assets/stickers/frog_pebble_art_palette.png',
+  '/assets/stickers/art_crafts.png': '/assets/stickers/frog_pebble_art_palette.png',
+  '/assets/stickers/pencil_write.png': '/assets/stickers/frog_bamboo_pencil.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/frog_bamboo_pencil.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/frog_reed_school_folder.png',
+  '/assets/stickers/playground_swings.png': '/assets/stickers/frog_willow_slide_swings.png',
+  '/assets/stickers/playground_recess.png': '/assets/stickers/frog_willow_slide_swings.png',
+  '/assets/stickers/apple_snack.png': '/assets/stickers/frog_pond_berry_snack.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/frog_lily_pajamas_sleep.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/frog_lily_pajamas_sleep.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/frog_reed_cart_ride.png',
+  '/assets/stickers/tablet_ipad.png': '/assets/stickers/frog_bamboo_tablet_ipad.png',
+  '/assets/stickers/toy_box.png': '/assets/stickers/frog_seagrass_toy_box.png',
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/frog_bamboo_energy_spoons.png',
+  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/frog_pond_dewdrop_bubbles.png',
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/frog_lotus_decision_wheel.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/frog_lily_pad_wall_clock.png',
 };
 
 /**
