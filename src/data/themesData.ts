@@ -349,7 +349,7 @@ export const PRESET_THEMES: AppTheme[] = [
       cardBg: 'bg-white/80 border-2 border-amber-300/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)]',
       cardInnerBg: 'bg-amber-100/70 border border-amber-300/80 shadow-2xs',
       designStyle: 'neumorphism',
-      wallpaperUrl: '/assets/wallpapers/default_honey_theme_bg.jpg',
+      wallpaperUrl: '/assets/wallpapers/default_honey_theme_bg.webp',
     },
     wallpaperPattern: 'honeycomb_clouds',
     aacStyling: {

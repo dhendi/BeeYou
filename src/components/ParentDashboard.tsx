@@ -478,7 +478,7 @@ export const ParentDashboard: React.FC = () => {
   return (
     <div
       ref={dashboardScrollRef}
-      className={`h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain ${activeTheme?.palette?.appBg || 'bg-[#FAF8F5]'} flex flex-col text-slate-800 transition-colors duration-300`}
+      className="h-[100dvh] max-h-[100dvh] w-full overflow-y-auto overscroll-contain bg-transparent flex flex-col text-slate-800 transition-colors duration-300"
     >
       {/* Top Caregiver Header */}
       <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md text-slate-900 px-3 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs border-b border-stone-200/70 transition-colors duration-300`}>
