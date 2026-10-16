@@ -1,8 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface StickerProps {
   className?: string;
   size?: number;
+}
+
+function checkIsTurtleThemeActive(): boolean {
+  try {
+    if (typeof document !== 'undefined') {
+      const cat = document.documentElement.dataset.themeCategory;
+      const id = document.documentElement.dataset.themeId;
+      if (cat === 'turtle' || id === 'theme-turtle') return true;
+      if (id && id !== 'theme-turtle' && cat !== 'turtle') return false;
+    }
+    if (typeof localStorage !== 'undefined') {
+      const savedId = localStorage.getItem('beeyou_active_theme_id');
+      if (savedId === 'theme-turtle') return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function useIsTurtleTheme(): boolean {
+  const [isTurtle, setIsTurtle] = useState<boolean>(() => checkIsTurtleThemeActive());
+
+  useEffect(() => {
+    const sync = () => setIsTurtle(checkIsTurtleThemeActive());
+    sync();
+    window.addEventListener('beeyou-theme-change', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('beeyou-theme-change', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  return isTurtle;
 }
 
 const renderStickerPng = (src: string, alt: string) => {
@@ -16,6 +49,23 @@ const renderStickerPng = (src: string, alt: string) => {
       decoding="async"
     />
   );
+  return Component;
+};
+
+const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string) => {
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size }) => {
+    const isTurtle = useIsTurtleTheme();
+    return (
+      <img
+        src={isTurtle ? turtleSrc : defaultSrc}
+        alt={alt}
+        className={`${className} object-contain select-none pointer-events-none drop-shadow-2xs`}
+        style={size ? { width: size, height: size } : undefined}
+        loading="eager"
+        decoding="async"
+      />
+    );
+  };
   return Component;
 };
 
@@ -40,8 +90,12 @@ export const ConnectHeartSticker = renderStickerPng('/assets/stickers/caregiver_
 // 🪪 About Me ID Card (Hand-drawn lanyard ID badge from reference)
 export const IdCardSticker = renderStickerPng('/assets/stickers/about_id.png', 'About Me ID');
 
-// 📖 Passport / Reading Book (Hand-drawn open book with bookmark from reference)
-export const ReadingBookSticker = renderStickerPng('/assets/stickers/passport_book.png', 'Reading Book');
+// 📖 Passport / Reading Book (Swaps to Firefly Lantern & Scroll in Turtle Sanctuary theme)
+export const ReadingBookSticker = renderThemedStickerPng(
+  '/assets/stickers/passport_book.png',
+  '/assets/stickers/turtle_firefly_lantern_book.png',
+  'Reading Book'
+);
 
 // 💬 Quick Phrases (Cute olive and tan speech bubbles from reference)
 export const QuickPhrasesSticker = renderStickerPng('/assets/stickers/quick_phrases.png', 'Quick Phrases');
@@ -59,9 +113,17 @@ export const MedicationSticker = renderStickerPng('/assets/stickers/medications_
 export const EveningMoonSticker = renderStickerPng('/assets/stickers/evening_moon.png', 'Evening Moon');
 
 // Routine, Wellness & Activity stickers
-export const ToothbrushSticker = renderStickerPng('/assets/stickers/toothbrush.png', 'Toothbrush');
+export const ToothbrushSticker = renderThemedStickerPng(
+  '/assets/stickers/toothbrush.png',
+  '/assets/stickers/turtle_bamboo_toothbrush.png',
+  'Toothbrush'
+);
 export const ToyBoxSticker = renderStickerPng('/assets/stickers/toy_box.png', 'Clean Up Toys');
-export const GetDressedSticker = renderStickerPng('/assets/stickers/clothes_dressed.png', 'Get Dressed');
+export const GetDressedSticker = renderThemedStickerPng(
+  '/assets/stickers/clothes_dressed.png',
+  '/assets/stickers/turtle_cozy_hoodie.png',
+  'Get Dressed'
+);
 export const WashHandsSticker = renderStickerPng('/assets/stickers/soap_wash_hands.png', 'Wash Hands');
 export const QuietTimeSticker = renderStickerPng('/assets/stickers/breathing_cloud.png', 'Quiet Time');
 export const SpoonSticker = renderStickerPng('/assets/stickers/spoons_energy.png', 'Spoon Energy');
@@ -71,15 +133,31 @@ export const TabletIpadSticker = renderStickerPng('/assets/stickers/tablet_ipad.
 // Morning Routine & School Step Stickers
 export const AlarmClockSticker = renderStickerPng('/assets/stickers/alarm_clock.png', 'Wake Up Alarm Clock');
 export const ToiletSticker = renderStickerPng('/assets/stickers/routine_toilet_restroom.png', 'Toilet Restroom');
-export const PancakesSticker = renderStickerPng('/assets/stickers/pancakes_breakfast.png', 'Breakfast Pancakes');
-export const BackpackSticker = renderStickerPng('/assets/stickers/backpack_school.png', 'School Backpack');
+export const PancakesSticker = renderThemedStickerPng(
+  '/assets/stickers/pancakes_breakfast.png',
+  '/assets/stickers/turtle_clover_berry_feast.png',
+  'Breakfast Pancakes'
+);
+export const BackpackSticker = renderThemedStickerPng(
+  '/assets/stickers/backpack_school.png',
+  '/assets/stickers/turtle_shell_backpack.png',
+  'School Backpack'
+);
 export const SneakersSticker = renderStickerPng('/assets/stickers/sneaker_shoes.png', 'Shoes Sneakers');
 export const AppleSticker = renderStickerPng('/assets/stickers/apple_snack.png', 'Healthy Apple Snack');
 export const FolderSticker = renderStickerPng('/assets/stickers/folder_schoolwork.png', 'School Binder Folder');
 export const PencilSticker = renderStickerPng('/assets/stickers/pencil_write.png', 'Pencil Writing');
 export const TeddyBearSticker = renderStickerPng('/assets/stickers/teddy_bear.png', 'Teddy Bear Play');
-export const ShowerSticker = renderStickerPng('/assets/stickers/shower_wash.png', 'Shower Wash');
-export const SchoolBusSticker = renderStickerPng('/assets/stickers/school_bus.png', 'School Bus');
+export const ShowerSticker = renderThemedStickerPng(
+  '/assets/stickers/shower_wash.png',
+  '/assets/stickers/turtle_warm_spring_bath.png',
+  'Shower Wash'
+);
+export const SchoolBusSticker = renderThemedStickerPng(
+  '/assets/stickers/school_bus.png',
+  '/assets/stickers/turtle_bamboo_ferry.png',
+  'School Bus'
+);
 export const ScienceFlaskSticker = renderStickerPng('/assets/stickers/science_flask.png', 'Science Flask');
 
 // Onboarding, Personas & Feature Stickers
@@ -98,10 +176,18 @@ export const PetCareSticker = renderStickerPng('/assets/stickers/pet_care.png', 
 export const MusicSensorySticker = renderStickerPng('/assets/stickers/music_sensory.png', 'Music Sensory');
 export const OutdoorSunSticker = renderStickerPng('/assets/stickers/outdoor_sun.png', 'Outdoor Sunshine');
 export const HomeworkStudySticker = renderStickerPng('/assets/stickers/homework_study.png', 'Homework Study');
-export const ArtCraftsSticker = renderStickerPng('/assets/stickers/art_crafts.png', 'Art Crafts');
+export const ArtCraftsSticker = renderThemedStickerPng(
+  '/assets/stickers/art_crafts.png',
+  '/assets/stickers/turtle_pebble_paint_palette.png',
+  'Art Crafts'
+);
 export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Star');
 export const RewardTrophySticker = renderStickerPng('/assets/stickers/reward_trophy.png', 'Reward Trophy');
-export const BathTimeSticker = renderStickerPng('/assets/stickers/bath_time.png', 'Bath Time');
+export const BathTimeSticker = renderThemedStickerPng(
+  '/assets/stickers/bath_time.png',
+  '/assets/stickers/turtle_warm_spring_bath.png',
+  'Bath Time'
+);
 export const DinnerBowlSticker = renderStickerPng('/assets/stickers/dinner_bowl.png', 'Dinner Plate');
 export const DrinkCupSticker = renderStickerPng('/assets/stickers/drink_cup.png', 'Drink Cup');
 export const CandyTreatSticker = renderStickerPng('/assets/stickers/candy_treat.png', 'Candy Treat');
@@ -132,6 +218,16 @@ export const TurtleTracksSticker = renderStickerPng('/assets/stickers/turtle_tra
 export const TurtleSeedlingSticker = renderStickerPng('/assets/stickers/turtle_sprouting_seedling.png', 'Sprouting Seedling in Soil');
 export const TurtleEggNestSticker = renderStickerPng('/assets/stickers/turtle_egg_nest.png', 'Speckled Egg in Sand Nest');
 export const TurtleSwimmingSticker = renderStickerPng('/assets/stickers/turtle_swimming.png', 'Swimming Turtle (Pacing)');
+export const TurtleShellBackpackSticker = renderStickerPng('/assets/stickers/turtle_shell_backpack.png', 'Turtle Shell Backpack');
+export const TurtleBambooToothbrushSticker = renderStickerPng('/assets/stickers/turtle_bamboo_toothbrush.png', 'Bamboo Brush & Sea Sponge');
+export const TurtleCloverBerryFeastSticker = renderStickerPng('/assets/stickers/turtle_clover_berry_feast.png', 'Clover & Berry Feast');
+export const TurtleCozyHoodieSticker = renderStickerPng('/assets/stickers/turtle_cozy_hoodie.png', 'Cozy Turtle Hoodie');
+export const TurtleWarmSpringBathSticker = renderStickerPng('/assets/stickers/turtle_warm_spring_bath.png', 'Warm Spring Waterfall');
+export const TurtleTreehouseGazeboSticker = renderStickerPng('/assets/stickers/turtle_treehouse_gazebo.png', 'Canopy Treehouse Gazebo');
+export const TurtleBambooFerrySticker = renderStickerPng('/assets/stickers/turtle_bamboo_ferry.png', 'Tortoise Bamboo Ferry');
+export const TurtleFireflyLanternBookSticker = renderStickerPng('/assets/stickers/turtle_firefly_lantern_book.png', 'Firefly Lantern & Scroll');
+export const TurtlePebblePaintPaletteSticker = renderStickerPng('/assets/stickers/turtle_pebble_paint_palette.png', 'River Pebble Paint Palette');
+export const TurtleHollowLogSlideSticker = renderStickerPng('/assets/stickers/turtle_hollow_log_slide.png', 'Hollow Log Slide');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -151,7 +247,11 @@ export const OfflineStorageSticker = renderStickerPng('/assets/stickers/offline_
 export const SecurityLockSticker = renderStickerPng('/assets/stickers/security_lock.png', 'PIN Security Lock');
 
 // Table A Confirmed Existing Illustrated Stickers
-export const BookStorySticker = renderStickerPng('/assets/stickers/passport_book.png', 'Storybooks Reading');
+export const BookStorySticker = renderThemedStickerPng(
+  '/assets/stickers/passport_book.png',
+  '/assets/stickers/turtle_firefly_lantern_book.png',
+  'Storybooks Reading'
+);
 export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Cozy Armchair Break');
 export const CozyBedSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Cozy Bedroom Bed');
 export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
@@ -251,9 +351,17 @@ export const RainbowWeatherSticker = renderStickerPng('/assets/stickers/rainbow_
 export const HomeHouseSticker = renderStickerPng('/assets/stickers/home_house.png', 'Home House');
 export const TaskDoneSticker = renderStickerPng('/assets/stickers/task_done.png', 'Task Done Checkmark');
 export const TherapyBrainSticker = renderStickerPng('/assets/stickers/therapy_brain.png', 'Therapy & Sensory Brain');
-export const SchoolBuildingSticker = renderStickerPng('/assets/stickers/school_building.png', 'School Building');
+export const SchoolBuildingSticker = renderThemedStickerPng(
+  '/assets/stickers/school_building.png',
+  '/assets/stickers/turtle_treehouse_gazebo.png',
+  'School Building'
+);
 export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
-export const PlaygroundSwingsSticker = renderStickerPng('/assets/stickers/playground_swings.png', 'Playground Swings');
+export const PlaygroundSwingsSticker = renderThemedStickerPng(
+  '/assets/stickers/playground_swings.png',
+  '/assets/stickers/turtle_hollow_log_slide.png',
+  'Playground Swings'
+);
 
 // Morning Mood & Emotion Yellow Stickers
 export const MoodHappySticker = renderStickerPng('/assets/stickers/mood_happy.png', 'Happy Mood');
@@ -264,7 +372,11 @@ export const MoodUnsureSticker = renderStickerPng('/assets/stickers/mood_unsure.
 
 // Favorite Sentences Yellow Stickers
 export const FavLegoSticker = renderStickerPng('/assets/stickers/fav_lego.png', 'Lego Blocks');
-export const FavBathSticker = renderStickerPng('/assets/stickers/fav_bath.png', 'Take a Bath');
+export const FavBathSticker = renderThemedStickerPng(
+  '/assets/stickers/fav_bath.png',
+  '/assets/stickers/turtle_warm_spring_bath.png',
+  'Take a Bath'
+);
 export const FavSandwichSticker = renderStickerPng('/assets/stickers/fav_sandwich.png', 'Sandwich Snack');
 export const FavWaterSticker = renderStickerPng('/assets/stickers/fav_water.png', 'Drink Water');
 export const FavQuietBreakSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Quiet Break');
@@ -318,6 +430,16 @@ export const RoutineStickerIcon: React.FC<{
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;
   // 🐢 Turtle Sanctuary Themed Stickers
   if (normEmoji === '🐢' || normEmoji.includes('turtle') || normTitle.includes('turtle') || normTitle.includes('shelly')) {
+    if (normEmoji.includes('backpack') || normTitle.includes('backpack')) return <TurtleShellBackpackSticker className={className} size={size} />;
+    if (normEmoji.includes('toothbrush') || normTitle.includes('toothbrush') || normTitle.includes('bamboo brush')) return <TurtleBambooToothbrushSticker className={className} size={size} />;
+    if (normEmoji.includes('feast') || normEmoji.includes('clover') || normTitle.includes('feast') || normTitle.includes('clover')) return <TurtleCloverBerryFeastSticker className={className} size={size} />;
+    if (normEmoji.includes('hoodie') || normTitle.includes('hoodie')) return <TurtleCozyHoodieSticker className={className} size={size} />;
+    if (normEmoji.includes('spring') || normTitle.includes('waterfall') || normTitle.includes('warm spring')) return <TurtleWarmSpringBathSticker className={className} size={size} />;
+    if (normEmoji.includes('gazebo') || normEmoji.includes('treehouse') || normTitle.includes('gazebo') || normTitle.includes('treehouse')) return <TurtleTreehouseGazeboSticker className={className} size={size} />;
+    if (normEmoji.includes('ferry') || normTitle.includes('ferry') || normTitle.includes('raft')) return <TurtleBambooFerrySticker className={className} size={size} />;
+    if (normEmoji.includes('lantern') || normTitle.includes('firefly') || normTitle.includes('lantern')) return <TurtleFireflyLanternBookSticker className={className} size={size} />;
+    if (normEmoji.includes('palette') || normEmoji.includes('pebble') || normTitle.includes('palette') || normTitle.includes('pebble')) return <TurtlePebblePaintPaletteSticker className={className} size={size} />;
+    if (normEmoji.includes('slide') || normEmoji.includes('hollow') || normTitle.includes('hollow log') || normTitle.includes('log slide')) return <TurtleHollowLogSlideSticker className={className} size={size} />;
     if (normEmoji.includes('swim') || normTitle.includes('swim') || normTitle.includes('pacing') || normTitle.includes('slow down')) return <TurtleSwimmingSticker className={className} size={size} />;
     if (normEmoji.includes('fern') || normTitle.includes('fern') || normTitle.includes('plant')) return <TurtlePottedFernSticker className={className} size={size} />;
     if (normEmoji.includes('bridge') || normTitle.includes('bridge') || normTitle.includes('transition')) return <TurtleArchedBridgeSticker className={className} size={size} />;

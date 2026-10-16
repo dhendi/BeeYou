@@ -77,6 +77,22 @@ export function useThemeState({
     ? resolvedThemes.find((t) => t.id === 'theme-classic') || PRESET_THEMES.find((t) => t.id === 'theme-classic') || resolvedThemes[0]
     : resolvedThemes.find((t) => t.id === activeThemeId) || resolvedThemes[0] || PRESET_THEMES[0];
 
+  useEffect(() => {
+    try {
+      if (typeof document !== 'undefined' && activeTheme) {
+        document.documentElement.dataset.themeId = activeTheme.id;
+        document.documentElement.dataset.themeCategory = activeTheme.category || '';
+      }
+      if (typeof window !== 'undefined' && activeTheme) {
+        window.dispatchEvent(
+          new CustomEvent('beeyou-theme-change', {
+            detail: { id: activeTheme.id, category: activeTheme.category },
+          })
+        );
+      }
+    } catch (e) {}
+  }, [activeTheme]);
+
   const setTheme = (id: string) => {
     if (!isPremium && id !== 'theme-classic') {
       triggerUpgrade('Themes are a BeeYou Premium feature! Start your 15-day free trial to unlock all themes.');

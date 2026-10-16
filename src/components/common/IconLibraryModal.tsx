@@ -149,6 +149,16 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_tracks', emoji: '/assets/stickers/turtle_tracks.png', label: 'Webbed Turtle Footprints', category: 'turtle', keywords: ['track', 'tracks', 'footprint', 'footprints', 'step', 'walk', 'path', 'shoes'] },
   { id: 'turtle_sprouting_seedling', emoji: '/assets/stickers/turtle_sprouting_seedling.png', label: 'Sprouting Seedling in Soil', category: 'turtle', keywords: ['seedling', 'sprout', 'grow', 'soil', 'learn', 'study', 'school', 'growth'] },
   { id: 'turtle_egg_nest', emoji: '/assets/stickers/turtle_egg_nest.png', label: 'Speckled Egg in Sand Nest', category: 'turtle', keywords: ['egg', 'nest', 'sand', 'bed', 'cozy', 'sleep', 'home', 'night', 'rest'] },
+  { id: 'turtle_shell_backpack', emoji: '/assets/stickers/turtle_shell_backpack.png', label: 'Turtle Shell Backpack', category: 'turtle', keywords: ['backpack', 'bag', 'school', 'pack', 'shell', 'turtle'] },
+  { id: 'turtle_bamboo_toothbrush', emoji: '/assets/stickers/turtle_bamboo_toothbrush.png', label: 'Bamboo Brush & Sea Sponge', category: 'turtle', keywords: ['toothbrush', 'teeth', 'brush', 'bamboo', 'sponge', 'morning', 'night'] },
+  { id: 'turtle_clover_berry_feast', emoji: '/assets/stickers/turtle_clover_berry_feast.png', label: 'Clover & Berry Feast', category: 'turtle', keywords: ['breakfast', 'food', 'eat', 'meal', 'clover', 'berry', 'feast', 'snack'] },
+  { id: 'turtle_cozy_hoodie', emoji: '/assets/stickers/turtle_cozy_hoodie.png', label: 'Cozy Turtle Hoodie', category: 'turtle', keywords: ['clothes', 'dress', 'dressed', 'hoodie', 'shirt', 'sweater', 'wear'] },
+  { id: 'turtle_warm_spring_bath', emoji: '/assets/stickers/turtle_warm_spring_bath.png', label: 'Warm Spring Waterfall', category: 'turtle', keywords: ['bath', 'shower', 'wash', 'spring', 'waterfall', 'water', 'clean'] },
+  { id: 'turtle_treehouse_gazebo', emoji: '/assets/stickers/turtle_treehouse_gazebo.png', label: 'Canopy Treehouse Gazebo', category: 'turtle', keywords: ['school', 'classroom', 'treehouse', 'gazebo', 'building', 'learn'] },
+  { id: 'turtle_bamboo_ferry', emoji: '/assets/stickers/turtle_bamboo_ferry.png', label: 'Tortoise Bamboo Ferry', category: 'turtle', keywords: ['bus', 'ride', 'ferry', 'raft', 'bamboo', 'travel', 'commute', 'school'] },
+  { id: 'turtle_firefly_lantern_book', emoji: '/assets/stickers/turtle_firefly_lantern_book.png', label: 'Firefly Lantern & Scroll', category: 'turtle', keywords: ['read', 'reading', 'book', 'story', 'scroll', 'firefly', 'lantern'] },
+  { id: 'turtle_pebble_paint_palette', emoji: '/assets/stickers/turtle_pebble_paint_palette.png', label: 'River Pebble Paint Palette', category: 'turtle', keywords: ['art', 'paint', 'craft', 'draw', 'palette', 'pebble', 'color'] },
+  { id: 'turtle_hollow_log_slide', emoji: '/assets/stickers/turtle_hollow_log_slide.png', label: 'Hollow Log Slide', category: 'turtle', keywords: ['playground', 'recess', 'slide', 'log', 'play', 'park', 'outside'] },
 ];
 
 export interface IconLibraryModalProps {
