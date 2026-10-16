@@ -760,7 +760,8 @@ export const DentistAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_dentist.png',
   '/assets/stickers/turtle_mineral_polishing_basin.png',
   'Visiting the Dentist',
-  '/assets/stickers/dino_trex_tooth_care.png'
+  '/assets/stickers/dino_trex_tooth_care.png',
+  '/assets/stickers/frog_lotus_dental_station.png'
 );
 export const RestaurantAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_restaurant.png',
@@ -778,7 +779,8 @@ export const DoctorAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_doctor_checkup.png',
   '/assets/stickers/turtle_elder_healer_pouch.png',
   'Doctor Check-Up',
-  '/assets/stickers/dino_healer_stethoscope_bag.png'
+  '/assets/stickers/dino_healer_stethoscope_bag.png',
+  '/assets/stickers/frog_healer_stethoscope_kit.png'
 );
 export const PlansChangeStorySticker = renderStickerPng('/assets/stickers/story_plans_change.png', 'When Plans Change');
 export const BirthdayStorySticker = renderStickerPng('/assets/stickers/story_birthday.png', 'Going to a Birthday Party');
@@ -1189,6 +1191,23 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/fidget_bubbles.png': '/assets/stickers/frog_pond_dewdrop_bubbles.png',
   '/assets/stickers/decision_wheel.png': '/assets/stickers/frog_lotus_decision_wheel.png',
   '/assets/stickers/clock_time.png': '/assets/stickers/frog_lily_pad_wall_clock.png',
+  // Batch 4: Identity, Daily Care & Health
+  '/assets/stickers/about_id.png': '/assets/stickers/frog_explorer_id_badge.png',
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/frog_lotus_dental_station.png',
+  '/assets/stickers/keyboard.png': '/assets/stickers/frog_bamboo_keyboard.png',
+  '/assets/stickers/caregiver_heart.png': '/assets/stickers/frog_caregiver_heart.png',
+  '/assets/stickers/eye_see.png': '/assets/stickers/frog_sensory_eye_stone.png',
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/frog_herbal_tea_mug.png',
+  '/assets/stickers/laundry_hamper.png': '/assets/stickers/frog_reed_laundry_basket.png',
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/frog_honey_seed_snack_bar.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/frog_timber_explorer_trunk.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/frog_whispering_shh.png',
+  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/frog_bamboo_washroom_basin.png',
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/frog_reed_explorer_shoes.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/frog_pond_crescent_moon.png',
+  '/assets/stickers/medications_health.png': '/assets/stickers/frog_herbal_wellness_vial.png',
+  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/frog_herbal_wellness_vial.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
 };
 
 /**
