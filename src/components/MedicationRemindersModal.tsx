@@ -158,9 +158,9 @@ export const MedicationRemindersModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 border-indigo-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 border-amber-300 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
+        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center p-1 shadow-inner backdrop-blur-xs">
               <RoutineStickerIcon emoji="💊" title="Medications" className="w-8 h-8 object-contain drop-shadow-2xs" />
@@ -170,8 +170,8 @@ export const MedicationRemindersModal: React.FC = () => {
                 <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
                   Health & Care
                 </span>
-                <span className="text-xs text-white/80 font-medium">
-                  {childProfile.name}'s Routine
+                <span className="text-xs text-white/90 font-medium">
+                  {childProfile.name ? `${childProfile.name}'s Routine` : 'Daily Health Routine'}
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
@@ -212,7 +212,7 @@ export const MedicationRemindersModal: React.FC = () => {
         )}
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 shrink-0">
+        <div className="flex border-b border-amber-200/80 bg-amber-50/40 p-2 gap-1 shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -221,13 +221,13 @@ export const MedicationRemindersModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'schedule'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
-                : 'text-slate-600 hover:bg-white/60'
+                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                : 'text-stone-600 hover:bg-white/60'
             }`}
           >
             <Calendar className="w-4 h-4" />
             <span>Today's Doses</span>
-            <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800">
+            <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-950 border border-amber-200/80">
               {takenDosesCount}/{totalDosesCount}
             </span>
           </button>
@@ -240,8 +240,8 @@ export const MedicationRemindersModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'inventory'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
-                : 'text-slate-600 hover:bg-white/60'
+                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                : 'text-stone-600 hover:bg-white/60'
             }`}
           >
             <Package className="w-4 h-4" />
@@ -259,8 +259,8 @@ export const MedicationRemindersModal: React.FC = () => {
             }}
             className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-white text-indigo-700 shadow-xs border border-indigo-200'
-                : 'text-slate-600 hover:bg-white/60'
+                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                : 'text-stone-600 hover:bg-white/60'
             }`}
           >
             <History className="w-4 h-4" />
@@ -274,18 +274,18 @@ export const MedicationRemindersModal: React.FC = () => {
           {activeTab === 'schedule' && (
             <div className="space-y-3">
               {/* Progress Summary Card */}
-              <div className="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-amber-50 via-yellow-50/70 to-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-center justify-between shadow-2xs">
                 <div>
-                  <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  <h4 className="text-xs font-black text-amber-900 uppercase tracking-wider">
                     Today's Adherence
                   </h4>
-                  <p className="text-sm sm:text-base font-black text-slate-800">
+                  <p className="text-sm sm:text-base font-black text-amber-950">
                     {takenDosesCount === totalDosesCount && totalDosesCount > 0
                       ? 'All doses taken today! Outstanding job! 🌟'
                       : `${takenDosesCount} of ${totalDosesCount} doses taken`}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shadow-xs">
                   {totalDosesCount > 0 ? `${Math.round((takenDosesCount / totalDosesCount) * 100)}%` : '100%'}
                 </div>
               </div>
@@ -304,7 +304,7 @@ export const MedicationRemindersModal: React.FC = () => {
                       className={`border-2 rounded-2xl p-3.5 sm:p-4 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                         dose.isTaken
                           ? 'bg-emerald-50/70 border-emerald-300'
-                          : 'bg-white border-slate-200 hover:border-indigo-300 shadow-xs'
+                          : 'bg-white border-amber-200/80 hover:border-amber-400 shadow-xs'
                       }`}
                     >
                       {/* Left: Emoji + Med Info */}
@@ -323,7 +323,7 @@ export const MedicationRemindersModal: React.FC = () => {
                             </span>
                           </div>
 
-                          <p className="text-xs font-bold text-indigo-700 mt-0.5">
+                          <p className="text-xs font-bold text-amber-800 mt-0.5">
                             Take {dose.dosage} {dose.unit}
                           </p>
 
@@ -381,7 +381,7 @@ export const MedicationRemindersModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => takeMedicationDose(dose.medId, dose.time)}
-                            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-md shadow-indigo-200 flex items-center gap-1.5 cursor-pointer transition-all"
+                            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-200 flex items-center gap-1.5 cursor-pointer transition-all"
                           >
                             <Pill className="w-4 h-4" />
                             <span>Take Dose (+1 ⭐)</span>
@@ -398,9 +398,9 @@ export const MedicationRemindersModal: React.FC = () => {
           {/* TAB 2: SUPPLY INVENTORY */}
           {activeTab === 'inventory' && (
             <div className="space-y-3">
-              <div className="p-3 bg-sky-50 border border-sky-200 rounded-2xl flex items-center justify-between text-xs text-sky-900">
+              <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-900">
                 <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-sky-600 shrink-0" />
+                  <Info className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>
                     Supply inventory automatically counts down each time a dose is taken.
                   </span>
@@ -465,7 +465,7 @@ export const MedicationRemindersModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => restockMedication(med.id, 30)}
-                        className="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-xs cursor-pointer transition-all active:scale-95 border border-indigo-200"
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-black text-xs cursor-pointer transition-all active:scale-95 border border-amber-200"
                         title="Add 30 (1 month pack)"
                       >
                         +30 (1 Mo)
@@ -476,7 +476,7 @@ export const MedicationRemindersModal: React.FC = () => {
                           setRestockMedId(med.id);
                           setRestockAmount(30);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer transition-all active:scale-95"
+                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs cursor-pointer transition-all active:scale-95 shadow-xs"
                       >
                         Custom Refill
                       </button>
@@ -487,9 +487,9 @@ export const MedicationRemindersModal: React.FC = () => {
 
               {/* Custom Restock Dialog */}
               {restockMedId && (
-                <div className="p-4 bg-indigo-50 border-2 border-indigo-300 rounded-2xl animate-in fade-in">
+                <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl animate-in fade-in">
                   <form onSubmit={handleRestockSubmit} className="flex flex-col sm:flex-row items-center gap-3">
-                    <span className="text-xs font-black text-indigo-900 shrink-0">
+                    <span className="text-xs font-black text-amber-950 shrink-0">
                       Add supply to {medications.find((m) => m.id === restockMedId)?.name}:
                     </span>
                     <input
@@ -498,7 +498,7 @@ export const MedicationRemindersModal: React.FC = () => {
                       max="1000"
                       value={restockAmount}
                       onChange={(e) => setRestockAmount(Number(e.target.value))}
-                      className="w-24 px-3 py-1.5 rounded-xl border border-indigo-300 font-black text-center text-sm bg-white"
+                      className="w-24 px-3 py-1.5 rounded-xl border border-amber-300 font-black text-center text-sm bg-white text-amber-950 focus:ring-2 focus:ring-amber-400 focus:outline-none"
                     />
                     <div className="flex items-center gap-2">
                       <button
@@ -510,7 +510,7 @@ export const MedicationRemindersModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setRestockMedId(null)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -524,7 +524,7 @@ export const MedicationRemindersModal: React.FC = () => {
           {/* TAB 3: DOSE LOG HISTORY */}
           {activeTab === 'history' && (
             <div className="space-y-2">
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600">
+              <div className="p-3 bg-amber-50/60 border border-amber-200/80 rounded-2xl text-xs text-amber-900">
                 Adherence log recorded for doctor and therapy appointments.
               </div>
 
@@ -571,14 +571,14 @@ export const MedicationRemindersModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex items-center justify-between shrink-0">
+        <div className="bg-amber-50/50 border-t border-amber-200/80 p-3 sm:p-4 flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={() => {
               setShowMedicationModal(false);
               setIsParentMode(true);
             }}
-            className="text-xs font-black text-indigo-700 hover:text-indigo-900 hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-black text-amber-800 hover:text-amber-950 hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>Configure Medications in Dashboard</span>
             <span>→</span>
@@ -590,7 +590,7 @@ export const MedicationRemindersModal: React.FC = () => {
               setShowMedicationModal(false);
               playChime('tap');
             }}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black text-xs cursor-pointer active:scale-95 transition-all shadow-xs"
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm cursor-pointer active:scale-95 transition-all shadow-md shadow-amber-200"
           >
             Done
           </button>
