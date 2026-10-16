@@ -751,18 +751,26 @@ export const AacCategoryIcon: React.FC<{
 export const DentistAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_dentist.png',
   '/assets/stickers/turtle_mineral_polishing_basin.png',
-  'Visiting the Dentist'
+  'Visiting the Dentist',
+  '/assets/stickers/dino_trex_tooth_care.png'
 );
-export const RestaurantAdventureSticker = renderStickerPng('/assets/stickers/adventure_restaurant.png', 'Eating at a Restaurant');
+export const RestaurantAdventureSticker = renderThemedStickerPng(
+  '/assets/stickers/adventure_restaurant.png',
+  '/assets/stickers/turtle_clover_berry_feast.png',
+  'Eating at a Restaurant',
+  '/assets/stickers/dino_feast_table_pavilion.png'
+);
 export const HaircutAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_haircut_salon.png',
   '/assets/stickers/turtle_grooming_comb_mirror.png',
-  'Getting a Haircut'
+  'Getting a Haircut',
+  '/assets/stickers/dino_bone_comb_mirror.png'
 );
 export const DoctorAdventureSticker = renderThemedStickerPng(
   '/assets/stickers/adventure_doctor_checkup.png',
   '/assets/stickers/turtle_elder_healer_pouch.png',
-  'Doctor Check-Up'
+  'Doctor Check-Up',
+  '/assets/stickers/dino_healer_stethoscope_bag.png'
 );
 export const PlansChangeStorySticker = renderStickerPng('/assets/stickers/story_plans_change.png', 'When Plans Change');
 export const BirthdayStorySticker = renderStickerPng('/assets/stickers/story_birthday.png', 'Going to a Birthday Party');
