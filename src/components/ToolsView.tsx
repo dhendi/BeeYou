@@ -10,8 +10,6 @@ import {
   MusicSensorySticker,
   ConnectHeartSticker,
   SpoonSticker,
-  FavQuietBreakSticker,
-  IdCardSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
@@ -214,10 +212,6 @@ export const ToolsView: React.FC = () => {
           const badgeClass = isColorCoded
             ? tool.badgeClass
             : themeStyles.adventureTag;
-          const stickerBorder = isColorCoded
-            ? 'border-slate-200/80'
-            : (themeStyles.stepIconBox.match(/border-[^ ]+/)?.[0] || 'border-amber-300');
-
           return (
             <button
               key={tool.id}
@@ -235,7 +229,7 @@ export const ToolsView: React.FC = () => {
                   {t(tool.desc)}
                 </p>
               </div>
-              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/90 border ${stickerBorder} shadow-2xs flex items-center justify-center shrink-0 p-1 group-hover:scale-108 transition-transform`}>
+              <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 p-0.5 group-hover:scale-108 transition-transform">
                 <Sticker className="w-full h-full object-contain" />
               </div>
             </button>
