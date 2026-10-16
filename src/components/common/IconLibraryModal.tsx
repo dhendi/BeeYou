@@ -186,6 +186,15 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
   { id: 'turtle_bamboo_wind_chimes', emoji: '/assets/stickers/turtle_bamboo_wind_chimes.png', label: 'Bamboo Wind Chimes & Melody', category: 'turtle', keywords: ['music', 'chimes', 'wind', 'sound', 'melody', 'song', 'sensory', 'bamboo'] },
   { id: 'turtle_wooden_puzzle', emoji: '/assets/stickers/turtle_wooden_puzzle.png', label: 'Carved Wooden Leaf & Shell Puzzle', category: 'turtle', keywords: ['puzzle', 'jigsaw', 'game', 'play', 'wooden', 'leaf', 'shell'] },
   { id: 'turtle_leaf_checkmark', emoji: '/assets/stickers/turtle_leaf_checkmark.png', label: 'Fresh Leaf Stamp Checkmark', category: 'turtle', keywords: ['done', 'check', 'checkmark', 'complete', 'finish', 'task', 'leaf'] },
+  { id: 'turtle_moss_cottage_home', emoji: '/assets/stickers/turtle_moss_cottage_home.png', label: 'Cozy Moss-Roof Sanctuary Cottage', category: 'turtle', keywords: ['home', 'house', 'cottage', 'family', 'inside', 'moss'] },
+  { id: 'turtle_wooden_leaf_cart', emoji: '/assets/stickers/turtle_wooden_leaf_cart.png', label: 'Leaf-Canopy Wooden Cart', category: 'turtle', keywords: ['car', 'ride', 'cart', 'buggy', 'travel', 'commute', 'drive'] },
+  { id: 'turtle_meadow_sunshine', emoji: '/assets/stickers/turtle_meadow_sunshine.png', label: 'Warm Sun Over Lily-Pad Pond', category: 'turtle', keywords: ['sun', 'sunshine', 'outdoor', 'outside', 'park', 'weather', 'warm'] },
+  { id: 'turtle_hatchling_pet_care', emoji: '/assets/stickers/turtle_hatchling_pet_care.png', label: 'Baby Hatchling & Snail Friend', category: 'turtle', keywords: ['pet', 'care', 'animal', 'hatchling', 'snail', 'clover', 'friend'] },
+  { id: 'turtle_garden_sandwich', emoji: '/assets/stickers/turtle_garden_sandwich.png', label: 'Garden Herb Sandwich on Board', category: 'turtle', keywords: ['sandwich', 'lunch', 'snack', 'food', 'meal', 'eat', 'herb'] },
+  { id: 'turtle_bamboo_drink_cup', emoji: '/assets/stickers/turtle_bamboo_drink_cup.png', label: 'Bamboo Tumbler with Leaf Straw', category: 'turtle', keywords: ['drink', 'cup', 'juice', 'smoothie', 'straw', 'bamboo', 'thirsty'] },
+  { id: 'turtle_herbal_tea_mug', emoji: '/assets/stickers/turtle_herbal_tea_mug.png', label: 'Carved Wooden Herbal Tea Mug', category: 'turtle', keywords: ['mug', 'tea', 'cocoa', 'warm', 'drink', 'cozy', 'chamomile'] },
+  { id: 'turtle_reed_laundry_basket', emoji: '/assets/stickers/turtle_reed_laundry_basket.png', label: 'Woven Reed Laundry Basket', category: 'turtle', keywords: ['laundry', 'hamper', 'basket', 'clothes', 'chores', 'tidy', 'towel'] },
+  { id: 'turtle_bamboo_calendar', emoji: '/assets/stickers/turtle_bamboo_calendar.png', label: 'Hanging Bamboo Checklist Board', category: 'turtle', keywords: ['schedule', 'calendar', 'plan', 'routine', 'checklist', 'bamboo'] },
 ];
 
 export interface IconLibraryModalProps {

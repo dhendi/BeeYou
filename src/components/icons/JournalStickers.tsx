@@ -254,19 +254,31 @@ export const TeenHeadphonesSticker = renderThemedStickerPng(
 );
 export const AdultBriefcaseSticker = renderStickerPng('/assets/stickers/adult_briefcase.png', 'Adult Briefcase');
 export const CaregiverPhoneSticker = renderStickerPng('/assets/stickers/caregiver_phone.png', 'Caregiver Phone');
-export const ScheduleCalendarSticker = renderStickerPng('/assets/stickers/schedule_calendar.png', 'Schedule Calendar');
+export const ScheduleCalendarSticker = renderThemedStickerPng(
+  '/assets/stickers/schedule_calendar.png',
+  '/assets/stickers/turtle_bamboo_calendar.png',
+  'Schedule Calendar'
+);
 export const TrialCrownSticker = renderStickerPng('/assets/stickers/trial_crown.png', '15-Day Free Trial Crown');
 
 // Future Expansion Routine & Activity Stickers
 export const BedtimeSleepSticker = renderStickerPng('/assets/stickers/bedtime_sleep.png', 'Bedtime Sleep');
 export const DrinkWaterSticker = renderStickerPng('/assets/stickers/routine_water_drink.png', 'Drink Water');
-export const PetCareSticker = renderStickerPng('/assets/stickers/pet_care.png', 'Pet Care');
+export const PetCareSticker = renderThemedStickerPng(
+  '/assets/stickers/pet_care.png',
+  '/assets/stickers/turtle_hatchling_pet_care.png',
+  'Pet Care'
+);
 export const MusicSensorySticker = renderThemedStickerPng(
   '/assets/stickers/music_sensory.png',
   '/assets/stickers/turtle_bamboo_wind_chimes.png',
   'Music Sensory'
 );
-export const OutdoorSunSticker = renderStickerPng('/assets/stickers/outdoor_sun.png', 'Outdoor Sunshine');
+export const OutdoorSunSticker = renderThemedStickerPng(
+  '/assets/stickers/outdoor_sun.png',
+  '/assets/stickers/turtle_meadow_sunshine.png',
+  'Outdoor Sunshine'
+);
 export const HomeworkStudySticker = renderThemedStickerPng(
   '/assets/stickers/homework_study.png',
   '/assets/stickers/turtle_bamboo_pencil.png',
@@ -293,11 +305,19 @@ export const DinnerBowlSticker = renderThemedStickerPng(
   '/assets/stickers/turtle_lotus_dinner_bowl.png',
   'Dinner Plate'
 );
-export const DrinkCupSticker = renderStickerPng('/assets/stickers/drink_cup.png', 'Drink Cup');
+export const DrinkCupSticker = renderThemedStickerPng(
+  '/assets/stickers/drink_cup.png',
+  '/assets/stickers/turtle_bamboo_drink_cup.png',
+  'Drink Cup'
+);
 export const CandyTreatSticker = renderStickerPng('/assets/stickers/candy_treat.png', 'Candy Treat');
 export const WallClockSticker = renderStickerPng('/assets/stickers/clock_time.png', 'Wall Clock');
 export const CutlerySticker = renderStickerPng('/assets/stickers/fork_knife.png', 'Fork & Knife');
-export const CarRideSticker = renderStickerPng('/assets/stickers/car_ride.png', 'Car Ride');
+export const CarRideSticker = renderThemedStickerPng(
+  '/assets/stickers/car_ride.png',
+  '/assets/stickers/turtle_wooden_leaf_cart.png',
+  'Car Ride'
+);
 export const WindBreezeSticker = renderStickerPng('/assets/stickers/wind_breeze.png', 'Wind Breeze');
 export const LungsInhalerSticker = renderStickerPng('/assets/stickers/lungs_inhaler.png', 'Lungs Inhaler');
 export const RepeatLoopSticker = renderStickerPng('/assets/stickers/refresh_repeat.png', 'Repeat Loop');
@@ -363,6 +383,15 @@ export const TurtleTerrariumScienceSticker = renderStickerPng('/assets/stickers/
 export const TurtleBambooWindChimesSticker = renderStickerPng('/assets/stickers/turtle_bamboo_wind_chimes.png', 'Bamboo Wind Chimes');
 export const TurtleWoodenPuzzleSticker = renderStickerPng('/assets/stickers/turtle_wooden_puzzle.png', 'Wooden Shell Puzzle Piece');
 export const TurtleLeafCheckmarkSticker = renderStickerPng('/assets/stickers/turtle_leaf_checkmark.png', 'Sanctuary Leaf Checkmark');
+export const TurtleMossCottageHomeSticker = renderStickerPng('/assets/stickers/turtle_moss_cottage_home.png', 'Moss-Roof Sanctuary Cottage');
+export const TurtleWoodenLeafCartSticker = renderStickerPng('/assets/stickers/turtle_wooden_leaf_cart.png', 'Leaf-Canopy Wooden Cart');
+export const TurtleMeadowSunshineSticker = renderStickerPng('/assets/stickers/turtle_meadow_sunshine.png', 'Warm Sun Over Lily-Pad Pond');
+export const TurtleHatchlingPetCareSticker = renderStickerPng('/assets/stickers/turtle_hatchling_pet_care.png', 'Baby Hatchling & Snail Friend');
+export const TurtleGardenSandwichSticker = renderStickerPng('/assets/stickers/turtle_garden_sandwich.png', 'Garden Herb Sandwich on Board');
+export const TurtleBambooDrinkCupSticker = renderStickerPng('/assets/stickers/turtle_bamboo_drink_cup.png', 'Bamboo Tumbler with Leaf Straw');
+export const TurtleHerbalTeaMugSticker = renderStickerPng('/assets/stickers/turtle_herbal_tea_mug.png', 'Carved Wooden Herbal Tea Mug');
+export const TurtleReedLaundryBasketSticker = renderStickerPng('/assets/stickers/turtle_reed_laundry_basket.png', 'Woven Reed Laundry Basket');
+export const TurtleBambooCalendarSticker = renderStickerPng('/assets/stickers/turtle_bamboo_calendar.png', 'Hanging Bamboo Checklist Board');
 export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
@@ -404,7 +433,11 @@ export const PawPrintSticker = renderStickerPng('/assets/stickers/paw_print.png'
 export const BoneTreatSticker = renderStickerPng('/assets/stickers/bone_treat.png', 'Dog Bone Treat');
 export const TennisBallSticker = renderStickerPng('/assets/stickers/tennis_ball.png', 'Tennis Ball');
 export const PottedPlantSticker = renderStickerPng('/assets/stickers/potted_plant.png', 'Potted Plant Care');
-export const LaundryHamperSticker = renderStickerPng('/assets/stickers/laundry_hamper.png', 'Laundry Hamper');
+export const LaundryHamperSticker = renderThemedStickerPng(
+  '/assets/stickers/laundry_hamper.png',
+  '/assets/stickers/turtle_reed_laundry_basket.png',
+  'Laundry Hamper'
+);
 export const ChocolateBarSticker = renderStickerPng('/assets/stickers/chocolate_bar.png', 'Comfort Chocolate Bar');
 export const RedBalloonSticker = renderStickerPng('/assets/stickers/red_balloon.png', 'Red Balloon');
 export const ShoppingCartSticker = renderStickerPng('/assets/stickers/shopping_cart.png', 'Supermarket Shopping Cart');
@@ -412,7 +445,11 @@ export const AirplaneFlightSticker = renderStickerPng('/assets/stickers/airplane
 export const TravelLuggageSticker = renderStickerPng('/assets/stickers/travel_luggage.png', 'Travel Rolling Luggage');
 export const BoardingTicketSticker = renderStickerPng('/assets/stickers/boarding_ticket.png', 'Boarding Pass Ticket');
 export const QuietVoiceSticker = renderStickerPng('/assets/stickers/quiet_voice.png', 'Quiet Inside Voice');
-export const HotCocoaSticker = renderStickerPng('/assets/stickers/hot_cocoa.png', 'Warm Hot Cocoa Mug');
+export const HotCocoaSticker = renderThemedStickerPng(
+  '/assets/stickers/hot_cocoa.png',
+  '/assets/stickers/turtle_herbal_tea_mug.png',
+  'Warm Hot Cocoa Mug'
+);
 export const JigsawPuzzleSticker = renderThemedStickerPng(
   '/assets/stickers/jigsaw_puzzle.png',
   '/assets/stickers/turtle_wooden_puzzle.png',
@@ -495,7 +532,11 @@ export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thu
 export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.png', 'Windy Breeze');
 export const FogMistWeatherSticker = renderStickerPng('/assets/stickers/fog_mist_weather.png', 'Fog & Mist Weather');
 export const RainbowWeatherSticker = renderStickerPng('/assets/stickers/rainbow_weather.png', 'Rainbow Weather');
-export const HomeHouseSticker = renderStickerPng('/assets/stickers/home_house.png', 'Home House');
+export const HomeHouseSticker = renderThemedStickerPng(
+  '/assets/stickers/home_house.png',
+  '/assets/stickers/turtle_moss_cottage_home.png',
+  'Home House'
+);
 export const TaskDoneSticker = renderThemedStickerPng(
   '/assets/stickers/task_done.png',
   '/assets/stickers/turtle_leaf_checkmark.png',
@@ -528,7 +569,11 @@ export const FavBathSticker = renderThemedStickerPng(
   '/assets/stickers/turtle_warm_spring_bath.png',
   'Take a Bath'
 );
-export const FavSandwichSticker = renderStickerPng('/assets/stickers/fav_sandwich.png', 'Sandwich Snack');
+export const FavSandwichSticker = renderThemedStickerPng(
+  '/assets/stickers/fav_sandwich.png',
+  '/assets/stickers/turtle_garden_sandwich.png',
+  'Sandwich Snack'
+);
 export const FavWaterSticker = renderStickerPng('/assets/stickers/fav_water.png', 'Drink Water');
 export const FavQuietBreakSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Quiet Break');
 export const FavHelpSosSticker = renderThemedStickerPng(
