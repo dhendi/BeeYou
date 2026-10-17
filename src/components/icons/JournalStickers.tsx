@@ -2064,6 +2064,25 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/clinic_height_scale.png': '/assets/stickers/ocean_clinic_height_scale.png',
   '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/ocean_doctor_exam_table_bed.png',
   '/assets/stickers/doctor_ear_light.png': '/assets/stickers/ocean_doctor_ear_light_tool.png',
+
+  // Batch 8 Pool, Cinema, Bowling, Camping, Museum & Rewards
+  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/ocean_walking_pool_feet.png',
+  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/ocean_swim_goggles_floaties.png',
+  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/ocean_fluffy_beach_towel.png',
+  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/ocean_movie_projector_screen.png',
+  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/ocean_bowling_ball_holes.png',
+  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/ocean_bowling_lane_bumpers.png',
+  '/assets/stickers/high_five_hands.png': '/assets/stickers/ocean_high_five_hands.png',
+  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/ocean_coastal_dunes_pine_trees.png',
+  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/ocean_campfire_marshmallows.png',
+  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/ocean_camping_sleeping_bag.png',
+  '/assets/stickers/museum_paper_map.png': '/assets/stickers/ocean_aquarium_paper_map.png',
+  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/ocean_megalodon_fossil_exhibit.png',
+  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/ocean_seashell_magnifying_glass.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/ocean_game_controller.png',
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/ocean_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/ocean_birthday_gift_box.png',
 };
 
 /**
