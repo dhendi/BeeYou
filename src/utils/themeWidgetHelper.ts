@@ -247,7 +247,14 @@ export function getThemeWidgetStyles(theme?: AppTheme | null): ThemeWidgetStyles
   }
 
   // 8. MAGIC FAIRYTALE (Pink / Rose)
-  if (themeId === 'theme-fantasy' || category === 'fantasy') {
+  if (
+    themeId === 'theme-fantasy' ||
+    themeId?.includes('fantasy') ||
+    themeId?.includes('fairytale') ||
+    themeId?.includes('magic') ||
+    category === 'fantasy' ||
+    category === 'magic'
+  ) {
     return {
       card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-pink-300/80 bg-pink-50/40 hover:bg-pink-50/80 text-pink-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(219,39,119,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
       scheduleContainer: 'p-4 sm:p-5 rounded-2xl border-2 border-pink-300/80 bg-pink-50/40 text-pink-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3',
@@ -447,7 +454,12 @@ export function getThemeCustomizerHeaderStyles(theme?: AppTheme | null): ThemeCu
   }
 
   // 7. SPEEDWAY RACING (Asphalt Black / Carbon)
-  if (themeId === 'theme-racing' || category === 'racing') {
+  if (
+    themeId === 'theme-racing' ||
+    themeId?.includes('racing') ||
+    themeId?.includes('speed') ||
+    category === 'racing'
+  ) {
     return {
       modalBorder: 'border-zinc-700',
       topBarGradient: 'bg-gradient-to-r from-zinc-900 via-neutral-900 to-black text-white',
@@ -466,7 +478,54 @@ export function getThemeCustomizerHeaderStyles(theme?: AppTheme | null): ThemeCu
     };
   }
 
-  // 8. DEFAULT BEE CLASSIC (Sunny Amber / Yellow)
+  // 8. MAGIC FAIRYTALE (Pastel Rose / Enchanted Lavender Pink)
+  if (
+    themeId === 'theme-fantasy' ||
+    themeId?.includes('fantasy') ||
+    themeId?.includes('fairytale') ||
+    themeId?.includes('magic') ||
+    category === 'fantasy' ||
+    category === 'magic'
+  ) {
+    return {
+      modalBorder: 'border-pink-300',
+      topBarGradient: 'bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 text-white',
+      topBarBorder: 'border-pink-400',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-pink-100',
+      bannerGradient: 'bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 text-white',
+      bannerBorder: 'border-pink-400',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-pink-100',
+      tabContainerBg: 'bg-pink-950/25',
+      activeTabStyle: 'bg-white text-pink-950 shadow-sm',
+      inactiveTabStyle: 'text-pink-100 hover:bg-white/15',
+      equippedCardBorder: 'border-pink-300',
+      equippedBadgeBg: 'bg-pink-100/70 border-pink-300',
+    };
+  }
+
+  // 9. CUSTOM USER THEMES (Using user's configured palette)
+  if (theme?.isCustom && theme.palette) {
+    return {
+      modalBorder: theme.palette.primaryBorder || 'border-amber-300',
+      topBarGradient: `${theme.palette.primaryBg} text-white`,
+      topBarBorder: theme.palette.primaryBorder || 'border-amber-400',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-white/80',
+      bannerGradient: `${theme.palette.primaryBg} text-white`,
+      bannerBorder: theme.palette.primaryBorder || 'border-amber-400',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-white/80',
+      tabContainerBg: 'bg-black/20',
+      activeTabStyle: 'bg-white text-slate-900 shadow-sm',
+      inactiveTabStyle: 'text-white/80 hover:bg-white/15',
+      equippedCardBorder: theme.palette.primaryBorder || 'border-amber-300',
+      equippedBadgeBg: theme.palette.primaryLight || 'bg-amber-100',
+    };
+  }
+
+  // 10. DEFAULT BEE CLASSIC (Sunny Amber / Yellow)
   return {
     modalBorder: 'border-amber-200',
     topBarGradient: 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950',
