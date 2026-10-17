@@ -1264,6 +1264,31 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const FROG_STICKER_SWAPS: Record<string, string> = {
+  // Adventure Step Mappings
+  '/assets/stickers/home_house.png': '/assets/stickers/frog_willow_hollow_retreat.png',
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/frog_bamboo_tablet_ipad.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/frog_bamboo_cutlery.png',
+  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/frog_reed_explorer_shoes.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/frog_lily_speech_bubbles.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/frog_pond_harvest_bowl.png',
+  '/assets/stickers/boarding_ticket.png': '/assets/stickers/frog_reed_checklist_board.png',
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/frog_waiting_room_couch.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/frog_waving_hand_hello.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/frog_padded_recliner_chair.png',
+  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/frog_open_mouth_wide.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/frog_open_mouth_wide.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/frog_open_welcome_door.png',
+  '/assets/stickers/dining_table_booth.png': '/assets/stickers/frog_dining_table_booth.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/frog_restaurant_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/frog_barbershop_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/frog_haircut_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/frog_water_spray_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/frog_barber_neck_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/frog_salon_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/frog_medical_clinic_building.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/frog_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/frog_doctor_exam_bed.png',
   // Batch 1: Core Daily Routines, Hubs & Wellness
   '/assets/stickers/routine_water_drink.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
   '/assets/stickers/drink_water.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
