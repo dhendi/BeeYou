@@ -16,7 +16,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
-import { PRESET_THEMES } from '../data/themesData';
+import { PRESET_THEMES, getThemeIcon } from '../data/themesData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 import { getThemeCustomizerHeaderStyles } from '../utils/themeWidgetHelper';
 
@@ -186,19 +186,19 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
 
 // Quick mascot choices
 const POPULAR_MASCOTS = [
-  { emoji: '🐝', name: 'Busy Bee', sound: 'classic' as const },
-  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle' as const },
-  { emoji: '🦖', name: 'T-Rex', sound: 'dino' as const },
-  { emoji: '🦕', name: 'Brachiosaurus', sound: 'dino' as const },
-  { emoji: '🐸', name: 'Tree Frog', sound: 'frog' as const },
-  { emoji: '🚂', name: 'Steam Train', sound: 'train' as const },
-  { emoji: '🚀', name: 'Rocket', sound: 'space' as const },
-  { emoji: '🐬', name: 'Dolphin', sound: 'classic' as const },
-  { emoji: '🦄', name: 'Unicorn', sound: 'magic' as const },
+  { emoji: '🐝', name: 'Busy Bee', sound: 'classic' as const, icon: '/assets/stickers/bee_mascot.png' },
+  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle' as const, icon: '/assets/stickers/turtle_mascot.png' },
+  { emoji: '🦖', name: 'T-Rex', sound: 'dino' as const, icon: '/assets/stickers/dino_rex.png' },
+  { emoji: '🦕', name: 'Brachiosaurus', sound: 'dino' as const, icon: '/assets/stickers/dino_rex.png' },
+  { emoji: '🐸', name: 'Tree Frog', sound: 'frog' as const, icon: '/assets/stickers/frog_mascot.png' },
+  { emoji: '🚂', name: 'Steam Train', sound: 'train' as const, icon: '/assets/stickers/train_mascot.png' },
+  { emoji: '🚀', name: 'Rocket', sound: 'space' as const, icon: '/assets/stickers/space_mascot.png' },
+  { emoji: '🐬', name: 'Dolphin', sound: 'classic' as const, icon: '/assets/stickers/ocean_mascot.png' },
+  { emoji: '🦄', name: 'Unicorn', sound: 'magic' as const, icon: '/assets/stickers/fairytale_mascot.png' },
   { emoji: '🐶', name: 'Puppy', sound: 'classic' as const },
   { emoji: '🐱', name: 'Kitty', sound: 'classic' as const },
   { emoji: '🦁', name: 'Lion', sound: 'classic' as const },
-  { emoji: '🏎️', name: 'Racecar', sound: 'train' as const },
+  { emoji: '🏎️', name: 'Racecar', sound: 'train' as const, icon: '/assets/stickers/racing_mascot.png' },
   { emoji: '🤖', name: 'Robot', sound: 'space' as const },
   { emoji: '🦋', name: 'Butterfly', sound: 'magic' as const },
   { emoji: '⭐', name: 'Star', sound: 'magic' as const },
@@ -255,6 +255,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   const [themeName, setThemeName] = useState('My Custom Theme');
   const [mascotEmoji, setMascotEmoji] = useState('🐝');
   const [mascotName, setMascotName] = useState('Bee');
+  const [mascotIcon, setMascotIcon] = useState('/assets/stickers/bee_mascot.png');
   const [greetingMessage, setGreetingMessage] = useState('Welcome back! Let us explore together!');
   const [themeDescription, setThemeDescription] = useState('A warm, personalized theme crafted with love.');
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
@@ -280,6 +281,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setThemeName(target.name);
     setMascotEmoji(target.mascotEmoji || target.emoji || '🐝');
     setMascotName(target.mascotName || 'Buddy');
+    setMascotIcon(getThemeIcon(target) || target.icon || target.mascotIcon || '');
     setGreetingMessage(target.greetingMessage || 'Welcome back!');
     setThemeDescription(target.description || '');
     setSelectedWallpaper(target.wallpaperPattern || 'none');
@@ -307,6 +309,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setThemeName('My Custom Theme');
     setMascotEmoji('🐝');
     setMascotName('Bee');
+    setMascotIcon('/assets/stickers/bee_mascot.png');
     setGreetingMessage('Welcome back! Let us explore together!');
     setThemeDescription('A warm, personalized theme crafted with love.');
     setSelectedPaletteIndex(0);
@@ -338,8 +341,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
       updateTheme(targetEditingThemeId, {
         name: themeName.trim(),
         emoji: mascotEmoji,
+        icon: mascotIcon || undefined,
         mascotName: mascotName.trim() || 'Buddy',
         mascotEmoji: mascotEmoji,
+        mascotIcon: mascotIcon || undefined,
         greetingMessage: greetingMessage.trim() || `Welcome to ${themeName}!`,
         description: themeDescription.trim() || `Theme styled with ${mascotEmoji} and warmth.`,
         palette: effectivePalette,
@@ -362,8 +367,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         name: themeName.trim(),
         category: 'custom',
         emoji: mascotEmoji,
+        icon: mascotIcon || undefined,
         mascotName: mascotName.trim() || 'Buddy',
         mascotEmoji: mascotEmoji,
+        mascotIcon: mascotIcon || undefined,
         greetingMessage: greetingMessage.trim() || `Welcome to ${themeName}!`,
         description: themeDescription.trim() || `Custom theme styled with ${mascotEmoji}.`,
         costStars: 0,
@@ -523,12 +530,20 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           {/* Currently Active Theme Highlight */}
           <div className={`bg-white rounded-3xl p-4 sm:p-5 border-2 ${headerStyles.equippedCardBorder} shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300`}>
             <div className="flex items-center gap-3.5 min-w-0">
-              <span className={`w-14 h-14 sm:w-16 sm:h-16 p-2 rounded-2xl ${headerStyles.equippedBadgeBg} shrink-0 flex items-center justify-center`}>
-                <RoutineStickerIcon
-                  emoji={activeTheme.mascotEmoji || activeTheme.emoji}
-                  title={activeTheme.mascotName}
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-2xs"
-                />
+              <span className={`w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl ${headerStyles.equippedBadgeBg} shrink-0 flex items-center justify-center overflow-hidden`}>
+                {getThemeIcon(activeTheme) ? (
+                  <img
+                    src={getThemeIcon(activeTheme)}
+                    alt={activeTheme.mascotName}
+                    className="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-2xs select-none pointer-events-none"
+                  />
+                ) : (
+                  <RoutineStickerIcon
+                    emoji={activeTheme.mascotEmoji || activeTheme.emoji}
+                    title={activeTheme.mascotName}
+                    className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-2xs"
+                  />
+                )}
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -638,9 +653,18 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     {/* Top Row: Mascot & Badges */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-3xl sm:text-4xl p-2 rounded-2xl bg-amber-50 border border-amber-200 shrink-0">
-                          {theme.emoji}
-                        </span>
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl bg-amber-50 border border-amber-200 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
+                          {getThemeIcon(theme) ? (
+                            <img
+                              src={getThemeIcon(theme)}
+                              alt={theme.mascotName || theme.name}
+                              className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-2xs select-none pointer-events-none"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-3xl sm:text-4xl select-none">{theme.emoji}</span>
+                          )}
+                        </div>
                         <div>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <h4 className="font-black text-slate-800 text-base sm:text-lg">
@@ -798,6 +822,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   onClick={() => {
                     setMascotEmoji(m.emoji);
                     setMascotName(m.name);
+                    if (m.icon) setMascotIcon(m.icon);
                     setSelectedSoundTheme(m.sound);
                     playChime('tap');
                   }}
@@ -808,7 +833,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   }`}
                   title={m.name}
                 >
-                  <RoutineStickerIcon emoji={m.emoji} title={m.name} className="w-7 h-7 object-contain drop-shadow-2xs" />
+                  {m.icon ? (
+                    <img src={m.icon} alt={m.name} className="w-7 h-7 object-contain drop-shadow-2xs select-none pointer-events-none" />
+                  ) : (
+                    <RoutineStickerIcon emoji={m.emoji} title={m.name} className="w-7 h-7 object-contain drop-shadow-2xs" />
+                  )}
                 </button>
               ))}
             </div>
@@ -982,8 +1011,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 className={`p-3 rounded-2xl mb-3 flex items-center justify-between shadow-xs ${getEffectivePalette().headerBg}`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center shrink-0 shadow-2xs">
-                    <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-6 h-6 object-contain" />
+                  <div className="w-8 h-8 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                    {mascotIcon ? (
+                      <img src={mascotIcon} alt={mascotName} className="w-6 h-6 object-contain select-none pointer-events-none" />
+                    ) : (
+                      <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-6 h-6 object-contain" />
+                    )}
                   </div>
                   <div>
                     <h5 className="font-black text-xs leading-none">
@@ -1001,7 +1034,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
               {/* Greeting Mockup */}
               <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 shadow-2xs flex items-center gap-2">
-                <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-5 h-5 object-contain shrink-0" />
+                {mascotIcon ? (
+                  <img src={mascotIcon} alt={mascotName} className="w-5 h-5 object-contain shrink-0 select-none pointer-events-none" />
+                ) : (
+                  <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-5 h-5 object-contain shrink-0" />
+                )}
                 <p className="text-xs font-bold text-slate-800 truncate">
                   {mascotName}: "{greetingMessage}"
                 </p>

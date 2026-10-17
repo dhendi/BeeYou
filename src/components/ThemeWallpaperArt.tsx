@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { WallpaperPattern, AppTheme } from '../types';
 
 export interface ThemeWallpaperArtProps {
+  id?: string;
+  themeId?: string;
   pattern?: WallpaperPattern;
   category?: AppTheme['category'];
   reduceMotion?: boolean;
@@ -125,6 +127,8 @@ function useViewportZoom(): ViewportZoomState {
  *    the background dynamically counter-scales so the wallpaper does NOT zoom in.
  */
 export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
+  id,
+  themeId,
   pattern,
   category,
   wallpaperUrl,
@@ -183,7 +187,8 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     wallpaperUrl?.includes('racing') ||
     category === 'racing' ||
     pattern === 'racing' ||
-    id === 'theme-racing';
+    id === 'theme-racing' ||
+    themeId === 'theme-racing';
 
   // Check if Default Honey Theme is active
   const isHoneyClassic =

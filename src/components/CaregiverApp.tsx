@@ -54,6 +54,7 @@ const CaregiverAppContent: React.FC = () => {
   return (
     <div className={`min-h-screen w-full ${activeTheme?.palette?.appBg || 'bg-[#FEF9F1]'} text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 transition-colors duration-300 relative`}>
       <ThemeWallpaperArt
+        themeId={activeTheme?.id}
         pattern={activeTheme?.wallpaperPattern}
         category={activeTheme?.category}
         wallpaperUrl={activeTheme?.palette?.wallpaperUrl}

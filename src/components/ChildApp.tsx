@@ -237,6 +237,7 @@ const ChildAppContent: React.FC = () => {
     <div className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}>
       {/* Theme Art Layer */}
       <ThemeWallpaperArt
+        themeId={activeTheme?.id}
         pattern={activeTheme?.wallpaperPattern}
         category={activeTheme?.category}
         wallpaperUrl={activeTheme?.palette?.wallpaperUrl}

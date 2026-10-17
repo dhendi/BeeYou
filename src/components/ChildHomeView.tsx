@@ -64,6 +64,7 @@ import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { getGrammaticalCategoryLabel } from './AACView';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
+import { getThemeIcon } from '../data/themesData';
 import { IconLibraryModal } from './common/IconLibraryModal';
 
 export const ChildHomeView: React.FC = () => {
@@ -402,11 +403,19 @@ export const ChildHomeView: React.FC = () => {
                       title={t("Change mascot companion icon from Icon Library")}
                       aria-label={t("Change mascot companion icon from Icon Library")}
                     >
-                      <RoutineStickerIcon
-                        emoji={activeTheme?.mascotEmoji || '🐝'}
-                        title={activeTheme?.mascotName || 'Bee Mascot'}
-                        className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-2xs"
-                      />
+                      {getThemeIcon(activeTheme) ? (
+                        <img
+                          src={getThemeIcon(activeTheme)}
+                          alt={activeTheme?.mascotName || 'Mascot'}
+                          className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-2xs select-none pointer-events-none"
+                        />
+                      ) : (
+                        <RoutineStickerIcon
+                          emoji={activeTheme?.mascotEmoji || '🐝'}
+                          title={activeTheme?.mascotName || 'Bee Mascot'}
+                          className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-2xs"
+                        />
+                      )}
                     </button>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">

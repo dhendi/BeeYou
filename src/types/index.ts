@@ -863,6 +863,7 @@ export {
   getThemesForAgeGroup,
   suggestThemeForUser,
   getThemedAacEmoji,
+  getThemeIcon,
 } from '../data/themesData';
 
 export type SubscriptionTier = 'basic' | 'premium';

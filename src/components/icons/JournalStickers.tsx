@@ -506,7 +506,10 @@ export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.pn
 export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
 export const FrogMascotSticker = renderStickerPng('/assets/stickers/frog_mascot.png', 'Hoppy the Tree Frog');
 export const TrainMascotSticker = renderStickerPng('/assets/stickers/train_mascot.png', 'Conductor Leo Mascot');
-export const SpaceMascotSticker = renderStickerPng('/assets/stickers/space_child_persona.png', 'Orion the Astro-Pup Mascot');
+export const SpaceMascotSticker = renderStickerPng('/assets/stickers/space_mascot.png', 'Orion the Astro-Pup Mascot');
+export const OceanMascotSticker = renderStickerPng('/assets/stickers/ocean_mascot.png', 'Scuba Diver Mascot');
+export const RacingMascotSticker = renderStickerPng('/assets/stickers/racing_mascot.png', 'Turbo Racer Mascot');
+export const FairytaleMascotSticker = renderStickerPng('/assets/stickers/fairytale_mascot.png', 'Stardust Unicorn Mascot');
 export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
 export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.png', 'Serene Lagoon & Reeds');
 export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
@@ -2719,6 +2722,32 @@ export const RoutineStickerIcon: React.FC<{
     (isFrog && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
   ) {
     return <FrogMascotSticker className={className} size={size} />;
+  }
+  // 🐬 Ocean Splash / Diver Mascot
+  if (
+    normEmoji === '🐬' ||
+    normTitle.includes('splash the dolphin') ||
+    normTitle.includes('scuba diver') ||
+    (isOcean && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+  ) {
+    return <OceanMascotSticker className={className} size={size} />;
+  }
+  // 🏎️ Turbo Speedway / Turbo Racer Mascot
+  if (
+    normEmoji === '🏎️' ||
+    normEmoji === '🏎' ||
+    normTitle.includes('turbo racer') ||
+    (activeTheme === 'racing' && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+  ) {
+    return <RacingMascotSticker className={className} size={size} />;
+  }
+  // 🦄 Magic Fairytale / Stardust Unicorn Mascot
+  if (
+    normEmoji === '🦄' ||
+    normTitle.includes('stardust unicorn') ||
+    (activeTheme === 'fantasy' && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+  ) {
+    return <FairytaleMascotSticker className={className} size={size} />;
   }
   // 🐝 Themed Companion & Motivation / Bee Mascot
   if (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion') || normTitle.includes('bee')) return <BeeMascotSticker className={className} size={size} />;

@@ -35,8 +35,10 @@ export interface AppTheme {
   name: string;
   category: 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'nature' | 'racing' | 'fantasy' | 'custom' | 'classic';
   emoji: string;
+  icon?: string;
   mascotName: string;
   mascotEmoji: string;
+  mascotIcon?: string;
   greetingMessage: string;
   description: string;
   costStars: number;
@@ -62,8 +64,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Wise Turtle Sanctuary',
     category: 'turtle',
     emoji: '🐢',
+    icon: '/assets/stickers/turtle_mascot.png',
     mascotName: 'Shelly the Wise Turtle',
     mascotEmoji: '🐢',
+    mascotIcon: '/assets/stickers/turtle_mascot.png',
     greetingMessage: 'Slow, steady, and peaceful! Welcome to your calm turtle sanctuary!',
     description: 'Calming turquoise waters, sacred geometric shell patterns, and gentle swimming turtles for deep relaxed focus.',
     costStars: 0, // Unlocked by default so kid or adult can pick turtles right away!
@@ -95,8 +99,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Dino Kingdom',
     category: 'dinosaur',
     emoji: '🦖',
+    icon: '/assets/stickers/dino_rex.png',
     mascotName: 'Rex the T-Rex',
     mascotEmoji: '🦖',
+    mascotIcon: '/assets/stickers/dino_rex.png',
     greetingMessage: 'Roar! Welcome to your prehistoric dinosaur kingdom!',
     description: 'Ancient Jurassic jungle, giant footprints, and friendly T-Rex & Triceratops companions.',
     costStars: 0, // Unlocked by default so kid can jump right into dinos!
@@ -128,8 +134,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Ribbit Pond',
     category: 'frog',
     emoji: '🐸',
+    icon: '/assets/stickers/frog_mascot.png',
     mascotName: 'Hoppy the Tree Frog',
     mascotEmoji: '🐸',
+    mascotIcon: '/assets/stickers/frog_mascot.png',
     greetingMessage: 'Ribbit ribbit! Welcome to the peaceful lily pad pond!',
     description: 'Calming fresh pond water, vibrant bouncy tree frogs, and floating lily pads.',
     costStars: 0,
@@ -161,8 +169,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Steam Express',
     category: 'train',
     emoji: '🚂',
+    icon: '/assets/stickers/train_mascot.png',
     mascotName: 'Conductor Leo',
     mascotEmoji: '🚂',
+    mascotIcon: '/assets/stickers/train_mascot.png',
     greetingMessage: 'All aboard! Full steam ahead on our daily schedule!',
     description: 'Chugga-chugga tracks, shiny steam locomotives, and brass conductor bells.',
     costStars: 0,
@@ -194,8 +204,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Cosmic Explorer',
     category: 'space',
     emoji: '🚀',
+    icon: '/assets/stickers/space_mascot.png',
     mascotName: 'Orion the Astro-Pup',
     mascotEmoji: '🚀',
+    mascotIcon: '/assets/stickers/space_mascot.png',
     greetingMessage: '3.. 2.. 1.. Blastoff! Ready for an interstellar space mission!',
     description: 'Stardust galaxies, glowing nebulae, planetary rings, and flying rocket ships.',
     costStars: 0,
@@ -227,8 +239,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Ocean Splash',
     category: 'ocean',
     emoji: '🐬',
+    icon: '/assets/stickers/ocean_mascot.png',
     mascotName: 'Splash the Dolphin',
     mascotEmoji: '🐬',
+    mascotIcon: '/assets/stickers/ocean_mascot.png',
     greetingMessage: 'Splash! Smooth waters and cheerful calm ocean waves!',
     description: 'Deep ocean coral, playful sea turtles, dancing dolphins, and seafoam bubbles.',
     costStars: 0,
@@ -260,8 +274,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Tactile Silicone & Oat Milk',
     category: 'classic',
     emoji: '🐝',
+    icon: '/assets/stickers/bee_mascot.png',
     mascotName: 'Barnaby the Cozy Bee',
     mascotEmoji: '🐝',
+    mascotIcon: '/assets/stickers/bee_mascot.png',
     greetingMessage: 'Welcome to your sensory space! You can be yourself here.',
     description: 'Warm Japanese oat milk canvas, tactile debossed silicone trays, and ergonomic pillowed action pads.',
     costStars: 0,
@@ -297,8 +313,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Turbo Speedway',
     category: 'racing',
     emoji: '🏎️',
+    icon: '/assets/stickers/racing_mascot.png',
     mascotName: 'Turbo Racer',
     mascotEmoji: '🏎️',
+    mascotIcon: '/assets/stickers/racing_mascot.png',
     greetingMessage: 'Vroom! Green flag is out — ready to zoom through today!',
     description: 'High-speed racecars, checkered finish lines, and turbo boost power.',
     costStars: 0,
@@ -330,8 +348,10 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Magic Fairytale',
     category: 'fantasy',
     emoji: '🦄',
+    icon: '/assets/stickers/fairytale_mascot.png',
     mascotName: 'Stardust Unicorn',
     mascotEmoji: '🦄',
+    mascotIcon: '/assets/stickers/fairytale_mascot.png',
     greetingMessage: 'Sparkle and wonder fill your gentle, happy day!',
     description: 'Whimsical pastel unicorns, fairy dust, and calm lavender gardens.',
     costStars: 0,
@@ -424,5 +444,38 @@ export function suggestThemeForUser(ageGroup: 'kid' | 'teen' | 'adult', interest
     if (lower.some((i) => i.includes('dino') || i.includes('jurassic'))) return 'theme-dino';
     return 'theme-classic';
   }
+}
+
+/**
+ * Returns the high-resolution sticker icon path for a theme or mascot.
+ * Gracefully falls back to category defaults or empty string if not found.
+ */
+export function getThemeIcon(theme?: AppTheme | null): string {
+  if (!theme) return '';
+  if (theme.icon) return theme.icon;
+  if (theme.mascotIcon) return theme.mascotIcon;
+  switch (theme.id) {
+    case 'theme-turtle': return '/assets/stickers/turtle_mascot.png';
+    case 'theme-dino': return '/assets/stickers/dino_rex.png';
+    case 'theme-frog': return '/assets/stickers/frog_mascot.png';
+    case 'theme-trains': return '/assets/stickers/train_mascot.png';
+    case 'theme-space': return '/assets/stickers/space_mascot.png';
+    case 'theme-ocean': return '/assets/stickers/ocean_mascot.png';
+    case 'theme-classic': return '/assets/stickers/bee_mascot.png';
+    case 'theme-racing': return '/assets/stickers/racing_mascot.png';
+    case 'theme-fantasy': return '/assets/stickers/fairytale_mascot.png';
+  }
+  switch (theme.category) {
+    case 'turtle': return '/assets/stickers/turtle_mascot.png';
+    case 'dinosaur': return '/assets/stickers/dino_rex.png';
+    case 'frog': return '/assets/stickers/frog_mascot.png';
+    case 'train': return '/assets/stickers/train_mascot.png';
+    case 'space': return '/assets/stickers/space_mascot.png';
+    case 'ocean': return '/assets/stickers/ocean_mascot.png';
+    case 'classic': return '/assets/stickers/bee_mascot.png';
+    case 'racing': return '/assets/stickers/racing_mascot.png';
+    case 'fantasy': return '/assets/stickers/fairytale_mascot.png';
+  }
+  return '';
 }
 
