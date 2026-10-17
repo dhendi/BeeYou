@@ -1104,6 +1104,31 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
+  // Adventure Step Mappings
+  '/assets/stickers/home_house.png': '/assets/stickers/dino_cavern_retreat.png',
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/dino_slate_tablet_ipad.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/dino_bone_cutlery_fork_spoon.png',
+  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/dino_trail_explorer_boots.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/dino_jungle_speech_bubbles.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/dino_forager_feast_bowl.png',
+  '/assets/stickers/boarding_ticket.png': '/assets/stickers/dino_expedition_log_book.png',
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/dino_waiting_room_couch.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/dino_waving_hand_hello.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/dino_padded_recliner_chair.png',
+  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/dino_open_mouth_wide.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/dino_open_mouth_wide.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/dino_open_welcome_door.png',
+  '/assets/stickers/dining_table_booth.png': '/assets/stickers/dino_dining_table_booth.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/dino_restaurant_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/dino_barbershop_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/dino_haircut_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/dino_water_spray_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/dino_barber_neck_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/dino_salon_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/dino_medical_clinic_building.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/dino_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/dino_doctor_exam_bed.png',
   // Batch 1: Core Routines & Favorites
   '/assets/stickers/routine_water_drink.png': '/assets/stickers/dino_stone_tumbler_water.png',
   '/assets/stickers/drink_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
