@@ -1340,6 +1340,22 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bee_mascot.png': '/assets/stickers/space_pet_care.png',
   '/assets/stickers/pizza_slice.png': '/assets/stickers/space_pizza_slice.png',
   '/assets/stickers/about_id.png': '/assets/stickers/space_about_id.png',
+  // Batch 4 Weather, Rewards, Tools & Exploration
+  '/assets/stickers/morning_sunrise.png': '/assets/stickers/space_morning_sunrise.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/space_evening_moon.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/space_reward_trophy.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/space_star_gold.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/space_feelings_thermometer.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/space_battery_meter.png',
+  '/assets/stickers/calm_sparkles.png': '/assets/stickers/space_calm_sparkles.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/space_quiet_voice.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/space_speech_bubble.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/space_science_flask.png',
+  '/assets/stickers/sunny_clear.png': '/assets/stickers/space_sunny_clear.png',
+  '/assets/stickers/rain_cloud.png': '/assets/stickers/space_rain_cloud.png',
+  '/assets/stickers/snow_weather.png': '/assets/stickers/space_snow_weather.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/space_travel_luggage.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/space_stethoscope.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
