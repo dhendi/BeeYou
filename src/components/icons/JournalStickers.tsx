@@ -1957,6 +1957,25 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/fav_lego.png': '/assets/stickers/ocean_treasure_toy_chest.png',
   '/assets/stickers/homework_study.png': '/assets/stickers/ocean_nautical_chart_study.png',
   '/assets/stickers/folder_schoolwork.png': '/assets/stickers/ocean_nautical_chart_study.png',
+
+  // Batch 3 Moods, Personas, Hubs & Daily Living
+  '/assets/stickers/mood_happy.png': '/assets/stickers/ocean_happy_baby_shark.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/ocean_calm_floating_shark.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/ocean_excited_leaping_shark.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/ocean_sleepy_resting_shark.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/ocean_unsure_wondering_shark.png',
+  '/assets/stickers/child_persona.png': '/assets/stickers/ocean_junior_snorkel_diver.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/ocean_waterproof_briefcase.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/ocean_waterproof_phone.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/ocean_navigational_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/ocean_golden_pearl_crown.png',
+  '/assets/stickers/home_house.png': '/assets/stickers/ocean_beachside_cottage.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/ocean_beach_cruiser_car.png',
+  '/assets/stickers/car_travel.png': '/assets/stickers/ocean_beach_cruiser_car.png',
+  '/assets/stickers/car_on_my_way.png': '/assets/stickers/ocean_beach_cruiser_car.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/ocean_boat_dog_lifevest.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/ocean_scallop_plate_pizza.png',
+  '/assets/stickers/about_id.png': '/assets/stickers/ocean_scuba_id_badge.png',
 };
 
 /**
