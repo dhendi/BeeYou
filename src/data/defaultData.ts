@@ -1163,27 +1163,27 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 1,
         text: 'Sometimes we have a plan for our day. We know where we are going and what we will do.',
-        emoji: '📅',
+        emoji: '/assets/stickers/schedule_calendar.png',
       },
       {
         pageNumber: 2,
         text: 'Sometimes something unexpected happens. A place might be closed, or someone might be sick.',
-        emoji: '🌧️',
+        emoji: '/assets/stickers/rain_cloud.png',
       },
       {
         pageNumber: 3,
         text: 'When a plan changes, my body might feel surprised, sad, or angry. That is okay. All feelings are okay.',
-        emoji: '❤️',
+        emoji: '/assets/stickers/caregiver_heart.png',
       },
       {
         pageNumber: 4,
         text: 'I can take three deep breaths. I can ask my caregiver: "What happens now?"',
-        emoji: '🧘',
+        emoji: '/assets/stickers/coping_lungs_breathing.png',
       },
       {
         pageNumber: 5,
         text: 'Together, we will make a new plan. I am safe, and we can still have a good day.',
-        emoji: '🌈',
+        emoji: '/assets/stickers/rainbow_weather.png',
       },
     ],
     keyTakeaways: [
@@ -1207,27 +1207,27 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 1,
         text: 'A birthday party is a celebration with games, cake, and friends.',
-        emoji: '🎈',
+        emoji: '/assets/stickers/red_balloon.png',
       },
       {
         pageNumber: 2,
         text: 'Parties can be noisy and full of movement. I can wear my headphones if the sounds are loud.',
-        emoji: '🎧',
+        emoji: '/assets/stickers/teen_headphones.png',
       },
       {
         pageNumber: 3,
         text: 'I can say "Happy Birthday" or give a card to the birthday child.',
-        emoji: '🎁',
+        emoji: '/assets/stickers/story_sharing.png',
       },
       {
         pageNumber: 4,
         text: 'If I feel tired or overwhelmed, I can tell my caregiver: "I need a quiet break."',
-        emoji: '🛋️',
+        emoji: '/assets/stickers/waiting_room_couch.png',
       },
       {
         pageNumber: 5,
         text: 'I can choose which games to join, eat yummy treats, and say goodbye when it is time to go.',
-        emoji: '🍰',
+        emoji: '/assets/stickers/story_birthday.png',
       },
     ],
     keyTakeaways: [
@@ -1256,22 +1256,22 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 2,
         text: 'Sometimes a friend wants to play with the same toy. We can take turns.',
-        emoji: '🤝',
+        emoji: '/assets/stickers/story_sharing.png',
       },
       {
         pageNumber: 3,
         text: 'We can use a visual timer so we know when each turn ends.',
-        emoji: '⏱️',
+        emoji: '/assets/stickers/timer_clock.png',
       },
       {
         pageNumber: 4,
         text: 'While I wait, I can play with another fun toy or watch my friend.',
-        emoji: '🧩',
+        emoji: '/assets/stickers/jigsaw_puzzle.png',
       },
       {
         pageNumber: 5,
         text: 'Taking turns helps everyone play together happily.',
-        emoji: '🌟',
+        emoji: '/assets/stickers/star_gold.png',
       },
     ],
     keyTakeaways: [

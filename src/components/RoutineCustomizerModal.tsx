@@ -169,7 +169,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
       instruction: newStepInstruction.trim() || undefined,
       durationMin: Number(newStepDuration) || 5,
       completed: false,
-      emoji: newStepEmoji || '✨',
+      emoji: newStepEmoji || '/assets/stickers/star_gold.png',
       sensoryNote: newStepSensoryNote.trim() || undefined,
     };
     setSteps([...steps, newStep]);

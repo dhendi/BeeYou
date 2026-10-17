@@ -106,7 +106,7 @@ export const PlansChangedModal: React.FC = () => {
 
   // Inputs for adding a step
   const [newStepTitle, setNewStepTitle] = useState<string>('');
-  const [newStepEmoji, setNewStepEmoji] = useState<string>('⭐');
+  const [newStepEmoji, setNewStepEmoji] = useState<string>('');
   const [newStepTime, setNewStepTime] = useState<string>('');
   const [showIconLibrary, setShowIconLibrary] = useState<boolean>(false);
   const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);
@@ -187,12 +187,13 @@ export const PlansChangedModal: React.FC = () => {
       ...steps,
       {
         title: newStepTitle.trim(),
-        emoji: newStepEmoji || '✨',
+        emoji: newStepEmoji || '/assets/stickers/star_gold.png',
         time: newStepTime.trim() || undefined,
       },
     ]);
     setNewStepTitle('');
     setNewStepTime('');
+    setNewStepEmoji('');
     playChime('tap');
   };
 
@@ -445,7 +446,7 @@ export const PlansChangedModal: React.FC = () => {
                         className="p-2.5 rounded-2xl bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition-all cursor-pointer shadow-2xs active:scale-95 flex items-start gap-2"
                       >
                         <div className="w-6 h-6 shrink-0 flex items-center justify-center">
-                          <RoutineStickerIcon emoji={preset.steps[0]?.emoji || '✨'} className="w-6 h-6 object-contain" />
+                          <RoutineStickerIcon emoji={preset.steps[0]?.emoji || '/assets/stickers/star_gold.png'} className="w-6 h-6 object-contain" />
                         </div>
                         <div className="min-w-0">
                           <span className="font-black text-xs text-slate-900 block truncate">
@@ -558,7 +559,11 @@ export const PlansChangedModal: React.FC = () => {
                         title={t('Pick an icon from our icon library')}
                       >
                         <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                          <RoutineStickerIcon emoji={newStepEmoji || '✨'} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+                          {newStepEmoji ? (
+                            <RoutineStickerIcon emoji={newStepEmoji} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+                          ) : (
+                            <Plus className="w-4 h-4 text-amber-700" />
+                          )}
                         </div>
                         <span className="text-xs font-black text-amber-950">
                           {t('Icon')}

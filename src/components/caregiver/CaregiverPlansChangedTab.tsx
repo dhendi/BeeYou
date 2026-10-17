@@ -36,7 +36,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [pcSteps, setPcSteps] = useState(plansChanged.newSteps);
   const [pcPhrases, setPcPhrases] = useState(plansChanged.relevantPhrases);
   const [newStepTitle, setNewStepTitle] = useState('');
-  const [newStepEmoji, setNewStepEmoji] = useState('⭐');
+  const [newStepEmoji, setNewStepEmoji] = useState('');
   const [newStepTime, setNewStepTime] = useState('');
   const [newPhraseInput, setNewPhraseInput] = useState('');
   const [showIconLibrary, setShowIconLibrary] = useState(false);
@@ -437,7 +437,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               title={t("Pick an icon from our icon library")}
             >
               <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                <RoutineStickerIcon emoji={newStepEmoji || '✨'} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+                {newStepEmoji ? (
+                  <RoutineStickerIcon emoji={newStepEmoji} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
+                ) : (
+                  <Plus className="w-4 h-4 text-amber-700" />
+                )}
               </div>
               <span className="text-xs font-black text-amber-950">
                 {t("Icon")}
@@ -456,11 +460,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 if (newStepTitle.trim()) {
                   setPcSteps([
                     ...pcSteps,
-                    { title: newStepTitle.trim(), emoji: newStepEmoji || '⭐', time: newStepTime.trim() || undefined },
+                    { title: newStepTitle.trim(), emoji: newStepEmoji || '/assets/stickers/star_gold.png', time: newStepTime.trim() || undefined },
                   ]);
                   setNewStepTitle('');
                   setNewStepTime('');
-                  setNewStepEmoji('⭐');
+                  setNewStepEmoji('');
                 }
               }}
               className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"

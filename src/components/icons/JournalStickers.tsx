@@ -1958,7 +1958,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🎮 Video Game / Special Interest
   if (normEmoji === '🎮' || normTitle.includes('game') || normTitle.includes('gaming') || normTitle.includes('console')) return <GameControllerSticker className={className} size={size} />;
   // 🫁 Deep Breathing / Lungs Pacer
-  if (normEmoji === '🫁' || normTitle.includes('lung') || normTitle.includes('breathing pacer')) return <LungsBreathingSticker className={className} size={size} />;
+  if (normEmoji === '🫁' || normEmoji === '🧘' || normTitle.includes('lung') || normTitle.includes('breathing') || normTitle.includes('deep breath')) return <LungsBreathingSticker className={className} size={size} />;
   // 💤 Rest / Power Nap / Zzz
   if (normEmoji === '💤' || normTitle.includes('nap') || (normTitle.includes('rest') && normTitle.includes('power'))) return <RestNapSticker className={className} size={size} />;
   // 🤒 Feeling Unwell / Fever / Sick
@@ -2081,9 +2081,9 @@ export const RoutineStickerIcon: React.FC<{
   // 🍽️ Dinner / Lunch / Meal / Plate
   if (normEmoji === '🍽️' || normEmoji === '🥪' || normTitle.includes('dinner') || normTitle.includes('lunch') || normTitle.includes('meal') || normTitle.includes('sandwich')) return <DinnerBowlSticker className={className} size={size} />;
   // 🎂 Birthday Party / Cake
-  if (normEmoji === '🎂' || normTitle.includes('birthday') || normTitle.includes('party')) return <BirthdayStorySticker className={className} size={size} />;
-  // 🤝 Taking Turns / Sharing / Friends / Social
-  if (normEmoji === '🤝' || normEmoji === '👥' || normTitle.includes('turn') || normTitle.includes('sharing') || normTitle.includes('social') || normTitle.includes('friction')) return <TakingTurnsStorySticker className={className} size={size} />;
+  if (normEmoji === '🎂' || normEmoji === '🍰' || normTitle.includes('birthday') || normTitle.includes('party')) return <BirthdayStorySticker className={className} size={size} />;
+  // 🤝 Taking Turns / Sharing / Friends / Social / Gift
+  if (normEmoji === '🤝' || normEmoji === '👥' || normEmoji === '🎁' || normTitle.includes('turn') || normTitle.includes('sharing') || normTitle.includes('social') || normTitle.includes('gift') || normTitle.includes('card') || normTitle.includes('friction')) return <TakingTurnsStorySticker className={className} size={size} />;
   // 🍎 Healthy Snack / Apple / Fruit
   if (normEmoji === '🍎' || normTitle.includes('snack') || normTitle.includes('apple') || normTitle.includes('fruit')) return <AppleSticker className={className} size={size} />;
   // 🍬 Candy / Treat / Reward Snack
@@ -2161,7 +2161,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🎨 Art / crafts / drawing
   if (normEmoji === '🎨' || normEmoji === '🖍️' || normTitle.includes('art') || normTitle.includes('paint') || normTitle.includes('craft')) return <ArtCraftsSticker className={className} size={size} />;
   // ⭐ Star / calm mindfulness
-  if (normEmoji === '⭐' || normEmoji === '✨' || normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
+  if (normTitle.includes('mindful') || normTitle.includes('reset')) return <CalmSparklesSticker className={className} size={size} />;
   // 🏆 Trophy / reward / milestone
   if (normEmoji === '🏆' || normEmoji === '🥇' || normTitle.includes('trophy') || normTitle.includes('reward') || normTitle.includes('win') || normTitle.includes('streak')) return <RewardTrophySticker className={className} size={size} />;
   // 🛁 Bath time / tub

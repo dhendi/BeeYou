@@ -375,7 +375,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
             { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), iconSrc: '/assets/stickers/pill_capsule.png', bg: 'hover:bg-rose-50/70 border-rose-200' },
             { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), iconSrc: '/assets/stickers/car_ride.png', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
             { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), iconSrc: '/assets/stickers/wind_breeze.png', bg: 'hover:bg-sky-50/70 border-sky-200' },
-            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), iconSrc: '/assets/stickers/purple_stars.png', bg: 'hover:bg-purple-50/70 border-purple-200' },
+            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), iconSrc: '/assets/stickers/high_five_hands.png', bg: 'hover:bg-purple-50/70 border-purple-200' },
             { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), iconSrc: '/assets/stickers/circular_arrow.png', bg: 'hover:bg-amber-200 border-amber-200' },
             { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), iconSrc: '/assets/stickers/speech_bubble.png', bg: 'hover:bg-blue-50/70 border-blue-200' },
           ].map((nudge, idx) => (
