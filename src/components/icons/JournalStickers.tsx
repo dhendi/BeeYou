@@ -1356,6 +1356,27 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/snow_weather.png': '/assets/stickers/space_snow_weather.png',
   '/assets/stickers/travel_luggage.png': '/assets/stickers/space_travel_luggage.png',
   '/assets/stickers/stethoscope.png': '/assets/stickers/space_stethoscope.png',
+  // Batch 5 Adventures & Sensory Regulation
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/space_adventure_dentist.png',
+  '/assets/stickers/dentist_adventure.png': '/assets/stickers/space_adventure_dentist.png',
+  '/assets/stickers/adventure_haircut.png': '/assets/stickers/space_adventure_haircut.png',
+  '/assets/stickers/haircut_adventure.png': '/assets/stickers/space_adventure_haircut.png',
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/space_adventure_movie_cinema.png',
+  '/assets/stickers/movie_cinema.png': '/assets/stickers/space_adventure_movie_cinema.png',
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/space_adventure_swimming_pool.png',
+  '/assets/stickers/swimming_pool.png': '/assets/stickers/space_adventure_swimming_pool.png',
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/space_adventure_camping_tent.png',
+  '/assets/stickers/camping_tent.png': '/assets/stickers/space_adventure_camping_tent.png',
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/space_shopping_cart.png',
+  '/assets/stickers/therapy_brain.png': '/assets/stickers/space_therapy_brain.png',
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/space_sensory_loud_noise.png',
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/space_sensory_bright_lights.png',
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/space_tennis_ball.png',
+  '/assets/stickers/red_balloon.png': '/assets/stickers/space_red_balloon.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/space_candy_treat.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/space_cutlery_meal.png',
+  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/space_grounding_touch_hand.png',
+  '/assets/stickers/cloudy_weather.png': '/assets/stickers/space_cloudy_weather.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {

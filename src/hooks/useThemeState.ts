@@ -61,22 +61,15 @@ export function useThemeState({
     } catch (e) {}
   }, [activeThemeId]);
 
-  useEffect(() => {
-    if (!isPremium && activeThemeId !== 'theme-classic') {
-      setActiveThemeId('theme-classic');
-    }
-  }, [isPremium, activeThemeId]);
-
-  // When premium is active, all themes are unlocked! Non-premium users have access to classic theme.
+  // All preset themes (Honey, Turtle, Dino, Frog, Train, Space, etc.) are fully unlocked!
+  // Custom user-created studio themes require premium.
   const resolvedThemes = themes.map((t) => ({
     ...t,
-    isUnlocked: isPremium ? true : t.id === 'theme-classic',
+    isUnlocked: t.isCustom ? isPremium : true,
     costStars: 0,
   }));
 
-  const activeTheme = !isPremium
-    ? resolvedThemes.find((t) => t.id === 'theme-classic') || PRESET_THEMES.find((t) => t.id === 'theme-classic') || resolvedThemes[0]
-    : resolvedThemes.find((t) => t.id === activeThemeId) || resolvedThemes[0] || PRESET_THEMES[0];
+  const activeTheme = resolvedThemes.find((t) => t.id === activeThemeId) || resolvedThemes[0] || PRESET_THEMES[0];
 
   useEffect(() => {
     try {
@@ -95,11 +88,11 @@ export function useThemeState({
   }, [activeTheme]);
 
   const setTheme = (id: string) => {
-    if (!isPremium && id !== 'theme-classic') {
-      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 15-day free trial to unlock all themes.');
+    const target = resolvedThemes.find((t) => t.id === id);
+    if (target?.isCustom && !isPremium) {
+      triggerUpgrade('Custom themes are a BeeYou Premium feature! Start your 15-day free trial to unlock custom theme studio.');
       return;
     }
-    const target = resolvedThemes.find((t) => t.id === id);
     if (target) {
       setActiveThemeId(id);
       preloadThemeStickers(id);
@@ -108,17 +101,15 @@ export function useThemeState({
   };
 
   const buyTheme = (themeId: string): boolean => {
-    if (!isPremium && themeId !== 'theme-classic') {
-      triggerUpgrade('Themes are a BeeYou Premium feature! Start your 15-day free trial to unlock all themes.');
+    const target = resolvedThemes.find((t) => t.id === themeId);
+    if (target?.isCustom && !isPremium) {
+      triggerUpgrade('Custom themes are a BeeYou Premium feature! Start your 15-day free trial to unlock custom theme studio.');
       return false;
     }
     setActiveThemeId(themeId);
     if (soundEffects) playChime('complete');
-    if (spokenAnnouncements) {
-      const target = resolvedThemes.find((t) => t.id === themeId);
-      if (target) {
-        speak(`Hooray! You equipped the ${target.name} theme!`);
-      }
+    if (spokenAnnouncements && target) {
+      speak(`Hooray! You equipped the ${target.name} theme!`);
     }
     return true;
   };
