@@ -1976,6 +1976,23 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/pet_care.png': '/assets/stickers/ocean_boat_dog_lifevest.png',
   '/assets/stickers/pizza_slice.png': '/assets/stickers/ocean_scallop_plate_pizza.png',
   '/assets/stickers/about_id.png': '/assets/stickers/ocean_scuba_id_badge.png',
+
+  // Batch 4 Weather, Rewards, Tools & Exploration
+  '/assets/stickers/morning_sunrise.png': '/assets/stickers/ocean_horizon_sunrise.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/ocean_night_crescent_moon.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/ocean_golden_seahorse_trophy.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/ocean_golden_starfish_badge.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/ocean_submarine_depth_meter.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/ocean_submarine_battery_gauge.png',
+  '/assets/stickers/calm_sparkles.png': '/assets/stickers/ocean_bioluminescent_sparkles.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/ocean_zipped_mouth_shark.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/ocean_bubble_speech_bubble.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/ocean_marine_science_flask.png',
+  '/assets/stickers/sunny_clear.png': '/assets/stickers/ocean_sunny_island_weather.png',
+  '/assets/stickers/rain_cloud.png': '/assets/stickers/ocean_raincloud_weather.png',
+  '/assets/stickers/snow_weather.png': '/assets/stickers/ocean_arctic_iceberg_snow.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/ocean_nautical_travel_trunk.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
 };
 
 /**
