@@ -62,12 +62,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
 
   // Helper for dynamic routine title formatting (including New Plan)
   const renderRoutineTitle = (title: string) => {
-    if (title.startsWith('✨ New Plan: ')) {
-      const planName = title.slice('✨ New Plan: '.length);
-      return `${t('New Plan')}: ${t(planName)}`;
-    }
-    if (title.startsWith('New Plan: ')) {
-      const planName = title.slice('New Plan: '.length);
+    if (title.includes('New Plan: ')) {
+      const planName = title.split('New Plan: ')[1];
       return `${t('New Plan')}: ${t(planName)}`;
     }
     return t(title);

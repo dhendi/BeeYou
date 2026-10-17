@@ -106,12 +106,12 @@ export function getQuickRepliesForAlert(
       {
         id: 'hug_back',
         label: t("🤗 Big Hug Back!"),
-        text: t("Big warm hug right back to you! You make me smile! ✨"),
+        text: t("Big warm hug right back to you! You make me smile!"),
         className: 'bg-amber-600 hover:bg-amber-700 text-white',
       },
       {
         id: 'proud_day',
-        label: t("✨ You Are Awesome!"),
+        label: t("You Are Awesome!"),
         text: t("Thinking of you too! You are doing amazing today! 🌟"),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },

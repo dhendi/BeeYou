@@ -399,7 +399,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         targetSelector: '[data-tour="subscription-trial-button"]',
         title: 'Start 15-Day Free Trial',
         instruction: 'Unlock all 17 soundscapes, unlimited routines, and therapist clinical summaries with 1 tap.',
-        mascotHint: 'Start with $0 today and cancel anytime! ✨',
+        mascotHint: 'Start with $0 today and cancel anytime!',
       },
     ],
   },
