@@ -11,7 +11,6 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
-  Sparkles,
   BookOpen,
   Check,
   Smile,
@@ -429,7 +428,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
               {!isEditing && (
                 <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50/80'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} rounded-2xl p-3.5`}>
                   <div className={`flex items-center gap-1.5 text-xs font-black ${activeTheme?.palette?.textAccent || 'text-amber-900'} mb-2 uppercase tracking-wider`}>
-                    <Sparkles className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
+                    <Lightbulb className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
                     <span>{t('Need inspiration? Choose a starter story:')}</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

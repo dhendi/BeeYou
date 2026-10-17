@@ -13,7 +13,6 @@ import {
   RotateCcw,
   CheckCircle2,
   Crown,
-  Sparkles,
   ArrowLeft
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
@@ -616,7 +615,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               onClick={handleStartCreateNewTheme}
               className="px-3.5 py-1.5 rounded-full font-black text-xs flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xs cursor-pointer active:scale-95 transition-all"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Palette className="w-3.5 h-3.5" />
               <span>+ Create New Theme</span>
             </button>
           </div>

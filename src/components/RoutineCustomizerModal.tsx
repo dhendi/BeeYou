@@ -17,8 +17,7 @@ import {
   Square,
   ListTree,
   Search,
-  Palette,
-  Sparkles
+  Palette
 } from 'lucide-react';
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';

@@ -11,7 +11,7 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
-  Sparkles,
+  Lightbulb,
   Volume2,
   Ear,
   Eye,
@@ -398,7 +398,7 @@ export const CreateAdventureModal: React.FC<CreateAdventureModalProps> = ({
               {!isEditing && (
                 <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5">
                   <div className="flex items-center gap-1.5 text-xs font-black text-amber-900 mb-2 uppercase tracking-wider">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <Lightbulb className="w-4 h-4 text-amber-600" />
                     <span>{t('Need inspiration? Choose a quick starter:')}</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
