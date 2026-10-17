@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
-import { t } from '../services/translator';
+import { t, getLanguage } from '../services/translator';
 import { 
   X, 
   Printer, 
@@ -35,7 +35,19 @@ export const PrintScheduleModal: React.FC = () => {
     printScheduleConfig,
     routines,
     childProfile,
+    settings,
   } = useApp();
+
+  // Re-render when language changes
+  const [, setLangTick] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setLangTick((n) => n + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
+  const activeLang = settings?.language || getLanguage() || 'en';
+  const dateLocale = activeLang === 'en' ? 'en-US' : (activeLang === 'fr_ca' ? 'fr-CA' : activeLang);
 
   if (!showPrintScheduleModal) return null;
 
@@ -203,7 +215,7 @@ export const PrintScheduleModal: React.FC = () => {
               type="button"
               onClick={handleDownloadImage}
               className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
-              title="Download as PNG image"
+              title={t('Download as PNG image')}
             >
               <Download className="w-4 h-4 text-stone-600" />
               <span className="hidden sm:inline">{t('Save PNG')}</span>
@@ -213,8 +225,8 @@ export const PrintScheduleModal: React.FC = () => {
               type="button"
               onClick={handleClose}
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-all cursor-pointer shrink-0"
-              title="Close print preview"
-              aria-label="Close"
+              title={t('Close print preview')}
+              aria-label={t('Close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -302,7 +314,7 @@ export const PrintScheduleModal: React.FC = () => {
               >
                 {routines.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.title} ({r.steps.length} steps)
+                    {t(r.title)} ({r.steps.length} {t('steps')})
                   </option>
                 ))}
               </select>
@@ -318,7 +330,7 @@ export const PrintScheduleModal: React.FC = () => {
               >
                 {scrapbookPages.map((p, idx) => (
                   <option key={p.id} value={idx}>
-                    Page {idx + 1}: {p.title} ({p.stickers.length} stickers)
+                    {t('Page')} {idx + 1}: {t(p.title)} ({p.stickers.length} {t('stickers')})
                   </option>
                 ))}
               </select>
@@ -332,9 +344,9 @@ export const PrintScheduleModal: React.FC = () => {
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   colorMode === 'color' ? 'bg-white text-amber-900 shadow-2xs' : 'text-stone-500'
                 }`}
-                title="Full color palette"
+                title={t('Full color palette')}
               >
-                🎨 Color
+                🎨 {t('Color')}
               </button>
               <button
                 type="button"
@@ -342,9 +354,9 @@ export const PrintScheduleModal: React.FC = () => {
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   colorMode === 'bw' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                 }`}
-                title="Ink-saver black and white for cheap printing"
+                title={t('Ink-saver black and white for cheap printing')}
               >
-                🖤 Ink-Saver B&amp;W
+                🖤 {t('Ink-Saver B&W')}
               </button>
             </div>
 
@@ -357,9 +369,9 @@ export const PrintScheduleModal: React.FC = () => {
                   className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     cardDensity === 'standard' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                   }`}
-                  title="6 Large Cards per page"
+                  title={t('6 Large Cards per page')}
                 >
-                  6 Cards
+                  6 {t('Cards')}
                 </button>
                 <button
                   type="button"
@@ -367,9 +379,9 @@ export const PrintScheduleModal: React.FC = () => {
                   className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     cardDensity === 'compact' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500'
                   }`}
-                  title="8 Pocket Cards per page"
+                  title={t('8 Pocket Cards per page')}
                 >
-                  8 Cards
+                  8 {t('Cards')}
                 </button>
               </div>
             )}
@@ -407,23 +419,23 @@ export const PrintScheduleModal: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[11px] font-black uppercase tracking-wider text-amber-700 block">
-                      {childName}'s Visual Daily Schedule
+                      {t("{childName}'s Visual Daily Schedule").replace('{childName}', childName)}
                     </span>
                     <h1 className="text-2xl sm:text-3xl font-black text-stone-900">
-                      {selectedRoutine.title}
+                      {t(selectedRoutine.title)}
                     </h1>
                     <p className="text-xs text-stone-500 font-medium">
-                      Scheduled for: <strong>{selectedRoutine.time || 'Daily'}</strong> • One step at a time!
+                      {t('Scheduled for')}: <strong>{t(selectedRoutine.time || 'Daily')}</strong> • {t('One step at a time!')}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <div className="text-[11px] font-bold text-stone-400 uppercase tracking-widest">
-                    BeeYou Daily Schedule
+                    {t('BeeYou Daily Schedule')}
                   </div>
                   <div className="text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 mt-1">
-                    {selectedRoutine.steps.length} Steps Total
+                    {selectedRoutine.steps.length} {t('Steps Total')}
                   </div>
                 </div>
               </div>
@@ -454,16 +466,16 @@ export const PrintScheduleModal: React.FC = () => {
                       {/* Title & Description */}
                       <div>
                         <h3 className="text-base sm:text-lg font-black text-stone-900 leading-tight">
-                          {step.title}
+                          {t(step.title)}
                         </h3>
                         {step.instruction && (
                           <p className="text-xs text-stone-500 font-medium mt-0.5 leading-snug">
-                            {step.instruction}
+                            {t(step.instruction)}
                           </p>
                         )}
                         {step.sensoryNote && (
                           <p className="text-[11px] text-amber-700 font-semibold mt-0.5">
-                            💡 Sensory tip: {step.sensoryNote}
+                            💡 {t('Sensory tip')}: {t(step.sensoryNote)}
                           </p>
                         )}
                       </div>
@@ -474,7 +486,7 @@ export const PrintScheduleModal: React.FC = () => {
                       {step.durationMin && (
                         <span className="text-xs font-bold text-stone-400 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          <span>{step.durationMin}m</span>
+                          <span>{step.durationMin}{t('m')}</span>
                         </span>
                       )}
 
@@ -493,16 +505,16 @@ export const PrintScheduleModal: React.FC = () => {
                   <span className="text-2xl">🎉</span>
                   <div>
                     <span className="text-xs font-black text-stone-900 block">
-                      When all steps are completed:
+                      {t('When all steps are completed:')}
                     </span>
                     <span className="text-[11px] text-stone-500 font-medium">
-                      Great perseverance! Celebrate with your caregiver or add a sticker to your Scrapbook.
+                      {t('Great perseverance! Celebrate with your caregiver or add a sticker to your Scrapbook.')}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-bold text-stone-400">
-                  <span>Parent / Teacher Notes: ______________________</span>
+                  <span>{t('Parent / Teacher Notes:')} ______________________</span>
                 </div>
               </div>
             </div>
@@ -522,7 +534,7 @@ export const PrintScheduleModal: React.FC = () => {
                   </span>
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-stone-400">
-                  {selectedRoutine.title} • {selectedRoutine.steps.length} Cards
+                  {t(selectedRoutine.title)} • {selectedRoutine.steps.length} {t('Cards')}
                 </span>
               </div>
 
@@ -557,11 +569,11 @@ export const PrintScheduleModal: React.FC = () => {
                     {/* Step Title & Duration */}
                     <div className="w-full">
                       <span className="font-black text-xs sm:text-sm text-stone-900 block leading-tight truncate">
-                        {step.title}
+                        {t(step.title)}
                       </span>
                       {step.durationMin && (
                         <span className="text-[10px] font-bold text-stone-400 block mt-0.5">
-                          ⏱️ {step.durationMin} min
+                          ⏱️ {step.durationMin} {t('min')}
                         </span>
                       )}
                     </div>
@@ -573,25 +585,25 @@ export const PrintScheduleModal: React.FC = () => {
               {includeHolderBoard && (
                 <div className="mt-8 pt-6 border-t-3 border-stone-300 print-avoid-break">
                   <div className="flex items-center justify-between text-xs font-black text-stone-500 mb-2 uppercase tracking-wider">
-                    <span>✂️ Cut-Out Daily Schedule Holder Board (Attach Velcro strip below)</span>
-                    <span>BeeYou PECS Board</span>
+                    <span>✂️ {t('Cut-Out Daily Schedule Holder Board (Attach Velcro strip below)')}</span>
+                    <span>{t('BeeYou PECS Board')}</span>
                   </div>
 
                   <div className="border-3 border-stone-800 rounded-3xl p-4 bg-stone-50 grid grid-cols-2 gap-4">
                     {/* Left: TO DO */}
                     <div className="bg-amber-100/70 border-2 border-dashed border-amber-400 rounded-2xl p-4 text-center min-h-[110px] flex flex-col justify-between">
                       <span className="text-sm font-black text-amber-950 uppercase tracking-wider flex items-center justify-center gap-1.5">
-                        <span>📌 TO DO</span>
+                        <span>📌 {t('TO DO')}</span>
                       </span>
                       <div className="flex items-center justify-center gap-3">
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-amber-500 bg-white flex items-center justify-center text-[9px] text-amber-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-amber-500 bg-white flex items-center justify-center text-[9px] text-amber-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-amber-500 bg-white flex items-center justify-center text-[9px] text-amber-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                       </div>
                     </div>
@@ -599,17 +611,17 @@ export const PrintScheduleModal: React.FC = () => {
                     {/* Right: ALL DONE */}
                     <div className="bg-emerald-100/70 border-2 border-dashed border-emerald-400 rounded-2xl p-4 text-center min-h-[110px] flex flex-col justify-between">
                       <span className="text-sm font-black text-emerald-950 uppercase tracking-wider flex items-center justify-center gap-1.5">
-                        <span>🎉 ALL DONE!</span>
+                        <span>🎉 {t('ALL DONE!')}</span>
                       </span>
                       <div className="flex items-center justify-center gap-3">
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-emerald-500 bg-white flex items-center justify-center text-[9px] text-emerald-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-emerald-500 bg-white flex items-center justify-center text-[9px] text-emerald-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                         <div className="w-8 h-8 rounded-full border-2 border-dashed border-emerald-500 bg-white flex items-center justify-center text-[9px] text-emerald-600 font-bold">
-                          Velcro
+                          {t('Velcro')}
                         </div>
                       </div>
                     </div>
@@ -627,45 +639,45 @@ export const PrintScheduleModal: React.FC = () => {
               {/* Header */}
               <div className="text-center border-b-2 border-stone-200 pb-3">
                 <span className="text-xs font-black uppercase tracking-wider text-amber-600 block">
-                  {childName}'s Visual Pacer
+                  {t("{childName}'s Visual Pacer").replace('{childName}', childName)}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-stone-900">
-                  FIRST ➔ THEN Visual Guide
+                  {t('FIRST ➔ THEN Visual Guide')}
                 </h2>
                 <p className="text-xs text-stone-500 font-medium">
-                  Complete step 1 first, then enjoy the rewarding step 2!
+                  {t('Complete step 1 first, then enjoy the rewarding step 2!')}
                 </p>
               </div>
 
               {/* Selector Bar in Preview (Hidden during print) */}
               <div className="no-print bg-stone-50 p-3 rounded-2xl border border-stone-200 flex items-center justify-between gap-4 text-xs font-bold">
                 <div className="flex items-center gap-2">
-                  <span className="text-emerald-700">1. First Activity:</span>
+                  <span className="text-emerald-700">1. {t('First Activity:')}</span>
                   <select
-                    aria-label="Select first activity"
+                    aria-label={t('Select first activity')}
                     value={firstStepIndex}
                     onChange={(e) => setFirstStepIndex(Number(e.target.value))}
                     className="bg-white border border-stone-300 rounded-lg px-2 py-1 text-xs"
                   >
                     {selectedRoutine.steps.map((s, i) => (
                       <option key={i} value={i}>
-                        {s.title}
+                        {t(s.title)}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sky-700">2. Then Activity:</span>
+                  <span className="text-sky-700">2. {t('Then Activity:')}</span>
                   <select
-                    aria-label="Select then activity"
+                    aria-label={t('Select then activity')}
                     value={thenStepIndex}
                     onChange={(e) => setThenStepIndex(Number(e.target.value))}
                     className="bg-white border border-stone-300 rounded-lg px-2 py-1 text-xs"
                   >
                     {selectedRoutine.steps.map((s, i) => (
                       <option key={i} value={i}>
-                        {s.title}
+                        {t(s.title)}
                       </option>
                     ))}
                   </select>
@@ -680,7 +692,7 @@ export const PrintScheduleModal: React.FC = () => {
                   return (
                     <div className="border-4 border-emerald-500 rounded-3xl p-6 bg-gradient-to-b from-emerald-50 via-white to-emerald-50 text-center flex flex-col items-center justify-between min-h-[300px] shadow-md">
                       <span className="px-5 py-1.5 rounded-full bg-emerald-600 text-white font-black text-base uppercase tracking-wider shadow-xs">
-                        1. FIRST
+                        {t('1. FIRST')}
                       </span>
 
                       <div className="w-28 h-28 rounded-3xl bg-white border-2 border-emerald-200 flex items-center justify-center p-3 shadow-md my-4">
@@ -694,16 +706,16 @@ export const PrintScheduleModal: React.FC = () => {
 
                       <div>
                         <h3 className="text-xl sm:text-2xl font-black text-stone-900 leading-tight">
-                          {step1.title}
+                          {t(step1.title)}
                         </h3>
                         {step1.instruction && (
                           <p className="text-xs text-stone-600 font-semibold mt-1">
-                            {step1.instruction}
+                            {t(step1.instruction)}
                           </p>
                         )}
                         {step1.durationMin && (
                           <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full inline-block mt-2">
-                            ⏱️ {step1.durationMin} Minutes
+                            ⏱️ {step1.durationMin} {t('Minutes')}
                           </span>
                         )}
                       </div>
@@ -717,7 +729,7 @@ export const PrintScheduleModal: React.FC = () => {
                   return (
                     <div className="border-4 border-sky-500 rounded-3xl p-6 bg-gradient-to-b from-sky-50 via-white to-sky-50 text-center flex flex-col items-center justify-between min-h-[300px] shadow-md">
                       <span className="px-5 py-1.5 rounded-full bg-sky-600 text-white font-black text-base uppercase tracking-wider shadow-xs">
-                        2. THEN
+                        {t('2. THEN')}
                       </span>
 
                       <div className="w-28 h-28 rounded-3xl bg-white border-2 border-sky-200 flex items-center justify-center p-3 shadow-md my-4">
@@ -731,15 +743,15 @@ export const PrintScheduleModal: React.FC = () => {
 
                       <div>
                         <h3 className="text-xl sm:text-2xl font-black text-stone-900 leading-tight">
-                          {step2.title}
+                          {t(step2.title)}
                         </h3>
                         {step2.instruction && (
                           <p className="text-xs text-stone-600 font-semibold mt-1">
-                            {step2.instruction}
+                            {t(step2.instruction)}
                           </p>
                         )}
                         <span className="text-xs font-bold text-sky-800 bg-sky-100 px-3 py-1 rounded-full inline-block mt-2">
-                          🎉 Reward / Next Activity!
+                          🎉 {t('Reward / Next Activity!')}
                         </span>
                       </div>
                     </div>
@@ -750,7 +762,7 @@ export const PrintScheduleModal: React.FC = () => {
               {/* Encouragement Footer */}
               <div className="pt-4 text-center border-t-2 border-stone-200">
                 <p className="text-xs font-bold text-stone-500">
-                  Tip: Laminate this board and attach Velcro coins to swap First and Then activities daily!
+                  {t('Tip: Laminate this board and attach Velcro coins to swap First and Then activities daily!')}
                 </p>
               </div>
             </div>
@@ -767,20 +779,20 @@ export const PrintScheduleModal: React.FC = () => {
                   <span className="text-2xl">🎨</span>
                   <div>
                     <h2 className="text-xl sm:text-2xl font-black text-stone-900">
-                      {activeScrapbookPage.title || 'My Sticker Scrapbook'}
+                      {t(activeScrapbookPage.title || 'My Sticker Scrapbook')}
                     </h2>
                     <p className="text-xs text-stone-500 font-medium">
-                      Artist: <strong>{childName}</strong> • Theme: {theme.name}
+                      {t('Artist:')} <strong>{childName}</strong> • {t('Theme:')} {t(theme.name)}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-black text-xs">
-                    Page {selectedPageIndex + 1} of {scrapbookPages.length}
+                    {t('Page')} {selectedPageIndex + 1} {t('of')} {scrapbookPages.length}
                   </span>
                   <div className="text-[10px] text-stone-400 font-bold mt-1">
-                    BeeYou Routine Rewards Album
+                    {t('BeeYou Routine Rewards Album')}
                   </div>
                 </div>
               </div>
@@ -818,15 +830,15 @@ export const PrintScheduleModal: React.FC = () => {
                 {activeScrapbookPage.stickers.length === 0 && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400">
                     <Star className="w-8 h-8 mb-2 opacity-50" />
-                    <span className="text-sm font-bold">This page is waiting for your stickers!</span>
+                    <span className="text-sm font-bold">{t('This page is waiting for your stickers!')}</span>
                   </div>
                 )}
               </div>
 
               {/* Poster Certificate Ribbon */}
               <div className="border-t-2 border-dashed border-stone-200 pt-3 flex items-center justify-between text-xs text-stone-500 font-bold">
-                <span>⭐ Official Routine Sticker Album Collection</span>
-                <span>Date: {new Date().toLocaleDateString()}</span>
+                <span>⭐ {t('Official Routine Sticker Album Collection')}</span>
+                <span>{t('Date')}: {new Date().toLocaleDateString(dateLocale)}</span>
               </div>
             </div>
           )}

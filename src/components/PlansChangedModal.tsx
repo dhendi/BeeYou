@@ -87,6 +87,14 @@ export const PlansChangedModal: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
+  // Re-render when language changes
+  const [, setLangTick] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setLangTick((n) => n + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
   // Edit form state
   const [selectedRoutineTarget, setSelectedRoutineTarget] = useState<string>('custom');
   const [originalTitle, setOriginalTitle] = useState<string>('');
@@ -709,7 +717,7 @@ export const PlansChangedModal: React.FC = () => {
                     </button>
                   </div>
                   <div className="flex items-center gap-2 font-bold text-slate-700 text-base">
-                    <span className="line-through">{plansChanged.originalPlanTitle}</span>
+                    <span className="line-through">{t(plansChanged.originalPlanTitle)}</span>
                   </div>
                 </div>
 
@@ -730,7 +738,7 @@ export const PlansChangedModal: React.FC = () => {
                     </button>
                   </div>
                   <p className={`font-bold ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-sm leading-snug`}>
-                    {plansChanged.reason}
+                    {t(plansChanged.reason)}
                   </p>
                 </div>
               </div>
@@ -741,7 +749,7 @@ export const PlansChangedModal: React.FC = () => {
                 <div>
                   <h4 className="font-black text-sky-950 text-sm">{t('You are safe')}</h4>
                   <p className="text-xs sm:text-sm text-sky-900 mt-0.5 leading-relaxed font-medium">
-                    {plansChanged.calmingMessage}
+                    {t(plansChanged.calmingMessage)}
                   </p>
                 </div>
               </div>
@@ -752,7 +760,7 @@ export const PlansChangedModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 text-emerald-600" />
                     <h3 className="text-base sm:text-lg font-black text-slate-800">
-                      {t('Our New Plan:')} {plansChanged.newPlanTitle}
+                      {t('Our New Plan:')} {t(plansChanged.newPlanTitle)}
                     </h3>
                   </div>
 
@@ -803,11 +811,11 @@ export const PlansChangedModal: React.FC = () => {
                   {plansChanged.relevantPhrases?.map((phrase, idx) => (
                     <button
                       key={idx}
-                      onClick={() => speak(phrase)}
+                      onClick={() => speak(t(phrase))}
                       className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-amber-100 border border-slate-300 text-slate-900 font-bold text-xs sm:text-sm active:scale-95 transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
                     >
                       <Volume2 className="w-4 h-4 text-slate-500" />
-                      <span>{phrase}</span>
+                      <span>{t(phrase)}</span>
                     </button>
                   ))}
                 </div>

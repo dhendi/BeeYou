@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   ChevronUp, 
@@ -51,6 +51,23 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     openPrintSchedule,
     activeTheme,
   } = useApp();
+
+  // Re-render when language changes
+  const [, setLangTick] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setLangTick((n) => n + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
+  // Helper for dynamic routine title formatting (including New Plan)
+  const renderRoutineTitle = (title: string) => {
+    if (title.startsWith('✨ New Plan: ')) {
+      const planName = title.slice('✨ New Plan: '.length);
+      return `✨ ${t('New Plan')}: ${t(planName)}`;
+    }
+    return t(title);
+  };
 
   // Filter out any legacy 20-step routines
   const validRoutines = routines.filter(
@@ -417,7 +434,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="text-base sm:text-lg font-black text-stone-900 tracking-tight flex items-center gap-2 truncate">
-                                <span>{t(routine.title)}</span>
+                                <span>{renderRoutineTitle(routine.title)}</span>
                                 <div className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center shrink-0">
                                   <RoutineStickerIcon emoji={routine.emoji} title={routine.title} className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
                                 </div>
@@ -439,11 +456,11 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                                   <span>·</span>
                                 </>
                               )}
-                              <span>{totalMinutes}m</span>
+                              <span>{totalMinutes}{t('m')}</span>
                               <span>·</span>
                               <span className="flex items-center gap-1">
                                 <RotateCw className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                                <span>{recurrenceText}</span>
+                                <span>{t(recurrenceText)}</span>
                               </span>
                             </p>
                           </div>
