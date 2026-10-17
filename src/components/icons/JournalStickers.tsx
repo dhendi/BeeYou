@@ -2418,6 +2418,44 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/passport_book.png': '/assets/stickers/racing_routine_writing_journal.png',
 
   '/assets/stickers/toy_box.png': '/assets/stickers/racing_toy_box.png',
+
+  // Batch 3 Moods, Personas, Onboarding & Places Swaps
+  '/assets/stickers/mood_happy.png': '/assets/stickers/racing_mood_happy.png',
+  '/assets/stickers/happy.png': '/assets/stickers/racing_mood_happy.png',
+
+  '/assets/stickers/mood_calm.png': '/assets/stickers/racing_mood_calm.png',
+  '/assets/stickers/calm.png': '/assets/stickers/racing_mood_calm.png',
+
+  '/assets/stickers/mood_excited.png': '/assets/stickers/racing_mood_excited.png',
+  '/assets/stickers/excited.png': '/assets/stickers/racing_mood_excited.png',
+
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/racing_mood_sleepy.png',
+  '/assets/stickers/sleepy.png': '/assets/stickers/racing_mood_sleepy.png',
+
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/racing_mood_unsure.png',
+  '/assets/stickers/unsure.png': '/assets/stickers/racing_mood_unsure.png',
+
+  '/assets/stickers/child_persona.png': '/assets/stickers/racing_child_persona.png',
+  '/assets/stickers/persona.png': '/assets/stickers/racing_child_persona.png',
+
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/racing_adult_briefcase.png',
+
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/racing_caregiver_phone.png',
+
+  '/assets/stickers/language_globe.png': '/assets/stickers/racing_language_globe.png',
+
+  '/assets/stickers/trial_crown.png': '/assets/stickers/racing_trial_crown.png',
+
+  '/assets/stickers/about_id.png': '/assets/stickers/racing_about_id.png',
+
+  '/assets/stickers/home_house.png': '/assets/stickers/racing_home_house.png',
+  '/assets/stickers/house.png': '/assets/stickers/racing_home_house.png',
+
+  '/assets/stickers/car_ride.png': '/assets/stickers/racing_car_ride.png',
+
+  '/assets/stickers/pet_care.png': '/assets/stickers/racing_pet_care.png',
+
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/racing_pizza_slice.png',
 };
 
 /**
