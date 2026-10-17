@@ -170,6 +170,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     pattern === 'bubbles' ||
     pattern === 'ocean_waves';
 
+  // Check if Magic Fairytale is active (by wallpaperUrl, category, or pattern)
+  const isMagicFairytale =
+    wallpaperUrl?.includes('fairytale') ||
+    wallpaperUrl?.includes('fantasy') ||
+    category === 'fantasy' ||
+    pattern === 'sparkles';
+
   // Check if Default Honey Theme is active
   const isHoneyClassic =
     wallpaperUrl?.includes('honey') ||
@@ -191,9 +198,11 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
               ? '/assets/wallpapers/cosmic_voyager_bg.webp'
               : isOceanSplash
                 ? '/assets/wallpapers/ocean_splash_bg.webp'
-                : isHoneyClassic
-                  ? '/assets/wallpapers/default_honey_theme_bg.webp'
-                  : undefined);
+                : isMagicFairytale
+                  ? '/assets/wallpapers/magic_fairytale_bg.webp'
+                  : isHoneyClassic
+                    ? '/assets/wallpapers/default_honey_theme_bg.webp'
+                    : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
@@ -209,7 +218,9 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
             ? '#bfb3e4'
             : isOceanSplash
               ? '#a6cce6'
-              : '#FAF7EE';
+              : isMagicFairytale
+                ? '#f8e5df'
+                : '#FAF7EE';
 
   return (
     <div
