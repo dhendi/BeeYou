@@ -1993,6 +1993,29 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/snow_weather.png': '/assets/stickers/ocean_arctic_iceberg_snow.png',
   '/assets/stickers/travel_luggage.png': '/assets/stickers/ocean_nautical_travel_trunk.png',
   '/assets/stickers/stethoscope.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
+
+  // Batch 5 Adventures, Sensory Regulation & Outings
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/ocean_shark_tooth_dental.png',
+  '/assets/stickers/dentist_adventure.png': '/assets/stickers/ocean_shark_tooth_dental.png',
+  '/assets/stickers/adventure_haircut.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
+  '/assets/stickers/haircut_adventure.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
+  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/ocean_seaside_movie_cinema.png',
+  '/assets/stickers/movie_cinema.png': '/assets/stickers/ocean_seaside_movie_cinema.png',
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/ocean_lagoon_swimming_pool.png',
+  '/assets/stickers/swimming_pool.png': '/assets/stickers/ocean_lagoon_swimming_pool.png',
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/ocean_beachside_campfire_tent.png',
+  '/assets/stickers/camping_tent.png': '/assets/stickers/ocean_beachside_campfire_tent.png',
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/ocean_coastal_market_cart.png',
+  '/assets/stickers/therapy_brain.png': '/assets/stickers/ocean_scuba_diver_brain.png',
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/ocean_marine_foghorn_siren.png',
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/ocean_polarized_sunglasses.png',
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/ocean_beach_paddle_tennis.png',
+  '/assets/stickers/red_balloon.png': '/assets/stickers/ocean_beach_ball_balloon.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/ocean_saltwater_taffy_candy.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/ocean_nautical_dining_cutlery.png',
+  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/ocean_sea_pebble_grounding_hand.png',
+  '/assets/stickers/cloudy_weather.png': '/assets/stickers/ocean_cloud_over_waves.png',
 };
 
 /**
