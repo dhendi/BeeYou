@@ -2456,6 +2456,53 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/pet_care.png': '/assets/stickers/racing_pet_care.png',
 
   '/assets/stickers/pizza_slice.png': '/assets/stickers/racing_pizza_slice.png',
+
+  // Batch 4 Weather, Sensory Regulation, Science & Travel Swaps
+  '/assets/stickers/sunny_clear.png': '/assets/stickers/racing_sunny_clear.png',
+  '/assets/stickers/sunny.png': '/assets/stickers/racing_sunny_clear.png',
+  '/assets/stickers/sun.png': '/assets/stickers/racing_sunny_clear.png',
+
+  '/assets/stickers/morning_sunrise.png': '/assets/stickers/racing_morning_sunrise.png',
+  '/assets/stickers/sunrise.png': '/assets/stickers/racing_morning_sunrise.png',
+
+  '/assets/stickers/evening_moon.png': '/assets/stickers/racing_evening_moon.png',
+  '/assets/stickers/moon.png': '/assets/stickers/racing_evening_moon.png',
+
+  '/assets/stickers/rain_cloud.png': '/assets/stickers/racing_rain_cloud.png',
+  '/assets/stickers/rain.png': '/assets/stickers/racing_rain_cloud.png',
+
+  '/assets/stickers/snow_weather.png': '/assets/stickers/racing_snow_weather.png',
+  '/assets/stickers/snow.png': '/assets/stickers/racing_snow_weather.png',
+
+  '/assets/stickers/science_flask.png': '/assets/stickers/racing_science_flask.png',
+  '/assets/stickers/flask.png': '/assets/stickers/racing_science_flask.png',
+
+  '/assets/stickers/stethoscope.png': '/assets/stickers/racing_doctor_stethoscope.png',
+  '/assets/stickers/doctor_stethoscope.png': '/assets/stickers/racing_doctor_stethoscope.png',
+
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/racing_travel_luggage.png',
+  '/assets/stickers/luggage.png': '/assets/stickers/racing_travel_luggage.png',
+
+  '/assets/stickers/star_gold.png': '/assets/stickers/racing_star_gold.png',
+  '/assets/stickers/star.png': '/assets/stickers/racing_star_gold.png',
+
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/racing_reward_trophy.png',
+  '/assets/stickers/trophy.png': '/assets/stickers/racing_reward_trophy.png',
+
+  '/assets/stickers/battery_meter.png': '/assets/stickers/racing_battery_meter.png',
+  '/assets/stickers/battery.png': '/assets/stickers/racing_battery_meter.png',
+
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/racing_feelings_thermometer.png',
+  '/assets/stickers/thermometer.png': '/assets/stickers/racing_feelings_thermometer.png',
+
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/racing_speech_bubble.png',
+  '/assets/stickers/speech.png': '/assets/stickers/racing_speech_bubble.png',
+
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/racing_quiet_voice.png',
+  '/assets/stickers/quiet.png': '/assets/stickers/racing_quiet_voice.png',
+
+  '/assets/stickers/calm_sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
+  '/assets/stickers/sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
 };
 
 /**
