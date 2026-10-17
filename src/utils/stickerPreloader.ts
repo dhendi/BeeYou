@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS } from '../data/themedIconsData';
 
 const loadedCache = new Set<string>();
 
@@ -77,6 +77,14 @@ export function preloadFrogThemeStickers() {
 }
 
 /**
+ * Preloads all Steam Express stickers into the browser's cache during idle cycles.
+ */
+export function preloadSteamThemeStickers() {
+  const trainUrls = STEAM_EXPRESS_ICONS.map((i) => i.value);
+  preloadStickerUrls(trainUrls, false);
+}
+
+/**
  * Preloads stickers for a specific theme ID.
  */
 export function preloadThemeStickers(themeId?: string) {
@@ -87,6 +95,8 @@ export function preloadThemeStickers(themeId?: string) {
     preloadDinoThemeStickers();
   } else if (themeId === 'theme-frog' || themeId === 'frog') {
     preloadFrogThemeStickers();
+  } else if (themeId === 'theme-trains' || themeId === 'train') {
+    preloadSteamThemeStickers();
   }
 }
 
@@ -103,6 +113,8 @@ export function preloadAllStickersOnIdle() {
     // Mascots & Greetings
     '/assets/stickers/bee_mascot.png',
     '/assets/stickers/turtle_mascot.png',
+    '/assets/stickers/frog_mascot.png',
+    '/assets/stickers/train_mascot.png',
     '/assets/stickers/dino_rex_mascot.png',
     '/assets/stickers/dino_rex.png',
     '/assets/stickers/turtle_welcome_sign.png',

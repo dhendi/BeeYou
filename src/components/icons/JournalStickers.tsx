@@ -66,6 +66,10 @@ export function useIsFrogTheme(): boolean {
   return useActiveThemeCategory() === 'frog';
 }
 
+export function useIsTrainTheme(): boolean {
+  return useActiveThemeCategory() === 'train';
+}
+
 const renderStickerPng = (src: string, alt: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
@@ -76,6 +80,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = DINO_STICKER_SWAPS[src];
     } else if (theme === 'frog' && FROG_STICKER_SWAPS[src]) {
       currentSrc = FROG_STICKER_SWAPS[src];
+    } else if (theme === 'train' && TRAIN_STICKER_SWAPS[src]) {
+      currentSrc = TRAIN_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -91,7 +97,7 @@ const renderStickerPng = (src: string, alt: string) => {
   return Component;
 };
 
-const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string) => {
+const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string, trainSrc?: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = defaultSrc;
@@ -101,6 +107,8 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
       currentSrc = dinoSrc || DINO_STICKER_SWAPS[defaultSrc] || defaultSrc;
     } else if (theme === 'frog') {
       currentSrc = frogSrc || FROG_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'train') {
+      currentSrc = trainSrc || TRAIN_STICKER_SWAPS[defaultSrc] || defaultSrc;
     }
     return (
       <img
@@ -451,6 +459,7 @@ export const PajamasShortsSticker = renderThemedStickerPng(
 export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
 export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
 export const FrogMascotSticker = renderStickerPng('/assets/stickers/frog_mascot.png', 'Hoppy the Tree Frog');
+export const TrainMascotSticker = renderStickerPng('/assets/stickers/train_mascot.png', 'Conductor Leo Mascot');
 export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
 export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.png', 'Serene Lagoon & Reeds');
 export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
@@ -1252,6 +1261,29 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bee_mascot.png': '/assets/stickers/frog_mascot.png',
 };
 
+export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/train_pocket_watch.png',
+  '/assets/stickers/toothbrush.png': '/assets/stickers/train_boiler_toothbrush.png',
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/train_conductor_uniform.png',
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/train_dining_pancakes.png',
+  '/assets/stickers/school_bus.png': '/assets/stickers/train_passenger_car.png',
+  '/assets/stickers/backpack_school.png': '/assets/stickers/train_conductor_satchel.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/train_ticket_punch.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/train_ticket_punch.png',
+  '/assets/stickers/pencil_write.png': '/assets/stickers/train_ticket_punch.png',
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/train_tin_lunchbox.png',
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/train_canteen_flask.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/train_canteen_flask.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/train_canteen_flask.png',
+  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/train_observation_seat.png',
+  '/assets/stickers/schedule_calendar.png': '/assets/stickers/train_timetable_board.png',
+  '/assets/stickers/timer_clock.png': '/assets/stickers/train_pressure_stopwatch.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/train_station_soap.png',
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/train_sleeper_bunk.png',
+  '/assets/stickers/golden_train.png': '/assets/stickers/train_mascot.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/train_mascot.png',
+};
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -1270,6 +1302,7 @@ export const RoutineStickerIcon: React.FC<{
   const isTurtle = activeTheme === 'turtle';
   const isDino = activeTheme === 'dinosaur';
   const isFrog = activeTheme === 'frog';
+  const isTrain = activeTheme === 'train';
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
@@ -1280,6 +1313,8 @@ export const RoutineStickerIcon: React.FC<{
       finalSrc = DINO_STICKER_SWAPS[normEmoji];
     } else if (isFrog && FROG_STICKER_SWAPS[normEmoji]) {
       finalSrc = FROG_STICKER_SWAPS[normEmoji];
+    } else if (isTrain && TRAIN_STICKER_SWAPS[normEmoji]) {
+      finalSrc = TRAIN_STICKER_SWAPS[normEmoji];
     }
     return (
       <img
@@ -1295,6 +1330,17 @@ export const RoutineStickerIcon: React.FC<{
 
   // 📅 Visual Schedule & Routine / Calendar
   if (normEmoji === '📅' || normTitle.includes('visual schedule') || normTitle.includes('schedule & routine') || normTitle.includes('calendar')) return <ScheduleCalendarSticker className={className} size={size} />;
+  // 🚂 Steam Express / Conductor Leo Themed Mascot & Stickers
+  if (
+    normEmoji === '🚂' ||
+    normEmoji.includes('train') ||
+    normTitle.includes('train') ||
+    normTitle.includes('conductor') ||
+    normTitle.includes('leo') ||
+    (isTrain && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+  ) {
+    return <TrainMascotSticker className={className} size={size} />;
+  }
   // 🐸 Frog / Ribbit Pond Themed Mascot & Stickers
   if (
     normEmoji === '🐸' ||

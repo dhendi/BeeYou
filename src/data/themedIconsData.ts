@@ -975,6 +975,24 @@ export const RIBBIT_POND_ICONS: ThemedIconItem[] = [
   { id: 'frog_mascot', value: '/assets/stickers/frog_mascot.png', label: 'Friendly Pond Frog Mascot', shortLabel: 'Frog Mascot', themeCategory: 'frog', keywords: ['mascot', 'frog', 'companion', 'bee', 'friend', 'pond'] },
 ];
 
+export const STEAM_EXPRESS_ICONS: ThemedIconItem[] = [
+  { id: 'train_pocket_watch', value: '/assets/stickers/train_pocket_watch.png', label: 'Stationmaster Pocket Watch', shortLabel: 'Pocket Watch', themeCategory: 'train', keywords: ['alarm', 'clock', 'time', 'wakeup', 'morning', 'watch', 'train'] },
+  { id: 'train_boiler_toothbrush', value: '/assets/stickers/train_boiler_toothbrush.png', label: 'Boiler Sparkle Toothbrush', shortLabel: 'Sparkle Brush', themeCategory: 'train', keywords: ['toothbrush', 'teeth', 'brush', 'morning', 'night', 'train'] },
+  { id: 'train_conductor_uniform', value: '/assets/stickers/train_conductor_uniform.png', label: 'Conductor Uniform & Cap', shortLabel: 'Conductor Suit', themeCategory: 'train', keywords: ['clothes', 'dress', 'dressed', 'jacket', 'hat', 'uniform', 'train'] },
+  { id: 'train_dining_pancakes', value: '/assets/stickers/train_dining_pancakes.png', label: 'Dining Car Pancake Platter', shortLabel: 'Dining Pancakes', themeCategory: 'train', keywords: ['breakfast', 'pancakes', 'food', 'meal', 'platter', 'train'] },
+  { id: 'train_passenger_car', value: '/assets/stickers/train_passenger_car.png', label: 'Passenger Railcar Trolley', shortLabel: 'Passenger Railcar', themeCategory: 'train', keywords: ['bus', 'train', 'car', 'commute', 'transit', 'school', 'railcar'] },
+  { id: 'train_conductor_satchel', value: '/assets/stickers/train_conductor_satchel.png', label: 'Conductor Travel Satchel', shortLabel: 'Travel Satchel', themeCategory: 'train', keywords: ['backpack', 'bag', 'pack', 'satchel', 'briefcase', 'train'] },
+  { id: 'train_ticket_punch', value: '/assets/stickers/train_ticket_punch.png', label: 'Ticket Punch & Star Ticket', shortLabel: 'Ticket Punch', themeCategory: 'train', keywords: ['homework', 'study', 'pencil', 'ticket', 'punch', 'learn', 'train'] },
+  { id: 'train_tin_lunchbox', value: '/assets/stickers/train_tin_lunchbox.png', label: 'Locomotive Tin Lunchbox', shortLabel: 'Tin Lunchbox', themeCategory: 'train', keywords: ['lunch', 'sandwich', 'food', 'snack', 'lunchbox', 'train'] },
+  { id: 'train_canteen_flask', value: '/assets/stickers/train_canteen_flask.png', label: 'Station Canteen Flask', shortLabel: 'Canteen Flask', themeCategory: 'train', keywords: ['water', 'drink', 'cup', 'hydrate', 'canteen', 'flask', 'train'] },
+  { id: 'train_observation_seat', value: '/assets/stickers/train_observation_seat.png', label: 'Observation Car Window Seat', shortLabel: 'Observation Seat', themeCategory: 'train', keywords: ['quiet', 'break', 'calm', 'retreat', 'window', 'seat', 'train'] },
+  { id: 'train_timetable_board', value: '/assets/stickers/train_timetable_board.png', label: 'Railway Timetable Board', shortLabel: 'Timetable Board', themeCategory: 'train', keywords: ['schedule', 'calendar', 'checklist', 'plan', 'routine', 'board', 'train'] },
+  { id: 'train_pressure_stopwatch', value: '/assets/stickers/train_pressure_stopwatch.png', label: 'Steam Pressure Stopwatch', shortLabel: 'Pressure Timer', themeCategory: 'train', keywords: ['timer', 'clock', 'stopwatch', 'countdown', 'time', 'gauge', 'train'] },
+  { id: 'train_station_soap', value: '/assets/stickers/train_station_soap.png', label: 'Brass Station Washbasin Soap', shortLabel: 'Station Soap', themeCategory: 'train', keywords: ['soap', 'wash', 'hands', 'clean', 'sink', 'bubbles', 'train'] },
+  { id: 'train_sleeper_bunk', value: '/assets/stickers/train_sleeper_bunk.png', label: 'Cozy Sleeper Train Bunk', shortLabel: 'Sleeper Bunk', themeCategory: 'train', keywords: ['bed', 'sleep', 'bedtime', 'rest', 'bunk', 'night', 'train'] },
+  { id: 'train_mascot', value: '/assets/stickers/train_mascot.png', label: 'Conductor Leo Mascot Badge', shortLabel: 'Conductor Leo', themeCategory: 'train', keywords: ['mascot', 'leo', 'train', 'locomotive', 'companion', 'conductor'] },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -988,6 +1006,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isFrog = themeCategoryOrId === 'frog' || themeCategoryOrId === 'theme-frog';
   if (isFrog) {
     return RIBBIT_POND_ICONS;
+  }
+  const isTrain = themeCategoryOrId === 'train' || themeCategoryOrId === 'theme-trains';
+  if (isTrain) {
+    return STEAM_EXPRESS_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)
