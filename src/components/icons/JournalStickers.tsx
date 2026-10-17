@@ -2276,6 +2276,24 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/ocean_wave.png': '/assets/stickers/fairytale_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/fairytale_story_birthday.png',
   '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/fairytale_story_birthday.png',
+
+  // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community)
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/fairytale_waiting_room_couch.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/fairytale_waving_hand_hello.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/fairytale_padded_recliner_chair.png',
+  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/fairytale_open_mouth_wide.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/fairytale_open_mouth_wide.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/fairytale_open_welcome_door.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/fairytale_restaurant_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/fairytale_barbershop_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/fairytale_haircut_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/fairytale_water_spray_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/fairytale_barber_neck_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/fairytale_salon_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/fairytale_medical_clinic_building.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/fairytale_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/fairytale_doctor_exam_bed.png',
+  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/fairytale_doctor_ear_light.png',
 };
 
 /**
