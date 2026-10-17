@@ -631,7 +631,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
           }}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
             mainTab === 'stories'
-              ? 'bg-indigo-600 text-white shadow-xs'
+              ? 'bg-amber-500 text-white shadow-xs'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -1105,7 +1105,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-black text-slate-900">{t("Social Stories & Scripts")}</h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-extrabold text-[11px]">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px]">
                   {socialStories.length} {t("Stories")}
                 </span>
               </div>
@@ -1122,7 +1122,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                   setIsStoryModalOpen(true);
                   playChime('tap');
                 }}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>{t("Add New Social Story")}</span>
@@ -1131,10 +1131,10 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
           </div>
 
           {/* QUICK STARTER STORIES BANNER */}
-          <div className="bg-linear-to-r from-indigo-50 via-purple-50/60 to-pink-50 border-2 border-indigo-200/80 rounded-2xl p-3.5 sm:p-4">
+          <div className="bg-linear-to-r from-amber-50 via-orange-50/60 to-amber-100/60 border-2 border-amber-200/80 rounded-2xl p-3.5 sm:p-4">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-indigo-600 shrink-0" />
+                <Star className="w-4 h-4 text-amber-600 shrink-0" />
                 <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
                   {t("Quick-Start Starter Stories:")}
                 </span>
@@ -1156,7 +1156,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                     setEditingStory(null);
                     setIsStoryModalOpen(true);
                   }}
-                  className="p-2.5 rounded-xl bg-white hover:bg-indigo-100/60 border border-indigo-200/80 transition text-left shadow-2xs group cursor-pointer"
+                  className="p-2.5 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200/80 transition text-left shadow-2xs group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{s.emoji}</span>
@@ -1176,7 +1176,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
               value={storySearchQuery}
               onChange={(e) => setStorySearchQuery(e.target.value)}
               placeholder={t("Search social stories by title, page text, or takeaways...")}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-400 bg-white"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-amber-400 bg-white"
             />
           </div>
 
@@ -1188,11 +1188,11 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
               return (
                 <div
                   key={story.id}
-                  className="bg-white rounded-2xl border-2 border-slate-200 hover:border-indigo-200 transition shadow-xs overflow-hidden"
+                  className="bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-300 transition shadow-xs overflow-hidden"
                 >
                   <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
-                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                      <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
                         <RoutineStickerIcon
                           emoji={story.stickerSrc || story.emoji}
                           title={story.title}
@@ -1201,7 +1201,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200">
                             {story.category ? t(story.category) : t('Social Story')}
                           </span>
                           {story.isCustom && (
@@ -1292,11 +1292,11 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                               key={pIdx}
                               className="p-3 rounded-xl bg-white border border-slate-200 flex items-start gap-2.5 shadow-2xs"
                             >
-                              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
                                 <RoutineStickerIcon emoji={p.emoji} className="w-5 h-5 object-contain" />
                               </div>
                               <div className="flex-1">
-                                <span className="text-[10px] font-black text-indigo-700 block">
+                                <span className="text-[10px] font-black text-amber-900 block">
                                   {t("Page")} {p.pageNumber || pIdx + 1}
                                 </span>
                                 <p className="text-xs font-medium text-slate-700 leading-snug mt-0.5">
@@ -1335,7 +1335,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                             {story.suggestedPhrases.map((phrase, phIdx) => (
                               <span
                                 key={phIdx}
-                                className="px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold"
+                                className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-950 text-xs font-bold"
                               >
                                 "{phrase}"
                               </span>

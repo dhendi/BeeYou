@@ -591,7 +591,7 @@ export const CozyBedSticker = renderThemedStickerPng(
   'Cozy Bedroom Bed'
 );
 export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
-export const GameControllerSticker = renderStickerPng('/assets/stickers/toy_box.png', 'Video Game Controller');
+export const GameControllerSticker = renderStickerPng('/assets/stickers/game_controller.png', 'Video Game Controller');
 export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs');
 export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
 export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
@@ -1851,14 +1851,25 @@ export const RoutineStickerIcon: React.FC<{
   }
   // 🚂 Steam Express / Conductor Leo Themed Mascot & Stickers
   if (
-    normEmoji === '🚂' ||
-    normEmoji.includes('train') ||
-    normTitle.includes('train') ||
-    normTitle.includes('conductor') ||
-    normTitle.includes('leo') ||
-    (isTrain && (normEmoji === '🐝' || normTitle.includes('mascot') || normTitle.includes('companion')))
+    (isTrain && (
+      normEmoji === '🚂' ||
+      normEmoji === '🐝' ||
+      normEmoji.includes('train') ||
+      normTitle.includes('train') ||
+      normTitle.includes('conductor') ||
+      normTitle.includes('leo') ||
+      normTitle.includes('mascot') ||
+      normTitle.includes('companion')
+    )) ||
+    normTitle.includes('conductor leo') ||
+    normEmoji.includes('train_mascot')
   ) {
     return <TrainMascotSticker className={className} size={size} />;
+  }
+
+  // 🚂 Toys / Toy Trains / Blocks fallback when not on Train theme
+  if (normEmoji === '🚂' || normTitle.includes('trains and blocks')) {
+    return <ToyBoxSticker className={className} size={size} />;
   }
   // 🐸 Frog / Ribbit Pond Themed Mascot & Stickers
   if (
@@ -2115,6 +2126,7 @@ export const RoutineStickerIcon: React.FC<{
   // 🛝 Playground swings / slide / park
   if (normEmoji === '🛝' || normTitle.includes('swing') || normTitle.includes('playground')) return <PlaygroundSwingsSticker className={className} size={size} />;
   // 🧸 Teddy bear / toys / play / recess / cart
+  if (normEmoji.includes('toy_box') || normTitle.includes('toy box') || normTitle.includes('clean up toys')) return <ToyBoxSticker className={className} size={size} />;
   if (normEmoji === '🧸' || normEmoji === '🛒' || normTitle.includes('toy') || normTitle.includes('teddy') || normTitle.includes('play') || normTitle.includes('recess')) return <TeddyBearSticker className={className} size={size} />;
   // 📖 / 📚 Books / reading
   if (normEmoji === '📖' || normEmoji === '📚' || normTitle.includes('read') || normTitle.includes('book') || normTitle.includes('story')) return <ReadingBookSticker className={className} size={size} />;

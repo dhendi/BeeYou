@@ -98,18 +98,34 @@ export const AdventuresView: React.FC = () => {
 
     return (
       <div className="flex flex-col flex-1 pb-24 max-w-3xl mx-auto w-full px-3 sm:px-4 py-2">
-        <button
-          onClick={() => {
-            setActiveStoryId(null);
-            setCurrentPageIndex(0);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs w-fit mb-3 transition-all cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('Back to Stories')}</span>
-        </button>
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={() => {
+              setActiveStoryId(null);
+              setCurrentPageIndex(0);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{t('Back to Stories')}</span>
+          </button>
 
-        <div className="bg-white rounded-3xl border-3 border-indigo-200 shadow-md p-6 sm:p-8 flex flex-col items-center text-center">
+          {selectedStory.isCustom && (
+            <button
+              onClick={() => {
+                setEditingStory(selectedStory);
+                setIsStoryModalOpen(true);
+                playChime('tap');
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all cursor-pointer"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>{t('Edit Story')}</span>
+            </button>
+          )}
+        </div>
+
+        <div className={`bg-white rounded-3xl border-3 ${activeTheme?.palette?.primaryBorder || 'border-amber-300/80'} shadow-md p-6 sm:p-8 flex flex-col items-center text-center`}>
           <div className="flex items-center gap-2 mb-2">
             <RoutineStickerIcon
               emoji={selectedStory.stickerSrc || getStorySticker(selectedStory.id) || selectedStory.emoji}
@@ -119,11 +135,11 @@ export const AdventuresView: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">{t(selectedStory.title)}</h2>
           </div>
 
-          <div className="text-xs font-bold text-indigo-700 mb-6 bg-indigo-50 px-3 py-1 rounded-full">
+          <div className={`text-xs font-bold ${activeTheme?.palette?.textAccent || 'text-amber-950'} mb-6 ${activeTheme?.palette?.badgeBg || 'bg-amber-100 border border-amber-300/60'} px-3 py-1 rounded-full`}>
             {t('Page')} {currentPageIndex + 1} {t('of')} {selectedStory.pages.length}
           </div>
 
-          <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-indigo-50 border-2 border-indigo-100 flex items-center justify-center p-4 mb-6 shadow-inner">
+          <div className={`w-36 h-36 sm:w-44 sm:h-44 rounded-3xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-center p-4 mb-6 shadow-inner`}>
             <RoutineStickerIcon emoji={page.emoji} className="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
           </div>
 
@@ -133,7 +149,7 @@ export const AdventuresView: React.FC = () => {
 
           <button
             onClick={() => speak(t(page.text))}
-            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-xs sm:text-sm active:scale-95 transition-all mb-8 cursor-pointer"
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold text-xs sm:text-sm active:scale-95 transition-all mb-8 cursor-pointer`}
           >
             <Volume2 className="w-4 h-4" />
             <span>{t('Read Page Aloud')}</span>
@@ -171,7 +187,7 @@ export const AdventuresView: React.FC = () => {
                   setCurrentPageIndex(0);
                 }
               }}
-              className="flex items-center gap-1.5 px-6 py-2.5 rounded-2xl font-black text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition-all cursor-pointer"
+              className={`flex items-center gap-1.5 px-6 py-2.5 rounded-2xl font-black text-xs sm:text-sm ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white shadow-md active:scale-95 transition-all cursor-pointer`}
             >
               <span>{isLastPage ? t('All Done! ⭐') : t('Next Page')}</span>
               {!isLastPage && <ChevronRight className="w-4 h-4" />}
@@ -510,7 +526,7 @@ export const AdventuresView: React.FC = () => {
                       speak(t(practice.response));
                     }, 1200);
                   }}
-                  className="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 text-indigo-950 font-bold text-xs sm:text-sm active:scale-95 transition-all cursor-pointer text-left"
+                  className={`flex items-center gap-2.5 p-3 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold text-xs sm:text-sm active:scale-95 transition-all cursor-pointer text-left`}
                 >
                   <div className="w-7 h-7 shrink-0 flex items-center justify-center">
                     <RoutineStickerIcon emoji={practice.emoji} className="w-7 h-7 object-contain" />
@@ -588,7 +604,7 @@ export const AdventuresView: React.FC = () => {
               setIsStoryModalOpen(true);
               playChime('tap');
             }}
-            className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+            className={`px-4 py-2.5 rounded-2xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0`}
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t('Add Social Story')}</span>
@@ -732,19 +748,19 @@ export const AdventuresView: React.FC = () => {
               setIsStoryModalOpen(true);
               playChime('tap');
             }}
-            className="w-full text-left rounded-3xl p-4 sm:p-5 border-2 border-dashed border-indigo-300 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-100/60 transition-all active:scale-98 cursor-pointer flex items-center gap-3.5 group"
+            className={`w-full text-left rounded-3xl p-4 sm:p-5 border-2 border-dashed ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} hover:border-amber-500 ${activeTheme?.palette?.primaryLight || 'bg-amber-50/50'} hover:opacity-90 transition-all active:scale-98 cursor-pointer flex items-center gap-3.5 group`}
           >
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 bg-white border-2 border-indigo-300 group-hover:scale-105 transition shadow-2xs text-indigo-600">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 bg-white border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} group-hover:scale-105 transition shadow-2xs ${activeTheme?.palette?.textAccent || 'text-amber-600'}`}>
               <Plus className="w-8 h-8 stroke-[2.5]" />
             </div>
             <div className="flex-1">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block bg-indigo-200/80 text-indigo-950 mb-1">
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${activeTheme?.palette?.badgeBg || 'bg-amber-200/80 text-amber-950'} mb-1`}>
                 {t('Custom')}
               </span>
-              <h3 className="font-black text-indigo-950 text-base sm:text-lg leading-snug">
+              <h3 className={`font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} text-base sm:text-lg leading-snug`}>
                 + {t('Add Your Own Social Story')}
               </h3>
-              <p className="text-xs text-indigo-800 font-medium mt-0.5">
+              <p className={`text-xs ${activeTheme?.palette?.textAccent || 'text-amber-800'} font-medium mt-0.5`}>
                 {t('Write illustrated pages with comforting scripts, calming visuals, and takeaways.')}
               </p>
             </div>
@@ -752,15 +768,15 @@ export const AdventuresView: React.FC = () => {
 
           {socialStories.map((story) => {
             const cardClass = isColorCoded
-              ? 'bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300'
+              ? 'bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300'
               : `${themeStyles.card} !p-4 sm:!p-5 !rounded-3xl`;
             const iconBoxClass = isColorCoded
-              ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-indigo-50 border border-indigo-200'
+              ? 'w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs bg-slate-50 border border-slate-200'
               : `w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 shadow-2xs ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'}`;
             const badgeClass = isColorCoded
-              ? 'text-indigo-700 bg-indigo-50'
+              ? 'text-slate-700 bg-slate-100 border border-slate-200'
               : themeStyles.adventureTag;
-            const subtextClass = isColorCoded ? 'text-indigo-700' : (activeTheme?.palette?.textAccent || 'text-amber-900');
+            const subtextClass = isColorCoded ? 'text-slate-600' : (activeTheme?.palette?.textAccent || 'text-amber-900');
 
             return (
               <div
@@ -790,7 +806,7 @@ export const AdventuresView: React.FC = () => {
                         {story.category ? t(story.category) : t('Social Story')}
                       </span>
                       {story.isCustom && (
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-200">
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${activeTheme?.palette?.badgeBg || 'bg-amber-100 text-amber-900 border border-amber-200'}`}>
                           {t('Custom')}
                         </span>
                       )}

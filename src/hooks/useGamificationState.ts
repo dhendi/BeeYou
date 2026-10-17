@@ -84,6 +84,7 @@ export function useGamificationState({
               return {
                 ...def,
                 ...s,
+                pages: def.pages,
                 stickerSrc: def.stickerSrc || s.stickerSrc,
               };
             });

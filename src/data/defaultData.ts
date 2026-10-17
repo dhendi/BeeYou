@@ -1251,12 +1251,12 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 1,
         text: 'Playing with toys like trains and blocks is lots of fun.',
-        emoji: '🚂',
+        emoji: '/assets/stickers/toy_box.png',
       },
       {
         pageNumber: 2,
         text: 'Sometimes a friend wants to play with the same toy. We can take turns.',
-        emoji: '⏳',
+        emoji: '🤝',
       },
       {
         pageNumber: 3,

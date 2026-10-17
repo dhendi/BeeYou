@@ -167,7 +167,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
   onClose,
   initialStory
 }) => {
-  const { addSocialStory, updateSocialStory } = useApp();
+  const { addSocialStory, updateSocialStory, activeTheme } = useApp();
 
   const isEditing = !!initialStory;
 
@@ -362,11 +362,11 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border-3 border-indigo-200 flex flex-col max-h-[92vh] overflow-hidden">
+      <div className={`bg-white w-full max-w-3xl rounded-3xl shadow-2xl border-3 ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex flex-col max-h-[92vh] overflow-hidden`}>
         {/* Header */}
-        <div className="px-5 py-4 border-b border-indigo-100 flex items-center justify-between bg-indigo-50/70">
+        <div className={`px-5 py-4 border-b ${activeTheme?.palette?.primaryBorder || 'border-amber-100'} flex items-center justify-between ${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'}`}>
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xl shadow-2xs">
+            <div className={`w-10 h-10 rounded-2xl ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-center text-xl shadow-2xs`}>
               <RoutineStickerIcon emoji={emoji} title={title || 'Social Story'} className="w-7 h-7 object-contain" />
             </div>
             <div>
@@ -393,7 +393,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
             onClick={() => setActiveTab('basics')}
             className={`px-4 py-2 rounded-t-xl font-black text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'basics'
-                ? 'bg-white text-indigo-900 border-t-2 border-x-2 border-indigo-300 shadow-2xs'
+                ? `bg-white ${activeTheme?.palette?.textAccent || 'text-amber-900'} border-t-2 border-x-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs`
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -403,7 +403,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
             onClick={() => setActiveTab('pages')}
             className={`px-4 py-2 rounded-t-xl font-black text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'pages'
-                ? 'bg-white text-indigo-900 border-t-2 border-x-2 border-indigo-300 shadow-2xs'
+                ? `bg-white ${activeTheme?.palette?.textAccent || 'text-amber-900'} border-t-2 border-x-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs`
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -413,7 +413,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
             onClick={() => setActiveTab('takeaways')}
             className={`px-4 py-2 rounded-t-xl font-black text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'takeaways'
-                ? 'bg-white text-indigo-900 border-t-2 border-x-2 border-indigo-300 shadow-2xs'
+                ? `bg-white ${activeTheme?.palette?.textAccent || 'text-amber-900'} border-t-2 border-x-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs`
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -427,9 +427,9 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
           {activeTab === 'basics' && (
             <div className="space-y-5">
               {!isEditing && (
-                <div className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-3.5">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-indigo-900 mb-2 uppercase tracking-wider">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-50/80'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} rounded-2xl p-3.5`}>
+                  <div className={`flex items-center gap-1.5 text-xs font-black ${activeTheme?.palette?.textAccent || 'text-amber-900'} mb-2 uppercase tracking-wider`}>
+                    <Sparkles className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
                     <span>{t('Need inspiration? Choose a starter story:')}</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -438,7 +438,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => handleApplyTemplate(tmpl)}
-                        className="text-left p-2.5 rounded-xl bg-white hover:bg-indigo-100/60 border border-indigo-200 transition text-xs font-bold text-slate-800 shadow-2xs active:scale-98 cursor-pointer flex items-center gap-2"
+                        className={`text-left p-2.5 rounded-xl bg-white hover:opacity-90 border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} transition text-xs font-bold text-slate-800 shadow-2xs active:scale-98 cursor-pointer flex items-center gap-2`}
                       >
                         <span className="text-lg">{tmpl.emoji}</span>
                         <span className="line-clamp-1">{tmpl.title}</span>
@@ -458,11 +458,11 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                       setIconPickerTarget('story');
                       setIsIconPickerOpen(true);
                     }}
-                    className="w-20 h-20 rounded-2xl bg-indigo-50 border-2 border-indigo-300 hover:border-indigo-400 flex flex-col items-center justify-center p-2 shadow-2xs transition active:scale-95 cursor-pointer group"
+                    className={`w-20 h-20 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} hover:opacity-90 flex flex-col items-center justify-center p-2 shadow-2xs transition active:scale-95 cursor-pointer group`}
                     title={t('Click to change sticker or emoji')}
                   >
                     <RoutineStickerIcon emoji={emoji} title={title || 'Icon'} className="w-12 h-12 object-contain" />
-                    <span className="text-[10px] font-bold text-indigo-700 mt-0.5 group-hover:underline">
+                    <span className={`text-[10px] font-bold ${activeTheme?.palette?.textAccent || 'text-amber-700'} mt-0.5 group-hover:underline`}>
                       {t('Change')}
                     </span>
                   </button>
@@ -478,7 +478,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder={t('e.g. Taking Turns on the Swing, Riding the School Bus...')}
-                      className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-sm font-bold text-slate-800"
+                      className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-sm font-bold text-slate-800"
                     />
                   </div>
 
@@ -489,7 +489,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-xs font-bold text-slate-800 bg-white"
                     >
                       {PRESET_STORY_CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
@@ -511,7 +511,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                   placeholder={t('A short note about what situation this story helps prepare for')}
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-xs font-medium text-slate-800"
+                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-xs font-medium text-slate-800"
                 />
               </div>
             </div>
@@ -532,7 +532,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAddPage}
-                  className="px-3 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-black text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+                  className={`px-3 py-1.5 rounded-xl ${activeTheme?.palette?.badgeBg || 'bg-amber-100'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-900'} font-black text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer`}
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{t('Add Page')}</span>
@@ -543,11 +543,11 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                 {pages.map((page, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50/40 flex flex-col gap-3"
+                    className={`p-4 rounded-2xl border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-100'} ${activeTheme?.palette?.primaryLight || 'bg-amber-50/40'} flex flex-col gap-3`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-full bg-indigo-600 text-white font-black text-xs">
+                        <span className={`px-2.5 py-1 rounded-full ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white font-black text-xs`}>
                           {t('Page')} {idx + 1}
                         </span>
                         <button
@@ -556,7 +556,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                             setIconPickerTarget(idx);
                             setIsIconPickerOpen(true);
                           }}
-                          className="w-10 h-10 rounded-xl bg-white border border-indigo-200 hover:border-indigo-400 flex items-center justify-center shadow-2xs transition cursor-pointer"
+                          className={`w-10 h-10 rounded-xl bg-white border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} hover:opacity-90 flex items-center justify-center shadow-2xs transition cursor-pointer`}
                           title={t('Change page icon')}
                         >
                           <RoutineStickerIcon emoji={page.emoji} className="w-7 h-7 object-contain" />
@@ -600,7 +600,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                         value={page.text}
                         onChange={(e) => handlePageChange(idx, 'text', e.target.value)}
                         placeholder={t('Write what happens on this page (e.g. "When a plan changes, my body might feel surprised. That is okay.")')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 focus:border-indigo-400 focus:outline-none text-xs font-bold text-slate-800 bg-white leading-relaxed"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} focus:border-amber-400 focus:outline-none text-xs font-bold text-slate-800 bg-white leading-relaxed`}
                       />
                     </div>
                   </div>
@@ -636,12 +636,12 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                       }
                     }}
                     placeholder={t('e.g. "Taking deep breaths helps my body feel calm."')}
-                    className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-xs font-bold text-slate-800"
+                    className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-xs font-bold text-slate-800"
                   />
                   <button
                     type="button"
                     onClick={handleAddTakeaway}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition active:scale-95 cursor-pointer"
+                    className={`px-4 py-2 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs transition active:scale-95 cursor-pointer`}
                   >
                     {t('Add')}
                   </button>
@@ -651,7 +651,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                   {keyTakeaways.map((takeaway, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 font-bold text-xs"
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${activeTheme?.palette?.badgeBg || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold text-xs`}
                     >
                       <span>✓ {takeaway}</span>
                       <button
@@ -670,7 +670,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
               <div className="space-y-3 pt-3 border-t border-slate-100">
                 <div>
                   <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                    <MessageSquare className="w-4 h-4 text-indigo-500" />
+                    <MessageSquare className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
                     <span>{t('Suggested Spoken AAC Phrases')}</span>
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
@@ -690,12 +690,12 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                       }
                     }}
                     placeholder={t('e.g. "Can I have a turn next?", "I need a quiet break."')}
-                    className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-indigo-400 focus:outline-none text-xs font-bold text-slate-800"
+                    className="flex-1 px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-amber-400 focus:outline-none text-xs font-bold text-slate-800"
                   />
                   <button
                     type="button"
                     onClick={handleAddPhrase}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition active:scale-95 cursor-pointer"
+                    className={`px-4 py-2 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs transition active:scale-95 cursor-pointer`}
                   >
                     {t('Add')}
                   </button>
@@ -705,7 +705,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
                   {suggestedPhrases.map((phrase, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-100/80 border border-indigo-200 text-indigo-950 font-bold text-xs"
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${activeTheme?.palette?.badgeBg || 'bg-amber-100/80'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-bold text-xs`}
                     >
                       <span>"{phrase}"</span>
                       <button
@@ -735,7 +735,7 @@ export const CreateSocialStoryModal: React.FC<CreateSocialStoryModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-2 cursor-pointer"
+            className={`px-6 py-2 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-2 cursor-pointer`}
           >
             <Check className="w-4 h-4" />
             <span>{isEditing ? t('Save Changes') : t('Create Story')}</span>
