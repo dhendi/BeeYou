@@ -2222,6 +2222,29 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/snow_weather.png': '/assets/stickers/fairytale_snow_weather.png',
   '/assets/stickers/travel_luggage.png': '/assets/stickers/fairytale_travel_luggage.png',
   '/assets/stickers/stethoscope.png': '/assets/stickers/fairytale_stethoscope.png',
+
+  // Batch 5 Adventures, Sensory Regulation & Outings
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/fairytale_adventure_dentist.png',
+  '/assets/stickers/dentist_adventure.png': '/assets/stickers/fairytale_adventure_dentist.png',
+  '/assets/stickers/adventure_haircut.png': '/assets/stickers/fairytale_adventure_haircut.png',
+  '/assets/stickers/haircut_adventure.png': '/assets/stickers/fairytale_adventure_haircut.png',
+  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/fairytale_adventure_haircut.png',
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/fairytale_adventure_movie_cinema.png',
+  '/assets/stickers/movie_cinema.png': '/assets/stickers/fairytale_adventure_movie_cinema.png',
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/fairytale_adventure_swimming_pool.png',
+  '/assets/stickers/swimming_pool.png': '/assets/stickers/fairytale_adventure_swimming_pool.png',
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/fairytale_adventure_camping_tent.png',
+  '/assets/stickers/camping_tent.png': '/assets/stickers/fairytale_adventure_camping_tent.png',
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/fairytale_shopping_cart.png',
+  '/assets/stickers/therapy_brain.png': '/assets/stickers/fairytale_therapy_brain.png',
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/fairytale_sensory_loud_noise.png',
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/fairytale_sensory_bright_lights.png',
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/fairytale_tennis_ball.png',
+  '/assets/stickers/red_balloon.png': '/assets/stickers/fairytale_red_balloon.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/fairytale_candy_treat.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/fairytale_cutlery_meal.png',
+  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/fairytale_grounding_touch_hand.png',
+  '/assets/stickers/cloudy_weather.png': '/assets/stickers/fairytale_cloudy_weather.png',
 };
 
 /**
