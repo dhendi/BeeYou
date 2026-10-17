@@ -2204,6 +2204,24 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/car_ride.png': '/assets/stickers/fairytale_car_ride.png',
   '/assets/stickers/pet_care.png': '/assets/stickers/fairytale_pet_care.png',
   '/assets/stickers/pizza_slice.png': '/assets/stickers/fairytale_pizza_slice.png',
+
+  // Batch 4 Weather, Rewards, Tools & Exploration
+  '/assets/stickers/morning_sunrise.png': '/assets/stickers/fairytale_morning_sunrise.png',
+  '/assets/stickers/sunrise.png': '/assets/stickers/fairytale_morning_sunrise.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/fairytale_evening_moon.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/fairytale_reward_trophy.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/fairytale_star_gold.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/fairytale_feelings_thermometer.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/fairytale_battery_meter.png',
+  '/assets/stickers/calm_sparkles.png': '/assets/stickers/fairytale_calm_sparkles.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/fairytale_quiet_voice.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/fairytale_speech_bubble.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/fairytale_science_flask.png',
+  '/assets/stickers/sunny_clear.png': '/assets/stickers/fairytale_sunny_clear.png',
+  '/assets/stickers/rain_cloud.png': '/assets/stickers/fairytale_rain_cloud.png',
+  '/assets/stickers/snow_weather.png': '/assets/stickers/fairytale_snow_weather.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/fairytale_travel_luggage.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/fairytale_stethoscope.png',
 };
 
 /**
