@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { EmotionType } from '../types';
+import { t, getLanguage } from '../services/translator';
 import { 
   fetchLiveWeather, 
   LiveWeatherData, 
@@ -81,6 +82,14 @@ export const MorningBriefModal: React.FC = () => {
   const [isRefreshingWeather, setIsRefreshingWeather] = useState<boolean>(false);
   const [selectedMood, setSelectedMood] = useState<EmotionType | null>(null);
   const [moodFeedback, setMoodFeedback] = useState<string | null>(null);
+
+  // Re-render when language changes
+  const [, setLangTick] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setLangTick((n) => n + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
 
   // Keep tempUnit in sync if settings update externally
   useEffect(() => {
@@ -170,7 +179,10 @@ export const MorningBriefModal: React.FC = () => {
   }, [showMorningBrief]);
 
   // Today's Date formatted warmly
-  const todayFormatted = new Intl.DateTimeFormat('en-US', {
+  // Today's Date formatted warmly in active locale
+  const activeLang = settings?.language || getLanguage() || 'en';
+  const dateLocale = activeLang === 'en' ? 'en-US' : (activeLang === 'fr_ca' ? 'fr-CA' : activeLang);
+  const todayFormatted = new Intl.DateTimeFormat(dateLocale, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -178,32 +190,32 @@ export const MorningBriefModal: React.FC = () => {
 
   // Determine Greeting, Badges, and Icons dynamically based on time of day
   const currentHour = new Date().getHours();
-  let greeting = 'Good morning';
-  let timeBadge = 'Daily Morning Brief';
-  let feelingQuestion = 'How are you feeling this morning? (Optional)';
-  let checkInLabel = 'Morning Check-In';
+  let greetingKey = 'Good morning';
+  let timeBadgeKey = 'Daily Morning Brief';
+  let feelingQuestionKey = 'How are you feeling this morning? (Optional)';
+  let checkInLabelKey = 'Morning Check-In';
 
   if (currentHour >= 5 && currentHour < 12) {
-    greeting = 'Good morning';
-    timeBadge = 'Daily Morning Brief';
-    feelingQuestion = 'How are you feeling this morning? (Optional)';
-    checkInLabel = 'Morning Check-In';
+    greetingKey = 'Good morning';
+    timeBadgeKey = 'Daily Morning Brief';
+    feelingQuestionKey = 'How are you feeling this morning? (Optional)';
+    checkInLabelKey = 'Morning Check-In';
   } else if (currentHour >= 12 && currentHour < 17) {
-    greeting = 'Good afternoon';
-    timeBadge = 'Daily Afternoon Brief';
-    feelingQuestion = 'How are you feeling this afternoon? (Optional)';
-    checkInLabel = 'Afternoon Check-In';
+    greetingKey = 'Good afternoon';
+    timeBadgeKey = 'Daily Afternoon Brief';
+    feelingQuestionKey = 'How are you feeling this afternoon? (Optional)';
+    checkInLabelKey = 'Afternoon Check-In';
   } else if (currentHour >= 17 && currentHour < 21) {
-    greeting = 'Good evening';
-    timeBadge = 'Daily Evening Brief';
-    feelingQuestion = 'How are you feeling this evening? (Optional)';
-    checkInLabel = 'Evening Check-In';
+    greetingKey = 'Good evening';
+    timeBadgeKey = 'Daily Evening Brief';
+    feelingQuestionKey = 'How are you feeling this evening? (Optional)';
+    checkInLabelKey = 'Evening Check-In';
   } else {
     // Late night / early hours (9:00 PM - 4:59 AM)
-    greeting = 'Good evening';
-    timeBadge = 'Daily Evening Brief';
-    feelingQuestion = 'How are you feeling tonight? (Optional)';
-    checkInLabel = 'Evening Check-In';
+    greetingKey = 'Good evening';
+    timeBadgeKey = 'Daily Evening Brief';
+    feelingQuestionKey = 'How are you feeling tonight? (Optional)';
+    checkInLabelKey = 'Evening Check-In';
   }
 
   const renderTimeHeaderIcon = () => {
@@ -218,7 +230,7 @@ export const MorningBriefModal: React.FC = () => {
 
   // Gracefully format greeting with child's name if present (avoids "Good morning, !")
   const childName = childProfile?.name?.trim();
-  const greetingTitle = childName ? `${greeting}, ${childName}!` : `${greeting}!`;
+  const greetingTitle = childName ? `${t(greetingKey)}, ${childName}!` : `${t(greetingKey)}!`;
 
   // Find key scheduled activity of today
   const keyRoutine = routines[0];
@@ -226,27 +238,27 @@ export const MorningBriefModal: React.FC = () => {
   const keyAdventure = adventures[0];
 
   const keyActivityTitle = firstThen
-    ? `${firstThen.first} → then ${firstThen.then}`
-    : keyAdventure?.title || keyRoutine?.title || 'Play & explore routines';
+    ? `${t(firstThen.first)} → ${t('then')} ${t(firstThen.then)}`
+    : t(keyAdventure?.title || keyRoutine?.title || 'Play & explore routines');
   const keySingleEmoji = firstThen?.firstEmoji || keyRoutine?.emoji || keyAdventure?.emoji || '⭐';
-  const keySingleTitle = firstThen?.first || keyRoutine?.title || keyAdventure?.title || '';
+  const keySingleTitle = firstThen?.first ? t(firstThen.first) : (keyRoutine?.title ? t(keyRoutine.title) : (keyAdventure?.title ? t(keyAdventure.title) : ''));
   const keyActivityTime = keyRoutine?.time || '10:00 AM';
 
   const handleHearBrief = () => {
     playChime('speak');
     const tempValue = tempUnit === 'C' ? fahrenheitToCelsius(weatherData.tempF) : weatherData.tempF;
-    const tempUnitWord = tempUnit === 'C' ? 'degrees Celsius' : 'degrees Fahrenheit';
-    const tempDesc = getTemperatureDescription(weatherData.tempF);
-    const briefText = `${greetingTitle} Today is ${todayFormatted}. The weather is ${weatherData.condition} at ${tempValue} ${tempUnitWord}, ${tempDesc}. Comfort tip: ${weatherData.sensoryTip}. Today's key activity is ${keyActivityTitle}. Have a gentle, wonderful day!`;
+    const tempUnitWord = tempUnit === 'C' ? t('degrees Celsius') : t('degrees Fahrenheit');
+    const tempDesc = t(getTemperatureDescription(weatherData.tempF));
+    const briefText = `${greetingTitle} ${t('Today is')} ${todayFormatted}. ${t('The weather is')} ${t(weatherData.condition)} ${t('at')} ${tempValue} ${tempUnitWord}, ${tempDesc}. ${t('Comfort tip:')} ${t(weatherData.sensoryTip)}. ${t("Today's key activity is")} ${keyActivityTitle}. ${t('Have a gentle, wonderful day!')}`;
     speakText(briefText);
   };
 
   const handleSelectMood = (mood: typeof MOOD_OPTIONS[0]) => {
     setSelectedMood(mood.id);
-    setMoodFeedback(mood.response);
-    recordEmotion(mood.id, checkInLabel);
+    setMoodFeedback(t(mood.response));
+    recordEmotion(mood.id, t(checkInLabelKey));
     playChime('star');
-    speakText(`Recorded: Feeling ${mood.label}. ${mood.response}`);
+    speakText(`${t('Recorded')}: ${t('Feeling')} ${t(mood.label)}. ${t(mood.response)}`);
   };
 
   const handleStartDay = () => {
@@ -268,7 +280,7 @@ export const MorningBriefModal: React.FC = () => {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={timeBadge}
+      aria-label={t(timeBadgeKey)}
       className="fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] overflow-y-auto animate-in fade-in"
     >
       <div className="bg-white border-3 border-amber-300 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)]">
@@ -281,7 +293,7 @@ export const MorningBriefModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-amber-950/15 text-amber-950 px-2 py-0.5 rounded-full">
-                  {timeBadge}
+                  {t(timeBadgeKey)}
                 </span>
                 <span className="text-xs font-bold text-amber-900/80">
                   {todayFormatted}
@@ -297,11 +309,11 @@ export const MorningBriefModal: React.FC = () => {
             <button
               onClick={handleHearBrief}
               className="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/80 hover:bg-white text-amber-950 font-black text-xs flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95"
-              title={`Hear ${timeBadge.toLowerCase()} spoken aloud`}
-              aria-label={`Hear ${timeBadge.toLowerCase()}`}
+              title={t('Read Aloud')}
+              aria-label={t('Read Aloud')}
             >
               <Volume2 className="w-4 h-4 text-amber-600" />
-              <span className="hidden sm:inline">Read Aloud</span>
+              <span className="hidden sm:inline">{t('Read Aloud')}</span>
             </button>
 
             <button
@@ -310,7 +322,7 @@ export const MorningBriefModal: React.FC = () => {
                 playChime('tap');
               }}
               className="p-2 rounded-xl bg-white/50 hover:bg-white/80 text-amber-950 transition-all cursor-pointer"
-              aria-label={`Close ${timeBadge.toLowerCase()}`}
+              aria-label={`Close ${t(timeBadgeKey).toLowerCase()}`}
             >
               <X className="w-5 h-5" />
             </button>
@@ -324,11 +336,11 @@ export const MorningBriefModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-                  Today's Weather & Sensory Comfort
+                  {t("Today's Weather & Sensory Comfort")}
                 </span>
                 <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1 shadow-2xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  Live Sync
+                  {t('Live Sync')}
                 </span>
               </div>
               <button
@@ -339,7 +351,7 @@ export const MorningBriefModal: React.FC = () => {
                 className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-1 p-1 rounded-lg hover:bg-slate-100 transition-all cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-3 h-3 ${isRefreshingWeather ? 'animate-spin text-amber-600' : ''}`} />
-                <span>{isRefreshingWeather ? 'Syncing...' : weatherData.locationName}</span>
+                <span>{isRefreshingWeather ? t('Syncing...') : weatherData.locationName}</span>
               </button>
             </div>
 
@@ -349,7 +361,7 @@ export const MorningBriefModal: React.FC = () => {
                 {weatherData.stickerSrc ? (
                   <img
                     src={weatherData.stickerSrc}
-                    alt={weatherData.condition}
+                    alt={t(weatherData.condition)}
                     className="w-14 h-14 sm:w-16 sm:h-16 object-contain select-none pointer-events-none drop-shadow-xs"
                     onError={(e) => {
                       (e.currentTarget as HTMLElement).style.display = 'none';
@@ -365,10 +377,10 @@ export const MorningBriefModal: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <h3 className="font-black text-slate-900 text-base sm:text-lg leading-tight">
-                      {weatherData.condition}
+                      {t(weatherData.condition)}
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                      {weatherData.locationName} • Updated {weatherData.lastUpdated}
+                      {weatherData.locationName} • {t('Updated')} {weatherData.lastUpdated}
                     </p>
                   </div>
 
@@ -389,7 +401,7 @@ export const MorningBriefModal: React.FC = () => {
                         <button
                           type="submit"
                           className="p-1 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white transition-colors cursor-pointer shadow-2xs active:scale-95"
-                          title="Save temperature"
+                          title={t('Save temperature')}
                         >
                           <Check className="w-3 h-3" />
                         </button>
@@ -397,7 +409,7 @@ export const MorningBriefModal: React.FC = () => {
                           type="button"
                           onClick={() => setIsEditingTemp(false)}
                           className="p-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 transition-colors cursor-pointer active:scale-95"
-                          title="Cancel"
+                          title={t('Cancel')}
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -411,10 +423,10 @@ export const MorningBriefModal: React.FC = () => {
                           setIsEditingTemp(true);
                         }}
                         className="group flex items-center gap-1 text-xs font-black text-slate-800 hover:text-amber-900 cursor-pointer transition-colors"
-                        title="Click to edit temperature value"
+                        title={t('Click to edit temperature value')}
                       >
                         <span>
-                          {tempUnit === 'C' ? `${fahrenheitToCelsius(weatherData.tempF)}°C` : `${weatherData.tempF}°F`} • {getTemperatureDescription(weatherData.tempF)}
+                          {tempUnit === 'C' ? `${fahrenheitToCelsius(weatherData.tempF)}°C` : `${weatherData.tempF}°F`} • {t(getTemperatureDescription(weatherData.tempF))}
                         </span>
                         <Edit2 className="w-2.5 h-2.5 text-slate-400 group-hover:text-amber-600 opacity-60 group-hover:opacity-100 transition-all" />
                       </button>
@@ -455,7 +467,7 @@ export const MorningBriefModal: React.FC = () => {
                 </div>
                 <div className="mt-2.5 p-2 rounded-xl bg-white/80 border border-amber-100/80">
                   <p className="text-xs text-slate-700 font-medium leading-relaxed">
-                    💡 <strong className="text-amber-950 font-bold">Sensory Comfort Tip:</strong> {weatherData.sensoryTip}
+                    💡 <strong className="text-amber-950 font-bold">{t('Sensory Comfort Tip:')}</strong> {t(weatherData.sensoryTip)}
                   </p>
                 </div>
               </div>
@@ -465,7 +477,7 @@ export const MorningBriefModal: React.FC = () => {
           {/* 2. ONE KEY SCHEDULED ACTIVITY */}
           <div className="space-y-2 pt-1">
             <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
-              Key Activity for Today
+              {t('Key Activity for Today')}
             </span>
 
             <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/70 via-yellow-50/60 to-amber-50/70 border-2 border-amber-200/90 flex items-center justify-between gap-3 shadow-xs">
@@ -479,14 +491,14 @@ export const MorningBriefModal: React.FC = () => {
                       {keyActivityTime}
                     </span>
                     <span className="text-xs text-amber-950 font-bold">
-                      Main Focus
+                      {t('Main Focus')}
                     </span>
                   </div>
                   <h4 className="font-black text-slate-900 text-sm sm:text-base mt-0.5 leading-snug">
                     {keyActivityTitle}
                   </h4>
                   <p className="text-[11px] text-slate-600 font-medium">
-                    Clear, calm steps prepared so you know exactly what is happening.
+                    {t('Clear, calm steps prepared so you know exactly what is happening.')}
                   </p>
                 </div>
               </div>
@@ -500,7 +512,7 @@ export const MorningBriefModal: React.FC = () => {
                 }}
                 className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shrink-0 transition-all cursor-pointer shadow-xs active:scale-95"
               >
-                <span>View</span>
+                <span>{t('View')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -511,11 +523,11 @@ export const MorningBriefModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                 <Heart className="w-3.5 h-3.5 text-rose-500" />
-                <span>{feelingQuestion}</span>
+                <span>{t(feelingQuestionKey)}</span>
               </span>
               {selectedMood && (
                 <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                  Recorded!
+                  {t('Recorded!')}
                 </span>
               )}
             </div>
@@ -538,7 +550,7 @@ export const MorningBriefModal: React.FC = () => {
                     <div className="w-10 h-10 sm:w-12 sm:h-12 mb-1 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Sticker className="w-full h-full object-contain drop-shadow-2xs" />
                     </div>
-                    <span className="font-black text-[11px] text-center">{mood.label}</span>
+                    <span className="font-black text-[11px] text-center">{t(mood.label)}</span>
                   </button>
                 );
               })}
@@ -548,7 +560,7 @@ export const MorningBriefModal: React.FC = () => {
             {moodFeedback && (
               <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center gap-2 text-xs text-amber-950 animate-in fade-in">
                 <Smile className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="font-semibold">{moodFeedback}</span>
+                <span className="font-semibold">{t(moodFeedback)}</span>
               </div>
             )}
           </div>
@@ -558,7 +570,7 @@ export const MorningBriefModal: React.FC = () => {
         <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
             <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-            <span>Daily Check-In</span>
+            <span>{t(checkInLabelKey)}</span>
           </div>
 
           <button
@@ -566,7 +578,7 @@ export const MorningBriefModal: React.FC = () => {
             onClick={handleStartDay}
             className="px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-sm sm:text-base flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
           >
-            <span>Ready for Today!</span>
+            <span>{currentHour >= 17 ? t('Ready for Tonight!') : t('Ready for Today!')}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
