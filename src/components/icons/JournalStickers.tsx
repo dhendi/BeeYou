@@ -2149,6 +2149,42 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/fairytale_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
   '/assets/stickers/turtle_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
   '/assets/stickers/bee_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
+
+  // Batch 2 Activities, Snacks, Tools & Regulation Swaps
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/fairytale_castle_hot_cocoa.png',
+  '/assets/stickers/drink_cup.png': '/assets/stickers/fairytale_castle_hot_cocoa.png',
+
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/fairytale_royal_chocolate_bar.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/fairytale_royal_chocolate_bar.png',
+
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/fairytale_storybook_jigsaw_puzzle.png',
+
+  '/assets/stickers/fav_music.png': '/assets/stickers/fairytale_star_melody_headphones.png',
+  '/assets/stickers/music_note.png': '/assets/stickers/fairytale_star_melody_headphones.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/fairytale_star_melody_headphones.png',
+
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/fairytale_crystal_gem_heart.png',
+
+  '/assets/stickers/fav_outside.png': '/assets/stickers/fairytale_blossom_meadow.png',
+  '/assets/stickers/outdoor_sun.png': '/assets/stickers/fairytale_blossom_meadow.png',
+
+  '/assets/stickers/fav_stop.png': '/assets/stickers/fairytale_royal_shield_stop.png',
+
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/fairytale_beacon_help_lantern.png',
+
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/fairytale_crystal_decision_wheel.png',
+
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/fairytale_stardust_energy_spoons.png',
+
+  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/fairytale_spellbook_journal.png',
+
+  '/assets/stickers/laundry_hamper.png': '/assets/stickers/fairytale_woven_laundry_basket.png',
+
+  '/assets/stickers/refresh_repeat.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
+
+  '/assets/stickers/toy_box.png': '/assets/stickers/fairytale_royal_toy_chest.png',
+
+  '/assets/stickers/homework_study.png': '/assets/stickers/fairytale_study_scroll_inkpot.png',
 };
 
 /**
