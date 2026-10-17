@@ -64,7 +64,11 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
   const renderRoutineTitle = (title: string) => {
     if (title.startsWith('✨ New Plan: ')) {
       const planName = title.slice('✨ New Plan: '.length);
-      return `✨ ${t('New Plan')}: ${t(planName)}`;
+      return `${t('New Plan')}: ${t(planName)}`;
+    }
+    if (title.startsWith('New Plan: ')) {
+      const planName = title.slice('New Plan: '.length);
+      return `${t('New Plan')}: ${t(planName)}`;
     }
     return t(title);
   };

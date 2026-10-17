@@ -259,7 +259,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
     const newRoutineId = 'routine-plans-changed';
     const updatedPlanRoutine: Routine = {
       id: newRoutineId,
-      title: `✨ New Plan: ${target.newPlanTitle || 'Updated Schedule'}`,
+      title: `New Plan: ${target.newPlanTitle || 'Updated Schedule'}`,
       category: 'special',
       emoji: '⭐',
       time: target.newSteps[0]?.time || 'Now',
@@ -316,7 +316,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
             // Replace the entire routine
             nextRoutines[targetIdx] = {
               ...origRoutine,
-              title: `✨ New Plan: ${target.newPlanTitle || origRoutine.title}`,
+              title: `New Plan: ${target.newPlanTitle || origRoutine.title}`,
               time: target.newSteps[0]?.time || origRoutine.time,
               steps: target.newSteps.map((step, idx) => ({
                 id: `pc-step-${idx}-${Date.now()}`,
