@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { AppTheme, ThemePalette, WallpaperPattern } from '../types';
 import { 
@@ -13,7 +13,9 @@ import {
   RotateCcw,
   CheckCircle2,
   Crown,
-  ArrowLeft
+  ArrowLeft,
+  UploadCloud,
+  Image as ImageIcon
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { PRESET_THEMES, getThemeIcon } from '../data/themesData';
@@ -204,6 +206,27 @@ const POPULAR_MASCOTS = [
   { emoji: '⭐', name: 'Star', sound: 'magic' as const },
 ];
 
+export interface WallpaperPatternOption {
+  id: WallpaperPattern;
+  label: string;
+  icon: string;
+}
+
+export const WALLPAPER_PATTERN_OPTIONS: WallpaperPatternOption[] = [
+  { id: 'honeycomb_clouds', label: 'Honeycomb & Clouds', icon: '/assets/stickers/bee_mascot.png' },
+  { id: 'sparkles', label: 'Calm Star', icon: '/assets/stickers/fairytale_star_gold.png' },
+  { id: 'turtle_shell', label: 'Turtle Shell', icon: '/assets/stickers/turtle_mascot.png' },
+  { id: 'dino_footprints', label: 'Dino Tracks', icon: '/assets/stickers/dino_rex.png' },
+  { id: 'lily_pads', label: 'Lily Pads', icon: '/assets/stickers/frog_mascot.png' },
+  { id: 'cosmic_stars', label: 'Cosmic Stars', icon: '/assets/stickers/space_mascot.png' },
+  { id: 'bubbles', label: 'Bubbles', icon: '/assets/stickers/ocean_mascot.png' },
+  { id: 'railroad', label: 'Railroad', icon: '/assets/stickers/train_mascot.png' },
+  { id: 'ocean_waves', label: 'Ocean Waves', icon: '/assets/stickers/ocean_ocean_wave.png' },
+  { id: 'racing', label: 'Speedway Track', icon: '/assets/stickers/racing_mascot.png' },
+  { id: 'zen_botanical', label: 'Zen Leaves', icon: '/assets/stickers/autumn_leaf.png' },
+  { id: 'none', label: 'Clean Solid', icon: '/assets/stickers/soap_wash_hands.png' },
+];
+
 function buildCustomPalette(primaryHex: string): ThemePalette {
   return {
     primary: primaryHex,
@@ -262,6 +285,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   const [customPrimaryColor, setCustomPrimaryColor] = useState('#d97706');
   const [useCustomHex, setUseCustomHex] = useState(false);
   const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperPattern>('sparkles');
+  const [customWallpaperUrl, setCustomWallpaperUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedBorderRadius, setSelectedBorderRadius] = useState<'rounded-2xl' | 'rounded-3xl' | 'rounded-xl'>('rounded-3xl');
   const [selectedSoundTheme, setSelectedSoundTheme] = useState<'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic'>('classic');
 
@@ -285,6 +310,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setGreetingMessage(target.greetingMessage || 'Welcome back!');
     setThemeDescription(target.description || '');
     setSelectedWallpaper(target.wallpaperPattern || 'none');
+    setCustomWallpaperUrl(
+      target.palette?.wallpaperUrl &&
+      (target.palette.wallpaperUrl.startsWith('data:') || target.palette.wallpaperUrl.startsWith('blob:') || target.wallpaperPattern === 'custom')
+        ? target.palette.wallpaperUrl
+        : null
+    );
     setSelectedBorderRadius(target.aacStyling?.tileBorderRadius || 'rounded-3xl');
     setSelectedSoundTheme(target.soundTheme || 'classic');
 
@@ -316,9 +347,65 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setUseCustomHex(false);
     setCustomPrimaryColor('#d97706');
     setSelectedWallpaper('sparkles');
+    setCustomWallpaperUrl(null);
     setSelectedSoundTheme('classic');
     setActiveTab('studio');
     playChime('tap');
+  };
+
+  const handleWallpaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      speakText('Please choose an image file like PNG or JPEG');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+
+      // Automatically compress & resize large photos using canvas to stay well within localStorage limits
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1920;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          setCustomWallpaperUrl(compressed);
+          setSelectedWallpaper('custom');
+          playChime('star');
+          speakText('Wallpaper uploaded!');
+        } else {
+          setCustomWallpaperUrl(dataUrl);
+          setSelectedWallpaper('custom');
+          playChime('star');
+          speakText('Wallpaper uploaded!');
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const getEffectivePalette = (): ThemePalette => {
@@ -334,7 +421,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
       return;
     }
 
-    const effectivePalette = getEffectivePalette();
+    const basePalette = getEffectivePalette();
+    const effectivePalette: ThemePalette = {
+      ...basePalette,
+      wallpaperUrl: customWallpaperUrl || undefined,
+    };
 
     if (targetEditingThemeId) {
       // EDIT EXISTING THEME
@@ -348,7 +439,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         greetingMessage: greetingMessage.trim() || `Welcome to ${themeName}!`,
         description: themeDescription.trim() || `Theme styled with ${mascotEmoji} and warmth.`,
         palette: effectivePalette,
-        wallpaperPattern: selectedWallpaper,
+        wallpaperPattern: customWallpaperUrl ? 'custom' : selectedWallpaper,
         aacStyling: {
           tileBorderRadius: selectedBorderRadius,
           tileBorderWidth: 'border-3',
@@ -375,7 +466,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         description: themeDescription.trim() || `Custom theme styled with ${mascotEmoji}.`,
         costStars: 0,
         palette: effectivePalette,
-        wallpaperPattern: selectedWallpaper,
+        wallpaperPattern: customWallpaperUrl ? 'custom' : selectedWallpaper,
         aacStyling: {
           tileBorderRadius: selectedBorderRadius,
           tileBorderWidth: 'border-3',
@@ -958,39 +1049,112 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
           {/* Studio Step 3: Wallpaper Pattern */}
           <div className="space-y-3">
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-              3. Background Wallpaper Pattern
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {[
-                { id: 'honeycomb_clouds', label: '🐝 Honeycomb & Clouds' },
-                { id: 'sparkles', label: '⭐ Calm Star' },
-                { id: 'turtle_shell', label: '🐢 Turtle Shell' },
-                { id: 'dino_footprints', label: '🦖 Dino Tracks' },
-                { id: 'lily_pads', label: '🐸 Lily Pads' },
-                { id: 'cosmic_stars', label: '🚀 Cosmic Stars' },
-                { id: 'bubbles', label: '🫧 Bubbles' },
-                { id: 'railroad', label: '🚂 Railroad' },
-                { id: 'ocean_waves', label: '🌊 Ocean Waves' },
-                { id: 'zen_botanical', label: '🌿 Zen Leaves' },
-                { id: 'none', label: '🧼 Clean Solid' },
-              ].map((wp) => (
-                <button
-                  key={wp.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedWallpaper(wp.id as WallpaperPattern);
-                    playChime('tap');
-                  }}
-                  className={`py-2 px-3 rounded-xl border-2 font-bold text-xs transition-all cursor-pointer ${
-                    selectedWallpaper === wp.id
-                      ? 'border-amber-500 bg-amber-50 text-amber-950 shadow-2xs font-black'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {wp.label}
-                </button>
-              ))}
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
+                3. Background Wallpaper Pattern
+              </label>
+              {customWallpaperUrl && (
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  Custom Photo Active
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {WALLPAPER_PATTERN_OPTIONS.map((wp) => {
+                const isSelected = selectedWallpaper === wp.id && !customWallpaperUrl;
+                return (
+                  <button
+                    key={wp.id}
+                    type="button"
+                    onClick={() => {
+                      setCustomWallpaperUrl(null);
+                      setSelectedWallpaper(wp.id);
+                      playChime('tap');
+                    }}
+                    className={`py-2 px-2.5 rounded-xl border-2 flex items-center gap-2 text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-amber-500 bg-amber-50 text-amber-950 shadow-2xs font-black ring-2 ring-amber-300/60'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-bold'
+                    }`}
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-amber-50/80 border border-amber-200 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs p-0.5">
+                      <img src={wp.icon} alt={wp.label} className="w-full h-full object-contain pointer-events-none select-none" />
+                    </div>
+                    <span className="text-xs truncate">{wp.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom Wallpaper Upload Box */}
+            <div className={`mt-3 p-3.5 rounded-2xl border-2 transition-all ${
+              customWallpaperUrl
+                ? 'border-amber-400 bg-amber-50/70 shadow-2xs'
+                : 'border-dashed border-slate-300 bg-slate-50/70 hover:border-amber-400 hover:bg-amber-50/40'
+            }`}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleWallpaperUpload}
+              />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {customWallpaperUrl ? (
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-amber-400 shadow-xs shrink-0 bg-white">
+                      <img
+                        src={customWallpaperUrl}
+                        alt="Uploaded wallpaper preview"
+                        className="w-full h-full object-cover select-none pointer-events-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 text-amber-600 shadow-2xs">
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <h5 className="font-black text-xs sm:text-sm text-slate-800 flex items-center gap-1.5">
+                      <span>{customWallpaperUrl ? 'Custom Wallpaper Uploaded' : 'Upload Your Own Wallpaper'}</span>
+                    </h5>
+                    <p className="text-[11px] text-slate-500 font-medium truncate">
+                      {customWallpaperUrl
+                        ? 'Your custom photo or art is set as the background.'
+                        : 'Choose a personal photo, calming artwork, or sensory picture from your device.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {customWallpaperUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomWallpaperUrl(null);
+                        setSelectedWallpaper('honeycomb_clouds');
+                        playChime('clear');
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-slate-200 hover:border-rose-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                      title="Remove uploaded wallpaper"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span>{customWallpaperUrl ? 'Replace Photo' : 'Upload Photo / Art'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1004,8 +1168,15 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </div>
 
             <div
-              className={`p-4 rounded-3xl border-2 border-slate-300 shadow-inner ${getEffectivePalette().appBg}`}
+              className={`p-4 rounded-3xl border-2 border-slate-300 shadow-inner relative overflow-hidden ${getEffectivePalette().appBg}`}
             >
+              {/* Custom wallpaper preview overlay in mockup */}
+              {customWallpaperUrl && (
+                <div
+                  className="absolute inset-0 pointer-events-none select-none bg-cover bg-center opacity-35"
+                  style={{ backgroundImage: `url('${customWallpaperUrl}')` }}
+                />
+              )}
               {/* Header Mockup */}
               <div
                 className={`p-3 rounded-2xl mb-3 flex items-center justify-between shadow-xs ${getEffectivePalette().headerBg}`}

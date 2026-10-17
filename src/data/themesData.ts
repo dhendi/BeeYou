@@ -28,6 +28,8 @@ export type WallpaperPattern =
   | 'ocean_waves'
   | 'zen_botanical'
   | 'honeycomb_clouds'
+  | 'racing'
+  | 'custom'
   | 'none';
 
 export interface AppTheme {
