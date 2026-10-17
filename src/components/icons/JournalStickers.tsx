@@ -2185,6 +2185,25 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/toy_box.png': '/assets/stickers/fairytale_royal_toy_chest.png',
 
   '/assets/stickers/homework_study.png': '/assets/stickers/fairytale_study_scroll_inkpot.png',
+
+  // Batch 3 Moods, Personas, Hubs & Daily Living Swaps
+  '/assets/stickers/mood_happy.png': '/assets/stickers/fairytale_mood_happy.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/fairytale_mood_calm.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/fairytale_mood_excited.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/fairytale_mood_sleepy.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/fairytale_mood_unsure.png',
+
+  '/assets/stickers/child_persona.png': '/assets/stickers/fairytale_child_persona.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/fairytale_adult_briefcase.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/fairytale_caregiver_phone.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/fairytale_language_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/fairytale_trial_crown.png',
+
+  '/assets/stickers/about_id.png': '/assets/stickers/fairytale_about_id.png',
+  '/assets/stickers/home_house.png': '/assets/stickers/fairytale_home_house.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/fairytale_car_ride.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/fairytale_pet_care.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/fairytale_pizza_slice.png',
 };
 
 /**
