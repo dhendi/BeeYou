@@ -20,12 +20,16 @@ function checkActiveThemeCategory(): string {
       if (cat === 'turtle' || id === 'theme-turtle') return 'turtle';
       if (cat === 'dinosaur' || id === 'theme-dino') return 'dinosaur';
       if (cat === 'frog' || id === 'theme-frog') return 'frog';
+      if (cat === 'train' || id === 'theme-trains') return 'train';
+      if (cat === 'space' || id === 'theme-space') return 'space';
     }
     if (typeof localStorage !== 'undefined') {
       const savedId = localStorage.getItem('beeyou_active_theme_id');
       if (savedId === 'theme-turtle') return 'turtle';
       if (savedId === 'theme-dino') return 'dinosaur';
       if (savedId === 'theme-frog') return 'frog';
+      if (savedId === 'theme-trains') return 'train';
+      if (savedId === 'theme-space') return 'space';
     }
   } catch (e) {}
   return 'default';
@@ -82,6 +86,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = FROG_STICKER_SWAPS[src];
     } else if (theme === 'train' && TRAIN_STICKER_SWAPS[src]) {
       currentSrc = TRAIN_STICKER_SWAPS[src];
+    } else if (theme === 'space' && SPACE_STICKER_SWAPS[src]) {
+      currentSrc = SPACE_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -97,7 +103,7 @@ const renderStickerPng = (src: string, alt: string) => {
   return Component;
 };
 
-const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string, trainSrc?: string) => {
+const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string, trainSrc?: string, spaceSrc?: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = defaultSrc;
@@ -109,6 +115,8 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
       currentSrc = frogSrc || FROG_STICKER_SWAPS[defaultSrc] || defaultSrc;
     } else if (theme === 'train') {
       currentSrc = trainSrc || TRAIN_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'space') {
+      currentSrc = spaceSrc || SPACE_STICKER_SWAPS[defaultSrc] || defaultSrc;
     }
     return (
       <img
@@ -1259,6 +1267,36 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/fav_lego.png': '/assets/stickers/frog_zen_balancing_stones.png',
   '/assets/stickers/fav_love_heart.png': '/assets/stickers/frog_lily_pad_heart.png',
   '/assets/stickers/bee_mascot.png': '/assets/stickers/frog_mascot.png',
+};
+
+export const SPACE_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1 Core Routine Swaps
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/space_alarm_clock.png',
+  '/assets/stickers/toothbrush.png': '/assets/stickers/space_toothbrush.png',
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/space_clothes_dressed.png',
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/space_pancakes_breakfast.png',
+  '/assets/stickers/school_bus.png': '/assets/stickers/space_school_bus.png',
+  '/assets/stickers/backpack_school.png': '/assets/stickers/space_backpack_school.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/space_homework_study.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/space_homework_study.png',
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/space_sandwich_lunch.png',
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/space_routine_water_drink.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/space_routine_water_drink.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/space_routine_water_drink.png',
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/space_sneaker_shoes.png',
+  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/space_toilet_restroom.png',
+  '/assets/stickers/toilet_restroom.png': '/assets/stickers/space_toilet_restroom.png',
+  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/space_routine_medicine_pill.png',
+  '/assets/stickers/medications_health.png': '/assets/stickers/space_routine_medicine_pill.png',
+  '/assets/stickers/pill_capsule.png': '/assets/stickers/space_routine_medicine_pill.png',
+  '/assets/stickers/school_building.png': '/assets/stickers/space_school_building.png',
+  '/assets/stickers/shower_wash.png': '/assets/stickers/space_shower_wash.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/space_shower_wash.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/space_shower_wash.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/space_shower_wash.png',
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/space_bedtime_sleep.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {

@@ -298,6 +298,56 @@ export const AACView: React.FC = () => {
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
+  const isTrainTheme = activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains';
+  const isSpaceTheme = activeTheme?.category === 'space' || activeTheme?.id === 'theme-space';
+
+  const TRAIN_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/train_timetable_board.png',
+    favorite_sentences: '/assets/stickers/train_speech_bubble.png',
+    favorites: '/assets/stickers/train_reward_trophy.png',
+    food: '/assets/stickers/train_dining_pancakes.png',
+    drinks: '/assets/stickers/train_canteen_flask.png',
+    activities: '/assets/stickers/train_playground_depot.png',
+    places: '/assets/stickers/train_home_station.png',
+    people: '/assets/stickers/train_child_persona.png',
+    feelings: '/assets/stickers/train_feelings_thermometer.png',
+    sensory: '/assets/stickers/train_ear_defenders.png',
+    all: '/assets/stickers/train_conductor_logbook.png',
+  };
+
+  const TRAIN_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/train_dining_pancakes.png',
+    'folder-drinks': '/assets/stickers/train_canteen_flask.png',
+    'folder-activities': '/assets/stickers/train_playground_depot.png',
+    'folder-places': '/assets/stickers/train_home_station.png',
+    'folder-people': '/assets/stickers/train_child_persona.png',
+    'folder-feelings': '/assets/stickers/train_feelings_thermometer.png',
+    'folder-sensory': '/assets/stickers/train_ear_defenders.png',
+  };
+
+  const SPACE_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/space_homework_study.png',
+    favorite_sentences: '/assets/stickers/space_alarm_clock.png',
+    favorites: '/assets/stickers/space_pancakes_breakfast.png',
+    food: '/assets/stickers/space_sandwich_lunch.png',
+    drinks: '/assets/stickers/space_routine_water_drink.png',
+    activities: '/assets/stickers/space_backpack_school.png',
+    places: '/assets/stickers/space_school_building.png',
+    people: '/assets/stickers/space_clothes_dressed.png',
+    feelings: '/assets/stickers/space_routine_medicine_pill.png',
+    sensory: '/assets/stickers/space_shower_wash.png',
+    all: '/assets/stickers/space_school_bus.png',
+  };
+
+  const SPACE_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/space_sandwich_lunch.png',
+    'folder-drinks': '/assets/stickers/space_routine_water_drink.png',
+    'folder-activities': '/assets/stickers/space_backpack_school.png',
+    'folder-places': '/assets/stickers/space_school_building.png',
+    'folder-people': '/assets/stickers/space_clothes_dressed.png',
+    'folder-feelings': '/assets/stickers/space_routine_medicine_pill.png',
+    'folder-sensory': '/assets/stickers/space_shower_wash.png',
+  };
 
   const TURTLE_CATEGORY_ICONS: Record<string, string> = {
     core: '/assets/stickers/turtle_lily_pads.png',
@@ -1199,7 +1249,11 @@ export const AACView: React.FC = () => {
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
               .map((cat) => {
-                const iconSrc = isFrogTheme && FROG_CATEGORY_ICONS[cat.id]
+                const iconSrc = isSpaceTheme && SPACE_CATEGORY_ICONS[cat.id]
+                  ? SPACE_CATEGORY_ICONS[cat.id]
+                  : isTrainTheme && TRAIN_CATEGORY_ICONS[cat.id]
+                  ? TRAIN_CATEGORY_ICONS[cat.id]
+                  : isFrogTheme && FROG_CATEGORY_ICONS[cat.id]
                   ? FROG_CATEGORY_ICONS[cat.id]
                   : isDinoTheme && DINO_CATEGORY_ICONS[cat.id]
                   ? DINO_CATEGORY_ICONS[cat.id]
@@ -1828,7 +1882,11 @@ export const AACView: React.FC = () => {
         >
           {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
           {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
-            const stickerSrc = isFrogTheme && FROG_FOLDER_STICKERS[folder.id]
+            const stickerSrc = isSpaceTheme && SPACE_FOLDER_STICKERS[folder.id]
+              ? SPACE_FOLDER_STICKERS[folder.id]
+              : isTrainTheme && TRAIN_FOLDER_STICKERS[folder.id]
+              ? TRAIN_FOLDER_STICKERS[folder.id]
+              : isFrogTheme && FROG_FOLDER_STICKERS[folder.id]
               ? FROG_FOLDER_STICKERS[folder.id]
               : isDinoTheme && DINO_FOLDER_STICKERS[folder.id]
               ? DINO_FOLDER_STICKERS[folder.id]

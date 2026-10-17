@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS, COSMIC_SPACE_ICONS } from '../data/themedIconsData';
 
 const loadedCache = new Set<string>();
 
@@ -85,6 +85,14 @@ export function preloadSteamThemeStickers() {
 }
 
 /**
+ * Preloads all Cosmic Explorer (Space) stickers into the browser's cache during idle cycles.
+ */
+export function preloadSpaceThemeStickers() {
+  const spaceUrls = COSMIC_SPACE_ICONS.map((i) => i.value);
+  preloadStickerUrls(spaceUrls, false);
+}
+
+/**
  * Preloads stickers for a specific theme ID.
  */
 export function preloadThemeStickers(themeId?: string) {
@@ -97,6 +105,8 @@ export function preloadThemeStickers(themeId?: string) {
     preloadFrogThemeStickers();
   } else if (themeId === 'theme-trains' || themeId === 'train') {
     preloadSteamThemeStickers();
+  } else if (themeId === 'theme-space' || themeId === 'space') {
+    preloadSpaceThemeStickers();
   }
 }
 

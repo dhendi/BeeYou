@@ -1089,6 +1089,24 @@ export const STEAM_EXPRESS_ICONS: ThemedIconItem[] = [
   { id: 'train_story_birthday', value: '/assets/stickers/train_story_birthday.png', label: 'Locomotive Birthday Cake', shortLabel: 'Birthday Cake', themeCategory: 'train', keywords: ['birthday', 'cake', 'party', 'celebrate', 'candles', 'sweet', 'train'] },
 ];
 
+export const COSMIC_SPACE_ICONS: ThemedIconItem[] = [
+  { id: 'space_alarm_clock', value: '/assets/stickers/space_alarm_clock.png', label: 'Mission Launch Countdown Clock', shortLabel: 'Countdown Clock', themeCategory: 'space', keywords: ['alarm', 'clock', 'time', 'countdown', 'morning', 'space', 'mission'] },
+  { id: 'space_toothbrush', value: '/assets/stickers/space_toothbrush.png', label: 'Zero-Gravity Sonic Toothbrush', shortLabel: 'Sonic Space Brush', themeCategory: 'space', keywords: ['toothbrush', 'teeth', 'brush', 'hygiene', 'morning', 'night', 'space'] },
+  { id: 'space_clothes_dressed', value: '/assets/stickers/space_clothes_dressed.png', label: 'Astronaut EVA Spacesuit', shortLabel: 'EVA Spacesuit', themeCategory: 'space', keywords: ['clothes', 'dressed', 'suit', 'astronaut', 'spacesuit', 'wear', 'space'] },
+  { id: 'space_pancakes_breakfast', value: '/assets/stickers/space_pancakes_breakfast.png', label: 'Cosmic Orbit Pancake Stack', shortLabel: 'Orbit Pancakes', themeCategory: 'space', keywords: ['breakfast', 'pancakes', 'food', 'meal', 'eat', 'orbit', 'space'] },
+  { id: 'space_school_bus', value: '/assets/stickers/space_school_bus.png', label: 'Yellow Star-Hopper Shuttle', shortLabel: 'Star-Hopper Shuttle', themeCategory: 'space', keywords: ['bus', 'shuttle', 'transit', 'school', 'transport', 'rocket', 'space'] },
+  { id: 'space_backpack_school', value: '/assets/stickers/space_backpack_school.png', label: 'Astronaut Jetpack Backpack', shortLabel: 'Space Jetpack', themeCategory: 'space', keywords: ['backpack', 'bag', 'pack', 'jetpack', 'school', 'astronaut', 'space'] },
+  { id: 'space_homework_study', value: '/assets/stickers/space_homework_study.png', label: 'Constellation Star Chart', shortLabel: 'Star Chart Map', themeCategory: 'space', keywords: ['study', 'homework', 'stars', 'constellation', 'map', 'chart', 'learn', 'space'] },
+  { id: 'space_sandwich_lunch', value: '/assets/stickers/space_sandwich_lunch.png', label: 'Space Station Bento Container', shortLabel: 'Space Bento Box', themeCategory: 'space', keywords: ['lunch', 'sandwich', 'bento', 'food', 'meal', 'container', 'space'] },
+  { id: 'space_routine_water_drink', value: '/assets/stickers/space_routine_water_drink.png', label: 'Zero-G Hydration Pouch', shortLabel: 'Hydration Pouch', themeCategory: 'space', keywords: ['water', 'drink', 'hydrate', 'pouch', 'straw', 'zero-g', 'space'] },
+  { id: 'space_sneaker_shoes', value: '/assets/stickers/space_sneaker_shoes.png', label: 'Lunar Rover Moon Boots', shortLabel: 'Lunar Moon Boots', themeCategory: 'space', keywords: ['shoes', 'boots', 'moon', 'lunar', 'feet', 'walk', 'space'] },
+  { id: 'space_toilet_restroom', value: '/assets/stickers/space_toilet_restroom.png', label: 'Space Station Hygiene Pod', shortLabel: 'Hygiene Pod', themeCategory: 'space', keywords: ['toilet', 'restroom', 'bathroom', 'hygiene', 'washroom', 'pod', 'space'] },
+  { id: 'space_routine_medicine_pill', value: '/assets/stickers/space_routine_medicine_pill.png', label: 'Astronaut Vitamin Capsule', shortLabel: 'Nutrient Capsule', themeCategory: 'space', keywords: ['medicine', 'vitamin', 'pill', 'health', 'capsule', 'nutrient', 'space'] },
+  { id: 'space_school_building', value: '/assets/stickers/space_school_building.png', label: 'Cosmic Academy Space Base', shortLabel: 'Cosmic Academy', themeCategory: 'space', keywords: ['school', 'academy', 'observatory', 'dome', 'telescope', 'building', 'space'] },
+  { id: 'space_shower_wash', value: '/assets/stickers/space_shower_wash.png', label: 'Astro-Shower Sonic Mist Pod', shortLabel: 'Sonic Mist Pod', themeCategory: 'space', keywords: ['shower', 'bath', 'wash', 'clean', 'mist', 'pod', 'space'] },
+  { id: 'space_bedtime_sleep', value: '/assets/stickers/space_bedtime_sleep.png', label: 'Zero-G Sleep Capsule Berth', shortLabel: 'Sleep Capsule', themeCategory: 'space', keywords: ['sleep', 'bed', 'bedtime', 'rest', 'night', 'capsule', 'pod', 'space'] },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -1106,6 +1124,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isTrain = themeCategoryOrId === 'train' || themeCategoryOrId === 'theme-trains';
   if (isTrain) {
     return STEAM_EXPRESS_ICONS;
+  }
+  const isSpace = themeCategoryOrId === 'space' || themeCategoryOrId === 'theme-space';
+  if (isSpace) {
+    return COSMIC_SPACE_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)
