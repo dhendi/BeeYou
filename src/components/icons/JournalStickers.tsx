@@ -2586,6 +2586,24 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/ocean_wave.png': '/assets/stickers/racing_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/racing_birthday_cake.png',
   '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/racing_birthday_cake.png',
+
+  // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community) Swaps
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/racing_waiting_room_couch.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/racing_waving_hand_hello.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/racing_padded_recliner_chair.png',
+  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/racing_open_mouth_wide.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/racing_open_mouth_wide.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/racing_open_welcome_door.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/racing_restaurant_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/racing_barbershop_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/racing_haircut_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/racing_water_spray_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/racing_barber_neck_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/racing_salon_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/racing_medical_clinic_building.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/racing_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/racing_doctor_exam_bed.png',
+  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/racing_doctor_ear_light.png',
 };
 
 /**
