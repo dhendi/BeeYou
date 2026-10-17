@@ -58,7 +58,24 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
     return DEFAULT_ROUTINES;
   });
 
-  const [plansChanged, setPlansChanged] = useState<PlansChangedState>(DEFAULT_PLANS_CHANGED);
+  const [plansChanged, setPlansChanged] = useState<PlansChangedState>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_plans_changed');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return { ...DEFAULT_PLANS_CHANGED, ...parsed };
+        }
+      }
+    } catch {}
+    return DEFAULT_PLANS_CHANGED;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('beeyou_plans_changed', JSON.stringify(plansChanged));
+    } catch {}
+  }, [plansChanged]);
 
   useEffect(() => {
     try {
@@ -335,19 +352,53 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
   };
 
   const activatePlansChanged = (data: Partial<PlansChangedState>) => {
-    const nextState = {
+    const shouldBeActive = data.active !== undefined ? Boolean(data.active) : true;
+    const nextState: PlansChangedState = {
       ...plansChanged,
       ...data,
-      active: true,
+      active: shouldBeActive,
     };
+    try {
+      localStorage.setItem('beeyou_plans_changed', JSON.stringify(nextState));
+    } catch {}
     setPlansChanged(nextState);
-    applyPlansChangedToRoutine(nextState);
-    setShowPlansChangedModal(true);
-    if (soundEffects) playChime('tap');
+    if (shouldBeActive) {
+      applyPlansChangedToRoutine(nextState);
+      setShowPlansChangedModal(true);
+      if (soundEffects) playChime('tap');
+    } else {
+      setShowPlansChangedModal(false);
+    }
+  };
+
+  const syncRemotePlansChanged = (data: Partial<PlansChangedState>) => {
+    setPlansChanged((prev) => {
+      const isNewlyActive = Boolean(data.active) && !prev.active;
+      const nextState: PlansChangedState = {
+        ...prev,
+        ...data,
+        active: Boolean(data.active),
+      };
+      try {
+        localStorage.setItem('beeyou_plans_changed', JSON.stringify(nextState));
+      } catch {}
+      if (isNewlyActive) {
+        applyPlansChangedToRoutine(nextState);
+        setShowPlansChangedModal(true);
+        if (soundEffects) playChime('tap');
+      } else if (data.active === false) {
+        setShowPlansChangedModal(false);
+      }
+      return nextState;
+    });
   };
 
   const dismissPlansChanged = () => {
-    setPlansChanged((prev) => ({ ...prev, active: false }));
+    const nextState: PlansChangedState = { ...plansChanged, active: false };
+    try {
+      localStorage.setItem('beeyou_plans_changed', JSON.stringify(nextState));
+    } catch {}
+    setPlansChanged(nextState);
     setShowPlansChangedModal(false);
   };
 
@@ -370,6 +421,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
     toggleFirstThen,
     applyPlansChangedToRoutine,
     activatePlansChanged,
+    syncRemotePlansChanged,
     dismissPlansChanged,
   };
 }

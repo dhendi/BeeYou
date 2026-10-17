@@ -788,7 +788,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     plansChanged: routinesSchedule.plansChanged,
     onRemoteRoutinesSync: (remoteRoutines) => routinesSchedule.setRoutines(remoteRoutines),
     onRemoteAacSync: (remoteAac) => aacComm.setAacItems(remoteAac),
-    onRemotePlansChangedSync: (plans) => routinesSchedule.activatePlansChanged(plans),
+    onRemotePlansChangedSync: (plans) => routinesSchedule.syncRemotePlansChanged(plans),
     speak: speechEngine.speak,
   });
 

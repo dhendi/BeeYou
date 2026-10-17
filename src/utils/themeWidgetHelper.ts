@@ -72,32 +72,32 @@ export function getThemeWidgetStyles(theme?: AppTheme | null): ThemeWidgetStyles
     };
   }
 
-  // 2. DINOSAUR KINGDOM (Jungle Green / Amber)
+  // 2. DINOSAUR KINGDOM (Earthy Terracotta & Orangy Dirt)
   if (themeId === 'theme-dino' || category === 'dinosaur') {
     return {
-      card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(22,163,74,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
-      scheduleContainer: 'p-4 sm:p-5 rounded-2xl border-2 border-green-300/80 bg-green-50/40 text-green-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3',
-      scheduleHeader: 'text-xs font-black uppercase tracking-wider text-green-900/80',
-      scheduleLink: 'text-xs font-bold text-green-900 hover:text-green-950 flex items-center gap-1 cursor-pointer transition-colors',
-      firstStep: 'w-full p-3 rounded-xl bg-green-100/70 hover:bg-green-100 border-2 border-green-300/90 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
-      thenStep: 'w-full p-3 rounded-xl bg-green-50 hover:bg-green-100/70 border-2 border-green-300/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
-      stepIconBox: 'w-7 h-7 rounded-lg bg-white border border-green-300 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden',
-      stepCheckActive: 'bg-green-400 text-green-950 border-green-500 font-black',
-      stepCheckInactive: 'bg-white text-green-400 border-green-300',
-      mascotBanner: 'p-4 sm:p-5 rounded-[28px] border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/60 text-green-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 transition-all',
-      mascotBadge: 'w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-green-100 text-green-950 border-2 border-green-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none',
-      mascotButton: 'p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-green-100 hover:bg-green-200 text-green-950 transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-green-300 shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-green-500/70 focus-visible:outline-none',
-      headerBar: 'bg-green-50/40 border-2 border-green-300/80 rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3',
-      headerButton: 'p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-green-100/70 hover:bg-green-200 text-green-950 border border-green-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-green-500/70 focus-visible:outline-none',
-      headerText: 'text-base sm:text-lg font-black text-green-950 leading-tight',
-      headerSubtext: 'text-xs text-green-900/80 font-semibold',
-      dashedButton: 'w-full py-3 px-4 rounded-2xl bg-green-50/50 hover:bg-green-100/70 text-green-900 hover:text-green-950 border-2 border-dashed border-green-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs',
-      dashedIcon: 'w-3.5 h-3.5 text-green-900',
-      adventureTag: 'text-[10px] font-bold uppercase tracking-wider text-green-800 bg-green-100 border border-green-200 px-2 py-0.5 rounded-md inline-block mb-1',
-      quickAacTalk: 'py-3 px-3 rounded-[24px] bg-green-200/90 hover:bg-green-300 text-green-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(22,163,74,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-green-400',
-      quickAacCalm: 'py-3 px-3 rounded-[24px] bg-green-100 hover:bg-green-200 text-green-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(22,163,74,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-green-300',
-      quickAacHelp: 'py-3 px-3 rounded-[24px] bg-green-100 hover:bg-green-200 text-green-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(22,163,74,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-green-300',
-      feedbackStrip: 'flex items-center justify-between p-3 rounded-2xl bg-green-50/70 border border-green-300/80 text-xs text-green-900 font-bold transition-all',
+      card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(194,100,51,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
+      scheduleContainer: 'p-4 sm:p-5 rounded-2xl border-2 border-amber-300/80 bg-amber-50/40 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3',
+      scheduleHeader: 'text-xs font-black uppercase tracking-wider text-amber-900/80',
+      scheduleLink: 'text-xs font-bold text-amber-900 hover:text-amber-950 flex items-center gap-1 cursor-pointer transition-colors',
+      firstStep: 'w-full p-3 rounded-xl bg-amber-100/70 hover:bg-amber-100 border-2 border-amber-300/90 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
+      thenStep: 'w-full p-3 rounded-xl bg-amber-50 hover:bg-amber-100/70 border-2 border-amber-300/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
+      stepIconBox: 'w-7 h-7 rounded-lg bg-white border border-amber-300 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden',
+      stepCheckActive: 'bg-amber-500 text-amber-950 border-amber-600 font-black',
+      stepCheckInactive: 'bg-white text-amber-400 border-amber-300',
+      mascotBanner: 'p-4 sm:p-5 rounded-[28px] border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/60 text-amber-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 transition-all',
+      mascotBadge: 'w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-amber-100 text-amber-950 border-2 border-amber-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none',
+      mascotButton: 'p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-amber-300 shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none',
+      headerBar: 'bg-amber-50/40 border-2 border-amber-300/80 rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3',
+      headerButton: 'p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-amber-100/70 hover:bg-amber-200 text-amber-950 border border-amber-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none',
+      headerText: 'text-base sm:text-lg font-black text-amber-950 leading-tight',
+      headerSubtext: 'text-xs text-amber-900/80 font-semibold',
+      dashedButton: 'w-full py-3 px-4 rounded-2xl bg-amber-50/50 hover:bg-amber-100/70 text-amber-900 hover:text-amber-950 border-2 border-dashed border-amber-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs',
+      dashedIcon: 'w-3.5 h-3.5 text-amber-900',
+      adventureTag: 'text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-md inline-block mb-1',
+      quickAacTalk: 'py-3 px-3 rounded-[24px] bg-amber-200/90 hover:bg-amber-300 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(180,83,9,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-400',
+      quickAacCalm: 'py-3 px-3 rounded-[24px] bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(180,83,9,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-300',
+      quickAacHelp: 'py-3 px-3 rounded-[24px] bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(180,83,9,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-amber-300',
+      feedbackStrip: 'flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-300/80 text-xs text-amber-900 font-bold transition-all',
     };
   }
 
@@ -130,32 +130,32 @@ export function getThemeWidgetStyles(theme?: AppTheme | null): ThemeWidgetStyles
     };
   }
 
-  // 4. STEAM TRAINS (Sky / Steel Blue)
+  // 4. STEAM TRAINS (Classic Navy Blue / Railroad Conductor)
   if (themeId === 'theme-trains' || category === 'train') {
     return {
-      card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 hover:bg-sky-50/80 text-sky-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(2,132,199,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
-      scheduleContainer: 'p-4 sm:p-5 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 text-sky-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3',
-      scheduleHeader: 'text-xs font-black uppercase tracking-wider text-sky-900/80',
-      scheduleLink: 'text-xs font-bold text-sky-900 hover:text-sky-950 flex items-center gap-1 cursor-pointer transition-colors',
-      firstStep: 'w-full p-3 rounded-xl bg-sky-100/70 hover:bg-sky-100 border-2 border-sky-300/90 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
-      thenStep: 'w-full p-3 rounded-xl bg-sky-50 hover:bg-sky-100/70 border-2 border-sky-300/70 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
-      stepIconBox: 'w-7 h-7 rounded-lg bg-white border border-sky-300 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden',
-      stepCheckActive: 'bg-sky-400 text-sky-950 border-sky-500 font-black',
-      stepCheckInactive: 'bg-white text-sky-400 border-sky-300',
-      mascotBanner: 'p-4 sm:p-5 rounded-[28px] border-2 border-sky-300/80 bg-sky-50/40 hover:bg-sky-50/60 text-sky-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 transition-all',
-      mascotBadge: 'w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-sky-100 text-sky-950 border-2 border-sky-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none',
-      mascotButton: 'p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-950 transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-sky-300 shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-sky-500/70 focus-visible:outline-none',
-      headerBar: 'bg-sky-50/40 border-2 border-sky-300/80 rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3',
-      headerButton: 'p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-sky-100/70 hover:bg-sky-200 text-sky-950 border border-sky-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-sky-500/70 focus-visible:outline-none',
-      headerText: 'text-base sm:text-lg font-black text-sky-950 leading-tight',
-      headerSubtext: 'text-xs text-sky-900/80 font-semibold',
-      dashedButton: 'w-full py-3 px-4 rounded-2xl bg-sky-50/50 hover:bg-sky-100/70 text-sky-900 hover:text-sky-950 border-2 border-dashed border-sky-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs',
-      dashedIcon: 'w-3.5 h-3.5 text-sky-900',
-      adventureTag: 'text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-md inline-block mb-1',
-      quickAacTalk: 'py-3 px-3 rounded-[24px] bg-sky-200/90 hover:bg-sky-300 text-sky-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(2,132,199,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-sky-400',
-      quickAacCalm: 'py-3 px-3 rounded-[24px] bg-sky-100 hover:bg-sky-200 text-sky-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(2,132,199,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-sky-300',
-      quickAacHelp: 'py-3 px-3 rounded-[24px] bg-sky-100 hover:bg-sky-200 text-sky-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(2,132,199,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-sky-300',
-      feedbackStrip: 'flex items-center justify-between p-3 rounded-2xl bg-sky-50/70 border border-sky-300/80 text-xs text-sky-900 font-bold transition-all',
+      card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-blue-200/90 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(30,58,138,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
+      scheduleContainer: 'p-4 sm:p-5 rounded-2xl border-2 border-blue-200/90 bg-blue-50/40 text-blue-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3',
+      scheduleHeader: 'text-xs font-black uppercase tracking-wider text-blue-950/80',
+      scheduleLink: 'text-xs font-bold text-blue-900 hover:text-blue-950 flex items-center gap-1 cursor-pointer transition-colors',
+      firstStep: 'w-full p-3 rounded-xl bg-blue-100/70 hover:bg-blue-100 border-2 border-blue-300/90 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
+      thenStep: 'w-full p-3 rounded-xl bg-slate-50 hover:bg-blue-50/80 border-2 border-blue-200/80 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer',
+      stepIconBox: 'w-7 h-7 rounded-lg bg-white border border-blue-200 p-0.5 shadow-2xs flex items-center justify-center overflow-hidden',
+      stepCheckActive: 'bg-blue-900 text-white border-blue-950 font-black',
+      stepCheckInactive: 'bg-white text-blue-400 border-blue-200',
+      mascotBanner: 'p-4 sm:p-5 rounded-[28px] border-2 border-blue-200/90 bg-blue-50/40 hover:bg-blue-50/60 text-blue-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3 transition-all',
+      mascotBadge: 'w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl bg-blue-100 text-blue-950 border-2 border-blue-300 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] shrink-0 text-2xl select-none',
+      mascotButton: 'p-2.5 min-w-[48px] min-h-[48px] rounded-2xl bg-blue-100 hover:bg-blue-200 text-blue-950 transition-all cursor-pointer shadow-[0_2px_4px_rgba(0,0,0,0.03)] border-2 border-blue-300 shrink-0 active:scale-95 flex items-center justify-center focus-visible:ring-4 focus-visible:ring-blue-500/70 focus-visible:outline-none',
+      headerBar: 'bg-blue-50/40 border-2 border-blue-200/90 rounded-2xl p-3 sm:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3',
+      headerButton: 'p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-blue-100/70 hover:bg-blue-200 text-blue-950 border border-blue-300/80 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-blue-500/70 focus-visible:outline-none',
+      headerText: 'text-base sm:text-lg font-black text-blue-950 leading-tight',
+      headerSubtext: 'text-xs text-blue-900/80 font-semibold',
+      dashedButton: 'w-full py-3 px-4 rounded-2xl bg-blue-50/50 hover:bg-blue-100/70 text-blue-900 hover:text-blue-950 border-2 border-dashed border-blue-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-2xs',
+      dashedIcon: 'w-3.5 h-3.5 text-blue-900',
+      adventureTag: 'text-[10px] font-bold uppercase tracking-wider text-blue-900 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-md inline-block mb-1',
+      quickAacTalk: 'py-3 px-3 rounded-[24px] bg-blue-200/90 hover:bg-blue-300 text-blue-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(30,58,138,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-blue-400',
+      quickAacCalm: 'py-3 px-3 rounded-[24px] bg-blue-100 hover:bg-blue-200 text-blue-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(30,58,138,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-blue-300',
+      quickAacHelp: 'py-3 px-3 rounded-[24px] bg-blue-100 hover:bg-blue-200 text-blue-950 font-black text-sm flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(30,58,138,0.25),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)] active:scale-95 cursor-pointer transition-all border-2 border-blue-300',
+      feedbackStrip: 'flex items-center justify-between p-3 rounded-2xl bg-blue-50/70 border border-blue-200/90 text-xs text-blue-900 font-bold transition-all',
     };
   }
 
@@ -346,23 +346,63 @@ export function getThemeCustomizerHeaderStyles(theme?: AppTheme | null): ThemeCu
     };
   }
 
-  // 2. DINOSAUR KINGDOM (Jungle Green / Amber)
+  // 2. DINOSAUR KINGDOM (Warm Terracotta / Orangy Dirt)
   if (themeId === 'theme-dino' || category === 'dinosaur') {
     return {
-      modalBorder: 'border-green-400',
-      topBarGradient: 'bg-gradient-to-r from-green-600 via-emerald-600 to-lime-600 text-white',
-      topBarBorder: 'border-green-400',
+      modalBorder: 'border-amber-400',
+      topBarGradient: 'bg-gradient-to-r from-amber-700 via-orange-700 to-amber-600 text-white',
+      topBarBorder: 'border-amber-500',
       topBarText: 'text-white',
-      topBarSubtext: 'text-green-100',
-      bannerGradient: 'bg-gradient-to-r from-green-600 via-emerald-600 to-lime-600 text-white',
-      bannerBorder: 'border-green-400',
+      topBarSubtext: 'text-amber-100',
+      bannerGradient: 'bg-gradient-to-r from-amber-700 via-orange-700 to-amber-600 text-white',
+      bannerBorder: 'border-amber-500',
       bannerText: 'text-white',
-      bannerSubtext: 'text-green-100',
-      tabContainerBg: 'bg-green-950/25',
-      activeTabStyle: 'bg-white text-green-950 shadow-sm',
-      inactiveTabStyle: 'text-green-100 hover:bg-white/15',
-      equippedCardBorder: 'border-green-300',
-      equippedBadgeBg: 'bg-green-100/70 border-green-300',
+      bannerSubtext: 'text-amber-100',
+      tabContainerBg: 'bg-amber-950/25',
+      activeTabStyle: 'bg-white text-amber-950 shadow-sm',
+      inactiveTabStyle: 'text-amber-100 hover:bg-white/15',
+      equippedCardBorder: 'border-amber-400',
+      equippedBadgeBg: 'bg-amber-100/70 border-amber-300',
+    };
+  }
+
+  // 3. FROG POND (Fresh Lime / Lily Pad Green)
+  if (themeId === 'theme-frog' || category === 'frog') {
+    return {
+      modalBorder: 'border-lime-400',
+      topBarGradient: 'bg-gradient-to-r from-lime-600 via-emerald-600 to-lime-500 text-white',
+      topBarBorder: 'border-lime-500',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-lime-100',
+      bannerGradient: 'bg-gradient-to-r from-lime-600 via-emerald-600 to-lime-500 text-white',
+      bannerBorder: 'border-lime-500',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-lime-100',
+      tabContainerBg: 'bg-lime-950/25',
+      activeTabStyle: 'bg-white text-lime-950 shadow-sm',
+      inactiveTabStyle: 'text-lime-100 hover:bg-white/15',
+      equippedCardBorder: 'border-lime-300',
+      equippedBadgeBg: 'bg-lime-100/70 border-lime-300',
+    };
+  }
+
+  // 4. STEAM EXPRESS (Classic Navy Blue / Railroad Conductor)
+  if (themeId === 'theme-trains' || category === 'train') {
+    return {
+      modalBorder: 'border-blue-400',
+      topBarGradient: 'bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white',
+      topBarBorder: 'border-blue-800',
+      topBarText: 'text-white',
+      topBarSubtext: 'text-blue-200',
+      bannerGradient: 'bg-gradient-to-r from-blue-900 via-slate-900 to-blue-950 text-white',
+      bannerBorder: 'border-blue-700',
+      bannerText: 'text-white',
+      bannerSubtext: 'text-blue-200',
+      tabContainerBg: 'bg-blue-950/40',
+      activeTabStyle: 'bg-white text-blue-950 shadow-sm',
+      inactiveTabStyle: 'text-blue-200 hover:bg-white/15',
+      equippedCardBorder: 'border-blue-300',
+      equippedBadgeBg: 'bg-blue-100/70 border-blue-300',
     };
   }
 

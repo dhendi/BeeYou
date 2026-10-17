@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { Eye, Save, Trash2, Plus, Star, MessageSquare } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { IconLibraryModal } from '../common/IconLibraryModal';
+import { pushFamilyStateUpdate } from '../../services/familySync';
 
 interface CaregiverPlansChangedTabProps {
   onShowNotification: (msg: string) => void;
@@ -41,7 +42,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [showIconLibrary, setShowIconLibrary] = useState(false);
   const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);
 
-  const handleSavePlansChanged = () => {
+  useEffect(() => {
+    setPcActive(Boolean(plansChanged.active));
+  }, [plansChanged.active]);
+
+  const applyStateUpdate = (newActiveState: boolean) => {
     let targetRoutineId: string | undefined = undefined;
     let targetStepId: string | undefined = undefined;
 
@@ -55,8 +60,8 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       }
     }
 
-    activatePlansChanged({
-      active: pcActive,
+    const payload = {
+      active: newActiveState,
       originalPlanTitle: pcOriginal,
       reason: pcReason,
       newPlanTitle: pcNewTitle,
@@ -65,8 +70,25 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       relevantPhrases: pcPhrases,
       targetRoutineId,
       targetStepId,
-    });
-    onShowNotification('Plans Changed configuration updated successfully!');
+    };
+
+    activatePlansChanged(payload);
+    pushFamilyStateUpdate({ plansChanged: payload });
+  };
+
+  const handleTogglePlansChanged = (newActive: boolean) => {
+    setPcActive(newActive);
+    applyStateUpdate(newActive);
+    onShowNotification(
+      newActive
+        ? t('Plans Changed alert is now ACTIVE on the child screen!')
+        : t('Plans Changed alert deactivated.')
+    );
+  };
+
+  const handleSavePlansChanged = () => {
+    applyStateUpdate(pcActive);
+    onShowNotification(t('Plans Changed configuration saved & synced!'));
   };
 
   const handleApplyPreset = (preset: 'dentist' | 'rain' | 'school') => {
@@ -184,7 +206,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
           </p>
         </div>
         <button
-          onClick={() => setPcActive(!pcActive)}
+          onClick={() => handleTogglePlansChanged(!pcActive)}
           className={`w-14 h-8 rounded-full p-1 transition-colors cursor-pointer ${
             pcActive ? 'bg-amber-500' : 'bg-slate-300'
           }`}

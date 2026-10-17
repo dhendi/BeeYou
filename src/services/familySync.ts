@@ -7,6 +7,13 @@
  */
 
 import { EmotionType, UserAgeGroup } from '../types';
+import { db } from './firebaseSync';
+import { ref, get, set, update, onValue, push, Unsubscribe } from 'firebase/database';
+
+function cleanFirebaseObject<T>(obj: T): T {
+  if (obj === null || obj === undefined) return null as any;
+  return JSON.parse(JSON.stringify(obj));
+}
 
 export interface RemoteChildProfile {
   name: string;
@@ -188,10 +195,28 @@ export function onFamilyConnectionStatus(fn: ConnectionListener): () => void {
 // -------------------------------------------------------------
 
 /**
- * Fetch full shared family state from cloud
+ * Fetch full shared family state from cloud (Firebase Realtime Database primary)
  */
 export async function fetchFamilyState(familyCode?: string): Promise<SharedFamilyState | null> {
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+
+  // 1. Primary: Fetch from Firebase Realtime Database
+  try {
+    const familyRef = ref(db, `beeyou/families/${code}`);
+    const snap = await get(familyRef);
+    if (snap.exists()) {
+      const data = snap.val();
+      if (data && typeof data === 'object') {
+        lastKnownState = data as SharedFamilyState;
+        notifyStateChange(lastKnownState);
+        return lastKnownState;
+      }
+    }
+  } catch (fbErr) {
+    console.warn('Firebase fetchFamilyState error, trying fallback:', fbErr);
+  }
+
+  // 2. Secondary Fallback: Local Express server (if running on localhost)
   try {
     const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`);
     if (res.ok) {
@@ -203,8 +228,9 @@ export async function fetchFamilyState(familyCode?: string): Promise<SharedFamil
       }
     }
   } catch (err) {
-    console.warn('Could not fetch family state:', err);
+    // Expected on static production hosts like Vercel
   }
+
   return lastKnownState;
 }
 
@@ -216,11 +242,39 @@ export async function pushFamilyStateUpdate(
   familyCode?: string
 ): Promise<{ success: boolean; state?: SharedFamilyState }> {
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  const cleanPartial = cleanFirebaseObject(partial);
+
+  let success = false;
+  const updatedState: SharedFamilyState = lastKnownState 
+    ? { ...lastKnownState, ...cleanPartial, lastUpdated: Date.now() }
+    : { ...cleanPartial, familyCode: code, lastUpdated: Date.now() } as SharedFamilyState;
+
+  // 1. Primary: Push directly to Firebase Realtime Database
+  try {
+    const familyRef = ref(db, `beeyou/families/${code}`);
+    await update(familyRef, cleanPartial);
+    success = true;
+    lastKnownState = updatedState;
+    notifyStateChange(updatedState);
+
+    // Broadcast on local channel for instant multi-tab response
+    if (localBroadcastChannel) {
+      localBroadcastChannel.postMessage({
+        type: 'STATE_UPDATE',
+        senderTabId: getTabId(),
+        state: updatedState,
+      });
+    }
+  } catch (fbErr) {
+    console.warn('Firebase pushFamilyStateUpdate error:', fbErr);
+  }
+
+  // 2. Secondary fallback: Local Express server
   try {
     const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(partial),
+      body: JSON.stringify(cleanPartial),
     });
     if (res.ok) {
       const data = await res.json();
@@ -231,9 +285,10 @@ export async function pushFamilyStateUpdate(
       }
     }
   } catch (err) {
-    console.error('pushFamilyStateUpdate error:', err);
+    // Expected on static production hosts like Vercel
   }
-  return { success: false };
+
+  return { success, state: updatedState };
 }
 
 /**
@@ -250,6 +305,39 @@ export async function sendEmergencyAlert(params: {
   familyCode?: string;
 }): Promise<{ success: boolean; alert?: RemoteFamilyAlert; deliveryStatus: 'delivered' | 'failed' }> {
   const code = (params.familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  const alertId = params.alertId || `alt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  const alert: RemoteFamilyAlert = {
+    id: alertId,
+    familyCode: code,
+    childName: params.childName,
+    emotion: params.emotion,
+    label: params.label,
+    emoji: params.emoji,
+    location: params.location,
+    note: params.note,
+    timestamp: new Date().toISOString(),
+    status: 'active',
+  };
+
+  // 1. Primary: Write to Firebase Realtime Database
+  try {
+    const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
+    await set(alertRef, cleanFirebaseObject(alert));
+
+    alertListeners.forEach((fn) => fn(alert));
+    if (localBroadcastChannel) {
+      localBroadcastChannel.postMessage({
+        type: 'CAREGIVER_ALERT',
+        senderTabId: getTabId(),
+        alert,
+      });
+    }
+    return { success: true, alert, deliveryStatus: 'delivered' };
+  } catch (fbErr) {
+    console.warn('Firebase sendEmergencyAlert error:', fbErr);
+  }
+
+  // 2. Secondary fallback: Local Express server
   try {
     const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}`, {
       method: 'POST',
@@ -283,6 +371,32 @@ export async function ackEmergencyAlert(params: {
   familyCode?: string;
 }): Promise<boolean> {
   const code = (params.familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  const ackData = {
+    status: 'acknowledged',
+    acknowledgedBy: params.acknowledgedBy,
+    responseMessage: params.responseMessage || "I'm on my way ❤️",
+    responseId: params.responseId || null,
+    acknowledgedAt: new Date().toISOString(),
+  };
+
+  // 1. Primary: Write to Firebase Realtime Database
+  try {
+    const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
+    await update(alertRef, cleanFirebaseObject(ackData));
+    alertAckListeners.forEach((fn) =>
+      fn({
+        alertId: params.alertId || '',
+        responseMessage: params.responseMessage,
+        responseId: params.responseId,
+        by: params.acknowledgedBy,
+      })
+    );
+    return true;
+  } catch (fbErr) {
+    console.warn('Firebase ackEmergencyAlert error:', fbErr);
+  }
+
+  // 2. Secondary fallback: Local Express server
   try {
     const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}/ack`, {
       method: 'POST',
@@ -308,6 +422,25 @@ export async function ackEmergencyAlert(params: {
  */
 export async function resolveEmergencyAlert(alertId?: string, familyCode?: string): Promise<boolean> {
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+
+  // 1. Primary: Clear in Firebase Realtime Database
+  try {
+    const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
+    await set(alertRef, null);
+    alertResolveListeners.forEach((fn) => fn(alertId));
+    if (localBroadcastChannel) {
+      localBroadcastChannel.postMessage({
+        type: 'ALERT_RESOLVED',
+        senderTabId: getTabId(),
+        alertId,
+      });
+    }
+    return true;
+  } catch (fbErr) {
+    console.warn('Firebase resolveEmergencyAlert error:', fbErr);
+  }
+
+  // 2. Secondary fallback: Local Express server
   try {
     const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}/resolve`, {
       method: 'POST',
@@ -339,6 +472,28 @@ export async function sendNudgeMessage(params: {
   familyCode?: string;
 }): Promise<{ success: boolean; message?: RemoteFamilyMessage }> {
   const code = (params.familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  const msgObj: RemoteFamilyMessage = {
+    id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    text: params.text,
+    emoji: params.emoji || '💬',
+    senderName: params.senderName || 'Caregiver',
+    timestamp: new Date().toISOString(),
+    read: false,
+    responseId: params.responseId,
+  };
+
+  // 1. Primary: Write to Firebase Realtime Database
+  try {
+    const msgsRef = ref(db, `beeyou/families/${code}/messages`);
+    const newMsgRef = push(msgsRef);
+    await set(newMsgRef, cleanFirebaseObject(msgObj));
+    messageListeners.forEach((fn) => fn(msgObj));
+    return { success: true, message: msgObj };
+  } catch (fbErr) {
+    console.warn('Firebase sendNudgeMessage error:', fbErr);
+  }
+
+  // 2. Secondary fallback: Local Express server
   try {
     const res = await fetch(`/api/family/message/${encodeURIComponent(code)}`, {
       method: 'POST',
@@ -461,7 +616,60 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
   // 1. Initial State Fetch
   fetchFamilyState(code);
 
-  // 2. Establish Server-Sent Events (SSE) Stream
+  // 2. Real-Time Firebase Listener (Direct WebSocket Push across all devices)
+  let fbFamilyUnsub: Unsubscribe | null = null;
+  let fbAlertUnsub: Unsubscribe | null = null;
+  let fbMsgsUnsub: Unsubscribe | null = null;
+
+  try {
+    const familyRef = ref(db, `beeyou/families/${code}`);
+    fbFamilyUnsub = onValue(familyRef, (snapshot) => {
+      const val = snapshot.val();
+      if (val && typeof val === 'object') {
+        lastServerPingTime = Date.now();
+        updateLiveConnectionStatus(true, 'sse');
+        lastKnownState = val as SharedFamilyState;
+        notifyStateChange(lastKnownState);
+      }
+    });
+
+    const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
+    fbAlertUnsub = onValue(alertRef, (snapshot) => {
+      const alert = snapshot.val();
+      if (!alert) {
+        alertResolveListeners.forEach((fn) => fn());
+      } else if (alert.status === 'acknowledged') {
+        alertAckListeners.forEach((fn) =>
+          fn({
+            alertId: alert.id,
+            responseMessage: alert.responseMessage,
+            responseId: alert.responseId,
+            by: alert.acknowledgedBy || 'Caregiver',
+          })
+        );
+      } else if (alert.status === 'active') {
+        alertListeners.forEach((fn) => fn(alert));
+      }
+    });
+
+    const msgsRef = ref(db, `beeyou/families/${code}/messages`);
+    fbMsgsUnsub = onValue(msgsRef, (snapshot) => {
+      const msgs = snapshot.val();
+      if (msgs && typeof msgs === 'object') {
+        const msgList = Object.values(msgs) as RemoteFamilyMessage[];
+        if (msgList.length > 0) {
+          const latest = msgList[msgList.length - 1];
+          if (latest) {
+            messageListeners.forEach((fn) => fn(latest));
+          }
+        }
+      }
+    });
+  } catch (fbErr) {
+    console.warn('Firebase live listener setup error, falling back to SSE:', fbErr);
+  }
+
+  // 3. Establish Server-Sent Events (SSE) Stream (if local server is running)
   if ('EventSource' in window) {
     try {
       const sseUrl = `/api/caregiver/events/${encodeURIComponent(code)}`;
@@ -476,15 +684,14 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
       };
 
       es.onerror = () => {
-        // SSE reconnects automatically; polling will cover any gap
-        updateLiveConnectionStatus(false, 'disconnected');
+        // SSE reconnects automatically
       };
     } catch (err) {
-      console.warn('Could not connect to SSE, relying on polling:', err);
+      // Expected on static hosts
     }
   }
 
-  // 3. Resilient Polling Fallback (runs every 2s)
+  // 4. Polling Fallback (runs every 5s on localhost)
   let lastPollTime = Date.now() - 30000;
   const poll = async () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
@@ -511,10 +718,12 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
     } catch {}
   };
 
-  poll();
-  activePollInterval = setInterval(poll, 2000);
+  activePollInterval = setInterval(poll, 5000);
 
   return () => {
+    if (fbFamilyUnsub) fbFamilyUnsub();
+    if (fbAlertUnsub) fbAlertUnsub();
+    if (fbMsgsUnsub) fbMsgsUnsub();
     if (activeEventSource) {
       try { activeEventSource.close(); } catch {}
       activeEventSource = null;

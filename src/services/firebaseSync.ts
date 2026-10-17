@@ -28,7 +28,7 @@ export const firebaseConfig = {
 };
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const db = getDatabase(app);
+export const db = getDatabase(app);
 
 // Event Callbacks
 type AlertCallback = (alert: CaregiverAlert) => void;
