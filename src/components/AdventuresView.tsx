@@ -7,12 +7,7 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   Volume2, 
-  Star, 
   Ear, 
-  Eye, 
-  Users, 
-  Hand, 
-  Clock, 
   Wind,
   MessageSquare,
   ShieldCheck,
@@ -348,8 +343,7 @@ export const AdventuresView: React.FC = () => {
         {adventureSubTab === 'sensory' && (
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                <Star className={`w-5 h-5 ${activeTheme?.palette?.textAccent || 'text-amber-600'}`} />
+              <h3 className="text-base font-black text-slate-800">
                 <span>{t('Sensory Guide for')} {t(selectedAdventure.title)}</span>
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -359,62 +353,47 @@ export const AdventuresView: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {selectedAdventure.sensoryPreview.sound && (
-                <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3.5 flex items-start gap-3">
-                  <Ear className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs text-sky-950 block">{t('Sound')}</span>
-                    <p className="text-xs text-sky-900 mt-0.5 font-medium leading-relaxed">
-                      {t(selectedAdventure.sensoryPreview.sound)}
-                    </p>
-                  </div>
+                <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3.5">
+                  <span className="font-bold text-xs text-sky-950 block">{t('Sound')}</span>
+                  <p className="text-xs text-sky-900 mt-0.5 font-medium leading-relaxed">
+                    {t(selectedAdventure.sensoryPreview.sound)}
+                  </p>
                 </div>
               )}
 
               {selectedAdventure.sensoryPreview.light && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-start gap-3">
-                  <Eye className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs text-amber-950 block">{t('Lighting')}</span>
-                    <p className="text-xs text-amber-900 mt-0.5 font-medium leading-relaxed">
-                      {t(selectedAdventure.sensoryPreview.light)}
-                    </p>
-                  </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
+                  <span className="font-bold text-xs text-amber-950 block">{t('Lighting')}</span>
+                  <p className="text-xs text-amber-900 mt-0.5 font-medium leading-relaxed">
+                    {t(selectedAdventure.sensoryPreview.light)}
+                  </p>
                 </div>
               )}
 
               {selectedAdventure.sensoryPreview.touch && (
-                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-start gap-3">
-                  <Hand className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs text-rose-950 block">{t('Touch & Clothing')}</span>
-                    <p className="text-xs text-rose-900 mt-0.5 font-medium leading-relaxed">
-                      {t(selectedAdventure.sensoryPreview.touch)}
-                    </p>
-                  </div>
+                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5">
+                  <span className="font-bold text-xs text-rose-950 block">{t('Touch & Clothing')}</span>
+                  <p className="text-xs text-rose-900 mt-0.5 font-medium leading-relaxed">
+                    {t(selectedAdventure.sensoryPreview.touch)}
+                  </p>
                 </div>
               )}
 
               {selectedAdventure.sensoryPreview.waiting && (
-                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3.5 flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs text-purple-950 block">{t('Waiting Time')}</span>
-                    <p className="text-xs text-purple-900 mt-0.5 font-medium leading-relaxed">
-                      {t(selectedAdventure.sensoryPreview.waiting)}
-                    </p>
-                  </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3.5">
+                  <span className="font-bold text-xs text-purple-950 block">{t('Waiting Time')}</span>
+                  <p className="text-xs text-purple-900 mt-0.5 font-medium leading-relaxed">
+                    {t(selectedAdventure.sensoryPreview.waiting)}
+                  </p>
                 </div>
               )}
 
               {selectedAdventure.sensoryPreview.people && (
-                <div className="bg-teal-50 border border-teal-200 rounded-2xl p-3.5 flex items-start gap-3">
-                  <Users className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-xs text-teal-950 block">{t('People & Faces')}</span>
-                    <p className="text-xs text-teal-900 mt-0.5 font-medium leading-relaxed">
-                      {t(selectedAdventure.sensoryPreview.people)}
-                    </p>
-                  </div>
+                <div className="bg-teal-50 border border-teal-200 rounded-2xl p-3.5">
+                  <span className="font-bold text-xs text-teal-950 block">{t('People & Faces')}</span>
+                  <p className="text-xs text-teal-900 mt-0.5 font-medium leading-relaxed">
+                    {t(selectedAdventure.sensoryPreview.people)}
+                  </p>
                 </div>
               )}
             </div>
@@ -442,10 +421,9 @@ export const AdventuresView: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => speak(t(phrase))}
-                    className={`flex items-center justify-between p-3 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left`}
+                    className={`flex items-center p-3 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 border-2 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left`}
                   >
-                    <span>💬 {t(phrase)}</span>
-                    <Volume2 className={`w-4 h-4 ${activeTheme?.palette?.textAccent || 'text-amber-600'} shrink-0`} />
+                    <span>{t(phrase)}</span>
                   </button>
                 ))}
               </div>
@@ -460,10 +438,9 @@ export const AdventuresView: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => speak(t(ask))}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 text-sky-950 font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left"
+                    className="flex items-center p-3 rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 text-sky-950 font-black text-xs sm:text-sm transition-all active:scale-95 shadow-xs cursor-pointer text-left"
                   >
-                    <span>🙋 {t(ask)}</span>
-                    <Volume2 className="w-4 h-4 text-sky-600 shrink-0" />
+                    <span>{t(ask)}</span>
                   </button>
                 ))}
               </div>
