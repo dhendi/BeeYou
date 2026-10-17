@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { preloadTurtleThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
+import { preloadTurtleThemeStickers, preloadFairytaleThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
 
 // Immediately initiate background pre-caching of all sticker images
 if (typeof window !== 'undefined') {
@@ -23,6 +23,7 @@ function checkActiveThemeCategory(): string {
       if (cat === 'train' || id === 'theme-trains') return 'train';
       if (cat === 'space' || id === 'theme-space') return 'space';
       if (cat === 'ocean' || id === 'theme-ocean') return 'ocean';
+      if (cat === 'fantasy' || id === 'theme-fantasy' || cat === 'magic') return 'fantasy';
     }
     if (typeof localStorage !== 'undefined') {
       const savedId = localStorage.getItem('beeyou_active_theme_id');
@@ -32,6 +33,7 @@ function checkActiveThemeCategory(): string {
       if (savedId === 'theme-trains') return 'train';
       if (savedId === 'theme-space') return 'space';
       if (savedId === 'theme-ocean') return 'ocean';
+      if (savedId === 'theme-fantasy') return 'fantasy';
     }
   } catch (e) {}
   return 'default';
@@ -46,6 +48,8 @@ function useActiveThemeCategory(): string {
       setTheme(active);
       if (active === 'turtle') {
         preloadTurtleThemeStickers();
+      } else if (active === 'fantasy') {
+        preloadFairytaleThemeStickers();
       }
     };
     sync();
@@ -80,6 +84,10 @@ export function useIsOceanTheme(): boolean {
   return useActiveThemeCategory() === 'ocean';
 }
 
+export function useIsFairytaleTheme(): boolean {
+  return useActiveThemeCategory() === 'fantasy';
+}
+
 const renderStickerPng = (src: string, alt: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
@@ -96,6 +104,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = SPACE_STICKER_SWAPS[src];
     } else if (theme === 'ocean' && OCEAN_STICKER_SWAPS[src]) {
       currentSrc = OCEAN_STICKER_SWAPS[src];
+    } else if (theme === 'fantasy' && FAIRYTALE_STICKER_SWAPS[src]) {
+      currentSrc = FAIRYTALE_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -125,6 +135,10 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
       currentSrc = trainSrc || TRAIN_STICKER_SWAPS[defaultSrc] || defaultSrc;
     } else if (theme === 'space') {
       currentSrc = spaceSrc || SPACE_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'ocean') {
+      currentSrc = OCEAN_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'fantasy') {
+      currentSrc = FAIRYTALE_STICKER_SWAPS[defaultSrc] || defaultSrc;
     }
     return (
       <img
@@ -2083,6 +2097,58 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/birthday_gift_box.png': '/assets/stickers/ocean_birthday_gift_box.png',
   '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
   '/assets/stickers/birthday_card.png': '/assets/stickers/ocean_birthday_gift_box.png',
+};
+
+export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1 Core Routine Swaps
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
+  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
+
+  '/assets/stickers/toothbrush.png': '/assets/stickers/fairytale_magic_toothbrush.png',
+  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/fairytale_magic_toothbrush.png',
+
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/fairytale_royal_cape.png',
+  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/fairytale_royal_cape.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/fairytale_royal_cape.png',
+
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/fairytale_cloudberry_pancakes.png',
+  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/fairytale_cloudberry_pancakes.png',
+
+  '/assets/stickers/school_bus.png': '/assets/stickers/fairytale_pumpkin_carriage.png',
+
+  '/assets/stickers/backpack_school.png': '/assets/stickers/fairytale_unicorn_satchel.png',
+  '/assets/stickers/backpack.png': '/assets/stickers/fairytale_unicorn_satchel.png',
+
+  '/assets/stickers/school_building.png': '/assets/stickers/fairytale_castle_academy.png',
+
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/fairytale_crown_bento.png',
+  '/assets/stickers/lunch_box.png': '/assets/stickers/fairytale_crown_bento.png',
+
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
+
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/fairytale_winged_shoes.png',
+
+  '/assets/stickers/shower_wash.png': '/assets/stickers/fairytale_clawfoot_bath.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/fairytale_clawfoot_bath.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/fairytale_clawfoot_bath.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/fairytale_clawfoot_bath.png',
+
+  '/assets/stickers/apple_snack.png': '/assets/stickers/fairytale_golden_apple.png',
+
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/fairytale_royal_feast_stew.png',
+  '/assets/stickers/cooking_pot.png': '/assets/stickers/fairytale_royal_feast_stew.png',
+
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/fairytale_canopy_bed.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/fairytale_canopy_bed.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/fairytale_canopy_bed.png',
+
+  '/assets/stickers/fairytale_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
+  '/assets/stickers/turtle_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
 };
 
 /**

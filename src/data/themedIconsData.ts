@@ -2440,6 +2440,129 @@ export const OCEAN_SPLASH_ICONS: ThemedIconItem[] = [
   },
 ];
 
+export const FAIRYTALE_MAGIC_ICONS: ThemedIconItem[] = [
+  {
+    id: 'fairytale_alarm_clock',
+    value: '/assets/stickers/fairytale_tower_alarm_clock.png',
+    label: 'Fairytale Tower Clock',
+    shortLabel: 'Tower Clock',
+    themeCategory: 'magic',
+    keywords: ['alarm', 'clock', 'morning', 'wake', 'time', 'fairytale', 'tower'],
+  },
+  {
+    id: 'fairytale_toothbrush',
+    value: '/assets/stickers/fairytale_magic_toothbrush.png',
+    label: 'Magic Star Toothbrush',
+    shortLabel: 'Star Brush',
+    themeCategory: 'magic',
+    keywords: ['brush', 'teeth', 'toothbrush', 'magic', 'clean', 'hygiene', 'star'],
+  },
+  {
+    id: 'fairytale_clothes_dressed',
+    value: '/assets/stickers/fairytale_royal_cape.png',
+    label: 'Royal Fairytale Cape & Crown',
+    shortLabel: 'Royal Cape',
+    themeCategory: 'magic',
+    keywords: ['clothes', 'dressed', 'cape', 'crown', 'royal', 'wear', 'outfit', 'fairytale'],
+  },
+  {
+    id: 'fairytale_pancakes_breakfast',
+    value: '/assets/stickers/fairytale_cloudberry_pancakes.png',
+    label: 'Enchanted Cloudberry Pancakes',
+    shortLabel: 'Cloudberry Pancakes',
+    themeCategory: 'magic',
+    keywords: ['breakfast', 'pancakes', 'food', 'cloudberry', 'eat', 'morning', 'magic'],
+  },
+  {
+    id: 'fairytale_school_bus',
+    value: '/assets/stickers/fairytale_pumpkin_carriage.png',
+    label: 'Royal Pumpkin Carriage Shuttle',
+    shortLabel: 'Pumpkin Carriage',
+    themeCategory: 'magic',
+    keywords: ['bus', 'travel', 'ride', 'carriage', 'pumpkin', 'transit', 'school', 'fairytale'],
+  },
+  {
+    id: 'fairytale_backpack_school',
+    value: '/assets/stickers/fairytale_unicorn_satchel.png',
+    label: 'Stardust Unicorn School Satchel',
+    shortLabel: 'Unicorn Satchel',
+    themeCategory: 'magic',
+    keywords: ['backpack', 'bag', 'school', 'unicorn', 'satchel', 'pack', 'supplies', 'magic'],
+  },
+  {
+    id: 'fairytale_school_building',
+    value: '/assets/stickers/fairytale_castle_academy.png',
+    label: 'Fairytale Castle Academy',
+    shortLabel: 'Castle Academy',
+    themeCategory: 'magic',
+    keywords: ['school', 'building', 'learn', 'study', 'class', 'castle', 'academy', 'fairytale'],
+  },
+  {
+    id: 'fairytale_sandwich_lunch',
+    value: '/assets/stickers/fairytale_crown_bento.png',
+    label: 'Crown-Cut Fairytale Bento Box',
+    shortLabel: 'Crown Bento',
+    themeCategory: 'magic',
+    keywords: ['lunch', 'sandwich', 'bento', 'food', 'eat', 'meal', 'crown', 'fairytale'],
+  },
+  {
+    id: 'fairytale_routine_water_drink',
+    value: '/assets/stickers/fairytale_crystal_potion_flask.png',
+    label: 'Crystal Star Potion Flask',
+    shortLabel: 'Crystal Flask',
+    themeCategory: 'magic',
+    keywords: ['water', 'drink', 'flask', 'potion', 'crystal', 'hydrate', 'bottle', 'thirst', 'magic'],
+  },
+  {
+    id: 'fairytale_sneaker_shoes',
+    value: '/assets/stickers/fairytale_winged_shoes.png',
+    label: 'Enchanted Winged Storybook Shoes',
+    shortLabel: 'Winged Shoes',
+    themeCategory: 'magic',
+    keywords: ['shoes', 'sneakers', 'feet', 'footwear', 'wings', 'winged', 'fairytale'],
+  },
+  {
+    id: 'fairytale_shower_wash',
+    value: '/assets/stickers/fairytale_clawfoot_bath.png',
+    label: 'Clawfoot Fairytale Bubble Bath',
+    shortLabel: 'Bubble Bath',
+    themeCategory: 'magic',
+    keywords: ['shower', 'wash', 'clean', 'bath', 'water', 'hygiene', 'clawfoot', 'duck', 'bubbles'],
+  },
+  {
+    id: 'fairytale_apple_snack',
+    value: '/assets/stickers/fairytale_golden_apple.png',
+    label: 'Enchanted Golden Apple Snack',
+    shortLabel: 'Golden Apple',
+    themeCategory: 'magic',
+    keywords: ['snack', 'fruit', 'apple', 'golden', 'gold', 'eat', 'fairytale', 'magic'],
+  },
+  {
+    id: 'fairytale_dinner_bowl',
+    value: '/assets/stickers/fairytale_royal_feast_stew.png',
+    label: 'Royal Feast Ceramic Stew Bowl',
+    shortLabel: 'Royal Stew',
+    themeCategory: 'magic',
+    keywords: ['dinner', 'bowl', 'stew', 'soup', 'meal', 'food', 'royal', 'feast', 'fairytale'],
+  },
+  {
+    id: 'fairytale_bedtime_sleep',
+    value: '/assets/stickers/fairytale_canopy_bed.png',
+    label: 'Canopy Four-Poster Royal Bed',
+    shortLabel: 'Canopy Bed',
+    themeCategory: 'magic',
+    keywords: ['bed', 'bedtime', 'sleep', 'night', 'rest', 'canopy', 'royal', 'fairytale'],
+  },
+  {
+    id: 'fairytale_mascot',
+    value: '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
+    label: 'Stardust Unicorn Mascot',
+    shortLabel: 'Unicorn Mascot',
+    themeCategory: 'magic',
+    keywords: ['mascot', 'unicorn', 'stardust', 'magic', 'fairytale', 'guide', 'companion', 'cute'],
+  },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -2465,6 +2588,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isOcean = themeCategoryOrId === 'ocean' || themeCategoryOrId === 'theme-ocean';
   if (isOcean) {
     return OCEAN_SPLASH_ICONS;
+  }
+  const isFantasy = themeCategoryOrId === 'fantasy' || themeCategoryOrId === 'theme-fantasy' || themeCategoryOrId === 'magic';
+  if (isFantasy) {
+    return FAIRYTALE_MAGIC_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)
