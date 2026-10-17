@@ -1443,6 +1443,22 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  // Train Adventure Batch 1 Swaps
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/train_waiting_room_bench.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/train_waving_hand_hello.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/train_padded_recliner_chair.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/train_open_mouth_lion.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/train_open_welcome_door.png',
+  '/assets/stickers/dining_table_booth.png': '/assets/stickers/train_dining_table_booth.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/train_restaurant_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/train_barbershop_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/train_haircut_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/train_water_spray_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/train_barber_neck_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/train_salon_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/train_medical_clinic_building.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/train_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/train_doctor_exam_bed.png',
   // Adventure Step Mappings
   '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/train_timetable_board.png',
   '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/train_boots.png',
