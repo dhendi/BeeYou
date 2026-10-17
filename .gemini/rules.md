@@ -1,13 +1,13 @@
 # BeeYou Theming & Icon Prompt Rules
 
-## 1. Option B Copy-Paste Prompts Format (STRICT)
-- When presenting icon prompts, NEVER add introductory style paragraphs, preambles, or extra adjectives (e.g., do NOT add "Hand-drawn watercolor stationery sticker aesthetic with soft textured espresso-brown ink outlines...").
+## 1. Option B Copy-Paste Prompts Format (STRICT - ZERO PREAMBLE)
+- ABSOLUTELY ZERO PREAMBLE: NEVER add any introductory text, style description, or instructions inside the copy-paste box (e.g., NEVER write "Please generate 15 cute, cozy...", NEVER write "Hand-drawn watercolor...").
+- The copy-paste block MUST contain ONLY the numbered items (1 to 15).
 - NEVER split the prompts into multiple individual markdown code boxes.
-- ALWAYS provide the prompts inside ONE SINGLE ````text ```` code box under `### **Copy-Paste Prompts (Option B)**`.
-- Each item must strictly follow this exact 2-line template:
+- ALWAYS provide the prompts inside ONE SINGLE ````text ```` code box.
+- Each item must strictly follow this exact format:
   ```text
-  [Number]. [Item Name]:
-  A cute hand-drawn [concise visual description], centered in a warm pastel yellow circle (#FCD873), planner sticker style on white background.
+  [Number]. [Item Name]: [Concise visual description], centered in a warm pastel yellow circle (#FCD873), planner sticker style on white background.
   ```
 
 ## 2. Icon Replacement Workflow
