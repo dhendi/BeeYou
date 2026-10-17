@@ -1443,6 +1443,9 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  // Adventure Step Mappings
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/train_timetable_board.png',
+  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/train_boots.png',
   // Batch 6 New Train Swaps
   '/assets/stickers/adventure_restaurant.png': '/assets/stickers/train_adventure_restaurant.png',
   '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/train_adventure_museum_visit.png',
