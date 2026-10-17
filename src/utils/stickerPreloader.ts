@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS, COSMIC_SPACE_ICONS, OCEAN_SPLASH_ICONS, FAIRYTALE_MAGIC_ICONS } from '../data/themedIconsData';
+import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS, COSMIC_SPACE_ICONS, OCEAN_SPLASH_ICONS, FAIRYTALE_MAGIC_ICONS, RACING_SPEEDWAY_ICONS } from '../data/themedIconsData';
 
 const loadedCache = new Set<string>();
 
@@ -109,6 +109,14 @@ export function preloadFairytaleThemeStickers() {
 }
 
 /**
+ * Preloads all Turbo Speedway stickers into the browser's cache during idle cycles.
+ */
+export function preloadRacingThemeStickers() {
+  const racingUrls = RACING_SPEEDWAY_ICONS.map((i) => i.value);
+  preloadStickerUrls(racingUrls, false);
+}
+
+/**
  * Preloads stickers for a specific theme ID.
  */
 export function preloadThemeStickers(themeId?: string) {
@@ -127,6 +135,8 @@ export function preloadThemeStickers(themeId?: string) {
     preloadOceanThemeStickers();
   } else if (themeId === 'theme-fantasy' || themeId === 'fantasy' || themeId === 'magic') {
     preloadFairytaleThemeStickers();
+  } else if (themeId === 'theme-racing' || themeId === 'racing') {
+    preloadRacingThemeStickers();
   }
 }
 

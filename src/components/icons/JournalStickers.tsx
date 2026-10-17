@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { preloadTurtleThemeStickers, preloadFairytaleThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
+import { preloadTurtleThemeStickers, preloadFairytaleThemeStickers, preloadRacingThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
 
 // Immediately initiate background pre-caching of all sticker images
 if (typeof window !== 'undefined') {
@@ -24,6 +24,7 @@ function checkActiveThemeCategory(): string {
       if (cat === 'space' || id === 'theme-space') return 'space';
       if (cat === 'ocean' || id === 'theme-ocean') return 'ocean';
       if (cat === 'fantasy' || id === 'theme-fantasy' || cat === 'magic') return 'fantasy';
+      if (cat === 'racing' || id === 'theme-racing') return 'racing';
     }
     if (typeof localStorage !== 'undefined') {
       const savedId = localStorage.getItem('beeyou_active_theme_id');
@@ -34,6 +35,7 @@ function checkActiveThemeCategory(): string {
       if (savedId === 'theme-space') return 'space';
       if (savedId === 'theme-ocean') return 'ocean';
       if (savedId === 'theme-fantasy') return 'fantasy';
+      if (savedId === 'theme-racing') return 'racing';
     }
   } catch (e) {}
   return 'default';
@@ -50,6 +52,8 @@ function useActiveThemeCategory(): string {
         preloadTurtleThemeStickers();
       } else if (active === 'fantasy') {
         preloadFairytaleThemeStickers();
+      } else if (active === 'racing') {
+        preloadRacingThemeStickers();
       }
     };
     sync();
@@ -88,6 +92,10 @@ export function useIsFairytaleTheme(): boolean {
   return useActiveThemeCategory() === 'fantasy';
 }
 
+export function useIsRacingTheme(): boolean {
+  return useActiveThemeCategory() === 'racing';
+}
+
 const renderStickerPng = (src: string, alt: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
@@ -106,6 +114,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = OCEAN_STICKER_SWAPS[src];
     } else if (theme === 'fantasy' && FAIRYTALE_STICKER_SWAPS[src]) {
       currentSrc = FAIRYTALE_STICKER_SWAPS[src];
+    } else if (theme === 'racing' && RACING_STICKER_SWAPS[src]) {
+      currentSrc = RACING_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -139,6 +149,8 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
       currentSrc = OCEAN_STICKER_SWAPS[defaultSrc] || defaultSrc;
     } else if (theme === 'fantasy') {
       currentSrc = FAIRYTALE_STICKER_SWAPS[defaultSrc] || defaultSrc;
+    } else if (theme === 'racing') {
+      currentSrc = RACING_STICKER_SWAPS[defaultSrc] || defaultSrc;
     }
     return (
       <img
@@ -2313,6 +2325,58 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/game_controller.png': '/assets/stickers/fairytale_game_controller.png',
   '/assets/stickers/birthday_gift_box.png': '/assets/stickers/fairytale_birthday_gift_box.png',
   '/assets/stickers/birthday_card.png': '/assets/stickers/fairytale_birthday_gift_box.png',
+};
+
+export const RACING_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1 Core Routine Swaps
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/racing_alarm_clock.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/racing_alarm_clock.png',
+  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/racing_alarm_clock.png',
+
+  '/assets/stickers/toothbrush.png': '/assets/stickers/racing_toothbrush.png',
+  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/racing_toothbrush.png',
+
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/racing_clothes_dressed.png',
+  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/racing_clothes_dressed.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/racing_clothes_dressed.png',
+
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/racing_pancakes_breakfast.png',
+  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/racing_pancakes_breakfast.png',
+
+  '/assets/stickers/school_bus.png': '/assets/stickers/racing_school_bus.png',
+
+  '/assets/stickers/backpack_school.png': '/assets/stickers/racing_backpack_school.png',
+  '/assets/stickers/backpack.png': '/assets/stickers/racing_backpack_school.png',
+
+  '/assets/stickers/homework_study.png': '/assets/stickers/racing_homework_study.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/racing_homework_study.png',
+
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/racing_sandwich_lunch.png',
+  '/assets/stickers/lunch_box.png': '/assets/stickers/racing_sandwich_lunch.png',
+
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/racing_routine_water_drink.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/racing_routine_water_drink.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/racing_routine_water_drink.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/racing_routine_water_drink.png',
+
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/racing_sneaker_shoes.png',
+
+  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/racing_toilet_restroom.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/racing_toilet_restroom.png',
+
+  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/racing_routine_medicine_pill.png',
+  '/assets/stickers/medications_health.png': '/assets/stickers/racing_routine_medicine_pill.png',
+
+  '/assets/stickers/school_building.png': '/assets/stickers/racing_school_building.png',
+
+  '/assets/stickers/shower_wash.png': '/assets/stickers/racing_shower_wash.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/racing_shower_wash.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/racing_shower_wash.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/racing_shower_wash.png',
+
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/racing_bedtime_sleep.png',
 };
 
 /**

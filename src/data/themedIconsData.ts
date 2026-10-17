@@ -3410,6 +3410,129 @@ export const FAIRYTALE_MAGIC_ICONS: ThemedIconItem[] = [
   },
 ];
 
+export const RACING_SPEEDWAY_ICONS: ThemedIconItem[] = [
+  {
+    id: 'racing_alarm_clock',
+    value: '/assets/stickers/racing_alarm_clock.png',
+    label: 'Racing Stopwatch Clock',
+    shortLabel: 'Stopwatch Clock',
+    themeCategory: 'racing',
+    keywords: ['alarm', 'clock', 'morning', 'wake', 'time', 'stopwatch', 'racing', 'speedway'],
+  },
+  {
+    id: 'racing_toothbrush',
+    value: '/assets/stickers/racing_toothbrush.png',
+    label: 'Checkered Flag Toothbrush',
+    shortLabel: 'Racing Toothbrush',
+    themeCategory: 'racing',
+    keywords: ['brush', 'teeth', 'toothbrush', 'checkered', 'clean', 'hygiene', 'racing'],
+  },
+  {
+    id: 'racing_clothes_dressed',
+    value: '/assets/stickers/racing_clothes_dressed.png',
+    label: 'Driver Racing Jumpsuit',
+    shortLabel: 'Racing Suit',
+    themeCategory: 'racing',
+    keywords: ['clothes', 'dressed', 'jumpsuit', 'suit', 'driver', 'wear', 'outfit', 'racing'],
+  },
+  {
+    id: 'racing_pancakes_breakfast',
+    value: '/assets/stickers/racing_pancakes_breakfast.png',
+    label: 'Racing Tire Stack Pancakes',
+    shortLabel: 'Tire Pancakes',
+    themeCategory: 'racing',
+    keywords: ['breakfast', 'pancakes', 'food', 'tire', 'eat', 'morning', 'racing'],
+  },
+  {
+    id: 'racing_school_bus',
+    value: '/assets/stickers/racing_school_bus.png',
+    label: 'Speedway Pit Transporter Bus',
+    shortLabel: 'Pit Bus',
+    themeCategory: 'racing',
+    keywords: ['bus', 'travel', 'ride', 'transporter', 'pit', 'transit', 'school', 'racing'],
+  },
+  {
+    id: 'racing_backpack_school',
+    value: '/assets/stickers/racing_backpack_school.png',
+    label: 'Turbo Racing Driver Backpack',
+    shortLabel: 'Racing Backpack',
+    themeCategory: 'racing',
+    keywords: ['backpack', 'bag', 'school', 'driver', 'satchel', 'pack', 'supplies', 'racing'],
+  },
+  {
+    id: 'racing_homework_study',
+    value: '/assets/stickers/racing_homework_study.png',
+    label: 'Telemetry Track Clipboard',
+    shortLabel: 'Track Clipboard',
+    themeCategory: 'racing',
+    keywords: ['homework', 'study', 'clipboard', 'telemetry', 'track', 'notes', 'pencil', 'racing'],
+  },
+  {
+    id: 'racing_sandwich_lunch',
+    value: '/assets/stickers/racing_sandwich_lunch.png',
+    label: 'Pit Crew Lunchbox & Sandwich',
+    shortLabel: 'Pit Lunchbox',
+    themeCategory: 'racing',
+    keywords: ['sandwich', 'lunch', 'food', 'pit crew', 'lunchbox', 'eat', 'meal', 'racing'],
+  },
+  {
+    id: 'racing_routine_water_drink',
+    value: '/assets/stickers/racing_routine_water_drink.png',
+    label: 'Racing Fuel Jug Bottle',
+    shortLabel: 'Fuel Jug Bottle',
+    themeCategory: 'racing',
+    keywords: ['water', 'drink', 'fuel', 'jug', 'bottle', 'hydrate', 'racing'],
+  },
+  {
+    id: 'racing_sneaker_shoes',
+    value: '/assets/stickers/racing_sneaker_shoes.png',
+    label: 'High-Top Racing Driving Shoes',
+    shortLabel: 'Racing Shoes',
+    themeCategory: 'racing',
+    keywords: ['shoes', 'sneakers', 'driving', 'high-top', 'feet', 'walk', 'racing'],
+  },
+  {
+    id: 'racing_toilet_restroom',
+    value: '/assets/stickers/racing_toilet_restroom.png',
+    label: 'Pit Stop Checkered Restroom',
+    shortLabel: 'Pit Restroom',
+    themeCategory: 'racing',
+    keywords: ['toilet', 'restroom', 'bathroom', 'pit stop', 'door', 'checkered', 'racing'],
+  },
+  {
+    id: 'racing_routine_medicine_pill',
+    value: '/assets/stickers/racing_routine_medicine_pill.png',
+    label: 'Turbo Energy Booster Pill',
+    shortLabel: 'Turbo Pill',
+    themeCategory: 'racing',
+    keywords: ['medicine', 'pill', 'booster', 'health', 'vitamins', 'energy', 'racing'],
+  },
+  {
+    id: 'racing_school_building',
+    value: '/assets/stickers/racing_school_building.png',
+    label: 'Speedway Racing Academy',
+    shortLabel: 'Speedway Academy',
+    themeCategory: 'racing',
+    keywords: ['school', 'building', 'academy', 'speedway', 'education', 'learn', 'racing'],
+  },
+  {
+    id: 'racing_shower_wash',
+    value: '/assets/stickers/racing_shower_wash.png',
+    label: 'Car Wash Hose Sprayer',
+    shortLabel: 'Wash Hose',
+    themeCategory: 'racing',
+    keywords: ['shower', 'bath', 'wash', 'clean', 'hose', 'sprayer', 'car wash', 'racing'],
+  },
+  {
+    id: 'racing_bedtime_sleep',
+    value: '/assets/stickers/racing_bedtime_sleep.png',
+    label: 'Turbo Red Racecar Bed',
+    shortLabel: 'Racecar Bed',
+    themeCategory: 'racing',
+    keywords: ['bed', 'sleep', 'night', 'bedtime', 'racecar', 'rest', 'racing'],
+  },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -3439,6 +3562,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isFantasy = themeCategoryOrId === 'fantasy' || themeCategoryOrId === 'theme-fantasy' || themeCategoryOrId === 'magic';
   if (isFantasy) {
     return FAIRYTALE_MAGIC_ICONS;
+  }
+  const isRacing = themeCategoryOrId === 'racing' || themeCategoryOrId === 'theme-racing';
+  if (isRacing) {
+    return RACING_SPEEDWAY_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)
