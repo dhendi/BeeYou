@@ -297,7 +297,7 @@ export const PRESET_THEMES: AppTheme[] = [
     name: 'Turbo Speedway',
     category: 'racing',
     emoji: '🏎️',
-    mascotName: 'Turbo Rex',
+    mascotName: 'Turbo Racer',
     mascotEmoji: '🏎️',
     greetingMessage: 'Vroom! Green flag is out — ready to zoom through today!',
     description: 'High-speed racecars, checkered finish lines, and turbo boost power.',

@@ -2377,6 +2377,47 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bedtime_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
   '/assets/stickers/pajamas_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
   '/assets/stickers/pajamas_shorts.png': '/assets/stickers/racing_bedtime_sleep.png',
+
+  // Batch 2 Meals, Calming Tools, Mascot & Regulation Swaps
+  // Apple snack kept as default apple per user preference
+
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/racing_dinner_bowl.png',
+  '/assets/stickers/cooking_pot.png': '/assets/stickers/racing_dinner_bowl.png',
+
+  '/assets/stickers/racing_mascot.png': '/assets/stickers/racing_mascot.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/racing_mascot.png',
+  '/assets/stickers/turtle_mascot.png': '/assets/stickers/racing_mascot.png',
+
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/racing_hot_cocoa.png',
+  '/assets/stickers/drink_cup.png': '/assets/stickers/racing_hot_cocoa.png',
+
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/racing_chocolate_bar.png',
+  '/assets/stickers/candy_treat.png': '/assets/stickers/racing_chocolate_bar.png',
+
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/racing_jigsaw_puzzle.png',
+
+  '/assets/stickers/fav_music.png': '/assets/stickers/racing_fav_music.png',
+  '/assets/stickers/music_note.png': '/assets/stickers/racing_fav_music.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/racing_fav_music.png',
+  '/assets/stickers/teen_headphones.png': '/assets/stickers/racing_fav_music.png',
+
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/racing_fav_love_heart.png',
+
+  '/assets/stickers/fav_outside.png': '/assets/stickers/racing_fav_outside.png',
+
+  '/assets/stickers/fav_stop.png': '/assets/stickers/racing_fav_stop.png',
+
+  '/assets/stickers/help_sos.png': '/assets/stickers/racing_help_sos.png',
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/racing_help_sos.png',
+
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/racing_decision_wheel.png',
+
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/racing_spoons_energy.png',
+
+  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/racing_routine_writing_journal.png',
+  '/assets/stickers/passport_book.png': '/assets/stickers/racing_routine_writing_journal.png',
+
+  '/assets/stickers/toy_box.png': '/assets/stickers/racing_toy_box.png',
 };
 
 /**
