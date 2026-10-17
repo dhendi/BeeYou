@@ -2046,6 +2046,24 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/paw_print.png': '/assets/stickers/ocean_beach_sand_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/ocean_turquoise_barrel_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
+
+  // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community)
+  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/ocean_waiting_room_bench.png',
+  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/ocean_waving_hand_diver.png',
+  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/ocean_dental_recliner_chair.png',
+  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/ocean_scuba_diver_open_mouth.png',
+  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/ocean_scuba_diver_open_mouth.png',
+  '/assets/stickers/open_welcome_door.png': '/assets/stickers/ocean_porthole_welcome_door.png',
+  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/ocean_seaside_menu_book.png',
+  '/assets/stickers/barbershop_pole.png': '/assets/stickers/ocean_lighthouse_barber_pole.png',
+  '/assets/stickers/haircut_cape.png': '/assets/stickers/ocean_haircut_styling_cape.png',
+  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/ocean_water_spray_mist_bottle.png',
+  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/ocean_barber_neck_duster_brush.png',
+  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/ocean_seashell_hand_mirror.png',
+  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/ocean_marine_health_clinic.png',
+  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/ocean_clinic_height_scale.png',
+  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/ocean_doctor_exam_table_bed.png',
+  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/ocean_doctor_ear_light_tool.png',
 };
 
 /**
