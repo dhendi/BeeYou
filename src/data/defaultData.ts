@@ -683,7 +683,7 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
       { order: 3, title: 'Wait in the waiting room', description: 'We can sit, look at magazines, play with a fidget, or listen to headphones.', emoji: '/assets/stickers/waiting_room_couch.png', sensoryTip: 'Waiting room can have soft chatter. Headphones help!' },
       { order: 4, title: 'Meet the dentist & hygienist', description: 'A friendly helper calls your name with a warm smile.', emoji: '/assets/stickers/waving_hand_hello.png' },
       { order: 5, title: 'Sit in the big recliner chair', description: 'The chair goes up and leans back like a spaceship! You can wear sunglasses for the overhead light.', emoji: '/assets/stickers/padded_recliner_chair.png' },
-      { order: 6, title: 'Open mouth like a friendly lion', description: 'The dentist counts your teeth with a tiny mirror on a little stick.', emoji: '/assets/stickers/open_mouth_lion.png' },
+      { order: 6, title: 'Open your mouth wide', description: 'The dentist counts your teeth with a tiny mirror on a little stick.', emoji: '/assets/stickers/open_mouth_wide.png' },
       { order: 7, title: 'Dental tools & brushing', description: 'A soft electric toothbrush cleans your teeth with yummy berry toothpaste.', emoji: '/assets/stickers/toothbrush.png', sensoryTip: 'The polisher makes a buzzing hum sound.' },
       { order: 8, title: 'Rinse with water', description: 'Sip water and swish, then spit into the little sink bowl.', emoji: '/assets/stickers/drink_water.png' },
       { order: 9, title: 'All done & treasure box!', description: 'The dentist says great job! You pick a cool sticker or toy ring.', emoji: '/assets/stickers/toy_box.png' },

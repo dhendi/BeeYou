@@ -45,8 +45,13 @@ export function useGamificationState({
             if (!def) return adv;
             const updatedSteps = (adv.steps || []).map((step, idx) => {
               const defStep = def.steps.find((s) => s.order === step.order) || def.steps[idx];
-              if (defStep && defStep.emoji && defStep.emoji.startsWith('/')) {
-                return { ...step, emoji: defStep.emoji };
+              if (defStep) {
+                return {
+                  ...step,
+                  title: defStep.title,
+                  description: defStep.description,
+                  emoji: defStep.emoji && defStep.emoji.startsWith('/') ? defStep.emoji : step.emoji,
+                };
               }
               return step;
             });
