@@ -2555,6 +2555,37 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
 
   '/assets/stickers/shopping_cart.png': '/assets/stickers/racing_shopping_cart.png',
   '/assets/stickers/cart.png': '/assets/stickers/racing_shopping_cart.png',
+
+  // Batch 6 Travel, Destinations, Living & Tools Swaps
+  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/racing_adventure_restaurant.png',
+  '/assets/stickers/restaurant_adventure.png': '/assets/stickers/racing_adventure_restaurant.png',
+  '/assets/stickers/dining_table_booth.png': '/assets/stickers/racing_adventure_restaurant.png',
+  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/racing_adventure_museum_visit.png',
+  '/assets/stickers/museum_visit.png': '/assets/stickers/racing_adventure_museum_visit.png',
+  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/racing_adventure_bowling_alley.png',
+  '/assets/stickers/bowling_alley.png': '/assets/stickers/racing_adventure_bowling_alley.png',
+  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/racing_adventure_bowling_alley.png',
+  '/assets/stickers/airplane_flight.png': '/assets/stickers/racing_airplane_flight.png',
+  '/assets/stickers/flight.png': '/assets/stickers/racing_airplane_flight.png',
+  '/assets/stickers/boarding_ticket.png': '/assets/stickers/racing_boarding_ticket.png',
+  '/assets/stickers/passport_book.png': '/assets/stickers/racing_passport_book.png',
+  '/assets/stickers/tablet_ipad.png': '/assets/stickers/racing_tablet_ipad.png',
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/racing_tablet_ipad.png',
+  '/assets/stickers/potted_plant.png': '/assets/stickers/racing_potted_plant.png',
+  '/assets/stickers/wall_clock.png': '/assets/stickers/racing_wall_clock.png',
+  '/assets/stickers/timer_clock.png': '/assets/stickers/racing_wall_clock.png',
+  '/assets/stickers/circle_carpet.png': '/assets/stickers/racing_circle_carpet.png',
+  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/racing_circle_carpet.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/racing_circle_carpet.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/racing_circle_carpet.png',
+  '/assets/stickers/locker_schedule.png': '/assets/stickers/racing_locker_schedule.png',
+  '/assets/stickers/bone_treat.png': '/assets/stickers/racing_bone_treat.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/racing_bone_treat.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/racing_bone_treat.png',
+  '/assets/stickers/paw_print.png': '/assets/stickers/racing_paw_print.png',
+  '/assets/stickers/ocean_wave.png': '/assets/stickers/racing_ocean_wave.png',
+  '/assets/stickers/story_birthday.png': '/assets/stickers/racing_birthday_cake.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/racing_birthday_cake.png',
 };
 
 /**
