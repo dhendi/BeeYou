@@ -37,7 +37,27 @@ export function useGamificationState({
   const [adventures, setAdventures] = useState<LifeAdventure[]>(() => {
     try {
       const saved = localStorage.getItem('beeyou_adventures');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: LifeAdventure[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((adv) => {
+            const def = DEFAULT_ADVENTURES.find((d) => d.id === adv.id);
+            if (!def) return adv;
+            const updatedSteps = (adv.steps || []).map((step, idx) => {
+              const defStep = def.steps.find((s) => s.order === step.order) || def.steps[idx];
+              if (defStep && defStep.emoji && defStep.emoji.startsWith('/')) {
+                return { ...step, emoji: defStep.emoji };
+              }
+              return step;
+            });
+            return {
+              ...adv,
+              stickerSrc: def.stickerSrc || adv.stickerSrc,
+              steps: updatedSteps,
+            };
+          });
+        }
+      }
     } catch (e) {}
     return DEFAULT_ADVENTURES;
   });
