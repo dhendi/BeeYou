@@ -2503,6 +2503,58 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
 
   '/assets/stickers/calm_sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
   '/assets/stickers/sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
+
+  // Batch 5 Adventures, Sensory Sensitivities, Play & Outings Swaps
+  '/assets/stickers/adventure_dentist.png': '/assets/stickers/racing_adventure_dentist.png',
+  '/assets/stickers/dentist.png': '/assets/stickers/racing_adventure_dentist.png',
+  '/assets/stickers/dentist_adventure.png': '/assets/stickers/racing_adventure_dentist.png',
+
+  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/racing_adventure_haircut.png',
+  '/assets/stickers/adventure_haircut.png': '/assets/stickers/racing_adventure_haircut.png',
+  '/assets/stickers/haircut.png': '/assets/stickers/racing_adventure_haircut.png',
+  '/assets/stickers/haircut_adventure.png': '/assets/stickers/racing_adventure_haircut.png',
+
+  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/racing_adventure_swimming_pool.png',
+  '/assets/stickers/swimming_pool.png': '/assets/stickers/racing_adventure_swimming_pool.png',
+  '/assets/stickers/swim.png': '/assets/stickers/racing_adventure_swimming_pool.png',
+
+  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
+  '/assets/stickers/movie_cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
+  '/assets/stickers/cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
+
+  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/racing_adventure_camping_tent.png',
+  '/assets/stickers/camping_tent.png': '/assets/stickers/racing_adventure_camping_tent.png',
+  '/assets/stickers/camping.png': '/assets/stickers/racing_adventure_camping_tent.png',
+
+  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/racing_sensory_loud_noise.png',
+  '/assets/stickers/loud_noise.png': '/assets/stickers/racing_sensory_loud_noise.png',
+
+  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/racing_sensory_bright_lights.png',
+  '/assets/stickers/bright_lights.png': '/assets/stickers/racing_sensory_bright_lights.png',
+
+  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/racing_grounding_touch_hand.png',
+  '/assets/stickers/touch_hand.png': '/assets/stickers/racing_grounding_touch_hand.png',
+
+  '/assets/stickers/therapy_brain.png': '/assets/stickers/racing_therapy_brain.png',
+  '/assets/stickers/brain.png': '/assets/stickers/racing_therapy_brain.png',
+
+  '/assets/stickers/cloudy_weather.png': '/assets/stickers/racing_cloudy_weather.png',
+  '/assets/stickers/cloudy.png': '/assets/stickers/racing_cloudy_weather.png',
+
+  '/assets/stickers/candy_treat.png': '/assets/stickers/racing_candy_treat_swirl.png',
+  '/assets/stickers/candy.png': '/assets/stickers/racing_candy_treat_swirl.png',
+
+  '/assets/stickers/red_balloon.png': '/assets/stickers/racing_red_balloon.png',
+  '/assets/stickers/balloon.png': '/assets/stickers/racing_red_balloon.png',
+
+  '/assets/stickers/tennis_ball.png': '/assets/stickers/racing_tennis_ball.png',
+  '/assets/stickers/ball.png': '/assets/stickers/racing_tennis_ball.png',
+
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/racing_cutlery_meal.png',
+  '/assets/stickers/cutlery.png': '/assets/stickers/racing_cutlery_meal.png',
+
+  '/assets/stickers/shopping_cart.png': '/assets/stickers/racing_shopping_cart.png',
+  '/assets/stickers/cart.png': '/assets/stickers/racing_shopping_cart.png',
 };
 
 /**
