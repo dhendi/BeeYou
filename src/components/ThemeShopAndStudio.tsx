@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { AppTheme, ThemePalette, WallpaperPattern } from '../types';
 import { 
@@ -14,6 +15,8 @@ import {
   CheckCircle2,
   Crown,
   ArrowLeft,
+  ArrowRight,
+  X,
   UploadCloud,
   Image as ImageIcon
 } from 'lucide-react';
@@ -21,6 +24,11 @@ import { playChime, speakText } from '../utils/audio';
 import { PRESET_THEMES, getThemeIcon } from '../data/themesData';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 import { getThemeCustomizerHeaderStyles } from '../utils/themeWidgetHelper';
+import { useModalBackHandler } from '../services/modalBackHandler';
+import { ThemeWallpaperArt } from './ThemeWallpaperArt';
+import { ChildHeader } from './ChildHeader';
+import { ChildHomeView } from './ChildHomeView';
+import { ChildNavBar } from './ChildNavBar';
 
 // Pre-packaged color presets for theme customizer
 const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] = [
@@ -266,6 +274,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     triggerUpgrade,
     editingThemeId: contextEditingThemeId,
     setEditingThemeId: setContextEditingThemeId,
+    settings,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'shop' | 'studio'>(defaultMode);
@@ -289,6 +298,42 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedBorderRadius, setSelectedBorderRadius] = useState<'rounded-2xl' | 'rounded-3xl' | 'rounded-xl'>('rounded-3xl');
   const [selectedSoundTheme, setSelectedSoundTheme] = useState<'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic' | 'classic'>('classic');
+
+  // Full-Screen Live Homepage Preview State
+  const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
+  useModalBackHandler(showFullScreenPreview, () => setShowFullScreenPreview(false), 50);
+
+  const getEffectivePalette = (): ThemePalette => {
+    if (useCustomHex) {
+      return buildCustomPalette(customPrimaryColor);
+    }
+    return PALETTE_PRESETS[selectedPaletteIndex]?.palette || PALETTE_PRESETS[0].palette;
+  };
+
+  const previewTheme: AppTheme = {
+    id: targetEditingThemeId || 'preview-custom-theme',
+    name: themeName.trim() || 'My Custom Theme',
+    category: (targetEditingThemeId ? themes.find((t) => t.id === targetEditingThemeId)?.category : 'custom') || 'custom',
+    emoji: mascotEmoji,
+    icon: mascotIcon || undefined,
+    mascotName: mascotName.trim() || 'Buddy',
+    mascotEmoji: mascotEmoji,
+    mascotIcon: mascotIcon || undefined,
+    greetingMessage: greetingMessage.trim() || `Welcome to ${themeName}!`,
+    description: themeDescription.trim() || `Custom theme styled with ${mascotEmoji}.`,
+    costStars: 0,
+    isUnlocked: true,
+    palette: {
+      ...getEffectivePalette(),
+      wallpaperUrl: customWallpaperUrl || undefined,
+    },
+    wallpaperPattern: customWallpaperUrl ? 'custom' : selectedWallpaper,
+    aacStyling: {
+      tileBorderRadius: selectedBorderRadius,
+      tileBorderWidth: 'border-3',
+    },
+    soundTheme: selectedSoundTheme,
+  };
 
   // Handle external editingThemeId from context if passed
   useEffect(() => {
@@ -406,13 +451,6 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     };
     reader.readAsDataURL(file);
     e.target.value = '';
-  };
-
-  const getEffectivePalette = (): ThemePalette => {
-    if (useCustomHex) {
-      return buildCustomPalette(customPrimaryColor);
-    }
-    return PALETTE_PRESETS[selectedPaletteIndex]?.palette || PALETTE_PRESETS[0].palette;
   };
 
   const handleSaveTheme = () => {
@@ -1158,63 +1196,31 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </div>
           </div>
 
-          {/* Studio Step 4: Live Real-Time Preview */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-slate-500" />
-              <label className="text-xs font-black uppercase tracking-wider text-slate-700">
+          {/* Studio Step 4: Live Real-Time Preview Trigger */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
                 4. Live Theme Preview
               </label>
+              <span className="text-[11px] font-bold text-amber-700">
+                Full-screen interactive view
+              </span>
             </div>
 
-            <div
-              className={`p-4 rounded-3xl border-2 border-slate-300 shadow-inner relative overflow-hidden ${getEffectivePalette().appBg}`}
+            <button
+              type="button"
+              onClick={() => {
+                setShowFullScreenPreview(true);
+                playChime('tap');
+              }}
+              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-600 hover:via-amber-500 hover:to-yellow-500 text-amber-950 font-black text-sm sm:text-base flex items-center justify-center gap-3 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer border-2 border-amber-300 group"
             >
-              {/* Custom wallpaper preview overlay in mockup */}
-              {customWallpaperUrl && (
-                <div
-                  className="absolute inset-0 pointer-events-none select-none bg-cover bg-center opacity-35"
-                  style={{ backgroundImage: `url('${customWallpaperUrl}')` }}
-                />
-              )}
-              {/* Header Mockup */}
-              <div
-                className={`p-3 rounded-2xl mb-3 flex items-center justify-between shadow-xs ${getEffectivePalette().headerBg}`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
-                    {mascotIcon ? (
-                      <img src={mascotIcon} alt={mascotName} className="w-6 h-6 object-contain select-none pointer-events-none" />
-                    ) : (
-                      <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-6 h-6 object-contain" />
-                    )}
-                  </div>
-                  <div>
-                    <h5 className="font-black text-xs leading-none">
-                      {themeName} Preview
-                    </h5>
-                    <span className="text-[10px] opacity-80">
-                      Mascot: {mascotName}
-                    </span>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-white/60 text-[10px] font-bold text-slate-800">
-                  Theme Preview
-                </span>
+              <div className="p-2 rounded-xl bg-white/40 group-hover:bg-white/60 transition-colors shadow-2xs">
+                <Eye className="w-5 h-5 stroke-[2.5]" />
               </div>
-
-              {/* Greeting Mockup */}
-              <div className="bg-white/85 backdrop-blur-xs p-3 rounded-2xl border border-white/60 shadow-2xs flex items-center gap-2">
-                {mascotIcon ? (
-                  <img src={mascotIcon} alt={mascotName} className="w-5 h-5 object-contain shrink-0 select-none pointer-events-none" />
-                ) : (
-                  <RoutineStickerIcon emoji={mascotEmoji} title={mascotName} className="w-5 h-5 object-contain shrink-0" />
-                )}
-                <p className="text-xs font-bold text-slate-800 truncate">
-                  {mascotName}: "{greetingMessage}"
-                </p>
-              </div>
-            </div>
+              <span className="tracking-wide">Click here for live preview</span>
+              <ArrowRight className="w-5 h-5 stroke-[2.5] group-hover:translate-x-1.5 transition-transform" />
+            </button>
           </div>
 
           {/* Save & Equip Theme Action */}
@@ -1256,6 +1262,112 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* FULL SCREEN HOMEPAGE LIVE PREVIEW MODAL */}
+      {showFullScreenPreview && typeof document !== 'undefined' && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Full Screen Live Theme Preview"
+          className={`fixed inset-0 z-[200] flex flex-col ${previewTheme.palette?.appBg || 'bg-amber-50/40'} text-slate-800 font-sans selection:bg-amber-200 overflow-hidden animate-in fade-in duration-200`}
+        >
+          {/* Wallpaper Layer */}
+          <ThemeWallpaperArt
+            themeId={previewTheme.id}
+            pattern={previewTheme.wallpaperPattern}
+            category={previewTheme.category}
+            wallpaperUrl={previewTheme.palette?.wallpaperUrl}
+            reduceMotion={settings?.reduceMotion}
+            className="!z-0"
+          />
+
+          {/* Floating Top Control Bar */}
+          <div className="shrink-0 z-40 bg-slate-900/95 text-white backdrop-blur-md px-3 sm:px-6 py-2.5 sm:py-3 border-b border-white/10 flex items-center justify-between gap-3 shadow-xl">
+            {/* Left: Exit preview button & Live Theme Info */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFullScreenPreview(false);
+                  playChime('tap');
+                }}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer border border-white/20 active:scale-95 shrink-0"
+                title="Exit live preview and return to editor"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Exit Preview</span>
+              </button>
+
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 border border-white/30 flex items-center justify-center shrink-0 overflow-hidden p-0.5">
+                  {previewTheme.icon ? (
+                    <img src={previewTheme.icon} alt={previewTheme.name} className="w-full h-full object-contain pointer-events-none select-none" />
+                  ) : (
+                    <RoutineStickerIcon emoji={previewTheme.emoji || '🐝'} title={previewTheme.name} className="w-full h-full object-contain" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 font-black text-[10px] uppercase tracking-wider hidden sm:inline-block">
+                      Live Preview
+                    </span>
+                    <h3 className="font-black text-xs sm:text-sm text-white truncate">
+                      {previewTheme.name}
+                    </h3>
+                  </div>
+                  <p className="text-[10px] text-white/70 truncate hidden md:block">
+                    Mascot: {previewTheme.mascotName} • "{previewTheme.greetingMessage}"
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Save & Equip + Exit X */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  handleSaveTheme();
+                  setShowFullScreenPreview(false);
+                }}
+                className="px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all cursor-pointer active:scale-95 border border-amber-300"
+                title="Save and equip this theme"
+              >
+                <Star className="w-4 h-4 fill-amber-950" />
+                <span>Save & Equip</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFullScreenPreview(false);
+                  playChime('tap');
+                }}
+                className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close preview"
+              >
+                <X className="w-5 h-5 stroke-[2.5]" />
+              </button>
+            </div>
+          </div>
+
+          {/* Child Top Header with Preview Theme */}
+          <header className="shrink-0 z-30 relative">
+            <ChildHeader previewTheme={previewTheme} />
+          </header>
+
+          {/* Homepage Content with Preview Theme */}
+          <main className="flex-1 overflow-y-auto p-2 sm:p-4 overscroll-contain relative z-10">
+            <ChildHomeView previewTheme={previewTheme} />
+          </main>
+
+          {/* Child Navigation Footer with Preview Theme */}
+          <footer className="shrink-0 z-20">
+            <ChildNavBar previewTheme={previewTheme} />
+          </footer>
+        </div>,
+        document.body
       )}
     </div>
   );

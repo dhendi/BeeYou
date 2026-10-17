@@ -15,8 +15,13 @@ import { t } from '../services/translator';
 
 import { LanguageDropdown } from './LanguageDropdown';
 import { CaregiverLockShield } from './CaregiverLockShield';
+import { AppTheme } from '../types';
 
-export const ChildHeader: React.FC = () => {
+export interface ChildHeaderProps {
+  previewTheme?: AppTheme;
+}
+
+export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
   const {
     settings,
     updateSettings,
@@ -34,8 +39,10 @@ export const ChildHeader: React.FC = () => {
     userAgeGroup,
   } = useApp();
 
+  const effectiveTheme = previewTheme || activeTheme;
+
   return (
-    <header className={`${activeTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
+    <header className={`${effectiveTheme?.palette?.headerBg || 'bg-white/95 border-b border-amber-200/60'} backdrop-blur-md px-2.5 sm:px-5 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 flex items-center justify-between sticky top-0 z-30 shadow-2xs transition-colors duration-300`}>
       {/* Left: Child Name */}
       <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
         <h1 className="text-sm sm:text-base font-extrabold text-[#1E293B] tracking-tight leading-none truncate">
@@ -94,12 +101,12 @@ export const ChildHeader: React.FC = () => {
               playChime('tap');
               window.dispatchEvent(new CustomEvent('beeyou_open_caregiver_help_hub'));
             }}
-            className={`flex items-center gap-1 px-2 py-1 rounded-xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 ${activeTheme?.palette?.textAccent || 'text-amber-950'} font-black text-[10px] sm:text-xs border ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs active:scale-95 transition-all cursor-pointer`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-xl ${effectiveTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 ${effectiveTheme?.palette?.textAccent || 'text-amber-950'} font-black text-[10px] sm:text-xs border ${effectiveTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs active:scale-95 transition-all cursor-pointer`}
             title="Caregiver Help Hub (Quick Guides & Ergonomics)"
             aria-label="Caregiver Help Hub"
           >
             <span className="text-sm">🐝</span>
-            <span className={`hidden sm:inline font-bold ${activeTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Help')}</span>
+            <span className={`hidden sm:inline font-bold ${effectiveTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Help')}</span>
           </button>
         </div>
 
@@ -121,7 +128,7 @@ export const ChildHeader: React.FC = () => {
               window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
             }
           }}
-          className={`flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-[11px] sm:text-xs active:scale-95 transition-all cursor-pointer shadow-xs border ${activeTheme?.palette?.primaryBorder || 'border-amber-600'}`}
+          className={`flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl ${effectiveTheme?.palette?.primaryBg || 'bg-amber-500'} ${effectiveTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-[11px] sm:text-xs active:scale-95 transition-all cursor-pointer shadow-xs border ${effectiveTheme?.palette?.primaryBorder || 'border-amber-600'}`}
           title="Open Caregiver Hub"
         >
           <Crown className="w-3 h-3" />

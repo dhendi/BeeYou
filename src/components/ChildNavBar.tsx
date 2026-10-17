@@ -10,8 +10,13 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
+import { AppTheme } from '../types';
 
-export const ChildNavBar: React.FC = () => {
+export interface ChildNavBarProps {
+  previewTheme?: AppTheme;
+}
+
+export const ChildNavBar: React.FC<ChildNavBarProps> = ({ previewTheme }) => {
   const { 
     childView, 
     setChildView, 
@@ -23,6 +28,8 @@ export const ChildNavBar: React.FC = () => {
     settings,
     activeTheme,
   } = useApp();
+
+  const effectiveTheme = previewTheme || activeTheme;
 
   const isAacEnabled = 
     enabledFeatures?.aacCommunication !== false && 
@@ -36,7 +43,7 @@ export const ChildNavBar: React.FC = () => {
       label: userAgeGroup === 'adult' ? 'Dashboard' : 'Home',
       emoji: '🏠',
       icon: Home,
-      activeBg: activeTheme?.palette?.navActiveBg || 'bg-[#D97706] text-white shadow-md ring-2 ring-amber-400',
+      activeBg: effectiveTheme?.palette?.navActiveBg || 'bg-[#D97706] text-white shadow-md ring-2 ring-amber-400',
       show: true,
     },
     {
@@ -84,6 +91,10 @@ export const ChildNavBar: React.FC = () => {
   const navItems = allNavItems.filter(item => item.show);
 
   const handleNav = (item: any) => {
+    if (previewTheme) {
+      playChime('tap');
+      return;
+    }
     setActiveAdventureId(null);
     setActiveSkillId(null);
     setActiveStoryId(null);
