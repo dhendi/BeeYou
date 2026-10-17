@@ -211,6 +211,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-indigo-50 via-purple-50 to-slate-100',
       headerBg: 'bg-purple-100/90 border-purple-300',
       navActiveBg: 'bg-purple-500 text-white shadow-md ring-2 ring-purple-600',
+      wallpaperUrl: '/assets/wallpapers/cosmic_voyager_bg.webp',
     },
     wallpaperPattern: 'cosmic_stars',
     aacStyling: {

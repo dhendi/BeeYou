@@ -156,6 +156,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     category === 'train' ||
     pattern === 'railroad';
 
+  // Check if Cosmic Explorer is active (by wallpaperUrl, category, or pattern)
+  const isCosmicExplorer =
+    wallpaperUrl?.includes('space') ||
+    wallpaperUrl?.includes('cosmic') ||
+    category === 'space' ||
+    pattern === 'cosmic_stars';
+
   // Check if Default Honey Theme is active
   const isHoneyClassic =
     wallpaperUrl?.includes('honey') ||
@@ -173,9 +180,11 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
           ? '/assets/wallpapers/turtle_sanctuary_bg.webp'
           : isSteamExpress
             ? '/assets/wallpapers/steam_express_bg.webp'
-            : isHoneyClassic
-              ? '/assets/wallpapers/default_honey_theme_bg.webp'
-              : undefined);
+            : isCosmicExplorer
+              ? '/assets/wallpapers/cosmic_voyager_bg.webp'
+              : isHoneyClassic
+                ? '/assets/wallpapers/default_honey_theme_bg.webp'
+                : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
@@ -187,7 +196,9 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
         ? '#fad6ac'
         : isSteamExpress
           ? '#ccdaee'
-          : '#FAF7EE';
+          : isCosmicExplorer
+            ? '#bfb3e4'
+            : '#FAF7EE';
 
   return (
     <div
