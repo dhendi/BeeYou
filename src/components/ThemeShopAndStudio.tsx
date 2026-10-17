@@ -31,10 +31,9 @@ import { ChildHomeView } from './ChildHomeView';
 import { ChildNavBar } from './ChildNavBar';
 
 // Pre-packaged color presets for theme customizer
-const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] = [
+const PALETTE_PRESETS: { name: string; palette: ThemePalette }[] = [
   {
     name: 'BeeYou Honey Amber',
-    icon: '🐝',
     palette: {
       primary: '#d97706',
       primaryBg: 'bg-amber-500',
@@ -50,7 +49,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Wise Turtle Emerald',
-    icon: '🐢',
     palette: {
       primary: '#059669',
       primaryBg: 'bg-emerald-600',
@@ -66,7 +64,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Jurassic Green',
-    icon: '🦖',
     palette: {
       primary: '#16a34a',
       primaryBg: 'bg-emerald-600',
@@ -82,7 +79,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Lily Frog Lime',
-    icon: '🐸',
     palette: {
       primary: '#65a30d',
       primaryBg: 'bg-lime-600',
@@ -98,7 +94,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Cosmic Indigo',
-    icon: '🚀',
     palette: {
       primary: '#7c3aed',
       primaryBg: 'bg-violet-600',
@@ -114,7 +109,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Ocean Lagoon',
-    icon: '🐬',
     palette: {
       primary: '#0891b2',
       primaryBg: 'bg-cyan-600',
@@ -130,7 +124,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Berry Fairytale',
-    icon: '🦄',
     palette: {
       primary: '#db2777',
       primaryBg: 'bg-pink-600',
@@ -146,7 +139,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Turbo Speedway Black',
-    icon: '🏎️',
     palette: {
       primary: '#000000',
       primaryBg: 'bg-zinc-900',
@@ -162,7 +154,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Calm Sky Blue',
-    icon: '☁️',
     palette: {
       primary: '#0284c7',
       primaryBg: 'bg-sky-600',
@@ -178,7 +169,6 @@ const PALETTE_PRESETS: { name: string; icon: string; palette: ThemePalette }[] =
   },
   {
     name: 'Locomotive Gold',
-    icon: '🚂',
     palette: {
       primary: '#b45309',
       primaryBg: 'bg-amber-600',
@@ -1040,7 +1030,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     setCustomPrimaryColor(p.palette.primary);
                     playChime('tap');
                   }}
-                  className={`p-2.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`p-2.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                     !useCustomHex && selectedPaletteIndex === idx
                       ? 'border-amber-500 bg-amber-50/70 shadow-sm ring-2 ring-amber-300'
                       : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
@@ -1050,10 +1040,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     className="w-5 h-5 rounded-full shrink-0 border-2 border-white shadow-2xs"
                     style={{ backgroundColor: p.palette.primary }}
                   />
-                  <div className="truncate">
-                    <span className="text-xs font-black text-slate-800 block truncate">{p.name}</span>
-                    <span className="text-[10px] text-slate-500">{p.icon}</span>
-                  </div>
+                  <span className="text-xs font-black text-slate-800 truncate leading-snug">{p.name}</span>
                 </button>
               ))}
             </div>
