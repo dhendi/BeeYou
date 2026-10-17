@@ -591,12 +591,60 @@ export const CozyBedSticker = renderThemedStickerPng(
   'Cozy Bedroom Bed'
 );
 export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
-export const GameControllerSticker = renderStickerPng('/assets/stickers/game_controller.png', 'Video Game Controller');
-export const BirthdayGiftBoxSticker = renderStickerPng('/assets/stickers/birthday_gift_box.png', 'Birthday Gift Box');
-export const BirthdayCakeSliceSticker = renderStickerPng('/assets/stickers/birthday_cake_slice.png', 'Birthday Cake Slice');
-export const WaterBottleSticker = renderStickerPng('/assets/stickers/water_bottle.png', 'School Water Bottle');
-export const PantsFoldedSticker = renderStickerPng('/assets/stickers/pants_folded.png', 'Folded Pants');
-export const BirthdayCardSticker = renderStickerPng('/assets/stickers/birthday_card.png', 'Birthday Card');
+export const GameControllerSticker = renderThemedStickerPng(
+  '/assets/stickers/game_controller.png',
+  '/assets/stickers/turtle_game_controller.png',
+  'Video Game Controller',
+  '/assets/stickers/dino_game_controller.png',
+  '/assets/stickers/frog_game_controller.png',
+  '/assets/stickers/train_game_controller.png',
+  '/assets/stickers/space_game_controller.png'
+);
+export const BirthdayGiftBoxSticker = renderThemedStickerPng(
+  '/assets/stickers/birthday_gift_box.png',
+  '/assets/stickers/turtle_birthday_gift_box.png',
+  'Birthday Gift Box',
+  '/assets/stickers/dino_birthday_gift_box.png',
+  '/assets/stickers/frog_birthday_gift_box.png',
+  '/assets/stickers/train_birthday_gift_box.png',
+  '/assets/stickers/space_birthday_gift_box.png'
+);
+export const BirthdayCakeSliceSticker = renderThemedStickerPng(
+  '/assets/stickers/birthday_cake_slice.png',
+  '/assets/stickers/turtle_birthday_cake_slice.png',
+  'Birthday Cake Slice',
+  '/assets/stickers/dino_birthday_cake_slice.png',
+  '/assets/stickers/frog_birthday_cake_slice.png',
+  '/assets/stickers/train_birthday_cake_slice.png',
+  '/assets/stickers/space_birthday_cake_slice.png'
+);
+export const WaterBottleSticker = renderThemedStickerPng(
+  '/assets/stickers/water_bottle.png',
+  '/assets/stickers/turtle_water_bottle.png',
+  'School Water Bottle',
+  '/assets/stickers/dino_water_bottle.png',
+  '/assets/stickers/frog_water_bottle.png',
+  '/assets/stickers/train_water_bottle.png',
+  '/assets/stickers/space_water_bottle.png'
+);
+export const PantsFoldedSticker = renderThemedStickerPng(
+  '/assets/stickers/pants_folded.png',
+  '/assets/stickers/turtle_pants_folded.png',
+  'Folded Pants',
+  '/assets/stickers/dino_pants_folded.png',
+  '/assets/stickers/frog_pants_folded.png',
+  '/assets/stickers/train_pants_folded.png',
+  '/assets/stickers/space_pants_folded.png'
+);
+export const BirthdayCardSticker = renderThemedStickerPng(
+  '/assets/stickers/birthday_card.png',
+  '/assets/stickers/turtle_birthday_card.png',
+  'Birthday Card',
+  '/assets/stickers/dino_birthday_card.png',
+  '/assets/stickers/frog_birthday_card.png',
+  '/assets/stickers/train_birthday_card.png',
+  '/assets/stickers/space_birthday_card.png'
+);
 export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs');
 export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
 export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
@@ -970,6 +1018,12 @@ export const CookingPotSticker = renderStickerPng('/assets/stickers/cooking_pot.
 export const CaregiverResponseOkaySticker = renderStickerPng('/assets/stickers/caregiver_response_okay.png', 'Caregiver Okay Thumbs Up');
 
 export const TURTLE_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/turtle_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/turtle_birthday_cake_slice.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/turtle_game_controller.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/turtle_water_bottle.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/turtle_pants_folded.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/turtle_birthday_card.png',
   // Adventure Step Mappings
   '/assets/stickers/home_house.png': '/assets/stickers/turtle_moss_cottage_home.png',
   '/assets/stickers/car_ride.png': '/assets/stickers/turtle_bamboo_ferry.png',
@@ -1109,6 +1163,12 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/dino_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/dino_birthday_cake_slice.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/dino_game_controller.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/dino_water_bottle.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/dino_pants_folded.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/dino_birthday_card.png',
   // Adventure Step Mappings
   '/assets/stickers/home_house.png': '/assets/stickers/dino_cavern_retreat.png',
   '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/dino_slate_tablet_ipad.png',
@@ -1269,6 +1329,12 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const FROG_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/frog_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/frog_birthday_cake_slice.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/frog_game_controller.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/frog_water_bottle.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/frog_pants_folded.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/frog_birthday_card.png',
   // Adventure Step Mappings
   '/assets/stickers/home_house.png': '/assets/stickers/frog_willow_hollow_retreat.png',
   '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/frog_bamboo_tablet_ipad.png',
@@ -1431,6 +1497,12 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const SPACE_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/space_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/space_birthday_cake_slice.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/space_game_controller.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/space_water_bottle.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/space_pants_folded.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/space_birthday_card.png',
   // Adventure Step Mappings
   '/assets/stickers/toy_box.png': '/assets/stickers/space_travel_luggage.png',
   '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/space_tablet_ipad.png',
@@ -1606,6 +1678,12 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/train_birthday_gift_box.png',
+  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/train_birthday_cake_slice.png',
+  '/assets/stickers/game_controller.png': '/assets/stickers/train_game_controller.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/train_water_bottle.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/train_pants_folded.png',
+  '/assets/stickers/birthday_card.png': '/assets/stickers/train_birthday_card.png',
   // Train Adventure Batch 1 Swaps
   '/assets/stickers/waiting_room_couch.png': '/assets/stickers/train_waiting_room_bench.png',
   '/assets/stickers/waving_hand_hello.png': '/assets/stickers/train_waving_hand_hello.png',
