@@ -12,12 +12,17 @@ import {
   MessageSquare,
   ShieldCheck,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Plus,
+  Trash2,
+  Edit3
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 import { t } from '../services/translator';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
+import { CreateAdventureModal } from './adventures/CreateAdventureModal';
+import { CreateSocialStoryModal } from './adventures/CreateSocialStoryModal';
 
 const getAdventureSticker = (id: string): string | undefined => {
   if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
@@ -51,6 +56,8 @@ export const AdventuresView: React.FC = () => {
     speak,
     announce,
     completeAdventure,
+    deleteAdventure,
+    deleteSocialStory,
     setChildView,
     activeTheme,
   } = useApp();
@@ -67,6 +74,19 @@ export const AdventuresView: React.FC = () => {
 
   // Practice mode message
   const [practiceFeedback, setPracticeFeedback] = useState<string | null>(null);
+
+  // Custom Creation / Edit Modal States
+  const [isAdventureModalOpen, setIsAdventureModalOpen] = useState(false);
+  const [editingAdventure, setEditingAdventure] = useState<LifeAdventure | null>(null);
+
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [editingStory, setEditingStory] = useState<SocialStory | null>(null);
+
+  const [deletingItem, setDeletingItem] = useState<{
+    type: 'adventure' | 'story';
+    id: string;
+    title: string;
+  } | null>(null);
 
   const selectedAdventure = adventures.find((a) => a.id === activeAdventureId);
   const selectedStory = socialStories.find((s) => s.id === activeStoryId);
@@ -519,34 +539,91 @@ export const AdventuresView: React.FC = () => {
   // MAIN ADVENTURES / STORIES LIST
   return (
     <div className="flex flex-col flex-1 pb-24 max-w-4xl mx-auto w-full px-3 sm:px-4 py-2 space-y-4">
-      {/* Tab Switcher: Real-World Adventures vs Social Stories */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-1 shadow-xs gap-1">
-        <button
-          onClick={() => setActiveTab('adventures')}
-          className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-            activeTab === 'adventures'
-              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-          <span>{t('Life Adventures')} ({adventures.length})</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('stories')}
-          className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-            activeTab === 'stories'
-              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span>{t('Social Stories')} ({socialStories.length})</span>
-        </button>
+      {/* Tab Switcher & Quick Add Button Row */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <div className="flex flex-1 border border-slate-200 bg-white rounded-2xl p-1 shadow-xs gap-1">
+          <button
+            onClick={() => setActiveTab('adventures')}
+            className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'adventures'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>{t('Life Adventures')} ({adventures.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('stories')}
+            className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'stories'
+                ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-sm`
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>{t('Social Stories')} ({socialStories.length})</span>
+          </button>
+        </div>
+
+        {/* Header Action Button */}
+        {activeTab === 'adventures' ? (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingAdventure(null);
+              setIsAdventureModalOpen(true);
+              playChime('tap');
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>{t('Add Adventure')}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingStory(null);
+              setIsStoryModalOpen(true);
+              playChime('tap');
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>{t('Add Social Story')}</span>
+          </button>
+        )}
       </div>
 
       {activeTab === 'adventures' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Create Custom Adventure Card */}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingAdventure(null);
+              setIsAdventureModalOpen(true);
+              playChime('tap');
+            }}
+            className="w-full text-left rounded-3xl p-4 sm:p-5 border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/50 hover:bg-amber-100/60 transition-all active:scale-98 cursor-pointer flex items-center gap-3.5 group"
+          >
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 bg-white border-2 border-amber-300 group-hover:scale-105 transition shadow-2xs text-amber-600">
+              <Plus className="w-8 h-8 stroke-[2.5]" />
+            </div>
+            <div className="flex-1">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block bg-amber-200/80 text-amber-950 mb-1">
+                {t('Custom')}
+              </span>
+              <h3 className="font-black text-amber-950 text-base sm:text-lg leading-snug">
+                + {t('Add Your Own Adventure')}
+              </h3>
+              <p className="text-xs text-amber-800 font-medium mt-0.5">
+                {t('Create personalized steps, sensory tips, and helpful AAC phrases for any outing.')}
+              </p>
+            </div>
+          </button>
+
           {adventures.map((adventure) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-300'
@@ -560,55 +637,119 @@ export const AdventuresView: React.FC = () => {
             const subtextClass = isColorCoded ? 'text-emerald-700' : (activeTheme?.palette?.textAccent || 'text-amber-900');
 
             return (
-              <button
-                type="button"
+              <div
                 key={adventure.id}
-                aria-label={`Adventure: ${t(adventure.title)}. ${adventure.steps.length} steps. ${t(adventure.summary)}`}
-                onClick={() => {
-                  setActiveAdventureId(adventure.id);
-                  setAdventureSubTab('steps');
-                  setCurrentStepIndex(0);
-                  playChime('tap');
-                }}
-                className={`w-full text-left rounded-3xl p-4 sm:p-5 transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+                className={`relative group ${cardClass} flex flex-col justify-between`}
               >
-                <div className={iconBoxClass} aria-hidden="true">
-                  <RoutineStickerIcon
-                    emoji={adventure.stickerSrc || getAdventureSticker(adventure.id) || adventure.emoji}
-                    title={adventure.title}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
-                    {t(adventure.category)}
-                  </span>
-                  <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
-                    {t(adventure.title)}
-                  </h3>
-                  <p className="text-xs text-slate-700 font-medium line-clamp-2 mt-1 leading-relaxed">
-                    {t(adventure.summary)}
-                  </p>
-                  <div className="flex items-center gap-3 mt-3 text-xs font-bold text-slate-400">
-                    <span className="text-slate-600 font-bold">{adventure.steps.length} {t('steps')}</span>
-                    <span>•</span>
-                    <span className={subtextClass}>{t('Sensory guide')}</span>
-                    {adventure.completedCount ? (
-                      <>
-                        <span>•</span>
-                        <span className="text-amber-700 font-black">
-                          ⭐ {t('Done')} {adventure.completedCount}x
-                        </span>
-                      </>
-                    ) : null}
+                <button
+                  type="button"
+                  aria-label={`Adventure: ${t(adventure.title)}. ${adventure.steps.length} steps. ${t(adventure.summary)}`}
+                  onClick={() => {
+                    setActiveAdventureId(adventure.id);
+                    setAdventureSubTab('steps');
+                    setCurrentStepIndex(0);
+                    playChime('tap');
+                  }}
+                  className="w-full text-left cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                >
+                  <div className={iconBoxClass} aria-hidden="true">
+                    <RoutineStickerIcon
+                      emoji={adventure.stickerSrc || getAdventureSticker(adventure.id) || adventure.emoji}
+                      title={adventure.title}
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
-                </div>
-              </button>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
+                        {t(adventure.category)}
+                      </span>
+                      {adventure.isCustom && (
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200">
+                          {t('Custom')}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
+                      {t(adventure.title)}
+                    </h3>
+                    <p className="text-xs text-slate-700 font-medium line-clamp-2 mt-1 leading-relaxed">
+                      {t(adventure.summary)}
+                    </p>
+                    <div className="flex items-center gap-3 mt-3 text-xs font-bold text-slate-400">
+                      <span className="text-slate-600 font-bold">{adventure.steps.length} {t('steps')}</span>
+                      <span>•</span>
+                      <span className={subtextClass}>{t('Sensory guide')}</span>
+                      {adventure.completedCount ? (
+                        <>
+                          <span>•</span>
+                          <span className="text-amber-700 font-black">
+                            ⭐ {t('Done')} {adventure.completedCount}x
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </button>
+
+                {adventure.isCustom && (
+                  <div className="flex items-center justify-end gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAdventure(adventure);
+                        setIsAdventureModalOpen(true);
+                        playChime('tap');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                      title={t('Edit Adventure')}
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{t('Edit')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingItem({ type: 'adventure', id: adventure.id, title: adventure.title })}
+                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                      title={t('Delete Adventure')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t('Delete')}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Create Custom Story Card */}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingStory(null);
+              setIsStoryModalOpen(true);
+              playChime('tap');
+            }}
+            className="w-full text-left rounded-3xl p-4 sm:p-5 border-2 border-dashed border-indigo-300 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-100/60 transition-all active:scale-98 cursor-pointer flex items-center gap-3.5 group"
+          >
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center p-1.5 shrink-0 bg-white border-2 border-indigo-300 group-hover:scale-105 transition shadow-2xs text-indigo-600">
+              <Plus className="w-8 h-8 stroke-[2.5]" />
+            </div>
+            <div className="flex-1">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block bg-indigo-200/80 text-indigo-950 mb-1">
+                {t('Custom')}
+              </span>
+              <h3 className="font-black text-indigo-950 text-base sm:text-lg leading-snug">
+                + {t('Add Your Own Social Story')}
+              </h3>
+              <p className="text-xs text-indigo-800 font-medium mt-0.5">
+                {t('Write illustrated pages with comforting scripts, calming visuals, and takeaways.')}
+              </p>
+            </div>
+          </button>
+
           {socialStories.map((story) => {
             const cardClass = isColorCoded
               ? 'bg-white hover:bg-indigo-50/40 border-2 border-slate-200 hover:border-indigo-300'
@@ -622,42 +763,145 @@ export const AdventuresView: React.FC = () => {
             const subtextClass = isColorCoded ? 'text-indigo-700' : (activeTheme?.palette?.textAccent || 'text-amber-900');
 
             return (
-              <button
-                type="button"
+              <div
                 key={story.id}
-                aria-label={`Social Story: ${t(story.title)}. ${story.pages.length} pages.`}
-                onClick={() => {
-                  setActiveStoryId(story.id);
-                  setCurrentPageIndex(0);
-                  playChime('tap');
-                }}
-                className={`w-full text-left rounded-3xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(245,184,101,0.18)] transition-all active:scale-98 cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none ${cardClass}`}
+                className={`relative group ${cardClass} flex flex-col justify-between`}
               >
-                <div className={iconBoxClass} aria-hidden="true">
-                  <RoutineStickerIcon
-                    emoji={story.stickerSrc || getStorySticker(story.id) || story.emoji}
-                    title={story.title}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
-                    {t('Social Story')}
-                  </span>
-                  <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
-                    {t(story.title)}
-                  </h3>
-                  <p className="text-xs text-slate-700 font-medium mt-1 leading-relaxed">
-                    {story.pages.length} {t('illustrated pages • Calm & predictable expectations')}
-                  </p>
-                  <div className={`mt-3 text-xs font-bold flex items-center gap-1 ${subtextClass}`}>
-                    <span>{t('Read story')}</span>
-                    <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+                <button
+                  type="button"
+                  aria-label={`Social Story: ${t(story.title)}. ${story.pages.length} pages.`}
+                  onClick={() => {
+                    setActiveStoryId(story.id);
+                    setCurrentPageIndex(0);
+                    playChime('tap');
+                  }}
+                  className="w-full text-left cursor-pointer flex items-start gap-3.5 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                >
+                  <div className={iconBoxClass} aria-hidden="true">
+                    <RoutineStickerIcon
+                      emoji={story.stickerSrc || getStorySticker(story.id) || story.emoji}
+                      title={story.title}
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
-                </div>
-              </button>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block ${badgeClass}`}>
+                        {story.category ? t(story.category) : t('Social Story')}
+                      </span>
+                      {story.isCustom && (
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-900 border border-indigo-200">
+                          {t('Custom')}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1 leading-snug">
+                      {t(story.title)}
+                    </h3>
+                    <p className="text-xs text-slate-700 font-medium mt-1 leading-relaxed">
+                      {story.summary ? t(story.summary) : `${story.pages.length} ${t('illustrated pages • Calm & predictable expectations')}`}
+                    </p>
+                    <div className={`mt-3 text-xs font-bold flex items-center gap-1 ${subtextClass}`}>
+                      <span>{t('Read story')}</span>
+                      <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+                    </div>
+                  </div>
+                </button>
+
+                {story.isCustom && (
+                  <div className="flex items-center justify-end gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingStory(story);
+                        setIsStoryModalOpen(true);
+                        playChime('tap');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                      title={t('Edit Social Story')}
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{t('Edit')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingItem({ type: 'story', id: story.id, title: story.title })}
+                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                      title={t('Delete Social Story')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t('Delete')}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
+        </div>
+      )}
+
+      {/* CREATE / EDIT ADVENTURE MODAL */}
+      {isAdventureModalOpen && (
+        <CreateAdventureModal
+          isOpen={isAdventureModalOpen}
+          onClose={() => {
+            setIsAdventureModalOpen(false);
+            setEditingAdventure(null);
+          }}
+          initialAdventure={editingAdventure}
+        />
+      )}
+
+      {/* CREATE / EDIT SOCIAL STORY MODAL */}
+      {isStoryModalOpen && (
+        <CreateSocialStoryModal
+          isOpen={isStoryModalOpen}
+          onClose={() => {
+            setIsStoryModalOpen(false);
+            setEditingStory(null);
+          }}
+          initialStory={editingStory}
+        />
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deletingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-200 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center mb-3">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-black text-slate-900 mb-1">
+              {deletingItem.type === 'adventure' ? t('Delete Adventure?') : t('Delete Social Story?')}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mb-5">
+              "{deletingItem.title}" {t('will be permanently removed.')}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setDeletingItem(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                {t('Cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deletingItem.type === 'adventure') {
+                    deleteAdventure(deletingItem.id);
+                  } else {
+                    deleteSocialStory(deletingItem.id);
+                  }
+                  setDeletingItem(null);
+                  playChime('clear');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition shadow-sm cursor-pointer"
+              >
+                {t('Delete')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

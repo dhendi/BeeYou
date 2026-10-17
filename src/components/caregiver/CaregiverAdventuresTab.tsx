@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { LifeAdventure, AdventureStep } from '../../types';
+import { LifeAdventure, AdventureStep, SocialStory } from '../../types';
 import {
   Lightbulb,
   MessageSquare,
@@ -26,11 +26,13 @@ import {
   Volume2,
   HelpCircle,
   Footprints,
-  RotateCcw
+  RotateCcw,
+  BookOpen
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { IconLibraryModal } from '../common/IconLibraryModal';
+import { CreateSocialStoryModal } from '../adventures/CreateSocialStoryModal';
 
 const getAdventureSticker = (id: string): string | undefined => {
   if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
@@ -154,7 +156,26 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
   onShowNotification,
   onStartTour,
 }) => {
-  const { adventures, addAdventure, updateAdventure, deleteAdventure, speak } = useApp();
+  const {
+    adventures,
+    addAdventure,
+    updateAdventure,
+    deleteAdventure,
+    socialStories,
+    addSocialStory,
+    deleteSocialStory,
+    speak
+  } = useApp();
+
+  // Sub-tab: Adventures vs Social Stories
+  const [mainTab, setMainTab] = useState<'adventures' | 'stories'>('adventures');
+
+  // Social Story States
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [editingStory, setEditingStory] = useState<SocialStory | null>(null);
+  const [deletingStory, setDeletingStory] = useState<SocialStory | null>(null);
+  const [expandedStoryIds, setExpandedStoryIds] = useState<Set<string>>(new Set());
+  const [storySearchQuery, setStorySearchQuery] = useState('');
 
   // Search & Category Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -541,10 +562,88 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
     });
   }, [adventures, selectedCategoryFilter, searchQuery]);
 
+  const filteredStories = useMemo(() => {
+    return socialStories.filter((s) => {
+      if (!storySearchQuery.trim()) return true;
+      const q = storySearchQuery.toLowerCase();
+      const inTitle = s.title.toLowerCase().includes(q);
+      const inCategory = s.category?.toLowerCase().includes(q);
+      const inTakeaways = s.keyTakeaways?.some((k) => k.toLowerCase().includes(q));
+      const inPages = s.pages?.some((p) => p.text.toLowerCase().includes(q));
+      return inTitle || inCategory || inTakeaways || inPages;
+    });
+  }, [socialStories, storySearchQuery]);
+
+  const toggleExpandStory = (id: string) => {
+    setExpandedStoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    playChime('tap');
+  };
+
+  const handleDuplicateStory = (story: SocialStory) => {
+    const duplicated: Omit<SocialStory, 'id'> = {
+      title: `${story.title} (Copy)`,
+      category: story.category,
+      summary: story.summary,
+      emoji: story.emoji,
+      stickerSrc: story.stickerSrc,
+      pages: story.pages.map((p) => ({ ...p })),
+      keyTakeaways: [...(story.keyTakeaways || [])],
+      suggestedPhrases: [...(story.suggestedPhrases || [])],
+      isCustom: true,
+    };
+    addSocialStory(duplicated);
+    playChime('star');
+    if (onShowNotification) onShowNotification(t("Story duplicated successfully!"));
+  };
+
   return (
     <div className="space-y-6">
-      {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      {/* SUB-TAB TOGGLE: LIFE ADVENTURES vs SOCIAL STORIES */}
+      <div className="flex border border-slate-200 bg-white rounded-2xl p-1 shadow-2xs gap-1 max-w-md">
+        <button
+          type="button"
+          onClick={() => {
+            setMainTab('adventures');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
+            mainTab === 'adventures'
+              ? 'bg-amber-500 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+          <span>{t("Life Adventures")} ({adventures.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMainTab('stories');
+            playChime('tap');
+          }}
+          className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
+            mainTab === 'stories'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>{t("Social Stories")} ({socialStories.length})</span>
+        </button>
+      </div>
+
+      {mainTab === 'adventures' ? (
+        <div className="space-y-6">
+          {/* HEADER SECTION */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-black text-slate-900">{t("Life Adventures & Contextual AAC")}</h2>
@@ -997,6 +1096,261 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
           })
         )}
       </div>
+        </div>
+      ) : (
+        /* SOCIAL STORIES MANAGEMENT SECTION */
+        <div className="space-y-6">
+          {/* STORIES HEADER */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900">{t("Social Stories & Scripts")}</h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900 font-extrabold text-[11px]">
+                  {socialStories.length} {t("Stories")}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                {t("Help children understand social expectations, transitions, and emotions with illustrated storybooks.")}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingStory(null);
+                  setIsStoryModalOpen(true);
+                  playChime('tap');
+                }}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs transition active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>{t("Add New Social Story")}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* QUICK STARTER STORIES BANNER */}
+          <div className="bg-linear-to-r from-indigo-50 via-purple-50/60 to-pink-50 border-2 border-indigo-200/80 rounded-2xl p-3.5 sm:p-4">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                  {t("Quick-Start Starter Stories:")}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-slate-500">
+                {t("One-click to customize & add")}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                { title: 'Taking Turns on the Playground', emoji: '🛝', desc: 'Waiting calmly for swings & asking for turns' },
+                { title: 'When It Gets Too Loud', emoji: '🎧', desc: 'Using headphones & finding a quiet corner' },
+                { title: 'Trying a New Food', emoji: '🥗', desc: 'Curiosity, mouse nibbles, and polite choices' }
+              ].map((s, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setEditingStory(null);
+                    setIsStoryModalOpen(true);
+                  }}
+                  className="p-2.5 rounded-xl bg-white hover:bg-indigo-100/60 border border-indigo-200/80 transition text-left shadow-2xs group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{s.emoji}</span>
+                    <span className="text-xs font-black text-slate-800 line-clamp-1">{s.title}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-medium line-clamp-1 mt-1">{s.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SEARCH BAR */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              value={storySearchQuery}
+              onChange={(e) => setStorySearchQuery(e.target.value)}
+              placeholder={t("Search social stories by title, page text, or takeaways...")}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-400 bg-white"
+            />
+          </div>
+
+          {/* STORIES LIST */}
+          <div className="space-y-3.5">
+            {filteredStories.map((story) => {
+              const isExpanded = expandedStoryIds.has(story.id);
+
+              return (
+                <div
+                  key={story.id}
+                  className="bg-white rounded-2xl border-2 border-slate-200 hover:border-indigo-200 transition shadow-xs overflow-hidden"
+                >
+                  <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                        <RoutineStickerIcon
+                          emoji={story.stickerSrc || story.emoji}
+                          title={story.title}
+                          className="w-10 h-10 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {story.category ? t(story.category) : t('Social Story')}
+                          </span>
+                          {story.isCustom && (
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200">
+                              {t('Custom')}
+                            </span>
+                          )}
+                          <span className="text-xs font-bold text-slate-400">
+                            {story.pages.length} {t('pages')}
+                          </span>
+                        </div>
+                        <h3 className="font-black text-slate-900 text-base sm:text-lg mt-1">
+                          {t(story.title)}
+                        </h3>
+                        <p className="text-xs text-slate-600 font-medium mt-0.5 line-clamp-2">
+                          {story.summary ? t(story.summary) : story.pages[0]?.text}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fullScript = story.pages.map((p) => p.text).join('. ');
+                          speak(fullScript);
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                        title={t("Listen to story read aloud")}
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t("Read Aloud")}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingStory(story);
+                          setIsStoryModalOpen(true);
+                          playChime('tap');
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                        title={t("Edit Story")}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>{t("Edit")}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDuplicateStory(story)}
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                        title={t("Duplicate Story")}
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t("Copy")}</span>
+                      </button>
+                      {story.isCustom && (
+                        <button
+                          type="button"
+                          onClick={() => setDeletingStory(story)}
+                          className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                          title={t("Delete Story")}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{t("Delete")}</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpandStory(story.id)}
+                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
+                        title={isExpanded ? t("Collapse") : t("Expand")}
+                      >
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* EXPANDED STORY PREVIEW */}
+                  {isExpanded && (
+                    <div className="border-t border-slate-100 p-4 sm:p-5 bg-slate-50/50 space-y-4">
+                      <div>
+                        <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                          {t("Story Pages:")}
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                          {story.pages.map((p, pIdx) => (
+                            <div
+                              key={pIdx}
+                              className="p-3 rounded-xl bg-white border border-slate-200 flex items-start gap-2.5 shadow-2xs"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                                <RoutineStickerIcon emoji={p.emoji} className="w-5 h-5 object-contain" />
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-[10px] font-black text-indigo-700 block">
+                                  {t("Page")} {p.pageNumber || pIdx + 1}
+                                </span>
+                                <p className="text-xs font-medium text-slate-700 leading-snug mt-0.5">
+                                  {p.text}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {story.keyTakeaways && story.keyTakeaways.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                            {t("Key Takeaways:")}
+                          </h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {story.keyTakeaways.map((k, kIdx) => (
+                              <span
+                                key={kIdx}
+                                className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold"
+                              >
+                                ✓ {k}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {story.suggestedPhrases && story.suggestedPhrases.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                            {t("Suggested AAC Phrases:")}
+                          </h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {story.suggestedPhrases.map((phrase, phIdx) => (
+                              <span
+                                key={phIdx}
+                                className="px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold"
+                              >
+                                "{phrase}"
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ADVENTURE CREATOR / EDITOR MODAL */}
       {isEditorOpen && (
@@ -1548,6 +1902,57 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
               <button
                 type="button"
                 onClick={handleConfirmDelete}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition shadow-xs active:scale-95 cursor-pointer"
+              >
+                {t("Yes, Delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SOCIAL STORY MODAL */}
+      {isStoryModalOpen && (
+        <CreateSocialStoryModal
+          isOpen={isStoryModalOpen}
+          onClose={() => {
+            setIsStoryModalOpen(false);
+            setEditingStory(null);
+          }}
+          initialStory={editingStory}
+        />
+      )}
+
+      {/* STORY DELETE CONFIRMATION MODAL */}
+      {deletingStory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border-2 border-rose-300 p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-black text-base text-slate-900">
+                {t("Delete Social Story?")}
+              </h3>
+              <p className="text-xs text-slate-600 font-medium mt-1">
+                {t("Are you sure you want to delete")} <span className="font-black text-slate-800">"{deletingStory.title}"</span>? {t("This action cannot be undone.")}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletingStory(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              >
+                {t("Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteSocialStory(deletingStory.id);
+                  setDeletingStory(null);
+                  playChime('clear');
+                }}
                 className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition shadow-xs active:scale-95 cursor-pointer"
               >
                 {t("Yes, Delete")}

@@ -226,6 +226,8 @@ export interface SocialStoryPage {
 export interface SocialStory {
   id: string;
   title: string;
+  category?: string;
+  summary?: string;
   emoji: string;
   stickerSrc?: string;
   pages: SocialStoryPage[];

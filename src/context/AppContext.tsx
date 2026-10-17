@@ -222,6 +222,8 @@ export interface AppContextType {
   // Social Stories
   socialStories: SocialStory[];
   addSocialStory: (story: Omit<SocialStory, 'id'>) => void;
+  updateSocialStory: (story: SocialStory) => void;
+  deleteSocialStory: (id: string) => void;
 
   awardStars: (amount: number) => void;
 
@@ -1083,6 +1085,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     // Social Stories
     socialStories: gamification.socialStories,
     addSocialStory: gamification.addSocialStory,
+    updateSocialStory: gamification.updateSocialStory,
+    deleteSocialStory: gamification.deleteSocialStory,
 
     awardStars: gamification.awardStars,
 

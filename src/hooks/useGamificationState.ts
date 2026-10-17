@@ -68,7 +68,33 @@ export function useGamificationState({
   });
   const [skills, setSkills] = useState<LifeSkill[]>(DEFAULT_SKILLS);
   const [habits, setHabits] = useState<DailyHabit[]>(DEFAULT_DAILY_HABITS);
-  const [socialStories, setSocialStories] = useState<SocialStory[]>(DEFAULT_SOCIAL_STORIES);
+  const [socialStories, setSocialStories] = useState<SocialStory[]>(() => {
+    try {
+      const saved = localStorage.getItem('beeyou_social_stories');
+      if (saved) {
+        const parsed: SocialStory[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const customStories = parsed.filter((s) => s.isCustom);
+          const defaultMap = new Map(DEFAULT_SOCIAL_STORIES.map((d) => [d.id, d]));
+          const savedDefaults = parsed
+            .filter((s) => !s.isCustom)
+            .map((s) => {
+              const def = defaultMap.get(s.id);
+              if (!def) return s;
+              return {
+                ...def,
+                ...s,
+                stickerSrc: def.stickerSrc || s.stickerSrc,
+              };
+            });
+          const existingIds = new Set(savedDefaults.map((s) => s.id));
+          const missingDefaults = DEFAULT_SOCIAL_STORIES.filter((d) => !existingIds.has(d.id));
+          return [...savedDefaults, ...missingDefaults, ...customStories];
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_SOCIAL_STORIES;
+  });
   const [emotionHistory, setEmotionHistory] = useState<EmotionRecord[]>([]);
   const [currentMood, setCurrentMood] = useState<EmotionType | null>('happy');
 
@@ -338,8 +364,36 @@ export function useGamificationState({
       ...story,
       isCustom: true,
     };
-    setSocialStories((prev) => [...prev, newStory]);
+    setSocialStories((prev) => {
+      const updated = [...prev, newStory];
+      try {
+        localStorage.setItem('beeyou_social_stories', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     if (soundEffects) playChime('star');
+  };
+
+  const updateSocialStory = (story: SocialStory) => {
+    setSocialStories((prev) => {
+      const updated = prev.map((s) => (s.id === story.id ? story : s));
+      try {
+        localStorage.setItem('beeyou_social_stories', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    if (soundEffects) playChime('tap');
+  };
+
+  const deleteSocialStory = (id: string) => {
+    setSocialStories((prev) => {
+      const updated = prev.filter((s) => s.id !== id);
+      try {
+        localStorage.setItem('beeyou_social_stories', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    if (soundEffects) playChime('clear');
   };
 
   return {
@@ -376,6 +430,8 @@ export function useGamificationState({
     socialStories,
     setSocialStories,
     addSocialStory,
+    updateSocialStory,
+    deleteSocialStory,
 
     emotionHistory,
     setEmotionHistory,
