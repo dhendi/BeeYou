@@ -1321,6 +1321,25 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/laundry_hamper.png': '/assets/stickers/space_laundry_hamper.png',
   '/assets/stickers/refresh_repeat.png': '/assets/stickers/space_refresh_repeat.png',
   '/assets/stickers/circular_arrow.png': '/assets/stickers/space_refresh_repeat.png',
+  // Batch 3 Moods, Personas, Habitats & Hubs
+  '/assets/stickers/mood_happy.png': '/assets/stickers/space_mood_happy.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/space_mood_calm.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/space_mood_excited.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/space_mood_sleepy.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/space_mood_unsure.png',
+  '/assets/stickers/child_persona.png': '/assets/stickers/space_child_persona.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/space_adult_briefcase.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/space_caregiver_phone.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/space_language_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/space_trial_crown.png',
+  '/assets/stickers/home_house.png': '/assets/stickers/space_home_house.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/space_car_ride.png',
+  '/assets/stickers/car_travel.png': '/assets/stickers/space_car_ride.png',
+  '/assets/stickers/car_on_my_way.png': '/assets/stickers/space_car_ride.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/space_pet_care.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/space_pet_care.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/space_pizza_slice.png',
+  '/assets/stickers/about_id.png': '/assets/stickers/space_about_id.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
