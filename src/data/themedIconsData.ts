@@ -3,7 +3,7 @@ export interface ThemedIconItem {
   value: string;
   label: string;
   shortLabel: string;
-  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'frog' | 'space' | 'magic' | 'train' | 'rocker' | 'all';
+  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'frog' | 'space' | 'magic' | 'train' | 'rocker' | 'ocean' | 'all';
   keywords: string[];
 }
 
@@ -1470,6 +1470,129 @@ export const COSMIC_SPACE_ICONS: ThemedIconItem[] = [
   },
 ];
 
+export const OCEAN_SPLASH_ICONS: ThemedIconItem[] = [
+  {
+    id: 'ocean_alarm_clock',
+    value: '/assets/stickers/ocean_porthole_alarm.png',
+    label: 'Submarine Porthole Alarm Clock',
+    shortLabel: 'Porthole Clock',
+    themeCategory: 'ocean',
+    keywords: ['alarm', 'clock', 'morning', 'wake', 'time', 'submarine', 'ocean'],
+  },
+  {
+    id: 'ocean_toothbrush',
+    value: '/assets/stickers/ocean_coral_toothbrush.png',
+    label: 'Coral & Seaweed Toothbrush',
+    shortLabel: 'Coral Brush',
+    themeCategory: 'ocean',
+    keywords: ['brush', 'teeth', 'toothbrush', 'coral', 'clean', 'hygiene', 'ocean'],
+  },
+  {
+    id: 'ocean_clothes_dressed',
+    value: '/assets/stickers/ocean_neoprene_wetsuit.png',
+    label: 'Neoprene Diving Wetsuit',
+    shortLabel: 'Diving Wetsuit',
+    themeCategory: 'ocean',
+    keywords: ['clothes', 'dressed', 'wetsuit', 'wear', 'outfit', 'diving', 'ocean'],
+  },
+  {
+    id: 'ocean_pancakes_breakfast',
+    value: '/assets/stickers/ocean_starfish_pancakes.png',
+    label: 'Starfish Pancake Stack',
+    shortLabel: 'Starfish Pancakes',
+    themeCategory: 'ocean',
+    keywords: ['breakfast', 'pancakes', 'food', 'starfish', 'eat', 'morning', 'ocean'],
+  },
+  {
+    id: 'ocean_school_bus',
+    value: '/assets/stickers/ocean_yellow_submarine.png',
+    label: 'Yellow Submarine Shuttle',
+    shortLabel: 'Submarine Shuttle',
+    themeCategory: 'ocean',
+    keywords: ['bus', 'travel', 'ride', 'submarine', 'transit', 'school', 'ocean'],
+  },
+  {
+    id: 'ocean_backpack_school',
+    value: '/assets/stickers/ocean_nautilus_backpack.png',
+    label: 'Nautilus Shell Backpack',
+    shortLabel: 'Nautilus Pack',
+    themeCategory: 'ocean',
+    keywords: ['backpack', 'bag', 'school', 'nautilus', 'pack', 'supplies', 'ocean'],
+  },
+  {
+    id: 'ocean_school_building',
+    value: '/assets/stickers/ocean_coral_schoolhouse.png',
+    label: 'Coral Reef Schoolhouse',
+    shortLabel: 'Reef School',
+    themeCategory: 'ocean',
+    keywords: ['school', 'building', 'learn', 'study', 'class', 'coral', 'ocean'],
+  },
+  {
+    id: 'ocean_sandwich_lunch',
+    value: '/assets/stickers/ocean_clamshell_bento.png',
+    label: 'Clam Shell Bento Box',
+    shortLabel: 'Clamshell Bento',
+    themeCategory: 'ocean',
+    keywords: ['lunch', 'sandwich', 'bento', 'food', 'eat', 'meal', 'clamshell', 'ocean'],
+  },
+  {
+    id: 'ocean_routine_water_drink',
+    value: '/assets/stickers/ocean_seaglass_canteen.png',
+    label: 'Sea Glass Canteen',
+    shortLabel: 'Sea Glass Canteen',
+    themeCategory: 'ocean',
+    keywords: ['water', 'drink', 'canteen', 'hydrate', 'bottle', 'thirst', 'ocean'],
+  },
+  {
+    id: 'ocean_sneaker_shoes',
+    value: '/assets/stickers/ocean_aqua_shoes.png',
+    label: 'Aqua Water Shoes',
+    shortLabel: 'Aqua Shoes',
+    themeCategory: 'ocean',
+    keywords: ['shoes', 'sneakers', 'feet', 'footwear', 'aqua', 'swim', 'ocean'],
+  },
+  {
+    id: 'ocean_shower_wash',
+    value: '/assets/stickers/ocean_shell_shower.png',
+    label: 'Seaside Shell Showerhead',
+    shortLabel: 'Shell Shower',
+    themeCategory: 'ocean',
+    keywords: ['shower', 'wash', 'clean', 'bath', 'water', 'hygiene', 'ocean'],
+  },
+  {
+    id: 'ocean_apple_snack',
+    value: '/assets/stickers/ocean_watermelon_kelp_snack.png',
+    label: 'Watermelon & Kelp Snack',
+    shortLabel: 'Melon & Kelp Snack',
+    themeCategory: 'ocean',
+    keywords: ['snack', 'fruit', 'apple', 'watermelon', 'kelp', 'eat', 'ocean'],
+  },
+  {
+    id: 'ocean_dinner_bowl',
+    value: '/assets/stickers/ocean_abalone_stew.png',
+    label: 'Abalone Shell Stew Bowl',
+    shortLabel: 'Abalone Stew',
+    themeCategory: 'ocean',
+    keywords: ['dinner', 'bowl', 'stew', 'soup', 'meal', 'food', 'abalone', 'ocean'],
+  },
+  {
+    id: 'ocean_bedtime_sleep',
+    value: '/assets/stickers/ocean_pearl_oyster_bed.png',
+    label: 'Pearl Oyster Bed',
+    shortLabel: 'Oyster Bed',
+    themeCategory: 'ocean',
+    keywords: ['bed', 'bedtime', 'sleep', 'night', 'rest', 'oyster', 'pearl', 'ocean'],
+  },
+  {
+    id: 'ocean_mascot',
+    value: '/assets/stickers/ocean_scuba_diver_mascot.png',
+    label: 'Scuba Diver Mascot',
+    shortLabel: 'Scuba Mascot',
+    themeCategory: 'ocean',
+    keywords: ['mascot', 'scuba', 'diver', 'guide', 'companion', 'ocean'],
+  },
+];
+
 export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   if (!themeCategoryOrId) return TURTLE_SANCTUARY_ICONS;
   const isTurtle = themeCategoryOrId === 'turtle' || themeCategoryOrId === 'theme-turtle';
@@ -1491,6 +1614,10 @@ export function getThemedIcons(themeCategoryOrId?: string): ThemedIconItem[] {
   const isSpace = themeCategoryOrId === 'space' || themeCategoryOrId === 'theme-space';
   if (isSpace) {
     return COSMIC_SPACE_ICONS;
+  }
+  const isOcean = themeCategoryOrId === 'ocean' || themeCategoryOrId === 'theme-ocean';
+  if (isOcean) {
+    return OCEAN_SPLASH_ICONS;
   }
   return OTHER_THEMED_ICONS.filter(
     (item) => item.themeCategory === themeCategoryOrId || themeCategoryOrId.includes(item.themeCategory)

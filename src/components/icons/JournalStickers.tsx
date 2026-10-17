@@ -22,6 +22,7 @@ function checkActiveThemeCategory(): string {
       if (cat === 'frog' || id === 'theme-frog') return 'frog';
       if (cat === 'train' || id === 'theme-trains') return 'train';
       if (cat === 'space' || id === 'theme-space') return 'space';
+      if (cat === 'ocean' || id === 'theme-ocean') return 'ocean';
     }
     if (typeof localStorage !== 'undefined') {
       const savedId = localStorage.getItem('beeyou_active_theme_id');
@@ -30,6 +31,7 @@ function checkActiveThemeCategory(): string {
       if (savedId === 'theme-frog') return 'frog';
       if (savedId === 'theme-trains') return 'train';
       if (savedId === 'theme-space') return 'space';
+      if (savedId === 'theme-ocean') return 'ocean';
     }
   } catch (e) {}
   return 'default';
@@ -74,6 +76,10 @@ export function useIsTrainTheme(): boolean {
   return useActiveThemeCategory() === 'train';
 }
 
+export function useIsOceanTheme(): boolean {
+  return useActiveThemeCategory() === 'ocean';
+}
+
 const renderStickerPng = (src: string, alt: string) => {
   const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
     const theme = useActiveThemeCategory();
@@ -88,6 +94,8 @@ const renderStickerPng = (src: string, alt: string) => {
       currentSrc = TRAIN_STICKER_SWAPS[src];
     } else if (theme === 'space' && SPACE_STICKER_SWAPS[src]) {
       currentSrc = SPACE_STICKER_SWAPS[src];
+    } else if (theme === 'ocean' && OCEAN_STICKER_SWAPS[src]) {
+      currentSrc = OCEAN_STICKER_SWAPS[src];
     }
     return (
       <img
@@ -1872,6 +1880,58 @@ export const TRAIN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bee_mascot.png': '/assets/stickers/train_mascot.png',
 };
 
+export const OCEAN_STICKER_SWAPS: Record<string, string> = {
+  // Batch 1 Core Routine Swaps
+  '/assets/stickers/alarm_clock.png': '/assets/stickers/ocean_porthole_alarm.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/ocean_porthole_alarm.png',
+  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/ocean_porthole_alarm.png',
+
+  '/assets/stickers/toothbrush.png': '/assets/stickers/ocean_coral_toothbrush.png',
+  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/ocean_coral_toothbrush.png',
+
+  '/assets/stickers/clothes_dressed.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
+  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
+  '/assets/stickers/pants_folded.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
+
+  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/ocean_starfish_pancakes.png',
+  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/ocean_starfish_pancakes.png',
+
+  '/assets/stickers/school_bus.png': '/assets/stickers/ocean_yellow_submarine.png',
+
+  '/assets/stickers/backpack_school.png': '/assets/stickers/ocean_nautilus_backpack.png',
+  '/assets/stickers/backpack.png': '/assets/stickers/ocean_nautilus_backpack.png',
+
+  '/assets/stickers/school_building.png': '/assets/stickers/ocean_coral_schoolhouse.png',
+
+  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/ocean_clamshell_bento.png',
+  '/assets/stickers/lunch_box.png': '/assets/stickers/ocean_clamshell_bento.png',
+
+  '/assets/stickers/routine_water_drink.png': '/assets/stickers/ocean_seaglass_canteen.png',
+  '/assets/stickers/drink_water.png': '/assets/stickers/ocean_seaglass_canteen.png',
+  '/assets/stickers/fav_water.png': '/assets/stickers/ocean_seaglass_canteen.png',
+  '/assets/stickers/water_bottle.png': '/assets/stickers/ocean_seaglass_canteen.png',
+
+  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/ocean_aqua_shoes.png',
+
+  '/assets/stickers/shower_wash.png': '/assets/stickers/ocean_shell_shower.png',
+  '/assets/stickers/bathtub_wash.png': '/assets/stickers/ocean_shell_shower.png',
+  '/assets/stickers/bath_time.png': '/assets/stickers/ocean_shell_shower.png',
+  '/assets/stickers/fav_bath.png': '/assets/stickers/ocean_shell_shower.png',
+
+  '/assets/stickers/apple_snack.png': '/assets/stickers/ocean_watermelon_kelp_snack.png',
+
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/ocean_abalone_stew.png',
+  '/assets/stickers/cooking_pot.png': '/assets/stickers/ocean_abalone_stew.png',
+
+  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
+  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
+  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
+
+  '/assets/stickers/ocean_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
+  '/assets/stickers/turtle_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
+  '/assets/stickers/bee_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
+};
+
 /**
  * Universal component that replaces raw emojis in routines with cute hand-drawn journal stickers.
  * Optically weighted to maintain harmonious sizing across all steps.
@@ -1892,6 +1952,7 @@ export const RoutineStickerIcon: React.FC<{
   const isFrog = activeTheme === 'frog';
   const isTrain = activeTheme === 'train';
   const isSpace = activeTheme === 'space';
+  const isOcean = activeTheme === 'ocean';
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
@@ -1906,6 +1967,8 @@ export const RoutineStickerIcon: React.FC<{
       finalSrc = TRAIN_STICKER_SWAPS[normEmoji];
     } else if (isSpace && SPACE_STICKER_SWAPS[normEmoji]) {
       finalSrc = SPACE_STICKER_SWAPS[normEmoji];
+    } else if (isOcean && OCEAN_STICKER_SWAPS[normEmoji]) {
+      finalSrc = OCEAN_STICKER_SWAPS[normEmoji];
     }
     return (
       <img
