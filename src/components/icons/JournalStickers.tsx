@@ -1930,6 +1930,33 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/ocean_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
   '/assets/stickers/turtle_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
   '/assets/stickers/bee_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
+
+  // Batch 2 Activities, Snacks, Tools & Regulation Swaps
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/ocean_seaside_mug_cocoa.png',
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/ocean_seasalt_chocolate.png',
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/ocean_clownfish_puzzle.png',
+  '/assets/stickers/fav_music.png': '/assets/stickers/ocean_conch_headphones.png',
+  '/assets/stickers/music_note.png': '/assets/stickers/ocean_conch_headphones.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/ocean_conch_headphones.png',
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/ocean_seaglass_heart.png',
+  '/assets/stickers/heart_here_for_you.png': '/assets/stickers/ocean_seaglass_heart.png',
+  '/assets/stickers/fav_outside.png': '/assets/stickers/ocean_sunny_beach_view.png',
+  '/assets/stickers/outdoor_sun.png': '/assets/stickers/ocean_sunny_beach_view.png',
+  '/assets/stickers/fav_stop.png': '/assets/stickers/ocean_buoy_stop.png',
+  '/assets/stickers/help_sos.png': '/assets/stickers/ocean_lifebuoy_sos.png',
+  '/assets/stickers/alert_sos_shield.png': '/assets/stickers/ocean_lifebuoy_sos.png',
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/ocean_lifebuoy_sos.png',
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/ocean_ships_helm_wheel.png',
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/ocean_energy_spoons.png',
+  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/ocean_captains_logbook.png',
+  '/assets/stickers/laundry_hamper.png': '/assets/stickers/ocean_seaglass_basket.png',
+  '/assets/stickers/refresh_repeat.png': '/assets/stickers/ocean_wave_loop.png',
+  '/assets/stickers/circular_arrow.png': '/assets/stickers/ocean_wave_loop.png',
+  '/assets/stickers/toy_box.png': '/assets/stickers/ocean_treasure_toy_chest.png',
+  '/assets/stickers/teddy_bear.png': '/assets/stickers/ocean_treasure_toy_chest.png',
+  '/assets/stickers/fav_lego.png': '/assets/stickers/ocean_treasure_toy_chest.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/ocean_nautical_chart_study.png',
+  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/ocean_nautical_chart_study.png',
 };
 
 /**
