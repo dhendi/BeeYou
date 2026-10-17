@@ -1262,6 +1262,24 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  // Batch 4 New Train Swaps
+  '/assets/stickers/morning_sunrise.png': '/assets/stickers/train_morning_sunrise.png',
+  '/assets/stickers/evening_moon.png': '/assets/stickers/train_evening_moon.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/train_reward_trophy.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/train_star_gold.png',
+  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/train_feelings_thermometer.png',
+  '/assets/stickers/battery_meter.png': '/assets/stickers/train_battery_meter.png',
+  '/assets/stickers/calm_sparkles.png': '/assets/stickers/train_calm_sparkles.png',
+  '/assets/stickers/quiet_voice.png': '/assets/stickers/train_quiet_voice.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/train_speech_bubble.png',
+  '/assets/stickers/science_flask.png': '/assets/stickers/train_science_flask.png',
+  '/assets/stickers/sunny_clear.png': '/assets/stickers/train_sunny_clear.png',
+  '/assets/stickers/rain_cloud.png': '/assets/stickers/train_rain_cloud.png',
+  '/assets/stickers/snow_weather.png': '/assets/stickers/train_snow_weather.png',
+  '/assets/stickers/travel_luggage.png': '/assets/stickers/train_travel_luggage.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/train_stethoscope.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/train_stethoscope.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/train_stethoscope.png',
   // Batch 3 New Train Swaps
   '/assets/stickers/mood_happy.png': '/assets/stickers/train_mood_happy.png',
   '/assets/stickers/fav_happy.png': '/assets/stickers/train_mood_happy.png',
