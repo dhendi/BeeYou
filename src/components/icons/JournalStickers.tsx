@@ -1377,6 +1377,23 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/cutlery_meal.png': '/assets/stickers/space_cutlery_meal.png',
   '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/space_grounding_touch_hand.png',
   '/assets/stickers/cloudy_weather.png': '/assets/stickers/space_cloudy_weather.png',
+  // Batch 6 Destinations, Travel & Station Living
+  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/space_adventure_restaurant.png',
+  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/space_adventure_museum_visit.png',
+  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/space_adventure_bowling_alley.png',
+  '/assets/stickers/airplane_flight.png': '/assets/stickers/space_airplane_flight.png',
+  '/assets/stickers/boarding_ticket.png': '/assets/stickers/space_boarding_ticket.png',
+  '/assets/stickers/passport_book.png': '/assets/stickers/space_passport_book.png',
+  '/assets/stickers/tablet_ipad.png': '/assets/stickers/space_tablet_ipad.png',
+  '/assets/stickers/potted_plant.png': '/assets/stickers/space_potted_plant.png',
+  '/assets/stickers/clock_time.png': '/assets/stickers/space_clock_time.png',
+  '/assets/stickers/circle_carpet.png': '/assets/stickers/space_circle_carpet.png',
+  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/space_circle_carpet.png',
+  '/assets/stickers/locker_schedule.png': '/assets/stickers/space_locker_schedule.png',
+  '/assets/stickers/bone_treat.png': '/assets/stickers/space_bone_treat.png',
+  '/assets/stickers/paw_print.png': '/assets/stickers/space_paw_print.png',
+  '/assets/stickers/ocean_wave.png': '/assets/stickers/space_ocean_wave.png',
+  '/assets/stickers/story_birthday.png': '/assets/stickers/space_story_birthday.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
