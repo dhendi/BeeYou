@@ -965,6 +965,18 @@ export const CookingPotSticker = renderStickerPng('/assets/stickers/cooking_pot.
 export const CaregiverResponseOkaySticker = renderStickerPng('/assets/stickers/caregiver_response_okay.png', 'Caregiver Okay Thumbs Up');
 
 export const TURTLE_STICKER_SWAPS: Record<string, string> = {
+  // Adventure Step Mappings
+  '/assets/stickers/home_house.png': '/assets/stickers/turtle_moss_cottage_home.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/turtle_bamboo_ferry.png',
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/turtle_bamboo_tablet.png',
+  '/assets/stickers/cutlery_meal.png': '/assets/stickers/turtle_bamboo_cutlery.png',
+  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/turtle_reed_explorer_shoes.png',
+  '/assets/stickers/ocean_wave.png': '/assets/stickers/turtle_pond_ripple_wave.png',
+  '/assets/stickers/speech_bubble.png': '/assets/stickers/turtle_leaf_speech_bubbles.png',
+  '/assets/stickers/reward_trophy.png': '/assets/stickers/turtle_lotus_trophy.png',
+  '/assets/stickers/star_gold.png': '/assets/stickers/turtle_webbed_paw_stamp.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/stethoscope.png': '/assets/stickers/turtle_elder_healer_pouch.png',
   // Batch 8 Swaps
   '/assets/stickers/tennis_ball.png': '/assets/stickers/turtle_moss_play_ball.png',
   '/assets/stickers/bone_treat.png': '/assets/stickers/turtle_water_chestnut_treat.png',
@@ -1323,6 +1335,21 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/medical_clinic_building.png': '/assets/stickers/space_medical_clinic_building.png',
   '/assets/stickers/clinic_height_scale.png': '/assets/stickers/space_clinic_height_scale.png',
   '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/space_doctor_exam_bed.png',
+  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/space_doctor_ear_light.png',
+  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/space_walking_pool_feet.png',
+  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/space_swim_goggles_floaties.png',
+  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/space_fluffy_beach_towel.png',
+  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/space_movie_projector_screen.png',
+  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/space_bowling_ball_holes.png',
+  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/space_bowling_lane_bumpers.png',
+  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/space_bowling_pins_strike.png',
+  '/assets/stickers/high_five_hands.png': '/assets/stickers/space_high_five_hands.png',
+  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/space_pine_trees_forest.png',
+  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/space_camping_sleeping_bag.png',
+  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/space_campfire_marshmallows.png',
+  '/assets/stickers/museum_paper_map.png': '/assets/stickers/space_museum_paper_map.png',
+  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/space_museum_dinosaur_fossil.png',
+  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/space_observing_magnifying_glass.png',
   // Batch 1 Core Routine Swaps
   '/assets/stickers/alarm_clock.png': '/assets/stickers/space_alarm_clock.png',
   '/assets/stickers/toothbrush.png': '/assets/stickers/space_toothbrush.png',
