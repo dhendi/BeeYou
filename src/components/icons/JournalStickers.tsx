@@ -1262,6 +1262,31 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  // Batch 2 New Train Swaps
+  '/assets/stickers/hot_cocoa.png': '/assets/stickers/train_hot_cocoa.png',
+  '/assets/stickers/dinner_bowl.png': '/assets/stickers/train_stew_pot.png',
+  '/assets/stickers/cooking_pot.png': '/assets/stickers/train_stew_pot.png',
+  '/assets/stickers/apple_snack.png': '/assets/stickers/train_fruit_crate.png',
+  '/assets/stickers/chocolate_bar.png': '/assets/stickers/train_chocolate.png',
+  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/train_track_puzzle.png',
+  '/assets/stickers/fav_music.png': '/assets/stickers/train_steam_whistle.png',
+  '/assets/stickers/music_note.png': '/assets/stickers/train_steam_whistle.png',
+  '/assets/stickers/music_sensory.png': '/assets/stickers/train_steam_whistle.png',
+  '/assets/stickers/fav_love_heart.png': '/assets/stickers/train_lantern_heart.png',
+  '/assets/stickers/heart_here_for_you.png': '/assets/stickers/train_lantern_heart.png',
+  '/assets/stickers/fav_outside.png': '/assets/stickers/train_scenic_lookout.png',
+  '/assets/stickers/outdoor_sun.png': '/assets/stickers/train_scenic_lookout.png',
+  '/assets/stickers/fav_stop.png': '/assets/stickers/train_crossing_signal.png',
+  '/assets/stickers/help_sos.png': '/assets/stickers/train_switch_lever.png',
+  '/assets/stickers/alert_sos_shield.png': '/assets/stickers/train_switch_lever.png',
+  '/assets/stickers/fav_help_sos.png': '/assets/stickers/train_switch_lever.png',
+  '/assets/stickers/decision_wheel.png': '/assets/stickers/train_speedometer_gauge.png',
+  '/assets/stickers/spoons_energy.png': '/assets/stickers/train_dining_spoons.png',
+  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/train_conductor_logbook.png',
+  '/assets/stickers/homework_study.png': '/assets/stickers/train_conductor_logbook.png',
+  '/assets/stickers/laundry_hamper.png': '/assets/stickers/train_linen_hamper.png',
+  '/assets/stickers/refresh_repeat.png': '/assets/stickers/train_circular_track.png',
+  '/assets/stickers/circular_arrow.png': '/assets/stickers/train_circular_track.png',
   // Batch 1 New Train Swaps
   '/assets/stickers/sneaker_shoes.png': '/assets/stickers/train_boots.png',
   '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/train_restroom.png',
