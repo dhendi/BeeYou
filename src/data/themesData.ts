@@ -314,6 +314,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-red-50 via-amber-50 to-slate-100',
       headerBg: 'bg-red-100/90 border-red-300',
       navActiveBg: 'bg-red-500 text-white shadow-md ring-2 ring-red-600',
+      wallpaperUrl: '/assets/wallpapers/turbo_speedway_bg.webp',
     },
     wallpaperPattern: 'none',
     aacStyling: {

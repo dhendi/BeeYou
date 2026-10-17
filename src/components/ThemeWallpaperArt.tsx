@@ -177,6 +177,14 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     category === 'fantasy' ||
     pattern === 'sparkles';
 
+  // Check if Turbo Speedway is active (by wallpaperUrl, category, or pattern)
+  const isTurboSpeedway =
+    wallpaperUrl?.includes('speedway') ||
+    wallpaperUrl?.includes('racing') ||
+    category === 'racing' ||
+    pattern === 'racing' ||
+    id === 'theme-racing';
+
   // Check if Default Honey Theme is active
   const isHoneyClassic =
     wallpaperUrl?.includes('honey') ||
@@ -200,9 +208,11 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
                 ? '/assets/wallpapers/ocean_splash_bg.webp'
                 : isMagicFairytale
                   ? '/assets/wallpapers/magic_fairytale_bg.webp'
-                  : isHoneyClassic
-                    ? '/assets/wallpapers/default_honey_theme_bg.webp'
-                    : undefined);
+                  : isTurboSpeedway
+                    ? '/assets/wallpapers/turbo_speedway_bg.webp'
+                    : isHoneyClassic
+                      ? '/assets/wallpapers/default_honey_theme_bg.webp'
+                      : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
@@ -220,7 +230,9 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
               ? '#a6cce6'
               : isMagicFairytale
                 ? '#f8e5df'
-                : '#FAF7EE';
+                : isTurboSpeedway
+                  ? '#fdf7eb'
+                  : '#FAF7EE';
 
   return (
     <div
