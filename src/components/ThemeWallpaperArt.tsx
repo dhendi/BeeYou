@@ -163,6 +163,13 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
     category === 'space' ||
     pattern === 'cosmic_stars';
 
+  // Check if Ocean Splash is active (by wallpaperUrl, category, or pattern)
+  const isOceanSplash =
+    wallpaperUrl?.includes('ocean') ||
+    category === 'ocean' ||
+    pattern === 'bubbles' ||
+    pattern === 'ocean_waves';
+
   // Check if Default Honey Theme is active
   const isHoneyClassic =
     wallpaperUrl?.includes('honey') ||
@@ -182,9 +189,11 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
             ? '/assets/wallpapers/steam_express_bg.webp'
             : isCosmicExplorer
               ? '/assets/wallpapers/cosmic_voyager_bg.webp'
-              : isHoneyClassic
-                ? '/assets/wallpapers/default_honey_theme_bg.webp'
-                : undefined);
+              : isOceanSplash
+                ? '/assets/wallpapers/ocean_splash_bg.webp'
+                : isHoneyClassic
+                  ? '/assets/wallpapers/default_honey_theme_bg.webp'
+                  : undefined);
 
   const { zoomFactor, pinchLeft, pinchTop } = useViewportZoom();
 
@@ -198,7 +207,9 @@ export const ThemeWallpaperArt: React.FC<ThemeWallpaperArtProps> = ({
           ? '#ccdaee'
           : isCosmicExplorer
             ? '#bfb3e4'
-            : '#FAF7EE';
+            : isOceanSplash
+              ? '#a6cce6'
+              : '#FAF7EE';
 
   return (
     <div

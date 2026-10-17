@@ -244,6 +244,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-cyan-50 via-teal-50 to-blue-50',
       headerBg: 'bg-cyan-100/90 border-cyan-300',
       navActiveBg: 'bg-cyan-500 text-white shadow-md ring-2 ring-cyan-600',
+      wallpaperUrl: '/assets/wallpapers/ocean_splash_bg.webp',
     },
     wallpaperPattern: 'bubbles',
     aacStyling: {
