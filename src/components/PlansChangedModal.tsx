@@ -793,7 +793,7 @@ export const PlansChangedModal: React.FC = () => {
                           {t(step.title)}
                         </span>
                         {step.time && (
-                          <span className="text-xs font-bold text-emerald-700">{step.time}</span>
+                          <span className="text-xs font-bold text-emerald-700">{t(step.time)}</span>
                         )}
                       </div>
                       <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />

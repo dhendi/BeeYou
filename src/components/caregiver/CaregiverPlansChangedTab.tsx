@@ -42,6 +42,14 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
   const [showIconLibrary, setShowIconLibrary] = useState(false);
   const [pickingForStepIndex, setPickingForStepIndex] = useState<number | null>(null);
 
+  // Re-render when language changes
+  const [, setLangTick] = useState(0);
+  useEffect(() => {
+    const handleLangChange = () => setLangTick((n) => n + 1);
+    window.addEventListener('beeyou_lang_changed', handleLangChange);
+    return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
+  }, []);
+
   useEffect(() => {
     setPcActive(Boolean(plansChanged.active));
   }, [plansChanged.active]);
@@ -391,11 +399,11 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                   <RoutineStickerIcon emoji={step.emoji} title={step.title} className="w-8 h-8 object-contain group-hover:scale-105 transition-transform" />
                 </button>
                 <span className="flex-1 font-bold text-xs sm:text-sm text-slate-800">
-                  {step.title}
+                  {t(step.title)}
                 </span>
                 {step.time && (
                   <span className="text-xs font-semibold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                    {step.time}
+                    {t(step.time)}
                   </span>
                 )}
                 <button
@@ -476,7 +484,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
               >
                 <span className="flex items-center gap-1.5">
                   <MessageSquare className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>{phrase}</span>
+                  <span>{t(phrase)}</span>
                 </span>
                 <button
                   onClick={() => setPcPhrases(pcPhrases.filter((_, i) => i !== idx))}
@@ -515,7 +523,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             onClick={() => {
               dismissPlansChanged();
               setPcActive(false);
-              onShowNotification('Plans Changed deactivated.');
+              onShowNotification(t('Plans Changed alert deactivated.'));
             }}
             className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
           >
