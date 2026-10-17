@@ -1262,6 +1262,26 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
+  // Batch 3 New Train Swaps
+  '/assets/stickers/mood_happy.png': '/assets/stickers/train_mood_happy.png',
+  '/assets/stickers/fav_happy.png': '/assets/stickers/train_mood_happy.png',
+  '/assets/stickers/mood_calm.png': '/assets/stickers/train_mood_calm.png',
+  '/assets/stickers/mood_excited.png': '/assets/stickers/train_mood_excited.png',
+  '/assets/stickers/mood_sleepy.png': '/assets/stickers/train_mood_sleepy.png',
+  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/train_mood_sleepy.png',
+  '/assets/stickers/mood_unsure.png': '/assets/stickers/train_mood_unsure.png',
+  '/assets/stickers/child_persona.png': '/assets/stickers/train_child_persona.png',
+  '/assets/stickers/adult_briefcase.png': '/assets/stickers/train_adult_briefcase.png',
+  '/assets/stickers/caregiver_phone.png': '/assets/stickers/train_caregiver_phone.png',
+  '/assets/stickers/language_globe.png': '/assets/stickers/train_language_globe.png',
+  '/assets/stickers/trial_crown.png': '/assets/stickers/train_trial_crown.png',
+  '/assets/stickers/about_id.png': '/assets/stickers/train_about_id.png',
+  '/assets/stickers/home_house.png': '/assets/stickers/train_home_station.png',
+  '/assets/stickers/car_ride.png': '/assets/stickers/train_handcar_ride.png',
+  '/assets/stickers/car_travel.png': '/assets/stickers/train_handcar_ride.png',
+  '/assets/stickers/car_on_my_way.png': '/assets/stickers/train_handcar_ride.png',
+  '/assets/stickers/pet_care.png': '/assets/stickers/train_station_dog.png',
+  '/assets/stickers/pizza_slice.png': '/assets/stickers/train_pizza_slice.png',
   // Batch 2 New Train Swaps
   '/assets/stickers/hot_cocoa.png': '/assets/stickers/train_hot_cocoa.png',
   '/assets/stickers/dinner_bowl.png': '/assets/stickers/train_stew_pot.png',
