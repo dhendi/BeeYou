@@ -1303,6 +1303,10 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
 };
 
 export const SPACE_STICKER_SWAPS: Record<string, string> = {
+  // Adventure Step Mappings
+  '/assets/stickers/toy_box.png': '/assets/stickers/space_travel_luggage.png',
+  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/space_tablet_ipad.png',
+  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/space_sneaker_shoes.png',
   // Batch 1 Core Routine Swaps
   '/assets/stickers/alarm_clock.png': '/assets/stickers/space_alarm_clock.png',
   '/assets/stickers/toothbrush.png': '/assets/stickers/space_toothbrush.png',
