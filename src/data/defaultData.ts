@@ -1013,7 +1013,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
       { id: 1, title: 'Take off pajamas', instruction: 'Place pajamas in hamper or on bed', emoji: '🩳', completed: false },
       { id: 2, title: 'Put on clean underwear', instruction: 'Step in one foot at a time and pull up', emoji: '🩲', completed: false },
       { id: 3, title: 'Put on shirt', instruction: 'Head through big hole, arms through sleeves', emoji: '👕', completed: false },
-      { id: 4, title: 'Put on pants', instruction: 'Sit down, put one leg in each pant leg, stand and pull up', emoji: '👖', completed: false },
+      { id: 4, title: 'Put on pants', instruction: 'Sit down, put one leg in each pant leg, stand and pull up', emoji: '/assets/stickers/pants_folded.png', completed: false },
       { id: 5, title: 'Put on comfy socks', instruction: 'Pull socks over toes and heel', emoji: '🧦', completed: false },
     ],
   },
@@ -1029,7 +1029,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     steps: [
       { id: 1, title: 'Open main zipper', instruction: 'Unzip backpack wide on table or floor', emoji: '🎒', completed: false },
       { id: 2, title: 'Put in folder/notebook', instruction: 'Slide school folder in flat', emoji: '📁', completed: false },
-      { id: 3, title: 'Put in water bottle', instruction: 'Place tightly sealed water bottle in side pocket', emoji: '🍼', completed: false },
+      { id: 3, title: 'Put in water bottle', instruction: 'Place tightly sealed water bottle in side pocket', emoji: '/assets/stickers/water_bottle.png', completed: false },
       { id: 4, title: 'Pack comfort fidget', instruction: 'Place calm squishy or comfort toy in front pouch', emoji: '🧸', completed: false },
       { id: 5, title: 'Zip up completely', instruction: 'Pull zipper all the way shut', emoji: '🔒', completed: false },
     ],
@@ -1217,7 +1217,7 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 3,
         text: 'I can say "Happy Birthday" or give a card to the birthday child.',
-        emoji: '/assets/stickers/story_sharing.png',
+        emoji: '/assets/stickers/birthday_gift_box.png',
       },
       {
         pageNumber: 4,
@@ -1227,7 +1227,7 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
       {
         pageNumber: 5,
         text: 'I can choose which games to join, eat yummy treats, and say goodbye when it is time to go.',
-        emoji: '/assets/stickers/story_birthday.png',
+        emoji: '/assets/stickers/birthday_cake_slice.png',
       },
     ],
     keyTakeaways: [

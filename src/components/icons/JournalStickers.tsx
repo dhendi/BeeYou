@@ -592,6 +592,11 @@ export const CozyBedSticker = renderThemedStickerPng(
 );
 export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
 export const GameControllerSticker = renderStickerPng('/assets/stickers/game_controller.png', 'Video Game Controller');
+export const BirthdayGiftBoxSticker = renderStickerPng('/assets/stickers/birthday_gift_box.png', 'Birthday Gift Box');
+export const BirthdayCakeSliceSticker = renderStickerPng('/assets/stickers/birthday_cake_slice.png', 'Birthday Cake Slice');
+export const WaterBottleSticker = renderStickerPng('/assets/stickers/water_bottle.png', 'School Water Bottle');
+export const PantsFoldedSticker = renderStickerPng('/assets/stickers/pants_folded.png', 'Folded Pants');
+export const BirthdayCardSticker = renderStickerPng('/assets/stickers/birthday_card.png', 'Birthday Card');
 export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs');
 export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
 export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
@@ -2081,9 +2086,19 @@ export const RoutineStickerIcon: React.FC<{
   // 🍽️ Dinner / Lunch / Meal / Plate
   if (normEmoji === '🍽️' || normEmoji === '🥪' || normTitle.includes('dinner') || normTitle.includes('lunch') || normTitle.includes('meal') || normTitle.includes('sandwich')) return <DinnerBowlSticker className={className} size={size} />;
   // 🎂 Birthday Party / Cake
-  if (normEmoji === '🎂' || normEmoji === '🍰' || normTitle.includes('birthday') || normTitle.includes('party')) return <BirthdayStorySticker className={className} size={size} />;
-  // 🤝 Taking Turns / Sharing / Friends / Social / Gift
-  if (normEmoji === '🤝' || normEmoji === '👥' || normEmoji === '🎁' || normTitle.includes('turn') || normTitle.includes('sharing') || normTitle.includes('social') || normTitle.includes('gift') || normTitle.includes('card') || normTitle.includes('friction')) return <TakingTurnsStorySticker className={className} size={size} />;
+  if (normEmoji === '🎂' || normTitle.includes('birthday party')) return <BirthdayStorySticker className={className} size={size} />;
+  // 🍰 Cake Slice / Birthday Treat
+  if (normEmoji === '🍰' || normTitle.includes('cake slice') || normTitle.includes('yummy treat')) return <BirthdayCakeSliceSticker className={className} size={size} />;
+  // 🎁 Gift Box / Present
+  if (normEmoji === '🎁' || normTitle.includes('gift') || normTitle.includes('present')) return <BirthdayGiftBoxSticker className={className} size={size} />;
+  // 💌 Greeting Card / Birthday Card
+  if (normEmoji === '💌' || normTitle.includes('birthday card') || (normTitle.includes('card') && !normTitle.includes('id') && !normTitle.includes('credit'))) return <BirthdayCardSticker className={className} size={size} />;
+  // 👖 Pants / Folded Jeans
+  if (normEmoji === '👖' || normTitle.includes('pants') || normTitle.includes('jeans')) return <PantsFoldedSticker className={className} size={size} />;
+  // 🍼 Water bottle
+  if (normEmoji === '🍼' || normTitle.includes('water bottle')) return <WaterBottleSticker className={className} size={size} />;
+  // 🤝 Taking Turns / Sharing / Friends / Social
+  if (normEmoji === '🤝' || normEmoji === '👥' || normTitle.includes('turn') || normTitle.includes('sharing') || normTitle.includes('social') || normTitle.includes('friction')) return <TakingTurnsStorySticker className={className} size={size} />;
   // 🍎 Healthy Snack / Apple / Fruit
   if (normEmoji === '🍎' || normTitle.includes('snack') || normTitle.includes('apple') || normTitle.includes('fruit')) return <AppleSticker className={className} size={size} />;
   // 🍬 Candy / Treat / Reward Snack
