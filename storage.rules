@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Isolated per-family sticker and icon storage
+    match /beeyou/families/{familyCode}/{allPaths=**} {
+      allow read, write: if familyCode.matches('^BEE-[A-Z0-9-]{3,16}$');
+    }
+    // Block all other root access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

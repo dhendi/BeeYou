@@ -1,0 +1,86 @@
+{
+  "rules": {
+    "beeyou": {
+      ".read": false,
+      ".write": false,
+
+      "families": {
+        ".read": false,
+        ".write": false,
+
+        "$familyCode": {
+          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".validate": "newData.hasChildren(['familyCode']) && newData.child('familyCode').val() === $familyCode",
+
+          "customIcons": {
+            "$iconId": {
+              ".validate": "newData.hasChildren(['id', 'label', 'dataUrl']) && newData.child('dataUrl').isString() && newData.child('dataUrl').val().length < 500000"
+            }
+          },
+
+          "activeAlert": {
+            ".validate": "newData.val() === null || (newData.hasChildren(['status']) && (newData.child('status').val() === 'active' || newData.child('status').val() === 'acknowledged' || newData.child('status').val() === 'resolved'))"
+          },
+
+          "messages": {
+            ".indexOn": ["timestamp"],
+            "$messageId": {
+              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length <= 1000"
+            }
+          }
+        }
+      },
+
+      "sessions": {
+        ".read": false,
+        ".write": false,
+
+        "$familyCode": {
+          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+
+          "pings": {
+            "$role": {
+              ".validate": "$role === 'caregiver' || $role === 'child'",
+              "timestamp": {
+                ".validate": "newData.isNumber()"
+              }
+            }
+          },
+
+          "activeAlert": {
+            ".validate": "newData.val() === null || newData.hasChildren(['status'])"
+          },
+
+          "childStatus": {
+            ".validate": "newData.hasChildren(['currentMood', 'currentActivity'])"
+          },
+
+          "messages": {
+            ".indexOn": ["timestamp"],
+            "$messageId": {
+              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length <= 1000"
+            }
+          }
+        }
+      },
+
+      "events": {
+        ".read": false,
+        ".write": false,
+
+        "$familyCode": {
+          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+
+          "latest": {
+            ".validate": "newData.hasChildren(['type', 'pairingCode', 'sentAt']) && newData.child('pairingCode').val() === $familyCode"
+          }
+        }
+      }
+    }
+  }
+}
