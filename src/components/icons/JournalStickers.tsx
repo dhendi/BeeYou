@@ -2753,6 +2753,25 @@ export const RoutineStickerIcon: React.FC<{
   const isFairytale = activeTheme === 'fantasy' || activeTheme === 'magic';
   const isRacing = activeTheme === 'racing';
 
+  // If already an uploaded custom image (data URL, blob URL, or external URL)
+  if (
+    normEmoji.startsWith('data:image/') ||
+    normEmoji.startsWith('blob:') ||
+    normEmoji.startsWith('http://') ||
+    normEmoji.startsWith('https://')
+  ) {
+    return (
+      <img
+        src={normEmoji}
+        alt={title || 'Custom icon'}
+        className={`${className} object-contain select-none pointer-events-none rounded-xl drop-shadow-2xs`}
+        style={size ? { width: size, height: size } : undefined}
+        loading={loading}
+        decoding="async"
+      />
+    );
+  }
+
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.webp') || normEmoji.includes('.png')) {
     const webpEmoji = normEmoji.startsWith('/assets/stickers/') ? normEmoji.replace(/\.png$/i, '.webp') : normEmoji;

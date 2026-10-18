@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Search, X, Palette, Check } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Search, X, Palette, Check, ImagePlus, Trash2 } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { playChime } from '../../utils/audio';
 import { useApp } from '../../context/AppContext';
+import { optimizeImageFile } from '../../utils/mediaOptimizer';
 import {
   TURTLE_SANCTUARY_ICONS,
   DINO_KINGDOM_ICONS,
@@ -16,12 +17,72 @@ import {
 
 export type ThemeIconCategory = 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'fantasy' | 'racing';
 
+const UPLOADED_ICONS_STORAGE_KEY = 'beeyou_custom_uploaded_icons';
+
+export interface UploadedCustomIcon {
+  id: string;
+  emoji: string;
+  label: string;
+  createdAt: number;
+}
+
+export function loadUploadedCustomIcons(): UploadedCustomIcon[] {
+  try {
+    const raw = localStorage.getItem(UPLOADED_ICONS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveUploadedCustomIcon(dataUrl: string, label: string): UploadedCustomIcon[] {
+  const current = loadUploadedCustomIcons();
+  const cleanLabel = label.trim() || 'Custom Icon';
+  const existingIdx = current.findIndex((item) => item.emoji === dataUrl);
+  let next: UploadedCustomIcon[];
+  if (existingIdx >= 0) {
+    next = [
+      { ...current[existingIdx], label: cleanLabel, createdAt: Date.now() },
+      ...current.filter((_, idx) => idx !== existingIdx),
+    ];
+  } else {
+    const newItem: UploadedCustomIcon = {
+      id: `custom-upload-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      emoji: dataUrl,
+      label: cleanLabel,
+      createdAt: Date.now(),
+    };
+    next = [newItem, ...current].slice(0, 40);
+  }
+  try {
+    localStorage.setItem(UPLOADED_ICONS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // If localStorage is near quota, keep most recent 15
+    try {
+      localStorage.setItem(UPLOADED_ICONS_STORAGE_KEY, JSON.stringify(next.slice(0, 15)));
+    } catch {}
+  }
+  return next;
+}
+
+export function removeUploadedCustomIcon(id: string): UploadedCustomIcon[] {
+  const current = loadUploadedCustomIcons();
+  const next = current.filter((item) => item.id !== id);
+  try {
+    localStorage.setItem(UPLOADED_ICONS_STORAGE_KEY, JSON.stringify(next));
+  } catch {}
+  return next;
+}
+
 export interface LibraryIconItem {
   id: string;
   emoji: string;
   label: string;
-  category: 'fun' | 'calm' | 'food' | 'daily' | ThemeIconCategory;
+  category: 'fun' | 'calm' | 'food' | 'daily' | 'uploaded' | ThemeIconCategory;
   keywords: string[];
+  isUploaded?: boolean;
 }
 
 export const ICON_LIBRARY: LibraryIconItem[] = [
@@ -319,7 +380,7 @@ export interface IconLibraryModalProps {
   onSelectIcon: (emoji: string, label: string) => void;
   selectedEmoji?: string;
   title?: string;
-  initialTab?: 'all' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily';
+  initialTab?: 'all' | 'uploaded' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily';
 }
 
 export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
@@ -354,11 +415,15 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                   : null;
 
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'uploaded' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily'>('all');
   const [customInput, setCustomInput] = useState('');
+  const [uploadedIcons, setUploadedIcons] = useState<UploadedCustomIcon[]>(() => loadUploadedCustomIcons());
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      setUploadedIcons(loadUploadedCustomIcons());
       if (initialTab && (!THEME_CATEGORY_SET.has(initialTab) || initialTab === activeThemeCategory)) {
         setActiveTab(initialTab);
       } else if (activeThemeCategory) {
@@ -371,7 +436,31 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
 
   const filteredIcons = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return ICON_LIBRARY.filter((item) => {
+    const customItems: LibraryIconItem[] = uploadedIcons.map((u) => ({
+      id: u.id,
+      emoji: u.emoji,
+      label: u.label,
+      category: 'uploaded' as const,
+      keywords: ['custom', 'upload', 'uploaded', 'photo', u.label.toLowerCase()],
+      isUploaded: true,
+    }));
+
+    const combined = [...customItems, ...ICON_LIBRARY];
+
+    return combined.filter((item) => {
+      if (item.isUploaded) {
+        const matchesUploadTab =
+          activeTab === 'all' ||
+          activeTab === 'uploaded' ||
+          (activeThemeCategory !== null && activeTab === activeThemeCategory);
+        if (!matchesUploadTab) return false;
+        if (!q) return true;
+        return (
+          item.label.toLowerCase().includes(q) ||
+          item.keywords.some((k) => k.toLowerCase().includes(q))
+        );
+      }
+
       // Strictly exclude themed icons that do not belong to the user's currently active theme
       if (THEME_CATEGORY_SET.has(item.category) && item.category !== activeThemeCategory) {
         return false;
@@ -386,7 +475,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         item.emoji.includes(q)
       );
     });
-  }, [search, activeTab, activeThemeCategory]);
+  }, [search, activeTab, activeThemeCategory, uploadedIcons]);
 
   if (!isOpen) return null;
 
@@ -394,6 +483,49 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
     playChime('tap');
     onSelectIcon(emoji, label);
     onClose();
+  };
+
+  const handleTriggerUpload = () => {
+    playChime('tap');
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim();
+      const cleanLabel = rawName
+        ? rawName.charAt(0).toUpperCase() + rawName.slice(1, 32)
+        : 'Custom Icon';
+
+      const dataUrl = await optimizeImageFile(file, {
+        maxWidth: 256,
+        maxHeight: 256,
+        quality: 0.86,
+        outputFormat: 'image/webp',
+      });
+
+      const updatedList = saveUploadedCustomIcon(dataUrl, cleanLabel);
+      setUploadedIcons(updatedList);
+      playChime('star');
+      onSelectIcon(dataUrl, cleanLabel);
+      onClose();
+    } catch (err) {
+      console.error('Failed to upload custom icon:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteUploaded = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    playChime('tap');
+    const updated = removeUploadedCustomIcon(id);
+    setUploadedIcons(updated);
   };
 
   const handleApplyCustom = (e: React.FormEvent) => {
@@ -424,6 +556,14 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
       aria-label={title}
       className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] animate-in fade-in"
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <div className={`bg-white border-3 ${isTurtleTheme ? 'border-emerald-400' : isDinoTheme ? 'border-emerald-500' : isFrogTheme ? 'border-lime-500' : (activeTheme?.palette?.primaryBorder || 'border-amber-300')} w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[calc(100dvh-2rem)]`}>
         {/* Header */}
         <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white' : isDinoTheme ? 'bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white' : isFrogTheme ? 'bg-gradient-to-r from-lime-600 via-emerald-600 to-teal-600 text-white' : (activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white` : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950')} p-4 sm:p-5 flex items-center justify-between shrink-0`}>
@@ -440,7 +580,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                 {title}
               </h3>
               <p className={`text-xs font-semibold ${activeThemeCategory ? 'text-white/90' : 'text-amber-900/80'} mt-0.5`}>
-                Pick a matching sticker icon for this routine or step
+                Pick a matching sticker icon or upload your own photo
               </p>
             </div>
           </div>
@@ -457,32 +597,52 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
 
         {/* Search & Tabs */}
         <div className={`p-3 sm:p-4 border-b border-slate-200 ${isTurtleTheme || isDinoTheme ? 'bg-emerald-50/40' : isFrogTheme ? 'bg-lime-50/40' : (activeTheme?.palette?.primaryLight || 'bg-amber-50/40')} space-y-3 shrink-0`}>
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search icons (e.g. pizza, art, quiet, water, morning)..."
-              className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme || isDinoTheme ? 'focus:ring-emerald-400' : isFrogTheme ? 'focus:ring-lime-400' : (activeTheme?.palette?.primaryBorder || 'focus:ring-amber-400')}`}
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                aria-label="Clear search"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+          {/* Search bar + Upload Own Icon button */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search icons (e.g. pizza, art, quiet, water, morning)..."
+                className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme || isDinoTheme ? 'focus:ring-emerald-400' : isFrogTheme ? 'focus:ring-lime-400' : (activeTheme?.palette?.primaryBorder || 'focus:ring-amber-400')}`}
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleTriggerUpload}
+              disabled={isUploading}
+              className={`px-3 py-2 rounded-xl font-black text-xs shrink-0 flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer ${
+                isTurtleTheme || isDinoTheme
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  : isFrogTheme
+                  ? 'bg-lime-600 hover:bg-lime-700 text-white'
+                  : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} hover:opacity-90 text-white`
+              }`}
+              title="Upload your own icon or photo from your device"
+            >
+              <ImagePlus className="w-4 h-4 shrink-0" />
+              <span>{isUploading ? 'Uploading...' : '+ Upload Icon'}</span>
+            </button>
           </div>
 
           {/* Categories — ONLY show the active theme's tab (never other themes) */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
             {[
               { id: 'all', label: 'All Icons', icon: undefined },
+              ...(uploadedIcons.length > 0 ? [{ id: 'uploaded', label: `My Uploads (${uploadedIcons.length})`, icon: undefined }] : []),
               ...(activeThemeCategory && activeThemeTab ? [{ id: activeThemeCategory, label: activeThemeTab.label, icon: activeThemeTab.icon }] : []),
               { id: 'fun', label: 'Fun & Play', icon: undefined },
               { id: 'calm', label: 'Calm & Rest', icon: undefined },
@@ -524,21 +684,36 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
 
         {/* Grid of Icons */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-          {filteredIcons.length === 0 ? (
-            <div className="py-12 text-center text-slate-400">
-              <p className="font-bold text-sm">No icons found matching "{search}"</p>
-              <p className="text-xs mt-1">Try a different keyword or enter a custom emoji below.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-              {filteredIcons.map((item) => {
-                const isSelected = selectedEmoji === item.emoji;
-                return (
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+            {/* First Tile: Upload Your Own Icon */}
+            <button
+              type="button"
+              onClick={handleTriggerUpload}
+              disabled={isUploading}
+              className={`p-2.5 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center transition-all cursor-pointer active:scale-95 group ${
+                isTurtleTheme || isDinoTheme
+                  ? 'bg-emerald-50/60 hover:bg-emerald-100/70 border-emerald-400 text-emerald-900'
+                  : isFrogTheme
+                  ? 'bg-lime-50/60 hover:bg-lime-100/70 border-lime-400 text-lime-900'
+                  : `${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} hover:opacity-90 ${activeTheme?.palette?.primaryBorder || 'border-amber-400'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
+              }`}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white/90 border border-current/20 shadow-2xs flex items-center justify-center group-hover:scale-105 transition-transform">
+                <ImagePlus className="w-6 h-6" />
+              </div>
+              <span className="font-black text-[11px] leading-tight mt-1.5">
+                {isUploading ? 'Uploading...' : '+ Upload Own Icon'}
+              </span>
+            </button>
+
+            {filteredIcons.map((item) => {
+              const isSelected = selectedEmoji === item.emoji;
+              return (
+                <div key={item.id} className="relative group/card">
                   <button
-                    key={item.id}
                     type="button"
                     onClick={() => handlePick(item.emoji, item.label)}
-                    className={`p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 group ${
+                    className={`w-full h-full p-2.5 rounded-2xl border-2 flex flex-col items-center justify-between text-center transition-all cursor-pointer active:scale-95 group ${
                       isSelected
                         ? isTurtleTheme || isDinoTheme
                           ? 'bg-emerald-100 border-emerald-500 ring-2 ring-emerald-300 text-emerald-950 shadow-xs'
@@ -569,17 +744,36 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       </span>
                     )}
                   </button>
-                );
-              })}
+
+                  {item.isUploaded && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteUploaded(e, item.id)}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-white/90 hover:bg-rose-500 text-slate-400 hover:text-white border border-slate-200 flex items-center justify-center opacity-0 group-hover/card:opacity-100 focus:opacity-100 transition shadow-2xs cursor-pointer"
+                      title="Delete uploaded icon"
+                      aria-label={`Delete ${item.label}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredIcons.length === 0 && search.trim() !== '' && (
+            <div className="py-8 text-center text-slate-400">
+              <p className="font-bold text-sm">No library icons found matching "{search}"</p>
+              <p className="text-xs mt-1">Click "+ Upload Own Icon" above or enter a custom emoji below.</p>
             </div>
           )}
         </div>
 
-        {/* Footer: Custom Emoji or Text Fallback */}
+        {/* Footer: Custom Emoji or Cancel */}
         <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
-          <form onSubmit={handleApplyCustom} className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <form onSubmit={handleApplyCustom} className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-500 shrink-0">
-              Custom icon:
+              Or type custom emoji:
             </span>
             <input
               type="text"
