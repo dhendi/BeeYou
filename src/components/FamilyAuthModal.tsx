@@ -304,14 +304,19 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   };
 
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      logoutFamilyAccount();
+      await logoutFamilyAccount();
       setCurrentAccount(null);
       setSuccessMessage('Logged out of Shared Family Account.');
       try {
         playChime('tap');
       } catch {}
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }, 500);
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -1015,14 +1020,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
           {/* If already signed in */}
           {currentAccount && (
-            <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
               <div>
                 <span>Signed in as <strong>{currentAccount.email}</strong> ({currentAccount.familyCode})</span>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Device is actively synced to your shared family space.</p>
               </div>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-rose-600 hover:text-rose-800 font-bold hover:underline cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-rose-600 dark:text-rose-400 font-bold transition cursor-pointer"
               >
                 Sign Out
               </button>

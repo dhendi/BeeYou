@@ -466,7 +466,7 @@ export async function launchDemoMode(asRole: 'child' | 'caregiver'): Promise<{
 }
 
 /**
- * Log out of family account
+ * Log out of family account and clear active pairing credentials
  */
 export async function logoutFamilyAccount(): Promise<void> {
   try {
@@ -475,6 +475,75 @@ export async function logoutFamilyAccount(): Promise<void> {
     console.warn('Firebase signOut error:', err);
   }
   saveStoredFamilyAccount(null);
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('beeyou_pairing_code');
+      localStorage.removeItem('beeyou_pending_pin_reset');
+      localStorage.removeItem('beeyou_temporary_pairing_session');
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+      localStorage.removeItem('beeyou_active_alert');
+      sessionStorage.removeItem('beeyou_active_device_view');
+      window.dispatchEvent(new CustomEvent('beeyou_account_updated', { detail: null }));
+    }
+  } catch {}
+}
+
+/**
+ * Completely purges all local storage, session state, cached credentials,
+ * and personal health data from this physical device.
+ * Used for school tablet returns, device handoffs, or fresh starts.
+ */
+export async function wipeDeviceStorage(): Promise<void> {
+  try {
+    await signOut(auth);
+  } catch (err) {
+    console.warn('Firebase signOut during wipe error:', err);
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('beeyou') || key.startsWith('firebase:'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+      // Clear specific known items
+      localStorage.removeItem('beeyou_family_account');
+      localStorage.removeItem('beeyou_pairing_code');
+      localStorage.removeItem('beeyou_pending_pin_reset');
+      localStorage.removeItem('beeyou_active_device_view');
+      localStorage.removeItem('beeyou_user_role');
+      localStorage.removeItem('beeyou_settings');
+      localStorage.removeItem('beeyou_daily_recollections');
+      localStorage.removeItem('beeyou_medications');
+      localStorage.removeItem('beeyou_mood_journal_entries');
+      localStorage.removeItem('beeyou_cycle_settings');
+      localStorage.removeItem('beeyou_cycle_logs');
+      localStorage.removeItem('beeyou_spoon_entries');
+      localStorage.removeItem('beeyou_temporary_pairing_session');
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+      localStorage.removeItem('beeyou_active_alert');
+      localStorage.removeItem('beeyou_about_me_id');
+      localStorage.removeItem('beeyou_child_profile');
+      localStorage.removeItem('beeyou_routines');
+      localStorage.removeItem('beeyou_help_alert_presets');
+      localStorage.removeItem('beeyou_caregiver_responses');
+      localStorage.removeItem('beeyou_calm_strategies');
+      localStorage.removeItem('beeyou_breathing_config');
+      localStorage.removeItem('beeyou_onboarding_completed');
+      localStorage.removeItem('beeyou_user_age_group');
+      localStorage.removeItem('beeyou_user_persona');
+      localStorage.removeItem('beeyou_app_state_v1');
+
+      sessionStorage.clear();
+    }
+  } catch (e) {
+    console.warn('Storage wipe warning:', e);
+  }
 }
 
 /**

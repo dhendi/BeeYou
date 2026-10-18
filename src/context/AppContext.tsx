@@ -59,6 +59,7 @@ import {
   syncChildStatusToCaregiver,
   ConnectionStatusInfo,
 } from '../services/caregiverSync';
+import { wipeDeviceStorage } from '../services/authService';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -976,23 +977,14 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
   };
 
-  const resetToDefaults = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('beeyou_daily_recollections');
-    localStorage.removeItem('beeyou_medications');
-    localStorage.removeItem('beeyou_mood_journal_entries');
-    localStorage.removeItem('beeyou_cycle_settings');
-    localStorage.removeItem('beeyou_cycle_logs');
-    localStorage.removeItem('beeyou_user_age_group');
-    localStorage.removeItem('beeyou_enabled_features');
-    localStorage.removeItem('beeyou_onboarding_completed');
-    localStorage.removeItem('beeyou_help_alert_presets');
-    localStorage.removeItem('beeyou_caregiver_responses');
-    localStorage.removeItem('beeyou_calm_strategies');
-    localStorage.removeItem('beeyou_breathing_config');
-    localStorage.removeItem('beeyou_routines');
+  const resetToDefaults = async () => {
+    try {
+      await wipeDeviceStorage();
+    } catch {}
     if (settings.soundEffects) playChime('clear');
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   const contextValue: AppContextType = {

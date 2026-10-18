@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
+import { logoutFamilyAccount, wipeDeviceStorage } from '../../services/authService';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
 
@@ -19,6 +20,40 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
     childProfile,
     connectionStatus,
   } = useApp();
+
+  const [confirmWipe, setConfirmWipe] = useState(false);
+  const [isWiping, setIsWiping] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await logoutFamilyAccount();
+      playChime('tap');
+      onShowNotification(t('Signed out of family account.'));
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }, 300);
+    } catch (e) {
+      console.error('Sign out error:', e);
+    }
+  };
+
+  const handleExecuteWipe = async () => {
+    try {
+      setIsWiping(true);
+      await wipeDeviceStorage();
+      playChime('clear');
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }, 300);
+    } catch (e) {
+      setIsWiping(false);
+      console.error('Wipe error:', e);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -75,7 +110,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </div>
           
           <p className="text-xs text-slate-600 font-medium">
-            {t("Scan this QR code with your phone camera or enter the 6-letter code to link instantly.")}
+            {t("Scan this QR code with your phone camera or enter the 7-character code to link instantly.")}
           </p>
 
           <div className="flex items-center gap-2 pt-2 flex-wrap">
@@ -116,6 +151,77 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
       {/* Embedded Live Companion Portal View */}
       <div data-tour="pairing-permissions-card" className="rounded-3xl border-2 border-slate-200 overflow-hidden shadow-xs">
         <CaregiverLivePortal initialCode={getPairingCode()} />
+      </div>
+
+      {/* Device Security & Clean Handoff */}
+      <div className="p-6 rounded-3xl bg-white border-2 border-slate-200 shadow-xs space-y-4">
+        <div>
+          <h3 className="text-base font-black text-slate-900">
+            {t("Device Handoff & Memory Sanitization")}
+          </h3>
+          <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
+            {t("Returning a school-loaned tablet or handing this device down to another child? You can safely unpair or wipe this device's memory without affecting your cloud family space.")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-left transition cursor-pointer"
+          >
+            <span className="text-xs font-black text-slate-800 block">
+              {t("Sign Out Family Account")}
+            </span>
+            <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
+              {t("Disconnects active account from this device. Preserves local schedules.")}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setConfirmWipe(true)}
+            className="p-4 rounded-2xl border-2 border-rose-200 bg-rose-50/60 hover:bg-rose-100/60 text-left transition cursor-pointer"
+          >
+            <span className="text-xs font-black text-rose-800 block">
+              {t("Erase & Reset Device")}
+            </span>
+            <span className="text-[11px] text-rose-600 font-medium block mt-0.5">
+              {t("Completely purges private medications, mood logs, and routines.")}
+            </span>
+          </button>
+        </div>
+
+        {confirmWipe && (
+          <div className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 space-y-3 animate-in fade-in">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider block text-rose-900">
+                {t("Confirm Clean Device Wipe")}
+              </span>
+              <p className="text-xs text-rose-800 font-medium mt-1 leading-relaxed">
+                {t("Are you sure? This will erase all local schedules, medication dose records, and personal journal entries from this physical device. (Your cloud account backup remains completely safe).")}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExecuteWipe}
+                disabled={isWiping}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition cursor-pointer"
+              >
+                <span>{isWiping ? t("Erasing...") : t("Yes, Erase This Device")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmWipe(false)}
+                disabled={isWiping}
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 transition cursor-pointer"
+              >
+                <span>{t("Cancel")}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
