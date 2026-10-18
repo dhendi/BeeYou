@@ -11,6 +11,48 @@ let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 const audioMemoryCache = new Map<string, string>();
+const TTS_CACHE_NAME = 'beeyou-tts-v1';
+
+/**
+ * Multi-tier Audio Cache Loader (Memory -> Browser CacheStorage -> Edge Stream)
+ */
+async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Promise<string | null> {
+  // 1. L1 In-Memory Cache (0ms latency)
+  if (audioMemoryCache.has(cacheKey)) {
+    return audioMemoryCache.get(cacheKey)!;
+  }
+
+  // 2. L2 Browser CacheStorage API (Persistent across app reloads & offline)
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    try {
+      const cache = await caches.open(TTS_CACHE_NAME);
+      const match = await cache.match(streamUrl);
+      if (match) {
+        const blob = await match.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        audioMemoryCache.set(cacheKey, blobUrl);
+        return blobUrl;
+      }
+    } catch {}
+  }
+
+  // 3. L3 Edge Server Stream
+  try {
+    const response = await fetch(streamUrl);
+    if (response.ok) {
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        caches.open(TTS_CACHE_NAME).then((c) => c.put(streamUrl, response.clone())).catch(() => {});
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      audioMemoryCache.set(cacheKey, blobUrl);
+      return blobUrl;
+    }
+  } catch {}
+
+  return null;
+}
+
 let serverTTSCooldownUntil = 0;
 
 export function subscribeToSpeechState(listener: (isSpeaking: boolean, text: string | null) => void) {
@@ -487,23 +529,10 @@ export async function speakText(
       // When device lacks native voice pack for this language, stream authentic neural audio
       if (!hasAuthenticLocalVoice) {
         const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
-        if (audioMemoryCache.has(cacheKey)) {
-          try {
-            const audioSrc = audioMemoryCache.get(cacheKey)!;
-            const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
-            if (played) return;
-          } catch (e) {
-            // Fall through to fetch
-          }
-        }
-
+        const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
         try {
-          const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
-          const response = await fetch(streamUrl);
-          if (response.ok) {
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, blobUrl);
+          const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
+          if (blobUrl) {
             const played = await playAudioUrl(blobUrl, formattedText, options?.rate);
             if (played) return;
           }
@@ -808,6 +837,56 @@ function speakWithBrowserSpeechSynthesis(
       playChime('speak');
       notifySpeechState(false, null);
       resolve();
+    }
+  });
+}
+
+/**
+ * Top high-frequency AAC vocabulary to pre-warm for 0ms instantaneous speech
+ */
+export const CORE_AAC_VOCABULARY = [
+  'Help please',
+  'I need a break',
+  'Water',
+  'Food / Snack',
+  'Bathroom',
+  'I feel happy',
+  'I feel sad',
+  'I feel overwhelmed',
+  'Quiet space',
+  'Yes',
+  'No',
+  'Thank you',
+  'I want',
+  'All done',
+  'Stop please',
+  'More please',
+  'Hurts',
+  'Tired',
+  'Love you',
+];
+
+/**
+ * Pre-warms core AAC vocabulary into persistent browser CacheStorage
+ * Runs on idle priority so it never impacts UI responsiveness or app boot time.
+ */
+export async function prewarmCoreAudioVocabulary(lang: string = 'en'): Promise<void> {
+  if (typeof window === 'undefined') return;
+  const normalizedLang =
+    (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
+    (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
+    lang.substring(0, 2);
+
+  // If language is English, system native voices handle it with 0ms latency; no need to stream
+  if (normalizedLang === 'en') return;
+
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 1200));
+  idleFn(async () => {
+    for (const phrase of CORE_AAC_VOCABULARY) {
+      const formatted = formatForNaturalSpeech(phrase);
+      const cacheKey = `${normalizedLang}_${formatted.toLowerCase()}`;
+      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}`;
+      await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
     }
   });
 }

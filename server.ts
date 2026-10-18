@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -55,7 +56,15 @@ app.get('/api/translate', async (req, res) => {
 
 // Authentic High-Fidelity Audio Streaming Endpoint (Google Neural TTS Stream)
 // Provides authentic native Spanish, French, German, Greek, Russian, Vietnamese, Chinese, Japanese, Korean pronunciation
+// Backed by multi-tier L1 in-memory cache + L2 persistent disk cache + 1-year immutable edge CDN headers
 const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
+const TTS_CACHE_DIR = path.join(process.cwd(), '.data', 'tts_cache');
+
+try {
+  if (!fs.existsSync(TTS_CACHE_DIR)) {
+    fs.mkdirSync(TTS_CACHE_DIR, { recursive: true });
+  }
+} catch {}
 
 app.get('/api/tts', async (req, res) => {
   const text = String(req.query.text || '').trim();
@@ -73,17 +82,35 @@ app.get('/api/tts', async (req, res) => {
   } else {
     normalizedLang = lang.substring(0, 2);
   }
-  const cacheKey = `${normalizedLang}_${text.toLowerCase()}`;
 
+  const safeText = text.length > 200 ? text.slice(0, 200) : text;
+  const hashKey = crypto.createHash('md5').update(`${normalizedLang}_${safeText.toLowerCase()}`).digest('hex');
+  const cacheKey = `${normalizedLang}_${safeText.toLowerCase()}`;
+  const diskPath = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
+
+  // 1. L1 In-Memory Cache (0ms latency, zero I/O)
   if (ttsAudioCache.has(cacheKey)) {
     const cached = ttsAudioCache.get(cacheKey)!;
     res.setHeader('Content-Type', cached.contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+    res.setHeader('ETag', `"${hashKey}"`);
     return res.send(cached.buffer);
   }
 
+  // 2. L2 Persistent Disk Cache (Survives server restarts and redeployments)
+  if (fs.existsSync(diskPath)) {
+    try {
+      const fileBuffer = await fs.promises.readFile(diskPath);
+      ttsAudioCache.set(cacheKey, { buffer: fileBuffer, contentType: 'audio/mpeg' });
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+      res.setHeader('ETag', `"${hashKey}"`);
+      return res.send(fileBuffer);
+    } catch {}
+  }
+
+  // 3. L3 Upstream Generation (Google Neural TTS Stream)
   try {
-    const safeText = text.length > 200 ? text.slice(0, 200) : text;
     const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(safeText)}`;
     const response = await fetch(targetUrl, {
       headers: {
@@ -100,14 +127,18 @@ app.get('/api/tts', async (req, res) => {
     const buffer = Buffer.from(arrayBuffer);
     const contentType = response.headers.get('content-type') || 'audio/mpeg';
 
-    if (ttsAudioCache.size > 500) {
+    if (ttsAudioCache.size > 1000) {
       const firstKey = ttsAudioCache.keys().next().value;
       if (firstKey) ttsAudioCache.delete(firstKey);
     }
     ttsAudioCache.set(cacheKey, { buffer, contentType });
 
+    // Asynchronously write to persistent disk cache (non-blocking)
+    fs.promises.writeFile(diskPath, buffer).catch(() => {});
+
     res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+    res.setHeader('ETag', `"${hashKey}"`);
     return res.send(buffer);
   } catch (err: any) {
     console.error('[TTS Proxy Error]:', err);

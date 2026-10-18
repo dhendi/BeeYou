@@ -15,6 +15,7 @@ import { AccessibleTile } from './common/AccessibleTile';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
+import { prewarmCoreAudioVocabulary } from '../utils/audio/speech';
 export { getGrammaticalCategoryLabel };
 
 
@@ -249,6 +250,11 @@ export const AACView: React.FC = () => {
       window.removeEventListener('beeyou_aac_button_size_change', handleButtonSizeChange);
     };
   }, []);
+
+  // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
+  useEffect(() => {
+    prewarmCoreAudioVocabulary(settings?.language || 'en');
+  }, [settings?.language]);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
