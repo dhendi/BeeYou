@@ -453,7 +453,7 @@ export function suggestThemeForUser(ageGroup: 'kid' | 'teen' | 'adult', interest
  * Gracefully falls back to category defaults or empty string if not found.
  */
 export function getThemeIcon(theme?: AppTheme | null): string {
-  if (!theme) return '';
+  if (!theme) return '/assets/stickers/bee_mascot.png';
   if (theme.icon) return theme.icon;
   if (theme.mascotIcon) return theme.mascotIcon;
   switch (theme.id) {
@@ -478,6 +478,6 @@ export function getThemeIcon(theme?: AppTheme | null): string {
     case 'racing': return '/assets/stickers/racing_mascot.png';
     case 'fantasy': return '/assets/stickers/fairytale_mascot.png';
   }
-  return '';
+  return '/assets/stickers/bee_mascot.png';
 }
 

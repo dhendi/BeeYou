@@ -18,7 +18,11 @@ import {
   ArrowRight,
   X,
   UploadCloud,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Sparkles,
+  Smile,
+  Headphones,
+  Briefcase
 } from 'lucide-react';
 import { playChime, speakText } from '../utils/audio';
 import { PRESET_THEMES, getThemeIcon } from '../data/themesData';
@@ -184,24 +188,27 @@ const PALETTE_PRESETS: { name: string; palette: ThemePalette }[] = [
   },
 ];
 
-// Quick mascot choices
-const POPULAR_MASCOTS = [
-  { emoji: '🐝', name: 'Busy Bee', sound: 'classic' as const, icon: '/assets/stickers/bee_mascot.png' },
-  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle' as const, icon: '/assets/stickers/turtle_mascot.png' },
-  { emoji: '🦖', name: 'T-Rex', sound: 'dino' as const, icon: '/assets/stickers/dino_rex.png' },
-  { emoji: '🦕', name: 'Brachiosaurus', sound: 'dino' as const, icon: '/assets/stickers/dino_rex.png' },
-  { emoji: '🐸', name: 'Tree Frog', sound: 'frog' as const, icon: '/assets/stickers/frog_mascot.png' },
-  { emoji: '🚂', name: 'Steam Train', sound: 'train' as const, icon: '/assets/stickers/train_mascot.png' },
-  { emoji: '🚀', name: 'Rocket', sound: 'space' as const, icon: '/assets/stickers/space_mascot.png' },
-  { emoji: '🐬', name: 'Dolphin', sound: 'classic' as const, icon: '/assets/stickers/ocean_mascot.png' },
-  { emoji: '🦄', name: 'Unicorn', sound: 'magic' as const, icon: '/assets/stickers/fairytale_mascot.png' },
-  { emoji: '🐶', name: 'Puppy', sound: 'classic' as const },
-  { emoji: '🐱', name: 'Kitty', sound: 'classic' as const },
-  { emoji: '🦁', name: 'Lion', sound: 'classic' as const },
-  { emoji: '🏎️', name: 'Racecar', sound: 'train' as const, icon: '/assets/stickers/racing_mascot.png' },
-  { emoji: '🤖', name: 'Robot', sound: 'space' as const },
-  { emoji: '🦋', name: 'Butterfly', sound: 'magic' as const },
-  { emoji: '⭐', name: 'Star', sound: 'magic' as const },
+// Quick mascot choices - 12 distinct mascots, each with its own unique sticker icon
+export interface PopularMascot {
+  emoji: string;
+  name: string;
+  sound: 'classic' | 'turtle' | 'dino' | 'frog' | 'train' | 'space' | 'magic';
+  icon: string;
+}
+
+const POPULAR_MASCOTS: PopularMascot[] = [
+  { emoji: '🐝', name: 'Busy Bee', sound: 'classic', icon: '/assets/stickers/bee_mascot.png' },
+  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle', icon: '/assets/stickers/turtle_mascot.png' },
+  { emoji: '🦖', name: 'T-Rex', sound: 'dino', icon: '/assets/stickers/dino_rex.png' },
+  { emoji: '🐸', name: 'Tree Frog', sound: 'frog', icon: '/assets/stickers/frog_mascot.png' },
+  { emoji: '🚂', name: 'Steam Train', sound: 'train', icon: '/assets/stickers/train_mascot.png' },
+  { emoji: '🚀', name: 'Cosmic Astro', sound: 'space', icon: '/assets/stickers/space_mascot.png' },
+  { emoji: '🐬', name: 'Splash Dolphin', sound: 'classic', icon: '/assets/stickers/ocean_mascot.png' },
+  { emoji: '🦄', name: 'Stardust Unicorn', sound: 'magic', icon: '/assets/stickers/fairytale_mascot.png' },
+  { emoji: '🏎️', name: 'Turbo Racer', sound: 'train', icon: '/assets/stickers/racing_mascot.png' },
+  { emoji: '🐶', name: 'Station Pup', sound: 'classic', icon: '/assets/stickers/train_station_dog.png' },
+  { emoji: '🦁', name: 'Brave Lion', sound: 'classic', icon: '/assets/stickers/open_mouth_lion.png' },
+  { emoji: '🧸', name: 'Cozy Teddy', sound: 'classic', icon: '/assets/stickers/teddy_bear.png' },
 ];
 
 export interface WallpaperPatternOption {
@@ -530,13 +537,15 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-2xl sm:text-3xl p-1.5 rounded-2xl bg-white/80 shadow-xs">🎨</span>
+              <span className="p-2 rounded-2xl bg-white/80 shadow-xs flex items-center justify-center text-amber-600">
+                <Palette className="w-6 h-6 sm:w-7 sm:h-7" />
+              </span>
               <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${headerStyles.bannerText}`}>
                 Themes & Visual Customizer
               </h2>
             </div>
             <p className={`text-xs sm:text-sm ${headerStyles.bannerSubtext} mt-1 max-w-xl font-semibold leading-relaxed`}>
-              Transform BeeYou to match passions and sensory needs! Pick ready-made themes (like 🐝 <strong>Bee Classic</strong> or 🐢 <strong>Wise Turtle</strong>), or edit and create your own themes with custom colors and mascots.
+              Transform BeeYou to match passions and sensory needs! Pick ready-made themes (like <strong>Bee Classic</strong> or <strong>Wise Turtle</strong>), or edit and create your own themes with custom colors and mascots.
             </p>
           </div>
 
@@ -548,7 +557,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 onClick={onStartTour}
                 className="px-3.5 py-2 rounded-2xl bg-white/90 hover:bg-white text-slate-900 font-black text-xs flex items-center gap-1.5 border border-white shadow-xs transition-all active:scale-95 cursor-pointer"
               >
-                <span>💡 Tour</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Tour</span>
               </button>
             )}
             <button
@@ -650,19 +660,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           <div className={`bg-white rounded-3xl p-4 sm:p-5 border-2 ${headerStyles.equippedCardBorder} shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300`}>
             <div className="flex items-center gap-3.5 min-w-0">
               <span className={`w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl ${headerStyles.equippedBadgeBg} shrink-0 flex items-center justify-center overflow-hidden`}>
-                {getThemeIcon(activeTheme) ? (
-                  <img
-                    src={getThemeIcon(activeTheme)}
-                    alt={activeTheme.mascotName}
-                    className="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-2xs select-none pointer-events-none"
-                  />
-                ) : (
-                  <RoutineStickerIcon
-                    emoji={activeTheme.mascotEmoji || activeTheme.emoji}
-                    title={activeTheme.mascotName}
-                    className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-2xs"
-                  />
-                )}
+                <img
+                  src={getThemeIcon(activeTheme) || '/assets/stickers/bee_mascot.png'}
+                  alt={activeTheme.mascotName}
+                  className="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-2xs select-none pointer-events-none"
+                />
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -708,7 +710,8 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 </button>
               ) : (
                 <div className="px-3.5 py-2 rounded-2xl bg-amber-50 text-amber-900 border border-amber-200 font-bold text-xs flex items-center gap-1.5">
-                  <span>🐝 Default Theme Active</span>
+                  <img src="/assets/stickers/bee_mascot.png" alt="Bee" className="w-4 h-4 object-contain shrink-0" />
+                  <span>Default Theme Active</span>
                 </div>
               )}
             </div>
@@ -719,29 +722,32 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-black text-slate-500 mr-1">Filter Themes:</span>
               {[
-                { id: 'all', label: 'All Themes', emoji: '🌟' },
-                { id: 'kid', label: 'Kids (3–11)', emoji: '🧒' },
-                { id: 'teen', label: 'Teens (12–17)', emoji: '🎧' },
-                { id: 'adult', label: 'Adults (18+)', emoji: '💼' },
-                { id: 'custom', label: 'Custom Creations', emoji: '⭐' },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => {
-                    setAgeFilter(f.id as any);
-                    playChime('tap');
-                  }}
-                  className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                    ageFilter === f.id
-                      ? 'bg-amber-500 text-white shadow-xs font-black'
-                      : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                  }`}
-                >
-                  <span>{f.emoji}</span>
-                  <span>{f.label}</span>
-                </button>
-              ))}
+                { id: 'all', label: 'All Themes', icon: Sparkles },
+                { id: 'kid', label: 'Kids (3–11)', icon: Smile },
+                { id: 'teen', label: 'Teens (12–17)', icon: Headphones },
+                { id: 'adult', label: 'Adults (18+)', icon: Briefcase },
+                { id: 'custom', label: 'Custom Creations', icon: Palette },
+              ].map((f) => {
+                const IconComp = f.icon;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setAgeFilter(f.id as any);
+                      playChime('tap');
+                    }}
+                    className={`px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                      ageFilter === f.id
+                        ? 'bg-amber-500 text-white shadow-xs font-black'
+                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                    }`}
+                  >
+                    <IconComp className="w-3.5 h-3.5" />
+                    <span>{f.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <button
@@ -773,16 +779,12 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2.5">
                         <div className="w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl bg-amber-50 border border-amber-200 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
-                          {getThemeIcon(theme) ? (
-                            <img
-                              src={getThemeIcon(theme)}
-                              alt={theme.mascotName || theme.name}
-                              className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-2xs select-none pointer-events-none"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <span className="text-3xl sm:text-4xl select-none">{theme.emoji}</span>
-                          )}
+                          <img
+                            src={getThemeIcon(theme) || '/assets/stickers/bee_mascot.png'}
+                            alt={theme.mascotName || theme.name}
+                            className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-2xs select-none pointer-events-none"
+                            loading="lazy"
+                          />
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -934,31 +936,34 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
             {/* Quick Mascot Selector */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-              {POPULAR_MASCOTS.map((m) => (
-                <button
-                  key={m.name}
-                  type="button"
-                  onClick={() => {
-                    setMascotEmoji(m.emoji);
-                    setMascotName(m.name);
-                    if (m.icon) setMascotIcon(m.icon);
-                    setSelectedSoundTheme(m.sound);
-                    playChime('tap');
-                  }}
-                  className={`p-2 rounded-2xl w-12 h-12 shrink-0 border-2 transition-all cursor-pointer flex items-center justify-center ${
-                    mascotEmoji === m.emoji
-                      ? 'border-amber-500 bg-amber-50 scale-105 shadow-sm'
-                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-                  }`}
-                  title={m.name}
-                >
-                  {m.icon ? (
-                    <img src={m.icon} alt={m.name} className="w-7 h-7 object-contain drop-shadow-2xs select-none pointer-events-none" />
-                  ) : (
-                    <RoutineStickerIcon emoji={m.emoji} title={m.name} className="w-7 h-7 object-contain drop-shadow-2xs" />
-                  )}
-                </button>
-              ))}
+              {POPULAR_MASCOTS.map((m) => {
+                const isSelected = (mascotIcon && mascotIcon === m.icon) || (!mascotIcon && mascotEmoji === m.emoji);
+                return (
+                  <button
+                    key={m.name}
+                    type="button"
+                    onClick={() => {
+                      setMascotEmoji(m.emoji);
+                      setMascotName(m.name);
+                      setMascotIcon(m.icon);
+                      setSelectedSoundTheme(m.sound);
+                      playChime('tap');
+                    }}
+                    className={`p-2 rounded-2xl w-12 h-12 shrink-0 border-2 transition-all cursor-pointer flex items-center justify-center ${
+                      isSelected
+                        ? 'border-amber-500 bg-amber-50 scale-105 shadow-sm ring-2 ring-amber-400/40'
+                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                    }`}
+                    title={m.name}
+                  >
+                    <img
+                      src={m.icon}
+                      alt={m.name}
+                      className="w-7 h-7 object-contain drop-shadow-2xs select-none pointer-events-none"
+                    />
+                  </button>
+                );
+              })}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -974,13 +979,15 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-600 block mb-1">Mascot Emoji</label>
-                <input
-                  type="text"
-                  value={mascotEmoji}
-                  onChange={(e) => setMascotEmoji(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border-2 border-slate-200 font-bold text-sm focus:border-amber-500 focus:outline-hidden text-center text-xl"
-                />
+                <label className="text-xs font-bold text-slate-600 block mb-1">Selected Mascot</label>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl border-2 border-slate-200 bg-slate-50 min-h-[46px]">
+                  <img
+                    src={mascotIcon || '/assets/stickers/bee_mascot.png'}
+                    alt={mascotName}
+                    className="w-7 h-7 object-contain drop-shadow-2xs shrink-0 select-none pointer-events-none"
+                  />
+                  <span className="text-xs font-bold text-slate-700 truncate">{mascotName || 'Mascot'}</span>
+                </div>
               </div>
 
               <div>
@@ -1288,11 +1295,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
 
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 border border-white/30 flex items-center justify-center shrink-0 overflow-hidden p-0.5">
-                  {previewTheme.icon ? (
-                    <img src={previewTheme.icon} alt={previewTheme.name} className="w-full h-full object-contain pointer-events-none select-none" />
-                  ) : (
-                    <RoutineStickerIcon emoji={previewTheme.emoji || '🐝'} title={previewTheme.name} className="w-full h-full object-contain" />
-                  )}
+                  <img
+                    src={previewTheme.icon || getThemeIcon(previewTheme) || '/assets/stickers/bee_mascot.png'}
+                    alt={previewTheme.name}
+                    className="w-full h-full object-contain pointer-events-none select-none"
+                  />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
