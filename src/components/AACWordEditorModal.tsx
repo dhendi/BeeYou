@@ -83,7 +83,7 @@ const SPEAKER_PRESETS = [
   { id: 'Mom', label: '👩 Mom' },
   { id: 'Dad', label: '👨 Dad' },
   { id: 'Caregiver', label: '🤝 Caregiver' },
-  { id: 'Leo', label: '⭐ Leo' },
+  { id: 'Child', label: '⭐ Child' },
   { id: 'Custom', label: '✏️ Custom' },
 ];
 

@@ -510,14 +510,14 @@ export function subscribeToCloudChannel(code: string): void {
       conn.on('open', () => {
         lastPeerPingTimestamp = Date.now();
         lastPeerRole = isCaregiver ? 'child_device' : 'caregiver';
-        lastPeerName = isCaregiver ? 'Child Tablet' : 'Sarah (Mom)';
+        lastPeerName = isCaregiver ? 'Child Device' : 'Caregiver';
         notifyConnectionStatus();
 
         // Send handshake
         conn.send({
           type: isCaregiver ? 'CAREGIVER_HEARTBEAT' : 'CHILD_HEARTBEAT',
           role: isCaregiver ? 'caregiver' : 'child_device',
-          name: isCaregiver ? 'Sarah (Mom)' : 'Leo',
+          name: isCaregiver ? 'Caregiver' : 'Child',
           pairingCode: safeCode,
           sentAt: Date.now(),
         });
@@ -1051,7 +1051,7 @@ export async function claimPairingSession(params: {
     expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     status: 'paired',
     initiatedBy: params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver',
-    childName: params.childName || 'Leo',
+    childName: params.childName || 'Child',
     childAge: params.childAge || 10,
     ageGroup: params.ageGroup || 'kid',
     caregiverName: params.caregiverName || 'Caregiver',
@@ -1370,8 +1370,8 @@ export async function sendCaregiverAlert(alertData: {
 /**
  * Fires a test alert to verify real-time caregiver delivery, sound, and visual indicators
  */
-export async function sendTestCaregiverAlert(pairingCodeOrChildName = 'Leo', childName?: string): Promise<CaregiverAlert> {
-  const actualName = childName || (pairingCodeOrChildName.length > 10 ? 'Child' : pairingCodeOrChildName) || 'Leo';
+export async function sendTestCaregiverAlert(pairingCodeOrChildName = 'Child', childName?: string): Promise<CaregiverAlert> {
+  const actualName = childName || (pairingCodeOrChildName.length > 10 ? 'Child' : pairingCodeOrChildName) || 'Child';
   return await sendCaregiverAlert({
     childName: actualName,
     emotion: 'need_help',

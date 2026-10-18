@@ -342,7 +342,7 @@ export function useGamificationState({
   const recordEmotion = (emotion: EmotionType, reason?: string, need?: string) => {
     setCurrentMood(emotion);
     syncChildStatusToCaregiver({
-      childName: childName || 'Leo',
+      childName: childName || 'Child',
       currentMood: emotion,
       currentMoodReason: reason,
       currentMoodNeed: need,

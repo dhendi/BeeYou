@@ -282,7 +282,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     const alertUid = 'alert-' + Date.now();
     await sendCaregiverAlert({
       id: alertUid,
-      childName: childProfile.name || 'Leo',
+      childName: childProfile.name || 'Child',
       emotion: choice.id as any,
       alertId: choice.id,
       label: choice.label,

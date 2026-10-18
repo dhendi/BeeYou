@@ -637,7 +637,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                     <div>
                       <h4 className="font-black text-xs text-amber-950 dark:text-amber-200">2. Caregiver Notified</h4>
                       <p className="text-xs text-amber-900 dark:text-amber-300 font-medium mt-0.5">
-                        Instant notification banner appears on caregiver device: <em>"Leo needs help."</em>
+                        Instant notification banner appears on caregiver device: <em>"Child needs help."</em>
                       </p>
                     </div>
                   </div>

@@ -117,7 +117,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
         sendHeartbeat({
           role: 'caregiver',
-          name: account.caregiverName || 'Sarah (Mom)',
+          name: account.caregiverName || 'Caregiver',
           pairingCode: code,
         });
       } else {
@@ -134,14 +134,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           ageGroup: account.childProfile.ageGroup,
           userRole: 'self',
         });
-        setSuccessMessage(`Logged in as ${account.childProfile.name}! Connected to ${account.caregiverName}.`);
+        setSuccessMessage(`Logged in! Connected to ${account.caregiverName || 'Caregiver'}.`);
         try {
-          speak(`${account.caregiverName} is connected to your device`);
+          speak(`${account.caregiverName || 'Caregiver'} is connected to your device`);
         } catch {}
 
         sendHeartbeat({
           role: 'child_device',
-          name: account.childProfile.name || 'Leo',
+          name: account.childProfile.name || 'Child',
           pairingCode: code,
         });
       }
@@ -376,7 +376,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     Test Live Connectivity Instantly
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed font-medium">
-                    We’ve prepared a complete sample family (<strong>Leo</strong>, 10 yrs old, and <strong>Sarah (Mom)</strong>) with routines, visual schedules, AAC speech buttons, and real-time alerts.
+                    Test real-time routines, visual schedules, AAC speech buttons, and instant alerts with our preconfigured testing playground.
                   </p>
                 </div>
 
@@ -410,10 +410,10 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     </div>
                     <div>
                       <h4 className="text-base font-black tracking-tight">
-                        Launch Demo as Child (Leo)
+                        Launch Demo as Child
                       </h4>
                       <p className="text-xs text-amber-100 mt-0.5 font-normal leading-snug">
-                        Opens visual routines, AAC symbol talker &amp; SOS button linked to Mom.
+                        Opens visual routines, AAC symbol talker &amp; SOS button linked to Caregiver.
                       </p>
                     </div>
                     <div className="flex items-center gap-1 text-xs font-bold text-amber-950 group-hover:translate-x-1 transition-transform">
@@ -438,10 +438,10 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     </div>
                     <div>
                       <h4 className="text-base font-black tracking-tight">
-                        Launch Demo as Caregiver (Mom)
+                        Launch Demo as Caregiver
                       </h4>
                       <p className="text-xs text-indigo-100 mt-0.5 font-normal leading-snug">
-                        Opens Live Command Hub to send 1-tap nudges &amp; receive Leo's alerts.
+                        Opens Live Command Hub to send 1-tap nudges &amp; receive child alerts.
                       </p>
                     </div>
                     <div className="flex items-center gap-1 text-xs font-bold text-indigo-200 group-hover:translate-x-1 transition-transform">

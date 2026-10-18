@@ -97,7 +97,7 @@ export function useIsRacingTheme(): boolean {
 }
 
 const renderStickerPng = (src: string, alt: string) => {
-  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'eager' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = src;
     if (theme === 'turtle' && TURTLE_STICKER_SWAPS[src]) {
@@ -132,7 +132,7 @@ const renderStickerPng = (src: string, alt: string) => {
 };
 
 const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: string, dinoSrc?: string, frogSrc?: string, trainSrc?: string, spaceSrc?: string) => {
-  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'lazy' }) => {
+  const Component: React.FC<StickerProps> = ({ className = 'w-9 h-9', size, loading = 'eager' }) => {
     const theme = useActiveThemeCategory();
     let currentSrc = defaultSrc;
     if (theme === 'turtle') {
@@ -2749,7 +2749,7 @@ export const RoutineStickerIcon: React.FC<{
   className?: string;
   size?: number;
   loading?: 'lazy' | 'eager';
-}> = ({ emoji, title, className = 'w-8 h-8', size, loading = 'lazy' }) => {
+}> = ({ emoji, title, className = 'w-8 h-8', size, loading = 'eager' }) => {
   const normEmoji = (emoji || '').trim();
   const normTitle = (title || '').toLowerCase();
   const activeTheme = useActiveThemeCategory();

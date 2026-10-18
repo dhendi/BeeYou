@@ -516,7 +516,19 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.childProfile) return parsed.childProfile;
+        if (parsed.childProfile) {
+          // Clean legacy mock demo user data if present
+          if (parsed.childProfile.name === 'Leo') {
+            parsed.childProfile.name = '';
+          }
+          if (parsed.childProfile.aboutMe?.emergencyContacts?.some((c: any) => c.name?.includes('Sarah'))) {
+            parsed.childProfile.aboutMe.emergencyContacts = [];
+            parsed.childProfile.aboutMe.allergiesOrMedical = [];
+            parsed.childProfile.aboutMe.bloodType = '';
+            parsed.childProfile.aboutMe.speechSummary = '';
+          }
+          return parsed.childProfile;
+        }
       }
     } catch (e) {}
     return INITIAL_CHILD_PROFILE;

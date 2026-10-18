@@ -262,7 +262,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
           <div>
             <div className="flex items-center gap-2">
               <h2 className={`text-base sm:text-lg font-black ${themeStyles.headerText} leading-tight`}>
-                {t('Hi')}, {childProfile.name}!
+                {childProfile.name?.trim() ? `${t('Hi')}, ${childProfile.name.trim()}!` : t('Welcome!')}
               </h2>
             </div>
             <p className={`text-xs ${themeStyles.headerSubtext} font-semibold`}>

@@ -253,7 +253,7 @@ export const ParentDashboard: React.FC = () => {
         };
         setActiveAlerts((prev) => deduplicateAlerts([fullAlert, ...prev]));
         setAlertHistoryList(getAlertHistory());
-        showNotification(`Incoming Alert from ${alert.childName || 'Leo'}: ${alert.label}`);
+        showNotification(`Incoming Alert from ${alert.childName || childProfile.name || 'Child'}: ${alert.label}`);
       }
     });
 
@@ -275,7 +275,7 @@ export const ParentDashboard: React.FC = () => {
 
   const handleSendQuickNudge = async (title: string, text: string, emoji: string) => {
     await sendCaregiverMessage(getPairingCode(), text, 'Caregiver', emoji);
-    showNotification(`Sent "${title}" alert to ${childProfile.name}'s device!`);
+    showNotification(`Sent "${title}" alert to ${childProfile.name || 'Child'}'s device!`);
     playChime('tap');
   };
 
@@ -291,11 +291,11 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleTriggerTestAlert = async () => {
-    const testAlert = await sendTestCaregiverAlert(childProfile.name || 'Leo');
+    const testAlert = await sendTestCaregiverAlert(childProfile.name || 'Child');
     setActiveAlerts((prev) => [testAlert, ...prev.filter((a) => a.id !== testAlert.id)]);
     setAlertHistoryList(getAlertHistory());
     playChime('complete');
-    showNotification(`Test alert triggered successfully for ${childProfile.name}!`);
+    showNotification(`Test alert triggered successfully${childProfile.name ? ` for ${childProfile.name}` : ''}!`);
   };
 
   const handleClearAlertHistory = () => {
@@ -507,9 +507,11 @@ export const ParentDashboard: React.FC = () => {
             <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 truncate">
               {t('Caregiver Hub')}
             </h1>
-            <span className="text-xs text-slate-500 font-medium truncate hidden sm:inline">
-              • {childProfile.name}
-            </span>
+            {childProfile.name?.trim() && (
+              <span className="text-xs text-slate-500 font-medium truncate hidden sm:inline">
+                • {childProfile.name.trim()}
+              </span>
+            )}
           </div>
         </div>
 

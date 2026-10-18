@@ -269,99 +269,14 @@ const getPastDateStr = (daysAgo: number): string => {
   return d.toISOString().split('T')[0];
 };
 
-export const INITIAL_DAILY_RECOLLECTIONS: DailyRecollectionEntry[] = [
-  {
-    id: 'rec-6',
-    date: getPastDateStr(6),
-    timestamp: Date.now() - 6 * 86400000,
-    submittedBy: 'together',
-    overallDay: 'good',
-    energyLevel: 'calm',
-    primaryFeeling: 'happy',
-    mainChallenge: 'none',
-    bestWin: 'routine_success',
-    sleepQuality: 'slept_well',
-    additionalNotes: 'Morning readiness routine took only 8 minutes with visual timer! Leo was proud.',
-    starsAwarded: 3,
-  },
-  {
-    id: 'rec-5',
-    date: getPastDateStr(5),
-    timestamp: Date.now() - 5 * 86400000,
-    submittedBy: 'parent',
-    overallDay: 'difficult',
-    energyLevel: 'overstimulated',
-    primaryFeeling: 'overwhelmed',
-    mainChallenge: 'sensory_overload',
-    bestWin: 'calmed_down',
-    sleepQuality: 'restless',
-    additionalNotes: 'Fire drill at school triggered high anxiety. Leo put on noise-cancelling headphones and used the calm pacer for 5 minutes.',
-    starsAwarded: 3,
-  },
-  {
-    id: 'rec-4',
-    date: getPastDateStr(4),
-    timestamp: Date.now() - 4 * 86400000,
-    submittedBy: 'together',
-    overallDay: 'great',
-    energyLevel: 'calm',
-    primaryFeeling: 'excited',
-    mainChallenge: 'none',
-    bestWin: 'communication_aac',
-    sleepQuality: 'slept_well',
-    additionalNotes: 'Speech session went wonderfully. Built a 4-word sentence on AAC board without prompting.',
-    starsAwarded: 3,
-  },
-  {
-    id: 'rec-3',
-    date: getPastDateStr(3),
-    timestamp: Date.now() - 3 * 86400000,
-    submittedBy: 'child',
-    overallDay: 'okay',
-    energyLevel: 'high',
-    primaryFeeling: 'calm',
-    mainChallenge: 'waiting_transitions',
-    bestWin: 'fun_play',
-    sleepQuality: 'slept_well',
-    additionalNotes: 'Built a huge LEGO train track. Hard to leave for dinner, but 2-minute countdown timer helped.',
-    starsAwarded: 3,
-  },
-  {
-    id: 'rec-2',
-    date: getPastDateStr(2),
-    timestamp: Date.now() - 2 * 86400000,
-    submittedBy: 'together',
-    overallDay: 'good',
-    energyLevel: 'calm',
-    primaryFeeling: 'happy',
-    mainChallenge: 'routine_change',
-    bestWin: 'tried_new',
-    sleepQuality: 'slept_well',
-    additionalNotes: 'Rain caused PE class to be inside. Leo adapted smoothly after viewing the Plans Changed card.',
-    starsAwarded: 3,
-  },
-  {
-    id: 'rec-1',
-    date: getPastDateStr(1),
-    timestamp: Date.now() - 1 * 86400000,
-    submittedBy: 'together',
-    overallDay: 'great',
-    energyLevel: 'calm',
-    primaryFeeling: 'excited',
-    mainChallenge: 'none',
-    bestWin: 'routine_success',
-    sleepQuality: 'slept_well',
-    additionalNotes: 'Completed full morning routine and earned Morning Superstar sticker! Very cheerful day.',
-    starsAwarded: 3,
-  },
-];
+export const INITIAL_DAILY_RECOLLECTIONS: DailyRecollectionEntry[] = [];
 
 /**
  * Generate a formatted clinical summary text to copy/share with therapists & educators
  */
 export function generateTherapistSummaryText(
   entries: DailyRecollectionEntry[],
-  childName: string = 'Leo'
+  childName: string = 'Child'
 ): string {
   if (entries.length === 0) {
     return `No daily recollections recorded yet for ${childName}.`;

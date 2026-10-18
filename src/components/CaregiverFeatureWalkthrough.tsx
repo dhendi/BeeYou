@@ -109,7 +109,7 @@ export const CaregiverFeatureWalkthrough: React.FC<CaregiverFeatureWalkthroughPr
       summary: '1-tap lifeline for dependents to request help and receive spoken caregiver reassurance.',
       steps: [
         { step: 1, title: 'User Taps Alert', desc: 'Dependent taps floating SOS or chooses Overwhelmed / Need Break.', clickTarget: 'Tap "🆘 Need Help"' },
-        { step: 2, title: 'Caregiver Notified', desc: 'Caregiver sees an instant notification banner: "Leo needs help".', clickTarget: 'Alert Banner' },
+        { step: 2, title: 'Caregiver Notified', desc: 'Caregiver sees an instant notification banner: "Child needs help".', clickTarget: 'Alert Banner' },
         { step: 3, title: 'Send 1-Tap Reply', desc: 'Tap quick reply: "❤️ I\'m here", "🚗 Coming", or "👍 Okay".', clickTarget: 'Tap "❤️ I\'m here"' },
         { step: 4, title: 'Spoken Reassurance', desc: 'Dependent device chimes softly and speaks caregiver reply aloud.', clickTarget: 'Speaks Message' },
       ],
@@ -524,7 +524,7 @@ export const CaregiverFeatureWalkthrough: React.FC<CaregiverFeatureWalkthroughPr
                     <div className="p-2.5 rounded-2xl bg-rose-950/60 border border-rose-500/60 space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">🆘</span>
-                        <span className="font-black text-rose-200 text-xs">Active Alert: "Leo needs help"</span>
+                        <span className="font-black text-rose-200 text-xs">Active Alert: "Child needs help"</span>
                       </div>
                       <p className="text-[11px] text-rose-300">Tap a reassuring response to send back instantly:</p>
 

@@ -417,7 +417,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
                   {t("Theme-Tinted Palette")}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-1 font-medium leading-snug">
-                  {t("Adapts button backgrounds to match the equipped theme colors (e.g. emerald greens for turtles, sunny ambers for Leo). Great for older teens or adults seeking a unified look.")}
+                  {t("Adapts button backgrounds to match the equipped theme colors (e.g. emerald greens for turtles, sunny ambers for honey bees). Great for older teens or adults seeking a unified look.")}
                 </p>
               </div>
 

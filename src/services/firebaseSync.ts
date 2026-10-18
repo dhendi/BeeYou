@@ -204,7 +204,7 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
     if (peerData && peerData.timestamp) {
       lastKnownPeerPing = peerData.timestamp;
       lastKnownPeerRole = isCaregiver ? 'child_device' : 'caregiver';
-      lastKnownPeerName = peerData.name || (isCaregiver ? 'Child Tablet' : 'Sarah (Mom)');
+      lastKnownPeerName = peerData.name || (isCaregiver ? 'Child Device' : 'Caregiver');
       notifyPresence();
     }
   });
@@ -225,7 +225,7 @@ function notifyPresence(): void {
 
   presenceListeners.forEach((fn) => fn({
     isConnected,
-    peerName: lastKnownPeerName || (lastKnownPeerRole === 'caregiver' ? 'Sarah (Mom)' : 'Leo'),
+    peerName: lastKnownPeerName || (lastKnownPeerRole === 'caregiver' ? 'Caregiver' : 'Child'),
     peerRole: lastKnownPeerRole,
     lastPingAgo: diffSec,
   }));

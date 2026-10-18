@@ -215,13 +215,13 @@ export function useFamilyCloudSync({
     currentMood,
     childView,
     stars,
-    childName: childName || 'Leo',
+    childName: childName || 'Child',
   });
   liveChildStatusRef.current = {
     currentMood,
     childView,
     stars,
-    childName: childName || 'Leo',
+    childName: childName || 'Child',
   };
 
   useEffect(() => {
@@ -312,10 +312,10 @@ export function useFamilyCloudSync({
       const snap = liveChildStatusRef.current;
       sendHeartbeat({
         role: isCaregiver ? 'caregiver' : 'child_device',
-        name: isCaregiver ? 'Sarah (Mom)' : snap.childName || 'Leo',
+        name: isCaregiver ? 'Caregiver' : snap.childName || 'Child',
         pairingCode: code,
         childStatus: {
-          childName: snap.childName || 'Leo',
+          childName: snap.childName || 'Child',
           currentMood: snap.currentMood,
           currentActivity: `In ${snap.childView === 'my-day' ? 'Visual Schedule' : snap.childView === 'aac' ? 'AAC Speech Board' : 'BeeYou'}`,
           stars: snap.stars,

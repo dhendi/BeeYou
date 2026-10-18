@@ -191,7 +191,7 @@ export function useAacCommunication({
       const singleSpoken = sentence[0].speechText || sentence[0].label;
       recordSentenceSpoken(singleSpoken, sentence[0].emoji);
       syncChildStatusToCaregiver({
-        childName: childName || 'Leo',
+        childName: childName || 'Child',
         lastAacSentence: singleSpoken,
         currentMood: currentMood as any,
       });
@@ -201,7 +201,7 @@ export function useAacCommunication({
     const fullText = autocorrectAacGrammar(sentence, language);
     recordSentenceSpoken(fullText, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
-      childName: childName || 'Leo',
+      childName: childName || 'Child',
       lastAacSentence: fullText,
       currentMood: currentMood as any,
     });

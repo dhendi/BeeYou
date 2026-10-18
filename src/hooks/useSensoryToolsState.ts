@@ -116,7 +116,7 @@ export function useSensoryToolsState({ childName, soundEffects }: UseSensoryTool
     } catch {}
 
     sendEmergencySafeModeEvent({
-      childName: childName || 'Leo',
+      childName: childName || 'Child',
       activatedAt: timestamp,
       reason: 'Sensory Safe Mode Activated (Overload Shield)',
     }).catch((err) => {

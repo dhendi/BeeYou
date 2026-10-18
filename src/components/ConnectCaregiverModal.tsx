@@ -228,7 +228,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setClaimError(null);
 
     const isCaregiverUser = userRole === 'caregiver';
-    const targetChildName = inputChildName.trim() || childProfile.name || 'Leo';
+    const targetChildName = inputChildName.trim() || childProfile.name || 'Child';
     const targetCaregiverName = inputCaregiverName.trim() || 'Caregiver';
 
     const res = await claimPairingSession({
@@ -624,7 +624,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                         type="text"
                         value={inputChildName}
                         onChange={(e) => setInputChildName(e.target.value)}
-                        placeholder="e.g. Leo"
+                        placeholder="e.g. Alex"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
                       />
                     </div>
@@ -679,7 +679,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                       type="text"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
-                      placeholder="e.g. Sarah"
+                      placeholder="e.g. Alex"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
                       required
                     />
@@ -720,7 +720,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                       type="email"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
-                      placeholder="e.g. sarah@example.com"
+                      placeholder="e.g. contact@example.com"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-bold text-xs"
                     />
                   </div>

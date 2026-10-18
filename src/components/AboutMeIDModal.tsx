@@ -75,44 +75,26 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
       'Gentle pressure or quiet dim break room',
       'Taking a break outdoors or walking to regulate',
     ],
-    allergiesOrMedical: [
-      'Peanuts (Severe - EpiPen in front backpack pocket)',
-      'Mild Asthma (Inhaler in backpack side pouch)',
-    ],
-    bloodType: 'O+',
-    emergencyContacts: [
-      {
-        id: 'ec-1',
-        name: userAgeGroup === 'adult' ? 'Morgan (Partner / Emergency Contact)' : 'Sarah (Mom)',
-        relationship: userAgeGroup === 'adult' ? 'Partner & Primary Emergency Contact' : 'Mother & Primary Caregiver',
-        phone: '(555) 234-5678',
-        isPrimary: true,
-        notes: 'Available anytime; please call first!',
-      },
-      {
-        id: 'ec-2',
-        name: userAgeGroup === 'adult' ? 'Taylor (Case Worker / Advocate)' : 'David (Dad)',
-        relationship: userAgeGroup === 'adult' ? 'Support Coordinator' : 'Father',
-        phone: '(555) 876-5432',
-        isPrimary: false,
-        notes: 'Backup contact',
-      },
-    ],
-    speechSummary: `Hello! My name is ${childProfile.name || 'Friend'}. I am ${userAgeGroup === 'adult' ? 'an adult AAC user' : 'a child'} and I communicate using this tablet. If I seem overwhelmed, hurt, or need assistance, please call my emergency contact at 555-234-5678. Thank you for your patience and respect.`,
+    allergiesOrMedical: [],
+    bloodType: '',
+    emergencyContacts: [],
+    speechSummary: childProfile.name
+      ? `Hello! My name is ${childProfile.name}. I communicate using this tablet. Thank you for your patience.`
+      : 'Hello! I communicate using this tablet. Thank you for your patience.',
   };
 
   const aboutMe = childProfile.aboutMe || defaultAboutMe;
 
   // Local Form State for Edit Mode
   const [formData, setFormData] = useState<AboutMeCardData>(aboutMe);
-  const [profileName, setProfileName] = useState(childProfile.name || 'Leo');
-  const [profilePronouns, setProfilePronouns] = useState(childProfile.pronouns || 'they/them');
+  const [profileName, setProfileName] = useState(childProfile.name || '');
+  const [profilePronouns, setProfilePronouns] = useState(childProfile.pronouns || '');
 
   useEffect(() => {
     if (isOpen) {
       setFormData(childProfile.aboutMe || defaultAboutMe);
-      setProfileName(childProfile.name || 'Leo');
-      setProfilePronouns(childProfile.pronouns || 'they/them');
+      setProfileName(childProfile.name || '');
+      setProfilePronouns(childProfile.pronouns || '');
       setIsEditing(false);
     }
   }, [isOpen, childProfile]);
@@ -810,7 +792,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                           type="text"
                           value={c.name}
                           onChange={(e) => updateEmergencyContact(c.id, { name: e.target.value })}
-                          placeholder="Name (e.g. Sarah)"
+                          placeholder="Name (e.g. Contact Name)"
                           className="flex-1 px-3 py-1 rounded-xl border border-slate-300 font-bold text-xs"
                         />
                         <button

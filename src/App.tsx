@@ -6,6 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { CaregiverApp } from './components/CaregiverApp';
 import { ChildApp } from './components/ChildApp';
+import { AppLoadingScreen } from './components/AppLoadingScreen';
+import { isAllAssetsPreloaded } from './utils/appAssetPreloader';
 
 function getActiveRole(): 'caregiver' | 'child' {
   if (typeof window === 'undefined') return 'child';
@@ -36,6 +38,7 @@ function getActiveRole(): 'caregiver' | 'child' {
 
 export default function App() {
   const [role, setRole] = useState<'caregiver' | 'child'>(getActiveRole);
+  const [isReady, setIsReady] = useState<boolean>(() => isAllAssetsPreloaded());
 
   useEffect(() => {
     const handleRoleUpdate = (e?: any) => {
@@ -54,9 +57,18 @@ export default function App() {
     };
   }, []);
 
-  if (role === 'caregiver') {
-    return <CaregiverApp key="caregiver-root-app" />;
-  }
-
-  return <ChildApp key="child-root-app" />;
+  return (
+    <>
+      {!isReady && (
+        <AppLoadingScreen onLoaded={() => setIsReady(true)} />
+      )}
+      <div className={!isReady ? 'invisible' : 'visible animate-fade-in'}>
+        {role === 'caregiver' ? (
+          <CaregiverApp key="caregiver-root-app" />
+        ) : (
+          <ChildApp key="child-root-app" />
+        )}
+      </div>
+    </>
+  );
 }
