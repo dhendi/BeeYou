@@ -15,7 +15,8 @@ import {
   Smile, 
   HelpCircle,
   Play,
-  RotateCcw
+  RotateCcw,
+  Clock
 } from 'lucide-react';
 import { GridStage, DwellMode, STORAGE_KEYS } from '../../types/aac';
 import { speakText, stopSpeaking, playChime } from '../../utils/audio';
@@ -161,7 +162,7 @@ export const TOUR_STRINGS: Record<string, Record<string, string>> = {
   s6_badge: { en: 'Step 6: Voice & Grammar', es: 'Paso 6: Voz y Gramática', fr: 'Étape 6 : Voix et grammaire', de: 'Schritt 6: Stimme & Grammatik', zh: '步骤 6：声音与语法' },
   s6_title: { en: 'Their Voice, Their Way', es: 'Su voz, a su manera', fr: 'Leur voix, à leur façon', de: 'Ihre Stimme, ihr Weg', zh: '专属声音，表达自我' },
   s6_subtitle: { en: 'Type phonetic pronunciations, record family voices, or hold any action word to reveal grammar tenses!', es: '¡Escribe pronunciaciones fonéticas, graba voces familiares o mantén presionado cualquier verbo para ver sus formas gramaticales!', fr: 'Tapez des prononciations phonétiques, enregistrez des voix de la famille ou maintenez un verbe pour voir sa conjugaison !', de: 'Tippe Lautschriften ein, nimm Stimmen der Familie auf oder halte ein Verb gedrückt, um Grammatikformen anzuzeigen!', zh: '输入发音注音、录制家人的声音，或长按任意动词展开语法时态！' },
-  s6_finish: { en: '🚀 All Set! Enter BeeYou', es: '🚀 ¡Todo listo! Entrar a BeeYou', fr: "🚀 C'est prêt ! Entrer dans BeeYou", de: '🚀 Alles bereit! BeeYou starten', zh: '🚀 全部就绪！进入 BeeYou' },
+  s6_finish: { en: 'All Set! Enter BeeYou', es: '¡Todo listo! Entrar a BeeYou', fr: "C'est prêt ! Entrer dans BeeYou", de: 'Alles bereit! BeeYou starten', zh: '全部就绪！进入 BeeYou' },
 
   universal_skip: { en: 'Skip & Jump to App', es: 'Saltar y entrar a la app', fr: "Passer et ouvrir l'app", de: 'Überspringen & zur App', zh: '跳过并进入应用' },
   universal_spoke: { en: 'Spoke:', es: 'Dijo:', fr: 'A dit :', de: 'Gesprochen:', zh: '已朗读：' },
@@ -694,8 +695,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
                   <span className="text-[11px] font-extrabold text-amber-800">
                     {currentFolder === 'snacks' 
-                      ? `👉 ${tTour('s4_tip', "Tap 'Home' anytime to snap straight back.")}`
-                      : `📁 ${tTour('s4_folder_desc', 'Tap Snacks to open ➜')}`}
+                      ? tTour('s4_tip', "Tap 'Home' anytime to snap straight back.")
+                      : tTour('s4_folder_desc', 'Tap Snacks to open ➜')}
                   </span>
                 </div>
 
@@ -858,7 +859,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 <div className="p-4 rounded-3xl bg-white border-2 border-amber-300 space-y-3 shadow-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      🔤 Grammar Tenses
+                      Grammar Tenses
                     </span>
                     <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                       Hold to expand
@@ -866,7 +867,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
 
                   <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex flex-col items-center gap-2">
-                    <span className="text-2xl">⏳</span>
+                    <Clock className="w-6 h-6 text-amber-700" />
                     <span className="font-black text-sm text-amber-950">Selected: {grammarTense}</span>
                   </div>
 
@@ -895,7 +896,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 <div className="p-4 rounded-3xl bg-white border-2 border-amber-300 space-y-3 shadow-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      🗣️ Phonetic TTS
+                      Phonetic TTS
                     </span>
                     <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                       Accurate Voice
@@ -969,7 +970,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 className="px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs"
               >
                 <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                <span>{tTour('s1_lock', '✓ Perfect for Now! (Start with 4 Tiles)')}</span>
+                <span>{tTour('s1_lock', 'Perfect for Now! (Start with 4 Tiles)')}</span>
               </button>
             )}
             {step === 2 && (
@@ -979,7 +980,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 className="px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs"
               >
                 <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                <span>{tTour('s2_lock', '✓ Lock at 12 Tiles')}</span>
+                <span>{tTour('s2_lock', 'Lock at 12 Tiles')}</span>
               </button>
             )}
             {step === 3 && (
@@ -989,7 +990,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 className="px-3.5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs"
               >
                 <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                <span>{tTour('s3_lock', '✓ Use Full Board')}</span>
+                <span>{tTour('s3_lock', 'Use Full Board')}</span>
               </button>
             )}
           </div>
@@ -1006,11 +1007,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-[0_4px_0_0_#B45309] active:translate-y-0.5 active:shadow-none cursor-pointer transition-all"
               >
                 <span>
-                  {step === 1 && `➜ ${tTour('s1_next', 'Next: See 12 Tiles')}`}
-                  {step === 2 && `➜ ${tTour('s2_next', 'Next: See Full Board')}`}
-                  {step === 3 && `➜ ${tTour('s3_next', 'Next: How Folders Work')}`}
-                  {step === 4 && `➜ ${tTour('s4_next', 'Next: Adding Photo Tiles')}`}
-                  {step === 5 && `➜ ${tTour('s5_next', 'Next: Custom Voices & Grammar')}`}
+                  {step === 1 && tTour('s1_next', 'Next: See 12 Tiles')}
+                  {step === 2 && tTour('s2_next', 'Next: See Full Board')}
+                  {step === 3 && tTour('s3_next', 'Next: How Folders Work')}
+                  {step === 4 && tTour('s4_next', 'Next: Adding Photo Tiles')}
+                  {step === 5 && tTour('s5_next', 'Next: Custom Voices & Grammar')}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
@@ -1020,7 +1021,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 onClick={() => handleSaveAndLockStage(3)}
                 className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-[0_4px_0_0_#047857] active:translate-y-0.5 active:shadow-none cursor-pointer transition-all"
               >
-                <span>{tTour('s6_finish', '🚀 All Set! Enter BeeYou')}</span>
+                <span>{tTour('s6_finish', 'All Set! Enter BeeYou')}</span>
               </button>
             )}
           </div>

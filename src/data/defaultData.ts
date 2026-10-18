@@ -1343,63 +1343,9 @@ export const INITIAL_MEDICATIONS: MedicationReminder[] = [
   },
 ];
 
-export const INITIAL_MEDICATION_LOGS: MedicationDoseLog[] = [
-  {
-    id: 'log-1',
-    medicationId: 'med-multivitamin',
-    medicationName: 'Morning Multivitamin Gummy',
-    timestamp: new Date(Date.now() - 86400000 + 3600000 * 8).toISOString(),
-    doseQuantity: 1,
-    doseUnit: 'gummy',
-    doseTime: '08:00',
-    status: 'taken',
-    notes: 'Taken with breakfast',
-  },
-  {
-    id: 'log-2',
-    medicationId: 'med-melatonin',
-    medicationName: 'Evening Calming Melatonin Drops',
-    timestamp: new Date(Date.now() - 86400000 + 3600000 * 20).toISOString(),
-    doseQuantity: 1,
-    doseUnit: 'dropper',
-    doseTime: '20:00',
-    status: 'taken',
-    notes: 'Bedtime routine complete',
-  },
-];
+export const INITIAL_MEDICATION_LOGS: MedicationDoseLog[] = [];
 
-export const INITIAL_MOOD_JOURNAL_ENTRIES: MoodJournalEntry[] = [
-  {
-    id: 'mj-1',
-    date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-    time: '20:30',
-    timestamp: Date.now() - 86400000,
-    primaryMood: 'reflective',
-    moodIntensity: 6,
-    energyLevel: 3,
-    sensoryDistress: 35,
-    triggers: ['social_masking', 'school_work_stress'],
-    copingStrategies: ['noise_cancelling_headphones', 'journaling', 'weighted_blanket'],
-    journalText: 'Today was full of conversations and meetings. Masking took quite a bit of energy, but taking 20 minutes in a dim room with my noise-cancelling headphones helped my nervous system reset.',
-    gratitudeOrWin: 'Finished my priority project and took a quiet walk at dusk.',
-    isPrivate: false,
-  },
-  {
-    id: 'mj-2',
-    date: new Date().toISOString().split('T')[0],
-    time: '14:15',
-    timestamp: Date.now() - 3600000 * 2,
-    primaryMood: 'content',
-    moodIntensity: 7,
-    energyLevel: 4,
-    sensoryDistress: 15,
-    triggers: ['routine_change'],
-    copingStrategies: ['deep_breathing', 'listening_to_music'],
-    journalText: 'Schedule shifted around lunchtime, but instead of spiraling into panic, I used the visual planner and listened to ambient lofi beats. Feeling grounded and clear-headed.',
-    gratitudeOrWin: 'Handled an unexpected plan change with calm self-advocacy.',
-    isPrivate: false,
-  },
-];
+export const INITIAL_MOOD_JOURNAL_ENTRIES: MoodJournalEntry[] = [];
 
 export const INITIAL_CYCLE_SETTINGS: CycleSettings = {
   enabled: true,
@@ -1411,38 +1357,7 @@ export const INITIAL_CYCLE_SETTINGS: CycleSettings = {
   remindersEnabled: true,
 };
 
-export const INITIAL_CYCLE_LOGS: CycleDailyLog[] = [
-  {
-    id: 'clog-1',
-    date: new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0],
-    flow: 'medium',
-    symptoms: ['cramps', 'fatigue'],
-    painLevel: 5,
-    energyLevel: 2,
-    moodSummary: 'Sensitive & tired',
-    notes: 'Period started. Used heating pad and weighted blanket.',
-  },
-  {
-    id: 'clog-2',
-    date: new Date(Date.now() - 13 * 86400000).toISOString().split('T')[0],
-    flow: 'heavy',
-    symptoms: ['cramps', 'headache', 'sensory_amplification'],
-    painLevel: 6,
-    energyLevel: 2,
-    moodSummary: 'Sensory sensitivity heightened',
-    notes: 'Lights felt very bright. Kept blinds down and rested.',
-  },
-  {
-    id: 'clog-3',
-    date: new Date(Date.now() - 12 * 86400000).toISOString().split('T')[0],
-    flow: 'medium',
-    symptoms: ['fatigue', 'bloating'],
-    painLevel: 3,
-    energyLevel: 3,
-    moodSummary: 'Calmer, cramps subsiding',
-    notes: 'Hydrated well and took a gentle walk.',
-  },
-];
+export const INITIAL_CYCLE_LOGS: CycleDailyLog[] = [];
 
 export const MOOD_META: Record<MoodJournalEmotion, { label: string; emoji: string; bg: string; text: string }> = {
   peaceful: { label: 'Peaceful', emoji: '😌', bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-800' },

@@ -112,10 +112,6 @@ export function getTier1Assets(): string[] {
 
   for (const url of assetsData.tier1Assets) {
     if (warm) {
-      // On warm cache visits, defer inactive themes' emotion folders to Tier 2A
-      if (url.startsWith('/assets/emotions/') && !url.startsWith(`/assets/emotions/${activeEmotionFolder}/`)) {
-        continue;
-      }
       // On warm cache visits, defer inactive themes' wallpapers to Tier 2A
       if (
         url.startsWith('/assets/wallpapers/') &&

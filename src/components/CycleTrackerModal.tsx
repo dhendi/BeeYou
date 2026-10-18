@@ -1,29 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  Calendar,
-  Star,
-  Heart,
   X,
-  Plus,
-  Trash2,
-  Clock,
-  Volume2,
-  Settings as SettingsIcon,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Info,
-  Droplet,
-  Zap,
-  Moon,
-  Smile,
-  Activity
+  Trash2
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { RoutineStickerIcon } from './icons/JournalStickers';
 import { FlowIntensity, CycleSymptom, CycleDailyLog } from '../types';
 
 export const CycleTrackerModal: React.FC = () => {
@@ -42,7 +23,7 @@ export const CycleTrackerModal: React.FC = () => {
     userAgeGroup,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'log' | 'history' | 'settings'>('log');
+  const [activeTab, setActiveTab] = useState<'summary' | 'log' | 'history' | 'settings'>('summary');
 
   // Daily Log Form State
   const [logDate, setLogDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
@@ -74,35 +55,35 @@ export const CycleTrackerModal: React.FC = () => {
 
   const cycleInfo = getCyclePhaseInfo();
 
-  const flowOptions: { id: FlowIntensity; label: string; emoji: string; color: string }[] = [
-    { id: 'none', label: 'No Flow', emoji: '⚪', color: 'border-slate-200 text-slate-700 bg-white' },
-    { id: 'spotting', label: 'Spotting', emoji: '💧', color: 'border-rose-200 text-rose-700 bg-rose-50' },
-    { id: 'light', label: 'Light', emoji: '🌸', color: 'border-rose-300 text-rose-800 bg-rose-100' },
-    { id: 'medium', label: 'Medium', emoji: '🩸', color: 'border-rose-400 text-rose-900 bg-rose-200' },
-    { id: 'heavy', label: 'Heavy', emoji: '🔴', color: 'border-rose-600 text-rose-950 bg-rose-300' },
+  const flowOptions: { id: FlowIntensity; label: string; color: string }[] = [
+    { id: 'none', label: 'No Flow', color: 'border-slate-200 text-slate-700 bg-white' },
+    { id: 'spotting', label: 'Spotting', color: 'border-rose-200 text-rose-700 bg-rose-50' },
+    { id: 'light', label: 'Light', color: 'border-rose-300 text-rose-800 bg-rose-100' },
+    { id: 'medium', label: 'Medium', color: 'border-rose-400 text-rose-900 bg-rose-200' },
+    { id: 'heavy', label: 'Heavy', color: 'border-rose-600 text-rose-950 bg-rose-300' },
   ];
 
-  const physicalSymptoms: { id: CycleSymptom; label: string; emoji: string }[] = [
-    { id: 'cramps', label: 'Pelvic Cramps', emoji: '😣' },
-    { id: 'headache', label: 'Headache / Migraine', emoji: '🤕' },
-    { id: 'fatigue', label: 'Physical Exhaustion', emoji: '🥱' },
-    { id: 'bloating', label: 'Abdominal Bloating', emoji: '🎈' },
-    { id: 'breast_tenderness', label: 'Breast Tenderness', emoji: '🌸' },
-    { id: 'backache', label: 'Lower Backache', emoji: '⚡' },
-    { id: 'nausea', label: 'Nausea / GI Upset', emoji: '🤢' },
-    { id: 'acne', label: 'Skin Breakouts', emoji: '⭐' },
-    { id: 'joint_muscle_pain', label: 'Joint & Muscle Aches', emoji: '🦴' },
+  const physicalSymptoms: { id: CycleSymptom; label: string }[] = [
+    { id: 'cramps', label: 'Pelvic Cramps' },
+    { id: 'headache', label: 'Headache / Migraine' },
+    { id: 'fatigue', label: 'Physical Exhaustion' },
+    { id: 'bloating', label: 'Abdominal Bloating' },
+    { id: 'breast_tenderness', label: 'Breast Tenderness' },
+    { id: 'backache', label: 'Lower Backache' },
+    { id: 'nausea', label: 'Nausea / GI Upset' },
+    { id: 'acne', label: 'Skin Breakouts' },
+    { id: 'joint_muscle_pain', label: 'Joint & Muscle Aches' },
   ];
 
-  const neuroSymptoms: { id: CycleSymptom; label: string; emoji: string }[] = [
-    { id: 'sensory_amplification', label: 'Heightened Sensory Sensitivity', emoji: '🔊' },
-    { id: 'sensory_overload', label: 'Rapid Sensory Overload', emoji: '🌊' },
-    { id: 'executive_dysfunction_dip', label: 'Executive Functioning Dip', emoji: '🌀' },
-    { id: 'brain_fog', label: 'Brain Fog & Memory Lag', emoji: '🌫️' },
-    { id: 'rejection_sensitivity', label: 'Rejection Sensitivity (RSD)', emoji: '💔' },
-    { id: 'mood_swings_irritability', label: 'Irritability / Low Patience', emoji: '⚡' },
-    { id: 'insomnia_restless_sleep', label: 'Restless Sleep / Vivid Dreams', emoji: '🌙' },
-    { id: 'cravings_comfort_food', label: 'Sensory Comfort Cravings', emoji: '🍫' },
+  const neuroSymptoms: { id: CycleSymptom; label: string }[] = [
+    { id: 'sensory_amplification', label: 'Heightened Sensory Sensitivity' },
+    { id: 'sensory_overload', label: 'Rapid Sensory Overload' },
+    { id: 'executive_dysfunction_dip', label: 'Executive Functioning Dip' },
+    { id: 'brain_fog', label: 'Brain Fog & Memory Lag' },
+    { id: 'rejection_sensitivity', label: 'Rejection Sensitivity (RSD)' },
+    { id: 'mood_swings_irritability', label: 'Irritability / Low Patience' },
+    { id: 'insomnia_restless_sleep', label: 'Restless Sleep / Vivid Dreams' },
+    { id: 'cravings_comfort_food', label: 'Sensory Comfort Cravings' },
   ];
 
   const toggleSymptom = (s: CycleSymptom) => {
@@ -159,23 +140,18 @@ export const CycleTrackerModal: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 border-rose-100 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner backdrop-blur-xs">
-              🌸
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
+                {cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle & Hormonal Health'}
+              </span>
+              <span className="text-xs text-white/80 font-medium">
+                {childProfile.name ? `${childProfile.name}'s ` : ''}Tracker
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {cycleSettings.discreetMode ? 'Wellness Rhythm' : 'Cycle & Hormonal Health'}
-                </span>
-                <span className="text-xs text-white/80 font-medium">
-                  {childProfile.name ? `${childProfile.name}'s ` : ''}Tracker
-                </span>
-              </div>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight">
-                {cycleSettings.discreetMode ? 'Body Rhythm & Sensory Tracker' : 'Menstrual Cycle Tracker'}
-              </h2>
-            </div>
+            <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
+              {cycleSettings.discreetMode ? 'Body Rhythm & Sensory Tracker' : 'Menstrual Cycle Tracker'}
+            </h2>
           </div>
 
           <button
@@ -207,8 +183,7 @@ export const CycleTrackerModal: React.FC = () => {
               {cycleInfo.phaseDescription}
             </p>
 
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-900 bg-white/80 px-2.5 py-1 rounded-xl border border-purple-200 w-fit mt-1">
-              <Star className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+            <div className="text-[11px] font-bold text-purple-900 bg-white/80 px-2.5 py-1 rounded-xl border border-purple-200 w-fit mt-1">
               <span>Sensory tip: {cycleInfo.sensoryInsight}</span>
             </div>
           </div>
@@ -218,9 +193,8 @@ export const CycleTrackerModal: React.FC = () => {
             <button
               type="button"
               onClick={handlePeriodStartToday}
-              className="px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs shadow-xs cursor-pointer transition-all"
             >
-              <Droplet className="w-3.5 h-3.5 fill-rose-200" />
               <span>Period Started Today</span>
             </button>
             <span className="text-[10px] font-bold text-slate-500">
@@ -230,20 +204,34 @@ export const CycleTrackerModal: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 shrink-0">
+        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 shrink-0 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('summary');
+              playChime('tap');
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'summary'
+                ? 'bg-white text-rose-700 shadow-xs border border-rose-200'
+                : 'text-slate-600 hover:bg-white/60'
+            }`}
+          >
+            <span>Summary & Rhythm</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
               setActiveTab('log');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'log'
                 ? 'bg-white text-rose-700 shadow-xs border border-rose-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <Plus className="w-4 h-4" />
             <span>Log Symptoms</span>
           </button>
 
@@ -253,13 +241,12 @@ export const CycleTrackerModal: React.FC = () => {
               setActiveTab('history');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'history'
                 ? 'bg-white text-rose-700 shadow-xs border border-rose-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <Calendar className="w-4 h-4" />
             <span>Cycle History ({cycleLogs.length})</span>
           </button>
 
@@ -269,19 +256,262 @@ export const CycleTrackerModal: React.FC = () => {
               setActiveTab('settings');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'settings'
                 ? 'bg-white text-rose-700 shadow-xs border border-rose-200'
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <SettingsIcon className="w-4 h-4" />
             <span>Cycle Settings</span>
           </button>
         </div>
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+          {/* TAB 0: SUMMARY & RHYTHM */}
+          {activeTab === 'summary' && (
+            <div className="space-y-5">
+              {/* Progress Bar & Phase Timeline */}
+              <div className="bg-white rounded-2xl border-2 border-rose-100 p-4 sm:p-5 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 block">
+                      Current Cycle Progress
+                    </span>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900">
+                      Day {cycleInfo.currentCycleDay} of {cycleSettings.averageCycleLength} • {cycleInfo.phaseLabel}
+                    </h3>
+                  </div>
+                  <div className="text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 self-start sm:self-auto">
+                    Next period expected: <span className="text-rose-700 font-black">{cycleInfo.nextPeriodDate}</span> ({cycleInfo.daysUntilNextPeriod} days)
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div>
+                  <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex">
+                    <div
+                      className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(100, Math.max(4, Math.round((cycleInfo.currentCycleDay / cycleSettings.averageCycleLength) * 100)))}%`
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] font-bold text-slate-400 mt-1.5 px-0.5">
+                    <span>Day 1 (Period)</span>
+                    <span>Day 14 (Ovulation)</span>
+                    <span>Day {cycleSettings.averageCycleLength} (Full Cycle)</span>
+                  </div>
+                </div>
+
+                {/* 4 Phases Visual Track */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                  {[
+                    {
+                      phase: 'menstrual',
+                      title: 'Menstrual',
+                      range: `Days 1–${cycleSettings.averagePeriodLength}`,
+                      focus: 'Rest & Reset',
+                      color: 'border-rose-400 bg-rose-50 text-rose-950',
+                    },
+                    {
+                      phase: 'follicular',
+                      title: 'Follicular',
+                      range: `Days ${cycleSettings.averagePeriodLength + 1}–13`,
+                      focus: 'Energy & Creativity',
+                      color: 'border-emerald-300 bg-emerald-50 text-emerald-950',
+                    },
+                    {
+                      phase: 'ovulatory',
+                      title: 'Ovulatory',
+                      range: 'Days 14–16',
+                      focus: 'Peak Stamina',
+                      color: 'border-amber-300 bg-amber-50 text-amber-950',
+                    },
+                    {
+                      phase: 'luteal',
+                      title: 'Luteal',
+                      range: `Days 17–${cycleSettings.averageCycleLength}`,
+                      focus: 'Sensory Care & Pacing',
+                      color: 'border-purple-300 bg-purple-50 text-purple-950',
+                    },
+                  ].map((p) => {
+                    const isCurrent = cycleInfo.currentPhase === p.phase;
+                    return (
+                      <div
+                        key={p.phase}
+                        className={`p-3 rounded-xl border-2 transition-all ${
+                          isCurrent
+                            ? `${p.color} ring-2 ring-rose-500 shadow-xs font-black`
+                            : 'bg-slate-50/70 border-slate-200 text-slate-600 opacity-80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-black">{p.title}</span>
+                          {isCurrent && (
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-rose-600 text-white">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-bold opacity-80">{p.range}</p>
+                        <p className="text-[10px] font-semibold mt-1 truncate">{p.focus}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sensory & Neurodivergent Guidance */}
+              <div className="bg-purple-50/80 rounded-2xl border-2 border-purple-200 p-4 sm:p-5 shadow-xs space-y-2">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-purple-950">
+                    Neurodivergent & Sensory Hormonal Guidance
+                  </h4>
+                  <p className="text-[11px] font-bold text-purple-700">
+                    How your nervous system interacts with this cycle phase
+                  </p>
+                </div>
+
+                <p className="text-xs text-slate-700 leading-relaxed font-medium bg-white/70 p-3 rounded-xl border border-purple-100">
+                  {cycleInfo.sensoryInsight}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                  <div className="bg-white/80 p-2.5 rounded-xl border border-purple-100">
+                    <span className="font-bold text-purple-950 block mb-0.5">Recommended Sensory Accommodations:</span>
+                    <ul className="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                      {cycleInfo.currentPhase === 'luteal' && (
+                        <>
+                          <li>Keep noise-cancelling headphones within arm's reach</li>
+                          <li>Lower overhead fluorescent lighting / use soft amber lamps</li>
+                          <li>Plan quiet buffer time between high-demand tasks</li>
+                        </>
+                      )}
+                      {cycleInfo.currentPhase === 'menstrual' && (
+                        <>
+                          <li>Prioritize physical rest, weighted blankets, and heat packs</li>
+                          <li>Comfort meals, gentle hydration, and loose-fitting clothing</li>
+                          <li>Give yourself permission to pause non-essential chores</li>
+                        </>
+                      )}
+                      {cycleInfo.currentPhase === 'follicular' && (
+                        <>
+                          <li>Great window for exploring new topics or visual projects</li>
+                          <li>Cognitive stamina and verbal flow are at a monthly high</li>
+                          <li>Balanced sensory tolerance for social or outdoor outings</li>
+                        </>
+                      )}
+                      {cycleInfo.currentPhase === 'ovulatory' && (
+                        <>
+                          <li>High social motivation and quick verbal expression</li>
+                          <li>Take scheduled mindful pauses to prevent sudden burnout</li>
+                          <li>Stay hydrated and maintain stable sensory routines</li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+
+                  <div className="bg-white/80 p-2.5 rounded-xl border border-purple-100">
+                    <span className="font-bold text-purple-950 block mb-0.5">Cycle Parameters:</span>
+                    <div className="space-y-1 text-[11px] text-slate-600">
+                      <div className="flex justify-between py-0.5 border-b border-slate-100">
+                        <span>Average Cycle Length:</span>
+                        <span className="font-black text-slate-900">{cycleSettings.averageCycleLength} days</span>
+                      </div>
+                      <div className="flex justify-between py-0.5 border-b border-slate-100">
+                        <span>Average Period Duration:</span>
+                        <span className="font-black text-slate-900">{cycleSettings.averagePeriodLength} days</span>
+                      </div>
+                      <div className="flex justify-between py-0.5 border-b border-slate-100">
+                        <span>Last Period Start:</span>
+                        <span className="font-black text-slate-900">{cycleSettings.lastPeriodStartDate || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between py-0.5">
+                        <span>Total Days Logged:</span>
+                        <span className="font-black text-slate-900">{cycleLogs.length} logs</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Today's Log Card & Quick Action */}
+              {(() => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayLog = cycleLogs.find((l) => l.date === todayStr);
+
+                return (
+                  <div className="bg-rose-50/70 rounded-2xl border-2 border-rose-200 p-4 sm:p-5 shadow-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-rose-900">
+                            Today's Daily Log ({todayStr})
+                          </span>
+                          {todayLog ? (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-300">
+                              Logged Today
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-300">
+                              Not Logged Yet
+                            </span>
+                          )}
+                        </div>
+
+                        {todayLog ? (
+                          <div className="text-xs text-slate-700 space-y-1 pt-1">
+                            <p className="font-bold">
+                              Flow: <span className="capitalize font-black text-rose-800">{todayLog.flow}</span> • Pain Level: <span className="font-black text-rose-800">{todayLog.painLevel}/10</span> • Energy: <span className="font-black text-amber-800">{todayLog.energyLevel}/5</span>
+                            </p>
+                            {todayLog.symptoms.length > 0 && (
+                              <p className="text-[11px] text-slate-600">
+                                Symptoms: {todayLog.symptoms.map(s => s.replace(/_/g, ' ')).join(', ')}
+                              </p>
+                            )}
+                            {todayLog.notes && (
+                              <p className="text-[11px] italic text-slate-600">"{todayLog.notes}"</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-600">
+                            Keep your hormonal rhythms up to date by tracking today's flow, energy, cramps, and sensory symptoms.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLogDate(todayStr);
+                            setActiveTab('log');
+                            playChime('tap');
+                          }}
+                          className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs shadow-xs cursor-pointer transition-all"
+                        >
+                          <span>{todayLog ? 'Edit Today\'s Log' : 'Log Today\'s Symptoms'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('history');
+                            playChime('tap');
+                          }}
+                          className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs cursor-pointer transition-all"
+                        >
+                          View History
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
           {/* TAB 1: DAILY LOGGING */}
           {activeTab === 'log' && (
             <form onSubmit={handleSaveDailyLog} className="space-y-5">
@@ -310,16 +540,13 @@ export const CycleTrackerModal: React.FC = () => {
                         type="button"
                         key={opt.id}
                         onClick={() => setFlow(opt.id)}
-                        className={`p-2 rounded-xl border-2 text-center transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-xl border-2 text-center transition-all cursor-pointer ${
                           flow === opt.id
                             ? `${opt.color} ring-2 ring-rose-500 font-black shadow-xs`
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 font-bold'
                         }`}
                       >
-                        <div className="w-5 h-5 mx-auto flex items-center justify-center">
-                          <RoutineStickerIcon emoji={opt.emoji} className="w-5 h-5 object-contain" />
-                        </div>
-                        <span className="text-[10px] mt-1 block truncate">{opt.label}</span>
+                        <span className="text-xs font-black block truncate">{opt.label}</span>
                       </button>
                     ))}
                   </div>
@@ -354,7 +581,7 @@ export const CycleTrackerModal: React.FC = () => {
                     <span className="font-bold text-slate-700">Energy Level</span>
                     <span className="font-black text-amber-700 inline-flex items-center gap-1.5">
                       {['Drained', 'Low', 'Steady', 'High', 'Overcharged'][energyLevel - 1]}
-                      <RoutineStickerIcon emoji={['🪫', '🔋', '⚡', '🚀', '💥'][energyLevel - 1]} className="w-4 h-4 object-contain inline-block" />
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 font-bold">{energyLevel}/5</span>
                     </span>
                   </div>
                   <input
@@ -392,9 +619,7 @@ export const CycleTrackerModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
-                          <RoutineStickerIcon emoji={sym.emoji} className="w-4 h-4 object-contain" />
-                        </div>
+                        <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-rose-600' : 'bg-slate-300'}`} />
                         <span>{sym.label}</span>
                       </button>
                     );
@@ -426,9 +651,7 @@ export const CycleTrackerModal: React.FC = () => {
                             : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
-                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
-                          <RoutineStickerIcon emoji={sym.emoji} className="w-4 h-4 object-contain" />
-                        </div>
+                        <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-purple-600' : 'bg-slate-300'}`} />
                         <span>{sym.label}</span>
                       </button>
                     );
@@ -453,9 +676,8 @@ export const CycleTrackerModal: React.FC = () => {
               <div className="flex justify-end pt-2 border-t border-slate-200">
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-sm shadow-md shadow-rose-200 cursor-pointer transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-sm shadow-md shadow-rose-200 cursor-pointer transition-all"
                 >
-                  <Heart className="w-4 h-4 fill-rose-200" />
                   <span>Save Cycle Log</span>
                 </button>
               </div>
@@ -481,8 +703,7 @@ export const CycleTrackerModal: React.FC = () => {
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-black text-sm text-slate-900">{log.date}</span>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border inline-flex items-center gap-1 ${flowObj?.color || ''}`}>
-                            <RoutineStickerIcon emoji={flowObj?.emoji || '🌸'} className="w-3 h-3 object-contain inline-block" />
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border inline-flex items-center ${flowObj?.color || ''}`}>
                             {flowObj?.label}
                           </span>
                           {log.painLevel > 0 && (
@@ -530,8 +751,7 @@ export const CycleTrackerModal: React.FC = () => {
           {/* TAB 3: SETTINGS */}
           {activeTab === 'settings' && (
             <form onSubmit={handleSaveSettings} className="space-y-4 max-w-lg">
-              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-950 flex items-center gap-2">
-                <Info className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-950">
                 <span>
                   Adjusting your cycle parameters personalizes future phase and period predictions.
                 </span>
@@ -621,7 +841,7 @@ export const CycleTrackerModal: React.FC = () => {
         {/* Footer */}
         <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex items-center justify-between shrink-0">
           <span className="text-xs text-slate-500 font-medium">
-            🔒 Completely private & saved locally on your device
+            <span>Completely private & saved locally on your device</span>
           </span>
 
           <button

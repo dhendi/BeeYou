@@ -26,21 +26,21 @@ import { IconLibraryModal } from './common/IconLibraryModal';
 import { t } from '../services/translator';
 
 const REASON_PRESETS = [
-  { label: 'Clinic/Place closed', icon: '🏥', reason: 'The dental clinic/place had to close unexpectedly today.' },
-  { label: 'Rain / Bad weather', icon: '🌧️', reason: 'Heavy rain and stormy weather made outdoor plans unsafe today.' },
-  { label: 'Early school dismissal', icon: '🏫', reason: 'School had an unexpected early dismissal today.' },
-  { label: 'Feeling tired/unwell', icon: '🤒', reason: 'Our bodies need a calm rest and recovery day today.' },
-  { label: 'Delayed / Rescheduled', icon: '⏰', reason: 'The original appointment was postponed to another day.' },
-  { label: 'Traffic / Car issue', icon: '🚗', reason: 'Unexpected travel delays meant we could not make it in time.' },
+  { label: 'Clinic/Place closed', icon: '', reason: 'The dental clinic/place had to close unexpectedly today.' },
+  { label: 'Rain / Bad weather', icon: '', reason: 'Heavy rain and stormy weather made outdoor plans unsafe today.' },
+  { label: 'Early school dismissal', icon: '', reason: 'School had an unexpected early dismissal today.' },
+  { label: 'Feeling tired/unwell', icon: '', reason: 'Our bodies need a calm rest and recovery day today.' },
+  { label: 'Delayed / Rescheduled', icon: '', reason: 'The original appointment was postponed to another day.' },
+  { label: 'Traffic / Car issue', icon: '', reason: 'Unexpected travel delays meant we could not make it in time.' },
 ];
 
 const REPLACEMENT_PRESETS = [
   {
     title: 'Picnic Lunch & Park Afternoon',
     steps: [
-      { title: 'Favorite pizza lunch at home', emoji: '🍕', time: '12:30 PM' },
-      { title: 'Play at the sunny playground swings', emoji: '🛝', time: '1:30 PM' },
-      { title: 'Drawing and cozy world building', emoji: '🎨', time: '3:00 PM' },
+      { title: 'Favorite pizza lunch at home', emoji: '', time: '12:30 PM' },
+      { title: 'Play at the sunny playground swings', emoji: '', time: '1:30 PM' },
+      { title: 'Drawing and cozy world building', emoji: '', time: '3:00 PM' },
     ],
     calming: 'It is okay to feel surprised or upset when plans change. Take a slow breath. You are safe, and here is our new calm plan.',
     phrases: ['Why did it change?', "I'm upset about this.", 'What happens now?', 'Can we go home?', 'I need a quiet break.'],
@@ -48,9 +48,9 @@ const REPLACEMENT_PRESETS = [
   {
     title: 'Indoor Blanket Fort & Cozy Movie',
     steps: [
-      { title: 'Build living room blanket fort with pillows', emoji: '🛋️', time: '1:00 PM' },
-      { title: 'Warm cocoa and crackers snack', emoji: '☕', time: '1:45 PM' },
-      { title: 'Watch favorite animal movie in fort', emoji: '🧸', time: '2:15 PM' },
+      { title: 'Build living room blanket fort with pillows', emoji: '', time: '1:00 PM' },
+      { title: 'Warm cocoa and crackers snack', emoji: '', time: '1:45 PM' },
+      { title: 'Watch favorite animal movie in fort', emoji: '', time: '2:15 PM' },
     ],
     calming: 'Staying inside can be super relaxing! We have blankets, warm snacks, and our favorite movie ready.',
     phrases: ['I want to build the fort now.', 'Can we have popcorn?', 'Can we go another day?', 'I like our fort.'],
@@ -58,16 +58,16 @@ const REPLACEMENT_PRESETS = [
   {
     title: 'Quiet Sensory Break & Free Play',
     steps: [
-      { title: 'Dim lights and put on comfy headphones', emoji: '🎧', time: 'Now' },
-      { title: 'Play with fidgets and squishy toys', emoji: '🫧', time: '15 mins' },
-      { title: 'Free tablet time and building blocks', emoji: '📱', time: 'Later' },
+      { title: 'Dim lights and put on comfy headphones', emoji: '', time: 'Now' },
+      { title: 'Play with fidgets and squishy toys', emoji: '', time: '15 mins' },
+      { title: 'Free tablet time and building blocks', emoji: '', time: 'Later' },
     ],
     calming: 'Take as much quiet time as you need. No rushing, no pressure.',
     phrases: ['I need quiet time.', 'Can I wear my headphones?', 'I want to be alone for a bit.', 'Thank you for understanding.'],
   },
 ];
 
-const QUICK_EMOJIS = ['🍕', '🛝', '🎨', '🛋️', '🧸', '☕', '🎧', '📱', '📚', '🫧', '🚗', '🍎', '🧩', '🪥', '🥪', '⭐'];
+const QUICK_EMOJIS: string[] = [];
 
 export const PlansChangedModal: React.FC = () => {
   const {
@@ -128,9 +128,9 @@ export const PlansChangedModal: React.FC = () => {
         plansChanged.newSteps && plansChanged.newSteps.length > 0
           ? [...plansChanged.newSteps]
           : [
-              { title: 'Favorite pizza lunch at home', emoji: '🍕', time: '12:30 PM' },
-              { title: 'Play at the sunny playground swings', emoji: '🛝', time: '1:30 PM' },
-              { title: 'Drawing and cozy world building', emoji: '🎨', time: '3:00 PM' },
+              { title: 'Favorite pizza lunch at home', emoji: '', time: '12:30 PM' },
+              { title: 'Play at the sunny playground swings', emoji: '', time: '1:30 PM' },
+              { title: 'Drawing and cozy world building', emoji: '', time: '3:00 PM' },
             ]
       );
       setPhrases(
@@ -349,7 +349,7 @@ export const PlansChangedModal: React.FC = () => {
                     onChange={(e) => handleRoutineTargetChange(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-amber-200 font-bold text-xs sm:text-sm text-slate-800 outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer shadow-2xs"
                   >
-                    <option value="custom">✍️ {t('Custom event / appointment (type manually)')}</option>
+                    <option value="custom">{t('Custom event / appointment (type manually)')}</option>
                     {routines.map((routine) => (
                       <optgroup key={routine.id} label={`${routine.emoji} ${routine.title}`}>
                         <option value={routine.id}>
@@ -662,7 +662,6 @@ export const PlansChangedModal: React.FC = () => {
                         key={idx}
                         className="px-2.5 py-1 rounded-xl bg-white border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center gap-1.5 shadow-2xs"
                       >
-                        <MessageSquare className="w-3 h-3 text-emerald-600" />
                         <span>{phrase}</span>
                         <button
                           type="button"
@@ -763,7 +762,6 @@ export const PlansChangedModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-emerald-600" />
                     <h3 className="text-base sm:text-lg font-black text-slate-800">
                       {t('Our New Plan:')} {t(plansChanged.newPlanTitle)}
                     </h3>
@@ -817,9 +815,8 @@ export const PlansChangedModal: React.FC = () => {
                     <button
                       key={idx}
                       onClick={() => speak(t(phrase))}
-                      className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-amber-100 border border-slate-300 text-slate-900 font-bold text-xs sm:text-sm active:scale-95 transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-amber-100 border border-slate-300 text-slate-900 font-bold text-xs sm:text-sm active:scale-95 transition-all shadow-xs cursor-pointer"
                     >
-                      <Volume2 className="w-4 h-4 text-slate-500" />
                       <span>{t(phrase)}</span>
                     </button>
                   ))}
@@ -863,7 +860,7 @@ export const PlansChangedModal: React.FC = () => {
                 }}
                 className="px-4 py-2.5 rounded-xl bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold text-xs sm:text-sm transition-all active:scale-95 cursor-pointer"
               >
-                {t('I need a calm break first')} 🛋️
+                {t('I need a calm break first')}
               </button>
 
               <div className="flex items-center gap-2">
@@ -888,7 +885,7 @@ export const PlansChangedModal: React.FC = () => {
                   }}
                   className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
                 >
-                  {t('I understand our new plan!')} 👍
+                  {t('I understand our new plan!')}
                 </button>
               </div>
             </>

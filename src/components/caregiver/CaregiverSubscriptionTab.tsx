@@ -1,7 +1,6 @@
 import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { Crown, Check } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 
 interface CaregiverSubscriptionTabProps {
@@ -29,7 +28,6 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
       <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Crown className="w-6 h-6 text-amber-500" />
             <h2 className="text-xl font-black text-slate-900">
               {t("BeeYou Membership & Plans")}
             </h2>
@@ -163,18 +161,11 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-500 font-bold">
-              <span className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-emerald-600" />
-                {t("No ads or tracking ever")}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-emerald-600" />
-                {t("Cancel anytime in 1 tap")}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-emerald-600" />
-                100% offline-ready & private
-              </span>
+              <span>{t("No ads or tracking ever")}</span>
+              <span>•</span>
+              <span>{t("Cancel anytime in 1 tap")}</span>
+              <span>•</span>
+              <span>100% offline-ready & private</span>
             </div>
           </div>
 
@@ -199,9 +190,8 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                   showNotification('Started 15-Day Free Trial with BeeYou Premium!');
                   playChime('star');
                 }}
-                className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition"
+                className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition"
               >
-                <Crown className="w-4 h-4 text-amber-200" />
                 <span>{t("Start 15-Day Free Trial ($0)")}</span>
               </button>
             )}

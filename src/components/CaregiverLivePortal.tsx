@@ -1,29 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Heart, 
-  Send, 
   RefreshCw, 
-  Star, 
-  Smile, 
-  MessageSquare, 
-  CheckCircle2, 
-  Clock, 
-  ShieldCheck, 
   ArrowLeft,
-  Calendar,
-  AlertCircle,
-  ShieldAlert,
-  Phone,
-  MessageCircle,
-  Car,
-  QrCode,
-  Smartphone,
-  Trash2,
-  Settings,
-  UserCheck,
-  X,
-  Plus,
-  Bell
+  X
 } from 'lucide-react';
 import { 
   fetchCaregiverSession, 
@@ -78,15 +57,7 @@ const PREDEFINED_RESPONSES: Array<{
   { id: 'give_minutes', text: "Give me a few minutes.", label: "Give me a few minutes", iconName: 'clock', colorClass: 'text-amber-600' },
 ];
 
-const renderResponseIcon = (iconName: string, className?: string) => {
-  switch (iconName) {
-    case 'heart': return <Heart className={`w-4 h-4 shrink-0 ${className || 'text-rose-500 fill-rose-500'}`} />;
-    case 'car': return <Car className={`w-4 h-4 shrink-0 ${className || 'text-sky-600'}`} />;
-    case 'check': return <CheckCircle2 className={`w-4 h-4 shrink-0 ${className || 'text-emerald-600'}`} />;
-    case 'clock': return <Clock className={`w-4 h-4 shrink-0 ${className || 'text-amber-600'}`} />;
-    default: return null;
-  }
-};
+const renderResponseIcon = (_iconName: string, _className?: string) => null;
 
 export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({ 
   initialCode, 
@@ -318,14 +289,14 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
   // Helper for emotion display (clean Lucide icons, 100% free of emojis)
   const getEmotionBadge = (mood: string | null | undefined) => {
     switch (mood) {
-      case 'happy': return { label: 'Happy', icon: <Smile className="w-5 h-5 text-emerald-600" />, color: 'bg-emerald-100 text-emerald-900 border-emerald-300' };
-      case 'calm': return { label: 'Calm & Steady', icon: <ShieldCheck className="w-5 h-5 text-teal-600" />, color: 'bg-teal-100 text-teal-900 border-teal-300' };
-      case 'need_help': return { label: 'Needs Help', icon: <AlertCircle className="w-5 h-5 text-rose-600" />, color: 'bg-rose-100 text-rose-950 border-rose-300' };
-      case 'overwhelmed': return { label: 'Overwhelmed', icon: <AlertCircle className="w-5 h-5 text-amber-600" />, color: 'bg-amber-100 text-amber-950 border-amber-300' };
-      case 'need_break': return { label: 'Taking a Break', icon: <Clock className="w-5 h-5 text-teal-600" />, color: 'bg-teal-100 text-teal-950 border-teal-300' };
-      case 'want_to_talk': return { label: 'Wants to Talk', icon: <MessageSquare className="w-5 h-5 text-blue-600" />, color: 'bg-blue-100 text-blue-950 border-blue-300' };
-      case 'im_okay': return { label: 'Feeling Okay', icon: <Heart className="w-5 h-5 text-emerald-600 fill-emerald-600" />, color: 'bg-emerald-100 text-emerald-950 border-emerald-300' };
-      default: return { label: 'Active', icon: <CheckCircle2 className="w-5 h-5 text-amber-600" />, color: 'bg-amber-100 text-amber-950 border-amber-300' };
+      case 'happy': return { label: 'Happy', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' };
+      case 'calm': return { label: 'Calm & Steady', color: 'bg-teal-100 text-teal-900 border-teal-300' };
+      case 'need_help': return { label: 'Needs Help', color: 'bg-rose-100 text-rose-950 border-rose-300' };
+      case 'overwhelmed': return { label: 'Overwhelmed', color: 'bg-amber-100 text-amber-950 border-amber-300' };
+      case 'need_break': return { label: 'Taking a Break', color: 'bg-teal-100 text-teal-950 border-teal-300' };
+      case 'want_to_talk': return { label: 'Wants to Talk', color: 'bg-blue-100 text-blue-950 border-blue-300' };
+      case 'im_okay': return { label: 'Feeling Okay', color: 'bg-emerald-100 text-emerald-950 border-emerald-300' };
+      default: return { label: 'Active', color: 'bg-amber-100 text-amber-950 border-amber-300' };
     }
   };
 
@@ -388,16 +359,14 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 title="Device notifications active. Tap to test vibration, sound, and notification banner."
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <Bell className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="hidden sm:inline">Alerts Active</span>
               </button>
             )}
             <ContextualHelpButton topic="all" label="How It Works" variant="pill" className="bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700" />
             <button
               onClick={() => setShowAddChildModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs cursor-pointer active:scale-95 transition flex items-center justify-center"
             >
-              <Smartphone className="w-3.5 h-3.5" />
               <span>Add Someone</span>
             </button>
           </div>
@@ -410,8 +379,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
         {/* Notification Toast */}
         {messageSentNotice && (
           <div className="bg-emerald-50 border-2 border-emerald-300 text-emerald-950 p-3.5 rounded-2xl text-xs font-bold flex items-center justify-between gap-2 shadow-xs animate-in slide-in-from-top-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div>
               <span>{messageSentNotice}</span>
             </div>
           </div>
@@ -421,18 +389,13 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
         {status?.activeAlert && (status.activeAlert.status === 'active' || !status.activeAlert.status) && (
           <div className="p-5 rounded-3xl bg-rose-50 border-3 border-rose-400 shadow-md animate-in zoom-in-95 space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-xs">
-                  <ShieldAlert className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-rose-800 uppercase tracking-wider block">
-                    Incoming Alert from {childName}
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    "{status.activeAlert.label}"
-                  </h3>
-                </div>
+              <div>
+                <span className="text-xs font-bold text-rose-800 uppercase tracking-wider block">
+                  Incoming Alert from {childName}
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">
+                  "{status.activeAlert.label}"
+                </h3>
               </div>
               
               <div className="flex items-center gap-2">
@@ -450,9 +413,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                       });
                     }
                   }}
-                  className="px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer shadow-2xs active:scale-95 transition flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer shadow-2xs active:scale-95 transition flex items-center justify-center"
                 >
-                  <MessageSquare className="w-3 h-3" />
                   <span>Reply in Pop-Up</span>
                 </button>
                 <button
@@ -460,7 +422,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                   onClick={handleResolveAlert}
                   className="px-3 py-1 rounded-full text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 cursor-pointer shadow-2xs active:scale-95 transition"
                 >
-                  Resolve ✓
+                  Resolve
                 </button>
               </div>
             </div>
@@ -477,9 +439,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                     setNewReplyLabel('');
                     setNewReplyText('');
                   }}
-                  className="text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition active:scale-95 shadow-2xs"
+                  className="text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg flex items-center justify-center cursor-pointer transition active:scale-95 shadow-2xs"
                 >
-                  <Plus className="w-3.5 h-3.5 text-amber-700" />
                   <span>Add quick reply</span>
                 </button>
               </div>
@@ -491,9 +452,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                     key={resp.id}
                     type="button"
                     onClick={() => handleSendPredefinedResponse(resp)}
-                    className="p-2.5 rounded-xl bg-white border-2 border-rose-300 hover:bg-rose-100 text-slate-900 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs"
+                    className="p-2.5 rounded-xl bg-white border-2 border-rose-300 hover:bg-rose-100 text-slate-900 font-bold text-xs flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
                   >
-                    {renderResponseIcon(resp.iconName, resp.colorClass)}
                     <span>{resp.label}</span>
                   </button>
                 ))}
@@ -507,10 +467,9 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSendTextResponse(customResp.text, customResp.id)}
-                        className="px-3 py-1.5 font-bold text-xs text-amber-950 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        className="px-3 py-1.5 font-bold text-xs text-amber-950 flex items-center justify-center cursor-pointer active:scale-95"
                         title={customResp.text}
                       >
-                        <MessageSquare className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                         <span>{customResp.label}</span>
                       </button>
                       <button
@@ -535,8 +494,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
               {showAddQuickReply && (
                 <div className="p-3 bg-amber-50 rounded-2xl border border-amber-300 space-y-2 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                      <Plus className="w-3.5 h-3.5 text-amber-700" />
+                    <span className="text-xs font-bold text-amber-950">
                       <span>New Custom Quick Reply</span>
                     </span>
                     <button
@@ -660,7 +618,6 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shadow-2xs active:scale-95 transition flex items-center gap-1"
               >
                 <span>Mark Resolved &amp; Clear</span>
-                <CheckCircle2 className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -669,14 +626,9 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
         {/* 2. LIVE STATUS CARD */}
         <div className="bg-white rounded-3xl p-5 border-2 border-stone-200/90 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
-                {badge.icon}
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Current Status</span>
-                <h2 className="text-base font-bold text-slate-900">{childName} is {status?.currentActivity || 'In BeeYou'}</h2>
-              </div>
+            <div>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Current Status</span>
+              <h2 className="text-base font-bold text-slate-900">{childName} is {status?.currentActivity || 'In BeeYou'}</h2>
             </div>
 
             <span className={`px-3 py-1 rounded-full text-xs font-bold border ${badge.color}`}>
@@ -695,9 +647,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                   key={resp.id}
                   type="button"
                   onClick={() => handleSendPredefinedResponse(resp)}
-                  className="p-3 rounded-2xl bg-amber-50/80 hover:bg-amber-100/90 border border-amber-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs"
+                  className="p-3 rounded-2xl bg-amber-50/80 hover:bg-amber-100/90 border border-amber-200 text-slate-800 font-bold text-xs flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
                 >
-                  {renderResponseIcon(resp.iconName, resp.colorClass)}
                   <span>{resp.label}</span>
                 </button>
               ))}
@@ -714,17 +665,15 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 <button
                   type="button"
                   onClick={() => launchNativePhoneCall(childPhone)}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 font-bold text-xs flex items-center justify-center cursor-pointer"
                 >
-                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Call Native</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => launchNativeSms(childPhone, `Hi ${childName}, checking in on you!`)}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-slate-800 font-bold text-xs flex items-center justify-center cursor-pointer"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-amber-600" />
                   <span>Text SMS</span>
                 </button>
               </div>
@@ -735,9 +684,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
         {/* 3. DEVICE & PAIRING MANAGEMENT */}
         <div className="bg-white rounded-3xl p-5 border-2 border-stone-200/90 shadow-xs space-y-3.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <Smartphone className="w-4 h-4 text-amber-600" />
-              <span>Device Connection & Code</span>
+            <h3 className="text-sm font-bold text-slate-900">
+              <span>Device Connection &amp; Code</span>
             </h3>
             <span className="text-xs text-slate-500 font-mono font-bold">
               Pairing Code: {code}
@@ -835,7 +783,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                   disabled={createLoading || !newChildName.trim()}
                   className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-xs cursor-pointer active:scale-95 transition flex items-center justify-center gap-2"
                 >
-                  {createLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <QrCode className="w-4 h-4" />}
+                  {createLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   <span>Generate Pairing Code &amp; QR</span>
                 </button>
               </form>

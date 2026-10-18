@@ -1,45 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, 
-  Flame, 
-  CheckCircle2, 
-  ChevronRight,
-  Smile,
-  Meh,
-  Frown,
-  Wind,
-  Hand,
-  Box,
-  Star,
-  ShieldAlert,
-  HelpCircle
-} from 'lucide-react';
+import { X } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
-import { TurtleBambooThermometerSticker } from './icons/JournalStickers';
-
-const getLevelIcon = (level: number) => {
-  switch (level) {
-    case 1: return Smile;
-    case 2: return Smile;
-    case 3: return Meh;
-    case 4: return Frown;
-    case 5: return Flame;
-    default: return Smile;
-  }
-};
-
-const getActionIcon = (label: string, idx: number) => {
-  const l = label.toLowerCase();
-  if (l.includes('breath') || l.includes('inhale')) return Wind;
-  if (l.includes('wiggle') || l.includes('squeeze') || l.includes('finger')) return Hand;
-  if (l.includes('box')) return Box;
-  if (l.includes('toolkit') || l.includes('quiet') || l.includes('nice') || l.includes('going')) return Star;
-  if (l.includes('emergency') || l.includes('button')) return ShieldAlert;
-  if (l.includes('help')) return HelpCircle;
-  return idx === 0 ? Star : CheckCircle2;
-};
 
 export const FivePointScaleModal: React.FC = () => {
   const {
@@ -56,6 +19,11 @@ export const FivePointScaleModal: React.FC = () => {
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
+  const isTrainTheme = activeTheme?.category === 'train' || activeTheme?.id === 'theme-train';
+  const isSpaceTheme = activeTheme?.category === 'space' || activeTheme?.id === 'theme-space';
+  const isOceanTheme = activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean';
+  const isRacingTheme = activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing';
+  const isFairytaleTheme = activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fairytale';
 
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
@@ -85,6 +53,18 @@ export const FivePointScaleModal: React.FC = () => {
 
   const selectedCfg = selectedLevel ? fivePointSettings.levels.find((l) => l.level === selectedLevel) : null;
 
+  const getScaleSticker = (level: number) => {
+    if (isFrogTheme) return `/assets/stickers/frog_scale_level_${level}.webp`;
+    if (isTurtleTheme) return `/assets/stickers/turtle_scale_level_${level}.webp`;
+    if (isDinoTheme) return `/assets/stickers/dino_scale_level_${level}.webp`;
+    if (isTrainTheme) return `/assets/stickers/train_scale_level_${level}.webp`;
+    if (isSpaceTheme) return `/assets/stickers/space_scale_level_${level}.webp`;
+    if (isOceanTheme) return `/assets/stickers/ocean_scale_level_${level}.webp`;
+    if (isRacingTheme) return `/assets/stickers/racing_scale_level_${level}.webp`;
+    if (isFairytaleTheme) return `/assets/stickers/fairytale_scale_level_${level}.webp`;
+    return `/assets/stickers/scale_level_${level}.webp`;
+  };
+
   return (
     <div
       role="dialog"
@@ -99,25 +79,17 @@ export const FivePointScaleModal: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
-          <div className="flex items-center gap-2.5">
-            {isTurtleTheme && (
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-center p-1 shadow-xs shrink-0">
-                <TurtleBambooThermometerSticker className="w-full h-full object-contain" />
-              </div>
-            )}
-            {isDinoTheme && (
-              <div className="w-9 h-9 rounded-xl bg-green-100 border border-green-400 flex items-center justify-center p-1 shadow-xs shrink-0 text-xl select-none">
-                🦖
-              </div>
-            )}
-            {isFrogTheme && (
-              <div className="w-9 h-9 rounded-xl bg-lime-100 border border-lime-400 flex items-center justify-center p-1 shadow-xs shrink-0 text-xl select-none">
-                🐸
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100/70 dark:bg-slate-800 border border-amber-200 dark:border-slate-700 flex items-center justify-center p-1 shadow-2xs shrink-0">
+              <img
+                src={isFrogTheme ? '/assets/stickers/frog_scale_level_1.webp' : isTurtleTheme ? '/assets/stickers/turtle_scale_level_1.webp' : isDinoTheme ? '/assets/stickers/dino_scale_level_1.webp' : isTrainTheme ? '/assets/stickers/train_scale_level_1.webp' : isSpaceTheme ? '/assets/stickers/space_scale_level_1.webp' : isOceanTheme ? '/assets/stickers/ocean_scale_level_1.webp' : isRacingTheme ? '/assets/stickers/racing_scale_level_1.webp' : isFairytaleTheme ? '/assets/stickers/fairytale_scale_level_1.webp' : '/assets/stickers/scale_level_1.webp'}
+                alt=""
+                className="w-10 h-10 object-contain drop-shadow-2xs select-none"
+              />
+            </div>
             <div>
               <p className={`text-[10px] font-black uppercase tracking-widest ${
-                isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : 'text-slate-400 dark:text-slate-500'
+                isFrogTheme ? 'text-lime-800' : isTurtleTheme ? 'text-emerald-800' : isDinoTheme ? 'text-green-800' : isTrainTheme ? 'text-sky-800 dark:text-sky-400' : isSpaceTheme ? 'text-purple-800 dark:text-purple-400' : isOceanTheme ? 'text-cyan-800 dark:text-cyan-400' : isRacingTheme ? 'text-rose-800 dark:text-rose-400' : isFairytaleTheme ? 'text-pink-800 dark:text-pink-400' : 'text-slate-400 dark:text-slate-500'
               }`}>
                 {isFrogTheme
                   ? t('Ribbit Pond Calming Scale')
@@ -125,6 +97,16 @@ export const FivePointScaleModal: React.FC = () => {
                   ? t('Wise Turtle Regulation Scale')
                   : isDinoTheme
                     ? t('Dino Kingdom Energy & Volcano Scale')
+                    : isTrainTheme
+                    ? t('Steam Express Pressure & Energy Scale')
+                    : isSpaceTheme
+                    ? t('Cosmic Explorer Orbit & Gravity Scale')
+                    : isOceanTheme
+                    ? t('Ocean Splash Tidal & Energy Scale')
+                    : isRacingTheme
+                    ? t('Turbo Speedway RPM & Speed Scale')
+                    : isFairytaleTheme
+                    ? t('Magic Fairytale Sparkle & Energy Scale')
                     : t('Incredible 5-Point Scale')}
               </p>
               <h2 className="text-xl font-black text-slate-800 dark:text-white">{t('How do I feel right now?')}</h2>
@@ -153,7 +135,6 @@ export const FivePointScaleModal: React.FC = () => {
         {/* Thermometer bar */}
         <div className="flex justify-between gap-1.5 mb-2" role="group" aria-label="5-Point scale level selector">
           {fivePointSettings.levels.map((l) => {
-            const LevelIcon = getLevelIcon(l.level);
             return (
               <button
                 key={l.level}
@@ -165,8 +146,12 @@ export const FivePointScaleModal: React.FC = () => {
                   selectedLevel === l.level ? 'border-white shadow-lg scale-105 ring-4 ring-slate-400/40' : 'border-transparent opacity-90 hover:opacity-100'
                 }`}
               >
-                <LevelIcon className={`w-5 h-5 ${l.textColor}`} aria-hidden="true" />
-                <span className={`text-[10px] font-black ${l.textColor} mt-0.5 tracking-tight text-center leading-tight line-clamp-1`}>
+                <img
+                  src={getScaleSticker(l.level)}
+                  alt=""
+                  className="w-7 h-7 object-contain mb-1 drop-shadow-2xs shrink-0 select-none"
+                />
+                <span className={`text-[10px] font-black ${l.textColor} tracking-tight text-center leading-tight line-clamp-1`}>
                   L{l.level} {l.label}
                 </span>
               </button>
@@ -176,7 +161,6 @@ export const FivePointScaleModal: React.FC = () => {
 
         {/* Level cards (full) */}
         {fivePointSettings.levels.map((l) => {
-          const LevelIcon = getLevelIcon(l.level);
           return (
             <button
               key={l.level}
@@ -191,9 +175,11 @@ export const FivePointScaleModal: React.FC = () => {
               }`}
             >
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-white/80 dark:bg-slate-900/60 flex items-center justify-center shadow-xs shrink-0" aria-hidden="true">
-                  <LevelIcon className={`w-7 h-7 ${selectedLevel === l.level ? l.textColor : 'text-slate-700 dark:text-slate-200'}`} />
-                </div>
+                <img
+                  src={getScaleSticker(l.level)}
+                  alt={`Level ${l.level}`}
+                  className="w-12 h-12 object-contain drop-shadow-2xs shrink-0 select-none mt-0.5"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${l.color} ${l.textColor}`}>
@@ -203,7 +189,6 @@ export const FivePointScaleModal: React.FC = () => {
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 leading-snug">{l.bodyFeelings}</p>
                 </div>
-                {selectedLevel === l.level && <CheckCircle2 className="w-5 h-5 text-white shrink-0 mt-0.5" aria-hidden="true" />}
               </div>
             </button>
           );
@@ -216,25 +201,49 @@ export const FivePointScaleModal: React.FC = () => {
               Helpful right now at Level {selectedCfg.level} ({selectedCfg.label}):
             </p>
             {selectedCfg.actions.map((action, idx) => {
-              const ActionIcon = getActionIcon(action.label, idx);
               return (
                 <button
                   key={idx}
                   type="button"
                   aria-label={`Strategy: ${action.label}`}
                   onClick={() => handleAction(action, selectedCfg.level)}
-                  className="w-full min-h-[48px] text-left flex items-center gap-3 p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
+                  className="w-full min-h-[48px] text-left flex items-center justify-between p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer active:scale-98 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-slate-700/80 flex items-center justify-center shrink-0">
-                    <ActionIcon className="w-5 h-5 text-amber-300" aria-hidden="true" />
-                  </div>
                   <span className="font-bold text-white text-sm flex-1">{action.label}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                 </button>
               );
             })}
           </div>
         )}
+        </div>
+
+        {/* Footer with Done Button */}
+        <div className="p-3.5 sm:px-6 sm:py-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate">
+            {selectedCfg ? (
+              <span>{t('Selected:')} <strong className="text-slate-800 dark:text-slate-200">Level {selectedCfg.level} - {selectedCfg.label}</strong></span>
+            ) : (
+              <span>{t('Select your feeling level')}</span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              playChime('tap');
+              setShowFivePointModal(false);
+            }}
+            className={`min-w-[100px] px-6 py-2.5 rounded-2xl font-black text-sm cursor-pointer active:scale-95 transition-all shadow-xs flex items-center justify-center shrink-0 ${
+              isFrogTheme
+                ? 'bg-lime-600 hover:bg-lime-700 text-white'
+                : isTurtleTheme
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : isDinoTheme
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-amber-500 hover:bg-amber-600 text-amber-950'
+            }`}
+          >
+            <span>{t('Done')}</span>
+          </button>
         </div>
       </div>
     </div>

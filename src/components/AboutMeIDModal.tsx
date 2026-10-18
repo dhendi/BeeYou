@@ -6,29 +6,7 @@ import {
   UserAgeGroup 
 } from '../types';
 import { playChime, speakText } from '../utils/audio';
-import { RoutineStickerIcon } from './icons/JournalStickers';
-import { 
-  X, 
-  Volume2, 
-  Phone, 
-  Copy, 
-  Check, 
-  ShieldAlert, 
-  Heart, 
-  Edit3, 
-  Save, 
-  Plus, 
-  Trash2, 
-  AlertTriangle, 
-  Smile, 
-  Star, 
-  User, 
-  ExternalLink,
-  MessageSquare,
-  ShieldCheck,
-  Eye,
-  CreditCard
-} from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 
 interface AboutMeIDModalProps {
   isOpen: boolean;
@@ -69,9 +47,9 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
       'Scratchy shirt tags and rough textures',
     ],
     comfortsAndLikes: [
-      userAgeGroup === 'adult' ? 'Calm quiet workspaces & ambient music' : 'Dinosaurs 🦖 & Trains 🚂',
-      'Noise-canceling headphones 🎧',
-      userAgeGroup === 'adult' ? 'Weighted lap pad & deep breathing' : 'Weighted blue dinosaur comfort toy 🦕',
+      userAgeGroup === 'adult' ? 'Calm quiet workspaces & ambient music' : 'Dinosaurs & Trains',
+      'Noise-canceling headphones',
+      userAgeGroup === 'adult' ? 'Weighted lap pad & deep breathing' : 'Weighted blue dinosaur comfort toy',
       'Gentle pressure or quiet dim break room',
       'Taking a break outdoors or walking to regulate',
     ],
@@ -196,34 +174,28 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
         
         {/* HEADER BADGE */}
         <div className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center p-1.5 shadow-inner border border-white/30">
-              <img src="/assets/stickers/about_id.webp" alt="ID Card" className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/30 text-white">
+                {userAgeGroup === 'adult' ? 'Advocacy & Medical Passport' : 'About Me ID Card'}
+              </span>
+              <span className="text-xs font-bold text-white/90">
+                {userAgeGroup === 'adult' ? 'Personal Profile' : 'Child Safety & AAC'}
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/30 text-white">
-                  {userAgeGroup === 'adult' ? 'Advocacy & Medical Passport' : 'About Me ID Card'}
-                </span>
-                <span className="text-xs font-bold text-white/90">
-                  {userAgeGroup === 'adult' ? 'Personal Profile' : 'Child Safety & AAC'}
-                </span>
-              </div>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
-                {childProfile.name ? `${childProfile.name}'s ` : ''}Digital ID & Safety Card
-              </h2>
-            </div>
+            <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight mt-0.5">
+              {childProfile.name ? `${childProfile.name}'s ` : ''}Digital ID & Safety Card
+            </h2>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsWalletView(!isWalletView)}
-              className={`p-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer ${
                 isWalletView ? `${activeTheme?.palette?.badgeBg || 'bg-amber-300'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}` : 'bg-white/20 hover:bg-white/30 text-white'
               }`}
               title="Toggle Wallet Badge Card View"
             >
-              <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">{isWalletView ? 'Detailed' : 'Wallet Card'}</span>
             </button>
 
@@ -244,11 +216,10 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
           <div className="flex items-center gap-2">
             <button
               onClick={handleReadAloud}
-              className={`px-3.5 py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all`}
+              className={`px-3.5 py-1.5 rounded-xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs shadow-xs flex items-center justify-center cursor-pointer active:scale-95 transition-all`}
               title="Speak ID Card introduction aloud"
             >
-              <Volume2 className="w-4 h-4" />
-              <span>Read ID Aloud 🔊</span>
+              <span>Read ID Aloud</span>
             </button>
 
             <button
@@ -256,11 +227,10 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                 setShowCaregiverAlertModal(true);
                 playChime('tap');
               }}
-              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all animate-pulse"
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-xs flex items-center justify-center cursor-pointer active:scale-95 transition-all animate-pulse"
               title="Emergency SOS Alert"
             >
-              <ShieldAlert className="w-4 h-4" />
-              <span>SOS Alert 🚨</span>
+              <span>SOS Alert</span>
             </button>
           </div>
 
@@ -277,9 +247,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               }
               playChime('tap');
             }}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 flex items-center justify-center cursor-pointer transition-all active:scale-95"
           >
-            <Edit3 className="w-3.5 h-3.5 text-slate-500" />
             <span>{isEditing ? 'Cancel Edit' : 'Edit ID Card'}</span>
           </button>
         </div>
@@ -348,7 +317,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               <div className="bg-gradient-to-r from-amber-50 via-sky-50 to-indigo-50 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
                   <div className="w-14 h-14 rounded-2xl bg-white shadow-xs shrink-0 border border-slate-200 flex items-center justify-center font-black text-indigo-700 text-xl">
-                    {childProfile.name.charAt(0).toUpperCase() || '👤'}
+                    {childProfile.name.charAt(0).toUpperCase() || 'A'}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -364,11 +333,11 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                         {userAgeGroup === 'adult' ? 'Adult • 18+' : userAgeGroup === 'teen' ? 'Teen • 12–17' : 'Child • 3–11'}
                       </span>
                       <span className="text-[11px] font-black uppercase text-indigo-800 bg-indigo-100 px-2.5 py-0.5 rounded-full">
-                        🧑 Nonbinary Hero
+                        Nonbinary Hero
                       </span>
                     </div>
                     <p className="text-xs text-slate-600 font-semibold mt-1">
-                      🗣️ Uses this AAC app to communicate • Please give me extra time to reply
+                      Uses this AAC app to communicate • Please give me extra time to reply
                     </p>
                   </div>
                 </div>
@@ -381,17 +350,15 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
 
               {/* SECTION: WHO I AM & WHAT I HAVE (Diagnoses & Conditions) */}
               <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-2.5">
-                <div className="flex items-center gap-2 text-indigo-900 font-black text-sm">
-                  <span className="text-xl">🧩</span>
+                <div className="font-black text-sm text-indigo-900">
                   <span>Who I Am & What I Have (Conditions & Diagnoses)</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {aboutMe.conditions.map((c, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-950 font-black text-xs flex items-center gap-1.5 shadow-2xs"
+                      className="px-3 py-1.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-950 font-black text-xs flex items-center justify-center shadow-2xs"
                     >
-                      <Check className="w-3.5 h-3.5 text-indigo-600" />
                       <span>{c}</span>
                     </span>
                   ))}
@@ -400,17 +367,15 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
 
               {/* SECTION: HOW TO COMMUNICATE WITH ME */}
               <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-2.5">
-                <div className="flex items-center gap-2 text-sky-900 font-black text-sm">
-                  <span className="text-xl">🗣️</span>
+                <div className="font-black text-sm text-sky-900">
                   <span>How To Best Communicate With Me</span>
                 </div>
                 <div className="space-y-1.5">
                   {aboutMe.communicationTips.map((tip, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-2xl bg-sky-50/70 border border-sky-200 text-xs font-bold text-sky-950 flex items-start gap-2.5"
+                      className="p-2.5 rounded-2xl bg-sky-50/70 border border-sky-200 text-xs font-bold text-sky-950"
                     >
-                      <span className="text-sm shrink-0">💡</span>
                       <span>{tip}</span>
                     </div>
                   ))}
@@ -420,8 +385,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               {/* SECTION: SENSORY SENSITIVITIES & TRIGGERS */}
               <div className="bg-white rounded-3xl border-2 border-rose-200 p-4 sm:p-5 shadow-xs space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-rose-900 font-black text-sm">
-                    <span className="text-xl">⚡</span>
+                  <div className="font-black text-sm text-rose-900">
                     <span>What I Am Sensitive To (Sensory Triggers)</span>
                   </div>
                   <span className="text-[10px] font-black uppercase bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">
@@ -429,38 +393,28 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {aboutMe.sensorySensitivities.map((s, idx) => {
-                    const l = s.toLowerCase();
-                    let stickerEmoji = '⚡';
-                    if (l.includes('noise') || l.includes('loud') || l.includes('siren') || l.includes('sound')) stickerEmoji = '🔊';
-                    else if (l.includes('light') || l.includes('flash') || l.includes('glare')) stickerEmoji = '💡';
-                    else if (l.includes('mask') || l.includes('social') || l.includes('crowd') || l.includes('tight')) stickerEmoji = '🎭';
-                    return (
-                      <div
-                        key={idx}
-                        className="p-2.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs font-bold text-rose-950 flex items-center gap-2"
-                      >
-                        <RoutineStickerIcon emoji={stickerEmoji} title={s} className="w-5 h-5 object-contain shrink-0" />
-                        <span>{s}</span>
-                      </div>
-                    );
-                  })}
+                  {aboutMe.sensorySensitivities.map((s, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs font-bold text-rose-950"
+                    >
+                      <span>{s}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* SECTION: WHAT HELPS ME & WHAT I LIKE */}
               <div className="bg-white rounded-3xl border-2 border-emerald-200 p-4 sm:p-5 shadow-xs space-y-2.5">
-                <div className="flex items-center gap-2 text-emerald-900 font-black text-sm">
-                  <span className="text-xl">💚</span>
+                <div className="font-black text-sm text-emerald-900">
                   <span>What Helps Me & What I Like (Comforts & Strategies)</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {aboutMe.comfortsAndLikes.map((item, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center gap-1.5 shadow-2xs"
+                      className="px-3 py-1.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 font-bold text-xs flex items-center justify-center shadow-2xs"
                     >
-                      <Star className="w-3.5 h-3.5 text-emerald-600" />
                       <span>{item}</span>
                     </span>
                   ))}
@@ -470,17 +424,15 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               {/* SECTION: ALLERGIES & MEDICAL ALERTS */}
               {aboutMe.allergiesOrMedical?.length > 0 && (
                 <div className="bg-white rounded-3xl border-2 border-amber-300 p-4 sm:p-5 shadow-xs space-y-2.5">
-                  <div className="flex items-center gap-2 text-amber-900 font-black text-sm">
-                    <span className="text-xl">⚠️</span>
+                  <div className="font-black text-sm text-amber-900">
                     <span>Allergies & Medical Alerts</span>
                   </div>
                   <div className="space-y-1.5">
                     {aboutMe.allergiesOrMedical.map((a, idx) => (
                       <div
                         key={idx}
-                        className="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-black text-amber-950 flex items-center gap-2"
+                        className="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-black text-amber-950"
                       >
-                        <span className="text-sm">🚨</span>
                         <span>{a}</span>
                       </div>
                     ))}
@@ -491,8 +443,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               {/* SECTION: CAREGIVERS & EMERGENCY CONTACTS */}
               <div className="bg-white rounded-3xl border-2 border-slate-200 p-4 sm:p-5 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-900 font-black text-sm">
-                    <span className="text-xl">📞</span>
+                  <div className="font-black text-sm text-slate-900">
                     <span>Caregivers & Emergency Contacts</span>
                   </div>
                   <span className="text-[10px] font-bold text-slate-500">Tap to call directly</span>
@@ -529,22 +480,17 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleCopyPhone(contact.phone, contact.id)}
-                            className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold cursor-pointer transition-all active:scale-95"
+                            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold cursor-pointer transition-all active:scale-95"
                             title="Copy Phone Number"
                           >
-                            {copiedPhoneId === contact.id ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
+                            <span>{copiedPhoneId === contact.id ? 'Copied' : 'Copy'}</span>
                           </button>
 
                           <a
                             href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all"
                             title="Call phone directly"
                           >
-                            <Phone className="w-3.5 h-3.5" />
                             <span>Call</span>
                           </a>
                         </div>
@@ -560,8 +506,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
           {/* 3. EDIT MODE FORM */}
           {isEditing && (
             <div className="space-y-5 animate-in fade-in">
-              <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-xs font-bold text-amber-900 flex items-center gap-2">
-                <span>✏️</span>
+              <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-xs font-bold text-amber-900">
                 <span>You are editing this profile's About Me ID card. Save your changes at the bottom.</span>
               </div>
 
@@ -777,9 +722,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   <button
                     type="button"
                     onClick={addEmergencyContact}
-                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1"
+                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
                     <span>Add Contact</span>
                   </button>
                 </div>
@@ -848,9 +792,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
             {isEditing ? (
               <button
                 onClick={handleSave}
-                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md flex items-center justify-center cursor-pointer active:scale-95 transition-all"
               >
-                <Save className="w-4 h-4" />
                 <span>Save ID Card</span>
               </button>
             ) : (

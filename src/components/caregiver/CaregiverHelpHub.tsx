@@ -170,7 +170,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
   // Test pad handlers for Dwell and Release modes
   const handleTestPadPointerDown = () => {
     if (dwellMode === 'direct') {
-      setTestPadStatus('✓ Direct Touch Activated!');
+      setTestPadStatus('Direct Touch Activated!');
       playChime('star');
       speakText('Direct Touch');
     } else if (dwellMode === 'dwell') {
@@ -184,7 +184,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
         setDwellProgress(progress);
         if (progress >= 100) {
           clearInterval(dwellTimerRef.current);
-          setTestPadStatus('✓ Dwell Complete!');
+          setTestPadStatus('Dwell Complete!');
           playChime('complete');
           speakText('Dwell activated');
         }
@@ -202,7 +202,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
         setDwellProgress(0);
       }
     } else if (dwellMode === 'release') {
-      setTestPadStatus('✓ Touch Released!');
+      setTestPadStatus('Touch Released!');
       playChime('complete');
       speakText('Touch on release');
     }

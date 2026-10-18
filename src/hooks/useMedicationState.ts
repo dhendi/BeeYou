@@ -43,7 +43,14 @@ export function useMedicationState({
       const saved = localStorage.getItem('beeyou_medication_logs');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const MOCK_IDS = new Set(['log-1', 'log-2']);
+          const clean = parsed.filter((item: any) => item && item.id && !MOCK_IDS.has(item.id));
+          if (clean.length !== parsed.length) {
+            localStorage.setItem('beeyou_medication_logs', JSON.stringify(clean));
+          }
+          return clean;
+        }
       }
     } catch (e) {
       console.error('Failed to parse beeyou_medication_logs:', e);

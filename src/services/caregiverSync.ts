@@ -1171,6 +1171,14 @@ export async function sendHeartbeat(params: {
  */
 export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildStatus>): Promise<void> {
   const code = getPairingCode();
+  let recollections = status.dailyRecollections;
+  if (!recollections && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('beeyou_daily_recollections');
+      if (raw) recollections = JSON.parse(raw);
+    } catch {}
+  }
+
   const payload: CaregiverChildStatus = {
     childName: status.childName || 'Child',
     pairingCode: code,
@@ -1184,6 +1192,7 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
     isOffline: status.isOffline ?? false,
     lastAacSentence: status.lastAacSentence,
     caregiverPhone: status.caregiverPhone,
+    dailyRecollections: recollections || [],
   };
 
   try {

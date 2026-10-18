@@ -37,6 +37,7 @@ export interface DailyRecollectionEntry {
   bestWin: WinType;
   sleepQuality?: SleepQualityType;
   additionalNotes?: string;
+  notes?: string;
   starsAwarded?: number;
 }
 
@@ -53,7 +54,7 @@ export const DAY_RATING_OPTIONS: DayRatingOption[] = [
   {
     value: 'great',
     label: 'Great Day',
-    emoji: '🌟',
+    emoji: '',
     description: 'Lots of joy, everything went smoothly',
     color: '#15803d',
     bgColor: '#dcfce7',
@@ -61,7 +62,7 @@ export const DAY_RATING_OPTIONS: DayRatingOption[] = [
   {
     value: 'good',
     label: 'Good Day',
-    emoji: '😊',
+    emoji: '',
     description: 'Mostly positive, handled tasks well',
     color: '#0369a1',
     bgColor: '#e0f2fe',
@@ -69,7 +70,7 @@ export const DAY_RATING_OPTIONS: DayRatingOption[] = [
   {
     value: 'okay',
     label: 'Okay / Normal',
-    emoji: '😐',
+    emoji: '',
     description: 'A mix of ups and downs, average day',
     color: '#854d0e',
     bgColor: '#fef9c3',
@@ -77,7 +78,7 @@ export const DAY_RATING_OPTIONS: DayRatingOption[] = [
   {
     value: 'difficult',
     label: 'Difficult',
-    emoji: '😕',
+    emoji: '',
     description: 'Some tough moments, felt frustrated or tired',
     color: '#c2410c',
     bgColor: '#ffedd5',
@@ -85,7 +86,7 @@ export const DAY_RATING_OPTIONS: DayRatingOption[] = [
   {
     value: 'very_hard',
     label: 'Very Tough',
-    emoji: '😣',
+    emoji: '',
     description: 'Heavy struggle, big meltdowns or overload',
     color: '#b91c1c',
     bgColor: '#fee2e2',
@@ -104,28 +105,28 @@ export const ENERGY_OPTIONS: EnergyOption[] = [
   {
     value: 'low',
     label: 'Low / Tired',
-    emoji: '🔋',
+    emoji: '',
     description: 'Slow body, depleted battery, needed rest',
     color: '#64748b',
   },
   {
     value: 'calm',
     label: 'Calm & Steady',
-    emoji: '⚡',
+    emoji: '',
     description: 'Just right, regulated, ready to engage',
     color: '#0284c7',
   },
   {
     value: 'high',
     label: 'High & Bouncy',
-    emoji: '⚡⚡',
+    emoji: '',
     description: 'Very active, sensory-seeking, lots of wiggles',
     color: '#eab308',
   },
   {
     value: 'overstimulated',
     label: 'Overstimulated',
-    emoji: '⚡💥',
+    emoji: '',
     description: 'Sensory fried, restless, close to burnout',
     color: '#ef4444',
   },
@@ -142,43 +143,43 @@ export const CHALLENGE_OPTIONS: ChallengeOption[] = [
   {
     value: 'none',
     label: 'Smooth Sailing',
-    emoji: '⛵',
+    emoji: '',
     description: 'No major hurdles or triggers today',
   },
   {
     value: 'routine_change',
     label: 'Plan / Routine Change',
-    emoji: '🔄',
+    emoji: '',
     description: 'Unexpected surprise or altered schedule',
   },
   {
     value: 'sensory_overload',
     label: 'Sensory Overload',
-    emoji: '🔊',
+    emoji: '',
     description: 'Too loud, bright, crowded, or itchy clothes',
   },
   {
     value: 'waiting_transitions',
     label: 'Waiting & Transitions',
-    emoji: '⏳',
+    emoji: '',
     description: 'Tough time stopping an activity or waiting turn',
   },
   {
     value: 'communication',
     label: 'Expressing Needs',
-    emoji: '🗣️',
+    emoji: '',
     description: 'Frustration finding words or being understood',
   },
   {
     value: 'social_conflict',
     label: 'Social Friction',
-    emoji: '👥',
+    emoji: '',
     description: 'Difficulty with peers, siblings, or sharing',
   },
   {
     value: 'physical',
     label: 'Body Discomfort / Hunger',
-    emoji: '🥱',
+    emoji: '',
     description: 'Tummy ache, overtiredness, or hungry',
   },
 ];
@@ -194,37 +195,37 @@ export const WIN_OPTIONS: WinOption[] = [
   {
     value: 'routine_success',
     label: 'Smooth Routine',
-    emoji: '⏰',
+    emoji: '',
     description: 'Finished morning or bedtime routines nicely',
   },
   {
     value: 'communication_aac',
     label: 'Great Communication',
-    emoji: '🗣️',
+    emoji: '',
     description: 'Used AAC or words to self-advocate and ask for needs',
   },
   {
     value: 'calmed_down',
     label: 'Coping & Calming',
-    emoji: '🌬️',
+    emoji: '',
     description: 'Took deep breaths or used calm toolkit independently',
   },
   {
     value: 'tried_new',
     label: 'Brave & Flexible',
-    emoji: '🌟',
+    emoji: '',
     description: 'Tried a new food, place, or adapted to change',
   },
   {
     value: 'great_school',
     label: 'School / Therapy Win',
-    emoji: '🏫',
+    emoji: '',
     description: 'Positive engagement with teachers or therapists',
   },
   {
     value: 'fun_play',
     label: 'Joyful Play & Connection',
-    emoji: '🎨',
+    emoji: '',
     description: 'Creative building, laughter, or happy family time',
   },
 ];
@@ -240,25 +241,25 @@ export const SLEEP_OPTIONS: SleepOption[] = [
   {
     value: 'slept_well',
     label: 'Slept Well',
-    emoji: '🌙',
+    emoji: '',
     description: 'Solid, restful sleep through the night',
   },
   {
     value: 'restless',
     label: 'Restless Sleep',
-    emoji: '😴',
+    emoji: '',
     description: 'Tossed and turned, woke up once or twice',
   },
   {
     value: 'trouble_falling_asleep',
     label: 'Hard to Wind Down',
-    emoji: '🛌',
+    emoji: '',
     description: 'Took a long time to fall asleep',
   },
   {
     value: 'woke_early',
     label: 'Woke Up Very Early',
-    emoji: '⏰',
+    emoji: '',
     description: 'Awoke before schedule feeling groggy',
   },
 ];
@@ -308,15 +309,15 @@ export function generateTherapistSummaryText(
 
   const lines: string[] = [
     `==================================================`,
-    `📋 BEEYOU DAILY MOOD & BEHAVIOR SUMMARY FOR THERAPY`,
+    `BEEYOU DAILY MOOD & BEHAVIOR SUMMARY FOR THERAPY`,
     `Child: ${childName} | Date Generated: ${new Date().toLocaleDateString()}`,
     `Days Logged: ${totalDays} | Positive Days: ${positiveRatio}% (${greatOrGoodCount}/${totalDays})`,
     `Difficult Days: ${difficultCount}/${totalDays}`,
     `==================================================\n`,
-    `📊 1. REGULATION & ENERGY TRENDS:`,
+    `1. REGULATION & ENERGY TRENDS:`,
     `- Energy: ${sorted.filter(e => e.energyLevel === 'calm').length} Calm/Regulated, ${sorted.filter(e => e.energyLevel === 'high').length} High/Seeking, ${sorted.filter(e => e.energyLevel === 'overstimulated').length} Overstimulated, ${sorted.filter(e => e.energyLevel === 'low').length} Low/Tired`,
     `- Sleep: ${sorted.filter(e => e.sleepQuality === 'slept_well').length} Slept well, ${sorted.filter(e => e.sleepQuality === 'restless').length} Restless/Fragmented\n`,
-    `⚡ 2. TOP REPORTED CHALLENGES & SENSORY TRIGGERS:`,
+    `2. TOP REPORTED CHALLENGES & SENSORY TRIGGERS:`,
   ];
 
   if (Object.keys(challengeCounts).length === 0) {
@@ -328,23 +329,23 @@ export function generateTherapistSummaryText(
     });
   }
 
-  lines.push(`\n🌟 3. TOP WINS & SUCCESSFUL COPING STRATEGIES:`);
+  lines.push(`\n3. TOP WINS & SUCCESSFUL COPING STRATEGIES:`);
   Object.entries(winCounts).forEach(([win, count]) => {
     const match = WIN_OPTIONS.find((w) => w.value === win);
     lines.push(`- ${match ? match.label : win}: ${count} time(s)`);
   });
 
-  lines.push(`\n📅 4. DAY-BY-DAY RECOLLECTION NOTES:`);
+  lines.push(`\n4. DAY-BY-DAY RECOLLECTION NOTES:`);
   sorted.slice(0, 7).forEach((entry) => {
     const ratingObj = DAY_RATING_OPTIONS.find((r) => r.value === entry.overallDay);
     const winObj = WIN_OPTIONS.find((w) => w.value === entry.bestWin);
     const challengeObj = CHALLENGE_OPTIONS.find((c) => c.value === entry.mainChallenge);
 
     lines.push(
-      `• [${entry.date}] Overall: ${ratingObj?.emoji} ${ratingObj?.label} | Energy: ${entry.energyLevel} | Win: ${winObj?.label}`
+      `• [${entry.date}] Overall: ${ratingObj?.label} | Energy: ${entry.energyLevel} | Win: ${winObj?.label}`
     );
     if (entry.mainChallenge !== 'none') {
-      lines.push(`  Challenge: ${challengeObj?.emoji} ${challengeObj?.label}`);
+      lines.push(`  Challenge: ${challengeObj?.label}`);
     }
     if (entry.additionalNotes) {
       lines.push(`  Note: "${entry.additionalNotes}"`);

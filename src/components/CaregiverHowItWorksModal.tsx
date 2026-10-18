@@ -1,31 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { 
-  X, 
-  HelpCircle, 
-  Star, 
-  Calendar, 
-  Timer, 
-  ShieldAlert, 
-  Smartphone, 
-  Heart, 
-  Volume2, 
-  CheckCircle2, 
-  ArrowRight, 
-  UserCheck, 
-  Search,
-  Play,
-  RotateCcw,
-  Bell,
-  VolumeX,
-  Vibrate,
-  Eye,
-  Info,
-  MessageSquare,
-  BookOpen
-} from 'lucide-react';
+import { X } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { BeeMascot } from './BeeYouLogo';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
 
 export type HelpTopic = 
@@ -61,11 +37,11 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
 
   // Sample Routine Interactive Sandbox State
   const [sampleSteps, setSampleSteps] = useState([
-    { id: '1', title: 'Wake up & stretch', emoji: '☀️', duration: 2, completed: false },
-    { id: '2', title: 'Brush teeth', emoji: '🪥', duration: 2, completed: false },
-    { id: '3', title: 'Get dressed', emoji: '👕', duration: 5, completed: false },
-    { id: '4', title: 'Eat breakfast', emoji: '🥞', duration: 15, completed: false },
-    { id: '5', title: 'Pack backpack', emoji: '🎒', duration: 3, completed: false },
+    { id: '1', title: 'Wake up & stretch', duration: 2, completed: false },
+    { id: '2', title: 'Brush teeth', duration: 2, completed: false },
+    { id: '3', title: 'Get dressed', duration: 5, completed: false },
+    { id: '4', title: 'Eat breakfast', duration: 15, completed: false },
+    { id: '5', title: 'Pack backpack', duration: 3, completed: false },
   ]);
   const [sampleTimerActive, setSampleTimerActive] = useState(false);
   const [sampleTimerSec, setSampleTimerSec] = useState(120);
@@ -98,21 +74,20 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
   const topics: Array<{
     id: HelpTopic;
     title: string;
-    icon: any;
     badge?: string;
   }> = [
-    { id: 'what_is_beeyou', title: 'What is BeeYou?', icon: Star },
-    { id: 'visual_walkthrough', title: 'Step-by-Step Feature Visuals & Screenshots', icon: BookOpen, badge: 'Visuals & Clicks' },
-    { id: 'quick_start', title: '5-Step Quick Start Guide', icon: UserCheck, badge: 'Caregiver' },
-    { id: 'who_is_it_for', title: 'Who is BeeYou for?', icon: Heart },
-    { id: 'does_my_child_need', title: 'Does the person I support need BeeYou?', icon: HelpCircle },
-    { id: 'aac_guide', title: 'How to use AAC & Communication', icon: MessageSquare, badge: 'AAC' },
-    { id: 'schedules', title: 'How do Schedules work?', icon: Calendar },
-    { id: 'timers', title: 'How do Timers work?', icon: Timer },
-    { id: 'alerts', title: 'How do Help Alerts work?', icon: ShieldAlert },
-    { id: 'device_connection', title: 'How to Connect Devices', icon: Smartphone },
-    { id: 'notifications', title: 'Alert & Sound Settings', icon: Bell },
-    { id: 'sample_demo', title: 'Try Sample Routine (Demo)', icon: Play, badge: 'Interactive' },
+    { id: 'what_is_beeyou', title: 'What is BeeYou?' },
+    { id: 'visual_walkthrough', title: 'Step-by-Step Feature Visuals & Screenshots', badge: 'Visuals & Clicks' },
+    { id: 'quick_start', title: '5-Step Quick Start Guide', badge: 'Caregiver' },
+    { id: 'who_is_it_for', title: 'Who is BeeYou for?' },
+    { id: 'does_my_child_need', title: 'Does the person I support need BeeYou?' },
+    { id: 'aac_guide', title: 'How to use AAC & Communication', badge: 'AAC' },
+    { id: 'schedules', title: 'How do Schedules work?' },
+    { id: 'timers', title: 'How do Timers work?' },
+    { id: 'alerts', title: 'How do Help Alerts work?' },
+    { id: 'device_connection', title: 'How to Connect Devices' },
+    { id: 'notifications', title: 'Alert & Sound Settings' },
+    { id: 'sample_demo', title: 'Try Sample Routine (Demo)', badge: 'Interactive' },
   ];
 
   const filteredTopics = searchQuery.trim() === ''

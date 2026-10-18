@@ -14,7 +14,14 @@ export function useMoodJournalState({ soundEffects, announce }: UseMoodJournalSt
       const saved = localStorage.getItem('beeyou_mood_journal');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const MOCK_IDS = new Set(['mj-1', 'mj-2']);
+          const clean = parsed.filter((item: any) => item && item.id && !MOCK_IDS.has(item.id));
+          if (clean.length !== parsed.length) {
+            localStorage.setItem('beeyou_mood_journal', JSON.stringify(clean));
+          }
+          return clean;
+        }
       }
     } catch (e) {
       console.error('Failed to parse beeyou_mood_journal:', e);

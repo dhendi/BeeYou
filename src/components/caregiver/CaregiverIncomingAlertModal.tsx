@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  ShieldAlert, 
-  X, 
-  Send, 
-  Car, 
-  Heart, 
-  Clock, 
-  Check, 
-  CheckCircle2, 
-  MapPin, 
-  MessageSquare,
-  Sparkles
-} from 'lucide-react';
+import { X } from 'lucide-react';
 import { CaregiverAlert, CaregiverResponsePreset } from '../../types';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
 import { playChime } from '../../utils/audio';
@@ -129,23 +117,18 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
       >
         {/* Urgent Header Banner */}
         <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 px-5 py-4 text-white flex items-center justify-between gap-3 shadow-md">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center shrink-0 shadow-inner">
-              <ShieldAlert className="w-6 h-6 text-white" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
+                {t('Live Urgent Alert')}
+              </span>
+              <span className="text-xs font-mono text-rose-100 font-bold">
+                {formattedTime}
+              </span>
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full text-white">
-                  {t('Live Urgent Alert')}
-                </span>
-                <span className="text-xs font-mono text-rose-100 font-bold">
-                  {formattedTime}
-                </span>
-              </div>
-              <h2 id="incoming-alert-modal-title" className="text-lg sm:text-xl font-black truncate text-white mt-0.5">
-                {displayName} {t('Needs Support')}
-              </h2>
-            </div>
+            <h2 id="incoming-alert-modal-title" className="text-lg sm:text-xl font-black truncate text-white mt-0.5">
+              {displayName} {t('Needs Support')}
+            </h2>
           </div>
 
           <button
@@ -164,9 +147,6 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
           {/* Sent Confirmation State */}
           {sentConfirmation ? (
             <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-950 flex items-center gap-3 animate-in fade-in duration-200">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Check className="w-6 h-6 stroke-[3]" />
-              </div>
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-black uppercase tracking-wider text-emerald-800 block">
                   {t('Reassurance Sent to')} {displayName}'s {t('Screen!')}
@@ -190,8 +170,7 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
                     </span>
                   </div>
                   {alert.location && (
-                    <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-rose-800 border border-rose-200 text-xs font-bold">
-                      <MapPin className="w-3.5 h-3.5 text-rose-600" />
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-rose-800 border border-rose-200 text-xs font-bold">
                       <span>{t('At')} {alert.location}</span>
                     </div>
                   )}
@@ -222,7 +201,7 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
                         type="button"
                         disabled={isSubmitting}
                         onClick={() => handleSendQuick(reply)}
-                        className={`p-2.5 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center justify-center gap-1.5 transition text-center disabled:opacity-50 ${
+                        className={`p-2.5 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center justify-center transition text-center disabled:opacity-50 ${
                           isComing
                             ? 'bg-rose-600 hover:bg-rose-700 text-white'
                             : isHere
@@ -232,15 +211,6 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
                             : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
                         }`}
                       >
-                        {isComing ? (
-                          <Car className="w-3.5 h-3.5 shrink-0" />
-                        ) : isHere ? (
-                          <Heart className="w-3.5 h-3.5 shrink-0" />
-                        ) : isWait ? (
-                          <Clock className="w-3.5 h-3.5 shrink-0" />
-                        ) : (
-                          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        )}
                         <span className="truncate">{cleanLabel || reply.label}</span>
                       </button>
                     );
@@ -250,9 +220,8 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
 
               {/* 2. Type Custom Reply Area */}
               <div className="space-y-1.5 pt-1">
-                <label htmlFor="caregiver-custom-reply-input" className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
-                  <span>{t('Or Type Your Own Reply:')}</span>
+                <label htmlFor="caregiver-custom-reply-input" className="text-xs font-black text-slate-700 uppercase tracking-wider block">
+                  {t('Or Type Your Own Reply:')}
                 </label>
                 <form onSubmit={handleSendCustomText} className="flex gap-2">
                   <input
@@ -268,9 +237,8 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
                   <button
                     type="submit"
                     disabled={!typedReply.trim() || isSubmitting}
-                    className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition border border-amber-600 shrink-0"
+                    className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-amber-950 font-black text-xs flex items-center justify-center cursor-pointer shadow-xs active:scale-95 transition border border-amber-600 shrink-0"
                   >
-                    <Send className="w-4 h-4" />
                     <span>{t('Send')}</span>
                   </button>
                 </form>
@@ -284,10 +252,9 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
               type="button"
               onClick={handleResolveAlert}
               disabled={isSubmitting}
-              className="px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black cursor-pointer shadow-2xs active:scale-95 transition flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-black cursor-pointer shadow-2xs active:scale-95 transition flex items-center justify-center"
             >
-              <Check className="w-4 h-4 text-emerald-600" />
-              <span>{t('Resolve & Clear ✓')}</span>
+              <span>{t('Resolve & Clear')}</span>
             </button>
 
             <button

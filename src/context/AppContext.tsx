@@ -241,11 +241,13 @@ export interface AppContextType {
 
   // Daily Mood & Recollection
   dailyRecollections: DailyRecollectionEntry[];
+  setDailyRecollections: React.Dispatch<React.SetStateAction<DailyRecollectionEntry[]>>;
   showRecollectionModal: boolean;
   setShowRecollectionModal: (val: boolean) => void;
   addDailyRecollection: (entry: Omit<DailyRecollectionEntry, 'id' | 'timestamp'>) => void;
   updateDailyRecollection: (id: string, updates: Partial<DailyRecollectionEntry>) => void;
   deleteDailyRecollection: (id: string) => void;
+  clearAllDailyRecollections: () => void;
 
   // Themes & Customization
   themes: AppTheme[];
@@ -1133,11 +1135,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
     // Daily Mood & Recollection
     dailyRecollections: recollections.dailyRecollections,
+    setDailyRecollections: recollections.setDailyRecollections,
     showRecollectionModal: recollections.showRecollectionModal,
     setShowRecollectionModal: recollections.setShowRecollectionModal,
     addDailyRecollection: recollections.addDailyRecollection,
     updateDailyRecollection: recollections.updateDailyRecollection,
     deleteDailyRecollection: recollections.deleteDailyRecollection,
+    clearAllDailyRecollections: recollections.clearAllDailyRecollections,
 
     // Themes & Customization
     themes: themeState.themes,

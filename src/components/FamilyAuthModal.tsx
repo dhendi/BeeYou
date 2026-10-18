@@ -1,25 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Mail, 
-  Lock, 
-  Star, 
-  CheckCircle2, 
-  Smartphone, 
-  Heart, 
   X, 
-  ArrowRight, 
-  User, 
-  ShieldCheck, 
-  Zap, 
-  RefreshCw,
-  Info,
-  Layers,
-  Crown,
-  Share2,
-  Check,
-  Globe,
-  AlertCircle,
-  Users
+  RefreshCw 
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { useApp } from '../context/AppContext';
@@ -298,9 +280,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                 <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 text-white">
                   Shared Family Account
                 </span>
-                <span className="text-xs text-amber-200 font-bold flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5" />
-                  <span>1 Email Links Both Devices</span>
+                <span className="text-xs text-amber-200 font-bold">
+                  1 Email Links Both Devices
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-black text-white mt-0.5 tracking-tight">
@@ -327,13 +308,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
               setActiveTab('demo');
               playChime('tap');
             }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
               activeTab === 'demo'
                 ? 'bg-amber-500 text-white shadow-xs font-black'
                 : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
             }`}
           >
-            <Zap className="w-4 h-4 text-amber-200" />
             <span>1-Click Demo Account</span>
           </button>
 
@@ -343,13 +323,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
               setActiveTab('login');
               playChime('tap');
             }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
               activeTab === 'login'
                 ? 'bg-indigo-600 text-white shadow-xs font-black'
                 : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
             }`}
           >
-            <Mail className="w-4 h-4" />
             <span>Sign In with Email</span>
           </button>
 
@@ -359,13 +338,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
               setActiveTab('register');
               playChime('tap');
             }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
               activeTab === 'register'
                 ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-xs font-black'
                 : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
             }`}
           >
-            <Crown className="w-4 h-4 text-amber-300" />
             <span>Create New Family</span>
           </button>
         </div>
@@ -373,12 +351,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         {/* MODAL BODY CONTENT */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
           {successMessage && (
-            <div className="p-4 rounded-2xl bg-emerald-500 text-white font-bold text-sm flex items-center gap-3 shadow-lg animate-in zoom-in-95">
-              <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-100" />
-              <div className="flex-1">
-                <p className="font-black text-white">{successMessage}</p>
-                <p className="text-xs text-emerald-100 mt-0.5">Connecting and loading your environment...</p>
-              </div>
+            <div className="p-4 rounded-2xl bg-emerald-500 text-white font-bold text-sm shadow-lg animate-in zoom-in-95">
+              <p className="font-black text-white">{successMessage}</p>
+              <p className="text-xs text-emerald-100 mt-0.5">Connecting and loading your environment...</p>
             </div>
           )}
 
@@ -427,10 +402,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     className="p-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-left shadow-md transition cursor-pointer flex flex-col justify-between gap-3 group"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <span className="text-xs bg-amber-600/60 px-2 py-0.5 rounded-full text-amber-100">
+                      <span className="text-xs bg-amber-600/60 px-2.5 py-1 rounded-full text-amber-100 font-bold">
                         Tablet Mode
                       </span>
                     </div>
@@ -442,9 +414,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                         Opens visual routines, AAC symbol talker &amp; SOS button linked to Caregiver.
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-950 group-hover:translate-x-1 transition-transform">
+                    <div className="text-xs font-bold text-amber-950">
                       <span>Open Child View</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </button>
 
@@ -455,10 +426,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     className="p-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-left shadow-md transition cursor-pointer flex flex-col justify-between gap-3 group"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-white" />
-                      </div>
-                      <span className="text-xs bg-indigo-700/60 px-2 py-0.5 rounded-full text-indigo-100">
+                      <span className="text-xs bg-indigo-700/60 px-2.5 py-1 rounded-full text-indigo-100 font-bold">
                         Caregiver Hub
                       </span>
                     </div>
@@ -470,9 +438,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                         Opens Live Command Hub to send 1-tap nudges &amp; receive child alerts.
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-indigo-200 group-hover:translate-x-1 transition-transform">
+                    <div className="text-xs font-bold text-indigo-200">
                       <span>Open Caregiver Hub</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </button>
                 </div>
@@ -501,16 +468,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                     Family Email:
                   </label>
-                  <div className="relative">
+                  <div>
                     <input
                       type="email"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       placeholder="e.g. family@gmail.com"
-                      className="w-full px-4 py-3 pl-10 rounded-2xl border-2 border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-sm focus:border-amber-500 outline-none"
+                      className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-sm focus:border-amber-500 outline-none"
                       required
                     />
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   </div>
                 </div>
 
@@ -518,16 +484,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                     Password (or PIN):
                   </label>
-                  <div className="relative">
+                  <div>
                     <input
                       type="password"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-4 py-3 pl-10 rounded-2xl border-2 border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-sm focus:border-amber-500 outline-none"
+                      className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-sm focus:border-amber-500 outline-none"
                       required
                     />
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   </div>
                 </div>
 
@@ -540,40 +505,33 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setLoginDeviceRole('child')}
-                      className={`p-3 rounded-2xl border-2 text-left flex items-center gap-2.5 transition cursor-pointer ${
+                      className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer ${
                         loginDeviceRole === 'child'
                           ? 'border-amber-500 bg-amber-50 dark:bg-slate-700 font-bold text-amber-950 dark:text-amber-200'
                           : 'border-slate-200 dark:border-slate-700 opacity-70'
                       }`}
                     >
-                      <User className="w-5 h-5 text-amber-600 shrink-0" />
-                      <div>
-                        <span className="text-xs font-black block">Child's Tablet</span>
-                        <span className="text-[10px] text-slate-500 block">Schedules &amp; AAC</span>
-                      </div>
+                      <span className="text-xs font-black block">Child's Tablet</span>
+                      <span className="text-[10px] text-slate-500 block">Schedules &amp; AAC</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setLoginDeviceRole('caregiver')}
-                      className={`p-3 rounded-2xl border-2 text-left flex items-center gap-2.5 transition cursor-pointer ${
+                      className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer ${
                         loginDeviceRole === 'caregiver'
                           ? 'border-indigo-500 bg-indigo-50 dark:bg-slate-700 font-bold text-indigo-950 dark:text-indigo-200'
                           : 'border-slate-200 dark:border-slate-700 opacity-70'
                       }`}
                     >
-                      <Users className="w-5 h-5 text-indigo-600 shrink-0" />
-                      <div>
-                        <span className="text-xs font-black block">Caregiver Phone</span>
-                        <span className="text-[10px] text-slate-500 block">Alerts &amp; Hub</span>
-                      </div>
+                      <span className="text-xs font-black block">Caregiver Phone</span>
+                      <span className="text-[10px] text-slate-500 block">Alerts &amp; Hub</span>
                     </button>
                   </div>
                 </div>
 
                 {loginError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
                     <span>{loginError}</span>
                   </div>
                 )}
@@ -588,7 +546,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   disabled={loginLoading}
                   className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {loginLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {loginLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   <span>Sign In &amp; Sync Device</span>
                 </button>
 
@@ -781,8 +739,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
                 {/* Preferred Language Picker */}
                 <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-slate-700/50 border border-amber-200 dark:border-slate-600">
-                  <label className="text-xs font-black uppercase tracking-wider text-amber-950 dark:text-amber-200 flex items-center gap-1.5 mb-1.5">
-                    <Globe className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <label className="text-xs font-black uppercase tracking-wider text-amber-950 dark:text-amber-200 block mb-1.5">
                     <span>App &amp; AAC Language / Idioma / Langue *</span>
                   </label>
                   <select
@@ -822,8 +779,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                 </div>
 
                 {regError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
                     <span>{regError}</span>
                   </div>
                 )}
@@ -833,7 +789,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   disabled={regLoading}
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {regLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+                  {regLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   <span>Create Shared Family Account</span>
                 </button>
               </div>
@@ -880,8 +836,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           {/* If already signed in */}
           {currentAccount && (
             <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div>
                 <span>Signed in as <strong>{currentAccount.email}</strong> ({currentAccount.familyCode})</span>
               </div>
               <button

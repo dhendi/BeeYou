@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
-import { Eye, Save, Trash2, Plus, Star, MessageSquare } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { IconLibraryModal } from '../common/IconLibraryModal';
@@ -106,9 +106,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Picnic Lunch & Park Swings');
       setPcCalming('It is completely normal to feel surprised or upset when plans change. Take a slow breath. You are safe, and here is our new calm plan.');
       setPcSteps([
-        { title: 'Favorite pizza lunch at home', emoji: '🍕', time: '12:30 PM' },
-        { title: 'Play at the sunny playground swings', emoji: '🛝', time: '1:30 PM' },
-        { title: 'Drawing and cozy world building', emoji: '🎨', time: '3:00 PM' },
+        { title: 'Favorite pizza lunch at home', emoji: '', time: '12:30 PM' },
+        { title: 'Play at the sunny playground swings', emoji: '', time: '1:30 PM' },
+        { title: 'Drawing and cozy world building', emoji: '', time: '3:00 PM' },
       ]);
       setPcPhrases([
         'Why did it change?',
@@ -125,9 +125,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Indoor Blanket Fort & Movie Afternoon');
       setPcCalming('Rainy days can be frustrating when we wanted to go outside. We will build a super cozy indoor fort and have warm cocoa!');
       setPcSteps([
-        { title: 'Build living room blanket fort with pillows', emoji: '🛋️', time: '11:00 AM' },
-        { title: 'Warm cocoa and crackers snack', emoji: '☕', time: '12:00 PM' },
-        { title: 'Watch favorite animal movie inside the fort', emoji: '🧸', time: '1:00 PM' },
+        { title: 'Build living room blanket fort with pillows', emoji: '', time: '11:00 AM' },
+        { title: 'Warm cocoa and crackers snack', emoji: '', time: '12:00 PM' },
+        { title: 'Watch favorite animal movie inside the fort', emoji: '', time: '1:00 PM' },
       ]);
       setPcPhrases([
         'I wanted to see the animals.',
@@ -141,9 +141,9 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       setPcNewTitle('Early Afternoon at Home');
       setPcCalming('School finished early today. Mom/Dad picked you up and we have extra cozy time at home.');
       setPcSteps([
-        { title: 'Ride car home and unpack backpack', emoji: '🚗', time: '12:30 PM' },
-        { title: 'Quiet sensory break with favorite toy', emoji: '🧸', time: '1:00 PM' },
-        { title: 'Free tablet and train play', emoji: '📱', time: '2:00 PM' },
+        { title: 'Ride car home and unpack backpack', emoji: '', time: '12:30 PM' },
+        { title: 'Quiet sensory break with favorite toy', emoji: '', time: '1:00 PM' },
+        { title: 'Free tablet and train play', emoji: '', time: '2:00 PM' },
       ]);
       setPcPhrases([
         'Why did school finish early?',
@@ -179,25 +179,22 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 playChime('tap');
                 onStartTour();
               }}
-              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
               title={t("Tour this section")}
             >
-              <Star className="w-4 h-4 text-amber-600" />
               <span>{t("How This Works (Tour)")}</span>
             </button>
           )}
           <button
             onClick={() => setShowPlansChangedModal(true)}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
           >
-            <Eye className="w-4 h-4" />
             <span>{t("Preview Child Modal")}</span>
           </button>
           <button
             onClick={handleSavePlansChanged}
-            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-sm cursor-pointer"
           >
-            <Save className="w-4 h-4" />
             <span>{t("Save & Update")}</span>
           </button>
         </div>
@@ -276,9 +273,8 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
       <div data-tour="plans-changed-message-input" className="space-y-4">
         {/* Routine Selector Dropdown */}
         <div>
-          <label className="text-xs font-black text-slate-700 block mb-1.5 flex items-center gap-1.5">
-            <span>📅</span>
-            <span>{t("Select which part of the routine changed (or type custom):")}</span>
+          <label className="text-xs font-black text-slate-700 block mb-1.5">
+            {t("Select which part of the routine changed (or type custom):")}
           </label>
           <select
             value={pcTargetRoutine}
@@ -303,7 +299,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             }}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-xs sm:text-sm focus:ring-2 focus:ring-amber-400 outline-none bg-white cursor-pointer"
           >
-            <option value="custom">✍️ {t("Custom event / appointment (type manually)")}</option>
+            <option value="custom">{t("Custom event / appointment (type manually)")}</option>
             {routines.map((routine) => (
               <optgroup key={routine.id} label={`${routine.emoji} ${routine.title}`}>
                 <option value={routine.id}>
@@ -440,13 +436,12 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 {newStepEmoji ? (
                   <RoutineStickerIcon emoji={newStepEmoji} title="Selected icon" className="w-6 h-6 object-contain drop-shadow-2xs" />
                 ) : (
-                  <Plus className="w-4 h-4 text-amber-700" />
+                  <span className="text-xs font-black text-amber-700">+</span>
                 )}
               </div>
               <span className="text-xs font-black text-amber-950">
                 {t("Icon")}
               </span>
-              <Star className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
             </button>
             <input
               type="text"
@@ -467,9 +462,8 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                   setNewStepEmoji('');
                 }
               }}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
             >
-              <Plus className="w-3.5 h-3.5" />
               <span>{t("Add Step")}</span>
             </button>
           </div>
@@ -486,13 +480,10 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 key={idx}
                 className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs flex items-center gap-2"
               >
-                <span className="flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>{t(phrase)}</span>
-                </span>
+                <span>{t(phrase)}</span>
                 <button
                   onClick={() => setPcPhrases(pcPhrases.filter((_, i) => i !== idx))}
-                  className="text-amber-700 hover:text-rose-600 cursor-pointer"
+                  className="text-amber-700 hover:text-rose-600 cursor-pointer ml-1"
                 >
                   ×
                 </button>
@@ -535,9 +526,8 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
           </button>
           <button
             onClick={handleSavePlansChanged}
-            className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-md cursor-pointer flex items-center gap-2"
+            className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-md cursor-pointer"
           >
-            <Save className="w-4 h-4" />
             <span>{t("Save & Activate Plans Changed")}</span>
           </button>
         </div>

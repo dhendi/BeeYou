@@ -5,7 +5,6 @@ import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
-import { Heart, ExternalLink, Copy, Lightbulb } from 'lucide-react';
 
 interface CaregiverDeviceLinkTabProps {
   onShowNotification: (msg: string) => void;
@@ -25,8 +24,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
-          <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-            <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
+          <h2 className="text-xl font-black text-slate-900">
             <span>{t("Caregiver Live Link & Remote Monitor")}</span>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -39,9 +37,8 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             <button
               type="button"
               onClick={onStartTour}
-              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black text-xs flex items-center justify-center shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <Lightbulb className="w-3.5 h-3.5 text-indigo-600" />
               <span>{t("How This Works")}</span>
             </button>
           )}
@@ -49,9 +46,8 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             href={`/?caregiver=true&code=${getPairingCode()}`}
             target="_blank"
             rel="noreferrer"
-            className="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs flex items-center justify-center shadow-sm transition active:scale-95 cursor-pointer"
           >
-            <ExternalLink className="w-4 h-4" />
             <span>{t("Open Remote Portal in New Window")}</span>
           </a>
         </div>
@@ -90,9 +86,8 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
                 navigator.clipboard?.writeText(url);
                 onShowNotification('Caregiver portal link copied to clipboard!');
               }}
-              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
+              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black flex items-center justify-center shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <Copy className="w-4 h-4" />
               <span>{t("Copy Direct Portal URL")}</span>
             </button>
 
@@ -100,9 +95,8 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               href={`/?caregiver=true&code=${getPairingCode()}`}
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black flex items-center gap-2 shadow-2xs transition active:scale-95 cursor-pointer"
+              className="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black flex items-center justify-center shadow-2xs transition active:scale-95 cursor-pointer"
             >
-              <ExternalLink className="w-4 h-4" />
               <span>{t("Open Portal In New Tab")}</span>
             </a>
           </div>

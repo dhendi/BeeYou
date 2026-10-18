@@ -4,34 +4,8 @@ import { useApp } from '../context/AppContext';
 // Caregiver portal lazy-loaded modals
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
-import {
-  ArrowLeft,
-  Crown,
-  AlertTriangle,
-  Check,
-  LayoutDashboard,
-  ShieldAlert,
-  HelpCircle,
-  Calendar,
-  Pill,
-  BarChart3,
-  FileText,
-  BookOpen,
-  HeartPulse,
-  Heart,
-  MessageSquare,
-  Volume2,
-  Database,
-  Compass,
-  CheckCircle2,
-  User,
-  Palette,
-  Settings as SettingsIcon,
-  Star,
-  ChevronDown,
-  Radio,
-  Bell
-} from 'lucide-react';
+const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
+import { ChevronDown } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { getQuickRepliesForAlert } from '../utils/alertResponses';
@@ -69,6 +43,7 @@ import { CaregiverAlertsTab } from './caregiver/CaregiverAlertsTab';
 import { CaregiverDeviceLinkTab } from './caregiver/CaregiverDeviceLinkTab';
 import { CaregiverPlansChangedTab } from './caregiver/CaregiverPlansChangedTab';
 import { CaregiverHealthSummaryTab } from './caregiver/CaregiverHealthSummaryTab';
+import { CaregiverCycleSummaryTab } from './caregiver/CaregiverCycleSummaryTab';
 import { CaregiverDaySummaryTab } from './caregiver/CaregiverDaySummaryTab';
 import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
 import { CaregiverIncomingAlertModal } from './caregiver/CaregiverIncomingAlertModal';
@@ -100,6 +75,7 @@ export const ParentDashboard: React.FC = () => {
     setShowAboutMeModal,
     getCyclePhaseInfo,
     caregiverResponses,
+    setDailyRecollections,
   } = useApp();
 
   type TabType =
@@ -108,6 +84,7 @@ export const ParentDashboard: React.FC = () => {
     | 'caregiver'
     | 'plans-changed'
     | 'health-summary'
+    | 'cycle-summary'
     | 'day-summary'
     | 'subscription';
 
@@ -174,16 +151,8 @@ export const ParentDashboard: React.FC = () => {
   } | null>(null);
 
   // Incoming Alert Pop-Up Modal & Device Push Notification State
-  const [popupAlert, setPopupAlert] = useState<CaregiverAlert | null>(() => {
-    try {
-      const raw = localStorage.getItem('beeyou_active_caregiver_alert');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && (parsed.status === 'active' || !parsed.status)) return parsed;
-      }
-    } catch {}
-    return null;
-  });
+  // Only pops up when a live incoming alert arrives in real time
+  const [popupAlert, setPopupAlert] = useState<CaregiverAlert | null>(null);
   const [dismissedPopupAlertIds, setDismissedPopupAlertIds] = useState<Set<string>>(() => new Set());
   const dismissedPopupAlertIdsRef = useRef(dismissedPopupAlertIds);
   dismissedPopupAlertIdsRef.current = dismissedPopupAlertIds;
@@ -220,6 +189,9 @@ export const ParentDashboard: React.FC = () => {
       fetchCaregiverSession(code).then((session) => {
         if (session) {
           setLiveChildStatus(session);
+          if (session.dailyRecollections && Array.isArray(session.dailyRecollections) && session.dailyRecollections.length > 0) {
+            setDailyRecollections(session.dailyRecollections);
+          }
           if (session.activeAlert && (session.activeAlert.status === 'active' || !session.activeAlert.status)) {
             const current: CaregiverAlert = {
               ...session.activeAlert,
@@ -228,11 +200,6 @@ export const ParentDashboard: React.FC = () => {
             };
             setActiveAlerts((prev) => deduplicateAlerts([current, ...prev]));
             setAlertHistoryList(getAlertHistory());
-
-            // Open pop-up modal if not dismissed
-            if (!dismissedPopupAlertIdsRef.current.has(current.id)) {
-              setPopupAlert((existing) => (existing?.id === current.id ? existing : current));
-            }
           }
         }
       });
@@ -281,6 +248,9 @@ export const ParentDashboard: React.FC = () => {
 
     const unsubStatus = onChildStatusUpdate((status) => {
       setLiveChildStatus(status);
+      if (status.dailyRecollections && Array.isArray(status.dailyRecollections) && status.dailyRecollections.length > 0) {
+        setDailyRecollections(status.dailyRecollections);
+      }
     });
 
     const seenMsgKeys = new Set<string>();
@@ -409,37 +379,31 @@ export const ParentDashboard: React.FC = () => {
     items: Array<{
       id: TabType;
       label: string;
-      icon: React.ComponentType<{ className?: string }>;
       badge?: string;
     }>;
   }[] = [
     {
       id: 'live',
       title: 'Live & Safety',
-      icon: Radio,
       items: [
         {
           id: 'home',
           label: 'Caregiver Live Hub',
-          icon: LayoutDashboard,
           badge: connectionStatus.isConnected ? t('Live') : (activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Alert')}` : undefined),
         },
         {
           id: 'alerts',
           label: 'Live Alerts & SOS Inbox',
-          icon: ShieldAlert,
           badge: activeAlerts.length > 0 ? `${activeAlerts.length} ${t('Active')}` : undefined,
         },
         {
           id: 'caregiver',
           label: 'Live Caregiver Link',
-          icon: Heart,
           badge: connectionStatus.isConnected ? t('Paired') : t('Pair'),
         },
         {
           id: 'plans-changed',
           label: 'Plans Changed Mode',
-          icon: AlertTriangle,
           badge: plansChanged.active ? t('Active') : undefined,
         },
       ],
@@ -447,18 +411,20 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'summaries',
       title: 'Summaries & Health',
-      icon: Calendar,
       items: [
         {
           id: 'health-summary',
-          label: 'Health Summary',
-          icon: HeartPulse,
+          label: 'Medication Summary',
           badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? t('Refill') : undefined,
+        },
+        {
+          id: 'cycle-summary',
+          label: 'Cycle Summary',
+          badge: cyclePhaseInfo?.currentCycleDay ? `Day ${cyclePhaseInfo.currentCycleDay}` : undefined,
         },
         {
           id: 'day-summary',
           label: 'Day-to-Day Summary',
-          icon: FileText,
           badge: isPremium ? t('Clinical') : t('7 Days'),
         },
       ],
@@ -466,12 +432,10 @@ export const ParentDashboard: React.FC = () => {
     {
       id: 'account',
       title: 'Account & Plan',
-      icon: Crown,
       items: [
         {
           id: 'subscription',
           label: 'Membership & Plan',
-          icon: Crown,
           badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '15d Free',
         },
       ],
@@ -480,7 +444,6 @@ export const ParentDashboard: React.FC = () => {
 
   const currentNavGroup = navGroups.find((g) => g.items.some((item) => item.id === activeTab)) || navGroups[0];
   const currentNavItem = navGroups.flatMap((g) => g.items).find((item) => item.id === activeTab) || navGroups[0].items[0];
-  const CurrentIcon = currentNavItem.icon;
 
   return (
     <div
@@ -505,7 +468,6 @@ export const ParentDashboard: React.FC = () => {
             className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 text-xs font-bold transition-all active:scale-95 cursor-pointer border border-stone-200 shadow-2xs shrink-0"
             title={t('Return to Child View')}
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
             <span className="hidden sm:inline">{t('Return to Child')}</span>
             <span className="sm:hidden">{t('Back')}</span>
           </button>
@@ -529,10 +491,9 @@ export const ParentDashboard: React.FC = () => {
             <button
               type="button"
               onClick={handleTestDeviceNotification}
-              className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+              className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
               title={t('Device notifications are enabled. Tap to test vibration and sound.')}
             >
-              <Bell className="w-3.5 h-3.5 text-emerald-600" />
               <span className="hidden sm:inline">{t('Alerts Active')}</span>
               <span className="sm:hidden">{t('Alerts')}</span>
             </button>
@@ -540,10 +501,9 @@ export const ParentDashboard: React.FC = () => {
             <button
               type="button"
               onClick={handleEnableDeviceNotifications}
-              className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs animate-pulse"
+              className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs animate-pulse"
               title={t('Enable sound and notification alerts on this device')}
             >
-              <Bell className="w-3.5 h-3.5 text-amber-700" />
               <span className="hidden sm:inline">{t('Enable Device Alerts')}</span>
               <span className="sm:hidden">{t('Alerts')}</span>
             </button>
@@ -555,10 +515,9 @@ export const ParentDashboard: React.FC = () => {
           <button
             type="button"
             onClick={handleStartTour}
-            className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100 text-xs font-black transition-all active:scale-95 cursor-pointer border border-amber-300/80 shadow-2xs"
+            className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 text-amber-950 dark:text-amber-100 text-xs font-black transition-all active:scale-95 cursor-pointer border border-amber-300/80 shadow-2xs"
             title={t('Launch Interactive In-Place Coachmark Tour')}
           >
-            <Star className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span className="hidden sm:inline">{t('Feature Tour (Guide)')}</span>
             <span className="sm:hidden">{t('Guide')}</span>
           </button>
@@ -568,10 +527,9 @@ export const ParentDashboard: React.FC = () => {
               onClick={() => {
                 activatePlansChanged({ active: false });
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1 bg-amber-500 text-white animate-pulse shadow-xs cursor-pointer"
+              className="px-2.5 py-1 rounded-xl text-xs font-black bg-amber-500 text-white animate-pulse shadow-xs cursor-pointer"
               title={t('Plans Changed is active for child. Tap to turn off.')}
             >
-              <AlertTriangle className="w-3.5 h-3.5" />
               <span className="text-[11px]">{t('Plans Changed Active')}</span>
             </button>
           )}
@@ -581,7 +539,6 @@ export const ParentDashboard: React.FC = () => {
       {/* Success Notification Banner */}
       {successMessage && (
         <div className="bg-emerald-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 animate-in fade-in">
-          <Check className="w-4 h-4" />
           <span>{successMessage}</span>
         </div>
       )}
@@ -591,10 +548,9 @@ export const ParentDashboard: React.FC = () => {
         {/* Mobile Navigation: 4 Domain Quick Tabs + Categorized Select Dropdown */}
         <div className="md:hidden flex flex-col gap-2 w-full bg-white/95 backdrop-blur-md rounded-2xl p-2.5 border-2 border-stone-200/80 shadow-xs">
           {/* 4 Domain Filter Pills */}
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5">
             {navGroups.map((group) => {
               const isGroupActive = currentNavGroup.id === group.id;
-              const GroupIcon = group.icon;
               return (
                 <button
                   key={group.id}
@@ -605,15 +561,14 @@ export const ParentDashboard: React.FC = () => {
                       playChime('tap');
                     }
                   }}
-                  className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  className={`flex items-center justify-center py-2 px-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     isGroupActive
                       ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
                       : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                   }`}
                 >
-                  <GroupIcon className="w-4 h-4 mb-0.5" />
-                  <span className="text-[10px] leading-tight truncate max-w-full font-bold mt-0.5">
-                    {group.id === 'live' ? t('Live') : group.id === 'routines' ? t('Routines') : group.id === 'skills' ? t('Skills') : t('Setup')}
+                  <span className="text-xs leading-tight truncate max-w-full font-bold">
+                    {t(group.title)}
                   </span>
                 </button>
               );
@@ -622,9 +577,6 @@ export const ParentDashboard: React.FC = () => {
 
           {/* Categorized Dropdown Selector */}
           <div className="relative flex items-center">
-            <div className={`absolute left-3 pointer-events-none w-6 h-6 rounded-lg flex items-center justify-center ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`}>
-              <CurrentIcon className="w-3.5 h-3.5 stroke-[2.4]" />
-            </div>
             <select
               aria-label="Select Caregiver Section"
               value={activeTab}
@@ -637,7 +589,7 @@ export const ParentDashboard: React.FC = () => {
                   playChime('tap');
                 }
               }}
-              className="w-full pl-11 pr-9 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
             >
               {currentNavGroup.items.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -654,16 +606,13 @@ export const ParentDashboard: React.FC = () => {
         {/* Desktop Categorized Sidebar */}
         <aside className="hidden md:flex md:w-64 bg-white/95 backdrop-blur-md rounded-3xl p-3 border-2 border-stone-200/80 shadow-xs flex-col gap-4 shrink-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           {navGroups.map((group) => {
-            const GroupIcon = group.icon;
             return (
               <div key={group.id} className="flex flex-col gap-1">
-                <div className="px-2 py-1 flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
-                  <GroupIcon className="w-3.5 h-3.5 text-slate-500" />
+                <div className="px-2 py-1 text-[11px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-400">
                   <span>{t(group.title)}</span>
                 </div>
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
-                  const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
                     <button
@@ -677,22 +626,13 @@ export const ParentDashboard: React.FC = () => {
                         setActiveTab(item.id);
                         playChime('tap');
                       }}
-                      className={`flex items-center justify-between p-2 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                         isActive
                           ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs font-black`
                           : `hover:${activeTheme?.palette?.primaryLight || 'hover:bg-amber-50'} text-slate-700`
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                            isActive
-                              ? 'bg-white/20 text-white'
-                              : `${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.textAccent || 'text-amber-900'}`
-                          }`}
-                        >
-                          <Icon className="w-3.5 h-3.5 stroke-[2.4]" />
-                        </div>
                         <span className="truncate">{t(item.label)}</span>
                       </div>
                       {item.badge && (
@@ -723,18 +663,13 @@ export const ParentDashboard: React.FC = () => {
           {/* INCOMING CHILD REPLY BANNER (Instant notification when child replies or sends a note) */}
           {incomingChildReply && (
             <div className="mb-6 p-4 rounded-2xl bg-amber-50 border-2 border-amber-400 shadow-md flex items-center justify-between gap-4 animate-in slide-in-from-top-2 ring-2 ring-amber-200">
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-amber-200/80 border border-amber-300 flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-5 h-5 text-amber-900" />
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-black text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>{t('Reply from')} {incomingChildReply.senderName || childProfile.name || 'Child'}</span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-black text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>{t('Reply from')} {incomingChildReply.senderName || childProfile.name || 'Child'}</span>
-                  </div>
-                  <p className="text-sm sm:text-base font-black text-slate-900 mt-0.5 break-words">
-                    "{incomingChildReply.text}"
-                  </p>
-                </div>
+                <p className="text-sm sm:text-base font-black text-slate-900 mt-0.5 break-words">
+                  "{incomingChildReply.text}"
+                </p>
               </div>
               <button
                 type="button"
@@ -745,7 +680,6 @@ export const ParentDashboard: React.FC = () => {
                 className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-950 font-bold text-xs border border-amber-300 shadow-2xs flex items-center gap-1.5 cursor-pointer transition active:scale-95 shrink-0"
                 title={t('Dismiss')}
               >
-                <Check className="w-4 h-4 text-emerald-600" />
                 <span>{t('Got it')}</span>
               </button>
             </div>
@@ -759,14 +693,10 @@ export const ParentDashboard: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600"></span>
                 </span>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                  <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
-                </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-black text-rose-950 text-sm flex items-center gap-2 flex-wrap">
                     <span>{t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
-                    <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs flex items-center gap-1.5">
-                      <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-3.5 h-3.5 object-contain" />
+                    <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs">
                       <span>{t(activeAlerts[0].label)}</span>
                     </span>
                   </div>
@@ -779,19 +709,14 @@ export const ParentDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2 w-full md:w-auto flex-wrap shrink-0">
                 {getQuickRepliesForAlert(activeAlerts[0], t).slice(0, 2).map((reply) => {
-                  const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
-                                    reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
-                                    reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
-                                    reply.iconSrc;
                   const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                   return (
                     <button
                       key={reply.id}
                       type="button"
                       onClick={() => handleAcknowledgeAlert(activeAlerts[0].id, reply.text, reply.id)}
-                      className={`px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition flex items-center gap-1.5 ${reply.className}`}
+                      className={`px-3.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition flex items-center justify-center ${reply.className}`}
                     >
-                      {replyIcon && <img src={replyIcon} alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />}
                       <span>{cleanLabel || reply.label}</span>
                     </button>
                   );
@@ -802,9 +727,8 @@ export const ParentDashboard: React.FC = () => {
                     setPopupAlert(activeAlerts[0]);
                     playChime('tap');
                   }}
-                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer transition whitespace-nowrap active:scale-95"
+                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs flex items-center justify-center cursor-pointer transition whitespace-nowrap active:scale-95"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" />
                   <span>{t('Reply in Pop-Up')}</span>
                 </button>
                 <button
@@ -815,7 +739,6 @@ export const ParentDashboard: React.FC = () => {
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center gap-1.5 cursor-pointer transition whitespace-nowrap active:scale-95"
                 >
-                  <img src="/assets/stickers/inbox_alerts.webp" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
                   <span>{t("Open Alerts Inbox")}</span>
                   <span>→</span>
                 </button>
@@ -880,6 +803,16 @@ export const ParentDashboard: React.FC = () => {
             <CaregiverHealthSummaryTab 
               onShowNotification={showNotification}
               onStartTour={() => handleStartSectionTour('healthSummary')}
+              setActiveTab={(tab: any) => setActiveTab(tab)}
+            />
+          )}
+
+          {/* TAB: CYCLE & HORMONAL RHYTHM SUMMARY */}
+          {activeTab === 'cycle-summary' && (
+            <CaregiverCycleSummaryTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('healthSummary')}
+              setActiveTab={(tab: any) => setActiveTab(tab)}
             />
           )}
 
@@ -945,6 +878,7 @@ export const ParentDashboard: React.FC = () => {
           isOpen={showAboutMeModal}
           onClose={() => setShowAboutMeModal(false)}
         />
+        <DailyRecollectionModal />
       </Suspense>
     </div>
   );

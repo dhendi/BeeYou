@@ -14,9 +14,16 @@ import {
   Trash2, 
   FileText, 
   TrendingUp, 
-  HelpCircle,
-  Share2,
-  Crown
+  Sparkles,
+  Meh,
+  Frown,
+  AlertCircle,
+  BatteryLow,
+  Activity,
+  Flame,
+  CloudMoon,
+  Hourglass,
+  Clock
 } from 'lucide-react';
 import { 
   DAY_RATING_OPTIONS, 
@@ -130,7 +137,8 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
               onClick={onStartTour}
               className="px-3 py-2 rounded-2xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
             >
-              <span>💡 How This Works</span>
+              <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+              <span>How This Works</span>
             </button>
           )}
           <button
@@ -145,7 +153,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
             }`}
           >
             <PlusCircle className="w-4 h-4 text-amber-700" />
-            <span>{loggedToday ? "Edit Today's Log 📝" : "Log Today's Reflection ⭐"}</span>
+            <span>{loggedToday ? "Edit Today's Log" : "Log Today's Reflection"}</span>
           </button>
         </div>
       </div>
@@ -342,10 +350,20 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
                   key={entry.id}
                   className="p-3.5 sm:p-4 rounded-3xl border-2 border-slate-200 hover:border-slate-300 bg-white dark:bg-slate-800 shadow-xs transition-all space-y-2.5"
                 >
-                  {/* Top Bar: Date, Day Rating Emoji & Submitter */}
+                  {/* Top Bar: Date, Day Rating Icon & Submitter */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-3xl select-none">{rating?.emoji || '📅'}</span>
+                      <div 
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border shadow-2xs"
+                        style={{ backgroundColor: rating?.bgColor || '#f1f5f9', borderColor: (rating?.color || '#cbd5e1') + '40' }}
+                      >
+                        {rating?.value === 'great' && <Sparkles className="w-5 h-5 text-emerald-600" />}
+                        {rating?.value === 'good' && <Smile className="w-5 h-5 text-sky-600" />}
+                        {rating?.value === 'okay' && <Meh className="w-5 h-5 text-amber-600" />}
+                        {rating?.value === 'difficult' && <Frown className="w-5 h-5 text-orange-600" />}
+                        {rating?.value === 'very_hard' && <AlertCircle className="w-5 h-5 text-rose-600" />}
+                        {!rating?.value && <Calendar className="w-5 h-5 text-slate-500" />}
+                      </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-black text-sm text-slate-900 dark:text-slate-100">
@@ -363,7 +381,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
                           </span>
                         </div>
                         <span className="text-[11px] text-slate-400 font-medium">
-                          Answered {entry.submittedBy === 'child' ? 'by Kid 🧒' : entry.submittedBy === 'parent' ? 'by Caregiver 🧑‍🍼' : 'Together 🤝'}
+                          Answered {entry.submittedBy === 'child' ? 'by Kid' : entry.submittedBy === 'parent' ? 'by Caregiver' : 'Together'}
                         </span>
                       </div>
                     </div>
@@ -383,10 +401,15 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
 
                   {/* Pills row: Energy, Primary Emotion, Win, Challenge, Sleep */}
                   <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200">
-                      <span>{energy?.emoji}</span>
-                      <span>{energy?.label}</span>
-                    </span>
+                    {energy && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200">
+                        {energy.value === 'low' && <BatteryLow className="w-3.5 h-3.5 text-emerald-500" />}
+                        {energy.value === 'calm_steady' && <Activity className="w-3.5 h-3.5 text-sky-500" />}
+                        {energy.value === 'high_bouncy' && <Zap className="w-3.5 h-3.5 text-amber-500" />}
+                        {energy.value === 'overstimulated' && <Flame className="w-3.5 h-3.5 text-rose-500" />}
+                        <span>{energy.label}</span>
+                      </span>
+                    )}
 
                     {emotion && (
                       <span
@@ -415,8 +438,11 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
                     )}
 
                     {sleep && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px]">
-                        <span>{sleep.emoji}</span>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px]">
+                        {sleep.value === 'great' && <Moon className="w-3.5 h-3.5 text-indigo-500" />}
+                        {sleep.value === 'restless' && <CloudMoon className="w-3.5 h-3.5 text-slate-500" />}
+                        {sleep.value === 'hard_wind_down' && <Hourglass className="w-3.5 h-3.5 text-purple-500" />}
+                        {sleep.value === 'early_waking' && <Clock className="w-3.5 h-3.5 text-amber-500" />}
                         <span>{sleep.label}</span>
                       </span>
                     )}

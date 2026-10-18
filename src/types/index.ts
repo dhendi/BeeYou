@@ -448,7 +448,7 @@ export const DEFAULT_KID_FEATURES: EnabledFeatures = {
   sensoryBreathingPacer: true,
   medicationReminders: true,
   moodJournal: false,
-  cycleTracker: false,
+  cycleTracker: true,
   discreetMode: false,
 };
 
@@ -810,6 +810,7 @@ export interface CaregiverChildStatus {
   caregiverPhone?: string;
   userRole?: UserAccountRole;
   permissions?: CaregiverPermissions;
+  dailyRecollections?: any[];
 }
 
 export interface OfflineStorageStats {

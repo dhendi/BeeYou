@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, ArrowRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
 
@@ -47,23 +47,18 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
       <div className="bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700/80 rounded-3xl w-full max-w-3xl max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-b border-amber-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center p-1.5 shadow-xs shrink-0">
-              <img src="/assets/stickers/bee_mascot.webp" alt="Bee Mascot" className="w-full h-full object-contain drop-shadow-2xs" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                Interactive Feature Guides
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 uppercase tracking-wide">
+                {allTours.length} Guides Available
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  Interactive Feature Guides
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 uppercase tracking-wide">
-                  {allTours.length} Guides Available
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
-                Choose any section below to launch its interactive step-by-step spotlight guide.
-              </p>
-            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
+              Choose any section below to launch its interactive step-by-step spotlight guide.
+            </p>
           </div>
 
           <button
@@ -87,8 +82,7 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
               <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-black text-[10px] uppercase tracking-wider">
                 Recommended for First Time Caregivers
               </span>
-              <h3 className="text-base sm:text-lg font-black flex items-center gap-2">
-                <img src="/assets/stickers/star_gold.webp" alt="" className="w-5 h-5 object-contain inline-block drop-shadow-2xs" />
+              <h3 className="text-base sm:text-lg font-black">
                 <span>Complete Caregiver Hub Tour</span>
               </h3>
               <p className="text-xs text-amber-100 max-w-xl font-medium">
@@ -99,10 +93,9 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
             <button
               type="button"
               onClick={() => handlePick('fullApp')}
-              className="px-4 py-2.5 rounded-xl bg-white hover:bg-amber-50 text-slate-900 font-black text-xs shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition shrink-0"
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-amber-50 text-slate-900 font-black text-xs shadow-md flex items-center justify-center cursor-pointer active:scale-95 transition shrink-0"
             >
               <span>Start Full Tour</span>
-              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
@@ -130,36 +123,16 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                   onClick={() => handlePick(sec.id)}
                   className="w-full text-left p-3.5 sm:p-4 min-h-[48px] rounded-2xl border-2 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-white dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer flex items-start justify-between gap-3 group shadow-2xs focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300/80 dark:border-amber-800/60 flex items-center justify-center p-1.5 shrink-0 shadow-2xs group-hover:scale-105 transition-transform" aria-hidden="true">
-                      {sec.stickerSrc ? (
-                        <img
-                          src={sec.stickerSrc}
-                          alt=""
-                          className="w-full h-full object-contain drop-shadow-2xs"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span className="text-xl select-none">
-                          {sec.emoji}
-                        </span>
-                      )}
-                    </div>
-                    <div className="space-y-0.5">
-                      <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition">
-                        {sec.title}
-                      </h5>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                        {sec.description}
-                      </p>
-                      <span className="inline-block text-[10px] font-bold text-amber-600 dark:text-amber-400 pt-1">
-                        {sec.steps.length} interactive steps 👉
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-amber-500 group-hover:text-white transition shrink-0 mt-1" aria-hidden="true">
-                    <ArrowRight className="w-3.5 h-3.5" />
+                  <div className="space-y-0.5">
+                    <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition">
+                      {sec.title}
+                    </h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                      {sec.description}
+                    </p>
+                    <span className="inline-block text-[10px] font-bold text-amber-600 dark:text-amber-400 pt-1">
+                      {sec.steps.length} interactive steps
+                    </span>
                   </div>
                 </button>
               ))}

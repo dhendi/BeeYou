@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell, Check } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
@@ -130,9 +130,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
       <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <ShieldAlert className="w-6 h-6 text-rose-600" />
-              <span>{t('Live Alerts & SOS Inbox')}</span>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+              {t('Live Alerts & SOS Inbox')}
             </h2>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
               activeAlerts.length > 0 
@@ -155,10 +154,9 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 playChime('tap');
                 onStartTour();
               }}
-              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
+              className="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs cursor-pointer shadow-2xs active:scale-95 transition border border-amber-300"
               title={t('Tour this section')}
             >
-              <Star className="w-4 h-4 text-amber-600" />
               <span>{t('How This Works (Tour)')}</span>
             </button>
           )}
@@ -166,9 +164,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             type="button"
             data-tour="alerts-test-button"
             onClick={handleTriggerTestAlert}
-            className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
+            className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs cursor-pointer shadow-xs active:scale-95 transition"
           >
-            <ShieldAlert className="w-4 h-4 text-amber-300" />
             <span>{t('Send Test Alert')}</span>
           </button>
           <button
@@ -177,9 +174,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               setActiveTab('home');
               playChime('tap');
             }}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition"
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition"
           >
-            <ArrowLeft className="w-4 h-4" />
             <span>{t('Back to Home')}</span>
           </button>
         </div>
@@ -249,18 +245,16 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             <button
               type="button"
               onClick={handleTestDeviceAlert}
-              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition active:scale-95 shadow-2xs"
+              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-xs cursor-pointer transition active:scale-95 shadow-2xs"
             >
-              <Bell className="w-3.5 h-3.5 text-emerald-600" />
               <span>{t('Test Device Alert')}</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={handleRequestDeviceNotifications}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition active:scale-95 shadow-xs border border-amber-600"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs cursor-pointer transition active:scale-95 shadow-xs border border-amber-600"
             >
-              <Bell className="w-4 h-4 text-amber-950" />
               <span>{t('Enable Device Notifications')}</span>
             </button>
           )}
@@ -282,9 +276,6 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
 
         {activeAlerts.length === 0 ? (
           <div className="p-6 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 text-center space-y-2">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
-              ✓
-            </div>
             <h4 className="text-sm font-black text-slate-800">{t('No active alerts right now')}</h4>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
               {t('When')} {childProfile.name} {t('taps the Help or Sensory Overload button on their tablet, it will instantly sound a chime and show up here with 1-tap reply options.')}
@@ -293,9 +284,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               <button
                 type="button"
                 onClick={handleTriggerTestAlert}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs cursor-pointer shadow-xs active:scale-95 transition"
               >
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-300" />
                 <span>{t('Test Alert Simulation')}</span>
               </button>
             </div>
@@ -330,9 +320,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenAlertPopup(alert)}
-                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition"
+                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs flex items-center justify-center cursor-pointer shadow-2xs active:scale-95 transition"
                       >
-                        <MessageSquare className="w-3.5 h-3.5" />
                         <span>{t('Reply in Pop-Up')}</span>
                       </button>
                     )}
@@ -341,7 +330,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       onClick={() => handleResolveAlert(alert.id)}
                       className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-black cursor-pointer shadow-2xs"
                     >
-                      {t('Resolve ✓')}
+                      {t('Resolve')}
                     </button>
                   </div>
                 </div>
@@ -369,19 +358,14 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                   <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
                     {/* Contextual quick replies */}
                     {getQuickRepliesForAlert(alert, t).map((reply) => {
-                      const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
-                                        reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
-                                        reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
-                                        reply.iconSrc;
                       const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                       return (
                         <button
                           key={reply.id}
                           type="button"
                           onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
-                          className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1.5 transition ${reply.className}`}
+                          className={`px-3.5 py-2 rounded-xl font-black text-xs cursor-pointer active:scale-95 shadow-2xs flex items-center justify-center transition ${reply.className}`}
                         >
-                          {replyIcon && <img src={replyIcon} alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />}
                           <span>{cleanLabel || reply.label}</span>
                         </button>
                       );
@@ -393,10 +377,9 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                         <button
                           type="button"
                           onClick={() => handleAcknowledgeAlert(alert.id, customResp.text, customResp.id)}
-                          className="px-3.5 py-2 font-black text-xs text-amber-950 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          className="px-3.5 py-2 font-black text-xs text-amber-950 flex items-center justify-center cursor-pointer active:scale-95"
                           title={customResp.text}
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                           <span>{customResp.label}</span>
                         </button>
                         <button
@@ -518,9 +501,8 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                     <button
                       type="submit"
                       disabled={!typedAlertReplies[alert.id]?.trim()}
-                      className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition shrink-0"
+                      className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-black cursor-pointer shadow-2xs active:scale-95 transition shrink-0"
                     >
-                      <Send className="w-3.5 h-3.5 text-amber-300" />
                       <span>{t("Send Reply")}</span>
                     </button>
                   </form>
@@ -566,9 +548,6 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             {alertHistoryList.map((item, idx) => (
               <div key={item.id || idx} className="p-4 flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-black text-slate-900">{item.label}</span>
@@ -590,7 +569,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                       minute: '2-digit',
                     })}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600">{t('Archived ✓')}</span>
+                  <span className="text-[10px] font-bold text-emerald-600">{t('Archived')}</span>
                 </div>
               </div>
             ))}
@@ -603,7 +582,6 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <SlidersHorizontal className="w-5 h-5 text-amber-600" />
               <span>{t("Child's 1-Tap Alert Buttons")}</span>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">
                 {childQuickAlerts.length} {t('Active on Screen')}
@@ -622,18 +600,16 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 showNotification(t("Default alerts restored."));
                 playChime('tap');
               }}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition active:scale-95"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition active:scale-95"
               title={t("Restore 8 default alerts")}
             >
-              <RotateCcw className="w-3.5 h-3.5" />
               <span>{t("Reset Defaults")}</span>
             </button>
             <button
               type="button"
               onClick={() => setShowAddChildAlertModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition"
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs cursor-pointer shadow-2xs active:scale-95 transition"
             >
-              <Plus className="w-3.5 h-3.5" />
               <span>{t("Add 1-Tap Alert")}</span>
             </button>
           </div>

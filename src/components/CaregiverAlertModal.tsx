@@ -375,7 +375,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               <div className="p-4 rounded-3xl bg-white border-2 border-amber-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between text-xs font-black">
                   <span className="text-slate-500 uppercase tracking-wider">
-                    📡 Live Delivery Status:
+                    Live Delivery Status:
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1.5 ${
                     deliveryStage === 'sending' ? 'bg-amber-100 text-amber-900 animate-pulse' :
@@ -458,7 +458,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
 
                 <div className="px-3 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-black shrink-0">
-                  Delivered ✓
+                  Delivered
                 </div>
               </div>
 
@@ -514,7 +514,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-teal-200/50 animate-ping opacity-30"></div>
                   <div className="w-16 h-16 rounded-full bg-teal-500 text-white flex flex-col items-center justify-center font-black shadow-md shadow-teal-200/50">
-                    <span className="text-lg">🌸</span>
+                    <Wind className="w-5 h-5 text-white" />
                     <span className="text-[8px] uppercase font-black">Breathe</span>
                   </div>
                 </div>
