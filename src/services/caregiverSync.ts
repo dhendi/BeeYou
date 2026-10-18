@@ -487,6 +487,7 @@ export function subscribeToCloudChannel(code: string): void {
   }
 
   if (activePollingInterval) {
+    clearTimeout(activePollingInterval);
     clearInterval(activePollingInterval);
     activePollingInterval = null;
   }
@@ -494,12 +495,24 @@ export function subscribeToCloudChannel(code: string): void {
   currentSubscribedCode = safeCode;
   lastPollTimestamp = Date.now();
 
-  // 1. Setup Direct WebRTC Peer Connection (PeerJS)
+  // 1. Setup Direct WebRTC Peer Connection (PeerJS with Circuit Breaker)
   try {
     const isCaregiver = isCurrentDeviceCaregiver();
     const sanitized = safeCode.replace(/[^A-Z0-9]/g, '').toLowerCase() || 'demo';
     const myPeerId = `by-${isCaregiver ? 'cg' : 'ch'}-${sanitized}`;
     const remoteTargetPeerId = `by-${isCaregiver ? 'ch' : 'cg'}-${sanitized}`;
+
+    // Circuit Breaker: 4-second timeout to establish WebRTC connection.
+    // If the public signaling server is unresponsive, congested, or firewalled,
+    // cleanly release WebRTC so the device relies seamlessly on Google Firebase Cloud Sync.
+    const peerTimeoutId = setTimeout(() => {
+      if (!activePeerConn || !activePeerConn.open) {
+        if (activePeer && !activePeer.destroyed) {
+          try { activePeer.destroy(); } catch {}
+          activePeer = null;
+        }
+      }
+    }, 4000);
 
     const peer = new Peer(myPeerId, {
       debug: 0,
@@ -515,6 +528,7 @@ export function subscribeToCloudChannel(code: string): void {
     const setupConnectionListeners = (conn: DataConnection) => {
       activePeerConn = conn;
       conn.on('open', () => {
+        clearTimeout(peerTimeoutId);
         lastPeerPingTimestamp = Date.now();
         lastPeerRole = isCaregiver ? 'child_device' : 'caregiver';
         lastPeerName = isCaregiver ? 'Child Device' : 'Caregiver';
@@ -548,17 +562,22 @@ export function subscribeToCloudChannel(code: string): void {
     });
 
     peer.on('connection', (conn) => {
+      clearTimeout(peerTimeoutId);
       setupConnectionListeners(conn);
     });
 
     peer.on('error', (err: any) => {
-      // If peer ID is taken or target offline, retry connect periodically
-      if (err.type === 'peer-unavailable') {
-        // Target peer hasn't opened yet; will connect when incoming connection arrives
+      // If peer server is congested, id taken, or network fails, trip circuit breaker cleanly without retry spam
+      if (err.type === 'unavailable-id' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'network') {
+        clearTimeout(peerTimeoutId);
+        if (activePeer && !activePeer.destroyed) {
+          try { activePeer.destroy(); } catch {}
+          activePeer = null;
+        }
       }
     });
   } catch (e) {
-    console.warn('WebRTC PeerJS init error:', e);
+    // Non-blocking fail-safe: Firebase cloud sync handles live communication
   }
 
   // 2. Live SSE Stream from App Server (/api/caregiver/events/:code)
@@ -673,8 +692,17 @@ export function subscribeToCloudChannel(code: string): void {
     } catch (e) {}
   };
 
-  pollServer();
-  activePollingInterval = setInterval(pollServer, 1500);
+  // Adaptive battery-saving polling: 2.5s during active emergency alerts, 8s during normal cloud sync
+  const scheduleNextAdaptivePoll = () => {
+    if (activePollingInterval) clearTimeout(activePollingInterval);
+    const delay = lastPolledAlertSignature.includes('active') ? 2500 : 8000;
+    activePollingInterval = setTimeout(async () => {
+      await pollServer();
+      scheduleNextAdaptivePoll();
+    }, delay);
+  };
+
+  pollServer().then(scheduleNextAdaptivePoll);
 }
 
 // Initialize cloud subscription on startup

@@ -782,7 +782,8 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
     } catch {}
   };
 
-  activePollInterval = setInterval(poll, 5000);
+  // Polling fallback runs as a background heartbeat (WebSocket provides instant live updates)
+  activePollInterval = setInterval(poll, 10000);
 
   return () => {
     if (fbFamilyUnsub) fbFamilyUnsub();
