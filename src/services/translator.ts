@@ -5,18 +5,30 @@
 
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
+let lowerDictionary: Record<string, string> = {};
+
+function rebuildLowerDictionary() {
+  lowerDictionary = {};
+  for (const k in dictionary) {
+    lowerDictionary[k.toLowerCase()] = dictionary[k];
+  }
+}
 
 // Load cached dictionary from localStorage on start, and revalidate in background
 if (typeof window !== 'undefined' && currentLang !== 'en') {
   try {
     const cached = localStorage.getItem(`beeyou_dict_${currentLang}`);
-    if (cached) dictionary = JSON.parse(cached);
+    if (cached) {
+      dictionary = JSON.parse(cached);
+      rebuildLowerDictionary();
+    }
   } catch {}
-  fetch(`/locales/${currentLang}.json?v=${Date.now()}`, { cache: 'no-cache' })
+  fetch(`/locales/${currentLang}.json`)
     .then((res) => (res.ok ? res.json() : null))
     .then((data) => {
       if (data) {
         dictionary = { ...dictionary, ...data };
+        rebuildLowerDictionary();
         try {
           localStorage.setItem(`beeyou_dict_${currentLang}`, JSON.stringify(dictionary));
         } catch {}
@@ -37,11 +49,13 @@ export async function setLanguage(lang: string): Promise<void> {
 
   if (lang === 'en') {
     dictionary = {};
+    lowerDictionary = {};
   } else {
     try {
-      const res = await fetch(`/locales/${lang}.json?v=${Date.now()}`, { cache: 'no-cache' });
+      const res = await fetch(`/locales/${lang}.json`);
       if (res.ok) {
         dictionary = await res.json();
+        rebuildLowerDictionary();
         localStorage.setItem(`beeyou_dict_${lang}`, JSON.stringify(dictionary));
       }
     } catch (e) {
@@ -60,9 +74,7 @@ export function t(text: string): string {
   if (dictionary[trimmed]) return dictionary[trimmed];
 
   const lower = trimmed.toLowerCase();
-  for (const k in dictionary) {
-    if (k.toLowerCase() === lower) return dictionary[k];
-  }
+  if (lowerDictionary[lower]) return lowerDictionary[lower];
 
   // Handle slash compounds like "I / Me", "My/Mine", "Hurt / Pain", "Toilet / Potty"
   // Return only the primary word so it never speaks "slash" or repeats both options
@@ -96,6 +108,7 @@ export async function translateDynamic(text: string): Promise<string> {
       const data = await res.json();
       if (data?.translated) {
         dictionary[text] = data.translated;
+        lowerDictionary[text.toLowerCase()] = data.translated;
         try {
           localStorage.setItem(`beeyou_dict_${currentLang}`, JSON.stringify(dictionary));
         } catch {}

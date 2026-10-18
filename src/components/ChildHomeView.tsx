@@ -65,8 +65,9 @@ import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
 import { t } from '../services/translator';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import { getThemeIcon } from '../data/themesData';
-import { IconLibraryModal } from './common/IconLibraryModal';
 import { AppTheme } from '../types';
+
+const IconLibraryModal = React.lazy(() => import('./common/IconLibraryModal').then((m) => ({ default: m.IconLibraryModal })));
 
 export interface ChildHomeViewProps {
   previewTheme?: AppTheme;
@@ -966,22 +967,24 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
       })()}
 
       {showMascotIconPicker && (
-        <IconLibraryModal
-          isOpen={showMascotIconPicker}
-          onClose={() => setShowMascotIconPicker(false)}
-          selectedEmoji={currentTheme?.mascotEmoji || '🐝'}
-          title={t("Choose Companion Mascot Icon")}
-          onSelectIcon={(emoji, label) => {
-            if (currentTheme?.id) {
-              updateTheme(currentTheme.id, {
-                mascotEmoji: emoji,
-                mascotName: label,
-              });
-            }
-            setShowMascotIconPicker(false);
-            playChime('star');
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <IconLibraryModal
+            isOpen={showMascotIconPicker}
+            onClose={() => setShowMascotIconPicker(false)}
+            selectedEmoji={currentTheme?.mascotEmoji || '🐝'}
+            title={t("Choose Companion Mascot Icon")}
+            onSelectIcon={(emoji, label) => {
+              if (currentTheme?.id) {
+                updateTheme(currentTheme.id, {
+                  mascotEmoji: emoji,
+                  mascotName: label,
+                });
+              }
+              setShowMascotIconPicker(false);
+              playChime('star');
+            }}
+          />
+        </React.Suspense>
       )}
     </div>
   );

@@ -19,8 +19,8 @@ import { MyDayView } from './MyDayView';
 const AdventuresView = lazy(() => import('./AdventuresView').then((m) => ({ default: m.AdventuresView })));
 const SkillsView = lazy(() => import('./SkillsView').then((m) => ({ default: m.SkillsView })));
 import { RoutineCalendarStrip } from './RoutineCalendarStrip';
-import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
-import { RoutineCustomizerModal } from './RoutineCustomizerModal';
+const RoutineTemplatesLibrary = lazy(() => import('./RoutineTemplatesLibrary').then((m) => ({ default: m.RoutineTemplatesLibrary })));
+const RoutineCustomizerModal = lazy(() => import('./RoutineCustomizerModal').then((m) => ({ default: m.RoutineCustomizerModal })));
 import { Routine, RoutineTemplate } from '../types';
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { t } from '../services/translator';
@@ -415,11 +415,13 @@ export const MyRoutineView: React.FC = () => {
               </button>
             </div>
 
-            <RoutineTemplatesLibrary
-              onQuickImport={handleQuickImportTemplate}
-              onCustomizeTemplate={handleCustomizeTemplate}
-              existingRoutineTitles={routines.map((r) => r.title)}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-warm-stone animate-pulse">Loading...</div>}>
+              <RoutineTemplatesLibrary
+                onQuickImport={handleQuickImportTemplate}
+                onCustomizeTemplate={handleCustomizeTemplate}
+                existingRoutineTitles={routines.map((r) => r.title)}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -436,12 +438,16 @@ export const MyRoutineView: React.FC = () => {
       </div>
 
       {/* Routine Customizer Modal */}
-      <RoutineCustomizerModal
-        isOpen={customizerOpen}
-        onClose={() => setCustomizerOpen(false)}
-        initialRoutine={customizingRoutine}
-        onSave={handleSaveCustomizedRoutine}
-      />
+      {customizerOpen && (
+        <Suspense fallback={null}>
+          <RoutineCustomizerModal
+            isOpen={customizerOpen}
+            onClose={() => setCustomizerOpen(false)}
+            initialRoutine={customizingRoutine}
+            onSave={handleSaveCustomizedRoutine}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

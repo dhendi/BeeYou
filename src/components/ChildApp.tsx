@@ -11,8 +11,6 @@ import { ChildHeader } from './ChildHeader';
 import { t } from '../services/translator';
 import { ChildNavBar } from './ChildNavBar';
 import { ChildHomeView } from './ChildHomeView';
-import { MyRoutineView } from './MyRoutineView';
-import { MyDayView } from './MyDayView';
 import { QuickPhrasesDrawer } from './QuickPhrasesDrawer';
 import { PinModal } from './PinModal';
 import { CaregiverMessageToast } from './CaregiverMessageToast';
@@ -23,9 +21,6 @@ import { setActiveDeviceView } from '../services/authService';
 import { setPairingCode, subscribeToCloudChannel, onDevicePairingEvent } from '../services/caregiverSync';
 import { SensoryEmergencyButton } from './SensoryEmergencyButton';
 import { SensorySafeModeOverlay } from './SensorySafeModeOverlay';
-import { OnboardingModal } from './onboarding/OnboardingModal';
-import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
-import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 import { useModalBackHandler } from '../services/modalBackHandler';
 import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
 
@@ -33,12 +28,17 @@ import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
 const AACView = lazy(() => import('./AACView').then((m) => ({ default: m.AACView })));
 const CommunicateView = lazy(() => import('./CommunicateView').then((m) => ({ default: m.CommunicateView })));
 const MeView = lazy(() => import('./MeView').then((m) => ({ default: m.MeView })));
+const MyRoutineView = lazy(() => import('./MyRoutineView').then((m) => ({ default: m.MyRoutineView })));
+const MyDayView = lazy(() => import('./MyDayView').then((m) => ({ default: m.MyDayView })));
 const ToolsView = lazy(() => import('./ToolsView').then((m) => ({ default: m.ToolsView })));
 const AdventuresView = lazy(() => import('./AdventuresView').then((m) => ({ default: m.AdventuresView })));
 const SkillsView = lazy(() => import('./SkillsView').then((m) => ({ default: m.SkillsView })));
 const FeelingsView = lazy(() => import('./FeelingsView').then((m) => ({ default: m.FeelingsView })));
 
 // Lazy-loaded child tools and modals
+const OnboardingModal = lazy(() => import('./onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const CaregiverHelpHub = lazy(() => import('./caregiver/CaregiverHelpHub').then(m => ({ default: m.CaregiverHelpHub })));
+const AACExperiencePromptModal = lazy(() => import('./onboarding/AACExperiencePromptModal').then(m => ({ default: m.AACExperiencePromptModal })));
 const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
 const CopingToolkitModal = lazy(() => import('./CopingToolkitModal').then(m => ({ default: m.CopingToolkitModal })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
@@ -90,12 +90,36 @@ const ChildAppContent: React.FC = () => {
     setShowRecollectionModal,
     showCycleTrackerModal,
     setShowCycleTrackerModal,
+    showCopingToolkit,
+    showPlansChangedModal,
+    showMorningBrief,
+    newlyAwardedSticker,
+    showPrintScheduleModal,
+    showThemeModal,
+    showMedicationModal,
+    showMoodJournalModal,
+    showEmergencyModal,
+    showFivePointModal,
+    showDecisionWheelModal,
+    showPassportModal,
+    showSpoonModal,
+    showPieTimerModal,
+    showFidgetModal,
+    showAacKeyboardModal,
+    showAccessibilityModal,
+    showDashboardCustomizer,
+    showEditAlertsModal,
+    showEditCalmModal,
     settings,
     isParentMode,
     isSafeModeActive,
   } = useApp();
 
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
+  const [pieTimerMounted, setPieTimerMounted] = useState(false);
+  useEffect(() => {
+    if (showPieTimerModal) setPieTimerMounted(true);
+  }, [showPieTimerModal]);
   const mainScrollRef = React.useRef<HTMLElement | null>(null);
 
   // 6-Step Gradual Interactive AAC Onboarding Tour State (Only triggered when clicking AAC / requested, never automatically upon signup)
@@ -293,130 +317,148 @@ const ChildAppContent: React.FC = () => {
       <PinModal />
 
       <Suspense fallback={null}>
-        <CopingToolkitModal />
-        <PlansChangedModal />
-        <MorningBriefModal />
-        <ConnectCaregiverModal 
-          isOpen={showCaregiverModal} 
-          onClose={() => setShowCaregiverModal(false)} 
-        />
-        <CaregiverAlertModal
-          isOpen={showCaregiverAlertModal}
-          onClose={() => setShowCaregiverAlertModal(false)}
-        />
-        <RoutineStickerCelebrationModal />
-        <PrintScheduleModal />
-        <ThemeCustomizerModal />
+        {showCopingToolkit && <CopingToolkitModal />}
+        {showPlansChangedModal && <PlansChangedModal />}
+        {showMorningBrief && <MorningBriefModal />}
+        {showCaregiverModal && (
+          <ConnectCaregiverModal 
+            isOpen={showCaregiverModal} 
+            onClose={() => setShowCaregiverModal(false)} 
+          />
+        )}
+        {showCaregiverAlertModal && (
+          <CaregiverAlertModal
+            isOpen={showCaregiverAlertModal}
+            onClose={() => setShowCaregiverAlertModal(false)}
+          />
+        )}
+        {newlyAwardedSticker && <RoutineStickerCelebrationModal />}
+        {showPrintScheduleModal && <PrintScheduleModal />}
+        {showThemeModal && <ThemeCustomizerModal />}
 
         {/* First-Time AAC Experience Knowledge Prompt Modal ("Do you know how AAC works?") */}
-        <AACExperiencePromptModal
-          isOpen={showAacExperiencePrompt}
-          onSelectKnowledgeable={() => {
-            try {
-              localStorage.setItem('beeyou_aac_prompt_completed', 'true');
-              localStorage.setItem('beeyou_aac_experience_known', 'yes');
-              localStorage.setItem('beeyou_grid_stage', '3');
-              window.dispatchEvent(new CustomEvent('beeyou_grid_stage_change', { detail: { stage: 3 } }));
-            } catch {}
-            setShowAacExperiencePrompt(false);
-          }}
-          onSelectNewToAAC={() => {
-            try {
-              localStorage.setItem('beeyou_aac_prompt_completed', 'true');
-              localStorage.setItem('beeyou_aac_experience_known', 'no');
-            } catch {}
-            setShowAacExperiencePrompt(false);
-            setShowInteractiveOnboarding(true);
-          }}
-          onClose={() => setShowAacExperiencePrompt(false)}
-        />
+        {showAacExperiencePrompt && (
+          <AACExperiencePromptModal
+            isOpen={showAacExperiencePrompt}
+            onSelectKnowledgeable={() => {
+              try {
+                localStorage.setItem('beeyou_aac_prompt_completed', 'true');
+                localStorage.setItem('beeyou_aac_experience_known', 'yes');
+                localStorage.setItem('beeyou_grid_stage', '3');
+                window.dispatchEvent(new CustomEvent('beeyou_grid_stage_change', { detail: { stage: 3 } }));
+              } catch {}
+              setShowAacExperiencePrompt(false);
+            }}
+            onSelectNewToAAC={() => {
+              try {
+                localStorage.setItem('beeyou_aac_prompt_completed', 'true');
+                localStorage.setItem('beeyou_aac_experience_known', 'no');
+              } catch {}
+              setShowAacExperiencePrompt(false);
+              setShowInteractiveOnboarding(true);
+            }}
+            onClose={() => setShowAacExperiencePrompt(false)}
+          />
+        )}
 
         {/* 6-Step Gradual Interactive AAC Onboarding Tour */}
-        <OnboardingModal
-          isOpen={showInteractiveOnboarding}
-          onClose={() => setShowInteractiveOnboarding(false)}
-        />
+        {showInteractiveOnboarding && (
+          <OnboardingModal
+            isOpen={showInteractiveOnboarding}
+            onClose={() => setShowInteractiveOnboarding(false)}
+          />
+        )}
 
         {/* Companion Caregiver Help Hub Drawer / Modal */}
-        <CaregiverHelpHub
-          isOpen={showCaregiverHelpHub}
-          onClose={() => setShowCaregiverHelpHub(false)}
-          onReplayTour={() => setShowInteractiveOnboarding(true)}
-        />
+        {showCaregiverHelpHub && (
+          <CaregiverHelpHub
+            isOpen={showCaregiverHelpHub}
+            onClose={() => setShowCaregiverHelpHub(false)}
+            onReplayTour={() => setShowInteractiveOnboarding(true)}
+          />
+        )}
 
         {/* 4-Step Adaptive Setup Onboarding Flow */}
-        <AdaptiveOnboardingFlow
-          isOpen={showOnboardingModal}
-          onClose={() => setShowOnboardingModal(false)}
-          canDismiss={true}
-        />
+        {showOnboardingModal && (
+          <AdaptiveOnboardingFlow
+            isOpen={showOnboardingModal}
+            onClose={() => setShowOnboardingModal(false)}
+            canDismiss={true}
+          />
+        )}
 
         {/* About Me & Emergency ID Card Modal */}
-        <AboutMeIDModal
-          isOpen={showAboutMeModal}
-          onClose={() => setShowAboutMeModal(false)}
-        />
+        {showAboutMeModal && (
+          <AboutMeIDModal
+            isOpen={showAboutMeModal}
+            onClose={() => setShowAboutMeModal(false)}
+          />
+        )}
 
         {/* Medication & Health Reminders Modal */}
-        <MedicationRemindersModal />
+        {showMedicationModal && <MedicationRemindersModal />}
 
         {/* Teen & Adult Deep Mood Reflection Journal Modal */}
-        <MoodJournalModal />
+        {showMoodJournalModal && <MoodJournalModal />}
 
         {/* Cycle & Hormonal Rhythm Tracker Modal */}
-        <CycleTrackerModal />
+        {showCycleTrackerModal && <CycleTrackerModal />}
 
         {/* Daily Mood & Recollection Check-in Modal */}
-        <DailyRecollectionModal />
+        {showRecollectionModal && <DailyRecollectionModal />}
 
         {/* Emergency Sensory Red Button Modal */}
-        <EmergencySensoryModal />
+        {showEmergencyModal && <EmergencySensoryModal />}
 
         {/* Incredible 5-Point Scale Modal */}
-        <FivePointScaleModal />
+        {showFivePointModal && <FivePointScaleModal />}
 
         {/* Decision Wheel Modal */}
-        <DecisionWheelModal />
+        {showDecisionWheelModal && <DecisionWheelModal />}
 
         {/* Communication Passport Modal */}
-        <CommunicationPassportModal />
+        {showPassportModal && <CommunicationPassportModal />}
 
         {/* Spoon Theory Energy Budget Modal */}
-        <SpoonBudgetModal />
+        {showSpoonModal && <SpoonBudgetModal />}
 
         {/* Visual Pie Clock (Time Timer) Modal */}
-        <PieTimerModal />
+        {(showPieTimerModal || pieTimerMounted) && <PieTimerModal />}
 
         {/* Digital Sensory Fidget Toys Modal */}
-        <DigitalFidgetModal />
+        {showFidgetModal && <DigitalFidgetModal />}
 
         {/* Dyslexia-Friendly AAC Keyboard Modal */}
-        <AacKeyboardModal />
+        {showAacKeyboardModal && <AacKeyboardModal />}
 
         {/* Accessibility & Sensory Preferences Hub Modal */}
-        <AccessibilityPreferencesModal />
+        {showAccessibilityModal && <AccessibilityPreferencesModal />}
 
         {/* Editable Dashboard Customizer Modal */}
-        <DashboardCustomizerModal />
+        {showDashboardCustomizer && <DashboardCustomizerModal />}
 
         {/* Editable Help Alerts & Caregiver Responses Customizer Modal */}
-        <EditAlertsModal />
+        {showEditAlertsModal && <EditAlertsModal />}
 
         {/* Editable Calm Tools & Breathing Pacer Customizer Modal */}
-        <EditCalmModal />
+        {showEditCalmModal && <EditCalmModal />}
 
         {/* Global Connection Feedback Modal */}
-        <ConnectionFeedbackModal
-          state={globalFeedbackState}
-          onClose={() => setGlobalFeedbackState(null)}
-          onOpenCamera={() => setShowCaregiverModal(true)}
-        />
+        {globalFeedbackState && (
+          <ConnectionFeedbackModal
+            state={globalFeedbackState}
+            onClose={() => setGlobalFeedbackState(null)}
+            onOpenCamera={() => setShowCaregiverModal(true)}
+          />
+        )}
 
         {/* Shared Family Email & Demo Modal */}
-        <FamilyAuthModal
-          isOpen={showFamilyAuthModal}
-          onClose={() => setShowFamilyAuthModal(false)}
-        />
+        {showFamilyAuthModal && (
+          <FamilyAuthModal
+            isOpen={showFamilyAuthModal}
+            onClose={() => setShowFamilyAuthModal(false)}
+          />
+        )}
       </Suspense>
     </div>
   );

@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -1639,6 +1638,7 @@ app.post('/api/caregiver/alert/resolve', (req, res) => {
 
 async function startServer() {
   if (!isProd) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true, allowedHosts: true, host: '0.0.0.0' },
       appType: 'spa',
