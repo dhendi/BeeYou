@@ -7,6 +7,7 @@ import { logoutFamilyAccount, wipeDeviceStorage, deleteFamilyAccount } from '../
 import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
+import { LegalModal } from '../LegalModals';
 import { hashPin } from '../../utils/security';
 
 interface CaregiverDeviceLinkTabProps {
@@ -26,6 +27,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
 
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [isWiping, setIsWiping] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | null>(null);
   const [isRunningAudit, setIsRunningAudit] = useState(false);
   const [auditResult, setAuditResult] = useState<{
     checkedAt: string;
@@ -356,6 +358,28 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             </span>
           </div>
         )}
+
+        <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-slate-500 font-medium">
+            {t("Apple App Store Kids Category & COPPA Transparency")}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLegalModalTab('privacy')}
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition cursor-pointer"
+            >
+              <span>{t("Privacy Policy (COPPA)")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLegalModalTab('terms')}
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition cursor-pointer"
+            >
+              <span>{t("Terms of Service")}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Device Security & Clean Handoff */}
@@ -500,6 +524,14 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </form>
         )}
       </div>
+
+      {legalModalTab && (
+        <LegalModal
+          isOpen={Boolean(legalModalTab)}
+          onClose={() => setLegalModalTab(null)}
+          initialTab={legalModalTab}
+        />
+      )}
     </div>
   );
 };

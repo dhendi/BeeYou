@@ -26,6 +26,7 @@ import {
   sendHeartbeat 
 } from '../services/caregiverSync';
 import { BeeMascot } from './BeeYouLogo';
+import { LegalModal } from './LegalModals';
 
 interface FamilyAuthModalProps {
   isOpen: boolean;
@@ -52,6 +53,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register' | 'forgot_password'>(initialTab);
+  const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | null>(null);
   const [currentAccount, setCurrentAccount] = useState<FamilyAccount | null>(() => getStoredFamilyAccount());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -722,6 +724,25 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   >
                     Forgot primary email, password, or PIN?
                   </button>
+
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-slate-100 dark:border-slate-800">
+                    Protected by BeeYou&apos;s{' '}
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('privacy')}
+                      className="underline text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-800 cursor-pointer"
+                    >
+                      Privacy Policy (COPPA)
+                    </button>{' '}
+                    and{' '}
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('terms')}
+                      className="underline text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-800 cursor-pointer"
+                    >
+                      Terms of Service
+                    </button>.
+                  </p>
                 </div>
               </div>
             </form>
@@ -935,6 +956,25 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   {regLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   <span>Create Shared Family Account</span>
                 </button>
+
+                <p className="text-[11px] text-center text-slate-500 dark:text-slate-400 font-medium pt-1">
+                  By creating a family space, you agree to BeeYou&apos;s{' '}
+                  <button
+                    type="button"
+                    onClick={() => setLegalModalTab('terms')}
+                    className="underline text-amber-700 dark:text-amber-400 font-bold hover:text-amber-900 cursor-pointer"
+                  >
+                    Terms of Service
+                  </button>{' '}
+                  and{' '}
+                  <button
+                    type="button"
+                    onClick={() => setLegalModalTab('privacy')}
+                    className="underline text-amber-700 dark:text-amber-400 font-bold hover:text-amber-900 cursor-pointer"
+                  >
+                    Privacy Policy (COPPA)
+                  </button>.
+                </p>
               </div>
             </form>
           )}
@@ -1133,6 +1173,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         </div>
 
       </div>
+
+      {legalModalTab && (
+        <LegalModal
+          isOpen={Boolean(legalModalTab)}
+          onClose={() => setLegalModalTab(null)}
+          initialTab={legalModalTab}
+        />
+      )}
     </div>
   );
 };

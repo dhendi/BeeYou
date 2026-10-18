@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { DwellMode, STORAGE_KEYS, CaregiverHelpTopicId } from '../../types/aac';
 import { playChime, speakText } from '../../utils/audio';
+import { LegalModal } from '../LegalModals';
 
 interface CaregiverHelpHubProps {
   isOpen: boolean;
@@ -133,6 +134,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
   onTriggerSpotlight,
 }) => {
   const [selectedTopicId, setSelectedTopicId] = useState<CaregiverHelpTopicId>('create_folder');
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | null>(null);
   
   // Dwell mode state
   const [dwellMode, setDwellMode] = useState<DwellMode>(() => {
@@ -430,10 +432,30 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
         </div>
 
         {/* FOOTER ACTION BAR */}
-        <div className="shrink-0 px-4 sm:px-6 py-3.5 bg-amber-50 border-t border-amber-200/80 flex items-center justify-between">
-          <span className="text-xs text-stone-500 font-bold hidden sm:inline">
-            Need to walk through the visual steps again?
-          </span>
+        <div className="shrink-0 px-4 sm:px-6 py-3.5 bg-amber-50 border-t border-amber-200/80 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                setLegalTab('privacy');
+              }}
+              className="font-bold text-amber-900 hover:text-amber-700 underline cursor-pointer"
+            >
+              <span>Privacy Policy (COPPA)</span>
+            </button>
+            <span className="text-amber-300">•</span>
+            <button
+              type="button"
+              onClick={() => {
+                playChime('tap');
+                setLegalTab('terms');
+              }}
+              className="font-bold text-amber-900 hover:text-amber-700 underline cursor-pointer"
+            >
+              <span>Terms of Service</span>
+            </button>
+          </div>
 
           <button
             type="button"
@@ -442,14 +464,21 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
               onClose();
               onReplayTour();
             }}
-            className="w-full sm:w-auto px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all ml-auto"
+            className="w-full sm:w-auto px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all ml-auto"
           >
-            <RotateCcw className="w-4 h-4" />
             <span>Replay Onboarding Tour</span>
           </button>
         </div>
 
       </div>
+
+      {legalTab && (
+        <LegalModal
+          isOpen={Boolean(legalTab)}
+          onClose={() => setLegalTab(null)}
+          initialTab={legalTab}
+        />
+      )}
     </div>
   );
 };
