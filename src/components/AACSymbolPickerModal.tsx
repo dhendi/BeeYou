@@ -26,6 +26,7 @@ import {
 import { AACCategory, AACItem } from '../types';
 import { playChime, speakText } from '../utils/audio';
 import { t } from '../services/translator';
+import { ParentalGateModal } from './common/ParentalGateModal';
 
 interface AACSymbolPickerModalProps {
   isOpen: boolean;
@@ -67,6 +68,7 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<AacSymbolItem | null>(null);
   const [upgradedAll, setUpgradedAll] = useState(false);
+  const [parentalGateTarget, setParentalGateTarget] = useState<{ url: string; title: string } | null>(null);
   
   // Quick 1-Tap Add Mode
   const [quickAddMode] = useState<boolean>(true);
@@ -778,24 +780,34 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
                   {MULBERRY_ATTRIBUTION.notice}
                 </p>
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
-                  <a
-                    href={MULBERRY_ATTRIBUTION.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playChime('tap');
+                      setParentalGateTarget({
+                        url: MULBERRY_ATTRIBUTION.url,
+                        title: 'MulberrySymbols.org',
+                      });
+                    }}
+                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>Visit MulberrySymbols.org</span>
                     <ExternalLink className="w-3 h-3" />
-                  </a>
-                  <a
-                    href={MULBERRY_ATTRIBUTION.licenseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playChime('tap');
+                      setParentalGateTarget({
+                        url: MULBERRY_ATTRIBUTION.licenseUrl,
+                        title: 'Creative Commons CC BY-SA License',
+                      });
+                    }}
+                    className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>CC BY-SA 2.0 / 4.0 License</span>
                     <ExternalLink className="w-3 h-3" />
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -1001,6 +1013,17 @@ export const AACSymbolPickerModal: React.FC<AACSymbolPickerModalProps> = ({
           </div>
         </div>
       </div>
+      {parentalGateTarget && (
+        <ParentalGateModal
+          isOpen={!!parentalGateTarget}
+          onClose={() => setParentalGateTarget(null)}
+          onSuccess={() => {
+            window.open(parentalGateTarget.url, '_blank', 'noopener,noreferrer');
+          }}
+          targetUrlTitle={parentalGateTarget.title}
+          targetUrl={parentalGateTarget.url}
+        />
+      )}
     </div>,
     document.body
   );

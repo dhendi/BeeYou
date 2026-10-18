@@ -12,6 +12,7 @@ import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { autocorrectAacGrammar } from '../utils/aacGrammar';
 import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
+import { ParentalGateModal } from './common/ParentalGateModal';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
@@ -265,6 +266,7 @@ export const AACView: React.FC = () => {
   const [showQuickChatDrawer, setShowQuickChatDrawer] = useState(false);
   const [isMaskingMode, setIsMaskingMode] = useState(false);
   const [showAttributionModal, setShowAttributionModal] = useState(false);
+  const [parentalGateTarget, setParentalGateTarget] = useState<{ url: string; title: string } | null>(null);
   const [inflectionTarget, setInflectionTarget] = useState<{ item: AACItem; inflections: WordInflection[] } | null>(null);
 
   const [maskedItemIds, setMaskedItemIds] = useState<string[]>(() => {
@@ -2459,24 +2461,34 @@ export const AACView: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                <a
-                  href={MULBERRY_ATTRIBUTION.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-xs"
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('tap');
+                    setParentalGateTarget({
+                      url: MULBERRY_ATTRIBUTION.url,
+                      title: 'MulberrySymbols.org',
+                    });
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <span>MulberrySymbols.org</span>
                   <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-                <a
-                  href={MULBERRY_ATTRIBUTION.licenseUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('tap');
+                    setParentalGateTarget({
+                      url: MULBERRY_ATTRIBUTION.licenseUrl,
+                      title: 'Creative Commons CC BY-SA License',
+                    });
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <span>View CC BY-SA License</span>
                   <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                </button>
               </div>
             </div>
 
@@ -2510,6 +2522,19 @@ export const AACView: React.FC = () => {
         isOpen={showAacGuideModal}
         onClose={() => setShowAacGuideModal(false)}
       />
+
+      {/* Parental Gate for External Link Protection */}
+      {parentalGateTarget && (
+        <ParentalGateModal
+          isOpen={!!parentalGateTarget}
+          onClose={() => setParentalGateTarget(null)}
+          onSuccess={() => {
+            window.open(parentalGateTarget.url, '_blank', 'noopener,noreferrer');
+          }}
+          targetUrlTitle={parentalGateTarget.title}
+          targetUrl={parentalGateTarget.url}
+        />
+      )}
     </div>
   );
 };
