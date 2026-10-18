@@ -1642,6 +1642,7 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bathtub_wash.png': '/assets/stickers/space_shower_wash.png',
   '/assets/stickers/bath_time.png': '/assets/stickers/space_shower_wash.png',
   '/assets/stickers/fav_bath.png': '/assets/stickers/space_shower_wash.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/space_soap_wash_hands.png',
   '/assets/stickers/bedtime_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
   '/assets/stickers/pajamas_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
   '/assets/stickers/pajamas_shorts.png': '/assets/stickers/space_bedtime_sleep.png',
@@ -2011,6 +2012,7 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bathtub_wash.png': '/assets/stickers/ocean_shell_shower.png',
   '/assets/stickers/bath_time.png': '/assets/stickers/ocean_shell_shower.png',
   '/assets/stickers/fav_bath.png': '/assets/stickers/ocean_shell_shower.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/ocean_soap_wash_hands.png',
 
   '/assets/stickers/apple_snack.png': '/assets/stickers/ocean_watermelon_kelp_snack.png',
 
@@ -2230,6 +2232,7 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/bathtub_wash.png': '/assets/stickers/fairytale_clawfoot_bath.png',
   '/assets/stickers/bath_time.png': '/assets/stickers/fairytale_clawfoot_bath.png',
   '/assets/stickers/fav_bath.png': '/assets/stickers/fairytale_clawfoot_bath.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/fairytale_soap_wash_hands.png',
 
   '/assets/stickers/apple_snack.png': '/assets/stickers/fairytale_golden_apple.png',
 
@@ -2458,7 +2461,7 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/sneaker_shoes.png': '/assets/stickers/racing_sneaker_shoes.png',
 
   '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/racing_toilet_restroom.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/racing_toilet_restroom.png',
+  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/racing_station_soap.png',
 
   '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/racing_routine_medicine_pill.png',
   '/assets/stickers/medications_health.png': '/assets/stickers/racing_routine_medicine_pill.png',

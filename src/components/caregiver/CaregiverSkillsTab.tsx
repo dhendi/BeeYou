@@ -2,6 +2,7 @@ import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { Lightbulb } from 'lucide-react';
+import { RoutineStickerIcon } from '../icons/JournalStickers';
 
 interface CaregiverSkillsTabProps {
   onStartTour?: () => void;
@@ -44,15 +45,13 @@ export const CaregiverSkillsTab: React.FC<CaregiverSkillsTabProps> = ({ onStartT
         {skills.map((sk, i) => (
           <div key={sk.id} className="p-4 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {(sk.stickerSrc || getSkillSticker(sk.id, sk.emoji)) ? (
-                <img
-                  src={sk.stickerSrc || getSkillSticker(sk.id, sk.emoji)}
-                  alt=""
-                  className="w-10 h-10 object-contain drop-shadow-2xs shrink-0"
+              <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1 shrink-0">
+                <RoutineStickerIcon
+                  emoji={sk.stickerSrc || getSkillSticker(sk.id, sk.emoji) || sk.emoji}
+                  title={sk.title}
+                  className="w-10 h-10 object-contain drop-shadow-2xs"
                 />
-              ) : (
-                <span className="text-3xl">{sk.emoji}</span>
-              )}
+              </div>
               <div>
                 <h4 className="font-black text-slate-800">{sk.title}</h4>
                 <span data-tour={i === 0 ? "skills-reward-badge" : undefined} className="text-xs text-purple-700 font-bold">

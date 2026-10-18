@@ -10,7 +10,8 @@ import {
   RotateCcw,
   Play,
   Pause,
-  Layers
+  Layers,
+  Trophy
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -138,7 +139,7 @@ export const SkillsView: React.FC = () => {
         {/* All Steps Completed Celebration Box */}
         {isAllDone && (
           <div className={`${activeTheme?.palette?.primaryLight || 'bg-amber-100'} border-3 ${activeTheme?.palette?.primaryBorder || 'border-amber-300'} rounded-3xl p-5 text-center shadow-md animate-in fade-in zoom-in-95`}>
-            <span className="text-5xl">🏆</span>
+            <Trophy className="w-14 h-14 text-amber-500 fill-amber-400 mx-auto drop-shadow-md" />
             <h3 className={`text-xl font-black ${activeTheme?.palette?.textAccent || 'text-amber-950'} mt-2`}>{t('Mission Accomplished!')}</h3>
             <p className={`text-xs sm:text-sm font-bold ${activeTheme?.palette?.textAccent || 'text-amber-800'} mt-1`}>
               {t('You completed')} "{t(selectedSkill.title)}" {t('independently!')}
@@ -309,8 +310,15 @@ export const SkillsView: React.FC = () => {
                   </p>
 
                   <div className="mt-3 flex items-center justify-between text-xs font-bold">
-                    <span className={isDone ? 'text-emerald-600 font-black' : 'text-slate-400'}>
-                      {isDone ? t('Completed! 🏆') : `${completedCount}/${totalCount} ${t('steps done')}`}
+                    <span className={isDone ? 'text-emerald-600 font-black inline-flex items-center gap-1' : 'text-slate-400'}>
+                      {isDone ? (
+                        <>
+                          <span>{t('Completed!')}</span>
+                          <Trophy className="w-3.5 h-3.5 text-amber-500 fill-amber-400 shrink-0 inline-block" />
+                        </>
+                      ) : (
+                        `${completedCount}/${totalCount} ${t('steps done')}`
+                      )}
                     </span>
                     {skill.completedTimes > 0 && (
                       <span className={subtextClass}>{t('Finished')} {skill.completedTimes}x</span>
