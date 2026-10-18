@@ -112,9 +112,9 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
-            { id: 'kid', label: 'Kids (3–11)', sticker: '/assets/stickers/child_persona.png', desc: 'Mascots, routine stickers, First/Then' },
-            { id: 'teen', label: 'Teens (12–17)', sticker: '/assets/stickers/teen_headphones.png', desc: 'Modern lofi/cyber, countdowns, independence' },
-            { id: 'adult', label: 'Adults (18+)', sticker: '/assets/stickers/adult_briefcase.png', desc: 'Executive function, discreet AAC, zero clutter' },
+            { id: 'kid', label: 'Kids (3–11)', sticker: '/assets/stickers/child_persona.webp', desc: 'Mascots, routine stickers, First/Then' },
+            { id: 'teen', label: 'Teens (12–17)', sticker: '/assets/stickers/teen_headphones.webp', desc: 'Modern lofi/cyber, countdowns, independence' },
+            { id: 'adult', label: 'Adults (18+)', sticker: '/assets/stickers/adult_briefcase.webp', desc: 'Executive function, discreet AAC, zero clutter' },
           ].map((a) => {
             const isSelected = userAgeGroup === a.id;
             return (
@@ -190,20 +190,20 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
-            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', sticker: '/assets/stickers/speech_bubble.png', desc: 'Motor-planned AAC tiles with voice' },
-            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', sticker: '/assets/stickers/timer_clock.png', desc: 'Activity countdown ring for routines' },
-            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', sticker: '/assets/stickers/clipboard_shutdown.png', desc: 'Clear step-by-step guidance' },
-            { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', sticker: '/assets/stickers/reward_trophy.png', desc: 'Achievement celebration & badges' },
-            { key: 'mascotCompanion', label: 'Playful Mascot Companion', sticker: '/assets/stickers/bee_mascot.png', desc: 'Rex/Hopper cheer greetings & banner' },
-            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', sticker: '/assets/stickers/evening_moon.png', desc: 'Evening reflection & therapist chart' },
-            { key: 'medicationReminders', label: 'Medication & Health Reminders', sticker: '/assets/stickers/pill_capsule.png', desc: 'Schedule doses, inventory & refill alerts' },
-            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', sticker: '/assets/stickers/passport_book.png', desc: 'Nuanced emotions, sensory load & coping strategies' },
-            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', sticker: '/assets/stickers/circular_arrow.png', desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
-            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', sticker: '/assets/stickers/calm_wind.png', desc: 'Coping toolkit & breath circle' },
-            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', sticker: '/assets/stickers/alert_sos_shield.png', desc: 'One-tap emergency & emotion broadcast' },
-            { key: 'socialStories', label: 'Social Stories Preparation', sticker: '/assets/stickers/story_sharing.png', desc: 'Scenarios for outings and changes' },
-            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', sticker: '/assets/stickers/clothes_dressed.png', desc: 'Task analysis breakdowns for independence' },
-            { key: 'discreetMode', label: 'Discreet Minimal Mode', sticker: '/assets/stickers/quiet_voice.png', desc: 'Text-focused layout, minimal clutter' },
+            { key: 'aacCommunication', label: 'AAC Symbol & Speech Board', sticker: '/assets/stickers/speech_bubble.webp', desc: 'Motor-planned AAC tiles with voice' },
+            { key: 'visualCountdownTimer', label: 'Visual Countdown Timer', sticker: '/assets/stickers/timer_clock.webp', desc: 'Activity countdown ring for routines' },
+            { key: 'firstThenSchedules', label: 'First / Then Routine Cards', sticker: '/assets/stickers/clipboard_shutdown.webp', desc: 'Clear step-by-step guidance' },
+            { key: 'starsAndRewards', label: 'Badges & Digital Routine Stickers', sticker: '/assets/stickers/reward_trophy.webp', desc: 'Achievement celebration & badges' },
+            { key: 'mascotCompanion', label: 'Playful Mascot Companion', sticker: '/assets/stickers/bee_mascot.webp', desc: 'Rex/Hopper cheer greetings & banner' },
+            { key: 'dailyMoodRecollection', label: 'Daily Mood & Therapy Log', sticker: '/assets/stickers/evening_moon.webp', desc: 'Evening reflection & therapist chart' },
+            { key: 'medicationReminders', label: 'Medication & Health Reminders', sticker: '/assets/stickers/pill_capsule.webp', desc: 'Schedule doses, inventory & refill alerts' },
+            { key: 'moodJournal', label: 'Mood Journal & Self-Reflection (Teens & Adults)', sticker: '/assets/stickers/passport_book.webp', desc: 'Nuanced emotions, sensory load & coping strategies' },
+            { key: 'cycleTracker', label: 'Cycle & Hormonal Rhythm Tracker (Teens & Adults)', sticker: '/assets/stickers/circular_arrow.webp', desc: 'Cycle phases, PMDD sensory shifts & discreet wellness' },
+            { key: 'sensoryBreathingPacer', label: 'Sensory Breathing Pacer', sticker: '/assets/stickers/calm_wind.webp', desc: 'Coping toolkit & breath circle' },
+            { key: 'emergencyAlertSOS', label: 'Caregiver Alert SOS Button', sticker: '/assets/stickers/alert_sos_shield.webp', desc: 'One-tap emergency & emotion broadcast' },
+            { key: 'socialStories', label: 'Social Stories Preparation', sticker: '/assets/stickers/story_sharing.webp', desc: 'Scenarios for outings and changes' },
+            { key: 'lifeSkills', label: 'Step-by-Step Life Skills', sticker: '/assets/stickers/clothes_dressed.webp', desc: 'Task analysis breakdowns for independence' },
+            { key: 'discreetMode', label: 'Discreet Minimal Mode', sticker: '/assets/stickers/quiet_voice.webp', desc: 'Text-focused layout, minimal clutter' },
           ].map((feat) => {
             const isChecked = enabledFeatures ? (enabledFeatures as any)[feat.key] !== false : true;
             return (
@@ -256,7 +256,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300/80 flex items-center justify-center p-1 shrink-0 shadow-2xs">
-              <img src="/assets/stickers/bee_mascot.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/bee_mascot.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <h3 className="text-base font-black text-amber-950 flex items-center gap-2">
@@ -329,7 +329,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300/80 flex items-center justify-center p-0.5 shrink-0 shadow-2xs">
-                <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                <img src="/assets/stickers/art_crafts.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <span>{t("AAC Tile Colors & Accessibility")}</span>
             </h3>
@@ -364,7 +364,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               <div>
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                    <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    <img src="/assets/stickers/art_crafts.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                   </div>
                   {(settings.aacButtonColorMode || 'fitzgerald') === 'fitzgerald' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
@@ -405,7 +405,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               <div>
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                    <img src="/assets/stickers/star_gold.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    <img src="/assets/stickers/star_gold.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                   </div>
                   {settings.aacButtonColorMode === 'theme' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
@@ -445,7 +445,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
               <div>
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                    <img src="/assets/stickers/sensory_bright_lights.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                    <img src="/assets/stickers/sensory_bright_lights.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                   </div>
                   {settings.aacButtonColorMode === 'high_contrast_white' && (
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
@@ -484,10 +484,10 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', sticker: '/assets/stickers/fidget_bubbles.png' },
-              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', sticker: '/assets/stickers/fav_lego.png' },
-              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', sticker: '/assets/stickers/jigsaw_puzzle.png' },
-              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', sticker: '/assets/stickers/tablet_ipad.png' },
+              { cols: 2 as const, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', sticker: '/assets/stickers/fidget_bubbles.webp' },
+              { cols: 3 as const, label: 'Large', desc: 'Enlarged buttons (3 cols)', sticker: '/assets/stickers/fav_lego.webp' },
+              { cols: 4 as const, label: 'Standard', desc: 'Balanced grid (4-5 cols)', sticker: '/assets/stickers/jigsaw_puzzle.webp' },
+              { cols: 6 as const, label: 'Compact', desc: 'High density (6-7 cols)', sticker: '/assets/stickers/tablet_ipad.webp' },
             ].map((preset) => {
               const isSelected = (settings.gridColumns || 4) === preset.cols;
               return (
@@ -538,7 +538,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <img src="/assets/stickers/art_crafts.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                <img src="/assets/stickers/art_crafts.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Color-Coded Action Cards")}</h4>
@@ -556,7 +556,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <label className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <img src="/assets/stickers/routine_writing_journal.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                <img src="/assets/stickers/routine_writing_journal.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Extra-Large Label Text")}</h4>
@@ -574,7 +574,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <img src="/assets/stickers/wall_clock.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                <img src="/assets/stickers/wall_clock.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Touch Hold Delay")}</h4>
@@ -596,7 +596,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
           <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-                <img src="/assets/stickers/outdoor_sun.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                <img src="/assets/stickers/outdoor_sun.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
               </div>
               <div>
                 <h4 className="text-xs font-black text-slate-800">{t("Weather Temperature Unit")}</h4>
@@ -750,7 +750,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
             className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-2xs shrink-0 active:scale-95 transition"
           >
             <div className="w-4 h-4 rounded-full overflow-hidden shrink-0">
-              <img src="/assets/stickers/calm_wind.png" alt="" className="w-full h-full object-contain" />
+              <img src="/assets/stickers/calm_wind.webp" alt="" className="w-full h-full object-contain" />
             </div>
             <span>{t("Edit Calm Tools")}</span>
           </button>
@@ -762,7 +762,7 @@ export const CaregiverSettingsTab: React.FC<CaregiverSettingsTabProps> = ({
         <div className="bg-gradient-to-br from-amber-50/70 to-orange-50/50 border border-amber-200/80 rounded-2xl p-5 shadow-xs">
           <div className="flex items-start gap-3">
             <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 p-0.5 flex items-center justify-center shrink-0 shadow-2xs">
-              <img src="/assets/stickers/offline_storage.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/offline_storage.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">

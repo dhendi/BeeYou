@@ -265,9 +265,9 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
       time: target.newSteps[0]?.time || 'Now',
       firstThen: {
         first: target.newSteps[0]?.title || 'First step',
-        firstEmoji: target.newSteps[0]?.emoji || '/assets/stickers/star_gold.png',
+        firstEmoji: target.newSteps[0]?.emoji || '/assets/stickers/star_gold.webp',
         then: target.newSteps[1]?.title || 'Next step',
-        thenEmoji: target.newSteps[1]?.emoji || '/assets/stickers/star_gold.png',
+        thenEmoji: target.newSteps[1]?.emoji || '/assets/stickers/star_gold.webp',
         completedFirst: false,
         completedThen: false,
       },
@@ -277,7 +277,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
         instruction: `Step ${idx + 1} of our updated plan`,
         durationMin: 15,
         completed: false,
-        emoji: step.emoji || '/assets/stickers/star_gold.png',
+        emoji: step.emoji || '/assets/stickers/star_gold.webp',
         time: step.time,
       })),
     };
@@ -301,7 +301,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
                   instruction: `Replacement for ${st.title}`,
                   durationMin: 15,
                   completed: false,
-                  emoji: ns.emoji || '/assets/stickers/star_gold.png',
+                  emoji: ns.emoji || '/assets/stickers/star_gold.webp',
                   time: ns.time || st.time,
                 }));
               }
@@ -324,7 +324,7 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
                 instruction: `Step ${idx + 1} of our updated plan`,
                 durationMin: 15,
                 completed: false,
-                emoji: step.emoji || '/assets/stickers/star_gold.png',
+                emoji: step.emoji || '/assets/stickers/star_gold.webp',
                 time: step.time,
               })),
             };

@@ -132,7 +132,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
               className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
               title={t("Shared Family Email & 1-Click Demo Testing")}
             >
-              <img src="/assets/stickers/zap_family_demo.png" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
+              <img src="/assets/stickers/zap_family_demo.webp" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
               <span>{t("Family Demo")}</span>
             </button>
 
@@ -144,7 +144,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
               }}
               className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
             >
-              <img src="/assets/stickers/pairing_qr_phone.png" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
+              <img src="/assets/stickers/pairing_qr_phone.webp" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
               <span>{t("Pairing & QR")}</span>
             </button>
 
@@ -209,7 +209,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
                 </span>
-                <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-5 h-5 object-contain drop-shadow-2xs shrink-0" />
+                <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-5 h-5 object-contain drop-shadow-2xs shrink-0" />
                 <span>{t("Live Emergency Alert from")} {childProfile.name}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1 shrink-0">
-                      <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                      <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                     </div>
                     <div>
                       <h4 className="text-sm font-black text-slate-900">{alert.label}</h4>
@@ -283,9 +283,9 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                 <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
                   <span className="text-xs font-bold text-slate-500">{t("Quick Reply:")}</span>
                   {getQuickRepliesForAlert(alert, t).map((reply) => {
-                    const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.png' :
-                                      reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.png' :
-                                      reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.png' :
+                    const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
+                                      reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
+                                      reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
                                       reply.iconSrc;
                     const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                     return (
@@ -370,14 +370,14 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
         {/* 1-Tap Quick Nudges Grid */}
         <div data-tour="nudges-grid-buttons" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
-            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), iconSrc: '/assets/stickers/wall_clock.png', bg: 'hover:bg-amber-50/70 border-amber-200' },
-            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), iconSrc: '/assets/stickers/fork_knife.png', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
-            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), iconSrc: '/assets/stickers/pill_capsule.png', bg: 'hover:bg-rose-50/70 border-rose-200' },
-            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), iconSrc: '/assets/stickers/car_ride.png', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
-            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), iconSrc: '/assets/stickers/wind_breeze.png', bg: 'hover:bg-sky-50/70 border-sky-200' },
-            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), iconSrc: '/assets/stickers/high_five_hands.png', bg: 'hover:bg-purple-50/70 border-purple-200' },
-            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), iconSrc: '/assets/stickers/circular_arrow.png', bg: 'hover:bg-amber-200 border-amber-200' },
-            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), iconSrc: '/assets/stickers/speech_bubble.png', bg: 'hover:bg-blue-50/70 border-blue-200' },
+            { title: t('5-Min Warning'), text: t('5 minutes until we leave or change activity!'), iconSrc: '/assets/stickers/wall_clock.webp', bg: 'hover:bg-amber-50/70 border-amber-200' },
+            { title: t('Meal / Snack Time'), text: t('Time for food or snack!'), iconSrc: '/assets/stickers/fork_knife.webp', bg: 'hover:bg-emerald-50/70 border-emerald-200' },
+            { title: t('Medicine Time'), text: t('Time to take your scheduled medicine'), iconSrc: '/assets/stickers/pill_capsule.webp', bg: 'hover:bg-rose-50/70 border-rose-200' },
+            { title: t("I'm On My Way"), text: t("Caregiver is on the way to pick you up"), iconSrc: '/assets/stickers/car_ride.webp', bg: 'hover:bg-indigo-50/70 border-indigo-200' },
+            { title: t('Calm Breathing'), text: t("Let's take 3 slow, deep breaths together"), iconSrc: '/assets/stickers/wind_breeze.webp', bg: 'hover:bg-sky-50/70 border-sky-200' },
+            { title: t('Proud of You'), text: t('Super proud of you! You are doing awesome'), iconSrc: '/assets/stickers/high_five_hands.webp', bg: 'hover:bg-purple-50/70 border-purple-200' },
+            { title: t('Plans Changed'), text: t('Quick reminder: Our plans changed a little today'), iconSrc: '/assets/stickers/circular_arrow.webp', bg: 'hover:bg-amber-200 border-amber-200' },
+            { title: t('Check In'), text: t('How are you feeling right now? Tap your feelings!'), iconSrc: '/assets/stickers/speech_bubble.webp', bg: 'hover:bg-blue-50/70 border-blue-200' },
           ].map((nudge, idx) => (
             <button
               key={idx}

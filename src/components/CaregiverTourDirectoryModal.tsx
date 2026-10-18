@@ -49,7 +49,7 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
         <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-b border-amber-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center p-1.5 shadow-xs shrink-0">
-              <img src="/assets/stickers/bee_mascot.png" alt="Bee Mascot" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/bee_mascot.webp" alt="Bee Mascot" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export const CaregiverTourDirectoryModal: React.FC<CaregiverTourDirectoryModalPr
                 Recommended for First Time Caregivers
               </span>
               <h3 className="text-base sm:text-lg font-black flex items-center gap-2">
-                <img src="/assets/stickers/star_gold.png" alt="" className="w-5 h-5 object-contain inline-block drop-shadow-2xs" />
+                <img src="/assets/stickers/star_gold.webp" alt="" className="w-5 h-5 object-contain inline-block drop-shadow-2xs" />
                 <span>Complete Caregiver Hub Tour</span>
               </h3>
               <p className="text-xs text-amber-100 max-w-xl font-medium">

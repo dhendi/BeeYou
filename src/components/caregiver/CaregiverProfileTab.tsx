@@ -44,7 +44,7 @@ export const CaregiverProfileTab: React.FC<CaregiverProfileTabProps> = ({
       <div data-tour="profile-digital-id-card" className="bg-gradient-to-r from-amber-500 via-sky-500 to-indigo-600 rounded-3xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center p-1.5 shadow-inner border border-white/30 text-white shrink-0">
-            <img src="/assets/stickers/about_id.png" alt="Digital ID" className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none" />
+            <img src="/assets/stickers/about_id.webp" alt="Digital ID" className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none" />
           </div>
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/30 text-white inline-block mb-1">

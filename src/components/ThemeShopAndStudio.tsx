@@ -197,18 +197,18 @@ export interface PopularMascot {
 }
 
 const POPULAR_MASCOTS: PopularMascot[] = [
-  { emoji: '🐝', name: 'Busy Bee', sound: 'classic', icon: '/assets/stickers/bee_mascot.png' },
-  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle', icon: '/assets/stickers/turtle_mascot.png' },
-  { emoji: '🦖', name: 'T-Rex', sound: 'dino', icon: '/assets/stickers/dino_rex.png' },
-  { emoji: '🐸', name: 'Tree Frog', sound: 'frog', icon: '/assets/stickers/frog_mascot.png' },
-  { emoji: '🚂', name: 'Steam Train', sound: 'train', icon: '/assets/stickers/train_mascot.png' },
-  { emoji: '🚀', name: 'Cosmic Astro', sound: 'space', icon: '/assets/stickers/space_mascot.png' },
-  { emoji: '🐬', name: 'Splash Dolphin', sound: 'classic', icon: '/assets/stickers/ocean_mascot.png' },
-  { emoji: '🦄', name: 'Stardust Unicorn', sound: 'magic', icon: '/assets/stickers/fairytale_mascot.png' },
-  { emoji: '🏎️', name: 'Turbo Racer', sound: 'train', icon: '/assets/stickers/racing_mascot.png' },
-  { emoji: '🐶', name: 'Station Pup', sound: 'classic', icon: '/assets/stickers/train_station_dog.png' },
-  { emoji: '🦁', name: 'Brave Lion', sound: 'classic', icon: '/assets/stickers/open_mouth_lion.png' },
-  { emoji: '🧸', name: 'Cozy Teddy', sound: 'classic', icon: '/assets/stickers/teddy_bear.png' },
+  { emoji: '🐝', name: 'Busy Bee', sound: 'classic', icon: '/assets/stickers/bee_mascot.webp' },
+  { emoji: '🐢', name: 'Wise Turtle', sound: 'turtle', icon: '/assets/stickers/turtle_mascot.webp' },
+  { emoji: '🦖', name: 'T-Rex', sound: 'dino', icon: '/assets/stickers/dino_rex.webp' },
+  { emoji: '🐸', name: 'Tree Frog', sound: 'frog', icon: '/assets/stickers/frog_mascot.webp' },
+  { emoji: '🚂', name: 'Steam Train', sound: 'train', icon: '/assets/stickers/train_mascot.webp' },
+  { emoji: '🚀', name: 'Cosmic Astro', sound: 'space', icon: '/assets/stickers/space_mascot.webp' },
+  { emoji: '🐬', name: 'Splash Dolphin', sound: 'classic', icon: '/assets/stickers/ocean_mascot.webp' },
+  { emoji: '🦄', name: 'Stardust Unicorn', sound: 'magic', icon: '/assets/stickers/fairytale_mascot.webp' },
+  { emoji: '🏎️', name: 'Turbo Racer', sound: 'train', icon: '/assets/stickers/racing_mascot.webp' },
+  { emoji: '🐶', name: 'Station Pup', sound: 'classic', icon: '/assets/stickers/train_station_dog.webp' },
+  { emoji: '🦁', name: 'Brave Lion', sound: 'classic', icon: '/assets/stickers/open_mouth_lion.webp' },
+  { emoji: '🧸', name: 'Cozy Teddy', sound: 'classic', icon: '/assets/stickers/teddy_bear.webp' },
 ];
 
 export interface WallpaperPatternOption {
@@ -218,18 +218,18 @@ export interface WallpaperPatternOption {
 }
 
 export const WALLPAPER_PATTERN_OPTIONS: WallpaperPatternOption[] = [
-  { id: 'honeycomb_clouds', label: 'Honeycomb & Clouds', icon: '/assets/stickers/bee_mascot.png' },
-  { id: 'sparkles', label: 'Calm Star', icon: '/assets/stickers/fairytale_star_gold.png' },
-  { id: 'turtle_shell', label: 'Turtle Shell', icon: '/assets/stickers/turtle_mascot.png' },
-  { id: 'dino_footprints', label: 'Dino Tracks', icon: '/assets/stickers/dino_rex.png' },
-  { id: 'lily_pads', label: 'Lily Pads', icon: '/assets/stickers/frog_mascot.png' },
-  { id: 'cosmic_stars', label: 'Cosmic Stars', icon: '/assets/stickers/space_mascot.png' },
-  { id: 'bubbles', label: 'Bubbles', icon: '/assets/stickers/ocean_mascot.png' },
-  { id: 'railroad', label: 'Railroad', icon: '/assets/stickers/train_mascot.png' },
-  { id: 'ocean_waves', label: 'Ocean Waves', icon: '/assets/stickers/ocean_ocean_wave.png' },
-  { id: 'racing', label: 'Speedway Track', icon: '/assets/stickers/racing_mascot.png' },
-  { id: 'zen_botanical', label: 'Zen Leaves', icon: '/assets/stickers/autumn_leaf.png' },
-  { id: 'none', label: 'Clean Solid', icon: '/assets/stickers/soap_wash_hands.png' },
+  { id: 'honeycomb_clouds', label: 'Honeycomb & Clouds', icon: '/assets/stickers/bee_mascot.webp' },
+  { id: 'sparkles', label: 'Calm Star', icon: '/assets/stickers/fairytale_star_gold.webp' },
+  { id: 'turtle_shell', label: 'Turtle Shell', icon: '/assets/stickers/turtle_mascot.webp' },
+  { id: 'dino_footprints', label: 'Dino Tracks', icon: '/assets/stickers/dino_rex.webp' },
+  { id: 'lily_pads', label: 'Lily Pads', icon: '/assets/stickers/frog_mascot.webp' },
+  { id: 'cosmic_stars', label: 'Cosmic Stars', icon: '/assets/stickers/space_mascot.webp' },
+  { id: 'bubbles', label: 'Bubbles', icon: '/assets/stickers/ocean_mascot.webp' },
+  { id: 'railroad', label: 'Railroad', icon: '/assets/stickers/train_mascot.webp' },
+  { id: 'ocean_waves', label: 'Ocean Waves', icon: '/assets/stickers/ocean_ocean_wave.webp' },
+  { id: 'racing', label: 'Speedway Track', icon: '/assets/stickers/racing_mascot.webp' },
+  { id: 'zen_botanical', label: 'Zen Leaves', icon: '/assets/stickers/autumn_leaf.webp' },
+  { id: 'none', label: 'Clean Solid', icon: '/assets/stickers/soap_wash_hands.webp' },
 ];
 
 function buildCustomPalette(primaryHex: string): ThemePalette {
@@ -284,7 +284,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   const [themeName, setThemeName] = useState('My Custom Theme');
   const [mascotEmoji, setMascotEmoji] = useState('🐝');
   const [mascotName, setMascotName] = useState('Bee');
-  const [mascotIcon, setMascotIcon] = useState('/assets/stickers/bee_mascot.png');
+  const [mascotIcon, setMascotIcon] = useState('/assets/stickers/bee_mascot.webp');
   const [greetingMessage, setGreetingMessage] = useState('Welcome back! Let us explore together!');
   const [themeDescription, setThemeDescription] = useState('A warm, personalized theme crafted with love.');
   const [selectedPaletteIndex, setSelectedPaletteIndex] = useState(0);
@@ -382,7 +382,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     setThemeName('My Custom Theme');
     setMascotEmoji('🐝');
     setMascotName('Bee');
-    setMascotIcon('/assets/stickers/bee_mascot.png');
+    setMascotIcon('/assets/stickers/bee_mascot.webp');
     setGreetingMessage('Welcome back! Let us explore together!');
     setThemeDescription('A warm, personalized theme crafted with love.');
     setSelectedPaletteIndex(0);
@@ -661,7 +661,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             <div className="flex items-center gap-3.5 min-w-0">
               <span className={`w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl ${headerStyles.equippedBadgeBg} shrink-0 flex items-center justify-center overflow-hidden`}>
                 <img
-                  src={getThemeIcon(activeTheme) || '/assets/stickers/bee_mascot.png'}
+                  src={getThemeIcon(activeTheme) || '/assets/stickers/bee_mascot.webp'}
                   alt={activeTheme.mascotName}
                   className="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-2xs select-none pointer-events-none"
                 />
@@ -710,7 +710,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 </button>
               ) : (
                 <div className="px-3.5 py-2 rounded-2xl bg-amber-50 text-amber-900 border border-amber-200 font-bold text-xs flex items-center gap-1.5">
-                  <img src="/assets/stickers/bee_mascot.png" alt="Bee" className="w-4 h-4 object-contain shrink-0" />
+                  <img src="/assets/stickers/bee_mascot.webp" alt="Bee" className="w-4 h-4 object-contain shrink-0" />
                   <span>Default Theme Active</span>
                 </div>
               )}
@@ -780,7 +780,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                       <div className="flex items-center gap-2.5">
                         <div className="w-14 h-14 sm:w-16 sm:h-16 p-1.5 rounded-2xl bg-amber-50 border border-amber-200 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
                           <img
-                            src={getThemeIcon(theme) || '/assets/stickers/bee_mascot.png'}
+                            src={getThemeIcon(theme) || '/assets/stickers/bee_mascot.webp'}
                             alt={theme.mascotName || theme.name}
                             className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-2xs select-none pointer-events-none"
                             loading="lazy"
@@ -982,7 +982,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 <label className="text-xs font-bold text-slate-600 block mb-1">Selected Mascot</label>
                 <div className="flex items-center gap-2 px-3 py-2 rounded-2xl border-2 border-slate-200 bg-slate-50 min-h-[46px]">
                   <img
-                    src={mascotIcon || '/assets/stickers/bee_mascot.png'}
+                    src={mascotIcon || '/assets/stickers/bee_mascot.webp'}
                     alt={mascotName}
                     className="w-7 h-7 object-contain drop-shadow-2xs shrink-0 select-none pointer-events-none"
                   />
@@ -1296,7 +1296,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/20 border border-white/30 flex items-center justify-center shrink-0 overflow-hidden p-0.5">
                   <img
-                    src={previewTheme.icon || getThemeIcon(previewTheme) || '/assets/stickers/bee_mascot.png'}
+                    src={previewTheme.icon || getThemeIcon(previewTheme) || '/assets/stickers/bee_mascot.webp'}
                     alt={previewTheme.name}
                     className="w-full h-full object-contain pointer-events-none select-none"
                   />

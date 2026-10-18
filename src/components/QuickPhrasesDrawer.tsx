@@ -96,7 +96,7 @@ export const QuickPhrasesDrawer: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-[#FFF2D4] border border-[#FED676] flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
               <img
-                src="/assets/stickers/quick_phrases.png"
+                src="/assets/stickers/quick_phrases.webp"
                 alt="Quick Phrases"
                 className="w-8 h-8 object-contain drop-shadow-xs select-none"
                 onError={(e) => {

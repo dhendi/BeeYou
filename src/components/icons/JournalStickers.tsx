@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { preloadTurtleThemeStickers, preloadFairytaleThemeStickers, preloadRacingThemeStickers, preloadAllStickersOnIdle } from '../../utils/stickerPreloader';
-
-// Immediately initiate background pre-caching of all sticker images
-if (typeof window !== 'undefined') {
-  preloadAllStickersOnIdle();
-}
+import { preloadThemeAssetsImmediate } from '../../utils/appAssetPreloader';
 
 interface StickerProps {
   className?: string;
@@ -48,12 +43,8 @@ function useActiveThemeCategory(): string {
     const sync = () => {
       const active = checkActiveThemeCategory();
       setTheme(active);
-      if (active === 'turtle') {
-        preloadTurtleThemeStickers();
-      } else if (active === 'fantasy') {
-        preloadFairytaleThemeStickers();
-      } else if (active === 'racing') {
-        preloadRacingThemeStickers();
+      if (active !== 'default') {
+        preloadThemeAssetsImmediate(active);
       }
     };
     sync();
@@ -168,685 +159,685 @@ const renderThemedStickerPng = (defaultSrc: string, turtleSrc: string, alt: stri
 
 // 🫧 Digital Fidgets (Swaps to Pond Dewdrop Bubbles in Turtle Sanctuary theme)
 export const FidgetBubblesSticker = renderThemedStickerPng(
-  '/assets/stickers/fidget_bubbles.png',
-  '/assets/stickers/turtle_pond_fidget_bubbles.png',
+  '/assets/stickers/fidget_bubbles.webp',
+  '/assets/stickers/turtle_pond_fidget_bubbles.webp',
   'Fidget Bubbles'
 );
 
 // 🌬️ Calm Breathing (Watercolor breathing cloud with soft swirl / Lagoon breeze in Turtle theme)
 export const BreathingCloudSticker = renderThemedStickerPng(
-  '/assets/stickers/breathing_cloud.png',
-  '/assets/stickers/turtle_lagoon_breeze_breath.png',
+  '/assets/stickers/breathing_cloud.webp',
+  '/assets/stickers/turtle_lagoon_breeze_breath.webp',
   'Calm Breathing Cloud'
 );
 
 // 🎡 Decision Wheel (Swaps to Wooden Lotus Spinner Wheel in Turtle Sanctuary theme)
 export const DecisionWheelSticker = renderThemedStickerPng(
-  '/assets/stickers/decision_wheel.png',
-  '/assets/stickers/turtle_wooden_wheel.png',
+  '/assets/stickers/decision_wheel.webp',
+  '/assets/stickers/turtle_wooden_wheel.webp',
   'Decision Wheel'
 );
 
 // ⏱️ Countdown Timer / Pie Clock (Swaps across all themes)
 export const CountdownTimerSticker = renderThemedStickerPng(
-  '/assets/stickers/timer_clock.png',
-  '/assets/stickers/turtle_sand_timer.png',
+  '/assets/stickers/timer_clock.webp',
+  '/assets/stickers/turtle_sand_timer.webp',
   'Countdown Timer Clock',
-  '/assets/stickers/dino_stone_stopwatch.png',
-  '/assets/stickers/frog_lily_stopwatch.png',
-  '/assets/stickers/train_pressure_stopwatch.png',
-  '/assets/stickers/space_clock_time.png'
+  '/assets/stickers/dino_stone_stopwatch.webp',
+  '/assets/stickers/frog_lily_stopwatch.webp',
+  '/assets/stickers/train_pressure_stopwatch.webp',
+  '/assets/stickers/space_clock_time.webp'
 );
 
 // 🚨 Ask for Help (SOS) (Swaps to Guardian Turtle Shell Shield in Turtle Sanctuary theme)
 export const ShieldSosSticker = renderThemedStickerPng(
-  '/assets/stickers/help_sos.png',
-  '/assets/stickers/turtle_guardian_shield_sos.png',
+  '/assets/stickers/help_sos.webp',
+  '/assets/stickers/turtle_guardian_shield_sos.webp',
   'Help SOS Shield'
 );
 
 // 🔗 Connect Caregiver (Warm pink watercolor heart with bandaid from reference)
-export const ConnectHeartSticker = renderStickerPng('/assets/stickers/caregiver_heart.png', 'Caregiver Heart');
+export const ConnectHeartSticker = renderStickerPng('/assets/stickers/caregiver_heart.webp', 'Caregiver Heart');
 
 // 🪪 About Me ID Card (Swaps to Wooden Explorer ID Badge in Turtle Sanctuary theme)
 export const IdCardSticker = renderThemedStickerPng(
-  '/assets/stickers/about_id.png',
-  '/assets/stickers/turtle_wooden_id_badge.png',
+  '/assets/stickers/about_id.webp',
+  '/assets/stickers/turtle_wooden_id_badge.webp',
   'About Me ID'
 );
 
 // 📖 Passport / Reading Book (Swaps to Firefly Lantern & Scroll in Turtle Sanctuary theme)
 export const ReadingBookSticker = renderThemedStickerPng(
-  '/assets/stickers/passport_book.png',
-  '/assets/stickers/turtle_firefly_lantern_book.png',
+  '/assets/stickers/passport_book.webp',
+  '/assets/stickers/turtle_firefly_lantern_book.webp',
   'Reading Book'
 );
 
 // 💬 Quick Phrases (Swaps to Leafy Speech Bubbles in Turtle Sanctuary theme)
 export const QuickPhrasesSticker = renderThemedStickerPng(
-  '/assets/stickers/quick_phrases.png',
-  '/assets/stickers/turtle_leaf_speech_bubbles.png',
+  '/assets/stickers/quick_phrases.webp',
+  '/assets/stickers/turtle_leaf_speech_bubbles.webp',
   'Quick Phrases'
 );
 
 // ⌨️ Type to Speak Keyboard (Swaps to Bamboo & Sage Keyboard in Turtle Sanctuary theme)
 export const KeyboardSticker = renderThemedStickerPng(
-  '/assets/stickers/keyboard.png',
-  '/assets/stickers/turtle_bamboo_keyboard.png',
+  '/assets/stickers/keyboard.webp',
+  '/assets/stickers/turtle_bamboo_keyboard.webp',
   'Keyboard'
 );
 
 // 🌡️ Feelings & Thermometer (Swaps to Bamboo Gauge & Heart in Turtle Sanctuary theme)
 export const ThermometerSticker = renderThemedStickerPng(
-  '/assets/stickers/feelings_thermometer.png',
-  '/assets/stickers/turtle_bamboo_thermometer.png',
+  '/assets/stickers/feelings_thermometer.webp',
+  '/assets/stickers/turtle_bamboo_thermometer.webp',
   'Feelings Thermometer'
 );
 
 // 💊 Medications & Health (Swaps to Leaf Dish & Vitamins in Turtle Sanctuary theme)
 export const MedicationSticker = renderThemedStickerPng(
-  '/assets/stickers/medications_health.png',
-  '/assets/stickers/turtle_leaf_vitamins.png',
+  '/assets/stickers/medications_health.webp',
+  '/assets/stickers/turtle_leaf_vitamins.webp',
   'Medications Health'
 );
 
 // 🌙 Evening Reflection (Swaps to Crescent Moon Over Lagoon in Turtle Sanctuary theme)
 export const EveningMoonSticker = renderThemedStickerPng(
-  '/assets/stickers/evening_moon.png',
-  '/assets/stickers/turtle_lagoon_moon.png',
+  '/assets/stickers/evening_moon.webp',
+  '/assets/stickers/turtle_lagoon_moon.webp',
   'Evening Moon'
 );
 
 // Routine, Wellness & Activity stickers
 export const ToothbrushSticker = renderThemedStickerPng(
-  '/assets/stickers/toothbrush.png',
-  '/assets/stickers/turtle_bamboo_toothbrush.png',
+  '/assets/stickers/toothbrush.webp',
+  '/assets/stickers/turtle_bamboo_toothbrush.webp',
   'Toothbrush'
 );
 export const ToyBoxSticker = renderThemedStickerPng(
-  '/assets/stickers/toy_box.png',
-  '/assets/stickers/turtle_seagrass_toy_box.png',
+  '/assets/stickers/toy_box.webp',
+  '/assets/stickers/turtle_seagrass_toy_box.webp',
   'Clean Up Toys'
 );
 export const GetDressedSticker = renderThemedStickerPng(
-  '/assets/stickers/clothes_dressed.png',
-  '/assets/stickers/turtle_cozy_hoodie.png',
+  '/assets/stickers/clothes_dressed.webp',
+  '/assets/stickers/turtle_cozy_hoodie.webp',
   'Get Dressed'
 );
 export const WashHandsSticker = renderThemedStickerPng(
-  '/assets/stickers/soap_wash_hands.png',
-  '/assets/stickers/turtle_leaf_soap_wash.png',
+  '/assets/stickers/soap_wash_hands.webp',
+  '/assets/stickers/turtle_leaf_soap_wash.webp',
   'Wash Hands'
 );
 export const QuietTimeSticker = renderThemedStickerPng(
-  '/assets/stickers/breathing_cloud.png',
-  '/assets/stickers/turtle_cozy_shell_retreat.png',
+  '/assets/stickers/breathing_cloud.webp',
+  '/assets/stickers/turtle_cozy_shell_retreat.webp',
   'Quiet Time'
 );
 export const SpoonSticker = renderThemedStickerPng(
-  '/assets/stickers/spoons_energy.png',
-  '/assets/stickers/turtle_bamboo_spoons.png',
+  '/assets/stickers/spoons_energy.webp',
+  '/assets/stickers/turtle_bamboo_spoons.webp',
   'Spoon Energy'
 );
 export const MoodJournalSticker = renderThemedStickerPng(
-  '/assets/stickers/passport_book.png',
-  '/assets/stickers/turtle_firefly_lantern_book.png',
+  '/assets/stickers/passport_book.webp',
+  '/assets/stickers/turtle_firefly_lantern_book.webp',
   'Mood Journal'
 );
 export const TabletIpadSticker = renderThemedStickerPng(
-  '/assets/stickers/tablet_ipad.png',
-  '/assets/stickers/turtle_bamboo_tablet.png',
+  '/assets/stickers/tablet_ipad.webp',
+  '/assets/stickers/turtle_bamboo_tablet.webp',
   'Tablet iPad'
 );
 
 // Morning Routine & School Step Stickers
 export const AlarmClockSticker = renderThemedStickerPng(
-  '/assets/stickers/alarm_clock.png',
-  '/assets/stickers/turtle_dawn_bell_clock.png',
+  '/assets/stickers/alarm_clock.webp',
+  '/assets/stickers/turtle_dawn_bell_clock.webp',
   'Wake Up Alarm Clock'
 );
 export const ToiletSticker = renderThemedStickerPng(
-  '/assets/stickers/routine_toilet_restroom.png',
-  '/assets/stickers/turtle_bamboo_restroom.png',
+  '/assets/stickers/routine_toilet_restroom.webp',
+  '/assets/stickers/turtle_bamboo_restroom.webp',
   'Toilet Restroom'
 );
 export const PancakesSticker = renderThemedStickerPng(
-  '/assets/stickers/pancakes_breakfast.png',
-  '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/pancakes_breakfast.webp',
+  '/assets/stickers/turtle_clover_berry_feast.webp',
   'Breakfast Pancakes'
 );
 export const BackpackSticker = renderThemedStickerPng(
-  '/assets/stickers/backpack_school.png',
-  '/assets/stickers/turtle_shell_backpack.png',
+  '/assets/stickers/backpack_school.webp',
+  '/assets/stickers/turtle_shell_backpack.webp',
   'School Backpack'
 );
 export const SneakersSticker = renderThemedStickerPng(
-  '/assets/stickers/sneaker_shoes.png',
-  '/assets/stickers/turtle_reed_explorer_shoes.png',
+  '/assets/stickers/sneaker_shoes.webp',
+  '/assets/stickers/turtle_reed_explorer_shoes.webp',
   'Shoes Sneakers'
 );
 export const AppleSticker = renderThemedStickerPng(
-  '/assets/stickers/apple_snack.png',
-  '/assets/stickers/turtle_garden_fruit_snack.png',
+  '/assets/stickers/apple_snack.webp',
+  '/assets/stickers/turtle_garden_fruit_snack.webp',
   'Healthy Apple Snack'
 );
 export const FolderSticker = renderThemedStickerPng(
-  '/assets/stickers/folder_schoolwork.png',
-  '/assets/stickers/turtle_botanical_folder.png',
+  '/assets/stickers/folder_schoolwork.webp',
+  '/assets/stickers/turtle_botanical_folder.webp',
   'School Binder Folder'
 );
 export const PencilSticker = renderThemedStickerPng(
-  '/assets/stickers/pencil_write.png',
-  '/assets/stickers/turtle_bamboo_pencil.png',
+  '/assets/stickers/pencil_write.webp',
+  '/assets/stickers/turtle_bamboo_pencil.webp',
   'Pencil Writing'
 );
 export const TeddyBearSticker = renderThemedStickerPng(
-  '/assets/stickers/teddy_bear.png',
-  '/assets/stickers/turtle_seagrass_toy_box.png',
+  '/assets/stickers/teddy_bear.webp',
+  '/assets/stickers/turtle_seagrass_toy_box.webp',
   'Teddy Bear Play'
 );
 export const ShowerSticker = renderThemedStickerPng(
-  '/assets/stickers/shower_wash.png',
-  '/assets/stickers/turtle_warm_spring_bath.png',
+  '/assets/stickers/shower_wash.webp',
+  '/assets/stickers/turtle_warm_spring_bath.webp',
   'Shower Wash'
 );
 export const SchoolBusSticker = renderThemedStickerPng(
-  '/assets/stickers/school_bus.png',
-  '/assets/stickers/turtle_bamboo_ferry.png',
+  '/assets/stickers/school_bus.webp',
+  '/assets/stickers/turtle_bamboo_ferry.webp',
   'School Bus'
 );
 export const ScienceFlaskSticker = renderThemedStickerPng(
-  '/assets/stickers/science_flask.png',
-  '/assets/stickers/turtle_terrarium_science.png',
+  '/assets/stickers/science_flask.webp',
+  '/assets/stickers/turtle_terrarium_science.webp',
   'Science Flask'
 );
 
 // Onboarding, Personas & Feature Stickers
 export const LanguageGlobeSticker = renderThemedStickerPng(
-  '/assets/stickers/language_globe.png',
-  '/assets/stickers/turtle_lagoon_globe.png',
+  '/assets/stickers/language_globe.webp',
+  '/assets/stickers/turtle_lagoon_globe.webp',
   'Language Globe'
 );
 export const ChildPersonaSticker = renderThemedStickerPng(
-  '/assets/stickers/child_persona.png',
-  '/assets/stickers/turtle_child_persona_hatchling.png',
+  '/assets/stickers/child_persona.webp',
+  '/assets/stickers/turtle_child_persona_hatchling.webp',
   'Child Persona (Teddy Bear)'
 );
 export const TeenHeadphonesSticker = renderThemedStickerPng(
-  '/assets/stickers/teen_headphones.png',
-  '/assets/stickers/turtle_shell_headphones.png',
+  '/assets/stickers/teen_headphones.webp',
+  '/assets/stickers/turtle_shell_headphones.webp',
   'Teen Headphones'
 );
 export const AdultBriefcaseSticker = renderThemedStickerPng(
-  '/assets/stickers/adult_briefcase.png',
-  '/assets/stickers/turtle_bamboo_satchel_briefcase.png',
+  '/assets/stickers/adult_briefcase.webp',
+  '/assets/stickers/turtle_bamboo_satchel_briefcase.webp',
   'Adult Briefcase'
 );
 export const CaregiverPhoneSticker = renderThemedStickerPng(
-  '/assets/stickers/caregiver_phone.png',
-  '/assets/stickers/turtle_wood_phone_caregiver.png',
+  '/assets/stickers/caregiver_phone.webp',
+  '/assets/stickers/turtle_wood_phone_caregiver.webp',
   'Caregiver Phone'
 );
 export const ScheduleCalendarSticker = renderThemedStickerPng(
-  '/assets/stickers/schedule_calendar.png',
-  '/assets/stickers/turtle_bamboo_calendar.png',
+  '/assets/stickers/schedule_calendar.webp',
+  '/assets/stickers/turtle_bamboo_calendar.webp',
   'Schedule Calendar'
 );
 export const TrialCrownSticker = renderThemedStickerPng(
-  '/assets/stickers/trial_crown.png',
-  '/assets/stickers/turtle_golden_shell_crown.png',
+  '/assets/stickers/trial_crown.webp',
+  '/assets/stickers/turtle_golden_shell_crown.webp',
   '15-Day Free Trial Crown'
 );
 
 // Future Expansion Routine & Activity Stickers
 export const BedtimeSleepSticker = renderThemedStickerPng(
-  '/assets/stickers/bedtime_sleep.png',
-  '/assets/stickers/turtle_moss_bed_sleep.png',
+  '/assets/stickers/bedtime_sleep.webp',
+  '/assets/stickers/turtle_moss_bed_sleep.webp',
   'Bedtime Sleep'
 );
 export const DrinkWaterSticker = renderThemedStickerPng(
-  '/assets/stickers/routine_water_drink.png',
-  '/assets/stickers/turtle_bamboo_drink_cup.png',
+  '/assets/stickers/routine_water_drink.webp',
+  '/assets/stickers/turtle_bamboo_drink_cup.webp',
   'Drink Water'
 );
 export const PetCareSticker = renderThemedStickerPng(
-  '/assets/stickers/pet_care.png',
-  '/assets/stickers/turtle_hatchling_pet_care.png',
+  '/assets/stickers/pet_care.webp',
+  '/assets/stickers/turtle_hatchling_pet_care.webp',
   'Pet Care'
 );
 export const MusicSensorySticker = renderThemedStickerPng(
-  '/assets/stickers/music_sensory.png',
-  '/assets/stickers/turtle_bamboo_wind_chimes.png',
+  '/assets/stickers/music_sensory.webp',
+  '/assets/stickers/turtle_bamboo_wind_chimes.webp',
   'Music Sensory'
 );
 export const OutdoorSunSticker = renderThemedStickerPng(
-  '/assets/stickers/outdoor_sun.png',
-  '/assets/stickers/turtle_meadow_sunshine.png',
+  '/assets/stickers/outdoor_sun.webp',
+  '/assets/stickers/turtle_meadow_sunshine.webp',
   'Outdoor Sunshine'
 );
 export const HomeworkStudySticker = renderThemedStickerPng(
-  '/assets/stickers/homework_study.png',
-  '/assets/stickers/turtle_bamboo_pencil.png',
+  '/assets/stickers/homework_study.webp',
+  '/assets/stickers/turtle_bamboo_pencil.webp',
   'Homework Study'
 );
 export const ArtCraftsSticker = renderThemedStickerPng(
-  '/assets/stickers/art_crafts.png',
-  '/assets/stickers/turtle_pebble_paint_palette.png',
+  '/assets/stickers/art_crafts.webp',
+  '/assets/stickers/turtle_pebble_paint_palette.webp',
   'Art Crafts'
 );
-export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.png', 'Calm Star');
+export const CalmSparklesSticker = renderStickerPng('/assets/stickers/calm_sparkles.webp', 'Calm Star');
 export const RewardTrophySticker = renderThemedStickerPng(
-  '/assets/stickers/reward_trophy.png',
-  '/assets/stickers/turtle_lotus_trophy.png',
+  '/assets/stickers/reward_trophy.webp',
+  '/assets/stickers/turtle_lotus_trophy.webp',
   'Reward Trophy'
 );
 export const BathTimeSticker = renderThemedStickerPng(
-  '/assets/stickers/bath_time.png',
-  '/assets/stickers/turtle_warm_spring_bath.png',
+  '/assets/stickers/bath_time.webp',
+  '/assets/stickers/turtle_warm_spring_bath.webp',
   'Bath Time'
 );
 export const DinnerBowlSticker = renderThemedStickerPng(
-  '/assets/stickers/dinner_bowl.png',
-  '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/dinner_bowl.webp',
+  '/assets/stickers/turtle_clover_berry_feast.webp',
   'Dinner Plate'
 );
 export const DrinkCupSticker = renderThemedStickerPng(
-  '/assets/stickers/drink_cup.png',
-  '/assets/stickers/turtle_bamboo_drink_cup.png',
+  '/assets/stickers/drink_cup.webp',
+  '/assets/stickers/turtle_bamboo_drink_cup.webp',
   'Drink Cup'
 );
 export const CandyTreatSticker = renderThemedStickerPng(
-  '/assets/stickers/candy_treat.png',
-  '/assets/stickers/turtle_berry_honey_treat.png',
+  '/assets/stickers/candy_treat.webp',
+  '/assets/stickers/turtle_berry_honey_treat.webp',
   'Candy Treat'
 );
 export const WallClockSticker = renderThemedStickerPng(
-  '/assets/stickers/clock_time.png',
-  '/assets/stickers/turtle_shell_wall_clock.png',
+  '/assets/stickers/clock_time.webp',
+  '/assets/stickers/turtle_shell_wall_clock.webp',
   'Wall Clock'
 );
 export const CutlerySticker = renderThemedStickerPng(
-  '/assets/stickers/fork_knife.png',
-  '/assets/stickers/turtle_bamboo_cutlery.png',
+  '/assets/stickers/fork_knife.webp',
+  '/assets/stickers/turtle_bamboo_cutlery.webp',
   'Fork & Knife'
 );
 export const CarRideSticker = renderThemedStickerPng(
-  '/assets/stickers/car_ride.png',
-  '/assets/stickers/turtle_wooden_leaf_cart.png',
+  '/assets/stickers/car_ride.webp',
+  '/assets/stickers/turtle_wooden_leaf_cart.webp',
   'Car Ride'
 );
 export const WindBreezeSticker = renderThemedStickerPng(
-  '/assets/stickers/wind_breeze.png',
-  '/assets/stickers/turtle_lagoon_breeze_breath.png',
+  '/assets/stickers/wind_breeze.webp',
+  '/assets/stickers/turtle_lagoon_breeze_breath.webp',
   'Wind Breeze'
 );
-export const LungsInhalerSticker = renderStickerPng('/assets/stickers/lungs_inhaler.png', 'Lungs Inhaler');
+export const LungsInhalerSticker = renderStickerPng('/assets/stickers/lungs_inhaler.webp', 'Lungs Inhaler');
 export const RepeatLoopSticker = renderThemedStickerPng(
-  '/assets/stickers/refresh_repeat.png',
-  '/assets/stickers/turtle_swimming_loop.png',
+  '/assets/stickers/refresh_repeat.webp',
+  '/assets/stickers/turtle_swimming_loop.webp',
   'Repeat Loop'
 );
-export const AccessibilityHubSticker = renderStickerPng('/assets/stickers/accessibility_hub.png', 'Accessibility & Sensory Hub');
+export const AccessibilityHubSticker = renderStickerPng('/assets/stickers/accessibility_hub.webp', 'Accessibility & Sensory Hub');
 
 // User Provided Routine Replacements
-export const LaptopExecutionSticker = renderStickerPng('/assets/stickers/laptop_execution.png', 'Laptop Execution Sprint');
-export const ClipboardShutdownSticker = renderStickerPng('/assets/stickers/clipboard_shutdown.png', 'Daily Shutdown Prep');
-export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.png', 'Gold Star');
+export const LaptopExecutionSticker = renderStickerPng('/assets/stickers/laptop_execution.webp', 'Laptop Execution Sprint');
+export const ClipboardShutdownSticker = renderStickerPng('/assets/stickers/clipboard_shutdown.webp', 'Daily Shutdown Prep');
+export const GoldStarSticker = renderStickerPng('/assets/stickers/star_gold.webp', 'Gold Star');
 export const LockerScheduleSticker = renderThemedStickerPng(
-  '/assets/stickers/locker_schedule.png',
-  '/assets/stickers/turtle_bamboo_calendar.png',
+  '/assets/stickers/locker_schedule.webp',
+  '/assets/stickers/turtle_bamboo_calendar.webp',
   'Locker & Daily Schedule'
 );
 export const PajamasShortsSticker = renderThemedStickerPng(
-  '/assets/stickers/pajamas_shorts.png',
-  '/assets/stickers/turtle_starry_pajamas.png',
+  '/assets/stickers/pajamas_shorts.webp',
+  '/assets/stickers/turtle_starry_pajamas.webp',
   'Put on Pajamas'
 );
-export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.png', 'Bee Mascot Companion');
-export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.png', 'Shelly the Wise Turtle');
-export const FrogMascotSticker = renderStickerPng('/assets/stickers/frog_mascot.png', 'Hoppy the Tree Frog');
-export const TrainMascotSticker = renderStickerPng('/assets/stickers/train_mascot.png', 'Conductor Leo Mascot');
-export const SpaceMascotSticker = renderStickerPng('/assets/stickers/space_mascot.png', 'Orion the Astro-Pup Mascot');
-export const OceanMascotSticker = renderStickerPng('/assets/stickers/ocean_mascot.png', 'Scuba Diver Mascot');
-export const RacingMascotSticker = renderStickerPng('/assets/stickers/racing_mascot.png', 'Turbo Racer Mascot');
-export const FairytaleMascotSticker = renderStickerPng('/assets/stickers/fairytale_mascot.png', 'Stardust Unicorn Mascot');
-export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.png', 'Quiet Break Lily Pads');
-export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.png', 'Serene Lagoon & Reeds');
-export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.png', 'Smooth River Worry Stone');
-export const TurtleWaterDropSticker = renderStickerPng('/assets/stickers/turtle_leaf_water_drop.png', 'Leaf with Water Dewdrop');
-export const TurtleWelcomeSignSticker = renderStickerPng('/assets/stickers/turtle_welcome_sign.png', 'Welcome Sign with Vines');
-export const TurtlePottedFernSticker = renderStickerPng('/assets/stickers/turtle_potted_fern.png', 'Potted Fern Fronds');
-export const TurtleArchedBridgeSticker = renderStickerPng('/assets/stickers/turtle_arched_bridge.png', 'Arched Garden Bridge');
-export const TurtleTracksSticker = renderStickerPng('/assets/stickers/turtle_tracks.png', 'Webbed Turtle Footprints');
-export const TurtleSeedlingSticker = renderStickerPng('/assets/stickers/turtle_sprouting_seedling.png', 'Sprouting Seedling in Soil');
-export const TurtleEggNestSticker = renderStickerPng('/assets/stickers/turtle_egg_nest.png', 'Speckled Egg in Sand Nest');
-export const TurtleSwimmingSticker = renderStickerPng('/assets/stickers/turtle_swimming.png', 'Swimming Turtle (Pacing)');
-export const TurtleShellBackpackSticker = renderStickerPng('/assets/stickers/turtle_shell_backpack.png', 'Turtle Shell Backpack');
-export const TurtleBambooToothbrushSticker = renderStickerPng('/assets/stickers/turtle_bamboo_toothbrush.png', 'Bamboo Brush & Sea Sponge');
-export const TurtleCloverBerryFeastSticker = renderStickerPng('/assets/stickers/turtle_clover_berry_feast.png', 'Clover & Berry Feast');
-export const TurtleCozyHoodieSticker = renderStickerPng('/assets/stickers/turtle_cozy_hoodie.png', 'Cozy Turtle Hoodie');
-export const TurtleWarmSpringBathSticker = renderStickerPng('/assets/stickers/turtle_warm_spring_bath.png', 'Warm Spring Waterfall');
-export const TurtleTreehouseGazeboSticker = renderStickerPng('/assets/stickers/turtle_treehouse_gazebo.png', 'Canopy Treehouse Gazebo');
-export const TurtleBambooFerrySticker = renderStickerPng('/assets/stickers/turtle_bamboo_ferry.png', 'Tortoise Bamboo Ferry');
-export const TurtleFireflyLanternBookSticker = renderStickerPng('/assets/stickers/turtle_firefly_lantern_book.png', 'Firefly Lantern & Scroll');
-export const TurtlePebblePaintPaletteSticker = renderStickerPng('/assets/stickers/turtle_pebble_paint_palette.png', 'River Pebble Paint Palette');
-export const TurtleHollowLogSlideSticker = renderStickerPng('/assets/stickers/turtle_hollow_log_slide.png', 'Hollow Log Slide');
-export const TurtleDawnBellClockSticker = renderStickerPng('/assets/stickers/turtle_dawn_bell_clock.png', 'Bamboo Dawn Bell');
-export const TurtleLeafSoapWashSticker = renderStickerPng('/assets/stickers/turtle_leaf_soap_wash.png', 'Herbal Leaf Soap & Basin');
-export const TurtleLotusDinnerBowlSticker = renderStickerPng('/assets/stickers/turtle_lotus_dinner_bowl.png', 'Lotus Leaf Soup Bowl');
-export const TurtleGardenFruitSnackSticker = renderStickerPng('/assets/stickers/turtle_garden_fruit_snack.png', 'Sanctuary Fruit Basket');
-export const TurtleSeagrassToyBoxSticker = renderStickerPng('/assets/stickers/turtle_seagrass_toy_box.png', 'Seagrass Basket & Plush Turtle');
-export const TurtleBambooPencilSticker = renderStickerPng('/assets/stickers/turtle_bamboo_pencil.png', 'Bamboo Pencil & Leaf Pad');
-export const TurtleShellHeadphonesSticker = renderStickerPng('/assets/stickers/turtle_shell_headphones.png', 'Turtle Shell Ear Defenders');
-export const TurtleSandTimerSticker = renderStickerPng('/assets/stickers/turtle_sand_timer.png', 'Sanctuary Sand Timer');
-export const TurtleBambooSpoonsSticker = renderStickerPng('/assets/stickers/turtle_bamboo_spoons.png', 'Three Bamboo Spoons');
-export const TurtleLotusTrophySticker = renderStickerPng('/assets/stickers/turtle_lotus_trophy.png', 'Golden Lotus & Shell Trophy');
-export const TurtleBambooRestroomSticker = renderStickerPng('/assets/stickers/turtle_bamboo_restroom.png', 'Bamboo Washroom & Stones');
-export const TurtleStarryPajamasSticker = renderStickerPng('/assets/stickers/turtle_starry_pajamas.png', 'Cozy Starry Turtle Pajamas');
-export const TurtleLagoonMoonSticker = renderStickerPng('/assets/stickers/turtle_lagoon_moon.png', 'Crescent Moon Over Lagoon');
-export const TurtleWoodenWheelSticker = renderStickerPng('/assets/stickers/turtle_wooden_wheel.png', 'Wooden Lotus Spinner Wheel');
-export const TurtleBambooThermometerSticker = renderStickerPng('/assets/stickers/turtle_bamboo_thermometer.png', 'Bamboo Gauge & Heart');
-export const TurtleLeafVitaminsSticker = renderStickerPng('/assets/stickers/turtle_leaf_vitamins.png', 'Leaf Dish & Vitamins');
-export const TurtleGuardianShieldSosSticker = renderStickerPng('/assets/stickers/turtle_guardian_shield_sos.png', 'Guardian Turtle Shell Shield');
-export const TurtleWoodenIdBadgeSticker = renderStickerPng('/assets/stickers/turtle_wooden_id_badge.png', 'Wooden Explorer ID Badge');
-export const TurtleBambooTabletSticker = renderStickerPng('/assets/stickers/turtle_bamboo_tablet.png', 'Bamboo-Framed Tablet');
-export const TurtleLeafSpeechBubblesSticker = renderStickerPng('/assets/stickers/turtle_leaf_speech_bubbles.png', 'Leafy Speech Bubbles');
-export const TurtleBambooKeyboardSticker = renderStickerPng('/assets/stickers/turtle_bamboo_keyboard.png', 'Bamboo & Sage Keyboard');
-export const TurtlePondFidgetBubblesSticker = renderStickerPng('/assets/stickers/turtle_pond_fidget_bubbles.png', 'Pond Dewdrop Bubbles');
-export const TurtleBotanicalFolderSticker = renderStickerPng('/assets/stickers/turtle_botanical_folder.png', 'Botanical Field Folder');
-export const TurtleTerrariumScienceSticker = renderStickerPng('/assets/stickers/turtle_terrarium_science.png', 'Moss Terrarium & Magnifier');
-export const TurtleBambooWindChimesSticker = renderStickerPng('/assets/stickers/turtle_bamboo_wind_chimes.png', 'Bamboo Wind Chimes');
-export const TurtleWoodenPuzzleSticker = renderStickerPng('/assets/stickers/turtle_wooden_puzzle.png', 'Wooden Shell Puzzle Piece');
-export const TurtleLeafCheckmarkSticker = renderStickerPng('/assets/stickers/turtle_leaf_checkmark.png', 'Sanctuary Leaf Checkmark');
-export const TurtleMossCottageHomeSticker = renderStickerPng('/assets/stickers/turtle_moss_cottage_home.png', 'Moss-Roof Sanctuary Cottage');
-export const TurtleWoodenLeafCartSticker = renderStickerPng('/assets/stickers/turtle_wooden_leaf_cart.png', 'Leaf-Canopy Wooden Cart');
-export const TurtleMeadowSunshineSticker = renderStickerPng('/assets/stickers/turtle_meadow_sunshine.png', 'Warm Sun Over Lily-Pad Pond');
-export const TurtleHatchlingPetCareSticker = renderStickerPng('/assets/stickers/turtle_hatchling_pet_care.png', 'Baby Hatchling & Snail Friend');
-export const TurtleGardenSandwichSticker = renderStickerPng('/assets/stickers/turtle_garden_sandwich.png', 'Garden Herb Sandwich on Board');
-export const TurtleBambooDrinkCupSticker = renderStickerPng('/assets/stickers/turtle_bamboo_drink_cup.png', 'Bamboo Tumbler with Leaf Straw');
-export const TurtleHerbalTeaMugSticker = renderStickerPng('/assets/stickers/turtle_herbal_tea_mug.png', 'Carved Wooden Herbal Tea Mug');
-export const TurtleReedLaundryBasketSticker = renderStickerPng('/assets/stickers/turtle_reed_laundry_basket.png', 'Woven Reed Laundry Basket');
-export const TurtleBambooCalendarSticker = renderStickerPng('/assets/stickers/turtle_bamboo_calendar.png', 'Hanging Bamboo Checklist Board');
-export const TurtleLagoonBreezeBreathSticker = renderStickerPng('/assets/stickers/turtle_lagoon_breeze_breath.png', 'Lagoon Mist & Lotus Breeze');
-export const TurtleMossBedSleepSticker = renderStickerPng('/assets/stickers/turtle_moss_bed_sleep.png', 'Cozy Wooden Leaf-Blanket Bed');
-export const TurtleReedExplorerShoesSticker = renderStickerPng('/assets/stickers/turtle_reed_explorer_shoes.png', 'Woven Reed Explorer Slip-On Shoes');
-export const TurtleBambooCutlerySticker = renderStickerPng('/assets/stickers/turtle_bamboo_cutlery.png', 'Carved Bamboo Fork & Spoon Set');
-export const TurtleBerryHoneyTreatSticker = renderStickerPng('/assets/stickers/turtle_berry_honey_treat.png', 'Wrapped Leaf-Berry Sweet Snack');
-export const TurtleShellWallClockSticker = renderStickerPng('/assets/stickers/turtle_shell_wall_clock.png', 'Turtle-Shell Wall Clock with Leaf Hands');
-export const TurtlePondRippleWaveSticker = renderStickerPng('/assets/stickers/turtle_pond_ripple_wave.png', 'Gentle Pond Ripple & Lily Pad');
-export const TurtleBambooEnergyMeterSticker = renderStickerPng('/assets/stickers/turtle_bamboo_energy_meter.png', 'Bamboo Energy Tube Gauge');
-export const TurtleWhisperingReedQuietSticker = renderStickerPng('/assets/stickers/turtle_whispering_reed_quiet.png', 'Peaceful Whispering Reeds & Ripples');
-export const TurtleHoneySeedBarSticker = renderStickerPng('/assets/stickers/turtle_honey_seed_bar.png', 'Honey & Seed Snack Bar');
-export const TurtleLotusFloatingLanternSticker = renderStickerPng('/assets/stickers/turtle_lotus_floating_lantern.png', 'Hanging Lotus Blossom Lantern');
-export const TurtleWovenGatheringCartSticker = renderStickerPng('/assets/stickers/turtle_woven_gathering_cart.png', 'Woven Gathering Cart on Wheels');
-export const TurtleDragonflyGlideSticker = renderStickerPng('/assets/stickers/turtle_dragonfly_glide.png', 'Soaring Dragonfly over Reeds');
-export const TurtleTimberExplorerTrunkSticker = renderStickerPng('/assets/stickers/turtle_timber_explorer_trunk.png', 'Explorer Timber Travel Trunk');
-export const TurtleWoodenTokenPassSticker = renderStickerPng('/assets/stickers/turtle_wooden_token_pass.png', 'Carved Wooden Token Pass');
-export const TurtleShadedCanopyLampSticker = renderStickerPng('/assets/stickers/turtle_shaded_canopy_lamp.png', 'Shaded Firefly Canopy Lamp');
-export const TurtleSoundSofteningShellSticker = renderStickerPng('/assets/stickers/turtle_sound_softening_shell.png', 'Sound-Softening Spiral Shell');
-export const TurtleCozyShellRetreatSticker = renderStickerPng('/assets/stickers/turtle_cozy_shell_retreat.png', 'Cozy Shell Retreat');
-export const TurtleMossPlayBallSticker = renderStickerPng('/assets/stickers/turtle_moss_play_ball.png', 'Woven Moss Play Ball');
-export const TurtleWaterChestnutTreatSticker = renderStickerPng('/assets/stickers/turtle_water_chestnut_treat.png', 'Water Chestnut Treat');
-export const TurtleWebbedPawStampSticker = renderStickerPng('/assets/stickers/turtle_webbed_paw_stamp.png', 'Webbed Turtle Paw Stamp');
-export const TurtleLogBonsaiPlanterSticker = renderStickerPng('/assets/stickers/turtle_log_bonsai_planter.png', 'Log Bonsai Planter');
-export const TurtleGroomingCombMirrorSticker = renderStickerPng('/assets/stickers/turtle_grooming_comb_mirror.png', 'Shell Grooming Comb & Mirror');
-export const TurtleElderHealerPouchSticker = renderStickerPng('/assets/stickers/turtle_elder_healer_pouch.png', 'Elder Healer Herb Pouch');
-export const TurtleSpringLagoonPoolSticker = renderStickerPng('/assets/stickers/turtle_spring_lagoon_pool.png', 'Spring Water Basin Lagoon');
-export const TurtleShadowPuppetTheaterSticker = renderStickerPng('/assets/stickers/turtle_shadow_puppet_theater.png', 'Shadow Silhouette Theater');
-export const TurtleRiverPebbleBowlingSticker = renderStickerPng('/assets/stickers/turtle_river_pebble_bowling.png', 'River Pebble Bowling');
-export const TurtleCanopyReedTentSticker = renderStickerPng('/assets/stickers/turtle_canopy_reed_tent.png', 'Canopy Reed Tent');
-export const TurtleHeritageArchivePavillionSticker = renderStickerPng('/assets/stickers/turtle_heritage_archive_pavillion.png', 'Heritage Archive Pavilion');
-export const TurtleMineralPolishingBasinSticker = renderStickerPng('/assets/stickers/turtle_mineral_polishing_basin.png', 'Mineral Polishing Shell Basin');
-export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.png', 'Rocket Adventure Spotlight');
+export const BeeMascotSticker = renderStickerPng('/assets/stickers/bee_mascot.webp', 'Bee Mascot Companion');
+export const TurtleMascotSticker = renderStickerPng('/assets/stickers/turtle_mascot.webp', 'Shelly the Wise Turtle');
+export const FrogMascotSticker = renderStickerPng('/assets/stickers/frog_mascot.webp', 'Hoppy the Tree Frog');
+export const TrainMascotSticker = renderStickerPng('/assets/stickers/train_mascot.webp', 'Conductor Leo Mascot');
+export const SpaceMascotSticker = renderStickerPng('/assets/stickers/space_mascot.webp', 'Orion the Astro-Pup Mascot');
+export const OceanMascotSticker = renderStickerPng('/assets/stickers/ocean_mascot.webp', 'Scuba Diver Mascot');
+export const RacingMascotSticker = renderStickerPng('/assets/stickers/racing_mascot.webp', 'Turbo Racer Mascot');
+export const FairytaleMascotSticker = renderStickerPng('/assets/stickers/fairytale_mascot.webp', 'Stardust Unicorn Mascot');
+export const TurtleLilyPadsSticker = renderStickerPng('/assets/stickers/turtle_lily_pads.webp', 'Quiet Break Lily Pads');
+export const TurtlePondReedsSticker = renderStickerPng('/assets/stickers/turtle_pond_reeds.webp', 'Serene Lagoon & Reeds');
+export const TurtleRiverStoneSticker = renderStickerPng('/assets/stickers/turtle_river_stone.webp', 'Smooth River Worry Stone');
+export const TurtleWaterDropSticker = renderStickerPng('/assets/stickers/turtle_leaf_water_drop.webp', 'Leaf with Water Dewdrop');
+export const TurtleWelcomeSignSticker = renderStickerPng('/assets/stickers/turtle_welcome_sign.webp', 'Welcome Sign with Vines');
+export const TurtlePottedFernSticker = renderStickerPng('/assets/stickers/turtle_potted_fern.webp', 'Potted Fern Fronds');
+export const TurtleArchedBridgeSticker = renderStickerPng('/assets/stickers/turtle_arched_bridge.webp', 'Arched Garden Bridge');
+export const TurtleTracksSticker = renderStickerPng('/assets/stickers/turtle_tracks.webp', 'Webbed Turtle Footprints');
+export const TurtleSeedlingSticker = renderStickerPng('/assets/stickers/turtle_sprouting_seedling.webp', 'Sprouting Seedling in Soil');
+export const TurtleEggNestSticker = renderStickerPng('/assets/stickers/turtle_egg_nest.webp', 'Speckled Egg in Sand Nest');
+export const TurtleSwimmingSticker = renderStickerPng('/assets/stickers/turtle_swimming.webp', 'Swimming Turtle (Pacing)');
+export const TurtleShellBackpackSticker = renderStickerPng('/assets/stickers/turtle_shell_backpack.webp', 'Turtle Shell Backpack');
+export const TurtleBambooToothbrushSticker = renderStickerPng('/assets/stickers/turtle_bamboo_toothbrush.webp', 'Bamboo Brush & Sea Sponge');
+export const TurtleCloverBerryFeastSticker = renderStickerPng('/assets/stickers/turtle_clover_berry_feast.webp', 'Clover & Berry Feast');
+export const TurtleCozyHoodieSticker = renderStickerPng('/assets/stickers/turtle_cozy_hoodie.webp', 'Cozy Turtle Hoodie');
+export const TurtleWarmSpringBathSticker = renderStickerPng('/assets/stickers/turtle_warm_spring_bath.webp', 'Warm Spring Waterfall');
+export const TurtleTreehouseGazeboSticker = renderStickerPng('/assets/stickers/turtle_treehouse_gazebo.webp', 'Canopy Treehouse Gazebo');
+export const TurtleBambooFerrySticker = renderStickerPng('/assets/stickers/turtle_bamboo_ferry.webp', 'Tortoise Bamboo Ferry');
+export const TurtleFireflyLanternBookSticker = renderStickerPng('/assets/stickers/turtle_firefly_lantern_book.webp', 'Firefly Lantern & Scroll');
+export const TurtlePebblePaintPaletteSticker = renderStickerPng('/assets/stickers/turtle_pebble_paint_palette.webp', 'River Pebble Paint Palette');
+export const TurtleHollowLogSlideSticker = renderStickerPng('/assets/stickers/turtle_hollow_log_slide.webp', 'Hollow Log Slide');
+export const TurtleDawnBellClockSticker = renderStickerPng('/assets/stickers/turtle_dawn_bell_clock.webp', 'Bamboo Dawn Bell');
+export const TurtleLeafSoapWashSticker = renderStickerPng('/assets/stickers/turtle_leaf_soap_wash.webp', 'Herbal Leaf Soap & Basin');
+export const TurtleLotusDinnerBowlSticker = renderStickerPng('/assets/stickers/turtle_lotus_dinner_bowl.webp', 'Lotus Leaf Soup Bowl');
+export const TurtleGardenFruitSnackSticker = renderStickerPng('/assets/stickers/turtle_garden_fruit_snack.webp', 'Sanctuary Fruit Basket');
+export const TurtleSeagrassToyBoxSticker = renderStickerPng('/assets/stickers/turtle_seagrass_toy_box.webp', 'Seagrass Basket & Plush Turtle');
+export const TurtleBambooPencilSticker = renderStickerPng('/assets/stickers/turtle_bamboo_pencil.webp', 'Bamboo Pencil & Leaf Pad');
+export const TurtleShellHeadphonesSticker = renderStickerPng('/assets/stickers/turtle_shell_headphones.webp', 'Turtle Shell Ear Defenders');
+export const TurtleSandTimerSticker = renderStickerPng('/assets/stickers/turtle_sand_timer.webp', 'Sanctuary Sand Timer');
+export const TurtleBambooSpoonsSticker = renderStickerPng('/assets/stickers/turtle_bamboo_spoons.webp', 'Three Bamboo Spoons');
+export const TurtleLotusTrophySticker = renderStickerPng('/assets/stickers/turtle_lotus_trophy.webp', 'Golden Lotus & Shell Trophy');
+export const TurtleBambooRestroomSticker = renderStickerPng('/assets/stickers/turtle_bamboo_restroom.webp', 'Bamboo Washroom & Stones');
+export const TurtleStarryPajamasSticker = renderStickerPng('/assets/stickers/turtle_starry_pajamas.webp', 'Cozy Starry Turtle Pajamas');
+export const TurtleLagoonMoonSticker = renderStickerPng('/assets/stickers/turtle_lagoon_moon.webp', 'Crescent Moon Over Lagoon');
+export const TurtleWoodenWheelSticker = renderStickerPng('/assets/stickers/turtle_wooden_wheel.webp', 'Wooden Lotus Spinner Wheel');
+export const TurtleBambooThermometerSticker = renderStickerPng('/assets/stickers/turtle_bamboo_thermometer.webp', 'Bamboo Gauge & Heart');
+export const TurtleLeafVitaminsSticker = renderStickerPng('/assets/stickers/turtle_leaf_vitamins.webp', 'Leaf Dish & Vitamins');
+export const TurtleGuardianShieldSosSticker = renderStickerPng('/assets/stickers/turtle_guardian_shield_sos.webp', 'Guardian Turtle Shell Shield');
+export const TurtleWoodenIdBadgeSticker = renderStickerPng('/assets/stickers/turtle_wooden_id_badge.webp', 'Wooden Explorer ID Badge');
+export const TurtleBambooTabletSticker = renderStickerPng('/assets/stickers/turtle_bamboo_tablet.webp', 'Bamboo-Framed Tablet');
+export const TurtleLeafSpeechBubblesSticker = renderStickerPng('/assets/stickers/turtle_leaf_speech_bubbles.webp', 'Leafy Speech Bubbles');
+export const TurtleBambooKeyboardSticker = renderStickerPng('/assets/stickers/turtle_bamboo_keyboard.webp', 'Bamboo & Sage Keyboard');
+export const TurtlePondFidgetBubblesSticker = renderStickerPng('/assets/stickers/turtle_pond_fidget_bubbles.webp', 'Pond Dewdrop Bubbles');
+export const TurtleBotanicalFolderSticker = renderStickerPng('/assets/stickers/turtle_botanical_folder.webp', 'Botanical Field Folder');
+export const TurtleTerrariumScienceSticker = renderStickerPng('/assets/stickers/turtle_terrarium_science.webp', 'Moss Terrarium & Magnifier');
+export const TurtleBambooWindChimesSticker = renderStickerPng('/assets/stickers/turtle_bamboo_wind_chimes.webp', 'Bamboo Wind Chimes');
+export const TurtleWoodenPuzzleSticker = renderStickerPng('/assets/stickers/turtle_wooden_puzzle.webp', 'Wooden Shell Puzzle Piece');
+export const TurtleLeafCheckmarkSticker = renderStickerPng('/assets/stickers/turtle_leaf_checkmark.webp', 'Sanctuary Leaf Checkmark');
+export const TurtleMossCottageHomeSticker = renderStickerPng('/assets/stickers/turtle_moss_cottage_home.webp', 'Moss-Roof Sanctuary Cottage');
+export const TurtleWoodenLeafCartSticker = renderStickerPng('/assets/stickers/turtle_wooden_leaf_cart.webp', 'Leaf-Canopy Wooden Cart');
+export const TurtleMeadowSunshineSticker = renderStickerPng('/assets/stickers/turtle_meadow_sunshine.webp', 'Warm Sun Over Lily-Pad Pond');
+export const TurtleHatchlingPetCareSticker = renderStickerPng('/assets/stickers/turtle_hatchling_pet_care.webp', 'Baby Hatchling & Snail Friend');
+export const TurtleGardenSandwichSticker = renderStickerPng('/assets/stickers/turtle_garden_sandwich.webp', 'Garden Herb Sandwich on Board');
+export const TurtleBambooDrinkCupSticker = renderStickerPng('/assets/stickers/turtle_bamboo_drink_cup.webp', 'Bamboo Tumbler with Leaf Straw');
+export const TurtleHerbalTeaMugSticker = renderStickerPng('/assets/stickers/turtle_herbal_tea_mug.webp', 'Carved Wooden Herbal Tea Mug');
+export const TurtleReedLaundryBasketSticker = renderStickerPng('/assets/stickers/turtle_reed_laundry_basket.webp', 'Woven Reed Laundry Basket');
+export const TurtleBambooCalendarSticker = renderStickerPng('/assets/stickers/turtle_bamboo_calendar.webp', 'Hanging Bamboo Checklist Board');
+export const TurtleLagoonBreezeBreathSticker = renderStickerPng('/assets/stickers/turtle_lagoon_breeze_breath.webp', 'Lagoon Mist & Lotus Breeze');
+export const TurtleMossBedSleepSticker = renderStickerPng('/assets/stickers/turtle_moss_bed_sleep.webp', 'Cozy Wooden Leaf-Blanket Bed');
+export const TurtleReedExplorerShoesSticker = renderStickerPng('/assets/stickers/turtle_reed_explorer_shoes.webp', 'Woven Reed Explorer Slip-On Shoes');
+export const TurtleBambooCutlerySticker = renderStickerPng('/assets/stickers/turtle_bamboo_cutlery.webp', 'Carved Bamboo Fork & Spoon Set');
+export const TurtleBerryHoneyTreatSticker = renderStickerPng('/assets/stickers/turtle_berry_honey_treat.webp', 'Wrapped Leaf-Berry Sweet Snack');
+export const TurtleShellWallClockSticker = renderStickerPng('/assets/stickers/turtle_shell_wall_clock.webp', 'Turtle-Shell Wall Clock with Leaf Hands');
+export const TurtlePondRippleWaveSticker = renderStickerPng('/assets/stickers/turtle_pond_ripple_wave.webp', 'Gentle Pond Ripple & Lily Pad');
+export const TurtleBambooEnergyMeterSticker = renderStickerPng('/assets/stickers/turtle_bamboo_energy_meter.webp', 'Bamboo Energy Tube Gauge');
+export const TurtleWhisperingReedQuietSticker = renderStickerPng('/assets/stickers/turtle_whispering_reed_quiet.webp', 'Peaceful Whispering Reeds & Ripples');
+export const TurtleHoneySeedBarSticker = renderStickerPng('/assets/stickers/turtle_honey_seed_bar.webp', 'Honey & Seed Snack Bar');
+export const TurtleLotusFloatingLanternSticker = renderStickerPng('/assets/stickers/turtle_lotus_floating_lantern.webp', 'Hanging Lotus Blossom Lantern');
+export const TurtleWovenGatheringCartSticker = renderStickerPng('/assets/stickers/turtle_woven_gathering_cart.webp', 'Woven Gathering Cart on Wheels');
+export const TurtleDragonflyGlideSticker = renderStickerPng('/assets/stickers/turtle_dragonfly_glide.webp', 'Soaring Dragonfly over Reeds');
+export const TurtleTimberExplorerTrunkSticker = renderStickerPng('/assets/stickers/turtle_timber_explorer_trunk.webp', 'Explorer Timber Travel Trunk');
+export const TurtleWoodenTokenPassSticker = renderStickerPng('/assets/stickers/turtle_wooden_token_pass.webp', 'Carved Wooden Token Pass');
+export const TurtleShadedCanopyLampSticker = renderStickerPng('/assets/stickers/turtle_shaded_canopy_lamp.webp', 'Shaded Firefly Canopy Lamp');
+export const TurtleSoundSofteningShellSticker = renderStickerPng('/assets/stickers/turtle_sound_softening_shell.webp', 'Sound-Softening Spiral Shell');
+export const TurtleCozyShellRetreatSticker = renderStickerPng('/assets/stickers/turtle_cozy_shell_retreat.webp', 'Cozy Shell Retreat');
+export const TurtleMossPlayBallSticker = renderStickerPng('/assets/stickers/turtle_moss_play_ball.webp', 'Woven Moss Play Ball');
+export const TurtleWaterChestnutTreatSticker = renderStickerPng('/assets/stickers/turtle_water_chestnut_treat.webp', 'Water Chestnut Treat');
+export const TurtleWebbedPawStampSticker = renderStickerPng('/assets/stickers/turtle_webbed_paw_stamp.webp', 'Webbed Turtle Paw Stamp');
+export const TurtleLogBonsaiPlanterSticker = renderStickerPng('/assets/stickers/turtle_log_bonsai_planter.webp', 'Log Bonsai Planter');
+export const TurtleGroomingCombMirrorSticker = renderStickerPng('/assets/stickers/turtle_grooming_comb_mirror.webp', 'Shell Grooming Comb & Mirror');
+export const TurtleElderHealerPouchSticker = renderStickerPng('/assets/stickers/turtle_elder_healer_pouch.webp', 'Elder Healer Herb Pouch');
+export const TurtleSpringLagoonPoolSticker = renderStickerPng('/assets/stickers/turtle_spring_lagoon_pool.webp', 'Spring Water Basin Lagoon');
+export const TurtleShadowPuppetTheaterSticker = renderStickerPng('/assets/stickers/turtle_shadow_puppet_theater.webp', 'Shadow Silhouette Theater');
+export const TurtleRiverPebbleBowlingSticker = renderStickerPng('/assets/stickers/turtle_river_pebble_bowling.webp', 'River Pebble Bowling');
+export const TurtleCanopyReedTentSticker = renderStickerPng('/assets/stickers/turtle_canopy_reed_tent.webp', 'Canopy Reed Tent');
+export const TurtleHeritageArchivePavillionSticker = renderStickerPng('/assets/stickers/turtle_heritage_archive_pavillion.webp', 'Heritage Archive Pavilion');
+export const TurtleMineralPolishingBasinSticker = renderStickerPng('/assets/stickers/turtle_mineral_polishing_basin.webp', 'Mineral Polishing Shell Basin');
+export const RocketAdventureSticker = renderStickerPng('/assets/stickers/rocket_adventure.webp', 'Rocket Adventure Spotlight');
 
 // User Provided Rewards & Milestone Badges
-export const GuitarRockerSticker = renderStickerPng('/assets/stickers/guitar_rocker.png', 'Electric Guitar');
-export const DinoRexSticker = renderStickerPng('/assets/stickers/dino_rex.png', 'Friendly Dinosaur');
-export const AstronautHelmetSticker = renderStickerPng('/assets/stickers/astronaut_helmet.png', 'Cosmic Astronaut Helmet');
-export const MagicWandSticker = renderStickerPng('/assets/stickers/magic_wand.png', 'Magic Star Wand');
-export const GoldenTrainSticker = renderStickerPng('/assets/stickers/golden_train.png', 'Golden Locomotive Train');
-export const RainbowHeartSticker = renderStickerPng('/assets/stickers/rainbow_heart.png', 'Rainbow Heart');
-export const MorningSunriseSticker = renderStickerPng('/assets/stickers/morning_sunrise.png', 'Morning Sunrise');
+export const GuitarRockerSticker = renderStickerPng('/assets/stickers/guitar_rocker.webp', 'Electric Guitar');
+export const DinoRexSticker = renderStickerPng('/assets/stickers/dino_rex.webp', 'Friendly Dinosaur');
+export const AstronautHelmetSticker = renderStickerPng('/assets/stickers/astronaut_helmet.webp', 'Cosmic Astronaut Helmet');
+export const MagicWandSticker = renderStickerPng('/assets/stickers/magic_wand.webp', 'Magic Star Wand');
+export const GoldenTrainSticker = renderStickerPng('/assets/stickers/golden_train.webp', 'Golden Locomotive Train');
+export const RainbowHeartSticker = renderStickerPng('/assets/stickers/rainbow_heart.webp', 'Rainbow Heart');
+export const MorningSunriseSticker = renderStickerPng('/assets/stickers/morning_sunrise.webp', 'Morning Sunrise');
 
 // Caregiver Tour & Section Stickers
-export const SatelliteDishSticker = renderStickerPng('/assets/stickers/satellite_dish.png', 'Satellite Dish Live Status');
-export const SpokenMegaphoneSticker = renderStickerPng('/assets/stickers/spoken_megaphone.png', 'Spoken Megaphone Nudge');
-export const VoiceMicrophoneSticker = renderStickerPng('/assets/stickers/voice_microphone.png', 'Voice Customization Microphone');
-export const OfflineStorageSticker = renderStickerPng('/assets/stickers/offline_storage.png', 'Offline Storage Readiness');
-export const SecurityLockSticker = renderStickerPng('/assets/stickers/security_lock.png', 'PIN Security Lock');
+export const SatelliteDishSticker = renderStickerPng('/assets/stickers/satellite_dish.webp', 'Satellite Dish Live Status');
+export const SpokenMegaphoneSticker = renderStickerPng('/assets/stickers/spoken_megaphone.webp', 'Spoken Megaphone Nudge');
+export const VoiceMicrophoneSticker = renderStickerPng('/assets/stickers/voice_microphone.webp', 'Voice Customization Microphone');
+export const OfflineStorageSticker = renderStickerPng('/assets/stickers/offline_storage.webp', 'Offline Storage Readiness');
+export const SecurityLockSticker = renderStickerPng('/assets/stickers/security_lock.webp', 'PIN Security Lock');
 
 // Table A Confirmed Existing Illustrated Stickers
 export const BookStorySticker = renderThemedStickerPng(
-  '/assets/stickers/passport_book.png',
-  '/assets/stickers/turtle_firefly_lantern_book.png',
+  '/assets/stickers/passport_book.webp',
+  '/assets/stickers/turtle_firefly_lantern_book.webp',
   'Storybooks Reading'
 );
-export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_break.png', 'Cozy Armchair Break');
+export const CozyArmchairSticker = renderStickerPng('/assets/stickers/fav_quiet_break.webp', 'Cozy Armchair Break');
 export const CozyBedSticker = renderThemedStickerPng(
-  '/assets/stickers/bedtime_sleep.png',
-  '/assets/stickers/turtle_moss_bed_sleep.png',
+  '/assets/stickers/bedtime_sleep.webp',
+  '/assets/stickers/turtle_moss_bed_sleep.webp',
   'Cozy Bedroom Bed'
 );
-export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.png', 'Sunny Yard Green Tree');
+export const GreenTreeSticker = renderStickerPng('/assets/stickers/fav_outside.webp', 'Sunny Yard Green Tree');
 export const GameControllerSticker = renderThemedStickerPng(
-  '/assets/stickers/game_controller.png',
-  '/assets/stickers/turtle_game_controller.png',
+  '/assets/stickers/game_controller.webp',
+  '/assets/stickers/turtle_game_controller.webp',
   'Video Game Controller',
-  '/assets/stickers/dino_game_controller.png',
-  '/assets/stickers/frog_game_controller.png',
-  '/assets/stickers/train_game_controller.png',
-  '/assets/stickers/space_game_controller.png'
+  '/assets/stickers/dino_game_controller.webp',
+  '/assets/stickers/frog_game_controller.webp',
+  '/assets/stickers/train_game_controller.webp',
+  '/assets/stickers/space_game_controller.webp'
 );
 export const BirthdayGiftBoxSticker = renderThemedStickerPng(
-  '/assets/stickers/birthday_gift_box.png',
-  '/assets/stickers/turtle_birthday_gift_box.png',
+  '/assets/stickers/birthday_gift_box.webp',
+  '/assets/stickers/turtle_birthday_gift_box.webp',
   'Birthday Gift Box',
-  '/assets/stickers/dino_birthday_gift_box.png',
-  '/assets/stickers/frog_birthday_gift_box.png',
-  '/assets/stickers/train_birthday_gift_box.png',
-  '/assets/stickers/space_birthday_gift_box.png'
+  '/assets/stickers/dino_birthday_gift_box.webp',
+  '/assets/stickers/frog_birthday_gift_box.webp',
+  '/assets/stickers/train_birthday_gift_box.webp',
+  '/assets/stickers/space_birthday_gift_box.webp'
 );
 export const BirthdayCakeSliceSticker = renderThemedStickerPng(
-  '/assets/stickers/birthday_cake_slice.png',
-  '/assets/stickers/turtle_birthday_cake_slice.png',
+  '/assets/stickers/birthday_cake_slice.webp',
+  '/assets/stickers/turtle_birthday_cake_slice.webp',
   'Birthday Cake Slice',
-  '/assets/stickers/dino_birthday_cake_slice.png',
-  '/assets/stickers/frog_birthday_cake_slice.png',
-  '/assets/stickers/train_birthday_cake_slice.png',
-  '/assets/stickers/space_birthday_cake_slice.png'
+  '/assets/stickers/dino_birthday_cake_slice.webp',
+  '/assets/stickers/frog_birthday_cake_slice.webp',
+  '/assets/stickers/train_birthday_cake_slice.webp',
+  '/assets/stickers/space_birthday_cake_slice.webp'
 );
 export const WaterBottleSticker = renderThemedStickerPng(
-  '/assets/stickers/water_bottle.png',
-  '/assets/stickers/turtle_water_bottle.png',
+  '/assets/stickers/water_bottle.webp',
+  '/assets/stickers/turtle_water_bottle.webp',
   'School Water Bottle',
-  '/assets/stickers/dino_water_bottle.png',
-  '/assets/stickers/frog_water_bottle.png',
-  '/assets/stickers/train_water_bottle.png',
-  '/assets/stickers/space_water_bottle.png'
+  '/assets/stickers/dino_water_bottle.webp',
+  '/assets/stickers/frog_water_bottle.webp',
+  '/assets/stickers/train_water_bottle.webp',
+  '/assets/stickers/space_water_bottle.webp'
 );
 export const PantsFoldedSticker = renderThemedStickerPng(
-  '/assets/stickers/pants_folded.png',
-  '/assets/stickers/turtle_pants_folded.png',
+  '/assets/stickers/pants_folded.webp',
+  '/assets/stickers/turtle_pants_folded.webp',
   'Folded Pants',
-  '/assets/stickers/dino_pants_folded.png',
-  '/assets/stickers/frog_pants_folded.png',
-  '/assets/stickers/train_pants_folded.png',
-  '/assets/stickers/space_pants_folded.png'
+  '/assets/stickers/dino_pants_folded.webp',
+  '/assets/stickers/frog_pants_folded.webp',
+  '/assets/stickers/train_pants_folded.webp',
+  '/assets/stickers/space_pants_folded.webp'
 );
 export const BirthdayCardSticker = renderThemedStickerPng(
-  '/assets/stickers/birthday_card.png',
-  '/assets/stickers/turtle_birthday_card.png',
+  '/assets/stickers/birthday_card.webp',
+  '/assets/stickers/turtle_birthday_card.webp',
   'Birthday Card',
-  '/assets/stickers/dino_birthday_card.png',
-  '/assets/stickers/frog_birthday_card.png',
-  '/assets/stickers/train_birthday_card.png',
-  '/assets/stickers/space_birthday_card.png'
+  '/assets/stickers/dino_birthday_card.webp',
+  '/assets/stickers/frog_birthday_card.webp',
+  '/assets/stickers/train_birthday_card.webp',
+  '/assets/stickers/space_birthday_card.webp'
 );
-export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs');
-export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.png', 'Cozy Rest Nap');
-export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.png', 'Feeling Unwell Fever');
+export const LungsBreathingSticker = renderStickerPng('/assets/stickers/coping_lungs_breathing.webp', 'Deep Breathing Lungs');
+export const RestNapSticker = renderStickerPng('/assets/stickers/fav_rest_tired.webp', 'Cozy Rest Nap');
+export const SickFeverSticker = renderStickerPng('/assets/stickers/feelings_thermometer.webp', 'Feeling Unwell Fever');
 
 // Table B User-Provided Outings, Coping, Pets & Wellness Stickers
-export const PlanetSaturnSticker = renderStickerPng('/assets/stickers/planet_saturn.png', 'Planet Saturn');
-export const AutumnLeafSticker = renderStickerPng('/assets/stickers/autumn_leaf.png', 'Autumn Leaf');
+export const PlanetSaturnSticker = renderStickerPng('/assets/stickers/planet_saturn.webp', 'Planet Saturn');
+export const AutumnLeafSticker = renderStickerPng('/assets/stickers/autumn_leaf.webp', 'Autumn Leaf');
 export const OceanWaveSticker = renderThemedStickerPng(
-  '/assets/stickers/ocean_wave.png',
-  '/assets/stickers/turtle_pond_ripple_wave.png',
+  '/assets/stickers/ocean_wave.webp',
+  '/assets/stickers/turtle_pond_ripple_wave.webp',
   'Ocean Wave Overwhelmed'
 );
 export const BatteryMeterSticker = renderThemedStickerPng(
-  '/assets/stickers/battery_meter.png',
-  '/assets/stickers/turtle_bamboo_energy_meter.png',
+  '/assets/stickers/battery_meter.webp',
+  '/assets/stickers/turtle_bamboo_energy_meter.webp',
   'Battery Meter'
 );
 export const PawPrintSticker = renderThemedStickerPng(
-  '/assets/stickers/paw_print.png',
-  '/assets/stickers/turtle_webbed_paw_stamp.png',
+  '/assets/stickers/paw_print.webp',
+  '/assets/stickers/turtle_webbed_paw_stamp.webp',
   'Pet Paw Print'
 );
 export const BoneTreatSticker = renderThemedStickerPng(
-  '/assets/stickers/bone_treat.png',
-  '/assets/stickers/turtle_water_chestnut_treat.png',
+  '/assets/stickers/bone_treat.webp',
+  '/assets/stickers/turtle_water_chestnut_treat.webp',
   'Dog Bone Treat'
 );
 export const TennisBallSticker = renderThemedStickerPng(
-  '/assets/stickers/tennis_ball.png',
-  '/assets/stickers/turtle_moss_play_ball.png',
+  '/assets/stickers/tennis_ball.webp',
+  '/assets/stickers/turtle_moss_play_ball.webp',
   'Tennis Ball'
 );
 export const PottedPlantSticker = renderThemedStickerPng(
-  '/assets/stickers/potted_plant.png',
-  '/assets/stickers/turtle_log_bonsai_planter.png',
+  '/assets/stickers/potted_plant.webp',
+  '/assets/stickers/turtle_log_bonsai_planter.webp',
   'Potted Plant Care'
 );
 export const LaundryHamperSticker = renderThemedStickerPng(
-  '/assets/stickers/laundry_hamper.png',
-  '/assets/stickers/turtle_reed_laundry_basket.png',
+  '/assets/stickers/laundry_hamper.webp',
+  '/assets/stickers/turtle_reed_laundry_basket.webp',
   'Laundry Hamper'
 );
 export const ChocolateBarSticker = renderThemedStickerPng(
-  '/assets/stickers/chocolate_bar.png',
-  '/assets/stickers/turtle_honey_seed_bar.png',
+  '/assets/stickers/chocolate_bar.webp',
+  '/assets/stickers/turtle_honey_seed_bar.webp',
   'Comfort Chocolate Bar'
 );
 export const RedBalloonSticker = renderThemedStickerPng(
-  '/assets/stickers/red_balloon.png',
-  '/assets/stickers/turtle_lotus_floating_lantern.png',
+  '/assets/stickers/red_balloon.webp',
+  '/assets/stickers/turtle_lotus_floating_lantern.webp',
   'Red Balloon'
 );
 export const ShoppingCartSticker = renderThemedStickerPng(
-  '/assets/stickers/shopping_cart.png',
-  '/assets/stickers/turtle_woven_gathering_cart.png',
+  '/assets/stickers/shopping_cart.webp',
+  '/assets/stickers/turtle_woven_gathering_cart.webp',
   'Supermarket Shopping Cart'
 );
 export const AirplaneFlightSticker = renderThemedStickerPng(
-  '/assets/stickers/airplane_flight.png',
-  '/assets/stickers/turtle_dragonfly_glide.png',
+  '/assets/stickers/airplane_flight.webp',
+  '/assets/stickers/turtle_dragonfly_glide.webp',
   'Passenger Airplane Flight'
 );
 export const TravelLuggageSticker = renderThemedStickerPng(
-  '/assets/stickers/travel_luggage.png',
-  '/assets/stickers/turtle_timber_explorer_trunk.png',
+  '/assets/stickers/travel_luggage.webp',
+  '/assets/stickers/turtle_timber_explorer_trunk.webp',
   'Travel Rolling Luggage'
 );
 export const BoardingTicketSticker = renderThemedStickerPng(
-  '/assets/stickers/boarding_ticket.png',
-  '/assets/stickers/turtle_wooden_token_pass.png',
+  '/assets/stickers/boarding_ticket.webp',
+  '/assets/stickers/turtle_wooden_token_pass.webp',
   'Boarding Pass Ticket'
 );
 export const QuietVoiceSticker = renderThemedStickerPng(
-  '/assets/stickers/quiet_voice.png',
-  '/assets/stickers/turtle_whispering_reed_quiet.png',
+  '/assets/stickers/quiet_voice.webp',
+  '/assets/stickers/turtle_whispering_reed_quiet.webp',
   'Quiet Inside Voice'
 );
 export const HotCocoaSticker = renderThemedStickerPng(
-  '/assets/stickers/hot_cocoa.png',
-  '/assets/stickers/turtle_herbal_tea_mug.png',
+  '/assets/stickers/hot_cocoa.webp',
+  '/assets/stickers/turtle_herbal_tea_mug.webp',
   'Warm Hot Cocoa Mug'
 );
 export const JigsawPuzzleSticker = renderThemedStickerPng(
-  '/assets/stickers/jigsaw_puzzle.png',
-  '/assets/stickers/turtle_wooden_puzzle.png',
+  '/assets/stickers/jigsaw_puzzle.webp',
+  '/assets/stickers/turtle_wooden_puzzle.webp',
   'Jigsaw Puzzle Piece'
 );
 
 // Table C Sensory Triggers, Daily Care & Community Adventures (User Provided Sheets)
 export const BrightLightsSticker = renderThemedStickerPng(
-  '/assets/stickers/sensory_bright_lights.png',
-  '/assets/stickers/turtle_shaded_canopy_lamp.png',
+  '/assets/stickers/sensory_bright_lights.webp',
+  '/assets/stickers/turtle_shaded_canopy_lamp.webp',
   'Bright Lights Sensory Trigger'
 );
 export const LoudNoiseSticker = renderThemedStickerPng(
-  '/assets/stickers/sensory_loud_noise.png',
-  '/assets/stickers/turtle_sound_softening_shell.png',
+  '/assets/stickers/sensory_loud_noise.webp',
+  '/assets/stickers/turtle_sound_softening_shell.webp',
   'Loud Noise Sensitivity Trigger'
 );
 export const SocialMaskingSticker = renderThemedStickerPng(
-  '/assets/stickers/sensory_social_masking.png',
-  '/assets/stickers/turtle_cozy_shell_retreat.png',
+  '/assets/stickers/sensory_social_masking.webp',
+  '/assets/stickers/turtle_cozy_shell_retreat.webp',
   'Social Masking Fatigue'
 );
-export const LungsBreathingStickerNew = renderStickerPng('/assets/stickers/coping_lungs_breathing.png', 'Deep Breathing Lungs Pacer');
-export const WritingJournalSticker = renderStickerPng('/assets/stickers/routine_writing_journal.png', 'Writing & Journaling');
+export const LungsBreathingStickerNew = renderStickerPng('/assets/stickers/coping_lungs_breathing.webp', 'Deep Breathing Lungs Pacer');
+export const WritingJournalSticker = renderStickerPng('/assets/stickers/routine_writing_journal.webp', 'Writing & Journaling');
 export const MedicinePillSticker = renderThemedStickerPng(
-  '/assets/stickers/routine_medicine_pill.png',
-  '/assets/stickers/turtle_leaf_vitamins.png',
+  '/assets/stickers/routine_medicine_pill.webp',
+  '/assets/stickers/turtle_leaf_vitamins.webp',
   'Daily Medication Pill'
 );
 export const ToiletRestroomSticker = renderThemedStickerPng(
-  '/assets/stickers/routine_toilet_restroom.png',
-  '/assets/stickers/turtle_bamboo_restroom.png',
+  '/assets/stickers/routine_toilet_restroom.webp',
+  '/assets/stickers/turtle_bamboo_restroom.webp',
   'Toilet Restroom'
 );
-export const WaterDropSticker = renderStickerPng('/assets/stickers/routine_water_drink.png', 'Water Hydration Tracker');
+export const WaterDropSticker = renderStickerPng('/assets/stickers/routine_water_drink.webp', 'Water Hydration Tracker');
 export const HaircutSalonSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_haircut_salon.png',
-  '/assets/stickers/turtle_grooming_comb_mirror.png',
+  '/assets/stickers/adventure_haircut_salon.webp',
+  '/assets/stickers/turtle_grooming_comb_mirror.webp',
   'Hair Salon Haircut'
 );
 export const DoctorCheckupSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_doctor_checkup.png',
-  '/assets/stickers/turtle_elder_healer_pouch.png',
+  '/assets/stickers/adventure_doctor_checkup.webp',
+  '/assets/stickers/turtle_elder_healer_pouch.webp',
   'Doctor Check-Up'
 );
 export const SwimmingPoolSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_swimming_pool.png',
-  '/assets/stickers/turtle_spring_lagoon_pool.png',
+  '/assets/stickers/adventure_swimming_pool.webp',
+  '/assets/stickers/turtle_spring_lagoon_pool.webp',
   'Swimming Pool Outing'
 );
 export const MovieCinemaSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_movie_cinema.png',
-  '/assets/stickers/turtle_shadow_puppet_theater.png',
+  '/assets/stickers/adventure_movie_cinema.webp',
+  '/assets/stickers/turtle_shadow_puppet_theater.webp',
   'Movie Cinema Theater'
 );
 export const BowlingAlleySticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_bowling_alley.png',
-  '/assets/stickers/turtle_river_pebble_bowling.png',
+  '/assets/stickers/adventure_bowling_alley.webp',
+  '/assets/stickers/turtle_river_pebble_bowling.webp',
   'Bowling Alley Outing'
 );
 export const CampingTentSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_camping_tent.png',
-  '/assets/stickers/turtle_canopy_reed_tent.png',
+  '/assets/stickers/adventure_camping_tent.webp',
+  '/assets/stickers/turtle_canopy_reed_tent.webp',
   'Camping Adventure Tent'
 );
 export const MuseumVisitSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_museum_visit.png',
-  '/assets/stickers/turtle_heritage_archive_pavillion.png',
+  '/assets/stickers/adventure_museum_visit.webp',
+  '/assets/stickers/turtle_heritage_archive_pavillion.webp',
   'Museum Visit Columns'
 );
 
 // AAC Dedicated Category Badge Stickers
-export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.png', 'Core Board');
-export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.png', 'Favorite Sentences');
-export const AacFavoritesSticker = renderStickerPng('/assets/stickers/aac_favorites.png', 'Favorites');
-export const AacFoodSticker = renderStickerPng('/assets/stickers/aac_food.png', 'Food');
-export const AacDrinksSticker = renderStickerPng('/assets/stickers/aac_drinks.png', 'Drinks');
-export const AacActivitiesSticker = renderStickerPng('/assets/stickers/aac_activities.png', 'Play & Fun');
-export const AacPlacesSticker = renderStickerPng('/assets/stickers/aac_places.png', 'Places');
-export const AacPeopleSticker = renderStickerPng('/assets/stickers/aac_people.png', 'People');
-export const AacFeelingsSticker = renderStickerPng('/assets/stickers/aac_feelings.png', 'Feelings');
-export const AacSensorySticker = renderStickerPng('/assets/stickers/aac_sensory.png', 'Sensory');
-export const AacAllWordsSticker = renderStickerPng('/assets/stickers/aac_all_words.png', 'All Words');
+export const AacCoreSticker = renderStickerPng('/assets/stickers/aac_core.webp', 'Core Board');
+export const AacSentencesSticker = renderStickerPng('/assets/stickers/aac_sentences.webp', 'Favorite Sentences');
+export const AacFavoritesSticker = renderStickerPng('/assets/stickers/aac_favorites.webp', 'Favorites');
+export const AacFoodSticker = renderStickerPng('/assets/stickers/aac_food.webp', 'Food');
+export const AacDrinksSticker = renderStickerPng('/assets/stickers/aac_drinks.webp', 'Drinks');
+export const AacActivitiesSticker = renderStickerPng('/assets/stickers/aac_activities.webp', 'Play & Fun');
+export const AacPlacesSticker = renderStickerPng('/assets/stickers/aac_places.webp', 'Places');
+export const AacPeopleSticker = renderStickerPng('/assets/stickers/aac_people.webp', 'People');
+export const AacFeelingsSticker = renderStickerPng('/assets/stickers/aac_feelings.webp', 'Feelings');
+export const AacSensorySticker = renderStickerPng('/assets/stickers/aac_sensory.webp', 'Sensory');
+export const AacAllWordsSticker = renderStickerPng('/assets/stickers/aac_all_words.webp', 'All Words');
 
 export const AacCategoryIcon: React.FC<{
   categoryId: string;
@@ -871,1871 +862,1871 @@ export const AacCategoryIcon: React.FC<{
 
 // Life Adventures & Social Stories Badge Stickers
 export const DentistAdventureSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_dentist.png',
-  '/assets/stickers/turtle_mineral_polishing_basin.png',
+  '/assets/stickers/adventure_dentist.webp',
+  '/assets/stickers/turtle_mineral_polishing_basin.webp',
   'Visiting the Dentist',
-  '/assets/stickers/dino_trex_tooth_care.png',
-  '/assets/stickers/frog_lotus_dental_station.png'
+  '/assets/stickers/dino_trex_tooth_care.webp',
+  '/assets/stickers/frog_lotus_dental_station.webp'
 );
 export const RestaurantAdventureSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_restaurant.png',
-  '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/adventure_restaurant.webp',
+  '/assets/stickers/turtle_clover_berry_feast.webp',
   'Eating at a Restaurant',
-  '/assets/stickers/dino_feast_table_pavilion.png',
-  '/assets/stickers/frog_feast_table_pavilion.png'
+  '/assets/stickers/dino_feast_table_pavilion.webp',
+  '/assets/stickers/frog_feast_table_pavilion.webp'
 );
 export const HaircutAdventureSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_haircut_salon.png',
-  '/assets/stickers/turtle_grooming_comb_mirror.png',
+  '/assets/stickers/adventure_haircut_salon.webp',
+  '/assets/stickers/turtle_grooming_comb_mirror.webp',
   'Getting a Haircut',
-  '/assets/stickers/dino_bone_comb_mirror.png',
-  '/assets/stickers/frog_grooming_comb_mirror.png',
-  '/assets/stickers/train_adventure_haircut.png',
-  '/assets/stickers/space_adventure_haircut.png'
+  '/assets/stickers/dino_bone_comb_mirror.webp',
+  '/assets/stickers/frog_grooming_comb_mirror.webp',
+  '/assets/stickers/train_adventure_haircut.webp',
+  '/assets/stickers/space_adventure_haircut.webp'
 );
 export const DoctorAdventureSticker = renderThemedStickerPng(
-  '/assets/stickers/adventure_doctor_checkup.png',
-  '/assets/stickers/turtle_elder_healer_pouch.png',
+  '/assets/stickers/adventure_doctor_checkup.webp',
+  '/assets/stickers/turtle_elder_healer_pouch.webp',
   'Doctor Check-Up',
-  '/assets/stickers/dino_healer_stethoscope_bag.png',
-  '/assets/stickers/frog_healer_stethoscope_kit.png',
-  '/assets/stickers/train_stethoscope.png',
-  '/assets/stickers/space_stethoscope.png'
+  '/assets/stickers/dino_healer_stethoscope_bag.webp',
+  '/assets/stickers/frog_healer_stethoscope_kit.webp',
+  '/assets/stickers/train_stethoscope.webp',
+  '/assets/stickers/space_stethoscope.webp'
 );
 export const PlansChangeStorySticker = renderThemedStickerPng(
-  '/assets/stickers/story_plans_change.png',
-  '/assets/stickers/turtle_swimming_loop.png',
+  '/assets/stickers/story_plans_change.webp',
+  '/assets/stickers/turtle_swimming_loop.webp',
   'When Plans Change',
-  '/assets/stickers/dino_footprint_loop.png',
-  '/assets/stickers/frog_tadpole_swim_loop.png',
-  '/assets/stickers/train_circular_track.png',
-  '/assets/stickers/space_refresh_repeat.png'
+  '/assets/stickers/dino_footprint_loop.webp',
+  '/assets/stickers/frog_tadpole_swim_loop.webp',
+  '/assets/stickers/train_circular_track.webp',
+  '/assets/stickers/space_refresh_repeat.webp'
 );
 export const BirthdayStorySticker = renderThemedStickerPng(
-  '/assets/stickers/story_birthday.png',
-  '/assets/stickers/turtle_clover_berry_feast.png',
+  '/assets/stickers/story_birthday.webp',
+  '/assets/stickers/turtle_clover_berry_feast.webp',
   'Going to a Birthday Party',
-  '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/frog_pond_birthday_feast.png',
-  '/assets/stickers/train_story_birthday.png',
-  '/assets/stickers/space_story_birthday.png'
+  '/assets/stickers/dino_forager_feast_bowl.webp',
+  '/assets/stickers/frog_pond_birthday_feast.webp',
+  '/assets/stickers/train_story_birthday.webp',
+  '/assets/stickers/space_story_birthday.webp'
 );
 export const TakingTurnsStorySticker = renderThemedStickerPng(
-  '/assets/stickers/story_sharing.png',
-  '/assets/stickers/turtle_seagrass_toy_box.png',
+  '/assets/stickers/story_sharing.webp',
+  '/assets/stickers/turtle_seagrass_toy_box.webp',
   'Taking Turns with Toys',
-  '/assets/stickers/dino_vine_toy_box.png',
-  '/assets/stickers/frog_seagrass_toy_box.png',
-  '/assets/stickers/train_toy_chest.png',
-  '/assets/stickers/space_game_controller.png'
+  '/assets/stickers/dino_vine_toy_box.webp',
+  '/assets/stickers/frog_seagrass_toy_box.webp',
+  '/assets/stickers/train_toy_chest.webp',
+  '/assets/stickers/space_game_controller.webp'
 );
-export const StethoscopeSticker = renderStickerPng('/assets/stickers/stethoscope.png', 'Stethoscope / Doctor');
-export const RainCloudSticker = renderStickerPng('/assets/stickers/rain_cloud.png', 'Rainy Day');
-export const PartlyCloudySticker = renderStickerPng('/assets/stickers/partly_cloudy.png', 'Partly Cloudy');
-export const CloudyWeatherSticker = renderStickerPng('/assets/stickers/cloudy_weather.png', 'Overcast Cloudy Weather');
-export const SnowWeatherSticker = renderStickerPng('/assets/stickers/snow_weather.png', 'Snow & Flurries');
-export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thunderstorm_weather.png', 'Thunderstorm');
-export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.png', 'Windy Breeze');
-export const FogMistWeatherSticker = renderStickerPng('/assets/stickers/fog_mist_weather.png', 'Fog & Mist Weather');
-export const RainbowWeatherSticker = renderStickerPng('/assets/stickers/rainbow_weather.png', 'Rainbow Weather');
+export const StethoscopeSticker = renderStickerPng('/assets/stickers/stethoscope.webp', 'Stethoscope / Doctor');
+export const RainCloudSticker = renderStickerPng('/assets/stickers/rain_cloud.webp', 'Rainy Day');
+export const PartlyCloudySticker = renderStickerPng('/assets/stickers/partly_cloudy.webp', 'Partly Cloudy');
+export const CloudyWeatherSticker = renderStickerPng('/assets/stickers/cloudy_weather.webp', 'Overcast Cloudy Weather');
+export const SnowWeatherSticker = renderStickerPng('/assets/stickers/snow_weather.webp', 'Snow & Flurries');
+export const ThunderstormWeatherSticker = renderStickerPng('/assets/stickers/thunderstorm_weather.webp', 'Thunderstorm');
+export const WindyWeatherSticker = renderStickerPng('/assets/stickers/windy_weather.webp', 'Windy Breeze');
+export const FogMistWeatherSticker = renderStickerPng('/assets/stickers/fog_mist_weather.webp', 'Fog & Mist Weather');
+export const RainbowWeatherSticker = renderStickerPng('/assets/stickers/rainbow_weather.webp', 'Rainbow Weather');
 export const HomeHouseSticker = renderThemedStickerPng(
-  '/assets/stickers/home_house.png',
-  '/assets/stickers/turtle_moss_cottage_home.png',
+  '/assets/stickers/home_house.webp',
+  '/assets/stickers/turtle_moss_cottage_home.webp',
   'Home House'
 );
 export const TaskDoneSticker = renderThemedStickerPng(
-  '/assets/stickers/task_done.png',
-  '/assets/stickers/turtle_leaf_checkmark.png',
+  '/assets/stickers/task_done.webp',
+  '/assets/stickers/turtle_leaf_checkmark.webp',
   'Task Done Checkmark'
 );
-export const TherapyBrainSticker = renderStickerPng('/assets/stickers/therapy_brain.png', 'Therapy & Sensory Brain');
+export const TherapyBrainSticker = renderStickerPng('/assets/stickers/therapy_brain.webp', 'Therapy & Sensory Brain');
 export const SchoolBuildingSticker = renderThemedStickerPng(
-  '/assets/stickers/school_building.png',
-  '/assets/stickers/turtle_treehouse_gazebo.png',
+  '/assets/stickers/school_building.webp',
+  '/assets/stickers/turtle_treehouse_gazebo.webp',
   'School Building'
 );
-export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.png', 'Pizza Slice');
+export const PizzaSliceSticker = renderStickerPng('/assets/stickers/pizza_slice.webp', 'Pizza Slice');
 export const PlaygroundSwingsSticker = renderThemedStickerPng(
-  '/assets/stickers/playground_swings.png',
-  '/assets/stickers/turtle_hollow_log_slide.png',
+  '/assets/stickers/playground_swings.webp',
+  '/assets/stickers/turtle_hollow_log_slide.webp',
   'Playground Swings'
 );
 
 // Morning Mood & Emotion Yellow Stickers
 export const MoodHappySticker = renderThemedStickerPng(
-  '/assets/stickers/mood_happy.png',
-  '/assets/stickers/turtle_mood_happy.png',
+  '/assets/stickers/mood_happy.webp',
+  '/assets/stickers/turtle_mood_happy.webp',
   'Happy Mood'
 );
 export const MoodCalmSticker = renderThemedStickerPng(
-  '/assets/stickers/mood_calm.png',
-  '/assets/stickers/turtle_mood_calm.png',
+  '/assets/stickers/mood_calm.webp',
+  '/assets/stickers/turtle_mood_calm.webp',
   'Calm Mood'
 );
 export const MoodExcitedSticker = renderThemedStickerPng(
-  '/assets/stickers/mood_excited.png',
-  '/assets/stickers/turtle_mood_excited.png',
+  '/assets/stickers/mood_excited.webp',
+  '/assets/stickers/turtle_mood_excited.webp',
   'Excited Mood'
 );
 export const MoodSleepySticker = renderThemedStickerPng(
-  '/assets/stickers/mood_sleepy.png',
-  '/assets/stickers/turtle_mood_sleepy.png',
+  '/assets/stickers/mood_sleepy.webp',
+  '/assets/stickers/turtle_mood_sleepy.webp',
   'Sleepy Mood'
 );
 export const MoodUnsureSticker = renderThemedStickerPng(
-  '/assets/stickers/mood_unsure.png',
-  '/assets/stickers/turtle_mood_unsure.png',
+  '/assets/stickers/mood_unsure.webp',
+  '/assets/stickers/turtle_mood_unsure.webp',
   'Unsure Mood'
 );
 
 // Favorite Sentences Yellow Stickers
 export const FavLegoSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_lego.png',
-  '/assets/stickers/turtle_zen_balancing_stones.png',
+  '/assets/stickers/fav_lego.webp',
+  '/assets/stickers/turtle_zen_balancing_stones.webp',
   'Lego Blocks'
 );
 export const FavBathSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_bath.png',
-  '/assets/stickers/turtle_warm_spring_bath.png',
+  '/assets/stickers/fav_bath.webp',
+  '/assets/stickers/turtle_warm_spring_bath.webp',
   'Take a Bath'
 );
 export const FavSandwichSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_sandwich.png',
-  '/assets/stickers/turtle_garden_sandwich.png',
+  '/assets/stickers/fav_sandwich.webp',
+  '/assets/stickers/turtle_garden_sandwich.webp',
   'Sandwich Snack'
 );
 export const FavWaterSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_water.png',
-  '/assets/stickers/turtle_bamboo_drink_cup.png',
+  '/assets/stickers/fav_water.webp',
+  '/assets/stickers/turtle_bamboo_drink_cup.webp',
   'Drink Water'
 );
 export const FavQuietBreakSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_quiet_break.png',
-  '/assets/stickers/turtle_cozy_shell_retreat.png',
+  '/assets/stickers/fav_quiet_break.webp',
+  '/assets/stickers/turtle_cozy_shell_retreat.webp',
   'Quiet Break'
 );
 export const FavHelpSosSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_help_sos.png',
-  '/assets/stickers/turtle_guardian_shield_sos.png',
+  '/assets/stickers/fav_help_sos.webp',
+  '/assets/stickers/turtle_guardian_shield_sos.webp',
   'Help Please'
 );
 export const FavOutsideSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_outside.png',
-  '/assets/stickers/turtle_treehouse_gazebo.png',
+  '/assets/stickers/fav_outside.webp',
+  '/assets/stickers/turtle_treehouse_gazebo.webp',
   'Go Outside'
 );
 export const FavLoveHeartSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_love_heart.png',
-  '/assets/stickers/turtle_shell_heart.png',
+  '/assets/stickers/fav_love_heart.webp',
+  '/assets/stickers/turtle_shell_heart.webp',
   'I Love You'
 );
 export const FavRestTiredSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_rest_tired.png',
-  '/assets/stickers/turtle_moss_bed_sleep.png',
+  '/assets/stickers/fav_rest_tired.webp',
+  '/assets/stickers/turtle_moss_bed_sleep.webp',
   'Rest and Sleep'
 );
 export const FavMusicSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_music.png',
-  '/assets/stickers/turtle_bamboo_wind_chimes.png',
+  '/assets/stickers/fav_music.webp',
+  '/assets/stickers/turtle_bamboo_wind_chimes.webp',
   'Listen to Music'
 );
 export const FavStopSticker = renderThemedStickerPng(
-  '/assets/stickers/fav_stop.png',
-  '/assets/stickers/turtle_stop_flipper.png',
+  '/assets/stickers/fav_stop.webp',
+  '/assets/stickers/turtle_stop_flipper.webp',
   'Stop Please'
 );
-export const FavHappySticker = renderStickerPng('/assets/stickers/fav_happy.png', 'I Am Happy');
+export const FavHappySticker = renderStickerPng('/assets/stickers/fav_happy.webp', 'I Am Happy');
 
 // User Provided Grounding, Cooking & Caregiver Response Stickers
-export const EyeSeeSticker = renderStickerPng('/assets/stickers/eye_see.png', 'Look Around Eye');
-export const GroundingTouchHandSticker = renderStickerPng('/assets/stickers/grounding_touch_hand.png', 'Touch Hand');
-export const GroundingHearEarSticker = renderStickerPng('/assets/stickers/grounding_hear_ear.png', 'Hear Ear');
-export const GroundingSmellNoseSticker = renderStickerPng('/assets/stickers/grounding_smell_nose.png', 'Smell Nose');
-export const CookingPotSticker = renderStickerPng('/assets/stickers/cooking_pot.png', 'Cooking Pan');
-export const CaregiverResponseOkaySticker = renderStickerPng('/assets/stickers/caregiver_response_okay.png', 'Caregiver Okay Thumbs Up');
+export const EyeSeeSticker = renderStickerPng('/assets/stickers/eye_see.webp', 'Look Around Eye');
+export const GroundingTouchHandSticker = renderStickerPng('/assets/stickers/grounding_touch_hand.webp', 'Touch Hand');
+export const GroundingHearEarSticker = renderStickerPng('/assets/stickers/grounding_hear_ear.webp', 'Hear Ear');
+export const GroundingSmellNoseSticker = renderStickerPng('/assets/stickers/grounding_smell_nose.webp', 'Smell Nose');
+export const CookingPotSticker = renderStickerPng('/assets/stickers/cooking_pot.webp', 'Cooking Pan');
+export const CaregiverResponseOkaySticker = renderStickerPng('/assets/stickers/caregiver_response_okay.webp', 'Caregiver Okay Thumbs Up');
 
 export const TURTLE_STICKER_SWAPS: Record<string, string> = {
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/turtle_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/turtle_birthday_cake_slice.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/turtle_game_controller.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/turtle_water_bottle.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/turtle_pants_folded.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/turtle_birthday_card.png',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/turtle_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/turtle_birthday_cake_slice.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/turtle_game_controller.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/turtle_water_bottle.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/turtle_pants_folded.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/turtle_birthday_card.webp',
   // Adventure Step Mappings
-  '/assets/stickers/home_house.png': '/assets/stickers/turtle_moss_cottage_home.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/turtle_bamboo_ferry.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/turtle_bamboo_tablet.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/turtle_bamboo_cutlery.png',
-  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/turtle_reed_explorer_shoes.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/turtle_pond_ripple_wave.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/turtle_leaf_speech_bubbles.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/turtle_lotus_trophy.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/turtle_webbed_paw_stamp.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/turtle_lily_pads.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/turtle_leaf_speech_bubbles.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/turtle_lotus_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/turtle_garden_sandwich.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/turtle_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/turtle_moss_cottage_home.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/turtle_child_persona_hatchling.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/turtle_shell_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/turtle_shell_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/turtle_botanical_folder.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/turtle_elder_healer_pouch.png',
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/turtle_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/turtle_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/turtle_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/turtle_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/turtle_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/turtle_open_welcome_door.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/turtle_dining_table_booth.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/turtle_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/turtle_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/turtle_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/turtle_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/turtle_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/turtle_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/turtle_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/turtle_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/turtle_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/turtle_doctor_ear_light.png',
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/turtle_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/turtle_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/turtle_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/turtle_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/turtle_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/turtle_bowling_lane_bumpers.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/turtle_bowling_pins_strike.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/turtle_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/turtle_pine_trees_forest.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/turtle_camping_sleeping_bag.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/turtle_campfire_marshmallows.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/turtle_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/turtle_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/turtle_observing_magnifying_glass.png',
+  '/assets/stickers/home_house.webp': '/assets/stickers/turtle_moss_cottage_home.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/turtle_bamboo_ferry.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/turtle_bamboo_tablet.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/turtle_bamboo_cutlery.webp',
+  '/assets/stickers/hiking_trail_boots.webp': '/assets/stickers/turtle_reed_explorer_shoes.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/turtle_pond_ripple_wave.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/turtle_leaf_speech_bubbles.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/turtle_lotus_trophy.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/turtle_webbed_paw_stamp.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/turtle_lily_pads.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/turtle_leaf_speech_bubbles.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/turtle_lotus_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/turtle_garden_sandwich.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/turtle_bamboo_drink_cup.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/turtle_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/turtle_moss_cottage_home.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/turtle_child_persona_hatchling.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/turtle_shell_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/turtle_shell_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/turtle_botanical_folder.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/turtle_clover_berry_feast.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/turtle_elder_healer_pouch.webp',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/turtle_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/turtle_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/turtle_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/turtle_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/turtle_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/turtle_open_welcome_door.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/turtle_dining_table_booth.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/turtle_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/turtle_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/turtle_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/turtle_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/turtle_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/turtle_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/turtle_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/turtle_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/turtle_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/turtle_doctor_ear_light.webp',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/turtle_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/turtle_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/turtle_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/turtle_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/turtle_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/turtle_bowling_lane_bumpers.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/turtle_bowling_pins_strike.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/turtle_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/turtle_pine_trees_forest.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/turtle_camping_sleeping_bag.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/turtle_campfire_marshmallows.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/turtle_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/turtle_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/turtle_observing_magnifying_glass.webp',
   // Batch 8 Swaps
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/turtle_moss_play_ball.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/turtle_water_chestnut_treat.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/turtle_webbed_paw_stamp.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/turtle_log_bonsai_planter.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/turtle_grooming_comb_mirror.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/turtle_elder_healer_pouch.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/turtle_spring_lagoon_pool.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/turtle_shadow_puppet_theater.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/turtle_river_pebble_bowling.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/turtle_canopy_reed_tent.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/turtle_heritage_archive_pavillion.png',
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/turtle_mineral_polishing_basin.png',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/turtle_moss_play_ball.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/turtle_water_chestnut_treat.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/turtle_webbed_paw_stamp.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/turtle_log_bonsai_planter.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/turtle_grooming_comb_mirror.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/turtle_elder_healer_pouch.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/turtle_spring_lagoon_pool.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/turtle_shadow_puppet_theater.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/turtle_river_pebble_bowling.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/turtle_canopy_reed_tent.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/turtle_heritage_archive_pavillion.webp',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/turtle_mineral_polishing_basin.webp',
   // Previous Batches Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/turtle_dawn_bell_clock.png',
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/turtle_bamboo_restroom.png',
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/backpack_school.png': '/assets/stickers/turtle_shell_backpack.png',
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/turtle_reed_explorer_shoes.png',
-  '/assets/stickers/apple_snack.png': '/assets/stickers/turtle_garden_fruit_snack.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/turtle_botanical_folder.png',
-  '/assets/stickers/pencil_write.png': '/assets/stickers/turtle_bamboo_pencil.png',
-  '/assets/stickers/teddy_bear.png': '/assets/stickers/turtle_seagrass_toy_box.png',
-  '/assets/stickers/shower_wash.png': '/assets/stickers/turtle_warm_spring_bath.png',
-  '/assets/stickers/school_bus.png': '/assets/stickers/turtle_bamboo_ferry.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/turtle_terrarium_science.png',
-  '/assets/stickers/art_palette.png': '/assets/stickers/turtle_pebble_paint_palette.png',
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/turtle_warm_spring_bath.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/turtle_starry_pajamas.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/turtle_cozy_shell_retreat.png',
-  '/assets/stickers/teen_headphones.png': '/assets/stickers/turtle_shell_headphones.png',
-  '/assets/stickers/schedule_calendar.png': '/assets/stickers/turtle_bamboo_calendar.png',
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/turtle_moss_bed_sleep.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/turtle_dawn_bell_clock.webp',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/turtle_bamboo_restroom.webp',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/turtle_clover_berry_feast.webp',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/turtle_shell_backpack.webp',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/turtle_reed_explorer_shoes.webp',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/turtle_garden_fruit_snack.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/turtle_botanical_folder.webp',
+  '/assets/stickers/pencil_write.webp': '/assets/stickers/turtle_bamboo_pencil.webp',
+  '/assets/stickers/teddy_bear.webp': '/assets/stickers/turtle_seagrass_toy_box.webp',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/turtle_warm_spring_bath.webp',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/turtle_bamboo_ferry.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/turtle_terrarium_science.webp',
+  '/assets/stickers/art_palette.webp': '/assets/stickers/turtle_pebble_paint_palette.webp',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/turtle_clover_berry_feast.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/turtle_warm_spring_bath.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/turtle_starry_pajamas.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/turtle_cozy_shell_retreat.webp',
+  '/assets/stickers/teen_headphones.webp': '/assets/stickers/turtle_shell_headphones.webp',
+  '/assets/stickers/schedule_calendar.webp': '/assets/stickers/turtle_bamboo_calendar.webp',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/turtle_moss_bed_sleep.webp',
   // New Handcrafted & Themed Turtle Replacements
-  '/assets/stickers/language_globe.png': '/assets/stickers/turtle_lagoon_globe.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/turtle_child_persona_hatchling.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/turtle_bamboo_satchel_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/turtle_wood_phone_caregiver.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/turtle_golden_shell_crown.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/turtle_swimming_loop.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/turtle_shell_heart.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/turtle_treehouse_gazebo.png',
-  '/assets/stickers/fav_lego.png': '/assets/stickers/turtle_zen_balancing_stones.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/turtle_stop_flipper.png',
-  '/assets/stickers/mood_happy.png': '/assets/stickers/turtle_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/turtle_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/turtle_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/turtle_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/turtle_mood_unsure.png',
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
-  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/turtle_cozy_shell_retreat.png',
-  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/turtle_moss_bed_sleep.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/turtle_bamboo_calendar.png',
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/turtle_herbal_tea_mug.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/turtle_reed_laundry_basket.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/turtle_honey_seed_bar.png',
-  '/assets/stickers/red_balloon.png': '/assets/stickers/turtle_lotus_floating_lantern.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/turtle_woven_gathering_cart.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/turtle_dragonfly_glide.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/turtle_timber_explorer_trunk.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/turtle_wooden_token_pass.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/turtle_whispering_reed_quiet.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/turtle_wooden_puzzle.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/turtle_shaded_canopy_lamp.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/turtle_sound_softening_shell.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/turtle_cozy_shell_retreat.png',
-  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/turtle_pond_fidget_bubbles.png',
-  '/assets/stickers/breathing_cloud.png': '/assets/stickers/turtle_lagoon_breeze_breath.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/turtle_wooden_wheel.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/turtle_sand_timer.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/turtle_guardian_shield_sos.png',
-  '/assets/stickers/about_id.png': '/assets/stickers/turtle_wooden_id_badge.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/turtle_firefly_lantern_book.png',
-  '/assets/stickers/quick_phrases.png': '/assets/stickers/turtle_leaf_speech_bubbles.png',
-  '/assets/stickers/keyboard.png': '/assets/stickers/turtle_bamboo_keyboard.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/turtle_bamboo_thermometer.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/turtle_leaf_vitamins.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/turtle_lagoon_moon.png',
-  '/assets/stickers/toothbrush.png': '/assets/stickers/turtle_bamboo_toothbrush.png',
-  '/assets/stickers/toy_box.png': '/assets/stickers/turtle_seagrass_toy_box.png',
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/turtle_cozy_hoodie.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/turtle_leaf_soap_wash.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/turtle_bamboo_spoons.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/turtle_bamboo_tablet.png',
-  '/assets/stickers/caregiver_heart.png': '/assets/stickers/turtle_shell_heart.png',
-  '/assets/stickers/eye_see.png': '/assets/stickers/turtle_river_stone.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/turtle_swimming_loop.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/turtle_swimming_loop.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/turtle_seagrass_toy_box.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/turtle_seagrass_toy_box.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/turtle_elder_healer_pouch.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/turtle_elder_healer_pouch.png',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/turtle_lagoon_globe.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/turtle_child_persona_hatchling.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/turtle_bamboo_satchel_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/turtle_wood_phone_caregiver.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/turtle_golden_shell_crown.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/turtle_swimming_loop.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/turtle_shell_heart.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/turtle_treehouse_gazebo.webp',
+  '/assets/stickers/fav_lego.webp': '/assets/stickers/turtle_zen_balancing_stones.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/turtle_stop_flipper.webp',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/turtle_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/turtle_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/turtle_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/turtle_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/turtle_mood_unsure.webp',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/turtle_bamboo_drink_cup.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/turtle_bamboo_drink_cup.webp',
+  '/assets/stickers/fav_quiet_break.webp': '/assets/stickers/turtle_cozy_shell_retreat.webp',
+  '/assets/stickers/fav_rest_tired.webp': '/assets/stickers/turtle_moss_bed_sleep.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/turtle_bamboo_calendar.webp',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/turtle_herbal_tea_mug.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/turtle_reed_laundry_basket.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/turtle_honey_seed_bar.webp',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/turtle_lotus_floating_lantern.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/turtle_woven_gathering_cart.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/turtle_dragonfly_glide.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/turtle_timber_explorer_trunk.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/turtle_wooden_token_pass.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/turtle_whispering_reed_quiet.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/turtle_wooden_puzzle.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/turtle_shaded_canopy_lamp.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/turtle_sound_softening_shell.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/turtle_cozy_shell_retreat.webp',
+  '/assets/stickers/fidget_bubbles.webp': '/assets/stickers/turtle_pond_fidget_bubbles.webp',
+  '/assets/stickers/breathing_cloud.webp': '/assets/stickers/turtle_lagoon_breeze_breath.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/turtle_wooden_wheel.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/turtle_sand_timer.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/turtle_guardian_shield_sos.webp',
+  '/assets/stickers/about_id.webp': '/assets/stickers/turtle_wooden_id_badge.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/turtle_firefly_lantern_book.webp',
+  '/assets/stickers/quick_phrases.webp': '/assets/stickers/turtle_leaf_speech_bubbles.webp',
+  '/assets/stickers/keyboard.webp': '/assets/stickers/turtle_bamboo_keyboard.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/turtle_bamboo_thermometer.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/turtle_leaf_vitamins.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/turtle_lagoon_moon.webp',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/turtle_bamboo_toothbrush.webp',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/turtle_seagrass_toy_box.webp',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/turtle_cozy_hoodie.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/turtle_leaf_soap_wash.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/turtle_bamboo_spoons.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/turtle_bamboo_tablet.webp',
+  '/assets/stickers/caregiver_heart.webp': '/assets/stickers/turtle_shell_heart.webp',
+  '/assets/stickers/eye_see.webp': '/assets/stickers/turtle_river_stone.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/turtle_bamboo_drink_cup.webp',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/turtle_clover_berry_feast.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/turtle_swimming_loop.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/turtle_swimming_loop.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/turtle_clover_berry_feast.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/turtle_seagrass_toy_box.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/turtle_seagrass_toy_box.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/turtle_elder_healer_pouch.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/turtle_elder_healer_pouch.webp',
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/dino_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/dino_birthday_cake_slice.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/dino_game_controller.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/dino_water_bottle.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/dino_pants_folded.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/dino_birthday_card.png',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/dino_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/dino_birthday_cake_slice.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/dino_game_controller.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/dino_water_bottle.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/dino_pants_folded.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/dino_birthday_card.webp',
   // Adventure Step Mappings
-  '/assets/stickers/home_house.png': '/assets/stickers/dino_cavern_retreat.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/dino_slate_tablet_ipad.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/dino_bone_cutlery_fork_spoon.png',
-  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/dino_trail_explorer_boots.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/dino_jungle_speech_bubbles.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/dino_expedition_log_book.png',
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/dino_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/dino_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/dino_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/dino_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/dino_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/dino_open_welcome_door.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/dino_dining_table_booth.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/dino_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/dino_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/dino_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/dino_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/dino_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/dino_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/dino_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/dino_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/dino_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/dino_doctor_ear_light.png',
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/dino_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/dino_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/dino_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/dino_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/dino_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/dino_bowling_lane_bumpers.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/dino_bowling_pins_strike.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/dino_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/dino_pine_trees_forest.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/dino_camping_sleeping_bag.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/dino_campfire_marshmallows.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/dino_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/dino_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/dino_observing_magnifying_glass.png',
+  '/assets/stickers/home_house.webp': '/assets/stickers/dino_cavern_retreat.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/dino_slate_tablet_ipad.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/dino_bone_cutlery_fork_spoon.webp',
+  '/assets/stickers/hiking_trail_boots.webp': '/assets/stickers/dino_trail_explorer_boots.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/dino_jungle_speech_bubbles.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/dino_healer_stethoscope_bag.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/dino_forager_feast_bowl.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/dino_expedition_log_book.webp',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/dino_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/dino_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/dino_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/dino_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/dino_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/dino_open_welcome_door.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/dino_dining_table_booth.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/dino_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/dino_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/dino_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/dino_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/dino_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/dino_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/dino_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/dino_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/dino_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/dino_doctor_ear_light.webp',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/dino_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/dino_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/dino_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/dino_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/dino_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/dino_bowling_lane_bumpers.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/dino_bowling_pins_strike.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/dino_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/dino_pine_trees_forest.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/dino_camping_sleeping_bag.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/dino_campfire_marshmallows.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/dino_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/dino_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/dino_observing_magnifying_glass.webp',
   // Batch 1: Core Routines & Favorites
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/dino_stone_tumbler_water.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/dino_stone_tumbler_water.png',
-  '/assets/stickers/drink_cup.png': '/assets/stickers/dino_stone_tumbler_water.png',
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/dino_fern_nest_sleep.png',
-  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/dino_fern_nest_sleep.png',
-  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/dino_cavern_retreat.png',
-  '/assets/stickers/breathing_cloud.png': '/assets/stickers/dino_cavern_retreat.png',
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/dino_sundial_clock.png',
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/dino_spike_hoodie.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/dino_amber_soap.png',
-  '/assets/stickers/toothbrush.png': '/assets/stickers/dino_bone_toothbrush.png',
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/backpack_school.png': '/assets/stickers/dino_expedition_backpack.png',
-  '/assets/stickers/fav_lego.png': '/assets/stickers/dino_wooden_stacking_blocks.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/dino_cycad_palm_tree.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/dino_triceratops_frill_heart.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/dino_warm_spring_bath.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/dino_warm_spring_bath.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/dino_ankylosaurus_shield_sos.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/dino_ankylosaurus_shield_sos.png',
-  '/assets/stickers/schedule_calendar.png': '/assets/stickers/dino_slate_checklist_tablet.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/dino_slate_checklist_tablet.png',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/dino_stone_tumbler_water.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/dino_stone_tumbler_water.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/dino_stone_tumbler_water.webp',
+  '/assets/stickers/drink_cup.webp': '/assets/stickers/dino_stone_tumbler_water.webp',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/dino_fern_nest_sleep.webp',
+  '/assets/stickers/fav_rest_tired.webp': '/assets/stickers/dino_fern_nest_sleep.webp',
+  '/assets/stickers/fav_quiet_break.webp': '/assets/stickers/dino_cavern_retreat.webp',
+  '/assets/stickers/breathing_cloud.webp': '/assets/stickers/dino_cavern_retreat.webp',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/dino_sundial_clock.webp',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/dino_spike_hoodie.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/dino_amber_soap.webp',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/dino_bone_toothbrush.webp',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/dino_forager_feast_bowl.webp',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/dino_forager_feast_bowl.webp',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/dino_expedition_backpack.webp',
+  '/assets/stickers/fav_lego.webp': '/assets/stickers/dino_wooden_stacking_blocks.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/dino_cycad_palm_tree.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/dino_triceratops_frill_heart.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/dino_warm_spring_bath.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/dino_warm_spring_bath.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/dino_ankylosaurus_shield_sos.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/dino_ankylosaurus_shield_sos.webp',
+  '/assets/stickers/schedule_calendar.webp': '/assets/stickers/dino_slate_checklist_tablet.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/dino_slate_checklist_tablet.webp',
   // Batch 2: Moods, Personas, School & Hubs
-  '/assets/stickers/mood_happy.png': '/assets/stickers/dino_mood_happy.png',
-  '/assets/stickers/fav_happy.png': '/assets/stickers/dino_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/dino_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/dino_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/dino_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/dino_mood_unsure.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/dino_stop_stamp.png',
-  '/assets/stickers/fav_music.png': '/assets/stickers/dino_bamboo_flute_music.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/dino_bamboo_flute_music.png',
-  '/assets/stickers/fav_sandwich.png': '/assets/stickers/dino_flatbread_sandwich.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/dino_child_persona_rex.png',
-  '/assets/stickers/teen_headphones.png': '/assets/stickers/dino_ammonite_headphones.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/dino_expedition_satchel_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/dino_slate_phone_caregiver.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/dino_pangea_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/dino_golden_amber_crown.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/dino_footprint_loop.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/dino_mood_happy.webp',
+  '/assets/stickers/fav_happy.webp': '/assets/stickers/dino_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/dino_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/dino_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/dino_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/dino_mood_unsure.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/dino_stop_stamp.webp',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/dino_bamboo_flute_music.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/dino_bamboo_flute_music.webp',
+  '/assets/stickers/fav_sandwich.webp': '/assets/stickers/dino_flatbread_sandwich.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/dino_child_persona_rex.webp',
+  '/assets/stickers/teen_headphones.webp': '/assets/stickers/dino_ammonite_headphones.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/dino_expedition_satchel_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/dino_slate_phone_caregiver.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/dino_pangea_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/dino_golden_amber_crown.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/dino_footprint_loop.webp',
   // Batch 3: School, Coping Tools & Activities
-  '/assets/stickers/school_bus.png': '/assets/stickers/dino_safari_wagon_bus.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/dino_volcano_flask_science.png',
-  '/assets/stickers/art_palette.png': '/assets/stickers/dino_slate_art_palette.png',
-  '/assets/stickers/art_crafts.png': '/assets/stickers/dino_slate_art_palette.png',
-  '/assets/stickers/pencil_write.png': '/assets/stickers/dino_bone_stylus_pencil.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/dino_bone_stylus_pencil.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/dino_palm_leaf_folio.png',
-  '/assets/stickers/playground_swings.png': '/assets/stickers/dino_brachiosaurus_slide_swings.png',
-  '/assets/stickers/playground_recess.png': '/assets/stickers/dino_brachiosaurus_slide_swings.png',
-  '/assets/stickers/apple_snack.png': '/assets/stickers/dino_starfruit_apple_snack.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/dino_starry_pajamas_sleep.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/dino_starry_pajamas_sleep.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/dino_wooden_cart_ride.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/dino_slate_tablet_ipad.png',
-  '/assets/stickers/toy_box.png': '/assets/stickers/dino_vine_toy_box.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/dino_bone_stamina_spoons.png',
-  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/dino_spring_sensory_bubbles.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/dino_stone_decision_wheel.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/dino_ammonite_spiral_clock.png',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/dino_safari_wagon_bus.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/dino_volcano_flask_science.webp',
+  '/assets/stickers/art_palette.webp': '/assets/stickers/dino_slate_art_palette.webp',
+  '/assets/stickers/art_crafts.webp': '/assets/stickers/dino_slate_art_palette.webp',
+  '/assets/stickers/pencil_write.webp': '/assets/stickers/dino_bone_stylus_pencil.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/dino_bone_stylus_pencil.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/dino_palm_leaf_folio.webp',
+  '/assets/stickers/playground_swings.webp': '/assets/stickers/dino_brachiosaurus_slide_swings.webp',
+  '/assets/stickers/playground_recess.webp': '/assets/stickers/dino_brachiosaurus_slide_swings.webp',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/dino_starfruit_apple_snack.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/dino_starry_pajamas_sleep.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/dino_starry_pajamas_sleep.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/dino_wooden_cart_ride.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/dino_slate_tablet_ipad.webp',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/dino_vine_toy_box.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/dino_bone_stamina_spoons.webp',
+  '/assets/stickers/fidget_bubbles.webp': '/assets/stickers/dino_spring_sensory_bubbles.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/dino_stone_decision_wheel.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/dino_ammonite_spiral_clock.webp',
   // Batch 4: Communication Hubs, Outings & Daily Activities
-  '/assets/stickers/about_id.png': '/assets/stickers/dino_explorer_id_badge.png',
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/dino_trex_tooth_care.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/dino_volcano_thermometer.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/dino_stone_stopwatch.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/dino_amber_star_core.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/dino_jungle_speech_bubbles.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/dino_amber_fossil_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/dino_flatbread_sandwich.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/dino_stone_tumbler_water.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/dino_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/dino_cavern_retreat.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/dino_child_persona_rex.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/dino_triceratops_frill_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/dino_ammonite_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/dino_palm_leaf_folio.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/dino_amber_star_core.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/dino_expedition_log_book.png',
-  '/assets/stickers/quick_phrases.png': '/assets/stickers/dino_jungle_speech_bubbles.png',
-  '/assets/stickers/keyboard.png': '/assets/stickers/dino_carved_slate_keyboard.png',
-  '/assets/stickers/caregiver_heart.png': '/assets/stickers/dino_caregiver_heart.png',
-  '/assets/stickers/eye_see.png': '/assets/stickers/dino_sensory_eye_stone.png',
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/dino_herbal_tea_mug.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/dino_reed_laundry_basket.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/dino_seed_honey_bar.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/dino_expedition_timber_trunk.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/dino_whispering_baby_shh.png',
+  '/assets/stickers/about_id.webp': '/assets/stickers/dino_explorer_id_badge.webp',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/dino_trex_tooth_care.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/dino_volcano_thermometer.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/dino_stone_stopwatch.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/dino_amber_star_core.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/dino_jungle_speech_bubbles.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/dino_amber_fossil_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/dino_flatbread_sandwich.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/dino_stone_tumbler_water.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/dino_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/dino_cavern_retreat.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/dino_child_persona_rex.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/dino_triceratops_frill_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/dino_ammonite_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/dino_palm_leaf_folio.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/dino_amber_star_core.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/dino_expedition_log_book.webp',
+  '/assets/stickers/quick_phrases.webp': '/assets/stickers/dino_jungle_speech_bubbles.webp',
+  '/assets/stickers/keyboard.webp': '/assets/stickers/dino_carved_slate_keyboard.webp',
+  '/assets/stickers/caregiver_heart.webp': '/assets/stickers/dino_caregiver_heart.webp',
+  '/assets/stickers/eye_see.webp': '/assets/stickers/dino_sensory_eye_stone.webp',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/dino_herbal_tea_mug.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/dino_reed_laundry_basket.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/dino_seed_honey_bar.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/dino_expedition_timber_trunk.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/dino_whispering_baby_shh.webp',
   // Batch 5: Outings, Routines, Health & Sensory Triggers
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/dino_stone_washroom_basin.png',
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/dino_trail_explorer_boots.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/dino_prehistoric_moon.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/dino_herbal_wellness_vial.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/dino_bone_comb_mirror.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/dino_expedition_camp_tent.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/dino_geothermal_spring_pool.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/dino_shadow_puppet_lantern.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/dino_ammonite_ear_defenders.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/dino_sun_hat_shades.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/dino_secret_cavern_den.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/dino_fossil_bone_treat.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/dino_wooden_gathering_wagon.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/dino_pterodactyl_flight.png',
-  '/assets/stickers/shower_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/dino_warm_spring_bath.png',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/dino_stone_washroom_basin.webp',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/dino_trail_explorer_boots.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/dino_prehistoric_moon.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/dino_herbal_wellness_vial.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/dino_healer_stethoscope_bag.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/dino_bone_comb_mirror.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/dino_expedition_camp_tent.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/dino_geothermal_spring_pool.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/dino_shadow_puppet_lantern.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/dino_ammonite_ear_defenders.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/dino_sun_hat_shades.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/dino_secret_cavern_den.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/dino_fossil_bone_treat.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/dino_wooden_gathering_wagon.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/dino_pterodactyl_flight.webp',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/dino_warm_spring_bath.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/dino_warm_spring_bath.webp',
   // Batch 6: Activities, Rewards, Pets & Outings
-  '/assets/stickers/teddy_bear.png': '/assets/stickers/dino_plush_stego_toy.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/dino_hatchling_pet_bowl.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/dino_primeval_sun_canopy.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/dino_amber_fossil_trophy.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/dino_leaf_berry_treat.png',
-  '/assets/stickers/fork_knife.png': '/assets/stickers/dino_bone_cutlery_fork_spoon.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/dino_tidal_ripple_wave.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/dino_amber_energy_gauge.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/dino_track_paw_print.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/dino_woven_moss_play_ball.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/dino_fern_log_planter.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/dino_stone_pebble_bowling.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/dino_amber_museum_archive.png',
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/dino_feast_table_pavilion.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/dino_fossil_puzzle_piece.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/dino_footprint_loop.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/dino_footprint_loop.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/dino_vine_toy_box.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/dino_vine_toy_box.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
+  '/assets/stickers/teddy_bear.webp': '/assets/stickers/dino_plush_stego_toy.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/dino_hatchling_pet_bowl.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/dino_primeval_sun_canopy.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/dino_amber_fossil_trophy.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/dino_leaf_berry_treat.webp',
+  '/assets/stickers/fork_knife.webp': '/assets/stickers/dino_bone_cutlery_fork_spoon.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/dino_tidal_ripple_wave.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/dino_amber_energy_gauge.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/dino_track_paw_print.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/dino_woven_moss_play_ball.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/dino_fern_log_planter.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/dino_stone_pebble_bowling.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/dino_amber_museum_archive.webp',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/dino_feast_table_pavilion.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/dino_fossil_puzzle_piece.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/dino_footprint_loop.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/dino_footprint_loop.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/dino_forager_feast_bowl.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/dino_vine_toy_box.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/dino_vine_toy_box.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/dino_healer_stethoscope_bag.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/dino_healer_stethoscope_bag.webp',
 };
 
 export const FROG_STICKER_SWAPS: Record<string, string> = {
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/frog_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/frog_birthday_cake_slice.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/frog_game_controller.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/frog_water_bottle.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/frog_pants_folded.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/frog_birthday_card.png',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/frog_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/frog_birthday_cake_slice.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/frog_game_controller.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/frog_water_bottle.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/frog_pants_folded.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/frog_birthday_card.webp',
   // Adventure Step Mappings
-  '/assets/stickers/home_house.png': '/assets/stickers/frog_willow_hollow_retreat.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/frog_bamboo_tablet_ipad.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/frog_bamboo_cutlery.png',
-  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/frog_reed_explorer_shoes.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/frog_lily_speech_bubbles.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/frog_pond_harvest_bowl.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/frog_reed_checklist_board.png',
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/frog_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/frog_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/frog_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/frog_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/frog_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/frog_open_welcome_door.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/frog_dining_table_booth.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/frog_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/frog_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/frog_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/frog_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/frog_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/frog_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/frog_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/frog_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/frog_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/frog_doctor_ear_light.png',
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/frog_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/frog_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/frog_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/frog_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/frog_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/frog_bowling_lane_bumpers.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/frog_bowling_pins_strike.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/frog_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/frog_pine_trees_forest.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/frog_camping_sleeping_bag.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/frog_campfire_marshmallows.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/frog_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/frog_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/frog_observing_magnifying_glass.png',
+  '/assets/stickers/home_house.webp': '/assets/stickers/frog_willow_hollow_retreat.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/frog_bamboo_tablet_ipad.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/frog_bamboo_cutlery.webp',
+  '/assets/stickers/hiking_trail_boots.webp': '/assets/stickers/frog_reed_explorer_shoes.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/frog_lily_speech_bubbles.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/frog_healer_stethoscope_kit.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/frog_pond_harvest_bowl.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/frog_reed_checklist_board.webp',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/frog_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/frog_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/frog_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/frog_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/frog_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/frog_open_welcome_door.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/frog_dining_table_booth.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/frog_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/frog_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/frog_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/frog_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/frog_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/frog_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/frog_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/frog_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/frog_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/frog_doctor_ear_light.webp',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/frog_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/frog_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/frog_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/frog_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/frog_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/frog_bowling_lane_bumpers.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/frog_bowling_pins_strike.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/frog_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/frog_pine_trees_forest.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/frog_camping_sleeping_bag.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/frog_campfire_marshmallows.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/frog_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/frog_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/frog_observing_magnifying_glass.webp',
   // Batch 1: Core Daily Routines, Hubs & Wellness
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-  '/assets/stickers/drink_cup.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/frog_lily_bed_sleep.png',
-  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/frog_lily_bed_sleep.png',
-  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/frog_willow_retreat_calm.png',
-  '/assets/stickers/breathing_cloud.png': '/assets/stickers/frog_willow_retreat_calm.png',
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/frog_lotus_bell_clock.png',
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/frog_raincoat_hoodie.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/frog_lily_pad_soap.png',
-  '/assets/stickers/toothbrush.png': '/assets/stickers/frog_bamboo_toothbrush.png',
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/frog_pond_harvest_bowl.png',
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/frog_pond_harvest_bowl.png',
-  '/assets/stickers/backpack_school.png': '/assets/stickers/frog_explorer_backpack.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/frog_leaf_shield_sos.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/frog_leaf_shield_sos.png',
-  '/assets/stickers/schedule_calendar.png': '/assets/stickers/frog_reed_checklist_board.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/frog_reed_checklist_board.png',
-  '/assets/stickers/quick_phrases.png': '/assets/stickers/frog_lily_speech_bubbles.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/frog_cattail_thermometer.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/frog_lily_stopwatch.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/frog_lotus_star_core.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/frog_lily_speech_bubbles.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/frog_lotus_reward_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/frog_garden_sandwich.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/frog_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/frog_willow_hollow_retreat.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/frog_child_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/frog_lily_pad_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/frog_pebble_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/frog_reed_school_folder.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/frog_lotus_star_core.png',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+  '/assets/stickers/drink_cup.webp': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/frog_lily_bed_sleep.webp',
+  '/assets/stickers/fav_rest_tired.webp': '/assets/stickers/frog_lily_bed_sleep.webp',
+  '/assets/stickers/fav_quiet_break.webp': '/assets/stickers/frog_willow_retreat_calm.webp',
+  '/assets/stickers/breathing_cloud.webp': '/assets/stickers/frog_willow_retreat_calm.webp',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/frog_lotus_bell_clock.webp',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/frog_raincoat_hoodie.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/frog_lily_pad_soap.webp',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/frog_bamboo_toothbrush.webp',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/frog_pond_harvest_bowl.webp',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/frog_pond_harvest_bowl.webp',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/frog_explorer_backpack.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/frog_leaf_shield_sos.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/frog_leaf_shield_sos.webp',
+  '/assets/stickers/schedule_calendar.webp': '/assets/stickers/frog_reed_checklist_board.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/frog_reed_checklist_board.webp',
+  '/assets/stickers/quick_phrases.webp': '/assets/stickers/frog_lily_speech_bubbles.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/frog_cattail_thermometer.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/frog_lily_stopwatch.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/frog_lotus_star_core.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/frog_lily_speech_bubbles.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/frog_lotus_reward_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/frog_garden_sandwich.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/frog_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/frog_willow_hollow_retreat.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/frog_child_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/frog_lily_pad_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/frog_pebble_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/frog_reed_school_folder.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/frog_lotus_star_core.webp',
   // Batch 2: Moods, Personas, School & Hubs
-  '/assets/stickers/mood_happy.png': '/assets/stickers/frog_mood_happy.png',
-  '/assets/stickers/fav_happy.png': '/assets/stickers/frog_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/frog_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/frog_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/frog_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/frog_mood_unsure.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/frog_stop_flipper.png',
-  '/assets/stickers/fav_music.png': '/assets/stickers/frog_bamboo_wind_chimes.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/frog_bamboo_wind_chimes.png',
-  '/assets/stickers/fav_sandwich.png': '/assets/stickers/frog_garden_sandwich.png',
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/frog_garden_sandwich.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/frog_child_persona.png',
-  '/assets/stickers/teen_headphones.png': '/assets/stickers/frog_pebble_headphones.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/frog_bamboo_satchel.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/frog_wood_phone_caregiver.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/frog_pond_biome_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/frog_golden_lotus_crown.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/frog_tadpole_swim_loop.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/frog_mood_happy.webp',
+  '/assets/stickers/fav_happy.webp': '/assets/stickers/frog_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/frog_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/frog_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/frog_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/frog_mood_unsure.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/frog_stop_flipper.webp',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/frog_bamboo_wind_chimes.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/frog_bamboo_wind_chimes.webp',
+  '/assets/stickers/fav_sandwich.webp': '/assets/stickers/frog_garden_sandwich.webp',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/frog_garden_sandwich.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/frog_child_persona.webp',
+  '/assets/stickers/teen_headphones.webp': '/assets/stickers/frog_pebble_headphones.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/frog_bamboo_satchel.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/frog_wood_phone_caregiver.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/frog_pond_biome_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/frog_golden_lotus_crown.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/frog_tadpole_swim_loop.webp',
   // Batch 3: School, Play & Daily Tools
-  '/assets/stickers/school_bus.png': '/assets/stickers/frog_bamboo_ferry_bus.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/frog_terrarium_science_flask.png',
-  '/assets/stickers/art_palette.png': '/assets/stickers/frog_pebble_art_palette.png',
-  '/assets/stickers/art_crafts.png': '/assets/stickers/frog_pebble_art_palette.png',
-  '/assets/stickers/pencil_write.png': '/assets/stickers/frog_bamboo_pencil.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/frog_bamboo_pencil.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/frog_reed_school_folder.png',
-  '/assets/stickers/playground_swings.png': '/assets/stickers/frog_willow_slide_swings.png',
-  '/assets/stickers/playground_recess.png': '/assets/stickers/frog_willow_slide_swings.png',
-  '/assets/stickers/apple_snack.png': '/assets/stickers/frog_pond_berry_snack.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/frog_lily_pajamas_sleep.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/frog_lily_pajamas_sleep.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/frog_reed_cart_ride.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/frog_bamboo_tablet_ipad.png',
-  '/assets/stickers/toy_box.png': '/assets/stickers/frog_seagrass_toy_box.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/frog_bamboo_energy_spoons.png',
-  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/frog_pond_dewdrop_bubbles.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/frog_lotus_decision_wheel.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/frog_lily_pad_wall_clock.png',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/frog_bamboo_ferry_bus.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/frog_terrarium_science_flask.webp',
+  '/assets/stickers/art_palette.webp': '/assets/stickers/frog_pebble_art_palette.webp',
+  '/assets/stickers/art_crafts.webp': '/assets/stickers/frog_pebble_art_palette.webp',
+  '/assets/stickers/pencil_write.webp': '/assets/stickers/frog_bamboo_pencil.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/frog_bamboo_pencil.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/frog_reed_school_folder.webp',
+  '/assets/stickers/playground_swings.webp': '/assets/stickers/frog_willow_slide_swings.webp',
+  '/assets/stickers/playground_recess.webp': '/assets/stickers/frog_willow_slide_swings.webp',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/frog_pond_berry_snack.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/frog_lily_pajamas_sleep.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/frog_lily_pajamas_sleep.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/frog_reed_cart_ride.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/frog_bamboo_tablet_ipad.webp',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/frog_seagrass_toy_box.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/frog_bamboo_energy_spoons.webp',
+  '/assets/stickers/fidget_bubbles.webp': '/assets/stickers/frog_pond_dewdrop_bubbles.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/frog_lotus_decision_wheel.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/frog_lily_pad_wall_clock.webp',
   // Batch 4: Identity, Daily Care & Health
-  '/assets/stickers/about_id.png': '/assets/stickers/frog_explorer_id_badge.png',
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/frog_lotus_dental_station.png',
-  '/assets/stickers/keyboard.png': '/assets/stickers/frog_bamboo_keyboard.png',
-  '/assets/stickers/caregiver_heart.png': '/assets/stickers/frog_caregiver_heart.png',
-  '/assets/stickers/eye_see.png': '/assets/stickers/frog_sensory_eye_stone.png',
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/frog_herbal_tea_mug.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/frog_reed_laundry_basket.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/frog_honey_seed_snack_bar.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/frog_timber_explorer_trunk.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/frog_whispering_shh.png',
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/frog_bamboo_washroom_basin.png',
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/frog_reed_explorer_shoes.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/frog_pond_crescent_moon.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/frog_herbal_wellness_vial.png',
-  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/frog_herbal_wellness_vial.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
+  '/assets/stickers/about_id.webp': '/assets/stickers/frog_explorer_id_badge.webp',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/frog_lotus_dental_station.webp',
+  '/assets/stickers/keyboard.webp': '/assets/stickers/frog_bamboo_keyboard.webp',
+  '/assets/stickers/caregiver_heart.webp': '/assets/stickers/frog_caregiver_heart.webp',
+  '/assets/stickers/eye_see.webp': '/assets/stickers/frog_sensory_eye_stone.webp',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/frog_herbal_tea_mug.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/frog_reed_laundry_basket.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/frog_honey_seed_snack_bar.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/frog_timber_explorer_trunk.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/frog_whispering_shh.webp',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/frog_bamboo_washroom_basin.webp',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/frog_reed_explorer_shoes.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/frog_pond_crescent_moon.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/frog_herbal_wellness_vial.webp',
+  '/assets/stickers/routine_medicine_pill.webp': '/assets/stickers/frog_herbal_wellness_vial.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/frog_healer_stethoscope_kit.webp',
   // Batch 5: Adventures, Sensory & Wellness
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/frog_grooming_comb_mirror.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/frog_canopy_reed_tent.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/frog_spring_lagoon_pool.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/frog_shadow_puppet_theater.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/frog_sound_softening_shell.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/frog_shaded_leaf_sun_hat.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/frog_willow_hollow_retreat.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/frog_water_chestnut_treat.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/frog_woven_gathering_cart.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/frog_dragonfly_glider.png',
-  '/assets/stickers/shower_wash.png': '/assets/stickers/frog_warm_spring_bath.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/frog_warm_spring_bath.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/frog_warm_spring_bath.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/frog_warm_spring_bath.png',
-  '/assets/stickers/teddy_bear.png': '/assets/stickers/frog_plush_toy_doll.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/frog_tadpole_pet_feed_bowl.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/frog_meadow_sunshine.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/frog_meadow_sunshine.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/frog_lotus_reward_trophy.png',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/frog_grooming_comb_mirror.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/frog_canopy_reed_tent.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/frog_spring_lagoon_pool.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/frog_shadow_puppet_theater.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/frog_sound_softening_shell.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/frog_shaded_leaf_sun_hat.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/frog_willow_hollow_retreat.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/frog_water_chestnut_treat.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/frog_woven_gathering_cart.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/frog_dragonfly_glider.webp',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/frog_warm_spring_bath.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/frog_warm_spring_bath.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/frog_warm_spring_bath.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/frog_warm_spring_bath.webp',
+  '/assets/stickers/teddy_bear.webp': '/assets/stickers/frog_plush_toy_doll.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/frog_tadpole_pet_feed_bowl.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/frog_meadow_sunshine.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/frog_meadow_sunshine.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/frog_lotus_reward_trophy.webp',
   // Batch 6: Outings, Social Stories, Dining & Toys
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/frog_feast_table_pavilion.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/frog_pebble_bowling_alley.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/frog_heritage_archive_pavilion.png',
-  '/assets/stickers/fork_knife.png': '/assets/stickers/frog_bamboo_cutlery.png',
-  '/assets/stickers/cutlery.png': '/assets/stickers/frog_bamboo_cutlery.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/frog_pond_ripple_wave.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/frog_bamboo_energy_gauge.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/frog_webbed_footprint_stamp.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/frog_woven_moss_play_ball.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/frog_driftwood_lotus_planter.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/frog_lotus_puzzle_piece.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/frog_tadpole_swim_loop.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/frog_tadpole_swim_loop.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/frog_pond_birthday_feast.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/frog_seagrass_toy_box.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/frog_seagrass_toy_box.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
-  '/assets/stickers/fav_lego.png': '/assets/stickers/frog_zen_balancing_stones.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/frog_lily_pad_heart.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/frog_mascot.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/frog_feast_table_pavilion.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/frog_pebble_bowling_alley.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/frog_heritage_archive_pavilion.webp',
+  '/assets/stickers/fork_knife.webp': '/assets/stickers/frog_bamboo_cutlery.webp',
+  '/assets/stickers/cutlery.webp': '/assets/stickers/frog_bamboo_cutlery.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/frog_pond_ripple_wave.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/frog_bamboo_energy_gauge.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/frog_webbed_footprint_stamp.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/frog_woven_moss_play_ball.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/frog_driftwood_lotus_planter.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/frog_lotus_puzzle_piece.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/frog_tadpole_swim_loop.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/frog_tadpole_swim_loop.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/frog_pond_birthday_feast.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/frog_seagrass_toy_box.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/frog_seagrass_toy_box.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/frog_healer_stethoscope_kit.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/frog_healer_stethoscope_kit.webp',
+  '/assets/stickers/fav_lego.webp': '/assets/stickers/frog_zen_balancing_stones.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/frog_lily_pad_heart.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/frog_mascot.webp',
 };
 
 export const SPACE_STICKER_SWAPS: Record<string, string> = {
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/space_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/space_birthday_cake_slice.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/space_game_controller.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/space_water_bottle.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/space_pants_folded.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/space_birthday_card.png',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/space_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/space_birthday_cake_slice.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/space_game_controller.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/space_water_bottle.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/space_pants_folded.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/space_birthday_card.webp',
   // Adventure Step Mappings
-  '/assets/stickers/toy_box.png': '/assets/stickers/space_travel_luggage.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/space_tablet_ipad.png',
-  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/space_sneaker_shoes.png',
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/space_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/space_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/space_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/space_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/space_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/space_open_welcome_door.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/space_dining_table_booth.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/space_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/space_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/space_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/space_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/space_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/space_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/space_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/space_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/space_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/space_doctor_ear_light.png',
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/space_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/space_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/space_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/space_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/space_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/space_bowling_lane_bumpers.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/space_bowling_pins_strike.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/space_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/space_pine_trees_forest.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/space_camping_sleeping_bag.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/space_campfire_marshmallows.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/space_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/space_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/space_observing_magnifying_glass.png',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/space_travel_luggage.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/space_tablet_ipad.webp',
+  '/assets/stickers/hiking_trail_boots.webp': '/assets/stickers/space_sneaker_shoes.webp',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/space_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/space_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/space_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/space_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/space_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/space_open_welcome_door.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/space_dining_table_booth.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/space_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/space_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/space_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/space_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/space_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/space_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/space_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/space_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/space_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/space_doctor_ear_light.webp',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/space_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/space_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/space_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/space_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/space_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/space_bowling_lane_bumpers.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/space_bowling_pins_strike.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/space_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/space_pine_trees_forest.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/space_camping_sleeping_bag.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/space_campfire_marshmallows.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/space_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/space_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/space_observing_magnifying_glass.webp',
   // Batch 1 Core Routine Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/space_alarm_clock.png',
-  '/assets/stickers/toothbrush.png': '/assets/stickers/space_toothbrush.png',
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/space_clothes_dressed.png',
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/space_pancakes_breakfast.png',
-  '/assets/stickers/school_bus.png': '/assets/stickers/space_school_bus.png',
-  '/assets/stickers/backpack_school.png': '/assets/stickers/space_backpack_school.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/space_homework_study.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/space_homework_study.png',
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/space_sandwich_lunch.png',
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/space_routine_water_drink.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/space_routine_water_drink.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/space_routine_water_drink.png',
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/space_sneaker_shoes.png',
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/space_toilet_restroom.png',
-  '/assets/stickers/toilet_restroom.png': '/assets/stickers/space_toilet_restroom.png',
-  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/space_routine_medicine_pill.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/space_routine_medicine_pill.png',
-  '/assets/stickers/pill_capsule.png': '/assets/stickers/space_routine_medicine_pill.png',
-  '/assets/stickers/school_building.png': '/assets/stickers/space_school_building.png',
-  '/assets/stickers/shower_wash.png': '/assets/stickers/space_shower_wash.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/space_shower_wash.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/space_shower_wash.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/space_shower_wash.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/space_soap_wash_hands.png',
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/space_bedtime_sleep.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/space_bedtime_sleep.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/space_alarm_clock.webp',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/space_toothbrush.webp',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/space_clothes_dressed.webp',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/space_pancakes_breakfast.webp',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/space_school_bus.webp',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/space_backpack_school.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/space_homework_study.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/space_homework_study.webp',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/space_sandwich_lunch.webp',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/space_routine_water_drink.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/space_routine_water_drink.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/space_routine_water_drink.webp',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/space_sneaker_shoes.webp',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/space_toilet_restroom.webp',
+  '/assets/stickers/toilet_restroom.webp': '/assets/stickers/space_toilet_restroom.webp',
+  '/assets/stickers/routine_medicine_pill.webp': '/assets/stickers/space_routine_medicine_pill.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/space_routine_medicine_pill.webp',
+  '/assets/stickers/pill_capsule.webp': '/assets/stickers/space_routine_medicine_pill.webp',
+  '/assets/stickers/school_building.webp': '/assets/stickers/space_school_building.webp',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/space_shower_wash.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/space_shower_wash.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/space_shower_wash.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/space_shower_wash.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/space_soap_wash_hands.webp',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/space_bedtime_sleep.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/space_bedtime_sleep.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/space_bedtime_sleep.webp',
   // Batch 2 Swaps
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/space_hot_cocoa.png',
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/space_dinner_bowl.png',
-  '/assets/stickers/cooking_pot.png': '/assets/stickers/space_dinner_bowl.png',
-  '/assets/stickers/apple_snack.png': '/assets/stickers/space_apple_snack.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/space_chocolate_bar.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/space_jigsaw_puzzle.png',
-  '/assets/stickers/fav_music.png': '/assets/stickers/space_fav_music.png',
-  '/assets/stickers/music_note.png': '/assets/stickers/space_fav_music.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/space_fav_music.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/space_fav_love_heart.png',
-  '/assets/stickers/heart_here_for_you.png': '/assets/stickers/space_fav_love_heart.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/space_fav_outside.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/space_fav_outside.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/space_fav_stop.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/space_help_sos.png',
-  '/assets/stickers/alert_sos_shield.png': '/assets/stickers/space_help_sos.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/space_help_sos.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/space_decision_wheel.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/space_spoons_energy.png',
-  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/space_routine_writing_journal.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/space_laundry_hamper.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/space_refresh_repeat.png',
-  '/assets/stickers/circular_arrow.png': '/assets/stickers/space_refresh_repeat.png',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/space_hot_cocoa.webp',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/space_dinner_bowl.webp',
+  '/assets/stickers/cooking_pot.webp': '/assets/stickers/space_dinner_bowl.webp',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/space_apple_snack.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/space_chocolate_bar.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/space_jigsaw_puzzle.webp',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/space_fav_music.webp',
+  '/assets/stickers/music_note.webp': '/assets/stickers/space_fav_music.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/space_fav_music.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/space_fav_love_heart.webp',
+  '/assets/stickers/heart_here_for_you.webp': '/assets/stickers/space_fav_love_heart.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/space_fav_outside.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/space_fav_outside.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/space_fav_stop.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/space_help_sos.webp',
+  '/assets/stickers/alert_sos_shield.webp': '/assets/stickers/space_help_sos.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/space_help_sos.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/space_decision_wheel.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/space_spoons_energy.webp',
+  '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/space_routine_writing_journal.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/space_laundry_hamper.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/space_refresh_repeat.webp',
+  '/assets/stickers/circular_arrow.webp': '/assets/stickers/space_refresh_repeat.webp',
   // Batch 3 Moods, Personas, Habitats & Hubs
-  '/assets/stickers/mood_happy.png': '/assets/stickers/space_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/space_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/space_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/space_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/space_mood_unsure.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/space_child_persona.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/space_adult_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/space_caregiver_phone.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/space_language_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/space_trial_crown.png',
-  '/assets/stickers/home_house.png': '/assets/stickers/space_home_house.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/space_car_ride.png',
-  '/assets/stickers/car_travel.png': '/assets/stickers/space_car_ride.png',
-  '/assets/stickers/car_on_my_way.png': '/assets/stickers/space_car_ride.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/space_pet_care.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/space_pet_care.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/space_pizza_slice.png',
-  '/assets/stickers/about_id.png': '/assets/stickers/space_about_id.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/space_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/space_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/space_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/space_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/space_mood_unsure.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/space_child_persona.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/space_adult_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/space_caregiver_phone.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/space_language_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/space_trial_crown.webp',
+  '/assets/stickers/home_house.webp': '/assets/stickers/space_home_house.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/space_car_ride.webp',
+  '/assets/stickers/car_travel.webp': '/assets/stickers/space_car_ride.webp',
+  '/assets/stickers/car_on_my_way.webp': '/assets/stickers/space_car_ride.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/space_pet_care.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/space_pet_care.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/space_pizza_slice.webp',
+  '/assets/stickers/about_id.webp': '/assets/stickers/space_about_id.webp',
   // Batch 4 Weather, Rewards, Tools & Exploration
-  '/assets/stickers/morning_sunrise.png': '/assets/stickers/space_morning_sunrise.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/space_evening_moon.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/space_reward_trophy.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/space_star_gold.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/space_star_gold.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/space_speech_bubble.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/space_reward_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/space_pizza_slice.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/space_routine_water_drink.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/space_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/space_home_house.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/space_child_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/space_fav_love_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/space_sensory_loud_noise.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/space_homework_study.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/space_feelings_thermometer.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/space_battery_meter.png',
-  '/assets/stickers/calm_sparkles.png': '/assets/stickers/space_calm_sparkles.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/space_quiet_voice.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/space_speech_bubble.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/space_science_flask.png',
-  '/assets/stickers/sunny_clear.png': '/assets/stickers/space_sunny_clear.png',
-  '/assets/stickers/rain_cloud.png': '/assets/stickers/space_rain_cloud.png',
-  '/assets/stickers/snow_weather.png': '/assets/stickers/space_snow_weather.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/space_travel_luggage.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/space_stethoscope.png',
+  '/assets/stickers/morning_sunrise.webp': '/assets/stickers/space_morning_sunrise.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/space_evening_moon.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/space_reward_trophy.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/space_star_gold.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/space_star_gold.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/space_speech_bubble.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/space_reward_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/space_pizza_slice.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/space_routine_water_drink.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/space_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/space_home_house.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/space_child_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/space_fav_love_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/space_sensory_loud_noise.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/space_homework_study.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/space_feelings_thermometer.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/space_battery_meter.webp',
+  '/assets/stickers/calm_sparkles.webp': '/assets/stickers/space_calm_sparkles.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/space_quiet_voice.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/space_speech_bubble.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/space_science_flask.webp',
+  '/assets/stickers/sunny_clear.webp': '/assets/stickers/space_sunny_clear.webp',
+  '/assets/stickers/rain_cloud.webp': '/assets/stickers/space_rain_cloud.webp',
+  '/assets/stickers/snow_weather.webp': '/assets/stickers/space_snow_weather.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/space_travel_luggage.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/space_stethoscope.webp',
   // Batch 5 Adventures & Sensory Regulation
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/space_adventure_dentist.png',
-  '/assets/stickers/dentist_adventure.png': '/assets/stickers/space_adventure_dentist.png',
-  '/assets/stickers/adventure_haircut.png': '/assets/stickers/space_adventure_haircut.png',
-  '/assets/stickers/haircut_adventure.png': '/assets/stickers/space_adventure_haircut.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/space_adventure_movie_cinema.png',
-  '/assets/stickers/movie_cinema.png': '/assets/stickers/space_adventure_movie_cinema.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/space_adventure_swimming_pool.png',
-  '/assets/stickers/swimming_pool.png': '/assets/stickers/space_adventure_swimming_pool.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/space_adventure_camping_tent.png',
-  '/assets/stickers/camping_tent.png': '/assets/stickers/space_adventure_camping_tent.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/space_shopping_cart.png',
-  '/assets/stickers/therapy_brain.png': '/assets/stickers/space_therapy_brain.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/space_sensory_loud_noise.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/space_sensory_bright_lights.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/space_tennis_ball.png',
-  '/assets/stickers/red_balloon.png': '/assets/stickers/space_red_balloon.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/space_candy_treat.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/space_cutlery_meal.png',
-  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/space_grounding_touch_hand.png',
-  '/assets/stickers/cloudy_weather.png': '/assets/stickers/space_cloudy_weather.png',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/space_adventure_dentist.webp',
+  '/assets/stickers/dentist_adventure.webp': '/assets/stickers/space_adventure_dentist.webp',
+  '/assets/stickers/adventure_haircut.webp': '/assets/stickers/space_adventure_haircut.webp',
+  '/assets/stickers/haircut_adventure.webp': '/assets/stickers/space_adventure_haircut.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/space_adventure_movie_cinema.webp',
+  '/assets/stickers/movie_cinema.webp': '/assets/stickers/space_adventure_movie_cinema.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/space_adventure_swimming_pool.webp',
+  '/assets/stickers/swimming_pool.webp': '/assets/stickers/space_adventure_swimming_pool.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/space_adventure_camping_tent.webp',
+  '/assets/stickers/camping_tent.webp': '/assets/stickers/space_adventure_camping_tent.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/space_shopping_cart.webp',
+  '/assets/stickers/therapy_brain.webp': '/assets/stickers/space_therapy_brain.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/space_sensory_loud_noise.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/space_sensory_bright_lights.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/space_tennis_ball.webp',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/space_red_balloon.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/space_candy_treat.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/space_cutlery_meal.webp',
+  '/assets/stickers/grounding_touch_hand.webp': '/assets/stickers/space_grounding_touch_hand.webp',
+  '/assets/stickers/cloudy_weather.webp': '/assets/stickers/space_cloudy_weather.webp',
   // Batch 6 Destinations, Travel & Station Living
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/space_adventure_restaurant.png',
-  '/assets/stickers/restaurant_adventure.png': '/assets/stickers/space_adventure_restaurant.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/space_adventure_museum_visit.png',
-  '/assets/stickers/museum_visit.png': '/assets/stickers/space_adventure_museum_visit.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/space_adventure_bowling_alley.png',
-  '/assets/stickers/bowling_alley.png': '/assets/stickers/space_adventure_bowling_alley.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/space_adventure_haircut.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/space_stethoscope.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/space_stethoscope.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/space_stethoscope.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/space_airplane_flight.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/space_boarding_ticket.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/space_passport_book.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/space_tablet_ipad.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/space_potted_plant.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/space_clock_time.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/space_clock_time.png',
-  '/assets/stickers/wall_clock.png': '/assets/stickers/space_clock_time.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/space_circle_carpet.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/space_circle_carpet.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/space_locker_schedule.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/space_bone_treat.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/space_paw_print.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/space_ocean_wave.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/space_story_birthday.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/space_refresh_repeat.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/space_refresh_repeat.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/space_game_controller.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/space_game_controller.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/space_adventure_restaurant.webp',
+  '/assets/stickers/restaurant_adventure.webp': '/assets/stickers/space_adventure_restaurant.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/space_adventure_museum_visit.webp',
+  '/assets/stickers/museum_visit.webp': '/assets/stickers/space_adventure_museum_visit.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/space_adventure_bowling_alley.webp',
+  '/assets/stickers/bowling_alley.webp': '/assets/stickers/space_adventure_bowling_alley.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/space_adventure_haircut.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/space_stethoscope.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/space_stethoscope.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/space_stethoscope.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/space_airplane_flight.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/space_boarding_ticket.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/space_passport_book.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/space_tablet_ipad.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/space_potted_plant.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/space_clock_time.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/space_clock_time.webp',
+  '/assets/stickers/wall_clock.webp': '/assets/stickers/space_clock_time.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/space_circle_carpet.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/space_circle_carpet.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/space_locker_schedule.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/space_bone_treat.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/space_paw_print.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/space_ocean_wave.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/space_story_birthday.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/space_refresh_repeat.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/space_refresh_repeat.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/space_game_controller.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/space_game_controller.webp',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/train_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/train_birthday_cake_slice.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/train_game_controller.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/train_water_bottle.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/train_pants_folded.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/train_birthday_card.png',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/train_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/train_birthday_cake_slice.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/train_game_controller.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/train_water_bottle.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/train_pants_folded.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/train_birthday_card.webp',
   // Train Adventure Batch 1 Swaps
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/train_waiting_room_bench.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/train_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/train_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/train_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/train_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/train_open_welcome_door.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/train_dining_table_booth.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/train_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/train_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/train_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/train_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/train_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/train_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/train_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/train_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/train_doctor_exam_bed.png',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/train_waiting_room_bench.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/train_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/train_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/train_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/train_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/train_open_welcome_door.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/train_dining_table_booth.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/train_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/train_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/train_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/train_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/train_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/train_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/train_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/train_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/train_doctor_exam_bed.webp',
   // Train Adventure Batch 2 Swaps
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/train_doctor_ear_light.png',
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/train_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/train_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/train_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/train_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/train_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/train_bowling_lane_bumpers.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/train_bowling_pins_strike.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/train_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/train_pine_trees_forest.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/train_camping_sleeping_bag.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/train_campfire_marshmallows.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/train_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/train_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/train_observing_magnifying_glass.png',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/train_doctor_ear_light.webp',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/train_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/train_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/train_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/train_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/train_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/train_bowling_lane_bumpers.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/train_bowling_pins_strike.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/train_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/train_pine_trees_forest.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/train_camping_sleeping_bag.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/train_campfire_marshmallows.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/train_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/train_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/train_observing_magnifying_glass.webp',
   // Adventure Step Mappings
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/train_timetable_board.png',
-  '/assets/stickers/hiking_trail_boots.png': '/assets/stickers/train_boots.png',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/train_timetable_board.webp',
+  '/assets/stickers/hiking_trail_boots.webp': '/assets/stickers/train_boots.webp',
   // Batch 6 New Train Swaps
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/train_adventure_restaurant.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/train_adventure_museum_visit.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/train_adventure_bowling_alley.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/train_airplane_flight.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/train_boarding_ticket.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/train_passport_book.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/train_tablet_ipad.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/train_potted_plant.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/train_clock_time.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/train_circle_carpet.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/train_circle_carpet.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/train_locker_schedule.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/train_bone_treat.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/train_paw_print.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/train_ocean_wave.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/train_story_birthday.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/train_circular_track.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/train_circular_track.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/train_toy_chest.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/train_toy_chest.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/train_adventure_restaurant.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/train_adventure_museum_visit.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/train_adventure_bowling_alley.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/train_airplane_flight.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/train_boarding_ticket.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/train_passport_book.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/train_tablet_ipad.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/train_potted_plant.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/train_clock_time.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/train_circle_carpet.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/train_circle_carpet.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/train_locker_schedule.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/train_bone_treat.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/train_paw_print.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/train_ocean_wave.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/train_story_birthday.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/train_circular_track.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/train_circular_track.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/train_toy_chest.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/train_toy_chest.webp',
   // Batch 5 New Train Swaps
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/train_adventure_dentist.png',
-  '/assets/stickers/adventure_haircut.png': '/assets/stickers/train_adventure_haircut.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/train_adventure_haircut.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/train_adventure_movie_cinema.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/train_adventure_swimming_pool.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/train_adventure_camping_tent.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/train_shopping_cart.png',
-  '/assets/stickers/therapy_brain.png': '/assets/stickers/train_therapy_brain.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/train_sensory_loud_noise.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/train_sensory_bright_lights.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/train_tennis_ball.png',
-  '/assets/stickers/red_balloon.png': '/assets/stickers/train_red_balloon.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/train_candy_treat.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/train_cutlery_meal.png',
-  '/assets/stickers/fork_knife.png': '/assets/stickers/train_cutlery_meal.png',
-  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/train_grounding_touch_hand.png',
-  '/assets/stickers/cloudy_weather.png': '/assets/stickers/train_cloudy_weather.png',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/train_adventure_dentist.webp',
+  '/assets/stickers/adventure_haircut.webp': '/assets/stickers/train_adventure_haircut.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/train_adventure_haircut.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/train_adventure_movie_cinema.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/train_adventure_swimming_pool.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/train_adventure_camping_tent.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/train_shopping_cart.webp',
+  '/assets/stickers/therapy_brain.webp': '/assets/stickers/train_therapy_brain.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/train_sensory_loud_noise.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/train_sensory_bright_lights.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/train_tennis_ball.webp',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/train_red_balloon.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/train_candy_treat.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/train_cutlery_meal.webp',
+  '/assets/stickers/fork_knife.webp': '/assets/stickers/train_cutlery_meal.webp',
+  '/assets/stickers/grounding_touch_hand.webp': '/assets/stickers/train_grounding_touch_hand.webp',
+  '/assets/stickers/cloudy_weather.webp': '/assets/stickers/train_cloudy_weather.webp',
   // Batch 4 New Train Swaps
-  '/assets/stickers/morning_sunrise.png': '/assets/stickers/train_morning_sunrise.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/train_evening_moon.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/train_reward_trophy.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/train_star_gold.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/train_star_gold.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/train_speech_bubble.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/train_reward_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/train_pizza_slice.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/train_canteen_flask.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/train_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/train_home_station.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/train_child_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/train_lantern_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/train_ear_defenders.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/train_conductor_logbook.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/train_feelings_thermometer.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/train_battery_meter.png',
-  '/assets/stickers/calm_sparkles.png': '/assets/stickers/train_calm_sparkles.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/train_quiet_voice.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/train_speech_bubble.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/train_science_flask.png',
-  '/assets/stickers/sunny_clear.png': '/assets/stickers/train_sunny_clear.png',
-  '/assets/stickers/rain_cloud.png': '/assets/stickers/train_rain_cloud.png',
-  '/assets/stickers/snow_weather.png': '/assets/stickers/train_snow_weather.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/train_travel_luggage.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/train_stethoscope.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/train_stethoscope.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/train_stethoscope.png',
+  '/assets/stickers/morning_sunrise.webp': '/assets/stickers/train_morning_sunrise.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/train_evening_moon.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/train_reward_trophy.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/train_star_gold.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/train_star_gold.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/train_speech_bubble.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/train_reward_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/train_pizza_slice.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/train_canteen_flask.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/train_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/train_home_station.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/train_child_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/train_lantern_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/train_ear_defenders.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/train_conductor_logbook.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/train_feelings_thermometer.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/train_battery_meter.webp',
+  '/assets/stickers/calm_sparkles.webp': '/assets/stickers/train_calm_sparkles.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/train_quiet_voice.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/train_speech_bubble.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/train_science_flask.webp',
+  '/assets/stickers/sunny_clear.webp': '/assets/stickers/train_sunny_clear.webp',
+  '/assets/stickers/rain_cloud.webp': '/assets/stickers/train_rain_cloud.webp',
+  '/assets/stickers/snow_weather.webp': '/assets/stickers/train_snow_weather.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/train_travel_luggage.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/train_stethoscope.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/train_stethoscope.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/train_stethoscope.webp',
   // Batch 3 New Train Swaps
-  '/assets/stickers/mood_happy.png': '/assets/stickers/train_mood_happy.png',
-  '/assets/stickers/fav_happy.png': '/assets/stickers/train_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/train_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/train_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/train_mood_sleepy.png',
-  '/assets/stickers/fav_rest_tired.png': '/assets/stickers/train_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/train_mood_unsure.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/train_child_persona.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/train_adult_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/train_caregiver_phone.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/train_language_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/train_trial_crown.png',
-  '/assets/stickers/about_id.png': '/assets/stickers/train_about_id.png',
-  '/assets/stickers/home_house.png': '/assets/stickers/train_home_station.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/train_handcar_ride.png',
-  '/assets/stickers/car_travel.png': '/assets/stickers/train_handcar_ride.png',
-  '/assets/stickers/car_on_my_way.png': '/assets/stickers/train_handcar_ride.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/train_station_dog.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/train_pizza_slice.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/train_mood_happy.webp',
+  '/assets/stickers/fav_happy.webp': '/assets/stickers/train_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/train_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/train_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/train_mood_sleepy.webp',
+  '/assets/stickers/fav_rest_tired.webp': '/assets/stickers/train_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/train_mood_unsure.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/train_child_persona.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/train_adult_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/train_caregiver_phone.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/train_language_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/train_trial_crown.webp',
+  '/assets/stickers/about_id.webp': '/assets/stickers/train_about_id.webp',
+  '/assets/stickers/home_house.webp': '/assets/stickers/train_home_station.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/train_handcar_ride.webp',
+  '/assets/stickers/car_travel.webp': '/assets/stickers/train_handcar_ride.webp',
+  '/assets/stickers/car_on_my_way.webp': '/assets/stickers/train_handcar_ride.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/train_station_dog.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/train_pizza_slice.webp',
   // Batch 2 New Train Swaps
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/train_hot_cocoa.png',
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/train_stew_pot.png',
-  '/assets/stickers/cooking_pot.png': '/assets/stickers/train_stew_pot.png',
-  '/assets/stickers/apple_snack.png': '/assets/stickers/train_fruit_crate.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/train_chocolate.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/train_track_puzzle.png',
-  '/assets/stickers/fav_music.png': '/assets/stickers/train_steam_whistle.png',
-  '/assets/stickers/music_note.png': '/assets/stickers/train_steam_whistle.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/train_steam_whistle.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/train_lantern_heart.png',
-  '/assets/stickers/heart_here_for_you.png': '/assets/stickers/train_lantern_heart.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/train_scenic_lookout.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/train_scenic_lookout.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/train_crossing_signal.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/train_switch_lever.png',
-  '/assets/stickers/alert_sos_shield.png': '/assets/stickers/train_switch_lever.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/train_switch_lever.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/train_speedometer_gauge.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/train_dining_spoons.png',
-  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/train_conductor_logbook.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/train_conductor_logbook.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/train_linen_hamper.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/train_circular_track.png',
-  '/assets/stickers/circular_arrow.png': '/assets/stickers/train_circular_track.png',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/train_hot_cocoa.webp',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/train_stew_pot.webp',
+  '/assets/stickers/cooking_pot.webp': '/assets/stickers/train_stew_pot.webp',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/train_fruit_crate.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/train_chocolate.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/train_track_puzzle.webp',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/train_steam_whistle.webp',
+  '/assets/stickers/music_note.webp': '/assets/stickers/train_steam_whistle.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/train_steam_whistle.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/train_lantern_heart.webp',
+  '/assets/stickers/heart_here_for_you.webp': '/assets/stickers/train_lantern_heart.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/train_scenic_lookout.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/train_scenic_lookout.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/train_crossing_signal.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/train_switch_lever.webp',
+  '/assets/stickers/alert_sos_shield.webp': '/assets/stickers/train_switch_lever.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/train_switch_lever.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/train_speedometer_gauge.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/train_dining_spoons.webp',
+  '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/train_conductor_logbook.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/train_conductor_logbook.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/train_linen_hamper.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/train_circular_track.webp',
+  '/assets/stickers/circular_arrow.webp': '/assets/stickers/train_circular_track.webp',
   // Batch 1 New Train Swaps
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/train_boots.png',
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/train_restroom.png',
-  '/assets/stickers/toilet_restroom.png': '/assets/stickers/train_restroom.png',
-  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/train_medicine_dropper.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/train_medicine_dropper.png',
-  '/assets/stickers/pill_capsule.png': '/assets/stickers/train_medicine_dropper.png',
-  '/assets/stickers/school_building.png': '/assets/stickers/train_school_station.png',
-  '/assets/stickers/reading_books.png': '/assets/stickers/train_story_atlas.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/train_story_atlas.png',
-  '/assets/stickers/playground_swings.png': '/assets/stickers/train_playground_depot.png',
-  '/assets/stickers/art_crafts.png': '/assets/stickers/train_paint_palette.png',
-  '/assets/stickers/art_palette.png': '/assets/stickers/train_paint_palette.png',
-  '/assets/stickers/teen_headphones.png': '/assets/stickers/train_ear_defenders.png',
-  '/assets/stickers/fidget_bubbles.png': '/assets/stickers/train_valve_spinner.png',
-  '/assets/stickers/breathing_cloud.png': '/assets/stickers/train_steam_breathing.png',
-  '/assets/stickers/coping_lungs_breathing.png': '/assets/stickers/train_steam_breathing.png',
-  '/assets/stickers/toy_box.png': '/assets/stickers/train_toy_chest.png',
-  '/assets/stickers/teddy_bear.png': '/assets/stickers/train_toy_chest.png',
-  '/assets/stickers/fav_lego.png': '/assets/stickers/train_toy_chest.png',
-  '/assets/stickers/shower_wash.png': '/assets/stickers/train_depot_shower.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/train_depot_shower.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/train_depot_shower.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/train_depot_shower.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/train_stripe_pajamas.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/train_stripe_pajamas.png',
-  '/assets/stickers/task_done.png': '/assets/stickers/train_signal_lantern.png',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/train_boots.webp',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/train_restroom.webp',
+  '/assets/stickers/toilet_restroom.webp': '/assets/stickers/train_restroom.webp',
+  '/assets/stickers/routine_medicine_pill.webp': '/assets/stickers/train_medicine_dropper.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/train_medicine_dropper.webp',
+  '/assets/stickers/pill_capsule.webp': '/assets/stickers/train_medicine_dropper.webp',
+  '/assets/stickers/school_building.webp': '/assets/stickers/train_school_station.webp',
+  '/assets/stickers/reading_books.webp': '/assets/stickers/train_story_atlas.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/train_story_atlas.webp',
+  '/assets/stickers/playground_swings.webp': '/assets/stickers/train_playground_depot.webp',
+  '/assets/stickers/art_crafts.webp': '/assets/stickers/train_paint_palette.webp',
+  '/assets/stickers/art_palette.webp': '/assets/stickers/train_paint_palette.webp',
+  '/assets/stickers/teen_headphones.webp': '/assets/stickers/train_ear_defenders.webp',
+  '/assets/stickers/fidget_bubbles.webp': '/assets/stickers/train_valve_spinner.webp',
+  '/assets/stickers/breathing_cloud.webp': '/assets/stickers/train_steam_breathing.webp',
+  '/assets/stickers/coping_lungs_breathing.webp': '/assets/stickers/train_steam_breathing.webp',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/train_toy_chest.webp',
+  '/assets/stickers/teddy_bear.webp': '/assets/stickers/train_toy_chest.webp',
+  '/assets/stickers/fav_lego.webp': '/assets/stickers/train_toy_chest.webp',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/train_depot_shower.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/train_depot_shower.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/train_depot_shower.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/train_depot_shower.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/train_stripe_pajamas.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/train_stripe_pajamas.webp',
+  '/assets/stickers/task_done.webp': '/assets/stickers/train_signal_lantern.webp',
   // Previous Core Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/train_pocket_watch.png',
-  '/assets/stickers/toothbrush.png': '/assets/stickers/train_boiler_toothbrush.png',
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/train_conductor_uniform.png',
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/train_dining_pancakes.png',
-  '/assets/stickers/school_bus.png': '/assets/stickers/train_passenger_car.png',
-  '/assets/stickers/backpack_school.png': '/assets/stickers/train_conductor_satchel.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/train_ticket_punch.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/train_ticket_punch.png',
-  '/assets/stickers/pencil_write.png': '/assets/stickers/train_pencil.png',
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/train_tin_lunchbox.png',
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/train_canteen_flask.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/train_canteen_flask.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/train_canteen_flask.png',
-  '/assets/stickers/fav_quiet_break.png': '/assets/stickers/train_observation_seat.png',
-  '/assets/stickers/schedule_calendar.png': '/assets/stickers/train_timetable_board.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/train_pressure_stopwatch.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/train_station_soap.png',
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/train_sleeper_bunk.png',
-  '/assets/stickers/golden_train.png': '/assets/stickers/train_mascot.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/train_mascot.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/train_pocket_watch.webp',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/train_boiler_toothbrush.webp',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/train_conductor_uniform.webp',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/train_dining_pancakes.webp',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/train_passenger_car.webp',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/train_conductor_satchel.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/train_ticket_punch.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/train_ticket_punch.webp',
+  '/assets/stickers/pencil_write.webp': '/assets/stickers/train_pencil.webp',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/train_tin_lunchbox.webp',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/train_canteen_flask.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/train_canteen_flask.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/train_canteen_flask.webp',
+  '/assets/stickers/fav_quiet_break.webp': '/assets/stickers/train_observation_seat.webp',
+  '/assets/stickers/schedule_calendar.webp': '/assets/stickers/train_timetable_board.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/train_pressure_stopwatch.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/train_station_soap.webp',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/train_sleeper_bunk.webp',
+  '/assets/stickers/golden_train.webp': '/assets/stickers/train_mascot.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/train_mascot.webp',
 };
 
 export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   // Batch 1 Core Routine Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/ocean_porthole_alarm.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/ocean_porthole_alarm.png',
-  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/ocean_porthole_alarm.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/ocean_porthole_alarm.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/ocean_porthole_alarm.webp',
+  '/assets/stickers/routine_alarm_clock.webp': '/assets/stickers/ocean_porthole_alarm.webp',
 
-  '/assets/stickers/toothbrush.png': '/assets/stickers/ocean_coral_toothbrush.png',
-  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/ocean_coral_toothbrush.png',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/ocean_coral_toothbrush.webp',
+  '/assets/stickers/routine_toothbrush.webp': '/assets/stickers/ocean_coral_toothbrush.webp',
 
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
-  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/ocean_neoprene_wetsuit.png',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/ocean_neoprene_wetsuit.webp',
+  '/assets/stickers/routine_clothes_dressed.webp': '/assets/stickers/ocean_neoprene_wetsuit.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/ocean_neoprene_wetsuit.webp',
 
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/ocean_starfish_pancakes.png',
-  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/ocean_starfish_pancakes.png',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/ocean_starfish_pancakes.webp',
+  '/assets/stickers/breakfast_cereal.webp': '/assets/stickers/ocean_starfish_pancakes.webp',
 
-  '/assets/stickers/school_bus.png': '/assets/stickers/ocean_yellow_submarine.png',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/ocean_yellow_submarine.webp',
 
-  '/assets/stickers/backpack_school.png': '/assets/stickers/ocean_nautilus_backpack.png',
-  '/assets/stickers/backpack.png': '/assets/stickers/ocean_nautilus_backpack.png',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/ocean_nautilus_backpack.webp',
+  '/assets/stickers/backpack.webp': '/assets/stickers/ocean_nautilus_backpack.webp',
 
-  '/assets/stickers/school_building.png': '/assets/stickers/ocean_coral_schoolhouse.png',
+  '/assets/stickers/school_building.webp': '/assets/stickers/ocean_coral_schoolhouse.webp',
 
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/ocean_clamshell_bento.png',
-  '/assets/stickers/lunch_box.png': '/assets/stickers/ocean_clamshell_bento.png',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/ocean_clamshell_bento.webp',
+  '/assets/stickers/lunch_box.webp': '/assets/stickers/ocean_clamshell_bento.webp',
 
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/ocean_seaglass_canteen.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/ocean_seaglass_canteen.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/ocean_seaglass_canteen.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/ocean_seaglass_canteen.png',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/ocean_seaglass_canteen.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/ocean_seaglass_canteen.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/ocean_seaglass_canteen.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/ocean_seaglass_canteen.webp',
 
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/ocean_aqua_shoes.png',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/ocean_aqua_shoes.webp',
 
-  '/assets/stickers/shower_wash.png': '/assets/stickers/ocean_shell_shower.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/ocean_shell_shower.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/ocean_shell_shower.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/ocean_shell_shower.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/ocean_soap_wash_hands.png',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/ocean_shell_shower.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/ocean_shell_shower.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/ocean_shell_shower.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/ocean_shell_shower.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/ocean_soap_wash_hands.webp',
 
-  '/assets/stickers/apple_snack.png': '/assets/stickers/ocean_watermelon_kelp_snack.png',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/ocean_watermelon_kelp_snack.webp',
 
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/ocean_abalone_stew.png',
-  '/assets/stickers/cooking_pot.png': '/assets/stickers/ocean_abalone_stew.png',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/ocean_abalone_stew.webp',
+  '/assets/stickers/cooking_pot.webp': '/assets/stickers/ocean_abalone_stew.webp',
 
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/ocean_pearl_oyster_bed.png',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/ocean_pearl_oyster_bed.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/ocean_pearl_oyster_bed.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/ocean_pearl_oyster_bed.webp',
 
-  '/assets/stickers/ocean_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
-  '/assets/stickers/turtle_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/ocean_scuba_diver_mascot.png',
+  '/assets/stickers/ocean_mascot.webp': '/assets/stickers/ocean_scuba_diver_mascot.webp',
+  '/assets/stickers/turtle_mascot.webp': '/assets/stickers/ocean_scuba_diver_mascot.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/ocean_scuba_diver_mascot.webp',
 
   // Batch 2 Activities, Snacks, Tools & Regulation Swaps
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/ocean_seaside_mug_cocoa.png',
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/ocean_seasalt_chocolate.png',
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/ocean_clownfish_puzzle.png',
-  '/assets/stickers/fav_music.png': '/assets/stickers/ocean_conch_headphones.png',
-  '/assets/stickers/music_note.png': '/assets/stickers/ocean_conch_headphones.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/ocean_conch_headphones.png',
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/ocean_seaglass_heart.png',
-  '/assets/stickers/heart_here_for_you.png': '/assets/stickers/ocean_seaglass_heart.png',
-  '/assets/stickers/fav_outside.png': '/assets/stickers/ocean_sunny_beach_view.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/ocean_sunny_beach_view.png',
-  '/assets/stickers/fav_stop.png': '/assets/stickers/ocean_buoy_stop.png',
-  '/assets/stickers/help_sos.png': '/assets/stickers/ocean_lifebuoy_sos.png',
-  '/assets/stickers/alert_sos_shield.png': '/assets/stickers/ocean_lifebuoy_sos.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/ocean_lifebuoy_sos.png',
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/ocean_ships_helm_wheel.png',
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/ocean_energy_spoons.png',
-  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/ocean_captains_logbook.png',
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/ocean_seaglass_basket.png',
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/ocean_wave_loop.png',
-  '/assets/stickers/circular_arrow.png': '/assets/stickers/ocean_wave_loop.png',
-  '/assets/stickers/toy_box.png': '/assets/stickers/ocean_treasure_toy_chest.png',
-  '/assets/stickers/teddy_bear.png': '/assets/stickers/ocean_treasure_toy_chest.png',
-  '/assets/stickers/fav_lego.png': '/assets/stickers/ocean_treasure_toy_chest.png',
-  '/assets/stickers/homework_study.png': '/assets/stickers/ocean_nautical_chart_study.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/ocean_nautical_chart_study.png',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/ocean_seaside_mug_cocoa.webp',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/ocean_seasalt_chocolate.webp',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/ocean_clownfish_puzzle.webp',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/ocean_conch_headphones.webp',
+  '/assets/stickers/music_note.webp': '/assets/stickers/ocean_conch_headphones.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/ocean_conch_headphones.webp',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/ocean_seaglass_heart.webp',
+  '/assets/stickers/heart_here_for_you.webp': '/assets/stickers/ocean_seaglass_heart.webp',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/ocean_sunny_beach_view.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/ocean_sunny_beach_view.webp',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/ocean_buoy_stop.webp',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/ocean_lifebuoy_sos.webp',
+  '/assets/stickers/alert_sos_shield.webp': '/assets/stickers/ocean_lifebuoy_sos.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/ocean_lifebuoy_sos.webp',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/ocean_ships_helm_wheel.webp',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/ocean_energy_spoons.webp',
+  '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/ocean_captains_logbook.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/ocean_seaglass_basket.webp',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/ocean_wave_loop.webp',
+  '/assets/stickers/circular_arrow.webp': '/assets/stickers/ocean_wave_loop.webp',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',
+  '/assets/stickers/teddy_bear.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',
+  '/assets/stickers/fav_lego.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/ocean_nautical_chart_study.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/ocean_nautical_chart_study.webp',
 
   // Batch 3 Moods, Personas, Hubs & Daily Living
-  '/assets/stickers/mood_happy.png': '/assets/stickers/ocean_happy_baby_shark.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/ocean_calm_floating_shark.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/ocean_excited_leaping_shark.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/ocean_sleepy_resting_shark.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/ocean_unsure_wondering_shark.png',
-  '/assets/stickers/child_persona.png': '/assets/stickers/ocean_junior_snorkel_diver.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/ocean_waterproof_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/ocean_waterproof_phone.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/ocean_navigational_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/ocean_golden_pearl_crown.png',
-  '/assets/stickers/home_house.png': '/assets/stickers/ocean_beachside_cottage.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/ocean_beach_cruiser_car.png',
-  '/assets/stickers/car_travel.png': '/assets/stickers/ocean_beach_cruiser_car.png',
-  '/assets/stickers/car_on_my_way.png': '/assets/stickers/ocean_beach_cruiser_car.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/ocean_boat_dog_lifevest.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/ocean_scallop_plate_pizza.png',
-  '/assets/stickers/about_id.png': '/assets/stickers/ocean_scuba_id_badge.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/ocean_happy_baby_shark.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/ocean_calm_floating_shark.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/ocean_excited_leaping_shark.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/ocean_sleepy_resting_shark.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/ocean_unsure_wondering_shark.webp',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/ocean_junior_snorkel_diver.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/ocean_waterproof_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/ocean_waterproof_phone.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/ocean_navigational_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/ocean_golden_pearl_crown.webp',
+  '/assets/stickers/home_house.webp': '/assets/stickers/ocean_beachside_cottage.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/ocean_beach_cruiser_car.webp',
+  '/assets/stickers/car_travel.webp': '/assets/stickers/ocean_beach_cruiser_car.webp',
+  '/assets/stickers/car_on_my_way.webp': '/assets/stickers/ocean_beach_cruiser_car.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/ocean_boat_dog_lifevest.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/ocean_scallop_plate_pizza.webp',
+  '/assets/stickers/about_id.webp': '/assets/stickers/ocean_scuba_id_badge.webp',
 
   // Batch 4 Weather, Rewards, Tools & Exploration
-  '/assets/stickers/morning_sunrise.png': '/assets/stickers/ocean_horizon_sunrise.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/ocean_night_crescent_moon.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/ocean_golden_seahorse_trophy.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/ocean_golden_starfish_badge.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/ocean_golden_starfish_badge.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/ocean_bubble_speech_bubble.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/ocean_golden_seahorse_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/ocean_pizza_slice.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/ocean_seaglass_canteen.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/ocean_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/ocean_home_house.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/ocean_child_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/ocean_seaglass_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/ocean_conch_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/ocean_captains_logbook.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/ocean_submarine_depth_meter.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/ocean_submarine_battery_gauge.png',
-  '/assets/stickers/calm_sparkles.png': '/assets/stickers/ocean_bioluminescent_sparkles.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/ocean_zipped_mouth_shark.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/ocean_bubble_speech_bubble.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/ocean_marine_science_flask.png',
-  '/assets/stickers/sunny_clear.png': '/assets/stickers/ocean_sunny_island_weather.png',
-  '/assets/stickers/rain_cloud.png': '/assets/stickers/ocean_raincloud_weather.png',
-  '/assets/stickers/snow_weather.png': '/assets/stickers/ocean_arctic_iceberg_snow.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/ocean_nautical_travel_trunk.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
+  '/assets/stickers/morning_sunrise.webp': '/assets/stickers/ocean_horizon_sunrise.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/ocean_night_crescent_moon.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/ocean_golden_seahorse_trophy.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/ocean_golden_starfish_badge.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/ocean_golden_starfish_badge.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/ocean_bubble_speech_bubble.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/ocean_golden_seahorse_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/ocean_pizza_slice.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/ocean_seaglass_canteen.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/ocean_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/ocean_home_house.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/ocean_child_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/ocean_seaglass_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/ocean_conch_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/ocean_captains_logbook.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/ocean_submarine_depth_meter.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/ocean_submarine_battery_gauge.webp',
+  '/assets/stickers/calm_sparkles.webp': '/assets/stickers/ocean_bioluminescent_sparkles.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/ocean_zipped_mouth_shark.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/ocean_bubble_speech_bubble.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/ocean_marine_science_flask.webp',
+  '/assets/stickers/sunny_clear.webp': '/assets/stickers/ocean_sunny_island_weather.webp',
+  '/assets/stickers/rain_cloud.webp': '/assets/stickers/ocean_raincloud_weather.webp',
+  '/assets/stickers/snow_weather.webp': '/assets/stickers/ocean_arctic_iceberg_snow.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/ocean_nautical_travel_trunk.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/ocean_marine_doctor_stethoscope.webp',
 
   // Batch 5 Adventures, Sensory Regulation & Outings
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/ocean_shark_tooth_dental.png',
-  '/assets/stickers/dentist_adventure.png': '/assets/stickers/ocean_shark_tooth_dental.png',
-  '/assets/stickers/adventure_haircut.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
-  '/assets/stickers/haircut_adventure.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/ocean_seashell_haircut_salon.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/ocean_seaside_movie_cinema.png',
-  '/assets/stickers/movie_cinema.png': '/assets/stickers/ocean_seaside_movie_cinema.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/ocean_lagoon_swimming_pool.png',
-  '/assets/stickers/swimming_pool.png': '/assets/stickers/ocean_lagoon_swimming_pool.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/ocean_beachside_campfire_tent.png',
-  '/assets/stickers/camping_tent.png': '/assets/stickers/ocean_beachside_campfire_tent.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/ocean_coastal_market_cart.png',
-  '/assets/stickers/therapy_brain.png': '/assets/stickers/ocean_scuba_diver_brain.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/ocean_marine_foghorn_siren.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/ocean_polarized_sunglasses.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/ocean_beach_paddle_tennis.png',
-  '/assets/stickers/red_balloon.png': '/assets/stickers/ocean_beach_ball_balloon.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/ocean_saltwater_taffy_candy.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/ocean_nautical_dining_cutlery.png',
-  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/ocean_sea_pebble_grounding_hand.png',
-  '/assets/stickers/cloudy_weather.png': '/assets/stickers/ocean_cloud_over_waves.png',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/ocean_shark_tooth_dental.webp',
+  '/assets/stickers/dentist_adventure.webp': '/assets/stickers/ocean_shark_tooth_dental.webp',
+  '/assets/stickers/adventure_haircut.webp': '/assets/stickers/ocean_seashell_haircut_salon.webp',
+  '/assets/stickers/haircut_adventure.webp': '/assets/stickers/ocean_seashell_haircut_salon.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/ocean_seashell_haircut_salon.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/ocean_seaside_movie_cinema.webp',
+  '/assets/stickers/movie_cinema.webp': '/assets/stickers/ocean_seaside_movie_cinema.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/ocean_lagoon_swimming_pool.webp',
+  '/assets/stickers/swimming_pool.webp': '/assets/stickers/ocean_lagoon_swimming_pool.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/ocean_beachside_campfire_tent.webp',
+  '/assets/stickers/camping_tent.webp': '/assets/stickers/ocean_beachside_campfire_tent.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/ocean_coastal_market_cart.webp',
+  '/assets/stickers/therapy_brain.webp': '/assets/stickers/ocean_scuba_diver_brain.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/ocean_marine_foghorn_siren.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/ocean_polarized_sunglasses.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/ocean_beach_paddle_tennis.webp',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/ocean_beach_ball_balloon.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/ocean_saltwater_taffy_candy.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/ocean_nautical_dining_cutlery.webp',
+  '/assets/stickers/grounding_touch_hand.webp': '/assets/stickers/ocean_sea_pebble_grounding_hand.webp',
+  '/assets/stickers/cloudy_weather.webp': '/assets/stickers/ocean_cloud_over_waves.webp',
 
   // Batch 6 Travel, Destinations, Living & Tools
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/ocean_seaside_diner_booth.png',
-  '/assets/stickers/restaurant_adventure.png': '/assets/stickers/ocean_seaside_diner_booth.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/ocean_seaside_diner_booth.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/ocean_maritime_aquarium_museum.png',
-  '/assets/stickers/museum_visit.png': '/assets/stickers/ocean_maritime_aquarium_museum.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/ocean_bowling_strike.png',
-  '/assets/stickers/bowling_alley.png': '/assets/stickers/ocean_bowling_strike.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/ocean_bowling_strike.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/ocean_coastal_seaplane_flight.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/ocean_ferry_boarding_pass.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/ocean_expedition_passport.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/ocean_waterproof_tablet.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/ocean_waterproof_tablet.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/ocean_seashell_succulent_pot.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/ocean_ship_bulkhead_clock.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/ocean_ship_bulkhead_clock.png',
-  '/assets/stickers/wall_clock.png': '/assets/stickers/ocean_ship_bulkhead_clock.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/ocean_wave_circle_rug.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/ocean_wave_circle_rug.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/ocean_wave_loop.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/ocean_wave_loop.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/ocean_beach_bathhouse_locker.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/ocean_fish_stamp_dog_biscuit.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/ocean_treasure_toy_chest.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/ocean_treasure_toy_chest.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/ocean_beach_sand_paw_print.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/ocean_turquoise_barrel_wave.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/ocean_seaside_diner_booth.webp',
+  '/assets/stickers/restaurant_adventure.webp': '/assets/stickers/ocean_seaside_diner_booth.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/ocean_seaside_diner_booth.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/ocean_maritime_aquarium_museum.webp',
+  '/assets/stickers/museum_visit.webp': '/assets/stickers/ocean_maritime_aquarium_museum.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/ocean_bowling_strike.webp',
+  '/assets/stickers/bowling_alley.webp': '/assets/stickers/ocean_bowling_strike.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/ocean_bowling_strike.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/ocean_coastal_seaplane_flight.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/ocean_ferry_boarding_pass.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/ocean_expedition_passport.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/ocean_waterproof_tablet.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/ocean_waterproof_tablet.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/ocean_seashell_succulent_pot.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/ocean_ship_bulkhead_clock.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/ocean_ship_bulkhead_clock.webp',
+  '/assets/stickers/wall_clock.webp': '/assets/stickers/ocean_ship_bulkhead_clock.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/ocean_wave_circle_rug.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/ocean_wave_circle_rug.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/ocean_wave_loop.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/ocean_wave_loop.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/ocean_beach_bathhouse_locker.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/ocean_fish_stamp_dog_biscuit.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/ocean_marine_doctor_stethoscope.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/ocean_marine_doctor_stethoscope.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/ocean_marine_doctor_stethoscope.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/ocean_beach_sand_paw_print.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/ocean_turquoise_barrel_wave.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/ocean_seaside_birthday_cake.webp',
 
   // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community)
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/ocean_waiting_room_bench.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/ocean_waving_hand_diver.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/ocean_dental_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/ocean_scuba_diver_open_mouth.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/ocean_scuba_diver_open_mouth.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/ocean_porthole_welcome_door.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/ocean_seaside_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/ocean_lighthouse_barber_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/ocean_haircut_styling_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/ocean_water_spray_mist_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/ocean_barber_neck_duster_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/ocean_seashell_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/ocean_marine_health_clinic.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/ocean_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/ocean_doctor_exam_table_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/ocean_doctor_ear_light_tool.png',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/ocean_waiting_room_bench.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/ocean_waving_hand_diver.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/ocean_dental_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/ocean_scuba_diver_open_mouth.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/ocean_scuba_diver_open_mouth.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/ocean_porthole_welcome_door.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/ocean_seaside_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/ocean_lighthouse_barber_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/ocean_haircut_styling_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/ocean_water_spray_mist_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/ocean_barber_neck_duster_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/ocean_seashell_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/ocean_marine_health_clinic.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/ocean_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/ocean_doctor_exam_table_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/ocean_doctor_ear_light_tool.webp',
 
   // Batch 8 Pool, Cinema, Bowling, Camping, Museum & Rewards
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/ocean_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/ocean_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/ocean_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/ocean_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/ocean_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/ocean_bowling_lane_bumpers.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/ocean_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/ocean_coastal_dunes_pine_trees.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/ocean_campfire_marshmallows.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/ocean_camping_sleeping_bag.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/ocean_aquarium_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/ocean_megalodon_fossil_exhibit.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/ocean_seashell_magnifying_glass.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/ocean_game_controller.png',
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/ocean_birthday_gift_box.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/ocean_birthday_gift_box.png',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/ocean_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/ocean_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/ocean_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/ocean_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/ocean_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/ocean_bowling_lane_bumpers.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/ocean_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/ocean_coastal_dunes_pine_trees.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/ocean_campfire_marshmallows.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/ocean_camping_sleeping_bag.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/ocean_aquarium_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/ocean_megalodon_fossil_exhibit.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/ocean_seashell_magnifying_glass.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/ocean_game_controller.webp',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/ocean_birthday_gift_box.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/ocean_seaside_birthday_cake.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/ocean_birthday_gift_box.webp',
 };
 
 export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   // Batch 1 Core Routine Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
-  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/fairytale_tower_alarm_clock.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
+  '/assets/stickers/routine_alarm_clock.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
 
-  '/assets/stickers/toothbrush.png': '/assets/stickers/fairytale_magic_toothbrush.png',
-  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/fairytale_magic_toothbrush.png',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/fairytale_magic_toothbrush.webp',
+  '/assets/stickers/routine_toothbrush.webp': '/assets/stickers/fairytale_magic_toothbrush.webp',
 
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/fairytale_royal_cape.png',
-  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/fairytale_royal_cape.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/fairytale_royal_cape.png',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/fairytale_royal_cape.webp',
+  '/assets/stickers/routine_clothes_dressed.webp': '/assets/stickers/fairytale_royal_cape.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/fairytale_royal_cape.webp',
 
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/fairytale_cloudberry_pancakes.png',
-  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/fairytale_cloudberry_pancakes.png',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/fairytale_cloudberry_pancakes.webp',
+  '/assets/stickers/breakfast_cereal.webp': '/assets/stickers/fairytale_cloudberry_pancakes.webp',
 
-  '/assets/stickers/school_bus.png': '/assets/stickers/fairytale_pumpkin_carriage.png',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/fairytale_pumpkin_carriage.webp',
 
-  '/assets/stickers/backpack_school.png': '/assets/stickers/fairytale_unicorn_satchel.png',
-  '/assets/stickers/backpack.png': '/assets/stickers/fairytale_unicorn_satchel.png',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/fairytale_unicorn_satchel.webp',
+  '/assets/stickers/backpack.webp': '/assets/stickers/fairytale_unicorn_satchel.webp',
 
-  '/assets/stickers/school_building.png': '/assets/stickers/fairytale_castle_academy.png',
+  '/assets/stickers/school_building.webp': '/assets/stickers/fairytale_castle_academy.webp',
 
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/fairytale_crown_bento.png',
-  '/assets/stickers/lunch_box.png': '/assets/stickers/fairytale_crown_bento.png',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/fairytale_crown_bento.webp',
+  '/assets/stickers/lunch_box.webp': '/assets/stickers/fairytale_crown_bento.webp',
 
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/fairytale_crystal_potion_flask.png',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/fairytale_crystal_potion_flask.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/fairytale_crystal_potion_flask.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/fairytale_crystal_potion_flask.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/fairytale_crystal_potion_flask.webp',
 
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/fairytale_winged_shoes.png',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/fairytale_winged_shoes.webp',
 
-  '/assets/stickers/shower_wash.png': '/assets/stickers/fairytale_clawfoot_bath.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/fairytale_clawfoot_bath.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/fairytale_clawfoot_bath.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/fairytale_clawfoot_bath.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/fairytale_soap_wash_hands.png',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/fairytale_clawfoot_bath.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/fairytale_clawfoot_bath.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/fairytale_clawfoot_bath.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/fairytale_clawfoot_bath.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/fairytale_soap_wash_hands.webp',
 
-  '/assets/stickers/apple_snack.png': '/assets/stickers/fairytale_golden_apple.png',
+  '/assets/stickers/apple_snack.webp': '/assets/stickers/fairytale_golden_apple.webp',
 
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/fairytale_royal_feast_stew.png',
-  '/assets/stickers/cooking_pot.png': '/assets/stickers/fairytale_royal_feast_stew.png',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/fairytale_royal_feast_stew.webp',
+  '/assets/stickers/cooking_pot.webp': '/assets/stickers/fairytale_royal_feast_stew.webp',
 
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/fairytale_canopy_bed.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/fairytale_canopy_bed.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/fairytale_canopy_bed.png',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/fairytale_canopy_bed.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/fairytale_canopy_bed.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/fairytale_canopy_bed.webp',
 
-  '/assets/stickers/fairytale_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
-  '/assets/stickers/turtle_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/fairytale_unicorn_fairy_mascot.png',
+  '/assets/stickers/fairytale_mascot.webp': '/assets/stickers/fairytale_unicorn_fairy_mascot.webp',
+  '/assets/stickers/turtle_mascot.webp': '/assets/stickers/fairytale_unicorn_fairy_mascot.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/fairytale_unicorn_fairy_mascot.webp',
 
   // Batch 2 Activities, Snacks, Tools & Regulation Swaps
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/fairytale_castle_hot_cocoa.png',
-  '/assets/stickers/drink_cup.png': '/assets/stickers/fairytale_castle_hot_cocoa.png',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/fairytale_castle_hot_cocoa.webp',
+  '/assets/stickers/drink_cup.webp': '/assets/stickers/fairytale_castle_hot_cocoa.webp',
 
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/fairytale_royal_chocolate_bar.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/fairytale_royal_chocolate_bar.png',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/fairytale_royal_chocolate_bar.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/fairytale_royal_chocolate_bar.webp',
 
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/fairytale_storybook_jigsaw_puzzle.png',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/fairytale_storybook_jigsaw_puzzle.webp',
 
-  '/assets/stickers/fav_music.png': '/assets/stickers/fairytale_star_melody_headphones.png',
-  '/assets/stickers/music_note.png': '/assets/stickers/fairytale_star_melody_headphones.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/fairytale_star_melody_headphones.png',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/fairytale_star_melody_headphones.webp',
+  '/assets/stickers/music_note.webp': '/assets/stickers/fairytale_star_melody_headphones.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/fairytale_star_melody_headphones.webp',
 
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/fairytale_crystal_gem_heart.png',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/fairytale_crystal_gem_heart.webp',
 
-  '/assets/stickers/fav_outside.png': '/assets/stickers/fairytale_blossom_meadow.png',
-  '/assets/stickers/outdoor_sun.png': '/assets/stickers/fairytale_blossom_meadow.png',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/fairytale_blossom_meadow.webp',
+  '/assets/stickers/outdoor_sun.webp': '/assets/stickers/fairytale_blossom_meadow.webp',
 
-  '/assets/stickers/fav_stop.png': '/assets/stickers/fairytale_royal_shield_stop.png',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/fairytale_royal_shield_stop.webp',
 
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/fairytale_beacon_help_lantern.png',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/fairytale_beacon_help_lantern.webp',
 
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/fairytale_crystal_decision_wheel.png',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/fairytale_crystal_decision_wheel.webp',
 
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/fairytale_stardust_energy_spoons.png',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/fairytale_stardust_energy_spoons.webp',
 
-  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/fairytale_spellbook_journal.png',
+  '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/fairytale_spellbook_journal.webp',
 
-  '/assets/stickers/laundry_hamper.png': '/assets/stickers/fairytale_woven_laundry_basket.png',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/fairytale_woven_laundry_basket.webp',
 
-  '/assets/stickers/refresh_repeat.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
+  '/assets/stickers/refresh_repeat.webp': '/assets/stickers/fairytale_sparkle_refresh_loop.webp',
 
-  '/assets/stickers/toy_box.png': '/assets/stickers/fairytale_royal_toy_chest.png',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/fairytale_royal_toy_chest.webp',
 
-  '/assets/stickers/homework_study.png': '/assets/stickers/fairytale_study_scroll_inkpot.png',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/fairytale_study_scroll_inkpot.webp',
 
   // Batch 3 Moods, Personas, Hubs & Daily Living Swaps
-  '/assets/stickers/mood_happy.png': '/assets/stickers/fairytale_mood_happy.png',
-  '/assets/stickers/mood_calm.png': '/assets/stickers/fairytale_mood_calm.png',
-  '/assets/stickers/mood_excited.png': '/assets/stickers/fairytale_mood_excited.png',
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/fairytale_mood_sleepy.png',
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/fairytale_mood_unsure.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/fairytale_mood_happy.webp',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/fairytale_mood_calm.webp',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/fairytale_mood_excited.webp',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/fairytale_mood_sleepy.webp',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/fairytale_mood_unsure.webp',
 
-  '/assets/stickers/child_persona.png': '/assets/stickers/fairytale_child_persona.png',
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/fairytale_adult_briefcase.png',
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/fairytale_caregiver_phone.png',
-  '/assets/stickers/language_globe.png': '/assets/stickers/fairytale_language_globe.png',
-  '/assets/stickers/trial_crown.png': '/assets/stickers/fairytale_trial_crown.png',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/fairytale_child_persona.webp',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/fairytale_adult_briefcase.webp',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/fairytale_caregiver_phone.webp',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/fairytale_language_globe.webp',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/fairytale_trial_crown.webp',
 
-  '/assets/stickers/about_id.png': '/assets/stickers/fairytale_about_id.png',
-  '/assets/stickers/home_house.png': '/assets/stickers/fairytale_home_house.png',
-  '/assets/stickers/car_ride.png': '/assets/stickers/fairytale_car_ride.png',
-  '/assets/stickers/pet_care.png': '/assets/stickers/fairytale_pet_care.png',
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/fairytale_pizza_slice.png',
+  '/assets/stickers/about_id.webp': '/assets/stickers/fairytale_about_id.webp',
+  '/assets/stickers/home_house.webp': '/assets/stickers/fairytale_home_house.webp',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/fairytale_car_ride.webp',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/fairytale_pet_care.webp',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/fairytale_pizza_slice.webp',
 
   // Batch 4 Weather, Rewards, Tools & Exploration
-  '/assets/stickers/morning_sunrise.png': '/assets/stickers/fairytale_morning_sunrise.png',
-  '/assets/stickers/sunrise.png': '/assets/stickers/fairytale_morning_sunrise.png',
-  '/assets/stickers/evening_moon.png': '/assets/stickers/fairytale_evening_moon.png',
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/fairytale_reward_trophy.png',
-  '/assets/stickers/star_gold.png': '/assets/stickers/fairytale_star_gold.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/fairytale_star_gold.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/fairytale_speech_bubble.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/fairytale_reward_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/fairytale_pizza_slice.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/fairytale_routine_water_drink.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/fairytale_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/fairytale_home_house.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/fairytale_child_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/fairytale_fav_love_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/fairytale_star_melody_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/fairytale_spellbook_journal.png',
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/fairytale_feelings_thermometer.png',
-  '/assets/stickers/battery_meter.png': '/assets/stickers/fairytale_battery_meter.png',
-  '/assets/stickers/calm_sparkles.png': '/assets/stickers/fairytale_calm_sparkles.png',
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/fairytale_quiet_voice.png',
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/fairytale_speech_bubble.png',
-  '/assets/stickers/science_flask.png': '/assets/stickers/fairytale_science_flask.png',
-  '/assets/stickers/sunny_clear.png': '/assets/stickers/fairytale_sunny_clear.png',
-  '/assets/stickers/rain_cloud.png': '/assets/stickers/fairytale_rain_cloud.png',
-  '/assets/stickers/snow_weather.png': '/assets/stickers/fairytale_snow_weather.png',
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/fairytale_travel_luggage.png',
-  '/assets/stickers/stethoscope.png': '/assets/stickers/fairytale_stethoscope.png',
+  '/assets/stickers/morning_sunrise.webp': '/assets/stickers/fairytale_morning_sunrise.webp',
+  '/assets/stickers/sunrise.webp': '/assets/stickers/fairytale_morning_sunrise.webp',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/fairytale_evening_moon.webp',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/fairytale_reward_trophy.webp',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/fairytale_star_gold.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/fairytale_star_gold.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/fairytale_speech_bubble.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/fairytale_reward_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/fairytale_pizza_slice.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/fairytale_routine_water_drink.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/fairytale_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/fairytale_home_house.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/fairytale_child_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/fairytale_fav_love_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/fairytale_star_melody_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/fairytale_spellbook_journal.webp',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/fairytale_feelings_thermometer.webp',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/fairytale_battery_meter.webp',
+  '/assets/stickers/calm_sparkles.webp': '/assets/stickers/fairytale_calm_sparkles.webp',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/fairytale_quiet_voice.webp',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/fairytale_speech_bubble.webp',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/fairytale_science_flask.webp',
+  '/assets/stickers/sunny_clear.webp': '/assets/stickers/fairytale_sunny_clear.webp',
+  '/assets/stickers/rain_cloud.webp': '/assets/stickers/fairytale_rain_cloud.webp',
+  '/assets/stickers/snow_weather.webp': '/assets/stickers/fairytale_snow_weather.webp',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/fairytale_travel_luggage.webp',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/fairytale_stethoscope.webp',
 
   // Batch 5 Adventures, Sensory Regulation & Outings
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/fairytale_adventure_dentist.png',
-  '/assets/stickers/dentist_adventure.png': '/assets/stickers/fairytale_adventure_dentist.png',
-  '/assets/stickers/adventure_haircut.png': '/assets/stickers/fairytale_adventure_haircut.png',
-  '/assets/stickers/haircut_adventure.png': '/assets/stickers/fairytale_adventure_haircut.png',
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/fairytale_adventure_haircut.png',
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/fairytale_adventure_movie_cinema.png',
-  '/assets/stickers/movie_cinema.png': '/assets/stickers/fairytale_adventure_movie_cinema.png',
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/fairytale_adventure_swimming_pool.png',
-  '/assets/stickers/swimming_pool.png': '/assets/stickers/fairytale_adventure_swimming_pool.png',
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/fairytale_adventure_camping_tent.png',
-  '/assets/stickers/camping_tent.png': '/assets/stickers/fairytale_adventure_camping_tent.png',
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/fairytale_shopping_cart.png',
-  '/assets/stickers/therapy_brain.png': '/assets/stickers/fairytale_therapy_brain.png',
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/fairytale_sensory_loud_noise.png',
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/fairytale_sensory_bright_lights.png',
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/fairytale_tennis_ball.png',
-  '/assets/stickers/red_balloon.png': '/assets/stickers/fairytale_red_balloon.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/fairytale_candy_treat.png',
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/fairytale_cutlery_meal.png',
-  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/fairytale_grounding_touch_hand.png',
-  '/assets/stickers/cloudy_weather.png': '/assets/stickers/fairytale_cloudy_weather.png',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/fairytale_adventure_dentist.webp',
+  '/assets/stickers/dentist_adventure.webp': '/assets/stickers/fairytale_adventure_dentist.webp',
+  '/assets/stickers/adventure_haircut.webp': '/assets/stickers/fairytale_adventure_haircut.webp',
+  '/assets/stickers/haircut_adventure.webp': '/assets/stickers/fairytale_adventure_haircut.webp',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/fairytale_adventure_haircut.webp',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/fairytale_adventure_movie_cinema.webp',
+  '/assets/stickers/movie_cinema.webp': '/assets/stickers/fairytale_adventure_movie_cinema.webp',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/fairytale_adventure_swimming_pool.webp',
+  '/assets/stickers/swimming_pool.webp': '/assets/stickers/fairytale_adventure_swimming_pool.webp',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/fairytale_adventure_camping_tent.webp',
+  '/assets/stickers/camping_tent.webp': '/assets/stickers/fairytale_adventure_camping_tent.webp',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/fairytale_shopping_cart.webp',
+  '/assets/stickers/therapy_brain.webp': '/assets/stickers/fairytale_therapy_brain.webp',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/fairytale_sensory_loud_noise.webp',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/fairytale_sensory_bright_lights.webp',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/fairytale_tennis_ball.webp',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/fairytale_red_balloon.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/fairytale_candy_treat.webp',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/fairytale_cutlery_meal.webp',
+  '/assets/stickers/grounding_touch_hand.webp': '/assets/stickers/fairytale_grounding_touch_hand.webp',
+  '/assets/stickers/cloudy_weather.webp': '/assets/stickers/fairytale_cloudy_weather.webp',
 
   // Batch 6 Travel, Destinations, Living & Tools
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/fairytale_adventure_restaurant.png',
-  '/assets/stickers/restaurant_adventure.png': '/assets/stickers/fairytale_adventure_restaurant.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/fairytale_adventure_restaurant.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/fairytale_adventure_museum_visit.png',
-  '/assets/stickers/museum_visit.png': '/assets/stickers/fairytale_adventure_museum_visit.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/fairytale_adventure_bowling_alley.png',
-  '/assets/stickers/bowling_alley.png': '/assets/stickers/fairytale_adventure_bowling_alley.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/fairytale_adventure_bowling_alley.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/fairytale_airplane_flight.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/fairytale_boarding_ticket.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/fairytale_passport_book.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/fairytale_tablet_ipad.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/fairytale_tablet_ipad.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/fairytale_potted_plant.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/fairytale_clock_time.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/fairytale_clock_time.png',
-  '/assets/stickers/wall_clock.png': '/assets/stickers/fairytale_clock_time.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/fairytale_circle_carpet.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/fairytale_circle_carpet.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/fairytale_locker_schedule.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/fairytale_bone_treat.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/fairytale_royal_toy_chest.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/fairytale_royal_toy_chest.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/fairytale_paw_print.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/fairytale_ocean_wave.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/fairytale_story_birthday.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/fairytale_story_birthday.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/fairytale_adventure_restaurant.webp',
+  '/assets/stickers/restaurant_adventure.webp': '/assets/stickers/fairytale_adventure_restaurant.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/fairytale_adventure_restaurant.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/fairytale_adventure_museum_visit.webp',
+  '/assets/stickers/museum_visit.webp': '/assets/stickers/fairytale_adventure_museum_visit.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/fairytale_adventure_bowling_alley.webp',
+  '/assets/stickers/bowling_alley.webp': '/assets/stickers/fairytale_adventure_bowling_alley.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/fairytale_adventure_bowling_alley.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/fairytale_airplane_flight.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/fairytale_boarding_ticket.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/fairytale_passport_book.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/fairytale_tablet_ipad.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/fairytale_tablet_ipad.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/fairytale_potted_plant.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/fairytale_clock_time.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/fairytale_clock_time.webp',
+  '/assets/stickers/wall_clock.webp': '/assets/stickers/fairytale_clock_time.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/fairytale_circle_carpet.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/fairytale_circle_carpet.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/fairytale_sparkle_refresh_loop.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/fairytale_sparkle_refresh_loop.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/fairytale_locker_schedule.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/fairytale_bone_treat.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/fairytale_royal_toy_chest.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/fairytale_royal_toy_chest.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/fairytale_doctor_stethoscope.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/fairytale_doctor_stethoscope.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/fairytale_doctor_stethoscope.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/fairytale_paw_print.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/fairytale_ocean_wave.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/fairytale_story_birthday.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/fairytale_story_birthday.webp',
 
   // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community)
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/fairytale_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/fairytale_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/fairytale_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/fairytale_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/fairytale_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/fairytale_open_welcome_door.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/fairytale_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/fairytale_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/fairytale_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/fairytale_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/fairytale_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/fairytale_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/fairytale_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/fairytale_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/fairytale_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/fairytale_doctor_ear_light.png',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/fairytale_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/fairytale_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/fairytale_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/fairytale_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/fairytale_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/fairytale_open_welcome_door.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/fairytale_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/fairytale_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/fairytale_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/fairytale_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/fairytale_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/fairytale_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/fairytale_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/fairytale_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/fairytale_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/fairytale_doctor_ear_light.webp',
 
   // Batch 8 Pool, Cinema, Bowling, Camping, Museum & Celebrations
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/fairytale_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/fairytale_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/fairytale_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/fairytale_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/fairytale_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/fairytale_bowling_lane_bumpers.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/fairytale_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/fairytale_pine_trees_forest.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/fairytale_campfire_marshmallows.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/fairytale_camping_sleeping_bag.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/fairytale_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/fairytale_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/fairytale_observing_magnifying_glass.png',
-  '/assets/stickers/magnifying_glass.png': '/assets/stickers/fairytale_observing_magnifying_glass.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/fairytale_game_controller.png',
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/fairytale_birthday_gift_box.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/fairytale_birthday_gift_box.png',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/fairytale_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/fairytale_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/fairytale_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/fairytale_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/fairytale_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/fairytale_bowling_lane_bumpers.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/fairytale_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/fairytale_pine_trees_forest.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/fairytale_campfire_marshmallows.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/fairytale_camping_sleeping_bag.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/fairytale_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/fairytale_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/fairytale_observing_magnifying_glass.webp',
+  '/assets/stickers/magnifying_glass.webp': '/assets/stickers/fairytale_observing_magnifying_glass.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/fairytale_game_controller.webp',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/fairytale_birthday_gift_box.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/fairytale_birthday_gift_box.webp',
 };
 
 export const RACING_STICKER_SWAPS: Record<string, string> = {
   // Batch 1 Core Routine Swaps
-  '/assets/stickers/alarm_clock.png': '/assets/stickers/racing_alarm_clock.png',
-  '/assets/stickers/clock_time.png': '/assets/stickers/racing_alarm_clock.png',
-  '/assets/stickers/routine_alarm_clock.png': '/assets/stickers/racing_alarm_clock.png',
+  '/assets/stickers/alarm_clock.webp': '/assets/stickers/racing_alarm_clock.webp',
+  '/assets/stickers/clock_time.webp': '/assets/stickers/racing_alarm_clock.webp',
+  '/assets/stickers/routine_alarm_clock.webp': '/assets/stickers/racing_alarm_clock.webp',
 
-  '/assets/stickers/toothbrush.png': '/assets/stickers/racing_toothbrush.png',
-  '/assets/stickers/routine_toothbrush.png': '/assets/stickers/racing_toothbrush.png',
+  '/assets/stickers/toothbrush.webp': '/assets/stickers/racing_toothbrush.webp',
+  '/assets/stickers/routine_toothbrush.webp': '/assets/stickers/racing_toothbrush.webp',
 
-  '/assets/stickers/clothes_dressed.png': '/assets/stickers/racing_clothes_dressed.png',
-  '/assets/stickers/routine_clothes_dressed.png': '/assets/stickers/racing_clothes_dressed.png',
-  '/assets/stickers/pants_folded.png': '/assets/stickers/racing_clothes_dressed.png',
+  '/assets/stickers/clothes_dressed.webp': '/assets/stickers/racing_clothes_dressed.webp',
+  '/assets/stickers/routine_clothes_dressed.webp': '/assets/stickers/racing_clothes_dressed.webp',
+  '/assets/stickers/pants_folded.webp': '/assets/stickers/racing_clothes_dressed.webp',
 
-  '/assets/stickers/pancakes_breakfast.png': '/assets/stickers/racing_pancakes_breakfast.png',
-  '/assets/stickers/breakfast_cereal.png': '/assets/stickers/racing_pancakes_breakfast.png',
+  '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/racing_pancakes_breakfast.webp',
+  '/assets/stickers/breakfast_cereal.webp': '/assets/stickers/racing_pancakes_breakfast.webp',
 
-  '/assets/stickers/school_bus.png': '/assets/stickers/racing_school_bus.png',
+  '/assets/stickers/school_bus.webp': '/assets/stickers/racing_school_bus.webp',
 
-  '/assets/stickers/backpack_school.png': '/assets/stickers/racing_backpack_school.png',
-  '/assets/stickers/backpack.png': '/assets/stickers/racing_backpack_school.png',
+  '/assets/stickers/backpack_school.webp': '/assets/stickers/racing_backpack_school.webp',
+  '/assets/stickers/backpack.webp': '/assets/stickers/racing_backpack_school.webp',
 
-  '/assets/stickers/homework_study.png': '/assets/stickers/racing_homework_study.png',
-  '/assets/stickers/folder_schoolwork.png': '/assets/stickers/racing_homework_study.png',
+  '/assets/stickers/homework_study.webp': '/assets/stickers/racing_homework_study.webp',
+  '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/racing_homework_study.webp',
 
-  '/assets/stickers/sandwich_lunch.png': '/assets/stickers/racing_sandwich_lunch.png',
-  '/assets/stickers/lunch_box.png': '/assets/stickers/racing_sandwich_lunch.png',
+  '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/racing_sandwich_lunch.webp',
+  '/assets/stickers/lunch_box.webp': '/assets/stickers/racing_sandwich_lunch.webp',
 
-  '/assets/stickers/routine_water_drink.png': '/assets/stickers/racing_routine_water_drink.png',
-  '/assets/stickers/drink_water.png': '/assets/stickers/racing_routine_water_drink.png',
-  '/assets/stickers/fav_water.png': '/assets/stickers/racing_routine_water_drink.png',
-  '/assets/stickers/water_bottle.png': '/assets/stickers/racing_routine_water_drink.png',
+  '/assets/stickers/routine_water_drink.webp': '/assets/stickers/racing_routine_water_drink.webp',
+  '/assets/stickers/drink_water.webp': '/assets/stickers/racing_routine_water_drink.webp',
+  '/assets/stickers/fav_water.webp': '/assets/stickers/racing_routine_water_drink.webp',
+  '/assets/stickers/water_bottle.webp': '/assets/stickers/racing_routine_water_drink.webp',
 
-  '/assets/stickers/sneaker_shoes.png': '/assets/stickers/racing_sneaker_shoes.png',
+  '/assets/stickers/sneaker_shoes.webp': '/assets/stickers/racing_sneaker_shoes.webp',
 
-  '/assets/stickers/routine_toilet_restroom.png': '/assets/stickers/racing_toilet_restroom.png',
-  '/assets/stickers/soap_wash_hands.png': '/assets/stickers/racing_station_soap.png',
+  '/assets/stickers/routine_toilet_restroom.webp': '/assets/stickers/racing_toilet_restroom.webp',
+  '/assets/stickers/soap_wash_hands.webp': '/assets/stickers/racing_station_soap.webp',
 
-  '/assets/stickers/routine_medicine_pill.png': '/assets/stickers/racing_routine_medicine_pill.png',
-  '/assets/stickers/medications_health.png': '/assets/stickers/racing_routine_medicine_pill.png',
+  '/assets/stickers/routine_medicine_pill.webp': '/assets/stickers/racing_routine_medicine_pill.webp',
+  '/assets/stickers/medications_health.webp': '/assets/stickers/racing_routine_medicine_pill.webp',
 
-  '/assets/stickers/school_building.png': '/assets/stickers/racing_school_building.png',
+  '/assets/stickers/school_building.webp': '/assets/stickers/racing_school_building.webp',
 
-  '/assets/stickers/shower_wash.png': '/assets/stickers/racing_shower_wash.png',
-  '/assets/stickers/bathtub_wash.png': '/assets/stickers/racing_shower_wash.png',
-  '/assets/stickers/bath_time.png': '/assets/stickers/racing_shower_wash.png',
-  '/assets/stickers/fav_bath.png': '/assets/stickers/racing_shower_wash.png',
+  '/assets/stickers/shower_wash.webp': '/assets/stickers/racing_shower_wash.webp',
+  '/assets/stickers/bathtub_wash.webp': '/assets/stickers/racing_shower_wash.webp',
+  '/assets/stickers/bath_time.webp': '/assets/stickers/racing_shower_wash.webp',
+  '/assets/stickers/fav_bath.webp': '/assets/stickers/racing_shower_wash.webp',
 
-  '/assets/stickers/bedtime_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
-  '/assets/stickers/pajamas_sleep.png': '/assets/stickers/racing_bedtime_sleep.png',
-  '/assets/stickers/pajamas_shorts.png': '/assets/stickers/racing_bedtime_sleep.png',
+  '/assets/stickers/bedtime_sleep.webp': '/assets/stickers/racing_bedtime_sleep.webp',
+  '/assets/stickers/pajamas_sleep.webp': '/assets/stickers/racing_bedtime_sleep.webp',
+  '/assets/stickers/pajamas_shorts.webp': '/assets/stickers/racing_bedtime_sleep.webp',
 
   // Batch 2 Meals, Calming Tools, Mascot & Regulation Swaps
   // Apple snack kept as default apple per user preference
 
-  '/assets/stickers/dinner_bowl.png': '/assets/stickers/racing_dinner_bowl.png',
-  '/assets/stickers/cooking_pot.png': '/assets/stickers/racing_dinner_bowl.png',
+  '/assets/stickers/dinner_bowl.webp': '/assets/stickers/racing_dinner_bowl.webp',
+  '/assets/stickers/cooking_pot.webp': '/assets/stickers/racing_dinner_bowl.webp',
 
-  '/assets/stickers/racing_mascot.png': '/assets/stickers/racing_mascot.png',
-  '/assets/stickers/bee_mascot.png': '/assets/stickers/racing_mascot.png',
-  '/assets/stickers/turtle_mascot.png': '/assets/stickers/racing_mascot.png',
+  '/assets/stickers/racing_mascot.webp': '/assets/stickers/racing_mascot.webp',
+  '/assets/stickers/bee_mascot.webp': '/assets/stickers/racing_mascot.webp',
+  '/assets/stickers/turtle_mascot.webp': '/assets/stickers/racing_mascot.webp',
 
-  '/assets/stickers/hot_cocoa.png': '/assets/stickers/racing_hot_cocoa.png',
-  '/assets/stickers/drink_cup.png': '/assets/stickers/racing_hot_cocoa.png',
+  '/assets/stickers/hot_cocoa.webp': '/assets/stickers/racing_hot_cocoa.webp',
+  '/assets/stickers/drink_cup.webp': '/assets/stickers/racing_hot_cocoa.webp',
 
-  '/assets/stickers/chocolate_bar.png': '/assets/stickers/racing_chocolate_bar.png',
-  '/assets/stickers/candy_treat.png': '/assets/stickers/racing_chocolate_bar.png',
+  '/assets/stickers/chocolate_bar.webp': '/assets/stickers/racing_chocolate_bar.webp',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/racing_chocolate_bar.webp',
 
-  '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/racing_jigsaw_puzzle.png',
+  '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/racing_jigsaw_puzzle.webp',
 
-  '/assets/stickers/fav_music.png': '/assets/stickers/racing_fav_music.png',
-  '/assets/stickers/music_note.png': '/assets/stickers/racing_fav_music.png',
-  '/assets/stickers/music_sensory.png': '/assets/stickers/racing_fav_music.png',
-  '/assets/stickers/teen_headphones.png': '/assets/stickers/racing_fav_music.png',
+  '/assets/stickers/fav_music.webp': '/assets/stickers/racing_fav_music.webp',
+  '/assets/stickers/music_note.webp': '/assets/stickers/racing_fav_music.webp',
+  '/assets/stickers/music_sensory.webp': '/assets/stickers/racing_fav_music.webp',
+  '/assets/stickers/teen_headphones.webp': '/assets/stickers/racing_fav_music.webp',
 
-  '/assets/stickers/fav_love_heart.png': '/assets/stickers/racing_fav_love_heart.png',
+  '/assets/stickers/fav_love_heart.webp': '/assets/stickers/racing_fav_love_heart.webp',
 
-  '/assets/stickers/fav_outside.png': '/assets/stickers/racing_fav_outside.png',
+  '/assets/stickers/fav_outside.webp': '/assets/stickers/racing_fav_outside.webp',
 
-  '/assets/stickers/fav_stop.png': '/assets/stickers/racing_fav_stop.png',
+  '/assets/stickers/fav_stop.webp': '/assets/stickers/racing_fav_stop.webp',
 
-  '/assets/stickers/help_sos.png': '/assets/stickers/racing_help_sos.png',
-  '/assets/stickers/fav_help_sos.png': '/assets/stickers/racing_help_sos.png',
+  '/assets/stickers/help_sos.webp': '/assets/stickers/racing_help_sos.webp',
+  '/assets/stickers/fav_help_sos.webp': '/assets/stickers/racing_help_sos.webp',
 
-  '/assets/stickers/decision_wheel.png': '/assets/stickers/racing_decision_wheel.png',
+  '/assets/stickers/decision_wheel.webp': '/assets/stickers/racing_decision_wheel.webp',
 
-  '/assets/stickers/spoons_energy.png': '/assets/stickers/racing_spoons_energy.png',
+  '/assets/stickers/spoons_energy.webp': '/assets/stickers/racing_spoons_energy.webp',
 
-  '/assets/stickers/routine_writing_journal.png': '/assets/stickers/racing_routine_writing_journal.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/racing_routine_writing_journal.png',
+  '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/racing_routine_writing_journal.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/racing_routine_writing_journal.webp',
 
-  '/assets/stickers/toy_box.png': '/assets/stickers/racing_toy_box.png',
+  '/assets/stickers/toy_box.webp': '/assets/stickers/racing_toy_box.webp',
 
   // Batch 3 Moods, Personas, Onboarding & Places Swaps
-  '/assets/stickers/mood_happy.png': '/assets/stickers/racing_mood_happy.png',
-  '/assets/stickers/happy.png': '/assets/stickers/racing_mood_happy.png',
+  '/assets/stickers/mood_happy.webp': '/assets/stickers/racing_mood_happy.webp',
+  '/assets/stickers/happy.webp': '/assets/stickers/racing_mood_happy.webp',
 
-  '/assets/stickers/mood_calm.png': '/assets/stickers/racing_mood_calm.png',
-  '/assets/stickers/calm.png': '/assets/stickers/racing_mood_calm.png',
+  '/assets/stickers/mood_calm.webp': '/assets/stickers/racing_mood_calm.webp',
+  '/assets/stickers/calm.webp': '/assets/stickers/racing_mood_calm.webp',
 
-  '/assets/stickers/mood_excited.png': '/assets/stickers/racing_mood_excited.png',
-  '/assets/stickers/excited.png': '/assets/stickers/racing_mood_excited.png',
+  '/assets/stickers/mood_excited.webp': '/assets/stickers/racing_mood_excited.webp',
+  '/assets/stickers/excited.webp': '/assets/stickers/racing_mood_excited.webp',
 
-  '/assets/stickers/mood_sleepy.png': '/assets/stickers/racing_mood_sleepy.png',
-  '/assets/stickers/sleepy.png': '/assets/stickers/racing_mood_sleepy.png',
+  '/assets/stickers/mood_sleepy.webp': '/assets/stickers/racing_mood_sleepy.webp',
+  '/assets/stickers/sleepy.webp': '/assets/stickers/racing_mood_sleepy.webp',
 
-  '/assets/stickers/mood_unsure.png': '/assets/stickers/racing_mood_unsure.png',
-  '/assets/stickers/unsure.png': '/assets/stickers/racing_mood_unsure.png',
+  '/assets/stickers/mood_unsure.webp': '/assets/stickers/racing_mood_unsure.webp',
+  '/assets/stickers/unsure.webp': '/assets/stickers/racing_mood_unsure.webp',
 
-  '/assets/stickers/child_persona.png': '/assets/stickers/racing_child_persona.png',
-  '/assets/stickers/persona.png': '/assets/stickers/racing_child_persona.png',
+  '/assets/stickers/child_persona.webp': '/assets/stickers/racing_child_persona.webp',
+  '/assets/stickers/persona.webp': '/assets/stickers/racing_child_persona.webp',
 
-  '/assets/stickers/adult_briefcase.png': '/assets/stickers/racing_adult_briefcase.png',
+  '/assets/stickers/adult_briefcase.webp': '/assets/stickers/racing_adult_briefcase.webp',
 
-  '/assets/stickers/caregiver_phone.png': '/assets/stickers/racing_caregiver_phone.png',
+  '/assets/stickers/caregiver_phone.webp': '/assets/stickers/racing_caregiver_phone.webp',
 
-  '/assets/stickers/language_globe.png': '/assets/stickers/racing_language_globe.png',
+  '/assets/stickers/language_globe.webp': '/assets/stickers/racing_language_globe.webp',
 
-  '/assets/stickers/trial_crown.png': '/assets/stickers/racing_trial_crown.png',
+  '/assets/stickers/trial_crown.webp': '/assets/stickers/racing_trial_crown.webp',
 
-  '/assets/stickers/about_id.png': '/assets/stickers/racing_about_id.png',
+  '/assets/stickers/about_id.webp': '/assets/stickers/racing_about_id.webp',
 
-  '/assets/stickers/home_house.png': '/assets/stickers/racing_home_house.png',
-  '/assets/stickers/house.png': '/assets/stickers/racing_home_house.png',
+  '/assets/stickers/home_house.webp': '/assets/stickers/racing_home_house.webp',
+  '/assets/stickers/house.webp': '/assets/stickers/racing_home_house.webp',
 
-  '/assets/stickers/car_ride.png': '/assets/stickers/racing_car_ride.png',
+  '/assets/stickers/car_ride.webp': '/assets/stickers/racing_car_ride.webp',
 
-  '/assets/stickers/pet_care.png': '/assets/stickers/racing_pet_care.png',
+  '/assets/stickers/pet_care.webp': '/assets/stickers/racing_pet_care.webp',
 
-  '/assets/stickers/pizza_slice.png': '/assets/stickers/racing_pizza_slice.png',
+  '/assets/stickers/pizza_slice.webp': '/assets/stickers/racing_pizza_slice.webp',
 
   // Batch 4 Weather, Sensory Regulation, Science & Travel Swaps
-  '/assets/stickers/sunny_clear.png': '/assets/stickers/racing_sunny_clear.png',
-  '/assets/stickers/sunny.png': '/assets/stickers/racing_sunny_clear.png',
-  '/assets/stickers/sun.png': '/assets/stickers/racing_sunny_clear.png',
+  '/assets/stickers/sunny_clear.webp': '/assets/stickers/racing_sunny_clear.webp',
+  '/assets/stickers/sunny.webp': '/assets/stickers/racing_sunny_clear.webp',
+  '/assets/stickers/sun.webp': '/assets/stickers/racing_sunny_clear.webp',
 
-  '/assets/stickers/morning_sunrise.png': '/assets/stickers/racing_morning_sunrise.png',
-  '/assets/stickers/sunrise.png': '/assets/stickers/racing_morning_sunrise.png',
+  '/assets/stickers/morning_sunrise.webp': '/assets/stickers/racing_morning_sunrise.webp',
+  '/assets/stickers/sunrise.webp': '/assets/stickers/racing_morning_sunrise.webp',
 
-  '/assets/stickers/evening_moon.png': '/assets/stickers/racing_evening_moon.png',
-  '/assets/stickers/moon.png': '/assets/stickers/racing_evening_moon.png',
+  '/assets/stickers/evening_moon.webp': '/assets/stickers/racing_evening_moon.webp',
+  '/assets/stickers/moon.webp': '/assets/stickers/racing_evening_moon.webp',
 
-  '/assets/stickers/rain_cloud.png': '/assets/stickers/racing_rain_cloud.png',
-  '/assets/stickers/rain.png': '/assets/stickers/racing_rain_cloud.png',
+  '/assets/stickers/rain_cloud.webp': '/assets/stickers/racing_rain_cloud.webp',
+  '/assets/stickers/rain.webp': '/assets/stickers/racing_rain_cloud.webp',
 
-  '/assets/stickers/snow_weather.png': '/assets/stickers/racing_snow_weather.png',
-  '/assets/stickers/snow.png': '/assets/stickers/racing_snow_weather.png',
+  '/assets/stickers/snow_weather.webp': '/assets/stickers/racing_snow_weather.webp',
+  '/assets/stickers/snow.webp': '/assets/stickers/racing_snow_weather.webp',
 
-  '/assets/stickers/science_flask.png': '/assets/stickers/racing_science_flask.png',
-  '/assets/stickers/flask.png': '/assets/stickers/racing_science_flask.png',
+  '/assets/stickers/science_flask.webp': '/assets/stickers/racing_science_flask.webp',
+  '/assets/stickers/flask.webp': '/assets/stickers/racing_science_flask.webp',
 
-  '/assets/stickers/stethoscope.png': '/assets/stickers/racing_doctor_stethoscope.png',
-  '/assets/stickers/doctor_stethoscope.png': '/assets/stickers/racing_doctor_stethoscope.png',
+  '/assets/stickers/stethoscope.webp': '/assets/stickers/racing_doctor_stethoscope.webp',
+  '/assets/stickers/doctor_stethoscope.webp': '/assets/stickers/racing_doctor_stethoscope.webp',
 
-  '/assets/stickers/travel_luggage.png': '/assets/stickers/racing_travel_luggage.png',
-  '/assets/stickers/luggage.png': '/assets/stickers/racing_travel_luggage.png',
+  '/assets/stickers/travel_luggage.webp': '/assets/stickers/racing_travel_luggage.webp',
+  '/assets/stickers/luggage.webp': '/assets/stickers/racing_travel_luggage.webp',
 
-  '/assets/stickers/star_gold.png': '/assets/stickers/racing_star_gold.png',
-  '/assets/stickers/star.png': '/assets/stickers/racing_star_gold.png',
-  '/assets/stickers/aac_core.png': '/assets/stickers/racing_star_gold.png',
-  '/assets/stickers/aac_sentences.png': '/assets/stickers/racing_speech_bubble.png',
-  '/assets/stickers/aac_favorites.png': '/assets/stickers/racing_reward_trophy.png',
-  '/assets/stickers/aac_food.png': '/assets/stickers/racing_pizza_slice.png',
-  '/assets/stickers/aac_drinks.png': '/assets/stickers/racing_water_drink.png',
-  '/assets/stickers/aac_activities.png': '/assets/stickers/racing_game_controller.png',
-  '/assets/stickers/aac_places.png': '/assets/stickers/racing_home_house.png',
-  '/assets/stickers/aac_people.png': '/assets/stickers/racing_persona.png',
-  '/assets/stickers/aac_feelings.png': '/assets/stickers/racing_heart.png',
-  '/assets/stickers/aac_sensory.png': '/assets/stickers/racing_teen_headphones.png',
-  '/assets/stickers/aac_all_words.png': '/assets/stickers/racing_homework_study.png',
+  '/assets/stickers/star_gold.webp': '/assets/stickers/racing_star_gold.webp',
+  '/assets/stickers/star.webp': '/assets/stickers/racing_star_gold.webp',
+  '/assets/stickers/aac_core.webp': '/assets/stickers/racing_star_gold.webp',
+  '/assets/stickers/aac_sentences.webp': '/assets/stickers/racing_speech_bubble.webp',
+  '/assets/stickers/aac_favorites.webp': '/assets/stickers/racing_reward_trophy.webp',
+  '/assets/stickers/aac_food.webp': '/assets/stickers/racing_pizza_slice.webp',
+  '/assets/stickers/aac_drinks.webp': '/assets/stickers/racing_water_drink.webp',
+  '/assets/stickers/aac_activities.webp': '/assets/stickers/racing_game_controller.webp',
+  '/assets/stickers/aac_places.webp': '/assets/stickers/racing_home_house.webp',
+  '/assets/stickers/aac_people.webp': '/assets/stickers/racing_persona.webp',
+  '/assets/stickers/aac_feelings.webp': '/assets/stickers/racing_heart.webp',
+  '/assets/stickers/aac_sensory.webp': '/assets/stickers/racing_teen_headphones.webp',
+  '/assets/stickers/aac_all_words.webp': '/assets/stickers/racing_homework_study.webp',
 
-  '/assets/stickers/reward_trophy.png': '/assets/stickers/racing_reward_trophy.png',
-  '/assets/stickers/trophy.png': '/assets/stickers/racing_reward_trophy.png',
+  '/assets/stickers/reward_trophy.webp': '/assets/stickers/racing_reward_trophy.webp',
+  '/assets/stickers/trophy.webp': '/assets/stickers/racing_reward_trophy.webp',
 
-  '/assets/stickers/battery_meter.png': '/assets/stickers/racing_battery_meter.png',
-  '/assets/stickers/battery.png': '/assets/stickers/racing_battery_meter.png',
+  '/assets/stickers/battery_meter.webp': '/assets/stickers/racing_battery_meter.webp',
+  '/assets/stickers/battery.webp': '/assets/stickers/racing_battery_meter.webp',
 
-  '/assets/stickers/feelings_thermometer.png': '/assets/stickers/racing_feelings_thermometer.png',
-  '/assets/stickers/thermometer.png': '/assets/stickers/racing_feelings_thermometer.png',
+  '/assets/stickers/feelings_thermometer.webp': '/assets/stickers/racing_feelings_thermometer.webp',
+  '/assets/stickers/thermometer.webp': '/assets/stickers/racing_feelings_thermometer.webp',
 
-  '/assets/stickers/speech_bubble.png': '/assets/stickers/racing_speech_bubble.png',
-  '/assets/stickers/speech.png': '/assets/stickers/racing_speech_bubble.png',
+  '/assets/stickers/speech_bubble.webp': '/assets/stickers/racing_speech_bubble.webp',
+  '/assets/stickers/speech.webp': '/assets/stickers/racing_speech_bubble.webp',
 
-  '/assets/stickers/quiet_voice.png': '/assets/stickers/racing_quiet_voice.png',
-  '/assets/stickers/quiet.png': '/assets/stickers/racing_quiet_voice.png',
+  '/assets/stickers/quiet_voice.webp': '/assets/stickers/racing_quiet_voice.webp',
+  '/assets/stickers/quiet.webp': '/assets/stickers/racing_quiet_voice.webp',
 
-  '/assets/stickers/calm_sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
-  '/assets/stickers/sparkles.png': '/assets/stickers/racing_calm_sparkles.png',
+  '/assets/stickers/calm_sparkles.webp': '/assets/stickers/racing_calm_sparkles.webp',
+  '/assets/stickers/sparkles.webp': '/assets/stickers/racing_calm_sparkles.webp',
 
   // Batch 5 Adventures, Sensory Sensitivities, Play & Outings Swaps
-  '/assets/stickers/adventure_dentist.png': '/assets/stickers/racing_adventure_dentist.png',
-  '/assets/stickers/dentist.png': '/assets/stickers/racing_adventure_dentist.png',
-  '/assets/stickers/dentist_adventure.png': '/assets/stickers/racing_adventure_dentist.png',
+  '/assets/stickers/adventure_dentist.webp': '/assets/stickers/racing_adventure_dentist.webp',
+  '/assets/stickers/dentist.webp': '/assets/stickers/racing_adventure_dentist.webp',
+  '/assets/stickers/dentist_adventure.webp': '/assets/stickers/racing_adventure_dentist.webp',
 
-  '/assets/stickers/adventure_haircut_salon.png': '/assets/stickers/racing_adventure_haircut.png',
-  '/assets/stickers/adventure_haircut.png': '/assets/stickers/racing_adventure_haircut.png',
-  '/assets/stickers/haircut.png': '/assets/stickers/racing_adventure_haircut.png',
-  '/assets/stickers/haircut_adventure.png': '/assets/stickers/racing_adventure_haircut.png',
+  '/assets/stickers/adventure_haircut_salon.webp': '/assets/stickers/racing_adventure_haircut.webp',
+  '/assets/stickers/adventure_haircut.webp': '/assets/stickers/racing_adventure_haircut.webp',
+  '/assets/stickers/haircut.webp': '/assets/stickers/racing_adventure_haircut.webp',
+  '/assets/stickers/haircut_adventure.webp': '/assets/stickers/racing_adventure_haircut.webp',
 
-  '/assets/stickers/adventure_swimming_pool.png': '/assets/stickers/racing_adventure_swimming_pool.png',
-  '/assets/stickers/swimming_pool.png': '/assets/stickers/racing_adventure_swimming_pool.png',
-  '/assets/stickers/swim.png': '/assets/stickers/racing_adventure_swimming_pool.png',
+  '/assets/stickers/adventure_swimming_pool.webp': '/assets/stickers/racing_adventure_swimming_pool.webp',
+  '/assets/stickers/swimming_pool.webp': '/assets/stickers/racing_adventure_swimming_pool.webp',
+  '/assets/stickers/swim.webp': '/assets/stickers/racing_adventure_swimming_pool.webp',
 
-  '/assets/stickers/adventure_movie_cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
-  '/assets/stickers/movie_cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
-  '/assets/stickers/cinema.png': '/assets/stickers/racing_adventure_movie_cinema.png',
+  '/assets/stickers/adventure_movie_cinema.webp': '/assets/stickers/racing_adventure_movie_cinema.webp',
+  '/assets/stickers/movie_cinema.webp': '/assets/stickers/racing_adventure_movie_cinema.webp',
+  '/assets/stickers/cinema.webp': '/assets/stickers/racing_adventure_movie_cinema.webp',
 
-  '/assets/stickers/adventure_camping_tent.png': '/assets/stickers/racing_adventure_camping_tent.png',
-  '/assets/stickers/camping_tent.png': '/assets/stickers/racing_adventure_camping_tent.png',
-  '/assets/stickers/camping.png': '/assets/stickers/racing_adventure_camping_tent.png',
+  '/assets/stickers/adventure_camping_tent.webp': '/assets/stickers/racing_adventure_camping_tent.webp',
+  '/assets/stickers/camping_tent.webp': '/assets/stickers/racing_adventure_camping_tent.webp',
+  '/assets/stickers/camping.webp': '/assets/stickers/racing_adventure_camping_tent.webp',
 
-  '/assets/stickers/sensory_loud_noise.png': '/assets/stickers/racing_sensory_loud_noise.png',
-  '/assets/stickers/loud_noise.png': '/assets/stickers/racing_sensory_loud_noise.png',
+  '/assets/stickers/sensory_loud_noise.webp': '/assets/stickers/racing_sensory_loud_noise.webp',
+  '/assets/stickers/loud_noise.webp': '/assets/stickers/racing_sensory_loud_noise.webp',
 
-  '/assets/stickers/sensory_bright_lights.png': '/assets/stickers/racing_sensory_bright_lights.png',
-  '/assets/stickers/bright_lights.png': '/assets/stickers/racing_sensory_bright_lights.png',
+  '/assets/stickers/sensory_bright_lights.webp': '/assets/stickers/racing_sensory_bright_lights.webp',
+  '/assets/stickers/bright_lights.webp': '/assets/stickers/racing_sensory_bright_lights.webp',
 
-  '/assets/stickers/grounding_touch_hand.png': '/assets/stickers/racing_grounding_touch_hand.png',
-  '/assets/stickers/touch_hand.png': '/assets/stickers/racing_grounding_touch_hand.png',
+  '/assets/stickers/grounding_touch_hand.webp': '/assets/stickers/racing_grounding_touch_hand.webp',
+  '/assets/stickers/touch_hand.webp': '/assets/stickers/racing_grounding_touch_hand.webp',
 
-  '/assets/stickers/therapy_brain.png': '/assets/stickers/racing_therapy_brain.png',
-  '/assets/stickers/brain.png': '/assets/stickers/racing_therapy_brain.png',
+  '/assets/stickers/therapy_brain.webp': '/assets/stickers/racing_therapy_brain.webp',
+  '/assets/stickers/brain.webp': '/assets/stickers/racing_therapy_brain.webp',
 
-  '/assets/stickers/cloudy_weather.png': '/assets/stickers/racing_cloudy_weather.png',
-  '/assets/stickers/cloudy.png': '/assets/stickers/racing_cloudy_weather.png',
+  '/assets/stickers/cloudy_weather.webp': '/assets/stickers/racing_cloudy_weather.webp',
+  '/assets/stickers/cloudy.webp': '/assets/stickers/racing_cloudy_weather.webp',
 
-  '/assets/stickers/candy_treat.png': '/assets/stickers/racing_candy_treat_swirl.png',
-  '/assets/stickers/candy.png': '/assets/stickers/racing_candy_treat_swirl.png',
+  '/assets/stickers/candy_treat.webp': '/assets/stickers/racing_candy_treat_swirl.webp',
+  '/assets/stickers/candy.webp': '/assets/stickers/racing_candy_treat_swirl.webp',
 
-  '/assets/stickers/red_balloon.png': '/assets/stickers/racing_red_balloon.png',
-  '/assets/stickers/balloon.png': '/assets/stickers/racing_red_balloon.png',
+  '/assets/stickers/red_balloon.webp': '/assets/stickers/racing_red_balloon.webp',
+  '/assets/stickers/balloon.webp': '/assets/stickers/racing_red_balloon.webp',
 
-  '/assets/stickers/tennis_ball.png': '/assets/stickers/racing_tennis_ball.png',
-  '/assets/stickers/ball.png': '/assets/stickers/racing_tennis_ball.png',
+  '/assets/stickers/tennis_ball.webp': '/assets/stickers/racing_tennis_ball.webp',
+  '/assets/stickers/ball.webp': '/assets/stickers/racing_tennis_ball.webp',
 
-  '/assets/stickers/cutlery_meal.png': '/assets/stickers/racing_cutlery_meal.png',
-  '/assets/stickers/cutlery.png': '/assets/stickers/racing_cutlery_meal.png',
+  '/assets/stickers/cutlery_meal.webp': '/assets/stickers/racing_cutlery_meal.webp',
+  '/assets/stickers/cutlery.webp': '/assets/stickers/racing_cutlery_meal.webp',
 
-  '/assets/stickers/shopping_cart.png': '/assets/stickers/racing_shopping_cart.png',
-  '/assets/stickers/cart.png': '/assets/stickers/racing_shopping_cart.png',
+  '/assets/stickers/shopping_cart.webp': '/assets/stickers/racing_shopping_cart.webp',
+  '/assets/stickers/cart.webp': '/assets/stickers/racing_shopping_cart.webp',
 
   // Batch 6 Travel, Destinations, Living & Tools Swaps
-  '/assets/stickers/adventure_restaurant.png': '/assets/stickers/racing_adventure_restaurant.png',
-  '/assets/stickers/restaurant_adventure.png': '/assets/stickers/racing_adventure_restaurant.png',
-  '/assets/stickers/dining_table_booth.png': '/assets/stickers/racing_adventure_restaurant.png',
-  '/assets/stickers/adventure_museum_visit.png': '/assets/stickers/racing_adventure_museum_visit.png',
-  '/assets/stickers/museum_visit.png': '/assets/stickers/racing_adventure_museum_visit.png',
-  '/assets/stickers/adventure_bowling_alley.png': '/assets/stickers/racing_adventure_bowling_alley.png',
-  '/assets/stickers/bowling_alley.png': '/assets/stickers/racing_adventure_bowling_alley.png',
-  '/assets/stickers/bowling_pins_strike.png': '/assets/stickers/racing_adventure_bowling_alley.png',
-  '/assets/stickers/airplane_flight.png': '/assets/stickers/racing_airplane_flight.png',
-  '/assets/stickers/flight.png': '/assets/stickers/racing_airplane_flight.png',
-  '/assets/stickers/boarding_ticket.png': '/assets/stickers/racing_boarding_ticket.png',
-  '/assets/stickers/passport_book.png': '/assets/stickers/racing_passport_book.png',
-  '/assets/stickers/tablet_ipad.png': '/assets/stickers/racing_tablet_ipad.png',
-  '/assets/stickers/clipboard_shutdown.png': '/assets/stickers/racing_tablet_ipad.png',
-  '/assets/stickers/potted_plant.png': '/assets/stickers/racing_potted_plant.png',
-  '/assets/stickers/wall_clock.png': '/assets/stickers/racing_wall_clock.png',
-  '/assets/stickers/timer_clock.png': '/assets/stickers/racing_wall_clock.png',
-  '/assets/stickers/circle_carpet.png': '/assets/stickers/racing_circle_carpet.png',
-  '/assets/stickers/sensory_social_masking.png': '/assets/stickers/racing_circle_carpet.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/racing_circuit_map.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/racing_circuit_map.png',
-  '/assets/stickers/locker_schedule.png': '/assets/stickers/racing_locker_schedule.png',
-  '/assets/stickers/bone_treat.png': '/assets/stickers/racing_bone_treat.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/racing_toy_chest.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/racing_toy_chest.png',
-  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/racing_doctor_stethoscope.png',
-  '/assets/stickers/adventure_doctor.png': '/assets/stickers/racing_doctor_stethoscope.png',
-  '/assets/stickers/doctor_checkup.png': '/assets/stickers/racing_doctor_stethoscope.png',
-  '/assets/stickers/paw_print.png': '/assets/stickers/racing_paw_print.png',
-  '/assets/stickers/ocean_wave.png': '/assets/stickers/racing_ocean_wave.png',
-  '/assets/stickers/story_birthday.png': '/assets/stickers/racing_birthday_cake.png',
-  '/assets/stickers/birthday_cake_slice.png': '/assets/stickers/racing_birthday_cake.png',
+  '/assets/stickers/adventure_restaurant.webp': '/assets/stickers/racing_adventure_restaurant.webp',
+  '/assets/stickers/restaurant_adventure.webp': '/assets/stickers/racing_adventure_restaurant.webp',
+  '/assets/stickers/dining_table_booth.webp': '/assets/stickers/racing_adventure_restaurant.webp',
+  '/assets/stickers/adventure_museum_visit.webp': '/assets/stickers/racing_adventure_museum_visit.webp',
+  '/assets/stickers/museum_visit.webp': '/assets/stickers/racing_adventure_museum_visit.webp',
+  '/assets/stickers/adventure_bowling_alley.webp': '/assets/stickers/racing_adventure_bowling_alley.webp',
+  '/assets/stickers/bowling_alley.webp': '/assets/stickers/racing_adventure_bowling_alley.webp',
+  '/assets/stickers/bowling_pins_strike.webp': '/assets/stickers/racing_adventure_bowling_alley.webp',
+  '/assets/stickers/airplane_flight.webp': '/assets/stickers/racing_airplane_flight.webp',
+  '/assets/stickers/flight.webp': '/assets/stickers/racing_airplane_flight.webp',
+  '/assets/stickers/boarding_ticket.webp': '/assets/stickers/racing_boarding_ticket.webp',
+  '/assets/stickers/passport_book.webp': '/assets/stickers/racing_passport_book.webp',
+  '/assets/stickers/tablet_ipad.webp': '/assets/stickers/racing_tablet_ipad.webp',
+  '/assets/stickers/clipboard_shutdown.webp': '/assets/stickers/racing_tablet_ipad.webp',
+  '/assets/stickers/potted_plant.webp': '/assets/stickers/racing_potted_plant.webp',
+  '/assets/stickers/wall_clock.webp': '/assets/stickers/racing_wall_clock.webp',
+  '/assets/stickers/timer_clock.webp': '/assets/stickers/racing_wall_clock.webp',
+  '/assets/stickers/circle_carpet.webp': '/assets/stickers/racing_circle_carpet.webp',
+  '/assets/stickers/sensory_social_masking.webp': '/assets/stickers/racing_circle_carpet.webp',
+  '/assets/stickers/story_plans_change.webp': '/assets/stickers/racing_circuit_map.webp',
+  '/assets/stickers/plans_changed.webp': '/assets/stickers/racing_circuit_map.webp',
+  '/assets/stickers/locker_schedule.webp': '/assets/stickers/racing_locker_schedule.webp',
+  '/assets/stickers/bone_treat.webp': '/assets/stickers/racing_bone_treat.webp',
+  '/assets/stickers/story_sharing.webp': '/assets/stickers/racing_toy_chest.webp',
+  '/assets/stickers/sharing_toys.webp': '/assets/stickers/racing_toy_chest.webp',
+  '/assets/stickers/adventure_doctor_checkup.webp': '/assets/stickers/racing_doctor_stethoscope.webp',
+  '/assets/stickers/adventure_doctor.webp': '/assets/stickers/racing_doctor_stethoscope.webp',
+  '/assets/stickers/doctor_checkup.webp': '/assets/stickers/racing_doctor_stethoscope.webp',
+  '/assets/stickers/paw_print.webp': '/assets/stickers/racing_paw_print.webp',
+  '/assets/stickers/ocean_wave.webp': '/assets/stickers/racing_ocean_wave.webp',
+  '/assets/stickers/story_birthday.webp': '/assets/stickers/racing_birthday_cake.webp',
+  '/assets/stickers/birthday_cake_slice.webp': '/assets/stickers/racing_birthday_cake.webp',
 
   // Batch 7 Social Story Adventure Steps (Dental, Haircut, Doctor & Community) Swaps
-  '/assets/stickers/waiting_room_couch.png': '/assets/stickers/racing_waiting_room_couch.png',
-  '/assets/stickers/waving_hand_hello.png': '/assets/stickers/racing_waving_hand_hello.png',
-  '/assets/stickers/padded_recliner_chair.png': '/assets/stickers/racing_padded_recliner_chair.png',
-  '/assets/stickers/open_mouth_wide.png': '/assets/stickers/racing_open_mouth_wide.png',
-  '/assets/stickers/open_mouth_lion.png': '/assets/stickers/racing_open_mouth_wide.png',
-  '/assets/stickers/open_welcome_door.png': '/assets/stickers/racing_open_welcome_door.png',
-  '/assets/stickers/restaurant_menu_book.png': '/assets/stickers/racing_restaurant_menu_book.png',
-  '/assets/stickers/barbershop_pole.png': '/assets/stickers/racing_barbershop_pole.png',
-  '/assets/stickers/haircut_cape.png': '/assets/stickers/racing_haircut_cape.png',
-  '/assets/stickers/water_spray_bottle.png': '/assets/stickers/racing_water_spray_bottle.png',
-  '/assets/stickers/barber_neck_brush.png': '/assets/stickers/racing_barber_neck_brush.png',
-  '/assets/stickers/salon_hand_mirror.png': '/assets/stickers/racing_salon_hand_mirror.png',
-  '/assets/stickers/medical_clinic_building.png': '/assets/stickers/racing_medical_clinic_building.png',
-  '/assets/stickers/clinic_height_scale.png': '/assets/stickers/racing_clinic_height_scale.png',
-  '/assets/stickers/doctor_exam_bed.png': '/assets/stickers/racing_doctor_exam_bed.png',
-  '/assets/stickers/doctor_ear_light.png': '/assets/stickers/racing_doctor_ear_light.png',
+  '/assets/stickers/waiting_room_couch.webp': '/assets/stickers/racing_waiting_room_couch.webp',
+  '/assets/stickers/waving_hand_hello.webp': '/assets/stickers/racing_waving_hand_hello.webp',
+  '/assets/stickers/padded_recliner_chair.webp': '/assets/stickers/racing_padded_recliner_chair.webp',
+  '/assets/stickers/open_mouth_wide.webp': '/assets/stickers/racing_open_mouth_wide.webp',
+  '/assets/stickers/open_mouth_lion.webp': '/assets/stickers/racing_open_mouth_wide.webp',
+  '/assets/stickers/open_welcome_door.webp': '/assets/stickers/racing_open_welcome_door.webp',
+  '/assets/stickers/restaurant_menu_book.webp': '/assets/stickers/racing_restaurant_menu_book.webp',
+  '/assets/stickers/barbershop_pole.webp': '/assets/stickers/racing_barbershop_pole.webp',
+  '/assets/stickers/haircut_cape.webp': '/assets/stickers/racing_haircut_cape.webp',
+  '/assets/stickers/water_spray_bottle.webp': '/assets/stickers/racing_water_spray_bottle.webp',
+  '/assets/stickers/barber_neck_brush.webp': '/assets/stickers/racing_barber_neck_brush.webp',
+  '/assets/stickers/salon_hand_mirror.webp': '/assets/stickers/racing_salon_hand_mirror.webp',
+  '/assets/stickers/medical_clinic_building.webp': '/assets/stickers/racing_medical_clinic_building.webp',
+  '/assets/stickers/clinic_height_scale.webp': '/assets/stickers/racing_clinic_height_scale.webp',
+  '/assets/stickers/doctor_exam_bed.webp': '/assets/stickers/racing_doctor_exam_bed.webp',
+  '/assets/stickers/doctor_ear_light.webp': '/assets/stickers/racing_doctor_ear_light.webp',
 
   // Batch 8 Pool, Cinema, Bowling, Camping, Museum & Celebrations Swaps
-  '/assets/stickers/walking_pool_feet.png': '/assets/stickers/racing_walking_pool_feet.png',
-  '/assets/stickers/swim_goggles_floaties.png': '/assets/stickers/racing_swim_goggles_floaties.png',
-  '/assets/stickers/fluffy_beach_towel.png': '/assets/stickers/racing_fluffy_beach_towel.png',
-  '/assets/stickers/movie_projector_screen.png': '/assets/stickers/racing_movie_projector_screen.png',
-  '/assets/stickers/bowling_ball_holes.png': '/assets/stickers/racing_bowling_ball_holes.png',
-  '/assets/stickers/bowling_lane_bumpers.png': '/assets/stickers/racing_bowling_lane_bumpers.png',
-  '/assets/stickers/high_five_hands.png': '/assets/stickers/racing_high_five_hands.png',
-  '/assets/stickers/pine_trees_forest.png': '/assets/stickers/racing_pine_trees_forest.png',
-  '/assets/stickers/campfire_marshmallows.png': '/assets/stickers/racing_campfire_marshmallows.png',
-  '/assets/stickers/camping_sleeping_bag.png': '/assets/stickers/racing_camping_sleeping_bag.png',
-  '/assets/stickers/museum_paper_map.png': '/assets/stickers/racing_museum_paper_map.png',
-  '/assets/stickers/museum_dinosaur_fossil.png': '/assets/stickers/racing_museum_dinosaur_fossil.png',
-  '/assets/stickers/observing_magnifying_glass.png': '/assets/stickers/racing_observing_magnifying_glass.png',
-  '/assets/stickers/magnifying_glass.png': '/assets/stickers/racing_observing_magnifying_glass.png',
-  '/assets/stickers/game_controller.png': '/assets/stickers/racing_game_controller.png',
-  '/assets/stickers/birthday_gift_box.png': '/assets/stickers/racing_birthday_gift_box.png',
-  '/assets/stickers/birthday_card.png': '/assets/stickers/racing_birthday_gift_box.png',
+  '/assets/stickers/walking_pool_feet.webp': '/assets/stickers/racing_walking_pool_feet.webp',
+  '/assets/stickers/swim_goggles_floaties.webp': '/assets/stickers/racing_swim_goggles_floaties.webp',
+  '/assets/stickers/fluffy_beach_towel.webp': '/assets/stickers/racing_fluffy_beach_towel.webp',
+  '/assets/stickers/movie_projector_screen.webp': '/assets/stickers/racing_movie_projector_screen.webp',
+  '/assets/stickers/bowling_ball_holes.webp': '/assets/stickers/racing_bowling_ball_holes.webp',
+  '/assets/stickers/bowling_lane_bumpers.webp': '/assets/stickers/racing_bowling_lane_bumpers.webp',
+  '/assets/stickers/high_five_hands.webp': '/assets/stickers/racing_high_five_hands.webp',
+  '/assets/stickers/pine_trees_forest.webp': '/assets/stickers/racing_pine_trees_forest.webp',
+  '/assets/stickers/campfire_marshmallows.webp': '/assets/stickers/racing_campfire_marshmallows.webp',
+  '/assets/stickers/camping_sleeping_bag.webp': '/assets/stickers/racing_camping_sleeping_bag.webp',
+  '/assets/stickers/museum_paper_map.webp': '/assets/stickers/racing_museum_paper_map.webp',
+  '/assets/stickers/museum_dinosaur_fossil.webp': '/assets/stickers/racing_museum_dinosaur_fossil.webp',
+  '/assets/stickers/observing_magnifying_glass.webp': '/assets/stickers/racing_observing_magnifying_glass.webp',
+  '/assets/stickers/magnifying_glass.webp': '/assets/stickers/racing_observing_magnifying_glass.webp',
+  '/assets/stickers/game_controller.webp': '/assets/stickers/racing_game_controller.webp',
+  '/assets/stickers/birthday_gift_box.webp': '/assets/stickers/racing_birthday_gift_box.webp',
+  '/assets/stickers/birthday_card.webp': '/assets/stickers/racing_birthday_gift_box.webp',
 };
 
 /**
@@ -2763,24 +2754,25 @@ export const RoutineStickerIcon: React.FC<{
   const isRacing = activeTheme === 'racing';
 
   // If already an image path or sticker asset
-  if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
-    let finalSrc = normEmoji;
-    if (isTurtle && TURTLE_STICKER_SWAPS[normEmoji]) {
-      finalSrc = TURTLE_STICKER_SWAPS[normEmoji];
-    } else if (isDino && DINO_STICKER_SWAPS[normEmoji]) {
-      finalSrc = DINO_STICKER_SWAPS[normEmoji];
-    } else if (isFrog && FROG_STICKER_SWAPS[normEmoji]) {
-      finalSrc = FROG_STICKER_SWAPS[normEmoji];
-    } else if (isTrain && TRAIN_STICKER_SWAPS[normEmoji]) {
-      finalSrc = TRAIN_STICKER_SWAPS[normEmoji];
-    } else if (isSpace && SPACE_STICKER_SWAPS[normEmoji]) {
-      finalSrc = SPACE_STICKER_SWAPS[normEmoji];
-    } else if (isOcean && OCEAN_STICKER_SWAPS[normEmoji]) {
-      finalSrc = OCEAN_STICKER_SWAPS[normEmoji];
-    } else if (isFairytale && FAIRYTALE_STICKER_SWAPS[normEmoji]) {
-      finalSrc = FAIRYTALE_STICKER_SWAPS[normEmoji];
-    } else if (isRacing && RACING_STICKER_SWAPS[normEmoji]) {
-      finalSrc = RACING_STICKER_SWAPS[normEmoji];
+  if (normEmoji.startsWith('/') || normEmoji.includes('.webp') || normEmoji.includes('.png')) {
+    const webpEmoji = normEmoji.startsWith('/assets/stickers/') ? normEmoji.replace(/\.png$/i, '.webp') : normEmoji;
+    let finalSrc = webpEmoji;
+    if (isTurtle && TURTLE_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = TURTLE_STICKER_SWAPS[webpEmoji];
+    } else if (isDino && DINO_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = DINO_STICKER_SWAPS[webpEmoji];
+    } else if (isFrog && FROG_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = FROG_STICKER_SWAPS[webpEmoji];
+    } else if (isTrain && TRAIN_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = TRAIN_STICKER_SWAPS[webpEmoji];
+    } else if (isSpace && SPACE_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = SPACE_STICKER_SWAPS[webpEmoji];
+    } else if (isOcean && OCEAN_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = OCEAN_STICKER_SWAPS[webpEmoji];
+    } else if (isFairytale && FAIRYTALE_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = FAIRYTALE_STICKER_SWAPS[webpEmoji];
+    } else if (isRacing && RACING_STICKER_SWAPS[webpEmoji]) {
+      finalSrc = RACING_STICKER_SWAPS[webpEmoji];
     }
     return (
       <img
@@ -3222,16 +3214,16 @@ export const RoutineStickerIcon: React.FC<{
  */
 export function getAdventureTabSticker(themeCategory?: string | null): string {
   switch (themeCategory) {
-    case 'turtle': return '/assets/stickers/turtle_reed_explorer_shoes.png';
-    case 'dinosaur': return '/assets/stickers/dino_expedition_log_book.png';
-    case 'frog': return '/assets/stickers/frog_explorer_backpack.png';
-    case 'train': return '/assets/stickers/train_passport_book.png';
-    case 'space': return '/assets/stickers/space_passport_book.png';
-    case 'ocean': return '/assets/stickers/ocean_expedition_passport.png';
+    case 'turtle': return '/assets/stickers/turtle_reed_explorer_shoes.webp';
+    case 'dinosaur': return '/assets/stickers/dino_expedition_log_book.webp';
+    case 'frog': return '/assets/stickers/frog_explorer_backpack.webp';
+    case 'train': return '/assets/stickers/train_passport_book.webp';
+    case 'space': return '/assets/stickers/space_passport_book.webp';
+    case 'ocean': return '/assets/stickers/ocean_expedition_passport.webp';
     case 'fantasy':
-    case 'magic': return '/assets/stickers/fairytale_passport_book.png';
-    case 'racing': return '/assets/stickers/racing_passport_book.png';
-    default: return '/assets/stickers/passport_book.png';
+    case 'magic': return '/assets/stickers/fairytale_passport_book.webp';
+    case 'racing': return '/assets/stickers/racing_passport_book.webp';
+    default: return '/assets/stickers/passport_book.webp';
   }
 }
 
@@ -3240,15 +3232,15 @@ export function getAdventureTabSticker(themeCategory?: string | null): string {
  */
 export function getStoryTabSticker(themeCategory?: string | null): string {
   switch (themeCategory) {
-    case 'turtle': return '/assets/stickers/turtle_firefly_lantern_book.png';
-    case 'dinosaur': return '/assets/stickers/dino_palm_leaf_folio.png';
-    case 'frog': return '/assets/stickers/frog_reed_school_folder.png';
-    case 'train': return '/assets/stickers/train_story_atlas.png';
-    case 'space': return '/assets/stickers/space_routine_writing_journal.png';
-    case 'ocean': return '/assets/stickers/ocean_captains_logbook.png';
+    case 'turtle': return '/assets/stickers/turtle_firefly_lantern_book.webp';
+    case 'dinosaur': return '/assets/stickers/dino_palm_leaf_folio.webp';
+    case 'frog': return '/assets/stickers/frog_reed_school_folder.webp';
+    case 'train': return '/assets/stickers/train_story_atlas.webp';
+    case 'space': return '/assets/stickers/space_routine_writing_journal.webp';
+    case 'ocean': return '/assets/stickers/ocean_captains_logbook.webp';
     case 'fantasy':
-    case 'magic': return '/assets/stickers/fairytale_spellbook_journal.png';
-    case 'racing': return '/assets/stickers/racing_journal.png';
-    default: return '/assets/stickers/routine_writing_journal.png';
+    case 'magic': return '/assets/stickers/fairytale_spellbook_journal.webp';
+    case 'racing': return '/assets/stickers/racing_journal.webp';
+    default: return '/assets/stickers/routine_writing_journal.webp';
   }
 }

@@ -16,18 +16,18 @@ interface TaskPreset {
 }
 
 const TASK_PRESETS: TaskPreset[] = [
-  { label: 'Getting dressed', stickerSrc: '/assets/stickers/clothes_dressed.png', cost: 1 },
-  { label: 'Eating a meal', stickerSrc: '/assets/stickers/cutlery_meal.png', cost: 1 },
-  { label: 'Showering / hygiene', stickerSrc: '/assets/stickers/shower_wash.png', cost: 2 },
-  { label: 'School / work', stickerSrc: '/assets/stickers/school_building.png', cost: 3 },
-  { label: 'Social interaction', stickerSrc: '/assets/stickers/aac_people.png', cost: 3 },
-  { label: 'Doctor / dentist', stickerSrc: '/assets/stickers/adventure_doctor_checkup.png', cost: 3 },
-  { label: 'Short errand', stickerSrc: '/assets/stickers/shopping_cart.png', cost: 2 },
-  { label: 'Exercise', stickerSrc: '/assets/stickers/sneaker_shoes.png', cost: 2 },
-  { label: 'Cooking', stickerSrc: '/assets/stickers/cooking_pot.png', cost: 2 },
-  { label: 'Commuting', stickerSrc: '/assets/stickers/car_ride.png', cost: 2 },
-  { label: 'Rest / nap', stickerSrc: '/assets/stickers/bedtime_sleep.png', cost: 1 },
-  { label: 'Phone call', stickerSrc: '/assets/stickers/caregiver_phone.png', cost: 2 },
+  { label: 'Getting dressed', stickerSrc: '/assets/stickers/clothes_dressed.webp', cost: 1 },
+  { label: 'Eating a meal', stickerSrc: '/assets/stickers/cutlery_meal.webp', cost: 1 },
+  { label: 'Showering / hygiene', stickerSrc: '/assets/stickers/shower_wash.webp', cost: 2 },
+  { label: 'School / work', stickerSrc: '/assets/stickers/school_building.webp', cost: 3 },
+  { label: 'Social interaction', stickerSrc: '/assets/stickers/aac_people.webp', cost: 3 },
+  { label: 'Doctor / dentist', stickerSrc: '/assets/stickers/adventure_doctor_checkup.webp', cost: 3 },
+  { label: 'Short errand', stickerSrc: '/assets/stickers/shopping_cart.webp', cost: 2 },
+  { label: 'Exercise', stickerSrc: '/assets/stickers/sneaker_shoes.webp', cost: 2 },
+  { label: 'Cooking', stickerSrc: '/assets/stickers/cooking_pot.webp', cost: 2 },
+  { label: 'Commuting', stickerSrc: '/assets/stickers/car_ride.webp', cost: 2 },
+  { label: 'Rest / nap', stickerSrc: '/assets/stickers/bedtime_sleep.webp', cost: 1 },
+  { label: 'Phone call', stickerSrc: '/assets/stickers/caregiver_phone.webp', cost: 2 },
 ];
 
 function getBatteryColor(remaining: number, total: number) {
@@ -140,7 +140,7 @@ export const SpoonBudgetModal: React.FC = () => {
                 <span className="text-2xl select-none leading-none">🦖</span>
               ) : (
                 <img
-                  src={isTurtleTheme ? '/assets/stickers/turtle_bamboo_spoons.png' : '/assets/stickers/spoons_energy.png'}
+                  src={isTurtleTheme ? '/assets/stickers/turtle_bamboo_spoons.webp' : '/assets/stickers/spoons_energy.webp'}
                   alt="Spoons"
                   className="w-8 h-8 object-contain drop-shadow-2xs select-none pointer-events-none"
                 />

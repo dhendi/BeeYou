@@ -453,6 +453,19 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'beeyou_app_state_v1';
 
+// Automatically migrate any cached /assets/stickers/*.png paths in localStorage to .webp
+if (typeof window !== 'undefined') {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw && raw.includes('/assets/stickers/') && raw.includes('.png')) {
+      const migrated = raw.replace(/(\/assets\/stickers\/[a-zA-Z0-9_\-\/]+)\.png/g, '$1.webp');
+      if (migrated !== raw) {
+        localStorage.setItem(STORAGE_KEY, migrated);
+      }
+    }
+  } catch {}
+}
+
 export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiver' | 'child' }> = ({
   children,
   initialRole,

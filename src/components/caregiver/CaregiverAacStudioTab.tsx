@@ -573,7 +573,7 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-amber-100 border border-amber-300/80 flex items-center justify-center p-0.5 shrink-0 shadow-2xs">
-              <img src="/assets/stickers/voice_microphone.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/voice_microphone.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <span>{t("Fluid Human Voice & Speech Settings")}</span>
           </h3>
@@ -589,10 +589,10 @@ export const CaregiverAacStudioTab: React.FC<CaregiverAacStudioTabProps> = ({ on
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {[
-              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', sticker: '/assets/stickers/fav_love_heart.png', badge: 'Recommended' },
-              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', sticker: '/assets/stickers/outdoor_sun.png' },
-              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', sticker: '/assets/stickers/wind_breeze.png' },
-              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', sticker: '/assets/stickers/tablet_ipad.png' },
+              { id: 'Kore', name: 'Kore', desc: 'Warm, gentle & empathetic', sticker: '/assets/stickers/fav_love_heart.webp', badge: 'Recommended' },
+              { id: 'Puck', name: 'Puck', desc: 'Bright, cheerful & playful', sticker: '/assets/stickers/outdoor_sun.webp' },
+              { id: 'Zephyr', name: 'Zephyr', desc: 'Soft, calm & soothing', sticker: '/assets/stickers/wind_breeze.webp' },
+              { id: 'system', name: 'On-Device Natural', desc: 'Device neural voice (offline)', sticker: '/assets/stickers/tablet_ipad.webp' },
             ].map((persona) => {
               const isSelected = (settings.voicePersona || 'Kore') === persona.id;
               return (

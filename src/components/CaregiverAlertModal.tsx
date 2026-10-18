@@ -69,7 +69,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'I Need Help',
     sublabel: 'I need adult assistance right now',
     icon: LifeBuoy,
-    stickerSrc: '/assets/stickers/fav_help_sos.png',
+    stickerSrc: '/assets/stickers/fav_help_sos.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -82,7 +82,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: "I'm Overwhelmed",
     sublabel: 'Sensory overload, too loud or bright',
     icon: Zap,
-    stickerSrc: '/assets/stickers/zap_family_demo.png',
+    stickerSrc: '/assets/stickers/zap_family_demo.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -95,7 +95,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'I Need a Break',
     sublabel: 'Pause from activity or noise',
     icon: Coffee,
-    stickerSrc: '/assets/stickers/hot_cocoa.png',
+    stickerSrc: '/assets/stickers/hot_cocoa.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -107,7 +107,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Send Love / Hug',
     sublabel: 'Thinking of you and safe',
     icon: Heart,
-    stickerSrc: '/assets/stickers/fav_love_heart.png',
+    stickerSrc: '/assets/stickers/fav_love_heart.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -119,7 +119,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Ready for Pickup / Home',
     sublabel: 'Ready to be picked up or go home',
     icon: Car,
-    stickerSrc: '/assets/stickers/car_ride.png',
+    stickerSrc: '/assets/stickers/car_ride.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -131,7 +131,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Hungry / Thirsty',
     sublabel: 'Need snack, meal or water',
     icon: Utensils,
-    stickerSrc: '/assets/stickers/cutlery_meal.png',
+    stickerSrc: '/assets/stickers/cutlery_meal.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -143,7 +143,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Need Restroom',
     sublabel: 'Need to use the bathroom',
     icon: DoorClosed,
-    stickerSrc: '/assets/stickers/routine_toilet_restroom.png',
+    stickerSrc: '/assets/stickers/routine_toilet_restroom.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -155,7 +155,7 @@ const DEFAULT_QUICK_ALERTS: PredefinedAlertChoice[] = [
     label: 'Finished My Task!',
     sublabel: 'Done with my routine or schedule',
     icon: CheckCircle2,
-    stickerSrc: '/assets/stickers/task_done.png',
+    stickerSrc: '/assets/stickers/task_done.webp',
     iconBgClass: 'bg-amber-100/90 border border-amber-300',
     iconColorClass: 'text-amber-900',
     colorClass: 'text-[#2D241E]',
@@ -341,7 +341,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-[#FFF2D4] border-2 border-[#FED676] flex items-center justify-center p-1.5 shadow-2xs shrink-0">
               <img
-                src="/assets/stickers/alert_sos_shield.png"
+                src="/assets/stickers/alert_sos_shield.webp"
                 alt="Alert"
                 className="w-9 h-9 object-contain drop-shadow-xs select-none"
                 onError={(e) => {
@@ -482,7 +482,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                       <Heart className="w-6 h-6 text-rose-600 fill-rose-600" />
                     ) : (
                       <img
-                        src="/assets/stickers/caregiver_response_okay.png"
+                        src="/assets/stickers/caregiver_response_okay.webp"
                         alt="Caregiver Okay"
                         className="w-10 h-10 object-contain drop-shadow-xs"
                       />
@@ -567,10 +567,10 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[
-                    { id: 'school', label: 'School', icon: School, stickerSrc: '/assets/stickers/school_building.png' },
-                    { id: 'therapy', label: 'Therapy', icon: Activity, stickerSrc: '/assets/stickers/therapy_brain.png' },
-                    { id: 'bus', label: 'Transit', icon: Bus, stickerSrc: '/assets/stickers/school_bus.png' },
-                    { id: 'home', label: 'Home', icon: Home, stickerSrc: '/assets/stickers/home_house.png' },
+                    { id: 'school', label: 'School', icon: School, stickerSrc: '/assets/stickers/school_building.webp' },
+                    { id: 'therapy', label: 'Therapy', icon: Activity, stickerSrc: '/assets/stickers/therapy_brain.webp' },
+                    { id: 'bus', label: 'Transit', icon: Bus, stickerSrc: '/assets/stickers/school_bus.webp' },
+                    { id: 'home', label: 'Home', icon: Home, stickerSrc: '/assets/stickers/home_house.webp' },
                   ].map((loc) => {
                     const LocIcon = loc.icon;
                     const isSelected = selectedLocation === loc.id;

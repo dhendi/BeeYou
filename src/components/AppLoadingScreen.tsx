@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { preloadAllAppAssets, PreloadProgress } from '../utils/appAssetPreloader';
+import { preloadAllAppAssets, getTier1Assets, PreloadProgress } from '../utils/appAssetPreloader';
 
 interface AppLoadingScreenProps {
   onLoaded: () => void;
 }
 
 export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) => {
-  const [progress, setProgress] = useState<PreloadProgress>({
+  const [progress, setProgress] = useState<PreloadProgress>(() => ({
     percent: 0,
     loaded: 0,
-    total: 2624,
-  });
+    total: getTier1Assets().length,
+  }));
 
   const [isFadingOut, setIsFadingOut] = useState(false);
 
@@ -21,14 +21,14 @@ export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) 
       if (!isMounted) return;
       setProgress(p);
 
-      // Gate: ONLY finish when 100% of all assets are preloaded
+      // Gate: ONLY finish when 100% of all Tier 1 startup assets are preloaded
       if (p.percent >= 100 && p.loaded >= p.total) {
         setTimeout(() => {
           if (isMounted) {
             setIsFadingOut(true);
             setTimeout(onLoaded, 500);
           }
-        }, 300);
+        }, 250);
       }
     });
 

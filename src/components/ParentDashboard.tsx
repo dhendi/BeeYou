@@ -697,13 +697,13 @@ export const ParentDashboard: React.FC = () => {
                   <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600"></span>
                 </span>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                  <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                  <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-black text-rose-950 text-sm flex items-center gap-2 flex-wrap">
                     <span>{t('Live Emergency Alert from')} {activeAlerts[0].childName || childProfile.name}:</span>
                     <span className="px-2 py-0.5 rounded-lg bg-rose-200 text-rose-900 font-extrabold text-xs flex items-center gap-1.5">
-                      <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                      <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-3.5 h-3.5 object-contain" />
                       <span>{t(activeAlerts[0].label)}</span>
                     </span>
                   </div>
@@ -716,9 +716,9 @@ export const ParentDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2 w-full md:w-auto flex-wrap shrink-0">
                 {getQuickRepliesForAlert(activeAlerts[0], t).slice(0, 2).map((reply) => {
-                  const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.png' :
-                                    reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.png' :
-                                    reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.png' :
+                  const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
+                                    reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
+                                    reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
                                     reply.iconSrc;
                   const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                   return (
@@ -741,7 +741,7 @@ export const ParentDashboard: React.FC = () => {
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200 shadow-2xs flex items-center gap-1.5 cursor-pointer transition whitespace-nowrap active:scale-95"
                 >
-                  <img src="/assets/stickers/inbox_alerts.png" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
+                  <img src="/assets/stickers/inbox_alerts.webp" alt="" className="w-4 h-4 object-contain drop-shadow-2xs shrink-0" />
                   <span>{t("Open Alerts Inbox")}</span>
                   <span>→</span>
                 </button>

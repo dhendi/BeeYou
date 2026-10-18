@@ -78,7 +78,7 @@ export const EditCalmModal: React.FC = () => {
         <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 px-6 py-4.5 text-white flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center p-1.5 shadow-2xs">
-              <img src="/assets/stickers/breathing_cloud.png" alt="Calm Tools" className="w-8 h-8 object-contain drop-shadow-xs" />
+              <img src="/assets/stickers/breathing_cloud.webp" alt="Calm Tools" className="w-8 h-8 object-contain drop-shadow-xs" />
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Customization</p>

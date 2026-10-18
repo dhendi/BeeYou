@@ -50,16 +50,16 @@ interface AACWordEditorModalProps {
 }
 
 const CATEGORY_OPTIONS: { id: AACCategory; label: string; iconSrc: string }[] = [
-  { id: 'favorites', label: 'Favorites', iconSrc: '/assets/stickers/aac_favorites.png' },
-  { id: 'core', label: 'Core Words', iconSrc: '/assets/stickers/aac_core.png' },
-  { id: 'food', label: 'Food', iconSrc: '/assets/stickers/aac_food.png' },
-  { id: 'drinks', label: 'Drinks', iconSrc: '/assets/stickers/aac_drinks.png' },
-  { id: 'activities', label: 'Play & Fun', iconSrc: '/assets/stickers/aac_activities.png' },
-  { id: 'places', label: 'Places', iconSrc: '/assets/stickers/aac_places.png' },
-  { id: 'people', label: 'People', iconSrc: '/assets/stickers/aac_people.png' },
-  { id: 'feelings', label: 'Feelings', iconSrc: '/assets/stickers/aac_feelings.png' },
-  { id: 'sensory', label: 'Sensory', iconSrc: '/assets/stickers/aac_sensory.png' },
-  { id: 'personal', label: 'Personal', iconSrc: '/assets/stickers/toothbrush.png' },
+  { id: 'favorites', label: 'Favorites', iconSrc: '/assets/stickers/aac_favorites.webp' },
+  { id: 'core', label: 'Core Words', iconSrc: '/assets/stickers/aac_core.webp' },
+  { id: 'food', label: 'Food', iconSrc: '/assets/stickers/aac_food.webp' },
+  { id: 'drinks', label: 'Drinks', iconSrc: '/assets/stickers/aac_drinks.webp' },
+  { id: 'activities', label: 'Play & Fun', iconSrc: '/assets/stickers/aac_activities.webp' },
+  { id: 'places', label: 'Places', iconSrc: '/assets/stickers/aac_places.webp' },
+  { id: 'people', label: 'People', iconSrc: '/assets/stickers/aac_people.webp' },
+  { id: 'feelings', label: 'Feelings', iconSrc: '/assets/stickers/aac_feelings.webp' },
+  { id: 'sensory', label: 'Sensory', iconSrc: '/assets/stickers/aac_sensory.webp' },
+  { id: 'personal', label: 'Personal', iconSrc: '/assets/stickers/toothbrush.webp' },
 ];
 
 const COLOR_TYPE_OPTIONS: { id: AACItem['colorType']; label: string; desc: string; bg: string }[] = [

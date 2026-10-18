@@ -771,7 +771,7 @@ export const ThemedEmotionFace: React.FC<ThemedEmotionFaceProps> = ({
 
   // Base authentic pixel art sprite set for the active theme:
   const folder = category;
-  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.png?v=11`;
+  const baseSrc = `/assets/emotions/${folder}/${normalizedId}.webp`;
 
   const hasRealImage = Boolean(category && REAL_IMAGE_THEMES.has(category) && !imageFailed);
 

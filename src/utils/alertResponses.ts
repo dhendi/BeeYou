@@ -24,21 +24,21 @@ export function getQuickRepliesForAlert(
         label: t("I'm On My Way"),
         text: t("I'm on my way! 🚗"),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
-        iconSrc: '/assets/stickers/car_on_my_way.png',
+        iconSrc: '/assets/stickers/car_on_my_way.webp',
       },
       {
         id: 'im_here',
         label: t("I'm Here For You"),
         text: t("I'm here for you ❤️ Take a deep breath."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
-        iconSrc: '/assets/stickers/heart_here_for_you.png',
+        iconSrc: '/assets/stickers/heart_here_for_you.webp',
       },
       {
         id: 'give_minutes',
         label: t("5 Minutes"),
         text: t("Give me 5 minutes, finish what you're doing ⏳"),
         className: 'bg-slate-100 hover:bg-slate-200 text-slate-700',
-        iconSrc: '/assets/stickers/wall_clock.png',
+        iconSrc: '/assets/stickers/wall_clock.webp',
       },
     ];
   }
@@ -215,7 +215,7 @@ export function getQuickRepliesForAlert(
         label: t("👍 Got It, Go Ahead"),
         text: t("Got your message! Go ahead to the restroom 👍"),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
-        iconSrc: '/assets/stickers/caregiver_response_okay.png',
+        iconSrc: '/assets/stickers/caregiver_response_okay.webp',
       },
     ];
   }
@@ -242,7 +242,7 @@ export function getQuickRepliesForAlert(
         label: t("👍 Great Choice to Rest"),
         text: t("Great job listening to your body and taking a break 👍"),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
-        iconSrc: '/assets/stickers/caregiver_response_okay.png',
+        iconSrc: '/assets/stickers/caregiver_response_okay.webp',
       },
       {
         id: 'im_here',
@@ -295,21 +295,21 @@ export function getQuickRepliesForAlert(
       label: t("I'm On My Way"),
       text: t("I'm on my way! 🚗 Keep breathing, help is coming."),
       className: 'bg-rose-600 hover:bg-rose-700 text-white',
-      iconSrc: '/assets/stickers/car_on_my_way.png',
+      iconSrc: '/assets/stickers/car_on_my_way.webp',
     },
     {
       id: 'im_here',
       label: t("I'm Here For You"),
       text: t("I'm here for you ❤️ Take a slow deep breath, you are safe."),
       className: 'bg-slate-900 hover:bg-slate-800 text-white',
-      iconSrc: '/assets/stickers/heart_here_for_you.png',
+      iconSrc: '/assets/stickers/heart_here_for_you.webp',
     },
     {
       id: 'give_minutes',
       label: t("5 Minutes, Stay Safe"),
       text: t("Give me 5 minutes, stay safe right where you are ⏳"),
       className: 'bg-amber-600 hover:bg-amber-700 text-white',
-      iconSrc: '/assets/stickers/wall_clock.png',
+      iconSrc: '/assets/stickers/wall_clock.webp',
     },
   ];
 }

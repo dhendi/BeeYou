@@ -31,22 +31,22 @@ import { CreateAdventureModal } from './adventures/CreateAdventureModal';
 import { CreateSocialStoryModal } from './adventures/CreateSocialStoryModal';
 
 const getAdventureSticker = (id: string): string | undefined => {
-  if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
-  if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.png';
-  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut_salon.png';
-  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor_checkup.png';
-  if (id === 'adv-pool') return '/assets/stickers/adventure_swimming_pool.png';
-  if (id === 'adv-cinema') return '/assets/stickers/adventure_movie_cinema.png';
-  if (id === 'adv-bowling') return '/assets/stickers/adventure_bowling_alley.png';
-  if (id === 'adv-camping') return '/assets/stickers/adventure_camping_tent.png';
-  if (id === 'adv-museum') return '/assets/stickers/adventure_museum_visit.png';
+  if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.webp';
+  if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.webp';
+  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut_salon.webp';
+  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor_checkup.webp';
+  if (id === 'adv-pool') return '/assets/stickers/adventure_swimming_pool.webp';
+  if (id === 'adv-cinema') return '/assets/stickers/adventure_movie_cinema.webp';
+  if (id === 'adv-bowling') return '/assets/stickers/adventure_bowling_alley.webp';
+  if (id === 'adv-camping') return '/assets/stickers/adventure_camping_tent.webp';
+  if (id === 'adv-museum') return '/assets/stickers/adventure_museum_visit.webp';
   return undefined;
 };
 
 const getStorySticker = (id: string): string | undefined => {
-  if (id === 'story-plans-change') return '/assets/stickers/story_plans_change.png';
-  if (id === 'story-birthday') return '/assets/stickers/story_birthday.png';
-  if (id === 'story-sharing') return '/assets/stickers/story_sharing.png';
+  if (id === 'story-plans-change') return '/assets/stickers/story_plans_change.webp';
+  if (id === 'story-birthday') return '/assets/stickers/story_birthday.webp';
+  if (id === 'story-sharing') return '/assets/stickers/story_sharing.webp';
   return undefined;
 };
 

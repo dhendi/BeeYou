@@ -19,11 +19,11 @@ import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import { RoutineStickerIcon, GoldStarSticker } from './icons/JournalStickers';
 
 const getSkillSticker = (id: string, emoji?: string): string | undefined => {
-  if (id === 'skill-teeth' || emoji === '🪥') return '/assets/stickers/toothbrush.png';
-  if (id === 'skill-hands' || emoji === '🧼') return '/assets/stickers/soap_wash_hands.png';
-  if (id === 'skill-dressed' || emoji === '👕') return '/assets/stickers/clothes_dressed.png';
-  if (id === 'skill-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.png';
-  if (id === 'skill-snack' || emoji === '🍏' || emoji === '🍎') return '/assets/stickers/apple_snack.png';
+  if (id === 'skill-teeth' || emoji === '🪥') return '/assets/stickers/toothbrush.webp';
+  if (id === 'skill-hands' || emoji === '🧼') return '/assets/stickers/soap_wash_hands.webp';
+  if (id === 'skill-dressed' || emoji === '👕') return '/assets/stickers/clothes_dressed.webp';
+  if (id === 'skill-backpack' || emoji === '🎒') return '/assets/stickers/backpack_school.webp';
+  if (id === 'skill-snack' || emoji === '🍏' || emoji === '🍎') return '/assets/stickers/apple_snack.webp';
   return undefined;
 };
 

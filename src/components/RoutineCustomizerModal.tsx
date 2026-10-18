@@ -116,37 +116,37 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
       // Default template when creating a brand new routine from scratch
       setTitle('');
       setCategory(isFrogTheme ? 'morning' : isDinoTheme ? 'morning' : isTurtleTheme ? 'morning' : 'school');
-      setEmoji(isFrogTheme ? '/assets/stickers/frog_mascot.png' : isDinoTheme ? '/assets/stickers/dino_rex.png' : isTurtleTheme ? '/assets/stickers/turtle_mascot.png' : '🎒');
+      setEmoji(isFrogTheme ? '/assets/stickers/frog_mascot.webp' : isDinoTheme ? '/assets/stickers/dino_rex.webp' : isTurtleTheme ? '/assets/stickers/turtle_mascot.webp' : '🎒');
       setTime('8:30 AM');
       setFirstTask(isFrogTheme ? 'Morning pond splash & settle in' : isDinoTheme ? 'Expedition arrival & check gear' : isTurtleTheme ? 'Mindful arrival & settle in' : 'Unpack backpack');
-      setFirstEmoji(isFrogTheme ? '/assets/stickers/frog_meadow_sunshine.png' : isDinoTheme ? '/assets/stickers/dino_expedition_backpack.png' : isTurtleTheme ? '/assets/stickers/turtle_welcome_sign.png' : '🎒');
+      setFirstEmoji(isFrogTheme ? '/assets/stickers/frog_meadow_sunshine.webp' : isDinoTheme ? '/assets/stickers/dino_expedition_backpack.webp' : isTurtleTheme ? '/assets/stickers/turtle_welcome_sign.webp' : '🎒');
       setThenTask(isFrogTheme ? 'Pond splash & lily pad rest' : isDinoTheme ? 'Cavern rest & recharge' : isTurtleTheme ? 'Quiet break by lily pond' : 'Free play & break');
-      setThenEmoji(isFrogTheme ? '/assets/stickers/frog_water_lilies.png' : isDinoTheme ? '/assets/stickers/dino_cavern_retreat.png' : isTurtleTheme ? '/assets/stickers/turtle_lily_pads.png' : '🛝');
-      setNewStepEmoji(isFrogTheme ? '/assets/stickers/frog_mascot.png' : isDinoTheme ? '/assets/stickers/dino_footprint_loop.png' : isTurtleTheme ? '/assets/stickers/turtle_tracks.png' : '⭐');
+      setThenEmoji(isFrogTheme ? '/assets/stickers/frog_water_lilies.webp' : isDinoTheme ? '/assets/stickers/dino_cavern_retreat.webp' : isTurtleTheme ? '/assets/stickers/turtle_lily_pads.webp' : '🛝');
+      setNewStepEmoji(isFrogTheme ? '/assets/stickers/frog_mascot.webp' : isDinoTheme ? '/assets/stickers/dino_footprint_loop.webp' : isTurtleTheme ? '/assets/stickers/turtle_tracks.webp' : '⭐');
       setSteps(
         isFrogTheme
           ? [
-              { id: `step-${Date.now()}-1`, title: 'Arrive at lily pond & unpack pack', instruction: 'Hop in gently and unpack school gear', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_adventure_wagon.png' },
-              { id: `step-${Date.now()}-2`, title: 'Drink fresh water from dew drop bottle', instruction: 'Hydrate stamina for the morning hop', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_morning_dew_drop.png' },
-              { id: `step-${Date.now()}-3`, title: 'Pond focus learning session', instruction: 'Take gentle hops through today tasks', durationMin: 20, completed: false, emoji: '/assets/stickers/frog_reed_pen_scroll.png' },
-              { id: `step-${Date.now()}-4`, title: 'Lily pad break & sensory recharge', instruction: 'Float peacefully to recharge your sensory battery', durationMin: 15, completed: false, emoji: '/assets/stickers/frog_water_lilies.png' },
-              { id: `step-${Date.now()}-5`, title: 'Pack up supplies & celebrate pond leap', instruction: 'Ribbit! Another wonderful routine completed!', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_mascot.png' },
+              { id: `step-${Date.now()}-1`, title: 'Arrive at lily pond & unpack pack', instruction: 'Hop in gently and unpack school gear', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_adventure_wagon.webp' },
+              { id: `step-${Date.now()}-2`, title: 'Drink fresh water from dew drop bottle', instruction: 'Hydrate stamina for the morning hop', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_morning_dew_drop.webp' },
+              { id: `step-${Date.now()}-3`, title: 'Pond focus learning session', instruction: 'Take gentle hops through today tasks', durationMin: 20, completed: false, emoji: '/assets/stickers/frog_reed_pen_scroll.webp' },
+              { id: `step-${Date.now()}-4`, title: 'Lily pad break & sensory recharge', instruction: 'Float peacefully to recharge your sensory battery', durationMin: 15, completed: false, emoji: '/assets/stickers/frog_water_lilies.webp' },
+              { id: `step-${Date.now()}-5`, title: 'Pack up supplies & celebrate pond leap', instruction: 'Ribbit! Another wonderful routine completed!', durationMin: 5, completed: false, emoji: '/assets/stickers/frog_mascot.webp' },
             ]
           : isDinoTheme
           ? [
-              { id: `step-${Date.now()}-1`, title: 'Arrive at expedition & unpack pack', instruction: 'Set down backpack and check field supplies', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_expedition_backpack.png' },
-              { id: `step-${Date.now()}-2`, title: 'Drink fresh water from stone tumbler', instruction: 'Hydrate stamina for the adventure ahead', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_stone_tumbler_water.png' },
-              { id: `step-${Date.now()}-3`, title: 'Dino discovery & focus learning', instruction: 'Tackle tasks step by step like a paleontologist', durationMin: 20, completed: false, emoji: '/assets/stickers/dino_bone_stylus_pencil.png' },
-              { id: `step-${Date.now()}-4`, title: 'Cavern break & sensory recharge', instruction: 'Rest in the quiet den to recharge your stamina battery', durationMin: 15, completed: false, emoji: '/assets/stickers/dino_cavern_retreat.png' },
-              { id: `step-${Date.now()}-5`, title: 'Pack up gear & celebrate expedition victory', instruction: 'Roar! Another great day accomplished!', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_rex.png' },
+              { id: `step-${Date.now()}-1`, title: 'Arrive at expedition & unpack pack', instruction: 'Set down backpack and check field supplies', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_expedition_backpack.webp' },
+              { id: `step-${Date.now()}-2`, title: 'Drink fresh water from stone tumbler', instruction: 'Hydrate stamina for the adventure ahead', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_stone_tumbler_water.webp' },
+              { id: `step-${Date.now()}-3`, title: 'Dino discovery & focus learning', instruction: 'Tackle tasks step by step like a paleontologist', durationMin: 20, completed: false, emoji: '/assets/stickers/dino_bone_stylus_pencil.webp' },
+              { id: `step-${Date.now()}-4`, title: 'Cavern break & sensory recharge', instruction: 'Rest in the quiet den to recharge your stamina battery', durationMin: 15, completed: false, emoji: '/assets/stickers/dino_cavern_retreat.webp' },
+              { id: `step-${Date.now()}-5`, title: 'Pack up gear & celebrate expedition victory', instruction: 'Roar! Another great day accomplished!', durationMin: 5, completed: false, emoji: '/assets/stickers/dino_rex.webp' },
             ]
           : isTurtleTheme
           ? [
-              { id: `step-${Date.now()}-1`, title: 'Arrive calmly & welcome day', instruction: 'Take a deep breath and settle into space', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_welcome_sign.png' },
-              { id: `step-${Date.now()}-2`, title: 'Drink cool fresh water', instruction: 'Hydrate body and stretch gently', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_leaf_water_drop.png' },
-              { id: `step-${Date.now()}-3`, title: 'Steady focus learning session', instruction: 'One step at a time at your own comfortable pace', durationMin: 20, completed: false, emoji: '/assets/stickers/turtle_sprouting_seedling.png' },
-              { id: `step-${Date.now()}-4`, title: 'Quiet break on lily pads', instruction: 'Rest eyes and recharge your sensory battery', durationMin: 15, completed: false, emoji: '/assets/stickers/turtle_lily_pads.png' },
-              { id: `step-${Date.now()}-5`, title: 'Pack up & celebrate steady progress', instruction: 'Slow and steady wins the race!', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_mascot.png' },
+              { id: `step-${Date.now()}-1`, title: 'Arrive calmly & welcome day', instruction: 'Take a deep breath and settle into space', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_welcome_sign.webp' },
+              { id: `step-${Date.now()}-2`, title: 'Drink cool fresh water', instruction: 'Hydrate body and stretch gently', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_leaf_water_drop.webp' },
+              { id: `step-${Date.now()}-3`, title: 'Steady focus learning session', instruction: 'One step at a time at your own comfortable pace', durationMin: 20, completed: false, emoji: '/assets/stickers/turtle_sprouting_seedling.webp' },
+              { id: `step-${Date.now()}-4`, title: 'Quiet break on lily pads', instruction: 'Rest eyes and recharge your sensory battery', durationMin: 15, completed: false, emoji: '/assets/stickers/turtle_lily_pads.webp' },
+              { id: `step-${Date.now()}-5`, title: 'Pack up & celebrate steady progress', instruction: 'Slow and steady wins the race!', durationMin: 5, completed: false, emoji: '/assets/stickers/turtle_mascot.webp' },
             ]
           : [
               { id: `step-${Date.now()}-1`, title: 'Arrive & unpack cubby', instruction: 'Hang up jacket and put lunchbox in bin', durationMin: 5, completed: false, emoji: '🎒' },
@@ -168,7 +168,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
       instruction: newStepInstruction.trim() || undefined,
       durationMin: Number(newStepDuration) || 5,
       completed: false,
-      emoji: newStepEmoji || '/assets/stickers/star_gold.png',
+      emoji: newStepEmoji || '/assets/stickers/star_gold.webp',
       sensoryNote: newStepSensoryNote.trim() || undefined,
     };
     setSteps([...steps, newStep]);

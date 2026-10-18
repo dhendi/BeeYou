@@ -35,7 +35,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'fullApp',
     title: 'Full Caregiver Hub Tour',
     emoji: '🌟',
-    stickerSrc: '/assets/stickers/star_gold.png',
+    stickerSrc: '/assets/stickers/star_gold.webp',
     description: 'A complete step-by-step walkthrough covering every main tool and feature in the app.',
     tabId: 'home',
     steps: [
@@ -106,7 +106,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'liveStatus',
     title: 'Live Child Status & Mood',
     emoji: '📡',
-    stickerSrc: '/assets/stickers/satellite_dish.png',
+    stickerSrc: '/assets/stickers/satellite_dish.webp',
     description: 'Learn how live connection, real-time emotions, and habit counters work.',
     tabId: 'home',
     steps: [
@@ -147,7 +147,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'nudges',
     title: 'Spoken Audio Nudges',
     emoji: '📣',
-    stickerSrc: '/assets/stickers/spoken_megaphone.png',
+    stickerSrc: '/assets/stickers/spoken_megaphone.webp',
     description: 'Broadcast spoken voice announcements and countdown alerts directly to your child\'s device.',
     tabId: 'home',
     steps: [
@@ -170,7 +170,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'pairing',
     title: 'Instant Device Pairing',
     emoji: '🔗',
-    stickerSrc: '/assets/stickers/pairing_qr_phone.png',
+    stickerSrc: '/assets/stickers/pairing_qr_phone.webp',
     description: 'Connect caregiver phones and child tablets in seconds using QR codes or shared email.',
     tabId: 'caregiver',
     steps: [
@@ -199,7 +199,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'alerts',
     title: 'Safety & SOS Alerts Inbox',
     emoji: '🚨',
-    stickerSrc: '/assets/stickers/alert_sos_shield.png',
+    stickerSrc: '/assets/stickers/alert_sos_shield.webp',
     description: 'Receive instant alerts when your child needs help, requests a break, or triggers an SOS.',
     tabId: 'alerts',
     steps: [
@@ -234,7 +234,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'routines',
     title: 'Visual Routine Templates & First/Then',
     emoji: '📅',
-    stickerSrc: '/assets/stickers/schedule_calendar.png',
+    stickerSrc: '/assets/stickers/schedule_calendar.webp',
     description: 'Build step-by-step visual schedules, First/Then visual boards, and reward stickers.',
     tabId: 'routines',
     steps: [
@@ -263,7 +263,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'medications',
     title: 'Medication Reminders & Refill Tracker',
     emoji: '💊',
-    stickerSrc: '/assets/stickers/medications_health.png',
+    stickerSrc: '/assets/stickers/medications_health.webp',
     description: 'Track daily pill schedules, dosage times, and receive automatic warnings before refills run out.',
     tabId: 'medications',
     steps: [
@@ -298,7 +298,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'plansChanged',
     title: 'Plans Changed Alert System',
     emoji: '⚠️',
-    stickerSrc: '/assets/stickers/story_plans_change.png',
+    stickerSrc: '/assets/stickers/story_plans_change.webp',
     description: 'Calm sudden schedule changes by broadcasting gentle visual explanations to your child.',
     tabId: 'plans-changed',
     steps: [
@@ -327,7 +327,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'aac',
     title: 'AAC Symbol Studio & Custom Vocab',
     emoji: '🗣️',
-    stickerSrc: '/assets/stickers/aac_core.png',
+    stickerSrc: '/assets/stickers/aac_core.webp',
     description: 'Customize AAC communication boards with 3,400+ Mulberry symbols, family photos, and custom speech.',
     tabId: 'aac',
     steps: [
@@ -356,7 +356,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'moodJournal',
     title: 'Mood & Self-Reflection Journal',
     emoji: '📖',
-    stickerSrc: '/assets/stickers/routine_writing_journal.png',
+    stickerSrc: '/assets/stickers/routine_writing_journal.webp',
     description: 'Daily emotional reflections, voice notes, and sensory regulation logs.',
     tabId: 'mood-journal',
     steps: [
@@ -379,7 +379,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'subscription',
     title: 'Membership & 15-Day Free Trial',
     emoji: '👑',
-    stickerSrc: '/assets/stickers/trial_crown.png',
+    stickerSrc: '/assets/stickers/trial_crown.webp',
     description: 'Manage subscription plans, 15-day free trial, and billing cycles with $0 upfront.',
     tabId: 'subscription',
     steps: [
@@ -408,7 +408,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'voice',
     title: 'Voice Customization & Testing',
     emoji: '🎙️',
-    stickerSrc: '/assets/stickers/voice_microphone.png',
+    stickerSrc: '/assets/stickers/voice_microphone.webp',
     description: 'Audition and fine-tune natural speech voices, pacing speed, and natural pitch.',
     tabId: 'voice',
     steps: [
@@ -437,7 +437,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'offline',
     title: 'Offline Readiness & Storage',
     emoji: '💾',
-    stickerSrc: '/assets/stickers/offline_storage.png',
+    stickerSrc: '/assets/stickers/offline_storage.webp',
     description: 'Ensure all AAC pictograms, routines, and sensory tools work 100% without internet.',
     tabId: 'offline',
     steps: [
@@ -466,7 +466,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'adventures',
     title: 'Life Adventures & Contextual AAC',
     emoji: '🧭',
-    stickerSrc: '/assets/stickers/rocket_adventure.png',
+    stickerSrc: '/assets/stickers/rocket_adventure.webp',
     description: 'Prepare for community outings like dentists, grocery stores, and haircuts with suggested phrases.',
     tabId: 'adventures',
     steps: [
@@ -489,7 +489,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'skills',
     title: 'Independence Missions & Skills',
     emoji: '⭐',
-    stickerSrc: '/assets/stickers/star_gold.png',
+    stickerSrc: '/assets/stickers/star_gold.webp',
     description: 'Break everyday tasks into rewarding micro-missions with star rewards.',
     tabId: 'skills',
     steps: [
@@ -512,7 +512,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'profile',
     title: 'Profile & Emergency ID Card',
     emoji: '🪪',
-    stickerSrc: '/assets/stickers/about_id.png',
+    stickerSrc: '/assets/stickers/about_id.webp',
     description: 'Manage child interests, pronouns, sensory sensitivities, and digital advocacy badge.',
     tabId: 'profile',
     steps: [
@@ -535,7 +535,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'themes',
     title: 'Custom Themes & Sensory Studio',
     emoji: '🎨',
-    stickerSrc: '/assets/stickers/magic_wand.png',
+    stickerSrc: '/assets/stickers/magic_wand.webp',
     description: 'Choose ready-made themes or build personalized color palettes, mascots, and AAC emojis.',
     tabId: 'themes',
     steps: [
@@ -558,7 +558,7 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
     id: 'settings',
     title: 'PIN Security & Safety Settings',
     emoji: '🔒',
-    stickerSrc: '/assets/stickers/security_lock.png',
+    stickerSrc: '/assets/stickers/security_lock.webp',
     description: 'Set custom 4-digit PIN locks and configure caregiver safety preferences.',
     tabId: 'settings',
     steps: [

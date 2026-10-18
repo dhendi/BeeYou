@@ -192,18 +192,18 @@ export const DEFAULT_AAC_ITEMS: AACItem[] = [
 ];
 
 export const DEFAULT_QUICK_PHRASES: QuickPhrase[] = [
-  { id: 'qp-1', text: 'I need a break.', emoji: '🛋️', isEmergency: true, stickerSrc: '/assets/stickers/fav_quiet_break.png' },
-  { id: 'qp-2', text: 'Please help me.', emoji: '🆘', isEmergency: true, stickerSrc: '/assets/stickers/fav_help_sos.png' },
+  { id: 'qp-1', text: 'I need a break.', emoji: '🛋️', isEmergency: true, stickerSrc: '/assets/stickers/fav_quiet_break.webp' },
+  { id: 'qp-2', text: 'Please help me.', emoji: '🆘', isEmergency: true, stickerSrc: '/assets/stickers/fav_help_sos.webp' },
   { id: 'qp-3', text: "I don't like that.", emoji: '👎', isEmergency: false },
-  { id: 'qp-4', text: 'Stop.', emoji: '🛑', isEmergency: true, stickerSrc: '/assets/stickers/fav_stop.png' },
-  { id: 'qp-5', text: 'I want to go home.', emoji: '🏠', isEmergency: false, stickerSrc: '/assets/stickers/home_house.png' },
-  { id: 'qp-6', text: "I'm hungry.", emoji: '🥪', isEmergency: false, stickerSrc: '/assets/stickers/fav_sandwich.png' },
-  { id: 'qp-7', text: "I'm tired.", emoji: '🥱', isEmergency: false, stickerSrc: '/assets/stickers/fav_rest_tired.png' },
-  { id: 'qp-8', text: 'Something hurts.', emoji: '🩹', isEmergency: true, stickerSrc: '/assets/stickers/caregiver_heart.png' },
-  { id: 'qp-9', text: "I'm okay.", emoji: '😊', isEmergency: false, stickerSrc: '/assets/stickers/fav_happy.png' },
-  { id: 'qp-10', text: 'Not right now.', emoji: '⏳', isEmergency: false, stickerSrc: '/assets/stickers/timer_clock.png' },
-  { id: 'qp-11', text: "What's next?", emoji: '❓', isEmergency: false, stickerSrc: '/assets/stickers/schedule_calendar.png' },
-  { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false, stickerSrc: '/assets/stickers/clock_time.png' },
+  { id: 'qp-4', text: 'Stop.', emoji: '🛑', isEmergency: true, stickerSrc: '/assets/stickers/fav_stop.webp' },
+  { id: 'qp-5', text: 'I want to go home.', emoji: '🏠', isEmergency: false, stickerSrc: '/assets/stickers/home_house.webp' },
+  { id: 'qp-6', text: "I'm hungry.", emoji: '🥪', isEmergency: false, stickerSrc: '/assets/stickers/fav_sandwich.webp' },
+  { id: 'qp-7', text: "I'm tired.", emoji: '🥱', isEmergency: false, stickerSrc: '/assets/stickers/fav_rest_tired.webp' },
+  { id: 'qp-8', text: 'Something hurts.', emoji: '🩹', isEmergency: true, stickerSrc: '/assets/stickers/caregiver_heart.webp' },
+  { id: 'qp-9', text: "I'm okay.", emoji: '😊', isEmergency: false, stickerSrc: '/assets/stickers/fav_happy.webp' },
+  { id: 'qp-10', text: 'Not right now.', emoji: '⏳', isEmergency: false, stickerSrc: '/assets/stickers/timer_clock.webp' },
+  { id: 'qp-11', text: "What's next?", emoji: '❓', isEmergency: false, stickerSrc: '/assets/stickers/schedule_calendar.webp' },
+  { id: 'qp-12', text: 'Can you wait?', emoji: '🖐️', isEmergency: false, stickerSrc: '/assets/stickers/clock_time.webp' },
 ];
 
 export const getQuickPhraseSticker = (phrase: {
@@ -218,48 +218,48 @@ export const getQuickPhraseSticker = (phrase: {
   const emoji = (phrase.emoji || '').trim();
 
   if (id === 'qp-1' || text.includes('break') || text.includes('quiet') || emoji === '🛋️') {
-    return '/assets/stickers/fav_quiet_break.png';
+    return '/assets/stickers/fav_quiet_break.webp';
   }
   if (id === 'qp-2' || text.includes('help') || emoji === '🆘') {
-    return '/assets/stickers/fav_help_sos.png';
+    return '/assets/stickers/fav_help_sos.webp';
   }
   if (id === 'qp-4' || text.includes('stop') || emoji === '🛑') {
-    return '/assets/stickers/fav_stop.png';
+    return '/assets/stickers/fav_stop.webp';
   }
   if (id === 'qp-5' || text.includes('home') || text.includes('house') || emoji === '🏠' || emoji === '🏡') {
-    return '/assets/stickers/home_house.png';
+    return '/assets/stickers/home_house.webp';
   }
   if (id === 'qp-6' || text.includes('hungry') || text.includes('snack') || text.includes('eat') || emoji === '🥪') {
-    return '/assets/stickers/fav_sandwich.png';
+    return '/assets/stickers/fav_sandwich.webp';
   }
   if (id === 'qp-7' || text.includes('tired') || text.includes('sleep') || text.includes('rest') || emoji === '🥱' || emoji === '😴') {
-    return '/assets/stickers/fav_rest_tired.png';
+    return '/assets/stickers/fav_rest_tired.webp';
   }
   if (id === 'qp-8' || text.includes('hurt') || text.includes('pain') || emoji === '🩹') {
-    return '/assets/stickers/caregiver_heart.png';
+    return '/assets/stickers/caregiver_heart.webp';
   }
   if (id === 'qp-9' || text.includes('okay') || text.includes('good') || text.includes('happy') || emoji === '😊' || emoji === '👍') {
-    return '/assets/stickers/fav_happy.png';
+    return '/assets/stickers/fav_happy.webp';
   }
   if (id === 'qp-10' || text.includes('not right now') || text.includes('later') || text.includes('not now') || emoji === '⏳') {
-    return '/assets/stickers/timer_clock.png';
+    return '/assets/stickers/timer_clock.webp';
   }
   if (id === 'qp-11' || text.includes("what's next") || text.includes('what next') || emoji === '❓') {
-    return '/assets/stickers/schedule_calendar.png';
+    return '/assets/stickers/schedule_calendar.webp';
   }
   if (id === 'qp-12' || text.includes('wait') || emoji === '🖐️' || emoji === '⏰') {
-    return '/assets/stickers/clock_time.png';
+    return '/assets/stickers/clock_time.webp';
   }
   if (text.includes('done') || text.includes('finish') || emoji === '✅' || emoji === '✔️') {
-    return '/assets/stickers/task_done.png';
+    return '/assets/stickers/task_done.webp';
   }
   if (text.includes('therapy') || emoji === '🧠') {
-    return '/assets/stickers/therapy_brain.png';
+    return '/assets/stickers/therapy_brain.webp';
   }
-  if (text.includes('water') || text.includes('drink')) return '/assets/stickers/fav_water.png';
-  if (text.includes('music')) return '/assets/stickers/fav_music.png';
-  if (text.includes('outside')) return '/assets/stickers/fav_outside.png';
-  if (text.includes('love')) return '/assets/stickers/fav_love_heart.png';
+  if (text.includes('water') || text.includes('drink')) return '/assets/stickers/fav_water.webp';
+  if (text.includes('music')) return '/assets/stickers/fav_music.webp';
+  if (text.includes('outside')) return '/assets/stickers/fav_outside.webp';
+  if (text.includes('love')) return '/assets/stickers/fav_love_heart.webp';
   return undefined;
 };
 
@@ -274,37 +274,37 @@ export const getFavoriteSentenceSticker = (fav: {
   const text = (fav.text || '').toLowerCase();
   const emoji = (fav.emoji || '').trim();
 
-  if (id === 'fav-1' || text.includes('lego') || emoji === '🧱') return '/assets/stickers/fav_lego.png';
-  if (id === 'fav-2' || text.includes('bath') || emoji === '🛁') return '/assets/stickers/fav_bath.png';
-  if (id === 'fav-3' || (text.includes('hungry') && text.includes('snack')) || emoji === '🥪') return '/assets/stickers/fav_sandwich.png';
-  if (id === 'fav-4' || (text.includes('thirsty') || text.includes('water')) || emoji === '💧') return '/assets/stickers/fav_water.png';
-  if (id === 'fav-5' || text.includes('quiet break') || text.includes('sensory quiet') || emoji === '🛋️') return '/assets/stickers/fav_quiet_break.png';
-  if (id === 'fav-6' || text.includes('help me') || emoji === '🆘') return '/assets/stickers/fav_help_sos.png';
-  if (id === 'fav-7' || text.includes('go outside') || emoji === '🌳') return '/assets/stickers/fav_outside.png';
-  if (id === 'fav-8' || text.includes('love you') || emoji === '💖' || emoji === '❤️') return '/assets/stickers/fav_love_heart.png';
-  if (id === 'fav-9' || (text.includes('tired') && text.includes('rest')) || emoji === '😴') return '/assets/stickers/fav_rest_tired.png';
-  if (id === 'fav-10' || text.includes('listen to music') || emoji === '🎧') return '/assets/stickers/fav_music.png';
-  if (id === 'fav-11' || text.includes('stop please') || text.includes('do not want this') || emoji === '🛑') return '/assets/stickers/fav_stop.png';
-  if (id === 'fav-12' || text.includes('happy') || emoji === '😊') return '/assets/stickers/fav_happy.png';
-  if (text.includes('home') || emoji === '🏠' || emoji === '🏡') return '/assets/stickers/home_house.png';
-  if (text.includes('done') || text.includes('finish') || emoji === '✅') return '/assets/stickers/task_done.png';
-  if (text.includes('therapy') || emoji === '🧠') return '/assets/stickers/therapy_brain.png';
+  if (id === 'fav-1' || text.includes('lego') || emoji === '🧱') return '/assets/stickers/fav_lego.webp';
+  if (id === 'fav-2' || text.includes('bath') || emoji === '🛁') return '/assets/stickers/fav_bath.webp';
+  if (id === 'fav-3' || (text.includes('hungry') && text.includes('snack')) || emoji === '🥪') return '/assets/stickers/fav_sandwich.webp';
+  if (id === 'fav-4' || (text.includes('thirsty') || text.includes('water')) || emoji === '💧') return '/assets/stickers/fav_water.webp';
+  if (id === 'fav-5' || text.includes('quiet break') || text.includes('sensory quiet') || emoji === '🛋️') return '/assets/stickers/fav_quiet_break.webp';
+  if (id === 'fav-6' || text.includes('help me') || emoji === '🆘') return '/assets/stickers/fav_help_sos.webp';
+  if (id === 'fav-7' || text.includes('go outside') || emoji === '🌳') return '/assets/stickers/fav_outside.webp';
+  if (id === 'fav-8' || text.includes('love you') || emoji === '💖' || emoji === '❤️') return '/assets/stickers/fav_love_heart.webp';
+  if (id === 'fav-9' || (text.includes('tired') && text.includes('rest')) || emoji === '😴') return '/assets/stickers/fav_rest_tired.webp';
+  if (id === 'fav-10' || text.includes('listen to music') || emoji === '🎧') return '/assets/stickers/fav_music.webp';
+  if (id === 'fav-11' || text.includes('stop please') || text.includes('do not want this') || emoji === '🛑') return '/assets/stickers/fav_stop.webp';
+  if (id === 'fav-12' || text.includes('happy') || emoji === '😊') return '/assets/stickers/fav_happy.webp';
+  if (text.includes('home') || emoji === '🏠' || emoji === '🏡') return '/assets/stickers/home_house.webp';
+  if (text.includes('done') || text.includes('finish') || emoji === '✅') return '/assets/stickers/task_done.webp';
+  if (text.includes('therapy') || emoji === '🧠') return '/assets/stickers/therapy_brain.webp';
   return undefined;
 };
 
 export const DEFAULT_FAVORITE_SENTENCES: FavoriteSentence[] = [
-  { id: 'fav-1', text: 'I want to play lego', speechText: 'I want to play lego', emoji: '🧱', stickerSrc: '/assets/stickers/fav_lego.png', usageCount: 14, isParentPinned: true, category: 'play' },
-  { id: 'fav-2', text: 'I want to take a bath', speechText: 'I want to take a bath', emoji: '🛁', stickerSrc: '/assets/stickers/fav_bath.png', usageCount: 11, isParentPinned: true, category: 'daily' },
-  { id: 'fav-3', text: 'I am hungry, can I have a snack?', speechText: 'I am hungry, can I have a snack please', emoji: '🥪', stickerSrc: '/assets/stickers/fav_sandwich.png', usageCount: 10, isParentPinned: true, category: 'requests' },
-  { id: 'fav-4', text: 'I am thirsty, I want water', speechText: 'I am thirsty, I want some water please', emoji: '💧', stickerSrc: '/assets/stickers/fav_water.png', usageCount: 9, isParentPinned: true, category: 'requests' },
-  { id: 'fav-5', text: 'I need a sensory quiet break', speechText: 'I need a quiet break please', emoji: '🛋️', stickerSrc: '/assets/stickers/fav_quiet_break.png', usageCount: 8, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-6', text: 'Can you help me please?', speechText: 'Can you please help me right now', emoji: '🆘', stickerSrc: '/assets/stickers/fav_help_sos.png', usageCount: 7, isParentPinned: true, category: 'requests' },
-  { id: 'fav-7', text: 'I want to go outside', speechText: 'I want to go outside and play', emoji: '🌳', stickerSrc: '/assets/stickers/fav_outside.png', usageCount: 6, isParentPinned: true, category: 'play' },
-  { id: 'fav-8', text: 'I love you', speechText: 'I love you', emoji: '💖', stickerSrc: '/assets/stickers/fav_love_heart.png', usageCount: 6, isParentPinned: true, category: 'social' },
-  { id: 'fav-9', text: 'I am tired, I want to rest', speechText: 'I am feeling tired and want to rest', emoji: '😴', stickerSrc: '/assets/stickers/fav_rest_tired.png', usageCount: 5, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-10', text: 'I want to listen to music', speechText: 'I want to listen to calming music', emoji: '🎧', stickerSrc: '/assets/stickers/fav_music.png', usageCount: 4, isParentPinned: true, category: 'play' },
-  { id: 'fav-11', text: 'I do not want this, stop please', speechText: 'I do not want this, please stop', emoji: '🛑', stickerSrc: '/assets/stickers/fav_stop.png', usageCount: 4, isParentPinned: true, category: 'feelings' },
-  { id: 'fav-12', text: 'I am happy!', speechText: 'I am feeling happy and good', emoji: '😊', stickerSrc: '/assets/stickers/fav_happy.png', usageCount: 3, isParentPinned: false, category: 'feelings' },
+  { id: 'fav-1', text: 'I want to play lego', speechText: 'I want to play lego', emoji: '🧱', stickerSrc: '/assets/stickers/fav_lego.webp', usageCount: 14, isParentPinned: true, category: 'play' },
+  { id: 'fav-2', text: 'I want to take a bath', speechText: 'I want to take a bath', emoji: '🛁', stickerSrc: '/assets/stickers/fav_bath.webp', usageCount: 11, isParentPinned: true, category: 'daily' },
+  { id: 'fav-3', text: 'I am hungry, can I have a snack?', speechText: 'I am hungry, can I have a snack please', emoji: '🥪', stickerSrc: '/assets/stickers/fav_sandwich.webp', usageCount: 10, isParentPinned: true, category: 'requests' },
+  { id: 'fav-4', text: 'I am thirsty, I want water', speechText: 'I am thirsty, I want some water please', emoji: '💧', stickerSrc: '/assets/stickers/fav_water.webp', usageCount: 9, isParentPinned: true, category: 'requests' },
+  { id: 'fav-5', text: 'I need a sensory quiet break', speechText: 'I need a quiet break please', emoji: '🛋️', stickerSrc: '/assets/stickers/fav_quiet_break.webp', usageCount: 8, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-6', text: 'Can you help me please?', speechText: 'Can you please help me right now', emoji: '🆘', stickerSrc: '/assets/stickers/fav_help_sos.webp', usageCount: 7, isParentPinned: true, category: 'requests' },
+  { id: 'fav-7', text: 'I want to go outside', speechText: 'I want to go outside and play', emoji: '🌳', stickerSrc: '/assets/stickers/fav_outside.webp', usageCount: 6, isParentPinned: true, category: 'play' },
+  { id: 'fav-8', text: 'I love you', speechText: 'I love you', emoji: '💖', stickerSrc: '/assets/stickers/fav_love_heart.webp', usageCount: 6, isParentPinned: true, category: 'social' },
+  { id: 'fav-9', text: 'I am tired, I want to rest', speechText: 'I am feeling tired and want to rest', emoji: '😴', stickerSrc: '/assets/stickers/fav_rest_tired.webp', usageCount: 5, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-10', text: 'I want to listen to music', speechText: 'I want to listen to calming music', emoji: '🎧', stickerSrc: '/assets/stickers/fav_music.webp', usageCount: 4, isParentPinned: true, category: 'play' },
+  { id: 'fav-11', text: 'I do not want this, stop please', speechText: 'I do not want this, please stop', emoji: '🛑', stickerSrc: '/assets/stickers/fav_stop.webp', usageCount: 4, isParentPinned: true, category: 'feelings' },
+  { id: 'fav-12', text: 'I am happy!', speechText: 'I am feeling happy and good', emoji: '😊', stickerSrc: '/assets/stickers/fav_happy.webp', usageCount: 3, isParentPinned: false, category: 'feelings' },
 ];
 
 export const DEFAULT_ROUTINES: Routine[] = [
@@ -627,19 +627,19 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Visiting the Dentist',
     category: 'Health & Care',
     emoji: '🦷',
-    stickerSrc: '/assets/stickers/adventure_dentist.png',
+    stickerSrc: '/assets/stickers/adventure_dentist.webp',
     summary: 'See what happens during a regular dental check-up, practice what to say, and know what to expect.',
     steps: [
-      { order: 1, title: 'Drive there & park', description: 'We ride in the car and arrive at the dentist building.', emoji: '/assets/stickers/car_ride.png' },
-      { order: 2, title: 'Check in at reception', description: 'Mom or Dad tells the receptionist we arrived. We get our name checked.', emoji: '/assets/stickers/clipboard_shutdown.png' },
-      { order: 3, title: 'Wait in the waiting room', description: 'We can sit, look at magazines, play with a fidget, or listen to headphones.', emoji: '/assets/stickers/waiting_room_couch.png', sensoryTip: 'Waiting room can have soft chatter. Headphones help!' },
-      { order: 4, title: 'Meet the dentist & hygienist', description: 'A friendly helper calls your name with a warm smile.', emoji: '/assets/stickers/waving_hand_hello.png' },
-      { order: 5, title: 'Sit in the big recliner chair', description: 'The chair goes up and leans back like a spaceship! You can wear sunglasses for the overhead light.', emoji: '/assets/stickers/padded_recliner_chair.png' },
-      { order: 6, title: 'Open your mouth wide', description: 'The dentist counts your teeth with a tiny mirror on a little stick.', emoji: '/assets/stickers/open_mouth_wide.png' },
-      { order: 7, title: 'Dental tools & brushing', description: 'A soft electric toothbrush cleans your teeth with yummy berry toothpaste.', emoji: '/assets/stickers/toothbrush.png', sensoryTip: 'The polisher makes a buzzing hum sound.' },
-      { order: 8, title: 'Rinse with water', description: 'Sip water and swish, then spit into the little sink bowl.', emoji: '/assets/stickers/drink_water.png' },
-      { order: 9, title: 'All done & treasure box!', description: 'The dentist says great job! You pick a cool sticker or toy ring.', emoji: '/assets/stickers/toy_box.png' },
-      { order: 10, title: 'Head home feeling fresh', description: 'We walk back to the car and go home to celebrate.', emoji: '/assets/stickers/home_house.png' },
+      { order: 1, title: 'Drive there & park', description: 'We ride in the car and arrive at the dentist building.', emoji: '/assets/stickers/car_ride.webp' },
+      { order: 2, title: 'Check in at reception', description: 'Mom or Dad tells the receptionist we arrived. We get our name checked.', emoji: '/assets/stickers/clipboard_shutdown.webp' },
+      { order: 3, title: 'Wait in the waiting room', description: 'We can sit, look at magazines, play with a fidget, or listen to headphones.', emoji: '/assets/stickers/waiting_room_couch.webp', sensoryTip: 'Waiting room can have soft chatter. Headphones help!' },
+      { order: 4, title: 'Meet the dentist & hygienist', description: 'A friendly helper calls your name with a warm smile.', emoji: '/assets/stickers/waving_hand_hello.webp' },
+      { order: 5, title: 'Sit in the big recliner chair', description: 'The chair goes up and leans back like a spaceship! You can wear sunglasses for the overhead light.', emoji: '/assets/stickers/padded_recliner_chair.webp' },
+      { order: 6, title: 'Open your mouth wide', description: 'The dentist counts your teeth with a tiny mirror on a little stick.', emoji: '/assets/stickers/open_mouth_wide.webp' },
+      { order: 7, title: 'Dental tools & brushing', description: 'A soft electric toothbrush cleans your teeth with yummy berry toothpaste.', emoji: '/assets/stickers/toothbrush.webp', sensoryTip: 'The polisher makes a buzzing hum sound.' },
+      { order: 8, title: 'Rinse with water', description: 'Sip water and swish, then spit into the little sink bowl.', emoji: '/assets/stickers/drink_water.webp' },
+      { order: 9, title: 'All done & treasure box!', description: 'The dentist says great job! You pick a cool sticker or toy ring.', emoji: '/assets/stickers/toy_box.webp' },
+      { order: 10, title: 'Head home feeling fresh', description: 'We walk back to the car and go home to celebrate.', emoji: '/assets/stickers/home_house.webp' },
     ],
     sensoryPreview: {
       sound: 'Dental polisher and suction tool make humming/whirring noises. You can wear your noise-canceling headphones!',
@@ -671,17 +671,17 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Eating at a Restaurant',
     category: 'Community',
     emoji: '🍽️',
-    stickerSrc: '/assets/stickers/adventure_restaurant.png',
+    stickerSrc: '/assets/stickers/adventure_restaurant.webp',
     summary: 'Ordering yummy food, sitting at a table, waiting calmly, and enjoying a meal out.',
     steps: [
-      { order: 1, title: 'Walk inside & see host', description: 'The host welcomes us and asks how many people.', emoji: '/assets/stickers/open_welcome_door.png' },
-      { order: 2, title: 'Find our table or booth', description: 'We sit in a comfy booth or chair.', emoji: '/assets/stickers/dining_table_booth.png' },
-      { order: 3, title: 'Look at the menu', description: 'We see pictures or words of pizza, fries, drinks, and desserts.', emoji: '/assets/stickers/restaurant_menu_book.png' },
-      { order: 4, title: 'Order food with server', description: 'We point to what we want or say it using our AAC tablet.', emoji: '/assets/stickers/speech_bubble.png' },
-      { order: 5, title: 'Wait for food to cook', description: 'Chefs are cooking fresh food in the kitchen. We can color or play a quiet game.', emoji: '/assets/stickers/timer_clock.png' },
-      { order: 6, title: 'Food arrives hot & tasty', description: 'The server brings our plates. We let hot food cool down if needed.', emoji: '/assets/stickers/pizza_slice.png' },
-      { order: 7, title: 'Eat and enjoy', description: 'Take bite-sized pieces and sip drink.', emoji: '/assets/stickers/cutlery_meal.png' },
-      { order: 8, title: 'Say thank you and leave', description: 'Mom or Dad pays the bill and we head out.', emoji: '/assets/stickers/waving_hand_hello.png' },
+      { order: 1, title: 'Walk inside & see host', description: 'The host welcomes us and asks how many people.', emoji: '/assets/stickers/open_welcome_door.webp' },
+      { order: 2, title: 'Find our table or booth', description: 'We sit in a comfy booth or chair.', emoji: '/assets/stickers/dining_table_booth.webp' },
+      { order: 3, title: 'Look at the menu', description: 'We see pictures or words of pizza, fries, drinks, and desserts.', emoji: '/assets/stickers/restaurant_menu_book.webp' },
+      { order: 4, title: 'Order food with server', description: 'We point to what we want or say it using our AAC tablet.', emoji: '/assets/stickers/speech_bubble.webp' },
+      { order: 5, title: 'Wait for food to cook', description: 'Chefs are cooking fresh food in the kitchen. We can color or play a quiet game.', emoji: '/assets/stickers/timer_clock.webp' },
+      { order: 6, title: 'Food arrives hot & tasty', description: 'The server brings our plates. We let hot food cool down if needed.', emoji: '/assets/stickers/pizza_slice.webp' },
+      { order: 7, title: 'Eat and enjoy', description: 'Take bite-sized pieces and sip drink.', emoji: '/assets/stickers/cutlery_meal.webp' },
+      { order: 8, title: 'Say thank you and leave', description: 'Mom or Dad pays the bill and we head out.', emoji: '/assets/stickers/waving_hand_hello.webp' },
     ],
     sensoryPreview: {
       sound: 'Dishes clinking, music, and background conversations.',
@@ -712,16 +712,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Getting a Haircut',
     category: 'Health & Care',
     emoji: '✂️',
-    stickerSrc: '/assets/stickers/adventure_haircut_salon.png',
+    stickerSrc: '/assets/stickers/adventure_haircut_salon.webp',
     summary: 'A predictable look at hair trimming, scissors, water spray, and sitting in the styling chair.',
     steps: [
-      { order: 1, title: 'Enter the salon / barbershop', description: 'Smell of shampoo and mirrors all around.', emoji: '/assets/stickers/barbershop_pole.png' },
-      { order: 2, title: 'Put on hair cape', description: 'A smooth nylon cape snaps around your shoulders like a superhero cape!', emoji: '/assets/stickers/haircut_cape.png' },
-      { order: 3, title: 'Gentle water spray', description: 'Hairdresser spritzes a tiny bit of water to make hair damp and smooth.', emoji: '/assets/stickers/water_spray_bottle.png' },
-      { order: 4, title: 'Comb and snip', description: 'Scissors make gentle "snip-snip" sounds as they trim ends.', emoji: '/assets/stickers/adventure_haircut_salon.png' },
-      { order: 5, title: 'Brush off loose hairs', description: 'A soft fluffy brush tickles your neck to sweep tiny hairs away.', emoji: '/assets/stickers/barber_neck_brush.png' },
-      { order: 6, title: 'Check in the big mirror', description: 'Look how sharp and neat you look!', emoji: '/assets/stickers/salon_hand_mirror.png' },
-      { order: 7, title: 'Take off cape & celebrate', description: 'All done and feeling fresh!', emoji: '/assets/stickers/reward_trophy.png' },
+      { order: 1, title: 'Enter the salon / barbershop', description: 'Smell of shampoo and mirrors all around.', emoji: '/assets/stickers/barbershop_pole.webp' },
+      { order: 2, title: 'Put on hair cape', description: 'A smooth nylon cape snaps around your shoulders like a superhero cape!', emoji: '/assets/stickers/haircut_cape.webp' },
+      { order: 3, title: 'Gentle water spray', description: 'Hairdresser spritzes a tiny bit of water to make hair damp and smooth.', emoji: '/assets/stickers/water_spray_bottle.webp' },
+      { order: 4, title: 'Comb and snip', description: 'Scissors make gentle "snip-snip" sounds as they trim ends.', emoji: '/assets/stickers/adventure_haircut_salon.webp' },
+      { order: 5, title: 'Brush off loose hairs', description: 'A soft fluffy brush tickles your neck to sweep tiny hairs away.', emoji: '/assets/stickers/barber_neck_brush.webp' },
+      { order: 6, title: 'Check in the big mirror', description: 'Look how sharp and neat you look!', emoji: '/assets/stickers/salon_hand_mirror.webp' },
+      { order: 7, title: 'Take off cape & celebrate', description: 'All done and feeling fresh!', emoji: '/assets/stickers/reward_trophy.webp' },
     ],
     sensoryPreview: {
       sound: 'Snip-snip of scissors, quiet buzzing of clippers if used, blow dryer hum.',
@@ -750,15 +750,15 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Doctor Check-Up',
     category: 'Health & Care',
     emoji: '🩺',
-    stickerSrc: '/assets/stickers/adventure_doctor_checkup.png',
+    stickerSrc: '/assets/stickers/adventure_doctor_checkup.webp',
     summary: 'Measuring height, checking heartbeat with a stethoscope, and getting healthy advice.',
     steps: [
-      { order: 1, title: 'Arrive at clinic', description: 'Walk into doctor office with caregiver.', emoji: '/assets/stickers/medical_clinic_building.png' },
-      { order: 2, title: 'Height and weight scale', description: 'Step on the scale and see how tall you grew!', emoji: '/assets/stickers/clinic_height_scale.png' },
-      { order: 3, title: 'Exam room & paper bed', description: 'Sit on the examination table with crunchy paper.', emoji: '/assets/stickers/doctor_exam_bed.png' },
-      { order: 4, title: 'Listen to heartbeat', description: 'Doctor warms stethoscope and listens to chest: thump-thump!', emoji: '/assets/stickers/stethoscope.png' },
-      { order: 5, title: 'Look in ears and throat', description: 'Doctor looks with a friendly little light.', emoji: '/assets/stickers/doctor_ear_light.png' },
-      { order: 6, title: 'High five & reward sticker', description: 'You did fantastic, healthy and strong!', emoji: '/assets/stickers/star_gold.png' },
+      { order: 1, title: 'Arrive at clinic', description: 'Walk into doctor office with caregiver.', emoji: '/assets/stickers/medical_clinic_building.webp' },
+      { order: 2, title: 'Height and weight scale', description: 'Step on the scale and see how tall you grew!', emoji: '/assets/stickers/clinic_height_scale.webp' },
+      { order: 3, title: 'Exam room & paper bed', description: 'Sit on the examination table with crunchy paper.', emoji: '/assets/stickers/doctor_exam_bed.webp' },
+      { order: 4, title: 'Listen to heartbeat', description: 'Doctor warms stethoscope and listens to chest: thump-thump!', emoji: '/assets/stickers/stethoscope.webp' },
+      { order: 5, title: 'Look in ears and throat', description: 'Doctor looks with a friendly little light.', emoji: '/assets/stickers/doctor_ear_light.webp' },
+      { order: 6, title: 'High five & reward sticker', description: 'You did fantastic, healthy and strong!', emoji: '/assets/stickers/star_gold.webp' },
     ],
     sensoryPreview: {
       sound: 'Quiet room with occasional paper rustle.',
@@ -777,16 +777,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Swimming Pool Outing',
     category: 'Community',
     emoji: '🏊',
-    stickerSrc: '/assets/stickers/adventure_swimming_pool.png',
+    stickerSrc: '/assets/stickers/adventure_swimming_pool.webp',
     summary: 'Changing into swimwear, shower rinse, walking on wet tiles, splashing, and pool safety.',
     steps: [
-      { order: 1, title: 'Locker room change', description: 'Put on swimsuit, lock clothes in locker, and keep wristband.', emoji: '/assets/stickers/locker_schedule.png' },
-      { order: 2, title: 'Rinse in shower', description: 'Quick warm water shower before stepping out to the pool deck.', emoji: '/assets/stickers/shower_wash.png' },
-      { order: 3, title: 'Walk safely to shallow end', description: 'No running on wet tiles. Hold hands or walk calmly to pool steps.', emoji: '/assets/stickers/walking_pool_feet.png' },
-      { order: 4, title: 'Dip toes & get used to water', description: 'Sit on pool edge, splash feet, and feel the cool water temperature.', emoji: '/assets/stickers/ocean_wave.png' },
-      { order: 5, title: 'Put on goggles & floaties', description: 'Protect eyes from chlorine sting and wear arm floaties or vest.', emoji: '/assets/stickers/swim_goggles_floaties.png' },
-      { order: 6, title: 'Swim and play safely', description: 'Kick legs, float, paddle, and have fun playing in the water.', emoji: '/assets/stickers/adventure_swimming_pool.png' },
-      { order: 7, title: 'Dry off with big towel', description: 'Climb ladder, wrap up in warm fluffy towel, and head back to change.', emoji: '/assets/stickers/fluffy_beach_towel.png' },
+      { order: 1, title: 'Locker room change', description: 'Put on swimsuit, lock clothes in locker, and keep wristband.', emoji: '/assets/stickers/locker_schedule.webp' },
+      { order: 2, title: 'Rinse in shower', description: 'Quick warm water shower before stepping out to the pool deck.', emoji: '/assets/stickers/shower_wash.webp' },
+      { order: 3, title: 'Walk safely to shallow end', description: 'No running on wet tiles. Hold hands or walk calmly to pool steps.', emoji: '/assets/stickers/walking_pool_feet.webp' },
+      { order: 4, title: 'Dip toes & get used to water', description: 'Sit on pool edge, splash feet, and feel the cool water temperature.', emoji: '/assets/stickers/ocean_wave.webp' },
+      { order: 5, title: 'Put on goggles & floaties', description: 'Protect eyes from chlorine sting and wear arm floaties or vest.', emoji: '/assets/stickers/swim_goggles_floaties.webp' },
+      { order: 6, title: 'Swim and play safely', description: 'Kick legs, float, paddle, and have fun playing in the water.', emoji: '/assets/stickers/adventure_swimming_pool.webp' },
+      { order: 7, title: 'Dry off with big towel', description: 'Climb ladder, wrap up in warm fluffy towel, and head back to change.', emoji: '/assets/stickers/fluffy_beach_towel.webp' },
     ],
     sensoryPreview: {
       sound: 'Echoing room acoustics, children splashing, lifeguard whistles.',
@@ -805,16 +805,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Going to the Movies',
     category: 'Community',
     emoji: '🍿',
-    stickerSrc: '/assets/stickers/adventure_movie_cinema.png',
+    stickerSrc: '/assets/stickers/adventure_movie_cinema.webp',
     summary: 'Buying tickets, buttery popcorn, walking into the dark theater, and watching on the giant screen.',
     steps: [
-      { order: 1, title: 'Enter cinema lobby', description: 'See colorful movie posters and hear theater lobby chatter.', emoji: '/assets/stickers/boarding_ticket.png' },
-      { order: 2, title: 'Get popcorn & snacks', description: 'Smell warm butter, pick a drink, and carry popcorn carefully.', emoji: '/assets/stickers/adventure_movie_cinema.png' },
-      { order: 3, title: 'Walk down dim hallway', description: 'Follow carpeted hall to our auditorium room number.', emoji: '/assets/stickers/open_welcome_door.png' },
-      { order: 4, title: 'Find our comfy seats', description: 'Check seat numbers and sink into big plush velvet chairs.', emoji: '/assets/stickers/padded_recliner_chair.png' },
-      { order: 5, title: 'Lights dim & movie begins', description: 'Room gets dark and screen lights up. Put on ear protection if loud.', emoji: '/assets/stickers/movie_projector_screen.png' },
-      { order: 6, title: 'Enjoy show with popcorn', description: 'Whisper softly during movie and crunch delicious popcorn.', emoji: '/assets/stickers/adventure_movie_cinema.png' },
-      { order: 7, title: 'Credits roll & lights turn on', description: 'Lights slowly fade up. Gather trash and walk out safely.', emoji: '/assets/stickers/waving_hand_hello.png' },
+      { order: 1, title: 'Enter cinema lobby', description: 'See colorful movie posters and hear theater lobby chatter.', emoji: '/assets/stickers/boarding_ticket.webp' },
+      { order: 2, title: 'Get popcorn & snacks', description: 'Smell warm butter, pick a drink, and carry popcorn carefully.', emoji: '/assets/stickers/adventure_movie_cinema.webp' },
+      { order: 3, title: 'Walk down dim hallway', description: 'Follow carpeted hall to our auditorium room number.', emoji: '/assets/stickers/open_welcome_door.webp' },
+      { order: 4, title: 'Find our comfy seats', description: 'Check seat numbers and sink into big plush velvet chairs.', emoji: '/assets/stickers/padded_recliner_chair.webp' },
+      { order: 5, title: 'Lights dim & movie begins', description: 'Room gets dark and screen lights up. Put on ear protection if loud.', emoji: '/assets/stickers/movie_projector_screen.webp' },
+      { order: 6, title: 'Enjoy show with popcorn', description: 'Whisper softly during movie and crunch delicious popcorn.', emoji: '/assets/stickers/adventure_movie_cinema.webp' },
+      { order: 7, title: 'Credits roll & lights turn on', description: 'Lights slowly fade up. Gather trash and walk out safely.', emoji: '/assets/stickers/waving_hand_hello.webp' },
     ],
     sensoryPreview: {
       sound: 'Deep bass theater speakers, loud movie trailers, crowd reactions.',
@@ -833,16 +833,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Bowling with Friends',
     category: 'Community',
     emoji: '🎳',
-    stickerSrc: '/assets/stickers/adventure_bowling_alley.png',
+    stickerSrc: '/assets/stickers/adventure_bowling_alley.webp',
     summary: 'Renting bowling shoes, rolling the ball down the glossy lane, bumpers, and celebrating strikes.',
     steps: [
-      { order: 1, title: 'Rent bowling shoes', description: 'Trade sneakers for special sliding bowling shoes at the counter.', emoji: '/assets/stickers/sneaker_shoes.png' },
-      { order: 2, title: 'Find our assigned lane', description: 'Walk to our lane number and see the scoring screen.', emoji: '/assets/stickers/adventure_bowling_alley.png' },
-      { order: 3, title: 'Pick a light bowling ball', description: 'Find a light ball with comfortable finger holes.', emoji: '/assets/stickers/bowling_ball_holes.png' },
-      { order: 4, title: 'Set up lane bumpers', description: 'Bumpers pop up so balls never get stuck in the gutter!', emoji: '/assets/stickers/bowling_lane_bumpers.png' },
-      { order: 5, title: 'Wait for your turn', description: 'Watch friends roll, cheer them on, and wait for your name on screen.', emoji: '/assets/stickers/timer_clock.png' },
-      { order: 6, title: 'Roll ball towards pins', description: 'Step up to line, swing arm gently, and roll ball towards pins: CRASH!', emoji: '/assets/stickers/bowling_pins_strike.png' },
-      { order: 7, title: 'High fives & score check', description: 'Celebrate knocking pins down and sit down for the next player.', emoji: '/assets/stickers/high_five_hands.png' },
+      { order: 1, title: 'Rent bowling shoes', description: 'Trade sneakers for special sliding bowling shoes at the counter.', emoji: '/assets/stickers/sneaker_shoes.webp' },
+      { order: 2, title: 'Find our assigned lane', description: 'Walk to our lane number and see the scoring screen.', emoji: '/assets/stickers/adventure_bowling_alley.webp' },
+      { order: 3, title: 'Pick a light bowling ball', description: 'Find a light ball with comfortable finger holes.', emoji: '/assets/stickers/bowling_ball_holes.webp' },
+      { order: 4, title: 'Set up lane bumpers', description: 'Bumpers pop up so balls never get stuck in the gutter!', emoji: '/assets/stickers/bowling_lane_bumpers.webp' },
+      { order: 5, title: 'Wait for your turn', description: 'Watch friends roll, cheer them on, and wait for your name on screen.', emoji: '/assets/stickers/timer_clock.webp' },
+      { order: 6, title: 'Roll ball towards pins', description: 'Step up to line, swing arm gently, and roll ball towards pins: CRASH!', emoji: '/assets/stickers/bowling_pins_strike.webp' },
+      { order: 7, title: 'High fives & score check', description: 'Celebrate knocking pins down and sit down for the next player.', emoji: '/assets/stickers/high_five_hands.webp' },
     ],
     sensoryPreview: {
       sound: 'Loud crashing bowling pins, ball rolling thunder on wood, arcade sounds.',
@@ -861,16 +861,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Camping in Nature',
     category: 'Community',
     emoji: '⛺',
-    stickerSrc: '/assets/stickers/adventure_camping_tent.png',
+    stickerSrc: '/assets/stickers/adventure_camping_tent.webp',
     summary: 'Pitching a tent, sleeping in a sleeping bag, campfire smells, nighttime crickets, and nature sounds.',
     steps: [
-      { order: 1, title: 'Arrive at campsite', description: 'Unload gear surrounded by tall trees and fresh pine scent.', emoji: '/assets/stickers/pine_trees_forest.png' },
-      { order: 2, title: 'Pitch the tent together', description: 'Unfold canvas, connect poles, and stake tent into the ground.', emoji: '/assets/stickers/adventure_camping_tent.png' },
-      { order: 3, title: 'Roll out sleeping bag', description: 'Lay out cozy sleeping pad and fluffy sleeping bag inside tent.', emoji: '/assets/stickers/camping_sleeping_bag.png' },
-      { order: 4, title: 'Explore nature trail', description: 'Walk forest path, spot pinecones, listen to birds chirping.', emoji: '/assets/stickers/hiking_trail_boots.png' },
-      { order: 5, title: 'Campfire & warm treats', description: 'Sit near safe campfire circle, roast marshmallows, and eat dinner.', emoji: '/assets/stickers/campfire_marshmallows.png' },
-      { order: 6, title: 'Star gazing with flashlight', description: 'Turn on flashlight, look up at glowing stars in the dark sky.', emoji: '/assets/stickers/evening_moon.png' },
-      { order: 7, title: 'Cozy sleep in tent', description: 'Zip tent closed, cuddle in sleeping bag, and fall asleep to crickets.', emoji: '/assets/stickers/bedtime_sleep.png' },
+      { order: 1, title: 'Arrive at campsite', description: 'Unload gear surrounded by tall trees and fresh pine scent.', emoji: '/assets/stickers/pine_trees_forest.webp' },
+      { order: 2, title: 'Pitch the tent together', description: 'Unfold canvas, connect poles, and stake tent into the ground.', emoji: '/assets/stickers/adventure_camping_tent.webp' },
+      { order: 3, title: 'Roll out sleeping bag', description: 'Lay out cozy sleeping pad and fluffy sleeping bag inside tent.', emoji: '/assets/stickers/camping_sleeping_bag.webp' },
+      { order: 4, title: 'Explore nature trail', description: 'Walk forest path, spot pinecones, listen to birds chirping.', emoji: '/assets/stickers/hiking_trail_boots.webp' },
+      { order: 5, title: 'Campfire & warm treats', description: 'Sit near safe campfire circle, roast marshmallows, and eat dinner.', emoji: '/assets/stickers/campfire_marshmallows.webp' },
+      { order: 6, title: 'Star gazing with flashlight', description: 'Turn on flashlight, look up at glowing stars in the dark sky.', emoji: '/assets/stickers/evening_moon.webp' },
+      { order: 7, title: 'Cozy sleep in tent', description: 'Zip tent closed, cuddle in sleeping bag, and fall asleep to crickets.', emoji: '/assets/stickers/bedtime_sleep.webp' },
     ],
     sensoryPreview: {
       sound: 'Crackling wood fire, wind through trees, night owls and crickets.',
@@ -889,16 +889,16 @@ export const DEFAULT_ADVENTURES: LifeAdventure[] = [
     title: 'Visiting the Museum',
     category: 'Community',
     emoji: '🏛️',
-    stickerSrc: '/assets/stickers/adventure_museum_visit.png',
+    stickerSrc: '/assets/stickers/adventure_museum_visit.webp',
     summary: 'Walking through grand halls, looking at fascinating exhibits, hands-on discovery rooms, and gift shop.',
     steps: [
-      { order: 1, title: 'Enter grand museum doors', description: 'Walk up big stone steps into towering entrance hall.', emoji: '/assets/stickers/adventure_museum_visit.png' },
-      { order: 2, title: 'Get museum map & badge', description: 'Look at gallery map and pick which exhibits to see first.', emoji: '/assets/stickers/museum_paper_map.png' },
-      { order: 3, title: 'Walk through exhibit galleries', description: 'See dinosaur fossils, ancient statues, or space rockets.', emoji: '/assets/stickers/museum_dinosaur_fossil.png' },
-      { order: 4, title: 'Look with eyes, gentle touch', description: 'Most exhibits are behind glass to keep safe; hands-on rooms have signs.', emoji: '/assets/stickers/observing_magnifying_glass.png' },
-      { order: 5, title: 'Interactive discovery lab', description: 'Press buttons, pull levers, and test science puzzles.', emoji: '/assets/stickers/science_flask.png' },
-      { order: 6, title: 'Quiet bench break', description: 'Sit on museum bench, drink water, and rest walking legs.', emoji: '/assets/stickers/waiting_room_couch.png' },
-      { order: 7, title: 'Browse museum gift shop', description: 'Look at gemstone rocks, postcards, and fun science toys.', emoji: '/assets/stickers/shopping_cart.png' },
+      { order: 1, title: 'Enter grand museum doors', description: 'Walk up big stone steps into towering entrance hall.', emoji: '/assets/stickers/adventure_museum_visit.webp' },
+      { order: 2, title: 'Get museum map & badge', description: 'Look at gallery map and pick which exhibits to see first.', emoji: '/assets/stickers/museum_paper_map.webp' },
+      { order: 3, title: 'Walk through exhibit galleries', description: 'See dinosaur fossils, ancient statues, or space rockets.', emoji: '/assets/stickers/museum_dinosaur_fossil.webp' },
+      { order: 4, title: 'Look with eyes, gentle touch', description: 'Most exhibits are behind glass to keep safe; hands-on rooms have signs.', emoji: '/assets/stickers/observing_magnifying_glass.webp' },
+      { order: 5, title: 'Interactive discovery lab', description: 'Press buttons, pull levers, and test science puzzles.', emoji: '/assets/stickers/science_flask.webp' },
+      { order: 6, title: 'Quiet bench break', description: 'Sit on museum bench, drink water, and rest walking legs.', emoji: '/assets/stickers/waiting_room_couch.webp' },
+      { order: 7, title: 'Browse museum gift shop', description: 'Look at gemstone rocks, postcards, and fun science toys.', emoji: '/assets/stickers/shopping_cart.webp' },
     ],
     sensoryPreview: {
       sound: 'Echoing high-ceiling halls, quiet whispers, occasional video display audio.',
@@ -919,7 +919,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     id: 'skill-teeth',
     title: 'Brush My Teeth',
     emoji: '🪥',
-    stickerSrc: '/assets/stickers/toothbrush.png',
+    stickerSrc: '/assets/stickers/toothbrush.webp',
     category: 'hygiene',
     estimatedMin: 3,
     starsReward: 2,
@@ -938,7 +938,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     id: 'skill-hands',
     title: 'Wash My Hands',
     emoji: '🧼',
-    stickerSrc: '/assets/stickers/soap_wash_hands.png',
+    stickerSrc: '/assets/stickers/soap_wash_hands.webp',
     category: 'hygiene',
     estimatedMin: 2,
     starsReward: 1,
@@ -956,7 +956,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     id: 'skill-dressed',
     title: 'Get Dressed for the Day',
     emoji: '👕',
-    stickerSrc: '/assets/stickers/clothes_dressed.png',
+    stickerSrc: '/assets/stickers/clothes_dressed.webp',
     category: 'dressing',
     estimatedMin: 5,
     starsReward: 2,
@@ -965,7 +965,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
       { id: 1, title: 'Take off pajamas', instruction: 'Place pajamas in hamper or on bed', emoji: '🩳', completed: false },
       { id: 2, title: 'Put on clean underwear', instruction: 'Step in one foot at a time and pull up', emoji: '🩲', completed: false },
       { id: 3, title: 'Put on shirt', instruction: 'Head through big hole, arms through sleeves', emoji: '👕', completed: false },
-      { id: 4, title: 'Put on pants', instruction: 'Sit down, put one leg in each pant leg, stand and pull up', emoji: '/assets/stickers/pants_folded.png', completed: false },
+      { id: 4, title: 'Put on pants', instruction: 'Sit down, put one leg in each pant leg, stand and pull up', emoji: '/assets/stickers/pants_folded.webp', completed: false },
       { id: 5, title: 'Put on comfy socks', instruction: 'Pull socks over toes and heel', emoji: '🧦', completed: false },
     ],
   },
@@ -973,7 +973,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     id: 'skill-backpack',
     title: 'Pack My Backpack',
     emoji: '🎒',
-    stickerSrc: '/assets/stickers/backpack_school.png',
+    stickerSrc: '/assets/stickers/backpack_school.webp',
     category: 'preparation',
     estimatedMin: 4,
     starsReward: 2,
@@ -981,7 +981,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     steps: [
       { id: 1, title: 'Open main zipper', instruction: 'Unzip backpack wide on table or floor', emoji: '🎒', completed: false },
       { id: 2, title: 'Put in folder/notebook', instruction: 'Slide school folder in flat', emoji: '📁', completed: false },
-      { id: 3, title: 'Put in water bottle', instruction: 'Place tightly sealed water bottle in side pocket', emoji: '/assets/stickers/water_bottle.png', completed: false },
+      { id: 3, title: 'Put in water bottle', instruction: 'Place tightly sealed water bottle in side pocket', emoji: '/assets/stickers/water_bottle.webp', completed: false },
       { id: 4, title: 'Pack comfort fidget', instruction: 'Place calm squishy or comfort toy in front pouch', emoji: '🧸', completed: false },
       { id: 5, title: 'Zip up completely', instruction: 'Pull zipper all the way shut', emoji: '🔒', completed: false },
     ],
@@ -990,7 +990,7 @@ export const DEFAULT_SKILLS: LifeSkill[] = [
     id: 'skill-snack',
     title: 'Make an Apple & Cracker Snack',
     emoji: '🍏',
-    stickerSrc: '/assets/stickers/apple_snack.png',
+    stickerSrc: '/assets/stickers/apple_snack.webp',
     category: 'eating',
     estimatedMin: 4,
     starsReward: 2,
@@ -1011,7 +1011,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-water',
     title: 'Drink Water',
     emoji: '💧',
-    stickerSrc: '/assets/stickers/drink_water.png',
+    stickerSrc: '/assets/stickers/drink_water.webp',
     category: 'health',
     completedToday: false,
     streakDays: 3,
@@ -1023,7 +1023,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-shoes',
     title: 'Put Shoes Away',
     emoji: '👟',
-    stickerSrc: '/assets/stickers/sneaker_shoes.png',
+    stickerSrc: '/assets/stickers/sneaker_shoes.webp',
     category: 'organization',
     completedToday: false,
     streakDays: 2,
@@ -1035,7 +1035,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-jacket',
     title: 'Hang Up Coat or Jacket',
     emoji: '🧥',
-    stickerSrc: '/assets/stickers/clothes_dressed.png',
+    stickerSrc: '/assets/stickers/clothes_dressed.webp',
     category: 'organization',
     completedToday: true,
     streakDays: 4,
@@ -1047,7 +1047,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-backpack',
     title: 'Unpack Backpack',
     emoji: '🎒',
-    stickerSrc: '/assets/stickers/backpack_school.png',
+    stickerSrc: '/assets/stickers/backpack_school.webp',
     category: 'organization',
     completedToday: false,
     streakDays: 1,
@@ -1059,7 +1059,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-hamper',
     title: 'Clothes in the Hamper',
     emoji: '🧺',
-    stickerSrc: '/assets/stickers/clothes_dressed.png',
+    stickerSrc: '/assets/stickers/clothes_dressed.webp',
     category: 'self-care',
     completedToday: false,
     streakDays: 5,
@@ -1071,7 +1071,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-breath',
     title: 'Peaceful Breath Break',
     emoji: '🧘',
-    stickerSrc: '/assets/stickers/breathing_cloud.png',
+    stickerSrc: '/assets/stickers/breathing_cloud.webp',
     category: 'self-care',
     completedToday: true,
     streakDays: 3,
@@ -1083,7 +1083,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-kindness',
     title: 'Kind Action or Plant Care',
     emoji: '🪴',
-    stickerSrc: '/assets/stickers/reward_trophy.png',
+    stickerSrc: '/assets/stickers/reward_trophy.webp',
     category: 'kindness',
     completedToday: false,
     streakDays: 2,
@@ -1095,7 +1095,7 @@ export const DEFAULT_DAILY_HABITS: DailyHabit[] = [
     id: 'habit-snack',
     title: 'Eat a Healthy Snack',
     emoji: '🍎',
-    stickerSrc: '/assets/stickers/apple_snack.png',
+    stickerSrc: '/assets/stickers/apple_snack.webp',
     category: 'health',
     completedToday: false,
     streakDays: 2,
@@ -1110,32 +1110,32 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-plans-change',
     title: 'When Plans Change',
     emoji: '🔄',
-    stickerSrc: '/assets/stickers/story_plans_change.png',
+    stickerSrc: '/assets/stickers/story_plans_change.webp',
     pages: [
       {
         pageNumber: 1,
         text: 'Sometimes we have a plan for our day. We know where we are going and what we will do.',
-        emoji: '/assets/stickers/schedule_calendar.png',
+        emoji: '/assets/stickers/schedule_calendar.webp',
       },
       {
         pageNumber: 2,
         text: 'Sometimes something unexpected happens. A place might be closed, or someone might be sick.',
-        emoji: '/assets/stickers/rain_cloud.png',
+        emoji: '/assets/stickers/rain_cloud.webp',
       },
       {
         pageNumber: 3,
         text: 'When a plan changes, my body might feel surprised, sad, or angry. That is okay. All feelings are okay.',
-        emoji: '/assets/stickers/caregiver_heart.png',
+        emoji: '/assets/stickers/caregiver_heart.webp',
       },
       {
         pageNumber: 4,
         text: 'I can take three deep breaths. I can ask my caregiver: "What happens now?"',
-        emoji: '/assets/stickers/coping_lungs_breathing.png',
+        emoji: '/assets/stickers/coping_lungs_breathing.webp',
       },
       {
         pageNumber: 5,
         text: 'Together, we will make a new plan. I am safe, and we can still have a good day.',
-        emoji: '/assets/stickers/rainbow_weather.png',
+        emoji: '/assets/stickers/rainbow_weather.webp',
       },
     ],
     keyTakeaways: [
@@ -1154,32 +1154,32 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-birthday',
     title: 'Going to a Birthday Party',
     emoji: '🎂',
-    stickerSrc: '/assets/stickers/story_birthday.png',
+    stickerSrc: '/assets/stickers/story_birthday.webp',
     pages: [
       {
         pageNumber: 1,
         text: 'A birthday party is a celebration with games, cake, and friends.',
-        emoji: '/assets/stickers/red_balloon.png',
+        emoji: '/assets/stickers/red_balloon.webp',
       },
       {
         pageNumber: 2,
         text: 'Parties can be noisy and full of movement. I can wear my headphones if the sounds are loud.',
-        emoji: '/assets/stickers/teen_headphones.png',
+        emoji: '/assets/stickers/teen_headphones.webp',
       },
       {
         pageNumber: 3,
         text: 'I can say "Happy Birthday" or give a card to the birthday child.',
-        emoji: '/assets/stickers/birthday_gift_box.png',
+        emoji: '/assets/stickers/birthday_gift_box.webp',
       },
       {
         pageNumber: 4,
         text: 'If I feel tired or overwhelmed, I can tell my caregiver: "I need a quiet break."',
-        emoji: '/assets/stickers/waiting_room_couch.png',
+        emoji: '/assets/stickers/waiting_room_couch.webp',
       },
       {
         pageNumber: 5,
         text: 'I can choose which games to join, eat yummy treats, and say goodbye when it is time to go.',
-        emoji: '/assets/stickers/birthday_cake_slice.png',
+        emoji: '/assets/stickers/birthday_cake_slice.webp',
       },
     ],
     keyTakeaways: [
@@ -1198,32 +1198,32 @@ export const DEFAULT_SOCIAL_STORIES: SocialStory[] = [
     id: 'story-sharing',
     title: 'Taking Turns with Toys',
     emoji: '🤝',
-    stickerSrc: '/assets/stickers/story_sharing.png',
+    stickerSrc: '/assets/stickers/story_sharing.webp',
     pages: [
       {
         pageNumber: 1,
         text: 'Playing with toys like trains and blocks is lots of fun.',
-        emoji: '/assets/stickers/toy_box.png',
+        emoji: '/assets/stickers/toy_box.webp',
       },
       {
         pageNumber: 2,
         text: 'Sometimes a friend wants to play with the same toy. We can take turns.',
-        emoji: '/assets/stickers/story_sharing.png',
+        emoji: '/assets/stickers/story_sharing.webp',
       },
       {
         pageNumber: 3,
         text: 'We can use a visual timer so we know when each turn ends.',
-        emoji: '/assets/stickers/timer_clock.png',
+        emoji: '/assets/stickers/timer_clock.webp',
       },
       {
         pageNumber: 4,
         text: 'While I wait, I can play with another fun toy or watch my friend.',
-        emoji: '/assets/stickers/jigsaw_puzzle.png',
+        emoji: '/assets/stickers/jigsaw_puzzle.webp',
       },
       {
         pageNumber: 5,
         text: 'Taking turns helps everyone play together happily.',
-        emoji: '/assets/stickers/star_gold.png',
+        emoji: '/assets/stickers/star_gold.webp',
       },
     ],
     keyTakeaways: [

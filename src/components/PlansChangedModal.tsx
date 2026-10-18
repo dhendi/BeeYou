@@ -187,7 +187,7 @@ export const PlansChangedModal: React.FC = () => {
       ...steps,
       {
         title: newStepTitle.trim(),
-        emoji: newStepEmoji || '/assets/stickers/star_gold.png',
+        emoji: newStepEmoji || '/assets/stickers/star_gold.webp',
         time: newStepTime.trim() || undefined,
       },
     ]);
@@ -446,7 +446,7 @@ export const PlansChangedModal: React.FC = () => {
                         className="p-2.5 rounded-2xl bg-white border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-left transition-all cursor-pointer shadow-2xs active:scale-95 flex items-start gap-2"
                       >
                         <div className="w-6 h-6 shrink-0 flex items-center justify-center">
-                          <RoutineStickerIcon emoji={preset.steps[0]?.emoji || '/assets/stickers/star_gold.png'} className="w-6 h-6 object-contain" />
+                          <RoutineStickerIcon emoji={preset.steps[0]?.emoji || '/assets/stickers/star_gold.webp'} className="w-6 h-6 object-contain" />
                         </div>
                         <div className="min-w-0">
                           <span className="font-black text-xs text-slate-900 block truncate">

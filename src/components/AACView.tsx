@@ -100,13 +100,13 @@ const FOLDER_TILES: Array<{
   colorType: 'noun' | 'subject' | 'social';
   description: string;
 }> = [
-  { id: 'folder-food', category: 'food', label: 'Food', stickerSrc: '/assets/stickers/aac_food.png', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
-  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', stickerSrc: '/assets/stickers/aac_drinks.png', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
-  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', stickerSrc: '/assets/stickers/aac_activities.png', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
-  { id: 'folder-places', category: 'places', label: 'Places', stickerSrc: '/assets/stickers/aac_places.png', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
-  { id: 'folder-people', category: 'people', label: 'People', stickerSrc: '/assets/stickers/aac_people.png', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
-  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', stickerSrc: '/assets/stickers/aac_feelings.png', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
-  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', stickerSrc: '/assets/stickers/aac_sensory.png', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
+  { id: 'folder-food', category: 'food', label: 'Food', stickerSrc: '/assets/stickers/aac_food.webp', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
+  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', stickerSrc: '/assets/stickers/aac_drinks.webp', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
+  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', stickerSrc: '/assets/stickers/aac_activities.webp', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
+  { id: 'folder-places', category: 'places', label: 'Places', stickerSrc: '/assets/stickers/aac_places.webp', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
+  { id: 'folder-people', category: 'people', label: 'People', stickerSrc: '/assets/stickers/aac_people.webp', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
+  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', stickerSrc: '/assets/stickers/aac_feelings.webp', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
+  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', stickerSrc: '/assets/stickers/aac_sensory.webp', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
 ];
 
 const QUICK_CHAT_GROUPS = [
@@ -305,209 +305,209 @@ export const AACView: React.FC = () => {
   const isRacingTheme = activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing';
 
   const TRAIN_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/train_star_gold.png',
-    favorite_sentences: '/assets/stickers/train_speech_bubble.png',
-    favorites: '/assets/stickers/train_reward_trophy.png',
-    food: '/assets/stickers/train_pizza_slice.png',
-    drinks: '/assets/stickers/train_canteen_flask.png',
-    activities: '/assets/stickers/train_game_controller.png',
-    places: '/assets/stickers/train_home_station.png',
-    people: '/assets/stickers/train_child_persona.png',
-    feelings: '/assets/stickers/train_lantern_heart.png',
-    sensory: '/assets/stickers/train_ear_defenders.png',
-    all: '/assets/stickers/train_conductor_logbook.png',
+    core: '/assets/stickers/train_star_gold.webp',
+    favorite_sentences: '/assets/stickers/train_speech_bubble.webp',
+    favorites: '/assets/stickers/train_reward_trophy.webp',
+    food: '/assets/stickers/train_pizza_slice.webp',
+    drinks: '/assets/stickers/train_canteen_flask.webp',
+    activities: '/assets/stickers/train_game_controller.webp',
+    places: '/assets/stickers/train_home_station.webp',
+    people: '/assets/stickers/train_child_persona.webp',
+    feelings: '/assets/stickers/train_lantern_heart.webp',
+    sensory: '/assets/stickers/train_ear_defenders.webp',
+    all: '/assets/stickers/train_conductor_logbook.webp',
   };
 
   const TRAIN_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/train_pizza_slice.png',
-    'folder-drinks': '/assets/stickers/train_canteen_flask.png',
-    'folder-activities': '/assets/stickers/train_game_controller.png',
-    'folder-places': '/assets/stickers/train_home_station.png',
-    'folder-people': '/assets/stickers/train_child_persona.png',
-    'folder-feelings': '/assets/stickers/train_lantern_heart.png',
-    'folder-sensory': '/assets/stickers/train_ear_defenders.png',
+    'folder-food': '/assets/stickers/train_pizza_slice.webp',
+    'folder-drinks': '/assets/stickers/train_canteen_flask.webp',
+    'folder-activities': '/assets/stickers/train_game_controller.webp',
+    'folder-places': '/assets/stickers/train_home_station.webp',
+    'folder-people': '/assets/stickers/train_child_persona.webp',
+    'folder-feelings': '/assets/stickers/train_lantern_heart.webp',
+    'folder-sensory': '/assets/stickers/train_ear_defenders.webp',
   };
 
   const SPACE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/space_star_gold.png',
-    favorite_sentences: '/assets/stickers/space_speech_bubble.png',
-    favorites: '/assets/stickers/space_reward_trophy.png',
-    food: '/assets/stickers/space_pizza_slice.png',
-    drinks: '/assets/stickers/space_routine_water_drink.png',
-    activities: '/assets/stickers/space_game_controller.png',
-    places: '/assets/stickers/space_home_house.png',
-    people: '/assets/stickers/space_child_persona.png',
-    feelings: '/assets/stickers/space_fav_love_heart.png',
-    sensory: '/assets/stickers/space_sensory_loud_noise.png',
-    all: '/assets/stickers/space_homework_study.png',
+    core: '/assets/stickers/space_star_gold.webp',
+    favorite_sentences: '/assets/stickers/space_speech_bubble.webp',
+    favorites: '/assets/stickers/space_reward_trophy.webp',
+    food: '/assets/stickers/space_pizza_slice.webp',
+    drinks: '/assets/stickers/space_routine_water_drink.webp',
+    activities: '/assets/stickers/space_game_controller.webp',
+    places: '/assets/stickers/space_home_house.webp',
+    people: '/assets/stickers/space_child_persona.webp',
+    feelings: '/assets/stickers/space_fav_love_heart.webp',
+    sensory: '/assets/stickers/space_sensory_loud_noise.webp',
+    all: '/assets/stickers/space_homework_study.webp',
   };
 
   const SPACE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/space_pizza_slice.png',
-    'folder-drinks': '/assets/stickers/space_routine_water_drink.png',
-    'folder-activities': '/assets/stickers/space_game_controller.png',
-    'folder-places': '/assets/stickers/space_home_house.png',
-    'folder-people': '/assets/stickers/space_child_persona.png',
-    'folder-feelings': '/assets/stickers/space_fav_love_heart.png',
-    'folder-sensory': '/assets/stickers/space_sensory_loud_noise.png',
+    'folder-food': '/assets/stickers/space_pizza_slice.webp',
+    'folder-drinks': '/assets/stickers/space_routine_water_drink.webp',
+    'folder-activities': '/assets/stickers/space_game_controller.webp',
+    'folder-places': '/assets/stickers/space_home_house.webp',
+    'folder-people': '/assets/stickers/space_child_persona.webp',
+    'folder-feelings': '/assets/stickers/space_fav_love_heart.webp',
+    'folder-sensory': '/assets/stickers/space_sensory_loud_noise.webp',
   };
 
   const TURTLE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/turtle_lily_pads.png',
-    favorite_sentences: '/assets/stickers/turtle_leaf_speech_bubbles.png',
-    favorites: '/assets/stickers/turtle_lotus_trophy.png',
-    food: '/assets/stickers/turtle_garden_sandwich.png',
-    drinks: '/assets/stickers/turtle_bamboo_drink_cup.png',
-    activities: '/assets/stickers/turtle_game_controller.png',
-    places: '/assets/stickers/turtle_moss_cottage_home.png',
-    people: '/assets/stickers/turtle_child_persona_hatchling.png',
-    feelings: '/assets/stickers/turtle_shell_heart.png',
-    sensory: '/assets/stickers/turtle_shell_headphones.png',
-    all: '/assets/stickers/turtle_botanical_folder.png',
+    core: '/assets/stickers/turtle_lily_pads.webp',
+    favorite_sentences: '/assets/stickers/turtle_leaf_speech_bubbles.webp',
+    favorites: '/assets/stickers/turtle_lotus_trophy.webp',
+    food: '/assets/stickers/turtle_garden_sandwich.webp',
+    drinks: '/assets/stickers/turtle_bamboo_drink_cup.webp',
+    activities: '/assets/stickers/turtle_game_controller.webp',
+    places: '/assets/stickers/turtle_moss_cottage_home.webp',
+    people: '/assets/stickers/turtle_child_persona_hatchling.webp',
+    feelings: '/assets/stickers/turtle_shell_heart.webp',
+    sensory: '/assets/stickers/turtle_shell_headphones.webp',
+    all: '/assets/stickers/turtle_botanical_folder.webp',
   };
 
   const TURTLE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/turtle_garden_sandwich.png',
-    'folder-drinks': '/assets/stickers/turtle_bamboo_drink_cup.png',
-    'folder-activities': '/assets/stickers/turtle_game_controller.png',
-    'folder-places': '/assets/stickers/turtle_moss_cottage_home.png',
-    'folder-people': '/assets/stickers/turtle_child_persona_hatchling.png',
-    'folder-feelings': '/assets/stickers/turtle_shell_heart.png',
-    'folder-sensory': '/assets/stickers/turtle_shell_headphones.png',
+    'folder-food': '/assets/stickers/turtle_garden_sandwich.webp',
+    'folder-drinks': '/assets/stickers/turtle_bamboo_drink_cup.webp',
+    'folder-activities': '/assets/stickers/turtle_game_controller.webp',
+    'folder-places': '/assets/stickers/turtle_moss_cottage_home.webp',
+    'folder-people': '/assets/stickers/turtle_child_persona_hatchling.webp',
+    'folder-feelings': '/assets/stickers/turtle_shell_heart.webp',
+    'folder-sensory': '/assets/stickers/turtle_shell_headphones.webp',
   };
 
   const DINO_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/dino_amber_star_core.png',
-    favorite_sentences: '/assets/stickers/dino_jungle_speech_bubbles.png',
-    favorites: '/assets/stickers/dino_amber_fossil_trophy.png',
-    food: '/assets/stickers/dino_flatbread_sandwich.png',
-    drinks: '/assets/stickers/dino_stone_tumbler_water.png',
-    activities: '/assets/stickers/dino_game_controller.png',
-    places: '/assets/stickers/dino_cavern_retreat.png',
-    people: '/assets/stickers/dino_child_persona_rex.png',
-    feelings: '/assets/stickers/dino_triceratops_frill_heart.png',
-    sensory: '/assets/stickers/dino_ammonite_headphones.png',
-    all: '/assets/stickers/dino_palm_leaf_folio.png',
+    core: '/assets/stickers/dino_amber_star_core.webp',
+    favorite_sentences: '/assets/stickers/dino_jungle_speech_bubbles.webp',
+    favorites: '/assets/stickers/dino_amber_fossil_trophy.webp',
+    food: '/assets/stickers/dino_flatbread_sandwich.webp',
+    drinks: '/assets/stickers/dino_stone_tumbler_water.webp',
+    activities: '/assets/stickers/dino_game_controller.webp',
+    places: '/assets/stickers/dino_cavern_retreat.webp',
+    people: '/assets/stickers/dino_child_persona_rex.webp',
+    feelings: '/assets/stickers/dino_triceratops_frill_heart.webp',
+    sensory: '/assets/stickers/dino_ammonite_headphones.webp',
+    all: '/assets/stickers/dino_palm_leaf_folio.webp',
   };
 
   const DINO_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/dino_flatbread_sandwich.png',
-    'folder-drinks': '/assets/stickers/dino_stone_tumbler_water.png',
-    'folder-activities': '/assets/stickers/dino_game_controller.png',
-    'folder-places': '/assets/stickers/dino_cavern_retreat.png',
-    'folder-people': '/assets/stickers/dino_child_persona_rex.png',
-    'folder-feelings': '/assets/stickers/dino_triceratops_frill_heart.png',
-    'folder-sensory': '/assets/stickers/dino_ammonite_headphones.png',
+    'folder-food': '/assets/stickers/dino_flatbread_sandwich.webp',
+    'folder-drinks': '/assets/stickers/dino_stone_tumbler_water.webp',
+    'folder-activities': '/assets/stickers/dino_game_controller.webp',
+    'folder-places': '/assets/stickers/dino_cavern_retreat.webp',
+    'folder-people': '/assets/stickers/dino_child_persona_rex.webp',
+    'folder-feelings': '/assets/stickers/dino_triceratops_frill_heart.webp',
+    'folder-sensory': '/assets/stickers/dino_ammonite_headphones.webp',
   };
 
   const FROG_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/frog_lotus_star_core.png',
-    favorite_sentences: '/assets/stickers/frog_lily_speech_bubbles.png',
-    favorites: '/assets/stickers/frog_lotus_reward_trophy.png',
-    food: '/assets/stickers/frog_garden_sandwich.png',
-    drinks: '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-    activities: '/assets/stickers/frog_game_controller.png',
-    places: '/assets/stickers/frog_willow_hollow_retreat.png',
-    people: '/assets/stickers/frog_child_persona.png',
-    feelings: '/assets/stickers/frog_lily_pad_heart.png',
-    sensory: '/assets/stickers/frog_pebble_headphones.png',
-    all: '/assets/stickers/frog_reed_school_folder.png',
+    core: '/assets/stickers/frog_lotus_star_core.webp',
+    favorite_sentences: '/assets/stickers/frog_lily_speech_bubbles.webp',
+    favorites: '/assets/stickers/frog_lotus_reward_trophy.webp',
+    food: '/assets/stickers/frog_garden_sandwich.webp',
+    drinks: '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+    activities: '/assets/stickers/frog_game_controller.webp',
+    places: '/assets/stickers/frog_willow_hollow_retreat.webp',
+    people: '/assets/stickers/frog_child_persona.webp',
+    feelings: '/assets/stickers/frog_lily_pad_heart.webp',
+    sensory: '/assets/stickers/frog_pebble_headphones.webp',
+    all: '/assets/stickers/frog_reed_school_folder.webp',
   };
 
   const FROG_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/frog_garden_sandwich.png',
-    'folder-drinks': '/assets/stickers/frog_dewdrop_bamboo_cup.png',
-    'folder-activities': '/assets/stickers/frog_game_controller.png',
-    'folder-places': '/assets/stickers/frog_willow_hollow_retreat.png',
-    'folder-people': '/assets/stickers/frog_child_persona.png',
-    'folder-feelings': '/assets/stickers/frog_lily_pad_heart.png',
-    'folder-sensory': '/assets/stickers/frog_pebble_headphones.png',
+    'folder-food': '/assets/stickers/frog_garden_sandwich.webp',
+    'folder-drinks': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
+    'folder-activities': '/assets/stickers/frog_game_controller.webp',
+    'folder-places': '/assets/stickers/frog_willow_hollow_retreat.webp',
+    'folder-people': '/assets/stickers/frog_child_persona.webp',
+    'folder-feelings': '/assets/stickers/frog_lily_pad_heart.webp',
+    'folder-sensory': '/assets/stickers/frog_pebble_headphones.webp',
   };
 
   const OCEAN_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/ocean_golden_starfish_badge.png',
-    favorite_sentences: '/assets/stickers/ocean_bubble_speech_bubble.png',
-    favorites: '/assets/stickers/ocean_golden_seahorse_trophy.png',
-    food: '/assets/stickers/ocean_pizza_slice.png',
-    drinks: '/assets/stickers/ocean_seaglass_canteen.png',
-    activities: '/assets/stickers/ocean_game_controller.png',
-    places: '/assets/stickers/ocean_home_house.png',
-    people: '/assets/stickers/ocean_child_persona.png',
-    feelings: '/assets/stickers/ocean_seaglass_heart.png',
-    sensory: '/assets/stickers/ocean_conch_headphones.png',
-    all: '/assets/stickers/ocean_captains_logbook.png',
+    core: '/assets/stickers/ocean_golden_starfish_badge.webp',
+    favorite_sentences: '/assets/stickers/ocean_bubble_speech_bubble.webp',
+    favorites: '/assets/stickers/ocean_golden_seahorse_trophy.webp',
+    food: '/assets/stickers/ocean_pizza_slice.webp',
+    drinks: '/assets/stickers/ocean_seaglass_canteen.webp',
+    activities: '/assets/stickers/ocean_game_controller.webp',
+    places: '/assets/stickers/ocean_home_house.webp',
+    people: '/assets/stickers/ocean_child_persona.webp',
+    feelings: '/assets/stickers/ocean_seaglass_heart.webp',
+    sensory: '/assets/stickers/ocean_conch_headphones.webp',
+    all: '/assets/stickers/ocean_captains_logbook.webp',
   };
 
   const OCEAN_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/ocean_pizza_slice.png',
-    'folder-drinks': '/assets/stickers/ocean_seaglass_canteen.png',
-    'folder-activities': '/assets/stickers/ocean_game_controller.png',
-    'folder-places': '/assets/stickers/ocean_home_house.png',
-    'folder-people': '/assets/stickers/ocean_child_persona.png',
-    'folder-feelings': '/assets/stickers/ocean_seaglass_heart.png',
-    'folder-sensory': '/assets/stickers/ocean_conch_headphones.png',
+    'folder-food': '/assets/stickers/ocean_pizza_slice.webp',
+    'folder-drinks': '/assets/stickers/ocean_seaglass_canteen.webp',
+    'folder-activities': '/assets/stickers/ocean_game_controller.webp',
+    'folder-places': '/assets/stickers/ocean_home_house.webp',
+    'folder-people': '/assets/stickers/ocean_child_persona.webp',
+    'folder-feelings': '/assets/stickers/ocean_seaglass_heart.webp',
+    'folder-sensory': '/assets/stickers/ocean_conch_headphones.webp',
   };
 
   const FAIRYTALE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/fairytale_star_gold.png',
-    favorite_sentences: '/assets/stickers/fairytale_speech_bubble.png',
-    favorites: '/assets/stickers/fairytale_reward_trophy.png',
-    food: '/assets/stickers/fairytale_pizza_slice.png',
-    drinks: '/assets/stickers/fairytale_routine_water_drink.png',
-    activities: '/assets/stickers/fairytale_game_controller.png',
-    places: '/assets/stickers/fairytale_home_house.png',
-    people: '/assets/stickers/fairytale_child_persona.png',
-    feelings: '/assets/stickers/fairytale_fav_love_heart.png',
-    sensory: '/assets/stickers/fairytale_star_melody_headphones.png',
-    all: '/assets/stickers/fairytale_spellbook_journal.png',
+    core: '/assets/stickers/fairytale_star_gold.webp',
+    favorite_sentences: '/assets/stickers/fairytale_speech_bubble.webp',
+    favorites: '/assets/stickers/fairytale_reward_trophy.webp',
+    food: '/assets/stickers/fairytale_pizza_slice.webp',
+    drinks: '/assets/stickers/fairytale_routine_water_drink.webp',
+    activities: '/assets/stickers/fairytale_game_controller.webp',
+    places: '/assets/stickers/fairytale_home_house.webp',
+    people: '/assets/stickers/fairytale_child_persona.webp',
+    feelings: '/assets/stickers/fairytale_fav_love_heart.webp',
+    sensory: '/assets/stickers/fairytale_star_melody_headphones.webp',
+    all: '/assets/stickers/fairytale_spellbook_journal.webp',
   };
 
   const FAIRYTALE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/fairytale_pizza_slice.png',
-    'folder-drinks': '/assets/stickers/fairytale_routine_water_drink.png',
-    'folder-activities': '/assets/stickers/fairytale_game_controller.png',
-    'folder-places': '/assets/stickers/fairytale_home_house.png',
-    'folder-people': '/assets/stickers/fairytale_child_persona.png',
-    'folder-feelings': '/assets/stickers/fairytale_fav_love_heart.png',
-    'folder-sensory': '/assets/stickers/fairytale_star_melody_headphones.png',
+    'folder-food': '/assets/stickers/fairytale_pizza_slice.webp',
+    'folder-drinks': '/assets/stickers/fairytale_routine_water_drink.webp',
+    'folder-activities': '/assets/stickers/fairytale_game_controller.webp',
+    'folder-places': '/assets/stickers/fairytale_home_house.webp',
+    'folder-people': '/assets/stickers/fairytale_child_persona.webp',
+    'folder-feelings': '/assets/stickers/fairytale_fav_love_heart.webp',
+    'folder-sensory': '/assets/stickers/fairytale_star_melody_headphones.webp',
   };
 
   const RACING_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/racing_star_gold.png',
-    favorite_sentences: '/assets/stickers/racing_speech_bubble.png',
-    favorites: '/assets/stickers/racing_reward_trophy.png',
-    food: '/assets/stickers/racing_pizza_slice.png',
-    drinks: '/assets/stickers/racing_water_drink.png',
-    activities: '/assets/stickers/racing_game_controller.png',
-    places: '/assets/stickers/racing_home_house.png',
-    people: '/assets/stickers/racing_persona.png',
-    feelings: '/assets/stickers/racing_heart.png',
-    sensory: '/assets/stickers/racing_teen_headphones.png',
-    all: '/assets/stickers/racing_homework_study.png',
+    core: '/assets/stickers/racing_star_gold.webp',
+    favorite_sentences: '/assets/stickers/racing_speech_bubble.webp',
+    favorites: '/assets/stickers/racing_reward_trophy.webp',
+    food: '/assets/stickers/racing_pizza_slice.webp',
+    drinks: '/assets/stickers/racing_water_drink.webp',
+    activities: '/assets/stickers/racing_game_controller.webp',
+    places: '/assets/stickers/racing_home_house.webp',
+    people: '/assets/stickers/racing_persona.webp',
+    feelings: '/assets/stickers/racing_heart.webp',
+    sensory: '/assets/stickers/racing_teen_headphones.webp',
+    all: '/assets/stickers/racing_homework_study.webp',
   };
 
   const RACING_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/racing_pizza_slice.png',
-    'folder-drinks': '/assets/stickers/racing_water_drink.png',
-    'folder-activities': '/assets/stickers/racing_game_controller.png',
-    'folder-places': '/assets/stickers/racing_home_house.png',
-    'folder-people': '/assets/stickers/racing_persona.png',
-    'folder-feelings': '/assets/stickers/racing_heart.png',
-    'folder-sensory': '/assets/stickers/racing_teen_headphones.png',
+    'folder-food': '/assets/stickers/racing_pizza_slice.webp',
+    'folder-drinks': '/assets/stickers/racing_water_drink.webp',
+    'folder-activities': '/assets/stickers/racing_game_controller.webp',
+    'folder-places': '/assets/stickers/racing_home_house.webp',
+    'folder-people': '/assets/stickers/racing_persona.webp',
+    'folder-feelings': '/assets/stickers/racing_heart.webp',
+    'folder-sensory': '/assets/stickers/racing_teen_headphones.webp',
   };
 
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
-    { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.png' },
-    { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.png' },
-    { id: 'favorites', label: t('Favorites'), iconSrc: '/assets/stickers/aac_favorites.png' },
-    { id: 'food', label: t('Food'), iconSrc: '/assets/stickers/aac_food.png' },
-    { id: 'drinks', label: t('Drinks'), iconSrc: '/assets/stickers/aac_drinks.png' },
-    { id: 'activities', label: t('Play & Fun'), iconSrc: '/assets/stickers/aac_activities.png' },
-    { id: 'places', label: t('Places'), iconSrc: '/assets/stickers/aac_places.png' },
-    { id: 'people', label: t('People'), iconSrc: '/assets/stickers/aac_people.png' },
-    { id: 'feelings', label: t('Feelings'), iconSrc: '/assets/stickers/aac_feelings.png' },
-    { id: 'sensory', label: t('Sensory'), iconSrc: '/assets/stickers/aac_sensory.png' },
-    { id: 'all', label: t('All Words'), iconSrc: '/assets/stickers/aac_all_words.png' },
+    { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.webp' },
+    { id: 'favorite_sentences', label: t('Favorite Sentences'), iconSrc: '/assets/stickers/aac_sentences.webp' },
+    { id: 'favorites', label: t('Favorites'), iconSrc: '/assets/stickers/aac_favorites.webp' },
+    { id: 'food', label: t('Food'), iconSrc: '/assets/stickers/aac_food.webp' },
+    { id: 'drinks', label: t('Drinks'), iconSrc: '/assets/stickers/aac_drinks.webp' },
+    { id: 'activities', label: t('Play & Fun'), iconSrc: '/assets/stickers/aac_activities.webp' },
+    { id: 'places', label: t('Places'), iconSrc: '/assets/stickers/aac_places.webp' },
+    { id: 'people', label: t('People'), iconSrc: '/assets/stickers/aac_people.webp' },
+    { id: 'feelings', label: t('Feelings'), iconSrc: '/assets/stickers/aac_feelings.webp' },
+    { id: 'sensory', label: t('Sensory'), iconSrc: '/assets/stickers/aac_sensory.webp' },
+    { id: 'all', label: t('All Words'), iconSrc: '/assets/stickers/aac_all_words.webp' },
   ];
 
   // Filter items while keeping consistent motor planning order (sorted by motorIndex)
@@ -1246,7 +1246,7 @@ export const AACView: React.FC = () => {
           <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 text-xs font-bold text-[#6B5E52] shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
             <span className="flex items-center gap-2">
               <img
-                src="/assets/stickers/aac_sentences.png"
+                src="/assets/stickers/aac_sentences.webp"
                 alt=""
                 aria-hidden="true"
                 className="w-4 h-4 object-contain pointer-events-none drop-shadow-2xs select-none"
@@ -1279,7 +1279,7 @@ export const AACView: React.FC = () => {
                   className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
                   <img
-                    src="/assets/stickers/aac_sentences.png"
+                    src="/assets/stickers/aac_sentences.webp"
                     alt=""
                     aria-hidden="true"
                     className="w-3.5 h-3.5 object-contain pointer-events-none drop-shadow-2xs select-none"
@@ -1735,7 +1735,7 @@ export const AACView: React.FC = () => {
             <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-500/10 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shadow-xs shrink-0 p-1 border border-amber-200">
-                  <img src="/assets/stickers/aac_sentences.png" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
+                  <img src="/assets/stickers/aac_sentences.webp" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
@@ -1931,7 +1931,7 @@ export const AACView: React.FC = () => {
                           )}
                           {fav.isParentPinned && (
                             <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1">
-                              <img src="/assets/stickers/aac_core.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                              <img src="/assets/stickers/aac_core.webp" alt="" className="w-3.5 h-3.5 object-contain" />
                               <span>Pinned</span>
                             </span>
                           )}

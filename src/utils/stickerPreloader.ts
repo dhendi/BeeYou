@@ -116,11 +116,14 @@ export function preloadRacingThemeStickers() {
   preloadStickerUrls(racingUrls, false);
 }
 
+import { preloadThemeAssetsImmediate } from './appAssetPreloader';
+
 /**
  * Preloads stickers for a specific theme ID.
  */
 export function preloadThemeStickers(themeId?: string) {
   if (!themeId) return;
+  preloadThemeAssetsImmediate(themeId);
   if (themeId === 'theme-turtle' || themeId === 'turtle') {
     preloadTurtleThemeStickers();
   } else if (themeId === 'theme-dino' || themeId === 'dinosaur') {
@@ -151,54 +154,54 @@ export function preloadAllStickersOnIdle() {
   // 1. Critical common dashboard stickers needed on first paint
   const immediateCommonUrls = [
     // Mascots & Greetings
-    '/assets/stickers/bee_mascot.png',
-    '/assets/stickers/turtle_mascot.png',
-    '/assets/stickers/frog_mascot.png',
-    '/assets/stickers/train_mascot.png',
-    '/assets/stickers/dino_rex_mascot.png',
-    '/assets/stickers/dino_rex.png',
-    '/assets/stickers/turtle_welcome_sign.png',
+    '/assets/stickers/bee_mascot.webp',
+    '/assets/stickers/turtle_mascot.webp',
+    '/assets/stickers/frog_mascot.webp',
+    '/assets/stickers/train_mascot.webp',
+    '/assets/stickers/dino_rex_mascot.webp',
+    '/assets/stickers/dino_rex.webp',
+    '/assets/stickers/turtle_welcome_sign.webp',
 
     // Dashboard Tools & Badges
-    '/assets/stickers/about_id.png',
-    '/assets/stickers/fidget_bubbles.png',
-    '/assets/stickers/timer_clock.png',
-    '/assets/stickers/feelings_thermometer.png',
-    '/assets/stickers/spoons_energy.png',
-    '/assets/stickers/decision_wheel.png',
-    '/assets/stickers/medications_health.png',
-    '/assets/stickers/passport_book.png',
-    '/assets/stickers/story_plans_change.png',
-    '/assets/stickers/turtle_arched_bridge.png',
-    '/assets/stickers/dino_footprint_loop.png',
-    '/assets/stickers/turtle_seedling.png',
-    '/assets/stickers/turtle_lily_pads.png',
+    '/assets/stickers/about_id.webp',
+    '/assets/stickers/fidget_bubbles.webp',
+    '/assets/stickers/timer_clock.webp',
+    '/assets/stickers/feelings_thermometer.webp',
+    '/assets/stickers/spoons_energy.webp',
+    '/assets/stickers/decision_wheel.webp',
+    '/assets/stickers/medications_health.webp',
+    '/assets/stickers/passport_book.webp',
+    '/assets/stickers/story_plans_change.webp',
+    '/assets/stickers/turtle_arched_bridge.webp',
+    '/assets/stickers/dino_footprint_loop.webp',
+    '/assets/stickers/turtle_seedling.webp',
+    '/assets/stickers/turtle_lily_pads.webp',
 
     // Core High-Frequency Routines & Steps
-    '/assets/stickers/alarm_clock.png',
-    '/assets/stickers/routine_toilet_restroom.png',
-    '/assets/stickers/toothbrush.png',
-    '/assets/stickers/soap_wash_hands.png',
-    '/assets/stickers/clothes_dressed.png',
-    '/assets/stickers/pancakes_breakfast.png',
-    '/assets/stickers/backpack_school.png',
-    '/assets/stickers/sneaker_shoes.png',
-    '/assets/stickers/apple_snack.png',
-    '/assets/stickers/folder_schoolwork.png',
-    '/assets/stickers/pencil_write.png',
-    '/assets/stickers/teddy_bear.png',
-    '/assets/stickers/shower_wash.png',
-    '/assets/stickers/school_bus.png',
-    '/assets/stickers/bedtime_sleep.png',
-    '/assets/stickers/breathing_cloud.png',
-    '/assets/stickers/drink_water.png',
-    '/assets/stickers/drink_cup.png',
-    '/assets/stickers/fav_quiet_break.png',
-    '/assets/stickers/help_sos.png',
-    '/assets/stickers/task_done.png',
-    '/assets/stickers/adventure_dentist.png',
-    '/assets/stickers/turtle_mineral_polishing_basin.png',
-    '/assets/stickers/dino_trex_tooth_care.png',
+    '/assets/stickers/alarm_clock.webp',
+    '/assets/stickers/routine_toilet_restroom.webp',
+    '/assets/stickers/toothbrush.webp',
+    '/assets/stickers/soap_wash_hands.webp',
+    '/assets/stickers/clothes_dressed.webp',
+    '/assets/stickers/pancakes_breakfast.webp',
+    '/assets/stickers/backpack_school.webp',
+    '/assets/stickers/sneaker_shoes.webp',
+    '/assets/stickers/apple_snack.webp',
+    '/assets/stickers/folder_schoolwork.webp',
+    '/assets/stickers/pencil_write.webp',
+    '/assets/stickers/teddy_bear.webp',
+    '/assets/stickers/shower_wash.webp',
+    '/assets/stickers/school_bus.webp',
+    '/assets/stickers/bedtime_sleep.webp',
+    '/assets/stickers/breathing_cloud.webp',
+    '/assets/stickers/drink_water.webp',
+    '/assets/stickers/drink_cup.webp',
+    '/assets/stickers/fav_quiet_break.webp',
+    '/assets/stickers/help_sos.webp',
+    '/assets/stickers/task_done.webp',
+    '/assets/stickers/adventure_dentist.webp',
+    '/assets/stickers/turtle_mineral_polishing_basin.webp',
+    '/assets/stickers/dino_trex_tooth_care.webp',
   ];
 
   // Immediately warm up the critical common stickers

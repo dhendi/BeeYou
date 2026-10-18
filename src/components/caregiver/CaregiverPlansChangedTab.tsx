@@ -238,7 +238,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
-              <img src="/assets/stickers/stethoscope.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/stethoscope.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <span className="font-black text-xs text-slate-800 block">{t("Dentist/Doctor Closed")}</span>
@@ -250,7 +250,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             className="p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
-              <img src="/assets/stickers/rain_cloud.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/rain_cloud.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <span className="font-black text-xs text-slate-800 block">{t("Rainy Day / Trip Cancelled")}</span>
@@ -262,7 +262,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
             className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition-all cursor-pointer flex flex-col justify-between"
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center p-0.5 mb-1.5 shrink-0">
-              <img src="/assets/stickers/school_building.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+              <img src="/assets/stickers/school_building.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             </div>
             <div>
               <span className="font-black text-xs text-slate-800 block">{t("School Early Dismissal")}</span>
@@ -460,7 +460,7 @@ export const CaregiverPlansChangedTab: React.FC<CaregiverPlansChangedTabProps> =
                 if (newStepTitle.trim()) {
                   setPcSteps([
                     ...pcSteps,
-                    { title: newStepTitle.trim(), emoji: newStepEmoji || '/assets/stickers/star_gold.png', time: newStepTime.trim() || undefined },
+                    { title: newStepTitle.trim(), emoji: newStepEmoji || '/assets/stickers/star_gold.webp', time: newStepTime.trim() || undefined },
                   ]);
                   setNewStepTitle('');
                   setNewStepTime('');

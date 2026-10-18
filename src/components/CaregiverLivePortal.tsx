@@ -66,10 +66,10 @@ const PREDEFINED_RESPONSES: Array<{
   label: string;
   stickerSrc?: string;
 }> = [
-  { id: 'im_here', text: "I'm here for you ❤️", emoji: '❤️', label: "I'm here", stickerSrc: '/assets/stickers/heart_here_for_you.png' },
-  { id: 'coming', text: "I'm on my way 🚗", emoji: '🚗', label: "I'm coming", stickerSrc: '/assets/stickers/car_on_my_way.png' },
-  { id: 'okay', text: "Okay, got your message 👍", emoji: '👍', label: "Okay", stickerSrc: '/assets/stickers/caregiver_response_okay.png' },
-  { id: 'give_minutes', text: "Give me a few minutes ⏳", emoji: '⏳', label: "Give me a few minutes", stickerSrc: '/assets/stickers/wall_clock.png' },
+  { id: 'im_here', text: "I'm here for you ❤️", emoji: '❤️', label: "I'm here", stickerSrc: '/assets/stickers/heart_here_for_you.webp' },
+  { id: 'coming', text: "I'm on my way 🚗", emoji: '🚗', label: "I'm coming", stickerSrc: '/assets/stickers/car_on_my_way.webp' },
+  { id: 'okay', text: "Okay, got your message 👍", emoji: '👍', label: "Okay", stickerSrc: '/assets/stickers/caregiver_response_okay.webp' },
+  { id: 'give_minutes', text: "Give me a few minutes ⏳", emoji: '⏳', label: "Give me a few minutes", stickerSrc: '/assets/stickers/wall_clock.webp' },
 ];
 
 export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({ 

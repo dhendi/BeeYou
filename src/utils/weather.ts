@@ -79,40 +79,40 @@ function getFallbackCoordinates(): { lat: number; lon: number; city: string } {
 function parseWmoCode(code: number, windMph: number = 0): { condition: string; emoji: string; bgGradient: string; stickerSrc: string } {
   // If severe thunderstorm
   if (code >= 95) {
-    return { condition: 'Thunderstorm (Stay Safe)', emoji: '🌩️', bgGradient: 'from-purple-100/80 via-slate-100 to-indigo-100', stickerSrc: '/assets/stickers/thunderstorm_weather.png' };
+    return { condition: 'Thunderstorm (Stay Safe)', emoji: '🌩️', bgGradient: 'from-purple-100/80 via-slate-100 to-indigo-100', stickerSrc: '/assets/stickers/thunderstorm_weather.webp' };
   }
   // Snow & flurries
   if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
-    return { condition: 'Snow & Quiet Flurries', emoji: '❄️', bgGradient: 'from-cyan-100/80 via-white to-sky-100', stickerSrc: '/assets/stickers/snow_weather.png' };
+    return { condition: 'Snow & Quiet Flurries', emoji: '❄️', bgGradient: 'from-cyan-100/80 via-white to-sky-100', stickerSrc: '/assets/stickers/snow_weather.webp' };
   }
   // Rain & Drizzle
   if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) {
-    return { condition: 'Rain Showers', emoji: '🌧️', bgGradient: 'from-indigo-100/80 via-sky-50 to-slate-50', stickerSrc: '/assets/stickers/rain_cloud.png' };
+    return { condition: 'Rain Showers', emoji: '🌧️', bgGradient: 'from-indigo-100/80 via-sky-50 to-slate-50', stickerSrc: '/assets/stickers/rain_cloud.webp' };
   }
   if (code >= 51 && code <= 57) {
-    return { condition: 'Cozy Light Drizzle', emoji: '🌦️', bgGradient: 'from-teal-100/80 via-sky-50 to-cyan-50', stickerSrc: '/assets/stickers/rain_cloud.png' };
+    return { condition: 'Cozy Light Drizzle', emoji: '🌦️', bgGradient: 'from-teal-100/80 via-sky-50 to-cyan-50', stickerSrc: '/assets/stickers/rain_cloud.webp' };
   }
   // Fog
   if (code === 45 || code === 48) {
-    return { condition: 'Foggy & Gentle Quiet', emoji: '🌫️', bgGradient: 'from-slate-100 via-teal-50 to-sky-50', stickerSrc: '/assets/stickers/fog_mist_weather.png' };
+    return { condition: 'Foggy & Gentle Quiet', emoji: '🌫️', bgGradient: 'from-slate-100 via-teal-50 to-sky-50', stickerSrc: '/assets/stickers/fog_mist_weather.webp' };
   }
   // High winds with clear/overcast sky
   if (windMph >= 18 && code <= 3) {
-    return { condition: 'Breezy & Windy', emoji: '💨', bgGradient: 'from-sky-100/80 via-slate-50 to-teal-50', stickerSrc: '/assets/stickers/windy_weather.png' };
+    return { condition: 'Breezy & Windy', emoji: '💨', bgGradient: 'from-sky-100/80 via-slate-50 to-teal-50', stickerSrc: '/assets/stickers/windy_weather.webp' };
   }
   // Overcast
   if (code === 3) {
-    return { condition: 'Overcast & Soft Daylight', emoji: '☁️', bgGradient: 'from-slate-100 via-sky-50 to-indigo-50', stickerSrc: '/assets/stickers/cloudy_weather.png' };
+    return { condition: 'Overcast & Soft Daylight', emoji: '☁️', bgGradient: 'from-slate-100 via-sky-50 to-indigo-50', stickerSrc: '/assets/stickers/cloudy_weather.webp' };
   }
   // Partly cloudy
   if (code === 1 || code === 2) {
-    return { condition: 'Partly Cloudy', emoji: '⛅', bgGradient: 'from-sky-100/80 via-slate-50 to-indigo-50', stickerSrc: '/assets/stickers/partly_cloudy.png' };
+    return { condition: 'Partly Cloudy', emoji: '⛅', bgGradient: 'from-sky-100/80 via-slate-50 to-indigo-50', stickerSrc: '/assets/stickers/partly_cloudy.webp' };
   }
   // Sunny & Clear
   if (code === 0) {
-    return { condition: 'Sunny & Clear', emoji: '☀️', bgGradient: 'from-amber-100/80 via-yellow-50 to-orange-50', stickerSrc: '/assets/stickers/outdoor_sun.png' };
+    return { condition: 'Sunny & Clear', emoji: '☀️', bgGradient: 'from-amber-100/80 via-yellow-50 to-orange-50', stickerSrc: '/assets/stickers/outdoor_sun.webp' };
   }
-  return { condition: 'Mild & Calm', emoji: '🌤️', bgGradient: 'from-amber-50 via-sky-50 to-indigo-50', stickerSrc: '/assets/stickers/partly_cloudy.png' };
+  return { condition: 'Mild & Calm', emoji: '🌤️', bgGradient: 'from-amber-50 via-sky-50 to-indigo-50', stickerSrc: '/assets/stickers/partly_cloudy.webp' };
 }
 
 export function getSensoryTip(tempF: number, code: number = 0, windMph: number = 5): string {
@@ -146,7 +146,7 @@ export const DEFAULT_WEATHER_DATA: LiveWeatherData = {
   tempC: 22,
   tempDisplay: '72°F • Mild',
   emoji: '☀️',
-  stickerSrc: '/assets/stickers/outdoor_sun.png',
+  stickerSrc: '/assets/stickers/outdoor_sun.webp',
   bgGradient: 'from-amber-100/80 via-yellow-50 to-orange-50',
   sensoryTip: 'Bright natural daylight! A cap or sunglasses can help your eyes feel calm.',
   locationName: 'Local Weather',

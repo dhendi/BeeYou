@@ -15,7 +15,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Morning Superstar',
     category: 'routine',
     emoji: '🌅',
-    src: '/assets/stickers/morning_sunrise.png',
+    src: '/assets/stickers/morning_sunrise.webp',
     description: 'Woke up, stretched, and greeted the new day!',
     isRoutineReward: true,
   },
@@ -24,7 +24,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Starry Dreamer',
     category: 'routine',
     emoji: '🌙',
-    src: '/assets/stickers/evening_moon.png',
+    src: '/assets/stickers/evening_moon.webp',
     description: 'Cozy in pajamas, calm and ready for sweet dreams.',
     isRoutineReward: true,
   },
@@ -33,7 +33,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Sparkle Chomper',
     category: 'routine',
     emoji: '🪥',
-    src: '/assets/stickers/toothbrush.png',
+    src: '/assets/stickers/toothbrush.webp',
     description: 'Brushed top and bottom teeth sparkling clean!',
     isRoutineReward: true,
   },
@@ -42,7 +42,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Backpack Hero',
     category: 'routine',
     emoji: '🎒',
-    src: '/assets/stickers/backpack_school.png',
+    src: '/assets/stickers/backpack_school.webp',
     description: 'Zipped up backpack with all essentials packed.',
     isRoutineReward: true,
   },
@@ -51,7 +51,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Tidy Champion',
     category: 'routine',
     emoji: '🧸',
-    src: '/assets/stickers/toy_box.png',
+    src: '/assets/stickers/toy_box.webp',
     description: 'Put every toy and block away into its cozy home.',
     isRoutineReward: true,
   },
@@ -60,7 +60,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Routine Rocker',
     category: 'routine',
     emoji: '🎸',
-    src: '/assets/stickers/guitar_rocker.png',
+    src: '/assets/stickers/guitar_rocker.webp',
     description: 'Rocked your daily schedule step by step!',
     isRoutineReward: true,
   },
@@ -71,7 +71,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Alarm Clock',
     category: 'daily',
     emoji: '⏰',
-    src: '/assets/stickers/alarm_clock.png',
+    src: '/assets/stickers/alarm_clock.webp',
     description: 'Bright and early morning wake up chime.',
   },
   {
@@ -79,7 +79,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Fluffy Pancakes',
     category: 'daily',
     emoji: '🥞',
-    src: '/assets/stickers/pancakes_breakfast.png',
+    src: '/assets/stickers/pancakes_breakfast.webp',
     description: 'Golden stack of pancakes with warm syrup.',
   },
   {
@@ -87,7 +87,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Crisp Apple',
     category: 'daily',
     emoji: '🍎',
-    src: '/assets/stickers/apple_snack.png',
+    src: '/assets/stickers/apple_snack.webp',
     description: 'Sweet and crunchy healthy afternoon snack.',
   },
   {
@@ -95,7 +95,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Ready Sneakers',
     category: 'daily',
     emoji: '👟',
-    src: '/assets/stickers/sneaker_shoes.png',
+    src: '/assets/stickers/sneaker_shoes.webp',
     description: 'Tied up shoes and ready to step outside.',
   },
   {
@@ -103,7 +103,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Foamy Soap',
     category: 'daily',
     emoji: '🧼',
-    src: '/assets/stickers/soap_wash_hands.png',
+    src: '/assets/stickers/soap_wash_hands.webp',
     description: 'Warm water and gentle sudsy bubbles.',
   },
   {
@@ -111,7 +111,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Restroom Break',
     category: 'daily',
     emoji: '🚽',
-    src: '/assets/stickers/routine_toilet_restroom.png',
+    src: '/assets/stickers/routine_toilet_restroom.webp',
     description: 'Clean bathroom break and flushed with care.',
   },
   {
@@ -119,7 +119,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Fresh Water',
     category: 'daily',
     emoji: '💧',
-    src: '/assets/stickers/routine_water_drink.png',
+    src: '/assets/stickers/routine_water_drink.webp',
     description: 'Cool refreshing glass of water.',
   },
   {
@@ -127,7 +127,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Soft Pajamas',
     category: 'daily',
     emoji: '🩳',
-    src: '/assets/stickers/pajamas_shorts.png',
+    src: '/assets/stickers/pajamas_shorts.webp',
     description: 'Coziest loungewear for evening wind-down.',
   },
   {
@@ -135,7 +135,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Writing Pencil',
     category: 'daily',
     emoji: '✏️',
-    src: '/assets/stickers/pencil_write.png',
+    src: '/assets/stickers/pencil_write.webp',
     description: 'Drawing pictures, numbers, and stories.',
   },
   {
@@ -143,7 +143,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Schoolwork Folder',
     category: 'daily',
     emoji: '📁',
-    src: '/assets/stickers/folder_schoolwork.png',
+    src: '/assets/stickers/folder_schoolwork.webp',
     description: 'Neat papers, drawings, and notes.',
   },
 
@@ -153,7 +153,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Friendly Dino Rex',
     category: 'adventures',
     emoji: '🦖',
-    src: '/assets/stickers/dino_rex.png',
+    src: '/assets/stickers/dino_rex.webp',
     description: 'Prehistoric green pal ready for discovery.',
   },
   {
@@ -161,7 +161,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Golden Locomotive',
     category: 'adventures',
     emoji: '🚂',
-    src: '/assets/stickers/golden_train.png',
+    src: '/assets/stickers/golden_train.webp',
     description: 'Full steam ahead across scenic railway bridges.',
   },
   {
@@ -169,7 +169,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Cosmic Rocket',
     category: 'adventures',
     emoji: '🚀',
-    src: '/assets/stickers/rocket_adventure.png',
+    src: '/assets/stickers/rocket_adventure.webp',
     description: 'Blasting off to starry galaxy adventures.',
   },
   {
@@ -177,7 +177,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Swimming Pool',
     category: 'adventures',
     emoji: '🏊',
-    src: '/assets/stickers/adventure_swimming_pool.png',
+    src: '/assets/stickers/adventure_swimming_pool.webp',
     description: 'Splashing in the pool with goggles on.',
   },
   {
@@ -185,7 +185,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Cinema Popcorn',
     category: 'adventures',
     emoji: '🍿',
-    src: '/assets/stickers/adventure_movie_cinema.png',
+    src: '/assets/stickers/adventure_movie_cinema.webp',
     description: 'Big screen movie with warm buttered popcorn.',
   },
   {
@@ -193,7 +193,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Bowling Strike',
     category: 'adventures',
     emoji: '🎳',
-    src: '/assets/stickers/adventure_bowling_alley.png',
+    src: '/assets/stickers/adventure_bowling_alley.webp',
     description: 'Rolling the ball and knocking down all 10 pins!',
   },
   {
@@ -201,7 +201,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Camping Tent',
     category: 'adventures',
     emoji: '⛺',
-    src: '/assets/stickers/adventure_camping_tent.png',
+    src: '/assets/stickers/adventure_camping_tent.webp',
     description: 'Roasting marshmallows around a safe campfire.',
   },
   {
@@ -209,7 +209,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Museum Columns',
     category: 'adventures',
     emoji: '🏛️',
-    src: '/assets/stickers/adventure_museum_visit.png',
+    src: '/assets/stickers/adventure_museum_visit.webp',
     description: 'Exploring dinosaur bones and ancient treasures.',
   },
   {
@@ -217,7 +217,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'School Bus',
     category: 'adventures',
     emoji: '🚌',
-    src: '/assets/stickers/school_bus.png',
+    src: '/assets/stickers/school_bus.webp',
     description: 'Wheels on the bus going all through town.',
   },
   {
@@ -225,7 +225,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Pizza Slice',
     category: 'adventures',
     emoji: '🍕',
-    src: '/assets/stickers/pizza_slice.png',
+    src: '/assets/stickers/pizza_slice.webp',
     description: 'Cheesy delicious slice of celebration pizza.',
   },
 
@@ -235,7 +235,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Fidget Bubbles',
     category: 'calm',
     emoji: '🫧',
-    src: '/assets/stickers/fidget_bubbles.png',
+    src: '/assets/stickers/fidget_bubbles.webp',
     description: 'Translucent pastel popping bubbles for sensory calm.',
   },
   {
@@ -243,7 +243,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Breathing Cloud',
     category: 'calm',
     emoji: '🌬️',
-    src: '/assets/stickers/breathing_cloud.png',
+    src: '/assets/stickers/breathing_cloud.webp',
     description: 'Gentle breeze swirl to reset breathing pace.',
   },
   {
@@ -251,7 +251,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Warm Hot Cocoa',
     category: 'calm',
     emoji: '☕',
-    src: '/assets/stickers/hot_cocoa.png',
+    src: '/assets/stickers/hot_cocoa.webp',
     description: 'Warm sweet mug with mini marshmallows.',
   },
   {
@@ -259,7 +259,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Rainbow Heart',
     category: 'calm',
     emoji: '🌈',
-    src: '/assets/stickers/rainbow_heart.png',
+    src: '/assets/stickers/rainbow_heart.webp',
     description: 'Full of love, kindness, and big feelings.',
   },
   {
@@ -267,7 +267,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Gold Star Badge',
     category: 'calm',
     emoji: '⭐',
-    src: '/assets/stickers/star_gold.png',
+    src: '/assets/stickers/star_gold.webp',
     description: 'Shining bright for great patience and effort!',
   },
   {
@@ -275,7 +275,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Planet Saturn',
     category: 'calm',
     emoji: '🪐',
-    src: '/assets/stickers/planet_saturn.png',
+    src: '/assets/stickers/planet_saturn.webp',
     description: 'Gentle ringed world floating peacefully in space.',
   },
   {
@@ -283,7 +283,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Magic Star Wand',
     category: 'calm',
     emoji: '🪄',
-    src: '/assets/stickers/magic_wand.png',
+    src: '/assets/stickers/magic_wand.webp',
     description: 'Sprinkling calm focus and magic wherever you go.',
   },
   {
@@ -291,7 +291,7 @@ export const SCRAPBOOK_STICKER_CATALOG: ScrapbookCatalogItem[] = [
     title: 'Cozy Potted Sprout',
     category: 'calm',
     emoji: '🪴',
-    src: '/assets/stickers/potted_plant.png',
+    src: '/assets/stickers/potted_plant.webp',
     description: 'Gently watered and growing strong every day.',
   },
 ];

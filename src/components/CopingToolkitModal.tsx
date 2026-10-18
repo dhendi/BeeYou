@@ -197,35 +197,35 @@ export const CopingToolkitModal: React.FC = () => {
       step: 5,
       title: 'Look Around: 5 things you can see',
       prompt: 'Notice colors, shapes, or lights in the room.',
-      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.webp'),
       fallbackIcon: Eye,
     },
     {
       step: 4,
       title: 'Touch Gently: 4 things you can feel',
       prompt: 'Touch your soft clothes, the cool floor, or your comfort toy.',
-      stickerSrc: '/assets/stickers/grounding_touch_hand.png',
+      stickerSrc: '/assets/stickers/grounding_touch_hand.webp',
       fallbackIcon: Hand,
     },
     {
       step: 3,
       title: 'Listen Closely: 3 things you can hear',
       prompt: 'Listen to the quiet hum, birds outside, or your own breath.',
-      stickerSrc: '/assets/stickers/grounding_hear_ear.png',
+      stickerSrc: '/assets/stickers/grounding_hear_ear.webp',
       fallbackIcon: Volume2,
     },
     {
       step: 2,
       title: 'Smell: 2 scents around you',
       prompt: 'Take a soft breath through your nose.',
-      stickerSrc: '/assets/stickers/grounding_smell_nose.png',
+      stickerSrc: '/assets/stickers/grounding_smell_nose.webp',
       fallbackIcon: Wind,
     },
     {
       step: 1,
       title: 'Taste / Sip: 1 cool sip of water',
       prompt: 'Take a gentle swallow or relax your jaw.',
-      stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.webp'),
       fallbackIcon: Droplets,
     },
   ];
@@ -235,31 +235,31 @@ export const CopingToolkitModal: React.FC = () => {
       title: 'Sensory Room Soundscapes',
       subtitle: 'Procedural acoustic masking & soothing sensory frequencies',
       icon: Volume2,
-      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_pond_reeds.png' : getThemedStickerSrc('/assets/stickers/music_sensory.png'),
+      stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_pond_reeds.webp' : getThemedStickerSrc('/assets/stickers/music_sensory.webp'),
     },
     breathing: {
       title: 'Sensory Breathing Pacer',
       subtitle: 'Follow the gentle bubble to pause, breathe, and reset',
       icon: Wind,
-      stickerSrc: getThemedStickerSrc('/assets/stickers/breathing_cloud.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/breathing_cloud.webp'),
     },
     grounding: {
       title: '5-4-3-2-1 Grounding',
       subtitle: 'Sensory countdown to reset during overwhelm',
       icon: Eye,
-      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/eye_see.webp'),
     },
     timer: {
       title: 'Break Timer',
       subtitle: 'Gentle visual timer to pause and reset',
       icon: Timer,
-      stickerSrc: getThemedStickerSrc('/assets/stickers/timer_clock.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/timer_clock.webp'),
     },
     strategies: {
       title: 'Calming Coping Strategies',
       subtitle: 'Personalized regulation and comfort strategies',
       icon: Heart,
-      stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.png'),
+      stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.webp'),
     },
   };
 
@@ -271,11 +271,11 @@ export const CopingToolkitModal: React.FC = () => {
   const HeaderIcon = headerInfo.icon;
 
   const quickNeeds = [
-    { text: 'I want a glass of water.', stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.png'), fallbackIcon: Droplets },
-    { text: 'Can I have a hug?', stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.png'), fallbackIcon: Heart },
-    { text: 'I want to sit quietly.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_whispering_reed_quiet.png' : getThemedStickerSrc('/assets/stickers/fav_quiet_break.png'), fallbackIcon: VolumeX },
-    { text: 'I want my comfort item.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.png' : getThemedStickerSrc('/assets/stickers/toy_box.png'), fallbackIcon: Star },
-    { text: 'Can we go home?', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_moss_cottage_home.png' : '/assets/stickers/home_house.png', fallbackIcon: Home },
+    { text: 'I want a glass of water.', stickerSrc: getThemedStickerSrc('/assets/stickers/routine_water_drink.webp'), fallbackIcon: Droplets },
+    { text: 'Can I have a hug?', stickerSrc: getThemedStickerSrc('/assets/stickers/fav_love_heart.webp'), fallbackIcon: Heart },
+    { text: 'I want to sit quietly.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_whispering_reed_quiet.webp' : getThemedStickerSrc('/assets/stickers/fav_quiet_break.webp'), fallbackIcon: VolumeX },
+    { text: 'I want my comfort item.', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_cozy_shell_retreat.webp' : getThemedStickerSrc('/assets/stickers/toy_box.webp'), fallbackIcon: Star },
+    { text: 'Can we go home?', stickerSrc: isTurtleTheme ? '/assets/stickers/turtle_moss_cottage_home.webp' : '/assets/stickers/home_house.webp', fallbackIcon: Home },
   ];
 
   return (
@@ -356,10 +356,10 @@ export const CopingToolkitModal: React.FC = () => {
             isFrogTheme ? 'border-lime-200/80 bg-[#F4F9F1]' : isDinoTheme ? 'border-green-200/80 bg-[#F2F8F1]' : isTurtleTheme ? 'border-emerald-200/80 bg-[#EEF7F2]' : 'border-amber-200/80 bg-[#FFF9EE]'
           } p-2 gap-2 overflow-x-auto shrink-0 scrollbar-none`}>
             {[
-              { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.png', icon: Wind },
-              { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.png', icon: Heart },
-              { id: 'timer', label: 'Break Timer', stickerSrc: '/assets/stickers/timer_clock.png', icon: Timer },
-              { id: 'grounding', label: '5-4-3-2-1', stickerSrc: '/assets/stickers/eye_see.png', icon: Eye },
+              { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.webp', icon: Wind },
+              { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.webp', icon: Heart },
+              { id: 'timer', label: 'Break Timer', stickerSrc: '/assets/stickers/timer_clock.webp', icon: Timer },
+              { id: 'grounding', label: '5-4-3-2-1', stickerSrc: '/assets/stickers/eye_see.webp', icon: Eye },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               const TabIcon = tab.icon;
@@ -419,7 +419,7 @@ export const CopingToolkitModal: React.FC = () => {
               >
                 <div className="w-34 h-34 rounded-full bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-amber-950 shadow-inner">
                   <img
-                    src="/assets/stickers/calm_wind.png"
+                    src="/assets/stickers/calm_wind.webp"
                     alt="Breathe"
                     className="w-10 h-10 object-contain drop-shadow-2xs select-none pointer-events-none mb-1 animate-pulse"
                     onError={(e) => {
@@ -612,7 +612,7 @@ export const CopingToolkitModal: React.FC = () => {
                 }}
                 className="mt-6 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#FFF2D4] hover:bg-[#FED676]/60 border-2 border-[#FED676] text-amber-950 text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                <img src="/assets/stickers/timer_clock.png" alt="Pie Clock" className="w-5 h-5 object-contain drop-shadow-2xs select-none" />
+                <img src="/assets/stickers/timer_clock.webp" alt="Pie Clock" className="w-5 h-5 object-contain drop-shadow-2xs select-none" />
                 <span>{t('Open Full Pie Clock')}</span>
               </button>
             </div>

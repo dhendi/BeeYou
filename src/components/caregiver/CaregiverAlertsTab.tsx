@@ -187,7 +187,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1 shrink-0">
-                      <img src="/assets/stickers/alert_sos_shield.png" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
+                      <img src="/assets/stickers/alert_sos_shield.webp" alt="" className="w-full h-full object-contain drop-shadow-2xs" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -223,9 +223,9 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
                   </span>
                   <div data-tour="alerts-quick-reply-buttons" className="flex items-center gap-2 flex-wrap">
                     {getQuickRepliesForAlert(alert, t).map((reply) => {
-                      const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.png' :
-                                        reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.png' :
-                                        reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.png' :
+                      const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
+                                        reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
+                                        reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
                                         reply.iconSrc;
                       const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
                       return (
