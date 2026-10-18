@@ -13,9 +13,30 @@ const isProd = process.env.NODE_ENV === 'production';
 
 app.use(express.json({ limit: '10mb' }));
 
+// Allowed origin patterns for Capacitor native apps (iOS / Android) and local development
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^capacitor:\/\/localhost$/,
+  /^https?:\/\/localhost(:[0-9]+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:[0-9]+)?$/,
+  /^https?:\/\/192\.168\.[0-9]+\.[0-9]+(:[0-9]+)?$/,
+  /^https?:\/\/10\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/,
+];
+
+function isOriginAllowed(origin?: string): boolean {
+  if (!origin) return true; // Direct native mobile app requests (Capacitor HTTP) or same-origin
+  return ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin));
+}
+
 // Security & CORS middleware
-app.use((_req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+app.use((req, res, next) => {
+  const origin = req.headers.origin as string | undefined;
+
+  if (isOriginAllowed(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Vary', 'Origin');
+  }
+
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('X-Content-Type-Options', 'nosniff');
@@ -23,7 +44,8 @@ app.use((_req, res, next) => {
   res.header('X-XSS-Protection', '1; mode=block');
   res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.header('Permissions-Policy', 'microphone=(self), camera=(self)');
-  if (_req.method === 'OPTIONS') {
+
+  if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
   next();
@@ -89,6 +111,18 @@ const apiLimiter = createRateLimiter({
   message: 'API rate limit exceeded. Please slow down.',
 });
 
+const alertLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 30,
+  message: 'Alert limit reached. Please wait a moment before sending more alerts.',
+});
+
+const recoverEmailLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 15,
+  message: 'Too many recovery attempts. Please wait a minute and try again.',
+});
+
 const ttsLimiter = createRateLimiter({
   windowMs: 60 * 1000,
   maxRequests: 120,
@@ -103,8 +137,37 @@ const translateLimiter = createRateLimiter({
 
 app.use('/api/translate', translateLimiter);
 app.use('/api/tts', ttsLimiter);
+app.use('/api/family/recover-email', recoverEmailLimiter);
+app.use('/api/family/alert', alertLimiter);
 app.use('/api/family', apiLimiter);
 app.use('/api/caregiver', apiLimiter);
+
+/**
+ * Strict validation and sanitization for family sync codes.
+ * Ensures code matches safe alphanumeric format (3-32 characters),
+ * completely blocking directory traversal ('..') and path injection.
+ */
+export function sanitizeFamilyCode(code: unknown): string | null {
+  if (!code || typeof code !== 'string') return null;
+  const clean = code.trim().toUpperCase();
+  if (!/^[A-Z0-9-]{3,32}$/.test(clean) || clean.includes('..')) {
+    return null;
+  }
+  return clean;
+}
+
+// Global Express route param handler for :code across all family and caregiver endpoints
+app.param('code', (req, res, next, rawCode) => {
+  const sanitized = sanitizeFamilyCode(rawCode);
+  if (!sanitized) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid family code format. Codes must contain only letters, numbers, and hyphens.',
+    });
+  }
+  req.params.code = sanitized;
+  next();
+});
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -506,9 +569,18 @@ async function flushDirtyFamilies(): Promise<void> {
 
     // Write each dirty family atomically to its own file (isolated, non-blocking)
     for (const code of codesToFlush) {
-      const state = activeFamilyStates.get(code);
+      const sanitized = sanitizeFamilyCode(code);
+      if (!sanitized) continue;
+
+      const state = activeFamilyStates.get(sanitized);
       if (state) {
-        const filePath = path.join(FAMILIES_DIR, `${code}.json`);
+        const filePath = path.join(FAMILIES_DIR, `${sanitized}.json`);
+        // Defense-in-depth: verify target file path is strictly inside FAMILIES_DIR
+        const resolvedPath = path.resolve(filePath);
+        if (!resolvedPath.startsWith(path.resolve(FAMILIES_DIR))) {
+          console.error(`[Security] Blocked path traversal attempt for code: ${code}`);
+          continue;
+        }
         const tempPath = `${filePath}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
         const json = JSON.stringify(state, null, 2);
         await fs.promises.writeFile(tempPath, json, 'utf-8');
@@ -534,7 +606,7 @@ async function flushDirtyFamilies(): Promise<void> {
 
 // Mark a family state as updated and trigger asynchronous persistence
 function saveFamilyState(code: string, state?: SharedFamilyState, immediate = false): void {
-  const cleanCode = code.trim().toUpperCase();
+  const cleanCode = sanitizeFamilyCode(code) || 'BEE-DEMO';
   if (state) {
     activeFamilyStates.set(cleanCode, state);
   }
@@ -583,7 +655,7 @@ function saveAllFamilyStates(_map?: Map<string, SharedFamilyState>, specificCode
 }
 
 function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState {
-  const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
+  const cleanCode = sanitizeFamilyCode(code) || 'BEE-DEMO';
   let state = activeFamilyStates.get(cleanCode);
 
   if (!state) {
@@ -1582,14 +1654,24 @@ app.post('/api/caregiver/family/login', (req, res) => {
   return res.json({ success: true, account, message: `Logged in as ${cleanEmail}!` });
 });
 
-// Fetch account details by email
+// Fetch account details by email (sanitized - strips internal PIN)
 app.get('/api/caregiver/family/:email', (req, res) => {
   const cleanEmail = (req.params.email || '').trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes('@') || cleanEmail.length > 254) {
+    return res.status(400).json({ success: false, message: 'Invalid email format' });
+  }
   const account = familyAccounts.get(cleanEmail);
   if (!account) {
     return res.status(404).json({ success: false, message: 'Family account not found' });
   }
-  return res.json({ success: true, account });
+  const safeAccount = {
+    ...account,
+    childProfile: {
+      ...account.childProfile,
+      pin: undefined,
+    },
+  };
+  return res.json({ success: true, account: safeAccount });
 });
 
 // -------------------------------------------------------------
