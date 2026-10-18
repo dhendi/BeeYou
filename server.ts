@@ -307,6 +307,7 @@ interface CloudSyncEvent {
 export interface SharedFamilyState {
   familyCode: string;
   email: string;
+  backupEmail?: string;
   caregiverName: string;
   caregiverRole: string;
   childProfile: {
@@ -1210,8 +1211,9 @@ app.post('/api/family/state/:code', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
   const current = getOrCreateFamilyState(code);
 
-  const { routines, aacItems, plansChanged, childState, childProfile, caregiverName } = req.body || {};
+  const { routines, aacItems, plansChanged, childState, childProfile, caregiverName, backupEmail } = req.body || {};
 
+  if (backupEmail) current.backupEmail = String(backupEmail).trim().toLowerCase();
   if (Array.isArray(routines)) current.routines = routines;
   if (Array.isArray(aacItems)) current.aacItems = aacItems;
   if (plansChanged && typeof plansChanged === 'object') current.plansChanged = { ...current.plansChanged, ...plansChanged };
@@ -1243,6 +1245,42 @@ app.post('/api/family/state/:code', (req, res) => {
   });
 
   return res.json({ success: true, state: current });
+});
+
+// Lookup account by primary or backup email
+app.post('/api/family/recover-email', (req, res) => {
+  const { lookupEmail } = req.body || {};
+  const clean = String(lookupEmail || '').trim().toLowerCase();
+  if (!clean || !clean.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Please provide a valid email.' });
+  }
+
+  for (const [code, state] of activeFamilyStates.entries()) {
+    const primary = (state.email || '').trim().toLowerCase();
+    const backup = (state.backupEmail || '').trim().toLowerCase();
+
+    if (clean === backup || clean === primary) {
+      const parts = primary.split('@');
+      const name = parts[0];
+      const domain = parts[1] || 'domain.com';
+      const masked = name.length > 2
+        ? `${name[0]}${'*'.repeat(Math.min(name.length - 2, 4))}${name[name.length - 1]}`
+        : `${name[0]}*`;
+      return res.json({
+        success: true,
+        found: true,
+        primaryEmail: primary,
+        maskedPrimaryEmail: `${masked}@${domain}`,
+        familyCode: state.familyCode,
+      });
+    }
+  }
+
+  return res.json({
+    success: false,
+    found: false,
+    message: 'No account found matching this email or backup email.',
+  });
 });
 
 // 3. Child triggers an emergency / sensory overload alert

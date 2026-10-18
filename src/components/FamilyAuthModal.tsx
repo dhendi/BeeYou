@@ -16,6 +16,7 @@ import {
   getStoredFamilyAccount,
   logoutFamilyAccount,
   setActiveDeviceView,
+  sendAccountPasswordResetEmail,
   FamilyAccount
 } from '../services/authService';
 import { 
@@ -28,7 +29,7 @@ import { BeeMascot } from './BeeYouLogo';
 interface FamilyAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'demo' | 'login' | 'register';
+  initialTab?: 'demo' | 'login' | 'register' | 'forgot_password';
 }
 
 export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
@@ -43,12 +44,13 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     setIsParentMode,
     setLinkedDeviceCode,
     setShowCaregiverModal,
+    setShowPinModal,
     speak,
     settings,
     updateSettings,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register' | 'forgot_password'>(initialTab);
   const [currentAccount, setCurrentAccount] = useState<FamilyAccount | null>(() => getStoredFamilyAccount());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -59,9 +61,16 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
+  // Forgot password & PIN recovery state
+  const [forgotInput, setForgotInput] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
+
   // Register form state
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [regBackupEmail, setRegBackupEmail] = useState('');
   const [regCaregiverName, setRegCaregiverName] = useState('');
   const [regCaregiverRole, setRegCaregiverRole] = useState('Parent');
   const [regChildName, setRegChildName] = useState('');
@@ -151,6 +160,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           }
         }
         onClose();
+        if (typeof window !== 'undefined' && localStorage.getItem('beeyou_pending_pin_reset') === 'true') {
+          setShowPinModal(true);
+        }
       }, 200);
     } catch (err) {
       console.error('Failed to apply account context:', err);
@@ -238,6 +250,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       const res = await registerSharedFamilyAccount({
         email: regEmail,
         password: regPassword,
+        backupEmail: regBackupEmail,
         caregiverName: regCaregiverName,
         caregiverRole: regCaregiverRole,
         childName: regChildName,
@@ -257,6 +270,36 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     } catch (err: any) {
       setRegLoading(false);
       setRegError(err?.message || 'Registration failed unexpectedly. Please try again.');
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotInput.trim()) {
+      setForgotError('Please enter your primary email or registered backup email.');
+      return;
+    }
+    try {
+      setForgotLoading(true);
+      setForgotError(null);
+      setForgotSuccess(null);
+      const res = await sendAccountPasswordResetEmail(forgotInput);
+      setForgotLoading(false);
+      if (res.success) {
+        setForgotSuccess(res.message);
+        try {
+          localStorage.setItem('beeyou_pending_pin_reset', 'true');
+          playChime('complete');
+        } catch {}
+      } else {
+        setForgotError(res.message);
+        try {
+          playChime('tap');
+        } catch {}
+      }
+    } catch (err: any) {
+      setForgotLoading(false);
+      setForgotError(err?.message || 'Could not send reset email. Please check your network.');
     }
   };
 
@@ -355,6 +398,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           >
             <span>Create New Family</span>
           </button>
+
+          {activeTab === 'forgot_password' && (
+            <button
+              type="button"
+              className="flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center bg-indigo-700 text-white shadow-xs font-black"
+            >
+              <span>Recover Account</span>
+            </button>
+          )}
         </div>
 
         {/* MODAL BODY CONTENT */}
@@ -490,9 +542,24 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
-                    Password (or PIN):
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
+                      Password (or PIN):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('forgot_password');
+                        setForgotInput(loginEmail);
+                        setForgotError(null);
+                        setForgotSuccess(null);
+                        playChime('tap');
+                      }}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <div>
                     <input
                       type="password"
@@ -593,7 +660,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   <span>Continue with Google</span>
                 </button>
 
-                <div className="flex items-center justify-center pt-1">
+                <div className="flex flex-col items-center justify-center gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -603,6 +670,20 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
                   >
                     Fill Demo Credentials (demo@beeyou.app)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('forgot_password');
+                      setForgotInput(loginEmail);
+                      setForgotError(null);
+                      setForgotSuccess(null);
+                      playChime('tap');
+                    }}
+                    className="text-xs font-medium text-slate-500 hover:text-indigo-600 underline cursor-pointer"
+                  >
+                    Forgot primary email, password, or PIN?
                   </button>
                 </div>
               </div>
@@ -684,6 +765,22 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       required
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                    Backup Recovery Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    value={regBackupEmail}
+                    onChange={(e) => setRegBackupEmail(e.target.value)}
+                    placeholder="e.g. secondary@gmail.com or spouse@gmail.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
+                  />
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    Used to safely recover your family space if you ever forget your primary email address.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -801,6 +898,80 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   {regLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   <span>Create Shared Family Account</span>
                 </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 4: FORGOT PASSWORD / ACCOUNT & PIN RECOVERY */}
+          {activeTab === 'forgot_password' && (
+            <form onSubmit={handleForgotPasswordSubmit} className="space-y-4 animate-in fade-in">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-stone-200 dark:border-slate-700 shadow-xs space-y-4">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Recover Family Account &amp; PIN
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">
+                    Enter your primary family email or your registered backup recovery email. We will send you a secure link to reset your password and choose a new Caregiver PIN.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                    Primary or Backup Recovery Email:
+                  </label>
+                  <input
+                    type="email"
+                    value={forgotInput}
+                    onChange={(e) => setForgotInput(e.target.value)}
+                    placeholder="e.g. family@gmail.com or secondary@gmail.com"
+                    className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-sm focus:border-indigo-500 outline-none"
+                    required
+                    autoFocus
+                  />
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    Forgot your primary email? Enter your backup email and we will locate your family space.
+                  </p>
+                </div>
+
+                {forgotError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
+                    <span>{forgotError}</span>
+                  </div>
+                )}
+
+                {forgotSuccess && (
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold space-y-1">
+                    <p className="font-black text-emerald-950">Reset Link Dispatched</p>
+                    <p className="font-normal text-emerald-800 leading-snug">{forgotSuccess}</p>
+                    <p className="font-normal text-emerald-700 text-[11px] pt-1">
+                      Check your inbox or spam folder. When you click the link and sign back in, you will be prompted to set a new 4-digit PIN!
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {forgotLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  <span>Send Password &amp; PIN Reset Link</span>
+                </button>
+
+                <div className="flex items-center justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('login');
+                      setForgotError(null);
+                      setForgotSuccess(null);
+                      playChime('tap');
+                    }}
+                    className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white underline cursor-pointer"
+                  >
+                    Return to Sign In
+                  </button>
+                </div>
               </div>
             </form>
           )}

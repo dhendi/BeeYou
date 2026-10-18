@@ -10,6 +10,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendEmailVerification,
+  sendPasswordResetEmail,
   reload,
   User as FirebaseUser
 } from 'firebase/auth';
@@ -36,6 +37,7 @@ export interface FamilyAccount {
   lastSyncedAt: string;
   isDemoAccount?: boolean;
   emailVerified?: boolean;
+  backupEmail?: string;
 }
 
 const FAMILY_ACCOUNT_KEY = 'beeyou_family_account';
@@ -346,6 +348,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; account?: F
 export async function registerSharedFamilyAccount(params: {
   email: string;
   password?: string;
+  backupEmail?: string;
   caregiverName: string;
   caregiverRole: string;
   childName: string;
@@ -353,6 +356,7 @@ export async function registerSharedFamilyAccount(params: {
   pin?: string;
 }): Promise<{ success: boolean; account?: FamilyAccount; message: string }> {
   const cleanEmail = params.email.trim().toLowerCase();
+  const cleanBackupEmail = params.backupEmail?.trim().toLowerCase();
 
   if (!cleanEmail || !cleanEmail.includes('@')) {
     return { success: false, message: 'Please enter a valid email address.' };
@@ -405,6 +409,7 @@ export async function registerSharedFamilyAccount(params: {
   let newAccount: FamilyAccount = {
     id: firebaseUid,
     email: cleanEmail,
+    backupEmail: cleanBackupEmail || undefined,
     caregiverName: params.caregiverName.trim() || 'Caregiver',
     caregiverRole: params.caregiverRole.trim() || 'Parent',
     familyCode: deterministicCode,
@@ -554,4 +559,95 @@ export function getStoredEmailVerificationStatus(): boolean {
   if (stored.emailVerified === true) return true;
   if (auth.currentUser?.emailVerified) return true;
   return false;
+}
+
+/**
+ * Send password reset email link (100% free via Firebase Auth).
+ * Also supports checking against registered backup email!
+ */
+export async function sendAccountPasswordResetEmail(
+  emailOrBackup: string
+): Promise<{ success: boolean; message: string; primaryEmailUsed?: string }> {
+  const clean = emailOrBackup.trim().toLowerCase();
+  if (!clean || !clean.includes('@')) {
+    return { success: false, message: 'Please enter a valid email address.' };
+  }
+
+  if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
+    return { success: true, message: 'Demo account password is pre-configured as: beeyou2026' };
+  }
+
+  let targetEmail = clean;
+  let isBackupMatch = false;
+
+  // 1. Check if input matches a backup email on the family server
+  try {
+    const res = await fetch('/api/family/recover-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lookupEmail: clean }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.found && data.primaryEmail) {
+        targetEmail = data.primaryEmail;
+        if (targetEmail !== clean) {
+          isBackupMatch = true;
+        }
+      }
+    }
+  } catch {}
+
+  // 2. Dispatch official Firebase password reset email to targetEmail
+  try {
+    await sendPasswordResetEmail(auth, targetEmail);
+    const msg = isBackupMatch
+      ? `We found your family space linked to this backup email! Password reset link sent to your primary email (${targetEmail}).`
+      : `Password reset link sent to ${clean}! Please check your inbox or spam folder.`;
+    return {
+      success: true,
+      message: msg,
+      primaryEmailUsed: targetEmail,
+    };
+  } catch (err: any) {
+    console.warn('sendPasswordResetEmail notice:', err?.code, err?.message);
+    if (err.code === 'auth/user-not-found') {
+      return {
+        success: false,
+        message: 'No account found with this email. Please check for typos or register a new family account.',
+      };
+    }
+    if (err.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        message: 'Too many reset attempts recently. Please wait a few moments and try again.',
+      };
+    }
+    return {
+      success: false,
+      message: err.message || 'Could not send reset link. Please verify the email address.',
+    };
+  }
+}
+
+/**
+ * Update the 4-digit caregiver PIN across stored family account and app settings
+ */
+export function updateCaregiverPin(newPin: string): boolean {
+  if (!newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+    return false;
+  }
+  const account = getStoredFamilyAccount();
+  if (account) {
+    account.childProfile.pin = newPin;
+    saveStoredFamilyAccount(account);
+  }
+  try {
+    const settingsRaw = localStorage.getItem('beeyou_settings');
+    const settings = settingsRaw ? JSON.parse(settingsRaw) : {};
+    settings.pin = newPin;
+    localStorage.setItem('beeyou_settings', JSON.stringify(settings));
+    window.dispatchEvent(new CustomEvent('beeyou_settings_updated', { detail: settings }));
+  } catch {}
+  return true;
 }
