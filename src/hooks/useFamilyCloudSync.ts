@@ -163,6 +163,16 @@ export function useFamilyCloudSync({
 
   const isSyncingFromRemoteRef = useRef(false);
 
+  // Auto-open Account Deletion interface if accessed via Google Play public deletion URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'delete-account' || params.get('delete') === 'true' || window.location.pathname === '/delete-account') {
+        setShowFamilyAuthModal(true);
+      }
+    }
+  }, []);
+
   // Unified Family Cloud Sync (Real-time remote control + live alert relay)
   useEffect(() => {
     const code = getPairingCode();
