@@ -128,13 +128,39 @@ export function setActiveDeviceView(view: 'child' | 'caregiver'): void {
   } catch {}
 }
 
+/**
+ * Generate a cryptographically random, unguessable pairing code.
+ * E.g., 'BEE-7K9M4X' (over 1 billion unique combinations).
+ * Uses unambiguous uppercase alphanumeric characters (no confusing 0/O, 1/I/L).
+ */
+export function generateSecureFamilyCode(): string {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let randomPart = '';
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(6);
+    crypto.getRandomValues(bytes);
+    for (let i = 0; i < 6; i++) {
+      randomPart += chars[bytes[i] % chars.length];
+    }
+  } else {
+    for (let i = 0; i < 6; i++) {
+      randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+  }
+  return `BEE-${randomPart}`;
+}
+
 export function getDeterministicFamilyCode(email: string): string {
   const clean = email.trim().toLowerCase();
   if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
     return 'BEE-DEMO';
   }
-  const prefix = clean.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 5).toUpperCase();
-  return `BEE-${prefix || 'FAM'}`;
+  // If this device already has an existing saved family account with a code, preserve it
+  const existing = getStoredFamilyAccount();
+  if (existing && existing.email === clean && existing.familyCode) {
+    return existing.familyCode;
+  }
+  return generateSecureFamilyCode();
 }
 
 /**

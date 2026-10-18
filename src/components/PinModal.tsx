@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
-import { X, Lock, KeyRound, Check, Users } from 'lucide-react';
+import { Lock, Users, AlertCircle } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { useModalBackHandler } from '../services/modalBackHandler';
 
@@ -9,15 +9,29 @@ export const PinModal: React.FC = () => {
   const { showPinModal, setShowPinModal, setIsParentMode, settings, setShowFamilyAuthModal } = useApp();
   const [pinInput, setPinInput] = useState('');
   const [error, setError] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   useModalBackHandler(showPinModal, () => {
     setShowPinModal(false);
     setPinInput('');
+    setError(false);
   });
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setCooldownSeconds((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldownSeconds]);
 
   if (!showPinModal) return null;
 
   const handleDigit = (digit: string) => {
+    if (cooldownSeconds > 0) return;
+
     if (pinInput.length < 4) {
       const next = pinInput + digit;
       setPinInput(next);
@@ -30,6 +44,7 @@ export const PinModal: React.FC = () => {
           setIsParentMode(true);
           setShowPinModal(false);
           setPinInput('');
+          setFailedAttempts(0);
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
             localStorage.setItem('beeyou_active_device_view', 'caregiver');
@@ -38,6 +53,14 @@ export const PinModal: React.FC = () => {
         } else {
           setError(true);
           playChime('clear');
+          const nextAttempts = failedAttempts + 1;
+          setFailedAttempts(nextAttempts);
+
+          if (nextAttempts >= 5) {
+            setCooldownSeconds(30);
+            setFailedAttempts(0);
+          }
+
           setTimeout(() => setPinInput(''), 600);
         }
       }
@@ -45,20 +68,9 @@ export const PinModal: React.FC = () => {
   };
 
   const handleBackspace = () => {
+    if (cooldownSeconds > 0) return;
     setPinInput((p) => p.slice(0, -1));
     playChime('tap');
-  };
-
-  const handleBypass = () => {
-    setIsParentMode(true);
-    setShowPinModal(false);
-    setPinInput('');
-    playChime('star');
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('beeyou_active_device_view', 'caregiver');
-      localStorage.setItem('beeyou_active_device_view', 'caregiver');
-      window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
-    }
   };
 
   if (typeof document === 'undefined') return null;
@@ -100,17 +112,25 @@ export const PinModal: React.FC = () => {
           })}
         </div>
 
-        {error && (
+        {/* Error / Cooldown Feedback */}
+        {cooldownSeconds > 0 ? (
+          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold mb-3 flex items-center gap-2 animate-in fade-in">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Too many attempts. Please wait {cooldownSeconds}s.</span>
+          </div>
+        ) : error ? (
           <p className="text-xs font-bold text-rose-600 mb-3 animate-in fade-in">
-            Incorrect PIN. Default is {settings.pin}.
+            Incorrect PIN. Please try again.
           </p>
-        )}
+        ) : null}
 
         {/* Keypad */}
         <div className="grid grid-cols-3 gap-2.5 w-full max-w-xs mb-4">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map((k) => (
             <button
               key={k}
+              type="button"
+              disabled={cooldownSeconds > 0}
               onClick={() => {
                 if (k === 'C') {
                   setPinInput('');
@@ -121,21 +141,29 @@ export const PinModal: React.FC = () => {
                   handleDigit(k);
                 }
               }}
-              className="h-12 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-black text-lg active:scale-90 transition-all border border-slate-200 flex items-center justify-center cursor-pointer shadow-xs"
+              className={`h-12 rounded-2xl font-black text-lg transition-all border flex items-center justify-center cursor-pointer shadow-xs ${
+                cooldownSeconds > 0
+                  ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed opacity-50'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-800 active:scale-90 border-slate-200'
+              }`}
             >
               {k}
             </button>
           ))}
         </div>
 
-        {/* Helper Note / Quick Bypass */}
-        <div className="flex items-center justify-between w-full pt-3 border-t border-slate-100 text-xs">
-          <span className="text-slate-400">Default PIN: {settings.pin}</span>
+        {/* Secure Recovery Option */}
+        <div className="flex items-center justify-center w-full pt-3 border-t border-slate-100 text-xs">
           <button
-            onClick={handleBypass}
-            className="text-indigo-600 hover:text-indigo-800 font-bold underline cursor-pointer"
+            type="button"
+            onClick={() => {
+              setShowPinModal(false);
+              setShowFamilyAuthModal(true);
+              playChime('tap');
+            }}
+            className="text-slate-500 hover:text-indigo-600 font-bold underline cursor-pointer transition"
           >
-            Direct Access
+            Forgot PIN? Sign in with Family Password
           </button>
         </div>
 
