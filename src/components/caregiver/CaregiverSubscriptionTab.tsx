@@ -210,7 +210,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                 </button>
                 {!getStoredEmailVerificationStatus() && (
                   <p className="text-[11px] text-amber-800 dark:text-amber-300 font-bold text-center md:text-right">
-                    Email verification unlocks 15-day trial
+                    Email verification unlocks 15-day free Premium trial
                   </p>
                 )}
               </div>

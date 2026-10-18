@@ -550,7 +550,7 @@ export const ParentDashboard: React.FC = () => {
             <div className="bg-amber-500/15 border-b border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100 px-4 py-2.5 text-xs font-semibold flex flex-col sm:flex-row items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2 text-center sm:text-left">
                 <span>
-                  <strong>BeeYou Basic Account:</strong> Verify your email (<strong>{storedAcc.email}</strong>) to unlock your 15-day free trial &amp; Premium features.
+                  Verify your email (<strong>{storedAcc.email}</strong>) so you can try the 15-day free Premium trial whenever you're ready.
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">

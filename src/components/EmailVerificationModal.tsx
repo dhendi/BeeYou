@@ -113,7 +113,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                 Verify Your Email
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                Unlock 15-Day Free Trial &amp; Premium
+                Enable 15-Day Free Premium Trial
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           </p>
 
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-            To activate your <strong>15-day free trial ($0)</strong> and access therapist summaries, custom themes, and full clinical tools, please verify your email address:
+            Verify your email address so you can try the 15-day free Premium trial whenever you're ready:
           </p>
 
           {/* Email badge */}
