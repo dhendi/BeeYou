@@ -237,8 +237,15 @@ export async function fetchFamilyState(familyCode?: string): Promise<SharedFamil
   return lastKnownState;
 }
 
+let stateUpdateDebounceTimer: any = null;
+let pendingStatePartial: Record<string, any> = {};
+
+let lastAlertSentTime = 0;
+let lastAlertSentPromise: Promise<{ success: boolean; alert?: RemoteFamilyAlert; deliveryStatus: 'delivered' | 'failed' }> | null = null;
+
 /**
  * Push remote updates (routines, AAC, plansChanged, childState, childProfile)
+ * Coalesces rapid stimming/tapping over 250ms window into single atomic write
  */
 export async function pushFamilyStateUpdate(
   partial: Partial<SharedFamilyState>,
@@ -247,55 +254,73 @@ export async function pushFamilyStateUpdate(
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
   const cleanPartial = cleanFirebaseObject(partial);
 
-  let success = false;
+  // Optimistic UI: update local state in 0ms so child checkmarks, stickers & animations never lag
   const updatedState: SharedFamilyState = lastKnownState 
     ? { ...lastKnownState, ...cleanPartial, lastUpdated: Date.now() }
     : { ...cleanPartial, familyCode: code, lastUpdated: Date.now() } as SharedFamilyState;
 
-  // 1. Primary: Push directly to Firebase Realtime Database
-  try {
-    const familyRef = ref(db, `beeyou/families/${code}`);
-    await update(familyRef, cleanPartial);
-    success = true;
-    lastKnownState = updatedState;
-    notifyStateChange(updatedState);
+  lastKnownState = updatedState;
+  notifyStateChange(updatedState);
 
-    // Broadcast on local channel for instant multi-tab response
-    if (localBroadcastChannel) {
+  // Broadcast on local channel for instant multi-tab response
+  if (localBroadcastChannel) {
+    try {
       localBroadcastChannel.postMessage({
         type: 'STATE_UPDATE',
         senderTabId: getTabId(),
         state: updatedState,
       });
-    }
-  } catch (fbErr) {
-    console.warn('Firebase pushFamilyStateUpdate error:', fbErr);
+    } catch {}
   }
 
-  // 2. Secondary fallback: Local Express server
-  try {
-    const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cleanPartial),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.success && data?.state) {
-        lastKnownState = data.state;
-        notifyStateChange(data.state);
-        return { success: true, state: data.state };
+  // Coalesce rapid tapping / stimming: merge changes across 250ms window into a single atomic write
+  pendingStatePartial = { ...pendingStatePartial, ...cleanPartial };
+
+  return new Promise((resolve) => {
+    if (stateUpdateDebounceTimer) {
+      clearTimeout(stateUpdateDebounceTimer);
+    }
+
+    stateUpdateDebounceTimer = setTimeout(async () => {
+      stateUpdateDebounceTimer = null;
+      const payloadToSend = { ...pendingStatePartial };
+      pendingStatePartial = {};
+
+      let success = false;
+      // 1. Primary: Push directly to Firebase Realtime Database
+      try {
+        const familyRef = ref(db, `beeyou/families/${code}`);
+        await update(familyRef, payloadToSend);
+        success = true;
+      } catch (fbErr) {
+        console.warn('Firebase pushFamilyStateUpdate error:', fbErr);
       }
-    }
-  } catch (err) {
-    // Expected on static production hosts like Vercel
-  }
 
-  return { success, state: updatedState };
+      // 2. Secondary fallback: Local Express server
+      try {
+        const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadToSend),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.success && data?.state) {
+            lastKnownState = data.state;
+            notifyStateChange(data.state);
+            return resolve({ success: true, state: data.state });
+          }
+        }
+      } catch (err) {}
+
+      resolve({ success, state: updatedState });
+    }, 250);
+  });
 }
 
 /**
  * Send instant emergency or sensory overload alert from Child tablet
+ * Protects against accidental multiple button taps while firing first tap in 0ms
  */
 export async function sendEmergencyAlert(params: {
   childName: string;
@@ -308,6 +333,14 @@ export async function sendEmergencyAlert(params: {
   familyCode?: string;
 }): Promise<{ success: boolean; alert?: RemoteFamilyAlert; deliveryStatus: 'delivered' | 'failed' }> {
   const code = (params.familyCode || getActiveFamilyCode()).trim().toUpperCase();
+
+  // Deduplicate rapid button mashing / stimming within 1.5 seconds (ensures first tap fires in 0ms)
+  const now = Date.now();
+  if (now - lastAlertSentTime < 1500 && lastAlertSentPromise) {
+    return lastAlertSentPromise;
+  }
+  lastAlertSentTime = now;
+
   const alertId = params.alertId || `alt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   const alert: RemoteFamilyAlert = {
     id: alertId,
@@ -322,45 +355,50 @@ export async function sendEmergencyAlert(params: {
     status: 'active',
   };
 
-  // 1. Primary: Write to Firebase Realtime Database
-  try {
-    const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
-    await set(alertRef, cleanFirebaseObject(alert));
+  const executeAlert = async (): Promise<{ success: boolean; alert?: RemoteFamilyAlert; deliveryStatus: 'delivered' | 'failed' }> => {
+    // 1. Primary: Write to Firebase Realtime Database
+    try {
+      const alertRef = ref(db, `beeyou/families/${code}/activeAlert`);
+      await set(alertRef, cleanFirebaseObject(alert));
 
-    alertListeners.forEach((fn) => fn(alert));
-    if (localBroadcastChannel) {
-      localBroadcastChannel.postMessage({
-        type: 'CAREGIVER_ALERT',
-        senderTabId: getTabId(),
-        alert,
-      });
-    }
-    return { success: true, alert, deliveryStatus: 'delivered' };
-  } catch (fbErr) {
-    console.warn('Firebase sendEmergencyAlert error:', fbErr);
-  }
-
-  // 2. Secondary fallback: Local Express server
-  try {
-    const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.success && data?.alert) {
-        if (data.state) {
-          lastKnownState = data.state;
-          notifyStateChange(data.state);
-        }
-        return { success: true, alert: data.alert, deliveryStatus: 'delivered' };
+      alertListeners.forEach((fn) => fn(alert));
+      if (localBroadcastChannel) {
+        localBroadcastChannel.postMessage({
+          type: 'CAREGIVER_ALERT',
+          senderTabId: getTabId(),
+          alert,
+        });
       }
+      return { success: true, alert, deliveryStatus: 'delivered' };
+    } catch (fbErr) {
+      console.warn('Firebase sendEmergencyAlert error:', fbErr);
     }
-  } catch (err) {
-    console.error('sendEmergencyAlert network failure:', err);
-  }
-  return { success: false, deliveryStatus: 'failed' };
+
+    // 2. Secondary fallback: Local Express server
+    try {
+      const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.success && data?.alert) {
+          if (data.state) {
+            lastKnownState = data.state;
+            notifyStateChange(data.state);
+          }
+          return { success: true, alert: data.alert, deliveryStatus: 'delivered' };
+        }
+      }
+    } catch (err) {
+      console.error('sendEmergencyAlert network failure:', err);
+    }
+    return { success: false, deliveryStatus: 'failed' };
+  };
+
+  lastAlertSentPromise = executeAlert();
+  return lastAlertSentPromise;
 }
 
 /**

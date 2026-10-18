@@ -1382,6 +1382,9 @@ export async function pollCaregiverMessages(code: string): Promise<CaregiverMess
 /**
  * Child sends an alert to caregiver or support contact
  */
+let lastCaregiverAlertSentAt = 0;
+let lastCaregiverAlertObj: CaregiverAlert | null = null;
+
 export async function sendCaregiverAlert(alertData: {
   childName: string;
   emotion: EmotionType | 'need_help' | 'need_break' | 'sensory_overload' | 'want_to_talk' | 'im_okay';
@@ -1393,6 +1396,14 @@ export async function sendCaregiverAlert(alertData: {
   id?: string;
 }): Promise<CaregiverAlert> {
   const code = getPairingCode();
+
+  // Deduplicate rapid button mashing / stimming within 1.5 seconds (fires first tap in 0ms)
+  const now = Date.now();
+  if (now - lastCaregiverAlertSentAt < 1500 && lastCaregiverAlertObj) {
+    return lastCaregiverAlertObj;
+  }
+  lastCaregiverAlertSentAt = now;
+
   const alertUniqueId = alertData.id || ('alert-' + Date.now());
   const alert: CaregiverAlert = {
     id: alertUniqueId,
@@ -1401,6 +1412,7 @@ export async function sendCaregiverAlert(alertData: {
     status: 'active',
     ...alertData,
   };
+  lastCaregiverAlertObj = alert;
 
   try {
     localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));

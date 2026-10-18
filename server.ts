@@ -29,6 +29,83 @@ app.use((_req, res, next) => {
   next();
 });
 
+// -------------------------------------------------------------
+// Sliding-Window Rate Limiting Middleware
+// Protects backend server from runaway loops, stimming, and abuse
+// -------------------------------------------------------------
+interface RateLimitRecord {
+  count: number;
+  resetAt: number;
+}
+
+function createRateLimiter(options: { windowMs: number; maxRequests: number; message?: string }) {
+  const hits = new Map<string, RateLimitRecord>();
+
+  // Periodically clean up expired entries every 2 minutes
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of hits.entries()) {
+      if (now > record.resetAt) {
+        hits.delete(key);
+      }
+    }
+  }, 2 * 60 * 1000).unref?.();
+
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.method === 'OPTIONS' || req.path === '/api/health') return next();
+
+    const rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.socket.remoteAddress || '127.0.0.1';
+    const now = Date.now();
+    let record = hits.get(rawIp);
+
+    if (!record || now > record.resetAt) {
+      record = { count: 1, resetAt: now + options.windowMs };
+      hits.set(rawIp, record);
+    } else {
+      record.count++;
+    }
+
+    res.setHeader('X-RateLimit-Limit', options.maxRequests);
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, options.maxRequests - record.count));
+    res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetAt / 1000));
+
+    if (record.count > options.maxRequests) {
+      const retryAfterSec = Math.ceil((record.resetAt - now) / 1000);
+      res.setHeader('Retry-After', retryAfterSec);
+      return res.status(429).json({
+        error: 'Too Many Requests',
+        message: options.message || 'Rate limit exceeded. Please slow down requests.',
+        retryAfter: retryAfterSec,
+      });
+    }
+
+    next();
+  };
+}
+
+const apiLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 300,
+  message: 'API rate limit exceeded. Please slow down.',
+});
+
+const ttsLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 120,
+  message: 'Audio generation limit reached. Please wait a moment.',
+});
+
+const translateLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 60,
+  message: 'Translation rate limit reached. Please wait a moment.',
+});
+
+app.use('/api/translate', translateLimiter);
+app.use('/api/tts', ttsLimiter);
+app.use('/api/family', apiLimiter);
+app.use('/api/caregiver', apiLimiter);
+
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
