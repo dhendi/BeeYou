@@ -369,6 +369,7 @@ export const PRESET_THEMES: AppTheme[] = [
       appBg: 'bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50',
       headerBg: 'bg-pink-100/90 border-pink-300',
       navActiveBg: 'bg-pink-400 text-white shadow-md ring-2 ring-pink-500',
+      wallpaperUrl: '/assets/wallpapers/magic_fairytale_bg.webp',
     },
     wallpaperPattern: 'sparkles',
     aacStyling: {
