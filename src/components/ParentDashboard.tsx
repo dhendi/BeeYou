@@ -50,6 +50,8 @@ import { CaregiverIncomingAlertModal } from './caregiver/CaregiverIncomingAlertM
 
 // Shared Components
 import { FamilyAuthModal } from './FamilyAuthModal';
+import { EmailVerificationModal } from './EmailVerificationModal';
+import { getStoredFamilyAccount, getStoredEmailVerificationStatus } from '../services/authService';
 
 export const ParentDashboard: React.FC = () => {
   const {
@@ -62,6 +64,8 @@ export const ParentDashboard: React.FC = () => {
     setShowCaregiverModal,
     showFamilyAuthModal,
     setShowFamilyAuthModal,
+    showEmailVerificationModal,
+    setShowEmailVerificationModal,
     plansChanged,
     activatePlansChanged,
     medications,
@@ -69,6 +73,7 @@ export const ParentDashboard: React.FC = () => {
     subscription,
     isPremium,
     getTrialDaysRemaining,
+    startFreeTrial,
     settings,
     updateSettings,
     showAboutMeModal,
@@ -536,6 +541,33 @@ export const ParentDashboard: React.FC = () => {
         </div>
       </header>
 
+      {/* Unverified Email Notice for Trial & Premium Access */}
+      {(() => {
+        const storedAcc = getStoredFamilyAccount();
+        const isVerified = getStoredEmailVerificationStatus();
+        if (storedAcc && !storedAcc.isDemoAccount && !isVerified) {
+          return (
+            <div className="bg-amber-500/15 border-b border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100 px-4 py-2.5 text-xs font-semibold flex flex-col sm:flex-row items-center justify-between gap-2 shadow-2xs">
+              <div className="flex items-center gap-2 text-center sm:text-left">
+                <span>
+                  <strong>BeeYou Basic Account:</strong> Verify your email (<strong>{storedAcc.email}</strong>) to unlock your 15-day free trial &amp; Premium features.
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailVerificationModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition cursor-pointer active:scale-95 shadow-2xs"
+                >
+                  <span>Verify Email</span>
+                </button>
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {/* Success Notification Banner */}
       {successMessage && (
         <div className="bg-emerald-600 text-white px-4 py-2 text-center text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 animate-in fade-in">
@@ -842,6 +874,16 @@ export const ParentDashboard: React.FC = () => {
       <FamilyAuthModal
         isOpen={showFamilyAuthModal}
         onClose={() => setShowFamilyAuthModal(false)}
+      />
+
+      {/* Email Verification Modal for 15-Day Free Trial & Premium */}
+      <EmailVerificationModal
+        isOpen={showEmailVerificationModal}
+        onClose={() => setShowEmailVerificationModal(false)}
+        onVerified={() => {
+          startFreeTrial();
+          showNotification('Email verified! Your 15-day free trial has started.');
+        }}
       />
 
       {/* Interactive Section Tour Directory Modal */}

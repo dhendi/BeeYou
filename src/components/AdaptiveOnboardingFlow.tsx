@@ -30,6 +30,10 @@ import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge, BillingCycle } 
 import { getPersonaLabel, getPersonaTokens, personaToAgeGroup } from '../utils/personaHelpers';
 import { QRCodeView } from './QRCodeView';
 import { getPairingCode } from '../services/caregiverSync';
+import { 
+  getStoredEmailVerificationStatus, 
+  checkEmailVerificationStatus 
+} from '../services/authService';
 import { playChime } from '../utils/audio';
 import { LanguageDropdown } from './LanguageDropdown';
 import { t } from '../services/translator';
@@ -75,6 +79,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     setLinkedDeviceCode,
     settings,
     startFreeTrial,
+    setShowEmailVerificationModal,
   } = useApp();
 
   const [step, setStep] = useState<number>(1);
@@ -178,11 +183,21 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     }
   };
 
-  const handleComplete = (withTrial = false) => {
+  const handleComplete = async (withTrial = false) => {
     playChime('star');
 
     if (withTrial) {
-      startFreeTrial(selectedCycle);
+      const isVerified = getStoredEmailVerificationStatus();
+      if (!isVerified) {
+        const liveCheck = await checkEmailVerificationStatus();
+        if (!liveCheck.isVerified) {
+          setShowEmailVerificationModal(true);
+        } else {
+          startFreeTrial(selectedCycle);
+        }
+      } else {
+        startFreeTrial(selectedCycle);
+      }
     }
 
     // 1. Commit persona & profile to state

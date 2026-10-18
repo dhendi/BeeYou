@@ -130,6 +130,8 @@ export interface AppContextType {
   setShowCaregiverAlertModal: (val: boolean) => void;
   showFamilyAuthModal: boolean;
   setShowFamilyAuthModal: (val: boolean) => void;
+  showEmailVerificationModal: boolean;
+  setShowEmailVerificationModal: (val: boolean) => void;
   showAboutMeModal: boolean;
   setShowAboutMeModal: (val: boolean) => void;
   incomingCaregiverMessage: CaregiverMessage | null;
@@ -1024,6 +1026,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setShowCaregiverAlertModal: familyCloudSync.setShowCaregiverAlertModal,
     showFamilyAuthModal: familyCloudSync.showFamilyAuthModal,
     setShowFamilyAuthModal: familyCloudSync.setShowFamilyAuthModal,
+    showEmailVerificationModal: familyCloudSync.showEmailVerificationModal,
+    setShowEmailVerificationModal: familyCloudSync.setShowEmailVerificationModal,
     showAboutMeModal,
     setShowAboutMeModal,
     incomingCaregiverMessage: familyCloudSync.incomingCaregiverMessage,

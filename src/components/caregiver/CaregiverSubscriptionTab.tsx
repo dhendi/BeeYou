@@ -2,6 +2,10 @@ import React from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
+import { 
+  getStoredEmailVerificationStatus, 
+  checkEmailVerificationStatus 
+} from '../../services/authService';
 
 interface CaregiverSubscriptionTabProps {
   showNotification: (msg: string) => void;
@@ -20,6 +24,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
     getTrialDaysRemaining,
     startFreeTrial,
     cancelSubscription,
+    setShowEmailVerificationModal,
   } = useApp();
 
   return (
@@ -183,17 +188,32 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                 {t("Cancel Membership")}
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  startFreeTrial();
-                  showNotification('Started 15-Day Free Trial with BeeYou Premium!');
-                  playChime('star');
-                }}
-                className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition"
-              >
-                <span>{t("Start 15-Day Free Trial ($0)")}</span>
-              </button>
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const isVerified = getStoredEmailVerificationStatus();
+                    if (!isVerified) {
+                      const liveCheck = await checkEmailVerificationStatus();
+                      if (!liveCheck.isVerified) {
+                        setShowEmailVerificationModal(true);
+                        return;
+                      }
+                    }
+                    startFreeTrial();
+                    showNotification('Started 15-Day Free Trial with BeeYou Premium!');
+                    playChime('star');
+                  }}
+                  className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md cursor-pointer active:scale-95 transition"
+                >
+                  <span>{t("Start 15-Day Free Trial ($0)")}</span>
+                </button>
+                {!getStoredEmailVerificationStatus() && (
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300 font-bold text-center md:text-right">
+                    Email verification unlocks 15-day trial
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>

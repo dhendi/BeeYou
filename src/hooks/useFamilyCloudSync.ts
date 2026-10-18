@@ -90,6 +90,7 @@ export function useFamilyCloudSync({
   const [showCaregiverModal, setShowCaregiverModal] = useState<boolean>(false);
   const [showCaregiverAlertModal, setShowCaregiverAlertModal] = useState<boolean>(false);
   const [showFamilyAuthModal, setShowFamilyAuthModal] = useState<boolean>(false);
+  const [showEmailVerificationModal, setShowEmailVerificationModal] = useState<boolean>(false);
 
   const [emergencyContact, setEmergencyContactState] =
     useState<EmergencySupportContact | null>(() => {
@@ -416,5 +417,7 @@ export function useFamilyCloudSync({
     setShowCaregiverAlertModal,
     showFamilyAuthModal,
     setShowFamilyAuthModal,
+    showEmailVerificationModal,
+    setShowEmailVerificationModal,
   };
 }

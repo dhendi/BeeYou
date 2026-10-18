@@ -25,6 +25,8 @@ const CaregiverAppContent: React.FC = () => {
     setShowOnboardingModal,
     showFamilyAuthModal,
     setShowFamilyAuthModal,
+    showEmailVerificationModal,
+    setShowEmailVerificationModal,
     activeTheme,
   } = useApp();
 
@@ -32,6 +34,7 @@ const CaregiverAppContent: React.FC = () => {
   useModalBackHandler(showCaregiverModal, () => setShowCaregiverModal(false));
   useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
   useModalBackHandler(showFamilyAuthModal, () => setShowFamilyAuthModal(false));
+  useModalBackHandler(showEmailVerificationModal, () => setShowEmailVerificationModal(false));
 
   useEffect(() => {
     setActiveDeviceView('caregiver');

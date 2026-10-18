@@ -9,6 +9,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  sendEmailVerification,
+  reload,
   User as FirebaseUser
 } from 'firebase/auth';
 
@@ -33,6 +35,7 @@ export interface FamilyAccount {
   createdAt: string;
   lastSyncedAt: string;
   isDemoAccount?: boolean;
+  emailVerified?: boolean;
 }
 
 const FAMILY_ACCOUNT_KEY = 'beeyou_family_account';
@@ -55,6 +58,7 @@ export const DEMO_FAMILY_ACCOUNT: FamilyAccount = {
   createdAt: '2026-10-01T00:00:00.000Z',
   lastSyncedAt: new Date().toISOString(),
   isDemoAccount: true,
+  emailVerified: true,
 };
 
 // Check if user is currently signed in with a Family Account
@@ -225,7 +229,8 @@ export async function loginWithSharedEmail(
           pronouns: '',
           pin: '1234',
         },
-    subscriptionTier: 'premium',
+    subscriptionTier: userCredential.user.emailVerified ? 'premium' : 'free',
+    emailVerified: userCredential.user.emailVerified,
     createdAt: existingMatches ? existing.createdAt : new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
@@ -274,6 +279,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; account?: F
         pin: '1234',
       },
       subscriptionTier: 'premium',
+      emailVerified: true,
       createdAt: new Date().toISOString(),
       lastSyncedAt: new Date().toISOString(),
     };
@@ -337,6 +343,13 @@ export async function registerSharedFamilyAccount(params: {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, params.password);
     firebaseUid = userCredential.user.uid;
+
+    // Send automated email verification link for free via Firebase
+    try {
+      await sendEmailVerification(userCredential.user);
+    } catch (verErr: any) {
+      console.warn('Firebase sendEmailVerification notice:', verErr?.message);
+    }
   } catch (err: any) {
     console.warn('Firebase createUser notice:', err?.code, err?.message);
     if (err.code === 'auth/email-already-in-use') {
@@ -376,7 +389,8 @@ export async function registerSharedFamilyAccount(params: {
       pronouns: '',
       pin: params.pin || '1234',
     },
-    subscriptionTier: 'premium',
+    subscriptionTier: 'free',
+    emailVerified: false,
     createdAt: new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
@@ -395,7 +409,7 @@ export async function registerSharedFamilyAccount(params: {
   return {
     success: true,
     account: newAccount,
-    message: `Account created for ${cleanEmail}! Family sync code: ${newAccount.familyCode}. Both devices link automatically!`,
+    message: `Account created for ${cleanEmail}! A free verification email has been sent to your inbox. You can use the Basic app now, or verify to unlock your 15-day free trial!`,
   };
 }
 
@@ -430,4 +444,88 @@ export async function logoutFamilyAccount(): Promise<void> {
     console.warn('Firebase signOut error:', err);
   }
   saveStoredFamilyAccount(null);
+}
+
+/**
+ * Send email verification link to current user (100% free via Firebase Auth)
+ */
+export async function sendAccountVerificationEmail(): Promise<{ success: boolean; message: string }> {
+  const user = auth.currentUser;
+  if (!user) {
+    const stored = getStoredFamilyAccount();
+    if (stored?.isDemoAccount) {
+      return { success: true, message: 'Demo accounts are pre-verified.' };
+    }
+    return { success: false, message: 'Please sign in to send a verification email.' };
+  }
+  if (user.emailVerified) {
+    const stored = getStoredFamilyAccount();
+    if (stored) {
+      stored.emailVerified = true;
+      saveStoredFamilyAccount(stored);
+    }
+    return { success: true, message: 'Your email address is already verified!' };
+  }
+  try {
+    await sendEmailVerification(user);
+    return {
+      success: true,
+      message: `Verification link sent to ${user.email}! Please check your inbox or spam folder.`,
+    };
+  } catch (err: any) {
+    console.error('sendEmailVerification error:', err);
+    if (err.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        message: 'A verification email was recently sent. Please wait a minute before requesting another.',
+      };
+    }
+    return {
+      success: false,
+      message: err.message || 'Could not send verification email. Please try again.',
+    };
+  }
+}
+
+/**
+ * Check if current user's email has been verified in Firebase
+ */
+export async function checkEmailVerificationStatus(): Promise<{ isVerified: boolean; message?: string }> {
+  const stored = getStoredFamilyAccount();
+  if (stored?.isDemoAccount) {
+    return { isVerified: true };
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    if (stored?.emailVerified) {
+      return { isVerified: true };
+    }
+    return { isVerified: false, message: 'No active session found. Please sign in.' };
+  }
+
+  try {
+    await reload(user);
+    const isVerified = user.emailVerified;
+    if (stored) {
+      stored.emailVerified = isVerified;
+      saveStoredFamilyAccount(stored);
+    }
+    return { isVerified };
+  } catch (err: any) {
+    console.warn('reload user verification error:', err);
+    return { isVerified: user.emailVerified || false };
+  }
+}
+
+/**
+ * Check current stored verification state synchronously
+ */
+export function getStoredEmailVerificationStatus(): boolean {
+  const stored = getStoredFamilyAccount();
+  if (!stored) return false;
+  if (stored.isDemoAccount) return true;
+  if (stored.emailVerified === true) return true;
+  if (auth.currentUser?.emailVerified) return true;
+  return false;
 }
