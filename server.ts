@@ -307,44 +307,175 @@ const DEFAULT_DEMO_PLANS_CHANGED = {
 
 const DATA_DIR = path.join(process.cwd(), '.data');
 const STATE_FILE = path.join(DATA_DIR, 'shared_families.json');
+const FAMILIES_DIR = path.join(DATA_DIR, 'families');
+const FIREBASE_DB_URL = process.env.VITE_FIREBASE_DATABASE_URL || 'https://beeyou-23d7d-default-rtdb.firebaseio.com';
 
-function loadAllFamilyStates(): Map<string, SharedFamilyState> {
-  const map = new Map<string, SharedFamilyState>();
-  try {
-    if (fs.existsSync(STATE_FILE)) {
-      const raw = fs.readFileSync(STATE_FILE, 'utf-8');
-      const data = JSON.parse(raw);
-      if (data && typeof data === 'object') {
-        for (const [code, val] of Object.entries(data)) {
-          map.set(code.toUpperCase(), val as SharedFamilyState);
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('Persistent family state file not found or corrupted, will recreate:', err);
-  }
-  return map;
-}
+// -------------------------------------------------------------
+// High-Performance In-Memory Family State Engine
+// - 0ms read/write latency in memory
+// - Asynchronous, isolated per-family atomic file persistence
+// - Non-blocking background mirroring to Firebase Realtime Database
+// - Zero event-loop blocking under high concurrent user load
+// -------------------------------------------------------------
+const activeFamilyStates = new Map<string, SharedFamilyState>();
+const dirtyFamilyCodes = new Set<string>();
 
-function saveAllFamilyStates(map: Map<string, SharedFamilyState>): void {
+function initFamilyStore(): void {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    const obj: Record<string, any> = {};
-    for (const [k, v] of map.entries()) {
-      obj[k] = v;
+    if (!fs.existsSync(FAMILIES_DIR)) {
+      fs.mkdirSync(FAMILIES_DIR, { recursive: true });
     }
-    fs.writeFileSync(STATE_FILE, JSON.stringify(obj, null, 2), 'utf-8');
+
+    // 1. Load legacy shared_families.json if present
+    if (fs.existsSync(STATE_FILE)) {
+      try {
+        const raw = fs.readFileSync(STATE_FILE, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          for (const [code, val] of Object.entries(data)) {
+            const cleanCode = code.toUpperCase();
+            activeFamilyStates.set(cleanCode, val as SharedFamilyState);
+            const perFamilyFile = path.join(FAMILIES_DIR, `${cleanCode}.json`);
+            if (!fs.existsSync(perFamilyFile)) {
+              fs.writeFileSync(perFamilyFile, JSON.stringify(val, null, 2), 'utf-8');
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[State Store] Legacy file parse error:', e);
+      }
+    }
+
+    // 2. Load individual per-family files
+    const files = fs.readdirSync(FAMILIES_DIR);
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const code = path.basename(file, '.json').toUpperCase();
+        try {
+          const raw = fs.readFileSync(path.join(FAMILIES_DIR, file), 'utf-8');
+          const val = JSON.parse(raw);
+          if (val && typeof val === 'object') {
+            activeFamilyStates.set(code, val as SharedFamilyState);
+          }
+        } catch {}
+      }
+    }
   } catch (err) {
-    console.error('Error saving persistent family state:', err);
+    console.warn('[State Store] Initial store boot warning:', err);
+  }
+}
+
+// Asynchronous background mirror to Firebase Realtime Database
+async function syncFamilyToFirebase(code: string): Promise<void> {
+  const state = activeFamilyStates.get(code);
+  if (!state || !FIREBASE_DB_URL) return;
+
+  try {
+    const url = `${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(code)}.json`;
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state),
+    });
+  } catch {}
+}
+
+let isFlushing = false;
+async function flushDirtyFamilies(): Promise<void> {
+  if (isFlushing || dirtyFamilyCodes.size === 0) return;
+  isFlushing = true;
+  const codesToFlush = Array.from(dirtyFamilyCodes);
+  dirtyFamilyCodes.clear();
+
+  try {
+    if (!fs.existsSync(FAMILIES_DIR)) {
+      await fs.promises.mkdir(FAMILIES_DIR, { recursive: true });
+    }
+
+    // Write each dirty family atomically to its own file (isolated, non-blocking)
+    for (const code of codesToFlush) {
+      const state = activeFamilyStates.get(code);
+      if (state) {
+        const filePath = path.join(FAMILIES_DIR, `${code}.json`);
+        const tempPath = `${filePath}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+        const json = JSON.stringify(state, null, 2);
+        await fs.promises.writeFile(tempPath, json, 'utf-8');
+        await fs.promises.rename(tempPath, filePath);
+      }
+    }
+
+    // Also update consolidated master file asynchronously for backups
+    const masterObj: Record<string, any> = {};
+    for (const [k, v] of activeFamilyStates.entries()) {
+      masterObj[k] = v;
+    }
+    const masterTemp = `${STATE_FILE}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+    await fs.promises.writeFile(masterTemp, JSON.stringify(masterObj, null, 2), 'utf-8');
+    await fs.promises.rename(masterTemp, STATE_FILE);
+  } catch (err) {
+    console.error('[State Store] Async flush error:', err);
+    codesToFlush.forEach((c) => dirtyFamilyCodes.add(c));
+  } finally {
+    isFlushing = false;
+  }
+}
+
+// Mark a family state as updated and trigger asynchronous persistence
+function saveFamilyState(code: string, state?: SharedFamilyState, immediate = false): void {
+  const cleanCode = code.trim().toUpperCase();
+  if (state) {
+    activeFamilyStates.set(cleanCode, state);
+  }
+  dirtyFamilyCodes.add(cleanCode);
+
+  // Background non-blocking sync to Firebase Realtime Database
+  syncFamilyToFirebase(cleanCode).catch(() => {});
+
+  if (immediate) {
+    flushDirtyFamilies().catch(() => {});
+  }
+}
+
+// Periodic non-blocking flush interval (flushes batches every 1000ms)
+setInterval(() => {
+  if (dirtyFamilyCodes.size > 0) {
+    flushDirtyFamilies().catch(() => {});
+  }
+}, 1000).unref?.();
+
+// Graceful process shutdown flushes any remaining state
+process.on('SIGINT', () => {
+  flushDirtyFamilies().finally(() => process.exit(0));
+});
+process.on('SIGTERM', () => {
+  flushDirtyFamilies().finally(() => process.exit(0));
+});
+
+// Boot the store once
+initFamilyStore();
+
+function loadAllFamilyStates(): Map<string, SharedFamilyState> {
+  return activeFamilyStates;
+}
+
+function saveAllFamilyStates(_map?: Map<string, SharedFamilyState>, specificCode?: string): void {
+  if (specificCode) {
+    saveFamilyState(specificCode);
+  } else {
+    for (const code of activeFamilyStates.keys()) {
+      dirtyFamilyCodes.add(code);
+      syncFamilyToFirebase(code).catch(() => {});
+    }
+    flushDirtyFamilies().catch(() => {});
   }
 }
 
 function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState {
   const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
-  let state = allStates.get(cleanCode);
+  let state = activeFamilyStates.get(cleanCode);
 
   if (!state) {
     state = {
@@ -376,8 +507,8 @@ function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState
       messages: [],
       lastUpdated: Date.now(),
     };
-    allStates.set(cleanCode, state);
-    saveAllFamilyStates(allStates);
+    activeFamilyStates.set(cleanCode, state);
+    saveFamilyState(cleanCode, state, true);
   }
   return state;
 }
@@ -693,9 +824,8 @@ app.post('/api/caregiver/event', (req, res) => {
     session.lastChildActiveTime = new Date().toISOString();
     familyState.activeAlert = envelope.alert;
     familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
-    const allStates = loadAllFamilyStates();
-    allStates.set(pairingCode, familyState);
-    saveAllFamilyStates(allStates);
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
     if (session.activeAlert) {
       session.activeAlert.status = 'acknowledged';
@@ -709,9 +839,8 @@ app.post('/api/caregiver/event', (req, res) => {
       familyState.activeAlert.responseId = envelope.ack.responseId;
     }
     session.lastCaregiverActiveTime = new Date().toISOString();
-    const allStates = loadAllFamilyStates();
-    allStates.set(pairingCode, familyState);
-    saveAllFamilyStates(allStates);
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'ALERT_RESOLVED') {
     session.activeAlert = null;
     session.quickAlert = null;
@@ -725,9 +854,8 @@ app.post('/api/caregiver/event', (req, res) => {
         return a;
       });
     }
-    const allStates = loadAllFamilyStates();
-    allStates.set(pairingCode, familyState);
-    saveAllFamilyStates(allStates);
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
     let msg = { ...envelope.message };
     const rawSender = String(msg.senderName || '');
@@ -863,7 +991,6 @@ app.get('/api/family/state/:code', (req, res) => {
 // 2. Update family state remotely (routines, aac, plansChanged, childState, childProfile)
 app.post('/api/family/state/:code', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
   const { routines, aacItems, plansChanged, childState, childProfile, caregiverName } = req.body || {};
@@ -882,8 +1009,7 @@ app.post('/api/family/state/:code', (req, res) => {
   if (caregiverName) current.caregiverName = caregiverName;
   current.lastUpdated = Date.now();
 
-  allStates.set(code, current);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, current);
 
   // Sync with caregiverSessions map for backwards compatibility
   const session = caregiverSessions.get(code);
@@ -905,7 +1031,6 @@ app.post('/api/family/state/:code', (req, res) => {
 // 3. Child triggers an emergency / sensory overload alert
 app.post('/api/family/alert/:code', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
   const { id, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
@@ -927,8 +1052,7 @@ app.post('/api/family/alert/:code', (req, res) => {
   current.alertHistory = [alert, ...(current.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
   current.lastUpdated = Date.now();
 
-  allStates.set(code, current);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, current, true);
 
   // Sync legacy caregiverSessions map
   const session = caregiverSessions.get(code);
@@ -952,7 +1076,6 @@ app.post('/api/family/alert/:code', (req, res) => {
 // 4. Caregiver acknowledges alert with reassurance message
 app.post('/api/family/alert/:code/ack', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
   const { acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
@@ -996,8 +1119,7 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
   }
 
   current.lastUpdated = Date.now();
-  allStates.set(code, current);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, current, true);
 
   broadcastEvent(code, {
     eventId: `ev-ack-${Date.now()}`,
@@ -1019,7 +1141,6 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
 // 5. Caregiver marks alert resolved / all clear
 app.post('/api/family/alert/:code/resolve', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
   const { alertId } = req.body || {};
 
@@ -1034,8 +1155,7 @@ app.post('/api/family/alert/:code/resolve', (req, res) => {
   }
 
   current.lastUpdated = Date.now();
-  allStates.set(code, current);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, current, true);
 
   // Sync legacy session
   const session = caregiverSessions.get(code);
@@ -1056,7 +1176,6 @@ app.post('/api/family/alert/:code/resolve', (req, res) => {
 // 6. Caregiver sends instant nudge or reminder message to child
 app.post('/api/family/message/:code', (req, res) => {
   const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
-  const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
   const { senderName, text, emoji, responseId, senderRole } = req.body || {};
@@ -1085,8 +1204,7 @@ app.post('/api/family/message/:code', (req, res) => {
 
   current.messages = [...(current.messages || []).slice(-29), newMsg];
   current.lastUpdated = Date.now();
-  allStates.set(code, current);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, current);
 
   broadcastEvent(code, {
     eventId: `ev-msg-${Date.now()}`,
@@ -1495,14 +1613,12 @@ app.post('/api/caregiver/alert', (req, res) => {
   session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
 
-  // Also sync persistent family state on disk
-  const allStates = loadAllFamilyStates();
+  // Also sync persistent family state
   const familyState = getOrCreateFamilyState(code);
   familyState.activeAlert = alert;
   familyState.alertHistory = [alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
   familyState.lastUpdated = Date.now();
-  allStates.set(code, familyState);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, familyState, true);
 
   broadcastEvent(code, {
     eventId: `ev-alert-${Date.now()}`,
@@ -1522,9 +1638,6 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   const code = (pairingCode || '').trim().toUpperCase();
 
   const session = caregiverSessions.get(code);
-
-  // Sync persistent family state on disk
-  const allStates = loadAllFamilyStates();
   const familyState = getOrCreateFamilyState(code);
 
   if (session && session.activeAlert) {
@@ -1583,8 +1696,7 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
   }
 
   familyState.lastUpdated = Date.now();
-  allStates.set(code, familyState);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, familyState, true);
 
   broadcastEvent(code, {
     eventId: `ev-ack-${Date.now()}`,
@@ -1609,7 +1721,6 @@ app.post('/api/caregiver/alert/resolve', (req, res) => {
     session.quickAlert = null;
   }
 
-  const allStates = loadAllFamilyStates();
   const familyState = getOrCreateFamilyState(code);
   familyState.activeAlert = null;
   if (Array.isArray(familyState.alertHistory)) {
@@ -1621,8 +1732,7 @@ app.post('/api/caregiver/alert/resolve', (req, res) => {
     });
   }
   familyState.lastUpdated = Date.now();
-  allStates.set(code, familyState);
-  saveAllFamilyStates(allStates);
+  saveFamilyState(code, familyState, true);
 
   broadcastEvent(code, {
     eventId: `ev-res-${Date.now()}`,
