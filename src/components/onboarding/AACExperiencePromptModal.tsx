@@ -11,7 +11,6 @@ import {
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { LanguageDropdown } from '../LanguageDropdown';
-import { AacCoreSticker } from '../icons/JournalStickers';
 import { useApp } from '../../context/AppContext';
 
 interface AACExperiencePromptModalProps {
@@ -179,7 +178,7 @@ function getPromptModalThemeStyles(theme?: { category?: string; id?: string }) {
     };
   }
 
-  if (id === 'theme-fantasy' || cat === 'fantasy') {
+  if (id === 'theme-fantasy' || cat === 'fantasy' || cat === 'magic') {
     return {
       cardBorder: 'border-pink-300',
       shadow: 'shadow-[0_20px_50px_rgba(219,39,119,0.22)]',
@@ -223,6 +222,20 @@ function getPromptModalThemeStyles(theme?: { category?: string; id?: string }) {
   };
 }
 
+function getAacPromptModalIcon(theme?: { category?: string; id?: string } | null): string {
+  const cat = theme?.category;
+  const id = theme?.id;
+  if (id === 'theme-turtle' || cat === 'turtle') return '/assets/stickers/turtle_lily_pads.png';
+  if (id === 'theme-dino' || cat === 'dinosaur') return '/assets/stickers/dino_amber_star_core.png';
+  if (id === 'theme-frog' || cat === 'frog') return '/assets/stickers/frog_lotus_star_core.png';
+  if (id === 'theme-fantasy' || cat === 'fantasy' || cat === 'magic') return '/assets/stickers/fairytale_star_gold.png';
+  if (id === 'theme-space' || cat === 'space') return '/assets/stickers/space_star_gold.png';
+  if (id === 'theme-trains' || cat === 'train') return '/assets/stickers/train_star_gold.png';
+  if (id === 'theme-ocean' || cat === 'ocean') return '/assets/stickers/ocean_golden_starfish_badge.png';
+  if (id === 'theme-racing' || cat === 'racing') return '/assets/stickers/racing_star_gold.png';
+  return '/assets/stickers/aac_core.png';
+}
+
 export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> = ({
   isOpen,
   onSelectKnowledgeable,
@@ -260,7 +273,11 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
         {/* Top Decorative Mascot / Header */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto flex items-center justify-center">
-            <AacCoreSticker className="w-full h-full object-contain drop-shadow-md" />
+            <img
+              src={getAacPromptModalIcon(activeTheme)}
+              alt={t('AAC Speech Board')}
+              className="w-full h-full object-contain drop-shadow-md select-none pointer-events-none"
+            />
           </div>
           <span className={`inline-block px-3 py-1 rounded-full ${tStyles.pillBadge} font-black text-xs uppercase tracking-wider`}>
             {t('AAC Speech Board')}

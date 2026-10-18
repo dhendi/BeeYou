@@ -300,6 +300,9 @@ export const AACView: React.FC = () => {
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
   const isTrainTheme = activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains';
   const isSpaceTheme = activeTheme?.category === 'space' || activeTheme?.id === 'theme-space';
+  const isOceanTheme = activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean';
+  const isFairytaleTheme = activeTheme?.category === 'fantasy' || activeTheme?.category === 'magic' || activeTheme?.id === 'theme-fantasy';
+  const isRacingTheme = activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing';
 
   const TRAIN_CATEGORY_ICONS: Record<string, string> = {
     core: '/assets/stickers/train_timetable_board.png',
@@ -419,6 +422,78 @@ export const AACView: React.FC = () => {
     'folder-people': '/assets/stickers/frog_tadpole_pet_feed_bowl.png',
     'folder-feelings': '/assets/stickers/frog_sensory_eye_stone.png',
     'folder-sensory': '/assets/stickers/frog_sound_softening_shell.png',
+  };
+
+  const OCEAN_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/ocean_golden_starfish_badge.png',
+    favorite_sentences: '/assets/stickers/ocean_bubble_speech_bubble.png',
+    favorites: '/assets/stickers/ocean_golden_seahorse_trophy.png',
+    food: '/assets/stickers/ocean_sandwich_lunch.png',
+    drinks: '/assets/stickers/ocean_seaglass_canteen.png',
+    activities: '/assets/stickers/ocean_game_controller.png',
+    places: '/assets/stickers/ocean_beachside_cottage.png',
+    people: '/assets/stickers/ocean_child_persona.png',
+    feelings: '/assets/stickers/ocean_feelings_thermometer.png',
+    sensory: '/assets/stickers/ocean_conch_headphones.png',
+    all: '/assets/stickers/ocean_captains_logbook.png',
+  };
+
+  const OCEAN_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/ocean_sandwich_lunch.png',
+    'folder-drinks': '/assets/stickers/ocean_seaglass_canteen.png',
+    'folder-activities': '/assets/stickers/ocean_game_controller.png',
+    'folder-places': '/assets/stickers/ocean_beachside_cottage.png',
+    'folder-people': '/assets/stickers/ocean_child_persona.png',
+    'folder-feelings': '/assets/stickers/ocean_feelings_thermometer.png',
+    'folder-sensory': '/assets/stickers/ocean_conch_headphones.png',
+  };
+
+  const FAIRYTALE_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/fairytale_star_gold.png',
+    favorite_sentences: '/assets/stickers/fairytale_speech_bubble.png',
+    favorites: '/assets/stickers/fairytale_reward_trophy.png',
+    food: '/assets/stickers/fairytale_royal_feast_stew.png',
+    drinks: '/assets/stickers/fairytale_routine_water_drink.png',
+    activities: '/assets/stickers/fairytale_royal_toy_chest.png',
+    places: '/assets/stickers/fairytale_home_house.png',
+    people: '/assets/stickers/fairytale_child_persona.png',
+    feelings: '/assets/stickers/fairytale_feelings_thermometer.png',
+    sensory: '/assets/stickers/fairytale_star_melody_headphones.png',
+    all: '/assets/stickers/fairytale_spellbook_journal.png',
+  };
+
+  const FAIRYTALE_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/fairytale_royal_feast_stew.png',
+    'folder-drinks': '/assets/stickers/fairytale_routine_water_drink.png',
+    'folder-activities': '/assets/stickers/fairytale_royal_toy_chest.png',
+    'folder-places': '/assets/stickers/fairytale_home_house.png',
+    'folder-people': '/assets/stickers/fairytale_child_persona.png',
+    'folder-feelings': '/assets/stickers/fairytale_feelings_thermometer.png',
+    'folder-sensory': '/assets/stickers/fairytale_star_melody_headphones.png',
+  };
+
+  const RACING_CATEGORY_ICONS: Record<string, string> = {
+    core: '/assets/stickers/racing_star_gold.png',
+    favorite_sentences: '/assets/stickers/racing_speech_bubble.png',
+    favorites: '/assets/stickers/racing_reward_trophy.png',
+    food: '/assets/stickers/racing_sandwich_lunch.png',
+    drinks: '/assets/stickers/racing_water_drink.png',
+    activities: '/assets/stickers/racing_game_controller.png',
+    places: '/assets/stickers/racing_home_house.png',
+    people: '/assets/stickers/racing_persona.png',
+    feelings: '/assets/stickers/racing_feelings_thermometer.png',
+    sensory: '/assets/stickers/racing_sensory_loud_noise.png',
+    all: '/assets/stickers/racing_homework_study.png',
+  };
+
+  const RACING_FOLDER_STICKERS: Record<string, string> = {
+    'folder-food': '/assets/stickers/racing_sandwich_lunch.png',
+    'folder-drinks': '/assets/stickers/racing_water_drink.png',
+    'folder-activities': '/assets/stickers/racing_game_controller.png',
+    'folder-places': '/assets/stickers/racing_home_house.png',
+    'folder-people': '/assets/stickers/racing_persona.png',
+    'folder-feelings': '/assets/stickers/racing_feelings_thermometer.png',
+    'folder-sensory': '/assets/stickers/racing_sensory_loud_noise.png',
   };
 
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
@@ -957,6 +1032,16 @@ export const AACView: React.FC = () => {
                 ? 'bg-green-50/70 border-green-300/80'
                 : isTurtleTheme
                 ? 'bg-emerald-50/70 border-emerald-300/80'
+                : isFairytaleTheme
+                ? 'bg-pink-50/70 border-pink-300/80'
+                : isRacingTheme
+                ? 'bg-zinc-100/90 border-zinc-300/90'
+                : isOceanTheme
+                ? 'bg-cyan-50/70 border-cyan-300/80'
+                : isTrainTheme
+                ? 'bg-sky-50/70 border-sky-300/80'
+                : isSpaceTheme
+                ? 'bg-purple-50/70 border-purple-300/80'
                 : 'bg-[#FCF9F2] border-[#E0D8CB]'
             } rounded-3xl border-2 shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150`}
           >
@@ -973,6 +1058,16 @@ export const AACView: React.FC = () => {
                     ? 'bg-green-100/50 border-green-300/60'
                     : isTurtleTheme
                     ? 'bg-emerald-100/50 border-emerald-300/60'
+                    : isFairytaleTheme
+                    ? 'bg-pink-100/50 border-pink-300/60'
+                    : isRacingTheme
+                    ? 'bg-zinc-200/60 border-zinc-300/80'
+                    : isOceanTheme
+                    ? 'bg-cyan-100/50 border-cyan-300/60'
+                    : isTrainTheme
+                    ? 'bg-sky-100/50 border-sky-300/60'
+                    : isSpaceTheme
+                    ? 'bg-purple-100/50 border-purple-300/60'
                     : 'bg-[#EFE9DF] border-[#E0D8CB]'
                 } border-2 rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:outline-none ${
                   sentence.length > 0
@@ -1244,12 +1339,28 @@ export const AACView: React.FC = () => {
               ? 'bg-green-100/70 border-green-300/80'
               : isTurtleTheme
               ? 'bg-emerald-100/70 border-emerald-300/80'
+              : isFairytaleTheme
+              ? 'bg-pink-100/70 border-pink-300/80'
+              : isRacingTheme
+              ? 'bg-zinc-200/80 border-zinc-400/80'
+              : isOceanTheme
+              ? 'bg-cyan-100/70 border-cyan-300/80'
+              : isTrainTheme
+              ? 'bg-sky-100/70 border-sky-300/80'
+              : isSpaceTheme
+              ? 'bg-purple-100/70 border-purple-300/80'
               : 'bg-[#EFE9DF] border-[#E0D8CB]'
           } p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 shadow-xs`}>
             {categories
               .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
               .map((cat) => {
-                const iconSrc = isSpaceTheme && SPACE_CATEGORY_ICONS[cat.id]
+                const iconSrc = isFairytaleTheme && FAIRYTALE_CATEGORY_ICONS[cat.id]
+                  ? FAIRYTALE_CATEGORY_ICONS[cat.id]
+                  : isRacingTheme && RACING_CATEGORY_ICONS[cat.id]
+                  ? RACING_CATEGORY_ICONS[cat.id]
+                  : isOceanTheme && OCEAN_CATEGORY_ICONS[cat.id]
+                  ? OCEAN_CATEGORY_ICONS[cat.id]
+                  : isSpaceTheme && SPACE_CATEGORY_ICONS[cat.id]
                   ? SPACE_CATEGORY_ICONS[cat.id]
                   : isTrainTheme && TRAIN_CATEGORY_ICONS[cat.id]
                   ? TRAIN_CATEGORY_ICONS[cat.id]
@@ -1288,6 +1399,30 @@ export const AACView: React.FC = () => {
                     } else {
                       activeStyle = 'bg-emerald-800 text-white border-2 border-emerald-900 shadow-[0_4px_12px_rgba(6,78,59,0.3)]';
                     }
+                  } else if (isFairytaleTheme) {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-pink-600 text-white border-2 border-pink-700 shadow-[0_4px_12px_rgba(219,39,119,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-rose-600 text-white border-2 border-rose-700 shadow-[0_4px_12px_rgba(225,29,72,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-pink-800 text-white border-2 border-pink-900 shadow-[0_4px_12px_rgba(157,23,77,0.3)]';
+                    }
+                  } else if (isRacingTheme) {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-zinc-900 text-white border-2 border-black shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.3)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-red-700 text-white border-2 border-red-800 shadow-[0_4px_12px_rgba(185,28,28,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-zinc-800 text-white border-2 border-zinc-900 shadow-[0_4px_12px_rgba(24,24,27,0.4)]';
+                    }
+                  } else if (isOceanTheme) {
+                    if (cat.id === 'core') {
+                      activeStyle = 'bg-cyan-600 text-white border-2 border-cyan-700 shadow-[0_4px_12px_rgba(8,145,178,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else if (cat.id === 'favorites') {
+                      activeStyle = 'bg-teal-600 text-white border-2 border-teal-700 shadow-[0_4px_12px_rgba(13,148,136,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
+                    } else {
+                      activeStyle = 'bg-cyan-800 text-white border-2 border-cyan-900 shadow-[0_4px_12px_rgba(21,94,117,0.3)]';
+                    }
                   } else {
                     if (cat.id === 'core') {
                       activeStyle = 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
@@ -1304,6 +1439,12 @@ export const AACView: React.FC = () => {
                     ? 'bg-green-50/70 hover:bg-green-50 text-green-900 hover:text-green-950 border-2 border-green-200/80 hover:border-green-300 shadow-2xs'
                     : isTurtleTheme
                     ? 'bg-emerald-50/70 hover:bg-emerald-50 text-emerald-900 hover:text-emerald-950 border-2 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
+                    : isFairytaleTheme
+                    ? 'bg-pink-50/70 hover:bg-pink-50 text-pink-900 hover:text-pink-950 border-2 border-pink-200/80 hover:border-pink-300 shadow-2xs'
+                    : isRacingTheme
+                    ? 'bg-zinc-100 hover:bg-white text-zinc-900 hover:text-black border-2 border-zinc-300 hover:border-zinc-400 shadow-2xs'
+                    : isOceanTheme
+                    ? 'bg-cyan-50/70 hover:bg-cyan-50 text-cyan-900 hover:text-cyan-950 border-2 border-cyan-200/80 hover:border-cyan-300 shadow-2xs'
                     : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs';
                 }
 
@@ -1874,6 +2015,16 @@ export const AACView: React.FC = () => {
               ? 'bg-green-100/50 border-green-300/70'
               : isTurtleTheme
               ? 'bg-emerald-100/50 border-emerald-300/70'
+              : isFairytaleTheme
+              ? 'bg-pink-100/50 border-pink-300/70'
+              : isRacingTheme
+              ? 'bg-zinc-200/50 border-zinc-400/70'
+              : isOceanTheme
+              ? 'bg-cyan-100/50 border-cyan-300/70'
+              : isTrainTheme
+              ? 'bg-sky-100/50 border-sky-300/70'
+              : isSpaceTheme
+              ? 'bg-purple-100/50 border-purple-300/70'
               : 'bg-[#EFE9DF] border-[#E0D8CB]'
           } ${
             buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3.5 sm:p-6' : 'p-2.5 sm:p-4'
@@ -1882,7 +2033,13 @@ export const AACView: React.FC = () => {
         >
           {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
           {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
-            const stickerSrc = isSpaceTheme && SPACE_FOLDER_STICKERS[folder.id]
+            const stickerSrc = isFairytaleTheme && FAIRYTALE_FOLDER_STICKERS[folder.id]
+              ? FAIRYTALE_FOLDER_STICKERS[folder.id]
+              : isRacingTheme && RACING_FOLDER_STICKERS[folder.id]
+              ? RACING_FOLDER_STICKERS[folder.id]
+              : isOceanTheme && OCEAN_FOLDER_STICKERS[folder.id]
+              ? OCEAN_FOLDER_STICKERS[folder.id]
+              : isSpaceTheme && SPACE_FOLDER_STICKERS[folder.id]
               ? SPACE_FOLDER_STICKERS[folder.id]
               : isTrainTheme && TRAIN_FOLDER_STICKERS[folder.id]
               ? TRAIN_FOLDER_STICKERS[folder.id]
@@ -1909,6 +2066,12 @@ export const AACView: React.FC = () => {
                       ? 'bg-green-50/80 hover:bg-green-50 border-green-300 text-green-950 shadow-[0_4px_10px_rgba(22,163,74,0.08)]'
                       : isTurtleTheme
                       ? 'bg-emerald-50/80 hover:bg-emerald-50 border-emerald-300 text-emerald-950 shadow-[0_4px_10px_rgba(5,150,105,0.08)]'
+                      : isFairytaleTheme
+                      ? 'bg-pink-50/80 hover:bg-pink-50 border-pink-300 text-pink-950 shadow-[0_4px_10px_rgba(219,39,119,0.08)]'
+                      : isRacingTheme
+                      ? 'bg-zinc-100 hover:bg-white border-zinc-300 text-zinc-950 shadow-[0_4px_10px_rgba(0,0,0,0.08)]'
+                      : isOceanTheme
+                      ? 'bg-cyan-50/80 hover:bg-cyan-50 border-cyan-300 text-cyan-950 shadow-[0_4px_10px_rgba(8,145,178,0.08)]'
                       : 'bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]'
                   }`}
                 >
@@ -1920,6 +2083,12 @@ export const AACView: React.FC = () => {
                       ? 'bg-green-800 text-white'
                       : isTurtleTheme
                       ? 'bg-emerald-800 text-white'
+                      : isFairytaleTheme
+                      ? 'bg-pink-800 text-white'
+                      : isRacingTheme
+                      ? 'bg-zinc-900 text-white'
+                      : isOceanTheme
+                      ? 'bg-cyan-800 text-white'
                       : 'bg-[#4A3E34] text-white'
                   } font-black flex items-center shadow-2xs pointer-events-none`}>
                     <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
