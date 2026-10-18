@@ -15,10 +15,16 @@ import {
   ChevronLeft,
   Plus,
   Trash2,
-  Edit3
+  Edit3,
+  Footprints,
+  Headphones,
+  MessageCircle,
+  Sparkles,
+  Star,
+  Trophy
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { RoutineStickerIcon } from './icons/JournalStickers';
+import { RoutineStickerIcon, getAdventureTabSticker, getStoryTabSticker } from './icons/JournalStickers';
 import { t } from '../services/translator';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import { CreateAdventureModal } from './adventures/CreateAdventureModal';
@@ -189,7 +195,16 @@ export const AdventuresView: React.FC = () => {
               }}
               className={`flex items-center gap-1.5 px-6 py-2.5 rounded-2xl font-black text-xs sm:text-sm ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white shadow-md active:scale-95 transition-all cursor-pointer`}
             >
-              <span>{isLastPage ? t('All Done! ⭐') : t('Next Page')}</span>
+              <span className="flex items-center gap-1.5">
+                {isLastPage ? (
+                  <>
+                    <span>{t('All Done!')}</span>
+                    <Star className="w-4 h-4 fill-amber-300 text-amber-300 shrink-0 inline-block" />
+                  </>
+                ) : (
+                  t('Next Page')
+                )}
+              </span>
               {!isLastPage && <ChevronRight className="w-4 h-4" />}
             </button>
           </div>
@@ -269,7 +284,8 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>🚶 {t('Walkthrough')} ({selectedAdventure.steps.length})</span>
+            <Footprints className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('Walkthrough')} ({selectedAdventure.steps.length})</span>
           </button>
           <button
             onClick={() => setAdventureSubTab('sensory')}
@@ -279,7 +295,8 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>🎧 {t('Sensory Preview')}</span>
+            <Headphones className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('Sensory Preview')}</span>
           </button>
           <button
             onClick={() => setAdventureSubTab('say')}
@@ -289,7 +306,8 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>🗣️ {t('Things I Can Say')}</span>
+            <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('Things I Can Say')}</span>
           </button>
           <button
             onClick={() => setAdventureSubTab('practice')}
@@ -299,7 +317,8 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>⭐ {t('Practice Mode')}</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('Practice Mode')}</span>
           </button>
         </div>
 
@@ -369,7 +388,16 @@ export const AdventuresView: React.FC = () => {
                 }}
                 className={`flex-1 py-2.5 rounded-2xl font-black text-xs sm:text-sm ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} hover:opacity-90 text-white shadow-md active:scale-95 transition-all cursor-pointer`}
               >
-                {isLastStep ? t('Complete Adventure! ⭐') : `${t('Next Step')} →`}
+                <span className="flex items-center justify-center gap-1.5">
+                  {isLastStep ? (
+                    <>
+                      <span>{t('Complete Adventure!')}</span>
+                      <Star className="w-4 h-4 fill-amber-300 text-amber-300 shrink-0 inline-block" />
+                    </>
+                  ) : (
+                    `${t('Next Step')} →`
+                  )}
+                </span>
               </button>
             </div>
           </div>
@@ -487,7 +515,7 @@ export const AdventuresView: React.FC = () => {
         {/* SUB-TAB 4: PRACTICE SIMULATION MODE */}
         {adventureSubTab === 'practice' && (
           <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-7 shadow-sm flex flex-col items-center text-center">
-            <span className="text-4xl mb-2">🎭</span>
+            <Sparkles className="w-10 h-10 text-amber-500 mb-2 drop-shadow-xs" />
             <h3 className="text-lg font-black text-slate-800">{t('Practice Conversation')}</h3>
             <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-md mt-1 mb-6">
               {t('Practice asking for a break or saying stop. See how friendly people respond when you speak your mind!')}
@@ -566,7 +594,11 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Compass className="w-4 h-4" />
+            <img
+              src={getAdventureTabSticker(activeTheme?.category)}
+              alt=""
+              className="w-5 h-5 object-contain shrink-0 drop-shadow-2xs select-none pointer-events-none"
+            />
             <span>{t('Life Adventures')} ({adventures.length})</span>
           </button>
           <button
@@ -577,7 +609,11 @@ export const AdventuresView: React.FC = () => {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <img
+              src={getStoryTabSticker(activeTheme?.category)}
+              alt=""
+              className="w-5 h-5 object-contain shrink-0 drop-shadow-2xs select-none pointer-events-none"
+            />
             <span>{t('Social Stories')} ({socialStories.length})</span>
           </button>
         </div>
@@ -591,7 +627,7 @@ export const AdventuresView: React.FC = () => {
               setIsAdventureModalOpen(true);
               playChime('tap');
             }}
-            className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+            className={`px-4 py-2.5 rounded-2xl ${activeTheme?.palette?.primaryBg || 'bg-amber-500'} ${activeTheme?.palette?.primaryHover || 'hover:bg-amber-600'} text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer shrink-0`}
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t('Add Adventure')}</span>
@@ -699,8 +735,9 @@ export const AdventuresView: React.FC = () => {
                       {adventure.completedCount ? (
                         <>
                           <span>•</span>
-                          <span className="text-amber-700 font-black">
-                            ⭐ {t('Done')} {adventure.completedCount}x
+                          <span className="text-amber-700 font-black inline-flex items-center gap-1">
+                            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 shrink-0" />
+                            <span>{t('Done')} {adventure.completedCount}x</span>
                           </span>
                         </>
                       ) : null}

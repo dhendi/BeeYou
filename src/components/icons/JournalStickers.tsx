@@ -904,12 +904,12 @@ export const DoctorAdventureSticker = renderThemedStickerPng(
 );
 export const PlansChangeStorySticker = renderThemedStickerPng(
   '/assets/stickers/story_plans_change.png',
-  '/assets/stickers/turtle_arched_bridge.png',
+  '/assets/stickers/turtle_swimming_loop.png',
   'When Plans Change',
   '/assets/stickers/dino_footprint_loop.png',
-  '/assets/stickers/frog_arched_willow_bridge.png',
-  '/assets/stickers/train_circle_carpet.png',
-  '/assets/stickers/space_circle_carpet.png'
+  '/assets/stickers/frog_tadpole_swim_loop.png',
+  '/assets/stickers/train_circular_track.png',
+  '/assets/stickers/space_refresh_repeat.png'
 );
 export const BirthdayStorySticker = renderThemedStickerPng(
   '/assets/stickers/story_birthday.png',
@@ -922,12 +922,12 @@ export const BirthdayStorySticker = renderThemedStickerPng(
 );
 export const TakingTurnsStorySticker = renderThemedStickerPng(
   '/assets/stickers/story_sharing.png',
-  '/assets/stickers/turtle_zen_balancing_stones.png',
+  '/assets/stickers/turtle_seagrass_toy_box.png',
   'Taking Turns with Toys',
-  '/assets/stickers/dino_wooden_stacking_blocks.png',
-  '/assets/stickers/frog_zen_balancing_stones.png',
-  '/assets/stickers/train_story_atlas.png',
-  '/assets/stickers/space_bone_treat.png'
+  '/assets/stickers/dino_vine_toy_box.png',
+  '/assets/stickers/frog_seagrass_toy_box.png',
+  '/assets/stickers/train_toy_chest.png',
+  '/assets/stickers/space_game_controller.png'
 );
 export const StethoscopeSticker = renderStickerPng('/assets/stickers/stethoscope.png', 'Stethoscope / Doctor');
 export const RainCloudSticker = renderStickerPng('/assets/stickers/rain_cloud.png', 'Rainy Day');
@@ -1205,9 +1205,13 @@ export const TURTLE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/eye_see.png': '/assets/stickers/turtle_river_stone.png',
   '/assets/stickers/drink_water.png': '/assets/stickers/turtle_bamboo_drink_cup.png',
   '/assets/stickers/adventure_restaurant.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/turtle_arched_bridge.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/turtle_swimming_loop.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/turtle_swimming_loop.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/turtle_clover_berry_feast.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/turtle_zen_balancing_stones.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/turtle_seagrass_toy_box.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/turtle_seagrass_toy_box.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/turtle_elder_healer_pouch.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/turtle_elder_healer_pouch.png',
 };
 
 export const DINO_STICKER_SWAPS: Record<string, string> = {
@@ -1382,8 +1386,12 @@ export const DINO_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/adventure_restaurant.png': '/assets/stickers/dino_feast_table_pavilion.png',
   '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/dino_fossil_puzzle_piece.png',
   '/assets/stickers/story_plans_change.png': '/assets/stickers/dino_footprint_loop.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/dino_footprint_loop.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/dino_forager_feast_bowl.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/dino_wooden_stacking_blocks.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/dino_vine_toy_box.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/dino_vine_toy_box.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/dino_healer_stethoscope_bag.png',
 };
 
 export const FROG_STICKER_SWAPS: Record<string, string> = {
@@ -1556,9 +1564,13 @@ export const FROG_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/tennis_ball.png': '/assets/stickers/frog_woven_moss_play_ball.png',
   '/assets/stickers/potted_plant.png': '/assets/stickers/frog_driftwood_lotus_planter.png',
   '/assets/stickers/jigsaw_puzzle.png': '/assets/stickers/frog_lotus_puzzle_piece.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/frog_arched_willow_bridge.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/frog_tadpole_swim_loop.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/frog_tadpole_swim_loop.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/frog_pond_birthday_feast.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/frog_zen_balancing_stones.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/frog_seagrass_toy_box.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/frog_seagrass_toy_box.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/frog_healer_stethoscope_kit.png',
   '/assets/stickers/fav_lego.png': '/assets/stickers/frog_zen_balancing_stones.png',
   '/assets/stickers/fav_love_heart.png': '/assets/stickers/frog_lily_pad_heart.png',
   '/assets/stickers/bee_mascot.png': '/assets/stickers/frog_mascot.png',
@@ -1750,10 +1762,10 @@ export const SPACE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/paw_print.png': '/assets/stickers/space_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/space_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/space_story_birthday.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/space_circle_carpet.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/space_circle_carpet.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/space_bone_treat.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/space_bone_treat.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/space_refresh_repeat.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/space_refresh_repeat.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/space_game_controller.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/space_game_controller.png',
 };
 
 export const TRAIN_STICKER_SWAPS: Record<string, string> = {
@@ -1816,10 +1828,10 @@ export const TRAIN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/paw_print.png': '/assets/stickers/train_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/train_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/train_story_birthday.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/train_circle_carpet.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/train_circle_carpet.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/train_story_atlas.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/train_story_atlas.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/train_circular_track.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/train_circular_track.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/train_toy_chest.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/train_toy_chest.png',
   // Batch 5 New Train Swaps
   '/assets/stickers/adventure_dentist.png': '/assets/stickers/train_adventure_dentist.png',
   '/assets/stickers/adventure_haircut.png': '/assets/stickers/train_adventure_haircut.png',
@@ -2130,12 +2142,15 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/wall_clock.png': '/assets/stickers/ocean_ship_bulkhead_clock.png',
   '/assets/stickers/circle_carpet.png': '/assets/stickers/ocean_wave_circle_rug.png',
   '/assets/stickers/sensory_social_masking.png': '/assets/stickers/ocean_wave_circle_rug.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/ocean_wave_circle_rug.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/ocean_wave_circle_rug.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/ocean_wave_loop.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/ocean_wave_loop.png',
   '/assets/stickers/locker_schedule.png': '/assets/stickers/ocean_beach_bathhouse_locker.png',
   '/assets/stickers/bone_treat.png': '/assets/stickers/ocean_fish_stamp_dog_biscuit.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/ocean_fish_stamp_dog_biscuit.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/ocean_fish_stamp_dog_biscuit.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/ocean_treasure_toy_chest.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/ocean_treasure_toy_chest.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/ocean_marine_doctor_stethoscope.png',
   '/assets/stickers/paw_print.png': '/assets/stickers/ocean_beach_sand_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/ocean_turquoise_barrel_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/ocean_seaside_birthday_cake.png',
@@ -2356,12 +2371,15 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/wall_clock.png': '/assets/stickers/fairytale_clock_time.png',
   '/assets/stickers/circle_carpet.png': '/assets/stickers/fairytale_circle_carpet.png',
   '/assets/stickers/sensory_social_masking.png': '/assets/stickers/fairytale_circle_carpet.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/fairytale_circle_carpet.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/fairytale_circle_carpet.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/fairytale_sparkle_refresh_loop.png',
   '/assets/stickers/locker_schedule.png': '/assets/stickers/fairytale_locker_schedule.png',
   '/assets/stickers/bone_treat.png': '/assets/stickers/fairytale_bone_treat.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/fairytale_bone_treat.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/fairytale_bone_treat.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/fairytale_royal_toy_chest.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/fairytale_royal_toy_chest.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/fairytale_doctor_stethoscope.png',
   '/assets/stickers/paw_print.png': '/assets/stickers/fairytale_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/fairytale_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/fairytale_story_birthday.png',
@@ -2665,12 +2683,15 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/timer_clock.png': '/assets/stickers/racing_wall_clock.png',
   '/assets/stickers/circle_carpet.png': '/assets/stickers/racing_circle_carpet.png',
   '/assets/stickers/sensory_social_masking.png': '/assets/stickers/racing_circle_carpet.png',
-  '/assets/stickers/story_plans_change.png': '/assets/stickers/racing_circle_carpet.png',
-  '/assets/stickers/plans_changed.png': '/assets/stickers/racing_circle_carpet.png',
+  '/assets/stickers/story_plans_change.png': '/assets/stickers/racing_circuit_map.png',
+  '/assets/stickers/plans_changed.png': '/assets/stickers/racing_circuit_map.png',
   '/assets/stickers/locker_schedule.png': '/assets/stickers/racing_locker_schedule.png',
   '/assets/stickers/bone_treat.png': '/assets/stickers/racing_bone_treat.png',
-  '/assets/stickers/story_sharing.png': '/assets/stickers/racing_bone_treat.png',
-  '/assets/stickers/sharing_toys.png': '/assets/stickers/racing_bone_treat.png',
+  '/assets/stickers/story_sharing.png': '/assets/stickers/racing_toy_chest.png',
+  '/assets/stickers/sharing_toys.png': '/assets/stickers/racing_toy_chest.png',
+  '/assets/stickers/adventure_doctor_checkup.png': '/assets/stickers/racing_doctor_stethoscope.png',
+  '/assets/stickers/adventure_doctor.png': '/assets/stickers/racing_doctor_stethoscope.png',
+  '/assets/stickers/doctor_checkup.png': '/assets/stickers/racing_doctor_stethoscope.png',
   '/assets/stickers/paw_print.png': '/assets/stickers/racing_paw_print.png',
   '/assets/stickers/ocean_wave.png': '/assets/stickers/racing_ocean_wave.png',
   '/assets/stickers/story_birthday.png': '/assets/stickers/racing_birthday_cake.png',
@@ -2735,6 +2756,8 @@ export const RoutineStickerIcon: React.FC<{
   const isTrain = activeTheme === 'train';
   const isSpace = activeTheme === 'space';
   const isOcean = activeTheme === 'ocean';
+  const isFairytale = activeTheme === 'fantasy' || activeTheme === 'magic';
+  const isRacing = activeTheme === 'racing';
 
   // If already an image path or sticker asset
   if (normEmoji.startsWith('/') || normEmoji.includes('.png')) {
@@ -2751,6 +2774,10 @@ export const RoutineStickerIcon: React.FC<{
       finalSrc = SPACE_STICKER_SWAPS[normEmoji];
     } else if (isOcean && OCEAN_STICKER_SWAPS[normEmoji]) {
       finalSrc = OCEAN_STICKER_SWAPS[normEmoji];
+    } else if (isFairytale && FAIRYTALE_STICKER_SWAPS[normEmoji]) {
+      finalSrc = FAIRYTALE_STICKER_SWAPS[normEmoji];
+    } else if (isRacing && RACING_STICKER_SWAPS[normEmoji]) {
+      finalSrc = RACING_STICKER_SWAPS[normEmoji];
     }
     return (
       <img
@@ -3187,5 +3214,38 @@ export const RoutineStickerIcon: React.FC<{
   return <span className={className} style={size ? { fontSize: size * 0.75 } : undefined}>{emoji || '⭐'}</span>;
 };
 
+/**
+ * Resolves the themed badge sticker for the "Life Adventures" tab header.
+ */
+export function getAdventureTabSticker(themeCategory?: string | null): string {
+  switch (themeCategory) {
+    case 'turtle': return '/assets/stickers/turtle_reed_explorer_shoes.png';
+    case 'dinosaur': return '/assets/stickers/dino_expedition_log_book.png';
+    case 'frog': return '/assets/stickers/frog_explorer_backpack.png';
+    case 'train': return '/assets/stickers/train_passport_book.png';
+    case 'space': return '/assets/stickers/space_passport_book.png';
+    case 'ocean': return '/assets/stickers/ocean_expedition_passport.png';
+    case 'fantasy':
+    case 'magic': return '/assets/stickers/fairytale_passport_book.png';
+    case 'racing': return '/assets/stickers/racing_passport_book.png';
+    default: return '/assets/stickers/passport_book.png';
+  }
+}
 
-
+/**
+ * Resolves the themed badge sticker for the "Social Stories" tab header.
+ */
+export function getStoryTabSticker(themeCategory?: string | null): string {
+  switch (themeCategory) {
+    case 'turtle': return '/assets/stickers/turtle_firefly_lantern_book.png';
+    case 'dinosaur': return '/assets/stickers/dino_palm_leaf_folio.png';
+    case 'frog': return '/assets/stickers/frog_reed_school_folder.png';
+    case 'train': return '/assets/stickers/train_story_atlas.png';
+    case 'space': return '/assets/stickers/space_routine_writing_journal.png';
+    case 'ocean': return '/assets/stickers/ocean_captains_logbook.png';
+    case 'fantasy':
+    case 'magic': return '/assets/stickers/fairytale_spellbook_journal.png';
+    case 'racing': return '/assets/stickers/racing_journal.png';
+    default: return '/assets/stickers/routine_writing_journal.png';
+  }
+}

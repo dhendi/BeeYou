@@ -27,18 +27,25 @@ import {
   HelpCircle,
   Footprints,
   RotateCcw,
-  BookOpen
+  BookOpen,
+  Sparkles,
+  MessageCircle
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
-import { RoutineStickerIcon } from '../icons/JournalStickers';
+import { RoutineStickerIcon, getAdventureTabSticker, getStoryTabSticker } from '../icons/JournalStickers';
 import { IconLibraryModal } from '../common/IconLibraryModal';
 import { CreateSocialStoryModal } from '../adventures/CreateSocialStoryModal';
 
 const getAdventureSticker = (id: string): string | undefined => {
   if (id === 'adv-dentist') return '/assets/stickers/adventure_dentist.png';
   if (id === 'adv-restaurant') return '/assets/stickers/adventure_restaurant.png';
-  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut.png';
-  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor.png';
+  if (id === 'adv-haircut') return '/assets/stickers/adventure_haircut_salon.png';
+  if (id === 'adv-doctor') return '/assets/stickers/adventure_doctor_checkup.png';
+  if (id === 'adv-pool') return '/assets/stickers/adventure_swimming_pool.png';
+  if (id === 'adv-cinema') return '/assets/stickers/adventure_movie_cinema.png';
+  if (id === 'adv-bowling') return '/assets/stickers/adventure_bowling_alley.png';
+  if (id === 'adv-camping') return '/assets/stickers/adventure_camping_tent.png';
+  if (id === 'adv-museum') return '/assets/stickers/adventure_museum_visit.png';
   return undefined;
 };
 
@@ -164,7 +171,8 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
     socialStories,
     addSocialStory,
     deleteSocialStory,
-    speak
+    speak,
+    activeTheme
   } = useApp();
 
   // Sub-tab: Adventures vs Social Stories
@@ -616,11 +624,15 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
           }}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
             mainTab === 'adventures'
-              ? 'bg-amber-500 text-white shadow-xs'
+              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Compass className="w-4 h-4" />
+          <img
+            src={getAdventureTabSticker(activeTheme?.category)}
+            alt=""
+            className="w-5 h-5 object-contain shrink-0 drop-shadow-2xs select-none pointer-events-none"
+          />
           <span>{t("Life Adventures")} ({adventures.length})</span>
         </button>
         <button
@@ -631,11 +643,15 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
           }}
           className={`flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer ${
             mainTab === 'stories'
-              ? 'bg-amber-500 text-white shadow-xs'
+              ? `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <img
+            src={getStoryTabSticker(activeTheme?.category)}
+            alt=""
+            className="w-5 h-5 object-contain shrink-0 drop-shadow-2xs select-none pointer-events-none"
+          />
           <span>{t("Social Stories")} ({socialStories.length})</span>
         </button>
       </div>
@@ -757,7 +773,14 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold'
               }`}
             >
-              {cat === 'Custom' ? `⭐ ${t("Custom")}` : t(cat)}
+              {cat === 'Custom' ? (
+                <span className="inline-flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t("Custom")}</span>
+                </span>
+              ) : (
+                t(cat)
+              )}
             </button>
           ))}
         </div>
@@ -801,20 +824,12 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                 <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
                   <div className="flex items-center gap-3.5">
                     {/* Adventure Icon */}
-                    <div className="w-13 h-13 rounded-2xl bg-amber-50/70 border border-amber-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                      {stickerPath ? (
-                        <img
-                          src={stickerPath}
-                          alt={adv.title}
-                          className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none"
-                        />
-                      ) : (
-                        <RoutineStickerIcon
-                          emoji={adv.emoji}
-                          title={adv.title}
-                          className="w-10 h-10 object-contain drop-shadow-2xs"
-                        />
-                      )}
+                    <div className={`w-13 h-13 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50/70'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} p-1 flex items-center justify-center shrink-0 shadow-2xs`}>
+                      <RoutineStickerIcon
+                        emoji={adv.stickerSrc || getAdventureSticker(adv.id) || adv.emoji}
+                        title={adv.title}
+                        className="w-10 h-10 object-contain drop-shadow-2xs"
+                      />
                     </div>
 
                     <div>
@@ -1066,9 +1081,10 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                           {adv.thingsICanAskFor.map((req, rIdx) => (
                             <span
                               key={rIdx}
-                              className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-950 font-bold text-xs"
+                              className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-950 font-bold text-xs inline-flex items-center gap-1.5"
                             >
-                              🙋 {req}
+                              <MessageCircle className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                              <span>{req}</span>
                             </span>
                           ))}
                         </div>
@@ -1192,7 +1208,7 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                 >
                   <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
-                      <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                      <div className={`w-14 h-14 rounded-2xl ${activeTheme?.palette?.primaryLight || 'bg-amber-50'} border ${activeTheme?.palette?.primaryBorder || 'border-amber-200'} flex items-center justify-center shrink-0 p-1.5 shadow-2xs`}>
                         <RoutineStickerIcon
                           emoji={story.stickerSrc || story.emoji}
                           title={story.title}
@@ -1697,7 +1713,10 @@ export const CaregiverAdventuresTab: React.FC<CaregiverAdventuresTabProps> = ({
                       key={rIdx}
                       className="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-950 font-bold text-xs flex items-center gap-1.5"
                     >
-                      <span>🙋 {req}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MessageCircle className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+                        <span>{req}</span>
+                      </span>
                       <button
                         type="button"
                         onClick={() => setFormRequests(formRequests.filter((_, i) => i !== rIdx))}
