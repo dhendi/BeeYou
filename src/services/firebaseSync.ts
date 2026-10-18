@@ -413,3 +413,21 @@ export function onFirebaseGenericEvent(listener: GenericEventCallback): () => vo
   eventListeners.add(listener);
   return () => eventListeners.delete(listener);
 }
+
+/**
+ * Permanently deletes all family cloud realtime records for a familyCode.
+ * Used for Apple Guideline 5.1.1(v) account deletion compliance.
+ */
+export async function deleteFirebaseFamilyNode(familyCode: string): Promise<boolean> {
+  const safeCode = (familyCode || '').trim().toUpperCase();
+  if (!safeCode || safeCode === 'BEE-DEMO') return true;
+  try {
+    const familyRef = ref(db, `beeyou/families/${safeCode}`);
+    await set(familyRef, null);
+    return true;
+  } catch (err) {
+    console.warn('deleteFirebaseFamilyNode warning:', err);
+    return false;
+  }
+}
+

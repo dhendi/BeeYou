@@ -3,7 +3,7 @@ import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
-import { logoutFamilyAccount, wipeDeviceStorage } from '../../services/authService';
+import { logoutFamilyAccount, wipeDeviceStorage, deleteFamilyAccount } from '../../services/authService';
 import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
@@ -110,6 +110,36 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
     } catch (e) {
       setIsWiping(false);
       console.error('Wipe error:', e);
+    }
+  };
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleExecuteDelete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      const res = await deleteFamilyAccount(deletePassword);
+      setIsDeleting(false);
+      if (res.success) {
+        playChime('clear');
+        onShowNotification(t(res.message));
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }, 400);
+      } else {
+        setDeleteError(res.message);
+        playChime('clear');
+      }
+    } catch (err: any) {
+      setIsDeleting(false);
+      setDeleteError(err?.message || 'Failed to delete account.');
     }
   };
 
@@ -339,7 +369,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
           <button
             type="button"
             onClick={handleSignOut}
@@ -355,25 +385,46 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
 
           <button
             type="button"
-            onClick={() => setConfirmWipe(true)}
-            className="p-4 rounded-2xl border-2 border-rose-200 bg-rose-50/60 hover:bg-rose-100/60 text-left transition cursor-pointer"
+            onClick={() => {
+              setConfirmWipe(true);
+              setConfirmDelete(false);
+            }}
+            className="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50/60 hover:bg-amber-100/60 text-left transition cursor-pointer"
           >
-            <span className="text-xs font-black text-rose-800 block">
+            <span className="text-xs font-black text-amber-900 block">
               {t("Erase & Reset Device")}
             </span>
+            <span className="text-[11px] text-amber-700 font-medium block mt-0.5">
+              {t("Completely purges local device memory while keeping cloud backup safe.")}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmDelete(true);
+              setConfirmWipe(false);
+              setDeletePassword('');
+              setDeleteError(null);
+            }}
+            className="p-4 rounded-2xl border-2 border-rose-300 bg-rose-50/70 hover:bg-rose-100/70 text-left transition cursor-pointer sm:col-span-2 lg:col-span-1"
+          >
+            <span className="text-xs font-black text-rose-800 block">
+              {t("Delete Family Account")}
+            </span>
             <span className="text-[11px] text-rose-600 font-medium block mt-0.5">
-              {t("Completely purges private medications, mood logs, and routines.")}
+              {t("Permanently deletes your account and cloud Realtime Database records.")}
             </span>
           </button>
         </div>
 
         {confirmWipe && (
-          <div className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-950 space-y-3 animate-in fade-in">
+          <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 space-y-3 animate-in fade-in">
             <div>
-              <span className="text-xs font-black uppercase tracking-wider block text-rose-900">
+              <span className="text-xs font-black uppercase tracking-wider block text-amber-900">
                 {t("Confirm Clean Device Wipe")}
               </span>
-              <p className="text-xs text-rose-800 font-medium mt-1 leading-relaxed">
+              <p className="text-xs text-amber-800 font-medium mt-1 leading-relaxed">
                 {t("Are you sure? This will erase all local schedules, medication dose records, and personal journal entries from this physical device. (Your cloud account backup remains completely safe).")}
               </p>
             </div>
@@ -382,7 +433,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
                 type="button"
                 onClick={handleExecuteWipe}
                 disabled={isWiping}
-                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs transition cursor-pointer"
               >
                 <span>{isWiping ? t("Erasing...") : t("Yes, Erase This Device")}</span>
               </button>
@@ -396,6 +447,57 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               </button>
             </div>
           </div>
+        )}
+
+        {confirmDelete && (
+          <form onSubmit={handleExecuteDelete} className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-950 space-y-3 animate-in fade-in">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider block text-rose-900">
+                {t("Permanent Account Deletion (Apple Rule 5.1.1v)")}
+              </span>
+              <p className="text-xs text-rose-800 font-medium mt-1 leading-relaxed">
+                {t("Warning: This action is permanent and cannot be undone. It will delete your family account, wipe your cloud database channel, and purge all personal schedules, medication logs, and journal entries from this device.")}
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-rose-900 block">
+                {t("Enter Account Password to Confirm Deletion:")}
+              </label>
+              <input
+                type="password"
+                required
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder={t("Your account password")}
+                className="w-full max-w-sm px-3.5 py-2.5 rounded-xl border border-rose-300 bg-white text-slate-800 text-xs font-medium focus:outline-rose-500"
+              />
+            </div>
+
+            {deleteError && (
+              <p className="text-xs font-bold text-rose-700 bg-rose-100/80 p-2 rounded-lg">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="submit"
+                disabled={isDeleting}
+                className="px-4 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-800 disabled:opacity-50 text-white font-black text-xs transition cursor-pointer"
+              >
+                <span>{isDeleting ? t("Deleting Account...") : t("Yes, Permanently Delete Account")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                disabled={isDeleting}
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 transition cursor-pointer"
+              >
+                <span>{t("Cancel")}</span>
+              </button>
+            </div>
+          </form>
         )}
       </div>
     </div>

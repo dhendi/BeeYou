@@ -1,6 +1,6 @@
 import { UserAgeGroup, UserAccountRole, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
 import { setPairingCode, subscribeToCloudChannel, syncChildStatusToCaregiver, sendHeartbeat } from './caregiverSync';
-import { app } from './firebaseSync';
+import { app, deleteFirebaseFamilyNode } from './firebaseSync';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -11,6 +11,9 @@ import {
   signInWithPopup,
   sendEmailVerification,
   sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  deleteUser,
   reload,
   User as FirebaseUser
 } from 'firebase/auth';
@@ -549,6 +552,81 @@ export async function wipeDeviceStorage(): Promise<void> {
     }
   } catch (e) {
     console.warn('Storage wipe warning:', e);
+  }
+}
+
+/**
+ * Apple Guideline 5.1.1(v) Compliant In-App Account Deletion
+ * Permanently deletes the family account from Firebase Authentication,
+ * purges cloud realtime data for this family, and wipes all local device data.
+ */
+export async function deleteFamilyAccount(password: string): Promise<{ success: boolean; message: string }> {
+  const account = getStoredFamilyAccount();
+  const user = auth.currentUser;
+
+  // Handle Demo Account: reset local device demo state
+  if (account?.isDemoAccount || user?.email === 'demo@beeyou.app') {
+    await wipeDeviceStorage();
+    return {
+      success: true,
+      message: 'Demo space has been completely reset on this device.',
+    };
+  }
+
+  if (!user || !user.email) {
+    // If no Firebase user session, perform clean local wipe
+    await wipeDeviceStorage();
+    return {
+      success: true,
+      message: 'Local family space has been completely deleted.',
+    };
+  }
+
+  if (!password || password.trim().length === 0) {
+    return {
+      success: false,
+      message: 'Please enter your account password to confirm permanent account deletion.',
+    };
+  }
+
+  try {
+    // 1. Re-authenticate with password before deletion
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+
+    // 2. Purge Cloud Realtime Database family node
+    if (account?.familyCode) {
+      await deleteFirebaseFamilyNode(account.familyCode);
+    }
+
+    // 3. Delete user from Firebase Auth
+    await deleteUser(user);
+
+    // 4. Wipe local device storage & session
+    await wipeDeviceStorage();
+
+    return {
+      success: true,
+      message: 'Your family account and all associated cloud data have been permanently deleted.',
+    };
+  } catch (err: any) {
+    console.error('Account deletion error:', err);
+    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      return {
+        success: false,
+        message: 'Incorrect password. Account deletion cancelled for your protection.',
+      };
+    }
+    if (err.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        message: 'Too many attempts. Please wait a few moments before trying again.',
+      };
+    }
+    return {
+      success: false,
+      message: err.message || 'Failed to delete account. Please try again.',
+    };
   }
 }
 

@@ -15,6 +15,7 @@ import {
   DEMO_FAMILY_ACCOUNT,
   getStoredFamilyAccount,
   logoutFamilyAccount,
+  deleteFamilyAccount,
   setActiveDeviceView,
   sendAccountPasswordResetEmail,
   FamilyAccount
@@ -319,6 +320,37 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }, 500);
     } catch (err) {
       console.error('Logout error:', err);
+    }
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleExecuteDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setDeleteLoading(true);
+      setDeleteError(null);
+      const res = await deleteFamilyAccount(deletePassword);
+      setDeleteLoading(false);
+      if (res.success) {
+        playChime('clear');
+        setShowDeleteModal(false);
+        setCurrentAccount(null);
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }, 400);
+      } else {
+        setDeleteError(res.message);
+        playChime('clear');
+      }
+    } catch (err: any) {
+      setDeleteLoading(false);
+      setDeleteError(err?.message || 'Failed to delete account.');
     }
   };
 
@@ -1020,18 +1052,81 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
           {/* If already signed in */}
           {currentAccount && (
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div>
-                <span>Signed in as <strong>{currentAccount.email}</strong> ({currentAccount.familyCode})</span>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Device is actively synced to your shared family space.</p>
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3 text-xs">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <span>Signed in as <strong>{currentAccount.email}</strong> ({currentAccount.familyCode})</span>
+                  <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Device is actively synced to your shared family space.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold transition cursor-pointer"
+                  >
+                    <span>Sign Out</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDeleteModal(true);
+                      setDeletePassword('');
+                      setDeleteError(null);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-900 transition cursor-pointer"
+                  >
+                    <span>Delete Account</span>
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-rose-600 dark:text-rose-400 font-bold transition cursor-pointer"
-              >
-                Sign Out
-              </button>
+
+              {showDeleteModal && (
+                <form onSubmit={handleExecuteDeleteAccount} className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-200 space-y-2.5 animate-in fade-in">
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wider block text-rose-900 dark:text-rose-300">
+                      Permanently Delete Account (Apple Rule 5.1.1v)
+                    </span>
+                    <p className="text-[11px] text-rose-800 dark:text-rose-300 font-medium mt-0.5 leading-relaxed">
+                      This will permanently delete your family account, wipe your cloud channel, and reset this device. This cannot be undone.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <input
+                      type="password"
+                      required
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      placeholder="Enter account password to confirm"
+                      className="w-full px-3 py-2 rounded-lg border border-rose-300 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-medium focus:outline-rose-500"
+                    />
+                  </div>
+
+                  {deleteError && (
+                    <p className="text-[11px] font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/40 p-2 rounded-md">
+                      {deleteError}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="submit"
+                      disabled={deleteLoading}
+                      className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer"
+                    >
+                      <span>{deleteLoading ? 'Deleting...' : 'Yes, Delete My Account'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteModal(false)}
+                      disabled={deleteLoading}
+                      className="px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs border border-slate-300 dark:border-slate-700 transition cursor-pointer"
+                    >
+                      <span>Cancel</span>
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
 
