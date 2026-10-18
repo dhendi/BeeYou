@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { preloadAllAppAssets, getTier1Assets, PreloadProgress } from '../utils/appAssetPreloader';
+import { preloadAllAppAssets, getTier1Assets, isWarmCacheVisit, PreloadProgress } from '../utils/appAssetPreloader';
 
 interface AppLoadingScreenProps {
   onLoaded: () => void;
 }
 
 export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) => {
+  const [warmCache] = useState(() => isWarmCacheVisit());
   const [progress, setProgress] = useState<PreloadProgress>(() => ({
     percent: 0,
     loaded: 0,
@@ -23,24 +24,28 @@ export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) 
 
       // Gate: ONLY finish when 100% of all Tier 1 startup assets are preloaded
       if (p.percent >= 100 && p.loaded >= p.total) {
+        const holdMs = warmCache ? 60 : 200;
+        const fadeMs = warmCache ? 220 : 400;
         setTimeout(() => {
           if (isMounted) {
             setIsFadingOut(true);
-            setTimeout(onLoaded, 500);
+            setTimeout(onLoaded, fadeMs);
           }
-        }, 250);
+        }, holdMs);
       }
     });
 
     return () => {
       isMounted = false;
     };
-  }, [onLoaded]);
+  }, [onLoaded, warmCache]);
 
   return (
     <div
       aria-live="polite"
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FAF7EE] text-[#422006] transition-opacity duration-500 select-none ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FAF7EE] text-[#422006] transition-opacity ${
+        warmCache ? 'duration-200' : 'duration-400'
+      } select-none ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >

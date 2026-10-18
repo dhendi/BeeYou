@@ -21,6 +21,24 @@ const memoryImageCache = new Map<string, HTMLImageElement>();
 let isTier1Completed = false;
 let isTier2Running = false;
 
+// Persistent cache version key — bump if asset manifest changes significantly
+const ASSET_CACHE_VERSION_KEY = 'beeyou_asset_cache_version';
+const ASSET_FULL_CACHE_KEY = 'beeyou_asset_full_cache_version';
+const CURRENT_ASSET_CACHE_VERSION = 'beeyou-webp-v2.3-1366';
+
+/**
+ * Returns true if this browser has already completed Tier 1 preloading for the
+ * current asset version on a previous visit (meaning assets are in HTTP/SW disk cache).
+ */
+export function isWarmCacheVisit(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(ASSET_CACHE_VERSION_KEY) === CURRENT_ASSET_CACHE_VERSION;
+  } catch {
+    return false;
+  }
+}
+
 export function isAllAssetsPreloaded(): boolean {
   return isTier1Completed;
 }
@@ -65,12 +83,51 @@ function detectActiveThemeCategory(): ThemeCategoryKey | null {
   return null;
 }
 
+const THEME_WALLPAPER_MAP: Record<ThemeCategoryKey | 'classic', string> = {
+  classic: '/assets/wallpapers/default_honey_theme_bg.webp',
+  turtle: '/assets/wallpapers/turtle_sanctuary_bg.webp',
+  dinosaur: '/assets/wallpapers/dino_kingdom_bg.webp',
+  frog: '/assets/wallpapers/ribbit_pond_bg.webp',
+  train: '/assets/wallpapers/steam_express_bg.webp',
+  space: '/assets/wallpapers/cosmic_voyager_bg.webp',
+  ocean: '/assets/wallpapers/ocean_splash_bg.webp',
+  fantasy: '/assets/wallpapers/magic_fairytale_bg.webp',
+  racing: '/assets/wallpapers/turbo_speedway_bg.webp',
+};
+
 /**
  * Compute the exact deduplicated Tier 1 URL list for the current startup session.
+ * - On a cold first visit: includes all 319 base Tier 1 assets + active theme swaps.
+ * - On a warm returning visit (already cached on disk): blocks only on the active theme's
+ *   emotions, wallpaper, core stickers, and active theme swaps (~223 assets), while the
+ *   other 8 themes' cached wallpapers & emotions warm up immediately in Tier 2A.
  */
 export function getTier1Assets(): string[] {
-  const set = new Set<string>(assetsData.tier1Assets);
   const activeCat = detectActiveThemeCategory();
+  const warm = isWarmCacheVisit();
+  const activeEmotionFolder = activeCat ?? 'classic';
+  const activeWallpaper = THEME_WALLPAPER_MAP[activeEmotionFolder];
+
+  const set = new Set<string>();
+
+  for (const url of assetsData.tier1Assets) {
+    if (warm) {
+      // On warm cache visits, defer inactive themes' emotion folders to Tier 2A
+      if (url.startsWith('/assets/emotions/') && !url.startsWith(`/assets/emotions/${activeEmotionFolder}/`)) {
+        continue;
+      }
+      // On warm cache visits, defer inactive themes' wallpapers to Tier 2A
+      if (
+        url.startsWith('/assets/wallpapers/') &&
+        url !== activeWallpaper &&
+        url !== THEME_WALLPAPER_MAP.classic
+      ) {
+        continue;
+      }
+    }
+    set.add(url);
+  }
+
   if (activeCat && assetsData.themeSwapAssets[activeCat]) {
     for (const url of assetsData.themeSwapAssets[activeCat]) {
       set.add(url);
@@ -177,31 +234,41 @@ export function preloadThemeAssetsImmediate(themeIdOrCategory?: string | null): 
 
   const pending = assetsData.themeSwapAssets[key].filter((u) => !memoryImageCache.has(u));
   if (pending.length > 0) {
-    void preloadPool(pending, 16, true);
+    void preloadPool(pending, 24, true);
   }
 }
 
 /**
- * Tier 2: Silently preload all remaining theme swap sets and deep Icon Library
- * stickers in the background after the main app has opened.
+ * Tier 2: Silently preload all remaining theme wallpapers, emotions, theme swap sets,
+ * and deep Icon Library stickers in the background after the main app has opened.
  */
 function startTier2BackgroundPreload(): void {
   if (typeof window === 'undefined' || isTier2Running) return;
   isTier2Running = true;
 
   const runTier2 = async () => {
+    // Tier 2A-0: Any deferred wallpapers & emotions from warm-cache startup
+    const deferredTier1 = assetsData.tier1Assets.filter((u) => !memoryImageCache.has(u));
+    if (deferredTier1.length > 0) {
+      await preloadPool(deferredTier1, 24, false);
+    }
+
     // Tier 2A: All remaining 9-theme swap stickers (so switching to any theme is 0ms instant)
     const pendingSwaps = assetsData.tier2PrioritySwaps.filter((u) => !memoryImageCache.has(u));
-    await preloadPool(pendingSwaps, 12, false);
+    await preloadPool(pendingSwaps, 16, false);
 
     // Tier 2B: Remaining deep Icon Library picker items
     const pendingDeep = assetsData.tier2DeepAssets.filter((u) => !memoryImageCache.has(u));
-    await preloadPool(pendingDeep, 8, false);
+    await preloadPool(pendingDeep, 12, false);
+
+    try {
+      localStorage.setItem(ASSET_FULL_CACHE_KEY, CURRENT_ASSET_CACHE_VERSION);
+    } catch {}
   };
 
   setTimeout(() => {
     void runTier2();
-  }, 100);
+  }, 50);
 }
 
 /**
@@ -213,6 +280,7 @@ export async function preloadAllAppAssets(
 ): Promise<void> {
   if (typeof window === 'undefined') return;
 
+  const warm = isWarmCacheVisit();
   const tier1Urls = getTier1Assets();
   const total = tier1Urls.length;
 
@@ -239,13 +307,18 @@ export async function preloadAllAppAssets(
 
   notify();
 
-  // Preload & decode all Tier 1 startup assets with 24 concurrent workers
-  await preloadPool(tier1Urls, 24, true, () => {
+  // Warm cache visits pull directly from local HTTP/SW disk cache with 64 concurrent workers;
+  // Cold network visits use 32 concurrent workers with full bitmap decode.
+  const concurrency = warm ? 64 : 32;
+  await preloadPool(tier1Urls, concurrency, true, () => {
     loaded++;
     notify();
   });
 
   isTier1Completed = true;
+  try {
+    localStorage.setItem(ASSET_CACHE_VERSION_KEY, CURRENT_ASSET_CACHE_VERSION);
+  } catch {}
   notify();
 
   // Immediately kick off silent Tier 2 background preloading for remaining themes & icon picker

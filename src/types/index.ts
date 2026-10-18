@@ -119,6 +119,7 @@ export interface RoutineTemplate {
   id: string;
   title: string;
   category: 'morning' | 'school' | 'after-school' | 'work' | 'study' | 'evening' | 'bedtime' | 'appointment' | 'special' | 'custom';
+  themeCategory?: 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'fantasy' | 'racing' | 'classic';
   emoji: string;
   time?: string;
   description: string;

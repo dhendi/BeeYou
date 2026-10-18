@@ -22,9 +22,18 @@ import {
 import { Routine, VisualScheduleStep } from '../types';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS } from '../data/themedIconsData';
+import {
+  TURTLE_SANCTUARY_ICONS,
+  DINO_KINGDOM_ICONS,
+  RIBBIT_POND_ICONS,
+  STEAM_EXPRESS_ICONS,
+  COSMIC_SPACE_ICONS,
+  OCEAN_SPLASH_ICONS,
+  FAIRYTALE_MAGIC_ICONS,
+  RACING_SPEEDWAY_ICONS,
+} from '../data/themedIconsData';
 import { useApp } from '../context/AppContext';
-import { IconLibraryModal } from './common/IconLibraryModal';
+import { IconLibraryModal, ThemeIconCategory } from './common/IconLibraryModal';
 
 interface RoutineCustomizerModalProps {
   isOpen: boolean;
@@ -50,13 +59,31 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
+  const activeThemeCategory: ThemeIconCategory | null = isTurtleTheme
+    ? 'turtle'
+    : isDinoTheme
+      ? 'dinosaur'
+      : isFrogTheme
+        ? 'frog'
+        : activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains'
+          ? 'train'
+          : activeTheme?.category === 'space' || activeTheme?.id === 'theme-space'
+            ? 'space'
+            : activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean'
+              ? 'ocean'
+              : activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fantasy'
+                ? 'fantasy'
+                : activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing'
+                  ? 'racing'
+                  : null;
+
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Routine['category']>('morning');
   const [emoji, setEmoji] = useState('🌅');
   const [time, setTime] = useState('8:00 AM');
   
-  // Themed icon filter tab: 'turtle' | 'dinosaur' | 'frog' | 'classic' | 'all'
-  const [iconFilterTab, setIconFilterTab] = useState<'turtle' | 'dinosaur' | 'frog' | 'classic' | 'all'>('classic');
+  // Themed icon filter tab: 'themed' | 'classic' | 'all'
+  const [iconFilterTab, setIconFilterTab] = useState<'themed' | 'classic' | 'all'>('classic');
 
   // Full Icon Library Modal State
   const [showIconLibrary, setShowIconLibrary] = useState(false);
@@ -157,8 +184,8 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
             ]
       );
     }
-    setIconFilterTab(isFrogTheme ? 'frog' : isDinoTheme ? 'dinosaur' : isTurtleTheme ? 'turtle' : 'classic');
-  }, [initialRoutine, isOpen, isTurtleTheme, isDinoTheme, isFrogTheme]);
+    setIconFilterTab(activeThemeCategory ? 'themed' : 'classic');
+  }, [initialRoutine, isOpen, isTurtleTheme, isDinoTheme, isFrogTheme, activeThemeCategory]);
 
   const handleAddStep = () => {
     if (!newStepTitle.trim()) return;
@@ -433,53 +460,53 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                 <label className="text-[11px] font-bold text-slate-500 block">Pick an icon:</label>
                 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {/* Category Filter Pills */}
+                  {/* Category Filter Pills — only show the active theme's tab to avoid clutter */}
                   <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIconFilterTab('turtle');
-                        playChime('tap');
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
-                        iconFilterTab === 'turtle'
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-emerald-800'
-                      }`}
-                    >
-                      <span>🐢</span>
-                      <span>Turtle ({TURTLE_SANCTUARY_ICONS.length})</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIconFilterTab('dinosaur');
-                        playChime('tap');
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all flex items-center gap-1 cursor-pointer ${
-                        iconFilterTab === 'dinosaur'
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-emerald-800'
-                      }`}
-                    >
-                      <span>🦖</span>
-                      <span>Dino ({DINO_KINGDOM_ICONS.length})</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIconFilterTab('frog');
-                        playChime('tap');
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all flex items-center gap-1 cursor-pointer ${
-                        iconFilterTab === 'frog'
-                          ? 'bg-lime-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-lime-800'
-                      }`}
-                    >
-                      <span>🐸</span>
-                      <span>Frog ({RIBBIT_POND_ICONS.length})</span>
-                    </button>
+                    {activeThemeCategory && (() => {
+                      const activeCount =
+                        activeThemeCategory === 'turtle'
+                          ? TURTLE_SANCTUARY_ICONS.length
+                          : activeThemeCategory === 'dinosaur'
+                            ? DINO_KINGDOM_ICONS.length
+                            : activeThemeCategory === 'frog'
+                              ? RIBBIT_POND_ICONS.length
+                              : activeThemeCategory === 'train'
+                                ? STEAM_EXPRESS_ICONS.length
+                                : activeThemeCategory === 'space'
+                                  ? COSMIC_SPACE_ICONS.length
+                                  : activeThemeCategory === 'ocean'
+                                    ? OCEAN_SPLASH_ICONS.length
+                                    : activeThemeCategory === 'fantasy'
+                                      ? FAIRYTALE_MAGIC_ICONS.length
+                                      : RACING_SPEEDWAY_ICONS.length;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIconFilterTab('themed');
+                            playChime('tap');
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                            iconFilterTab === 'themed'
+                              ? isFrogTheme
+                                ? 'bg-lime-600 text-white shadow-xs'
+                                : isTurtleTheme || isDinoTheme
+                                  ? 'bg-emerald-600 text-white shadow-xs'
+                                  : `${activeTheme?.palette?.primaryBg || 'bg-amber-500'} text-white shadow-xs`
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <RoutineStickerIcon
+                            emoji={activeTheme?.icon || activeTheme?.emoji || '⭐'}
+                            title={activeTheme?.name}
+                            className="w-4 h-4 object-contain shrink-0"
+                          />
+                          <span>
+                            {activeTheme?.name || 'Theme'} ({activeCount})
+                          </span>
+                        </button>
+                      );
+                    })()}
                     <button
                       type="button"
                       onClick={() => {
@@ -494,20 +521,22 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                     >
                       Classic ({COMMON_EMOJIS.length})
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIconFilterTab('all');
-                        playChime('tap');
-                      }}
-                      className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        iconFilterTab === 'all'
-                          ? 'bg-slate-800 text-white shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900'
-                      }`}
-                    >
-                      All
-                    </button>
+                    {activeThemeCategory && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIconFilterTab('all');
+                          playChime('tap');
+                        }}
+                        className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          iconFilterTab === 'all'
+                            ? 'bg-slate-800 text-white shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        All
+                      </button>
+                    )}
                   </div>
 
                   {/* Full Library Button */}
@@ -518,148 +547,88 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
                       setShowIconLibrary(true);
                       playChime('tap');
                     }}
-                    className={`px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'text-emerald-800 border-emerald-300 hover:bg-emerald-50' : 'text-slate-600 border-slate-200'} border text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-2xs`}
+                    className={`px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 ${activeThemeCategory ? 'text-emerald-800 border-emerald-300 hover:bg-emerald-50' : 'text-slate-600 border-slate-200'} border text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-2xs`}
                     title="Browse complete icon library"
                   >
-                    <Search className={`w-3 h-3 ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <Search className={`w-3 h-3 ${activeThemeCategory ? 'text-emerald-600' : 'text-slate-400'}`} />
                     <span>More...</span>
                   </button>
                 </div>
               </div>
 
-              {/* 1. Turtle Sanctuary Icons Grid (Visible when tab is 'turtle' or 'all') */}
-              {(iconFilterTab === 'turtle' || iconFilterTab === 'all') && (
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-2xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
-                      <span className="text-sm">🐢</span>
-                      Wise Turtle Sanctuary Themed Icons
-                      <span className="text-[10px] font-normal text-emerald-700">({TURTLE_SANCTUARY_ICONS.length})</span>
-                    </span>
-                    {isTurtleTheme && (
+              {/* Active Theme Icons Grid (Only for the currently equipped theme) */}
+              {activeThemeCategory && (iconFilterTab === 'themed' || iconFilterTab === 'all') && (() => {
+                const activeIcons =
+                  activeThemeCategory === 'turtle'
+                    ? TURTLE_SANCTUARY_ICONS
+                    : activeThemeCategory === 'dinosaur'
+                      ? DINO_KINGDOM_ICONS
+                      : activeThemeCategory === 'frog'
+                        ? RIBBIT_POND_ICONS
+                        : activeThemeCategory === 'train'
+                          ? STEAM_EXPRESS_ICONS
+                          : activeThemeCategory === 'space'
+                            ? COSMIC_SPACE_ICONS
+                            : activeThemeCategory === 'ocean'
+                              ? OCEAN_SPLASH_ICONS
+                              : activeThemeCategory === 'fantasy'
+                                ? FAIRYTALE_MAGIC_ICONS
+                                : RACING_SPEEDWAY_ICONS;
+                return (
+                  <div className={`p-3 rounded-2xl border-2 shadow-2xs space-y-2 ${
+                    isFrogTheme
+                      ? 'bg-gradient-to-r from-lime-50 via-emerald-50/70 to-teal-50 border-lime-400'
+                      : isTurtleTheme || isDinoTheme
+                        ? 'bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-emerald-300'
+                        : `${activeTheme?.palette?.primaryLight || 'bg-amber-50'} ${activeTheme?.palette?.primaryBorder || 'border-amber-300'}`
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                        <RoutineStickerIcon
+                          emoji={activeTheme?.icon || activeTheme?.emoji || '⭐'}
+                          title={activeTheme?.name}
+                          className="w-4 h-4 object-contain shrink-0"
+                        />
+                        <span>{activeTheme?.name} Themed Icons</span>
+                        <span className="text-[10px] font-normal text-slate-600">({activeIcons.length})</span>
+                      </span>
                       <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/90 px-2 py-0.5 rounded-full">
                         Active Theme
                       </span>
-                    )}
-                  </div>
-                  <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
-                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
-                      {TURTLE_SANCTUARY_ICONS.map((tIcon) => {
-                        const isSelected = emoji === tIcon.value;
-                        return (
-                          <button
-                            key={tIcon.id}
-                            type="button"
-                            onClick={() => {
-                              setEmoji(tIcon.value);
-                              playChime('tap');
-                            }}
-                            title={tIcon.label}
-                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
-                                : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-105'
-                            }`}
-                          >
-                            <RoutineStickerIcon emoji={tIcon.value} title={tIcon.label} loading="lazy" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                          </button>
-                        );
-                      })}
+                    </div>
+                    <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
+                      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+                        {activeIcons.map((tIcon) => {
+                          const isSelected = emoji === tIcon.value;
+                          return (
+                            <button
+                              key={tIcon.id}
+                              type="button"
+                              onClick={() => {
+                                setEmoji(tIcon.value);
+                                playChime('tap');
+                              }}
+                              title={tIcon.label}
+                              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
+                                  : 'bg-white hover:bg-emerald-100/70 border border-slate-200 hover:scale-105'
+                              }`}
+                            >
+                              <RoutineStickerIcon emoji={tIcon.value} title={tIcon.label} loading="lazy" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Dino Kingdom Icons Grid (Visible when tab is 'dinosaur' or 'all') */}
-              {(iconFilterTab === 'dinosaur' || iconFilterTab === 'all') && (
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-green-50/70 to-emerald-50 border-2 border-emerald-400 shadow-2xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
-                      <span className="text-sm">🦖</span>
-                      Dino Kingdom Themed Icons
-                      <span className="text-[10px] font-normal text-emerald-700">({DINO_KINGDOM_ICONS.length})</span>
-                    </span>
-                    {isDinoTheme && (
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/90 px-2 py-0.5 rounded-full">
-                        Active Theme
-                      </span>
-                    )}
-                  </div>
-                  <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
-                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
-                      {DINO_KINGDOM_ICONS.map((dIcon) => {
-                        const isSelected = emoji === dIcon.value;
-                        return (
-                          <button
-                            key={dIcon.id}
-                            type="button"
-                            onClick={() => {
-                              setEmoji(dIcon.value);
-                              playChime('tap');
-                            }}
-                            title={dIcon.label}
-                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-emerald-200 ring-2 ring-emerald-600 scale-105 shadow-xs border border-emerald-400'
-                                : 'bg-white hover:bg-emerald-100/70 border border-emerald-200 hover:scale-105'
-                            }`}
-                          >
-                            <RoutineStickerIcon emoji={dIcon.value} title={dIcon.label} loading="lazy" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Ribbit Pond Icons Grid (Visible when tab is 'frog' or 'all') */}
-              {(iconFilterTab === 'frog' || iconFilterTab === 'all') && (
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-lime-50 via-emerald-50/70 to-teal-50 border-2 border-lime-400 shadow-2xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-lime-950 flex items-center gap-1.5">
-                      <span className="text-sm">🐸</span>
-                      Ribbit Pond Themed Icons
-                      <span className="text-[10px] font-normal text-lime-700">({RIBBIT_POND_ICONS.length})</span>
-                    </span>
-                    {isFrogTheme && (
-                      <span className="text-[10px] font-bold text-lime-800 bg-lime-200/90 px-2 py-0.5 rounded-full">
-                        Active Theme
-                      </span>
-                    )}
-                  </div>
-                  <div className="max-h-44 sm:max-h-52 overflow-y-auto overscroll-contain pr-1 rounded-xl">
-                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
-                      {RIBBIT_POND_ICONS.map((fIcon) => {
-                        const isSelected = emoji === fIcon.value;
-                        return (
-                          <button
-                            key={fIcon.id}
-                            type="button"
-                            onClick={() => {
-                              setEmoji(fIcon.value);
-                              playChime('tap');
-                            }}
-                            title={fIcon.label}
-                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-lime-200 ring-2 ring-lime-600 scale-105 shadow-xs border border-lime-400'
-                                : 'bg-white hover:bg-lime-100/70 border border-lime-200 hover:scale-105'
-                            }`}
-                          >
-                            <RoutineStickerIcon emoji={fIcon.value} title={fIcon.label} loading="lazy" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* 2. Classic Icons (Visible when tab is 'classic' or 'all') */}
               {(iconFilterTab === 'classic' || iconFilterTab === 'all') && (
                 <div className="space-y-1">
-                  {(iconFilterTab === 'all' || isTurtleTheme || isDinoTheme || isFrogTheme) && (
+                  {(iconFilterTab === 'all' || Boolean(activeThemeCategory)) && (
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                       Standard Routine Icons:
                     </span>
@@ -981,7 +950,7 @@ export const RoutineCustomizerModal: React.FC<RoutineCustomizerModalProps> = ({
           setShowIconLibrary(false);
           setIconPickerTarget(null);
         }}
-        initialTab={isDinoTheme ? 'dinosaur' : isTurtleTheme ? 'turtle' : 'all'}
+        initialTab={activeThemeCategory ?? 'all'}
         selectedEmoji={
           iconPickerTarget === 'routine'
             ? emoji

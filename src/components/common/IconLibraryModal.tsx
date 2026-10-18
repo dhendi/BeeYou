@@ -3,13 +3,24 @@ import { Search, X, Palette, Check } from 'lucide-react';
 import { RoutineStickerIcon } from '../icons/JournalStickers';
 import { playChime } from '../../utils/audio';
 import { useApp } from '../../context/AppContext';
-import { DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS } from '../../data/themedIconsData';
+import {
+  TURTLE_SANCTUARY_ICONS,
+  DINO_KINGDOM_ICONS,
+  RIBBIT_POND_ICONS,
+  STEAM_EXPRESS_ICONS,
+  COSMIC_SPACE_ICONS,
+  OCEAN_SPLASH_ICONS,
+  FAIRYTALE_MAGIC_ICONS,
+  RACING_SPEEDWAY_ICONS,
+} from '../../data/themedIconsData';
+
+export type ThemeIconCategory = 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'fantasy' | 'racing';
 
 export interface LibraryIconItem {
   id: string;
   emoji: string;
   label: string;
-  category: 'fun' | 'calm' | 'food' | 'daily' | 'turtle' | 'dinosaur' | 'frog';
+  category: 'fun' | 'calm' | 'food' | 'daily' | ThemeIconCategory;
   keywords: string[];
 }
 
@@ -244,7 +255,63 @@ export const ICON_LIBRARY: LibraryIconItem[] = [
     category: 'frog' as const,
     keywords: f.keywords,
   })),
+
+  // 🚂 Steam Express Themed Stickers
+  ...STEAM_EXPRESS_ICONS.map((t) => ({
+    id: t.id,
+    emoji: t.value,
+    label: t.label,
+    category: 'train' as const,
+    keywords: t.keywords,
+  })),
+
+  // 🚀 Cosmic Explorer Themed Stickers
+  ...COSMIC_SPACE_ICONS.map((s) => ({
+    id: s.id,
+    emoji: s.value,
+    label: s.label,
+    category: 'space' as const,
+    keywords: s.keywords,
+  })),
+
+  // 🐬 Ocean Splash Themed Stickers
+  ...OCEAN_SPLASH_ICONS.map((o) => ({
+    id: o.id,
+    emoji: o.value,
+    label: o.label,
+    category: 'ocean' as const,
+    keywords: o.keywords,
+  })),
+
+  // 🦄 Magic Fairytale Themed Stickers
+  ...FAIRYTALE_MAGIC_ICONS.map((m) => ({
+    id: m.id,
+    emoji: m.value,
+    label: m.label,
+    category: 'fantasy' as const,
+    keywords: m.keywords,
+  })),
+
+  // 🏎️ Turbo Speedway Themed Stickers
+  ...RACING_SPEEDWAY_ICONS.map((r) => ({
+    id: r.id,
+    emoji: r.value,
+    label: r.label,
+    category: 'racing' as const,
+    keywords: r.keywords,
+  })),
 ];
+
+const THEME_CATEGORY_SET = new Set<string>([
+  'turtle',
+  'dinosaur',
+  'frog',
+  'train',
+  'space',
+  'ocean',
+  'fantasy',
+  'racing',
+]);
 
 export interface IconLibraryModalProps {
   isOpen: boolean;
@@ -252,7 +319,7 @@ export interface IconLibraryModalProps {
   onSelectIcon: (emoji: string, label: string) => void;
   selectedEmoji?: string;
   title?: string;
-  initialTab?: 'all' | 'turtle' | 'dinosaur' | 'frog' | 'fun' | 'calm' | 'food' | 'daily';
+  initialTab?: 'all' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily';
 }
 
 export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
@@ -267,29 +334,49 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
   const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
+
+  const activeThemeCategory: ThemeIconCategory | null = isTurtleTheme
+    ? 'turtle'
+    : isDinoTheme
+      ? 'dinosaur'
+      : isFrogTheme
+        ? 'frog'
+        : activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains'
+          ? 'train'
+          : activeTheme?.category === 'space' || activeTheme?.id === 'theme-space'
+            ? 'space'
+            : activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean'
+              ? 'ocean'
+              : activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fantasy'
+                ? 'fantasy'
+                : activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing'
+                  ? 'racing'
+                  : null;
+
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'turtle' | 'dinosaur' | 'frog' | 'fun' | 'calm' | 'food' | 'daily'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | ThemeIconCategory | 'fun' | 'calm' | 'food' | 'daily'>('all');
   const [customInput, setCustomInput] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      if (initialTab) {
+      if (initialTab && (!THEME_CATEGORY_SET.has(initialTab) || initialTab === activeThemeCategory)) {
         setActiveTab(initialTab);
-      } else if (isTurtleTheme) {
-        setActiveTab('turtle');
-      } else if (isDinoTheme) {
-        setActiveTab('dinosaur');
-      } else if (isFrogTheme) {
-        setActiveTab('frog');
+      } else if (activeThemeCategory) {
+        setActiveTab(activeThemeCategory);
       } else {
         setActiveTab('all');
       }
     }
-  }, [isOpen, initialTab, isTurtleTheme, isDinoTheme, isFrogTheme]);
+  }, [isOpen, initialTab, activeThemeCategory]);
 
   const filteredIcons = useMemo(() => {
     const q = search.trim().toLowerCase();
     return ICON_LIBRARY.filter((item) => {
+      // Strictly exclude themed icons that do not belong to the user's currently active theme
+      if (THEME_CATEGORY_SET.has(item.category) && item.category !== activeThemeCategory) {
+        return false;
+      }
+
       const matchesTab = activeTab === 'all' || item.category === activeTab;
       if (!matchesTab) return false;
       if (!q) return true;
@@ -299,7 +386,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         item.emoji.includes(q)
       );
     });
-  }, [search, activeTab]);
+  }, [search, activeTab, activeThemeCategory]);
 
   if (!isOpen) return null;
 
@@ -317,6 +404,19 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
     }
   };
 
+  const THEME_TAB_META: Record<ThemeIconCategory, { label: string; icon: string }> = {
+    turtle: { label: `Wise Turtle Sanctuary (${TURTLE_SANCTUARY_ICONS.length})`, icon: '/assets/stickers/turtle_mascot.webp' },
+    dinosaur: { label: `Dino Kingdom (${DINO_KINGDOM_ICONS.length})`, icon: '/assets/stickers/dino_rex.webp' },
+    frog: { label: `Ribbit Pond (${RIBBIT_POND_ICONS.length})`, icon: '/assets/stickers/frog_mascot.webp' },
+    train: { label: `Steam Express (${STEAM_EXPRESS_ICONS.length})`, icon: '/assets/stickers/train_mascot.webp' },
+    space: { label: `Cosmic Explorer (${COSMIC_SPACE_ICONS.length})`, icon: '/assets/stickers/space_mascot.webp' },
+    ocean: { label: `Ocean Splash (${OCEAN_SPLASH_ICONS.length})`, icon: '/assets/stickers/ocean_mascot.webp' },
+    fantasy: { label: `Magic Fairytale (${FAIRYTALE_MAGIC_ICONS.length})`, icon: '/assets/stickers/fairytale_mascot.webp' },
+    racing: { label: `Turbo Speedway (${RACING_SPEEDWAY_ICONS.length})`, icon: '/assets/stickers/racing_mascot.webp' },
+  };
+
+  const activeThemeTab = activeThemeCategory ? THEME_TAB_META[activeThemeCategory] : null;
+
   return (
     <div
       role="dialog"
@@ -328,14 +428,18 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         {/* Header */}
         <div className={`${isTurtleTheme ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white' : isDinoTheme ? 'bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white' : isFrogTheme ? 'bg-gradient-to-r from-lime-600 via-emerald-600 to-teal-600 text-white' : (activeTheme?.palette?.primaryBg ? `${activeTheme.palette.primaryBg} text-white` : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 text-amber-950')} p-4 sm:p-5 flex items-center justify-between shrink-0`}>
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'bg-white/20 text-white' : 'bg-white/80 text-amber-700'} shadow-xs flex items-center justify-center text-xl shrink-0`}>
-              {isTurtleTheme ? <span className="text-2xl">🐢</span> : isDinoTheme ? <span className="text-2xl">🦖</span> : isFrogTheme ? <span className="text-2xl">🐸</span> : <Palette className="w-5 h-5 text-amber-700" />}
+            <div className={`w-10 h-10 rounded-2xl ${activeThemeCategory ? 'bg-white/20 text-white' : 'bg-white/80 text-amber-700'} shadow-xs flex items-center justify-center text-xl shrink-0`}>
+              {activeTheme?.icon || activeTheme?.emoji ? (
+                <RoutineStickerIcon emoji={activeTheme.icon || activeTheme.emoji} title={activeTheme.name} className="w-7 h-7 object-contain" />
+              ) : (
+                <Palette className="w-5 h-5 text-amber-700" />
+              )}
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-black leading-tight">
                 {title}
               </h3>
-              <p className={`text-xs font-semibold ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'text-emerald-100' : 'text-amber-900/80'} mt-0.5`}>
+              <p className={`text-xs font-semibold ${activeThemeCategory ? 'text-white/90' : 'text-amber-900/80'} mt-0.5`}>
                 Pick a matching sticker icon for this routine or step
               </p>
             </div>
@@ -344,7 +448,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-xl ${isTurtleTheme || isDinoTheme || isFrogTheme ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-white/50 hover:bg-white/80 text-amber-950'} transition-all cursor-pointer`}
+            className={`p-2 rounded-xl ${activeThemeCategory ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-white/50 hover:bg-white/80 text-amber-950'} transition-all cursor-pointer`}
             aria-label="Close icon library"
           >
             <X className="w-5 h-5" />
@@ -360,7 +464,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search icons (e.g. dinosaur, rex, frog, lily, turtle, pizza, art, quiet, stone, water)..."
+              placeholder="Search icons (e.g. pizza, art, quiet, water, morning)..."
               className={`w-full pl-9 pr-9 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 ${isTurtleTheme || isDinoTheme ? 'focus:ring-emerald-400' : isFrogTheme ? 'focus:ring-lime-400' : (activeTheme?.palette?.primaryBorder || 'focus:ring-amber-400')}`}
             />
             {search && (
@@ -375,17 +479,15 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
             )}
           </div>
 
-          {/* Categories */}
+          {/* Categories — ONLY show the active theme's tab (never other themes) */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
             {[
-              { id: 'all', label: 'All Icons' },
-              { id: 'turtle', label: '🐢 Turtle Sanctuary' },
-              { id: 'dinosaur', label: `🦖 Dino Kingdom (${DINO_KINGDOM_ICONS.length})` },
-              { id: 'frog', label: `🐸 Ribbit Pond (${RIBBIT_POND_ICONS.length})` },
-              { id: 'fun', label: 'Fun & Play' },
-              { id: 'calm', label: 'Calm & Rest' },
-              { id: 'food', label: 'Food & Drinks' },
-              { id: 'daily', label: 'Daily & Places' },
+              { id: 'all', label: 'All Icons', icon: undefined },
+              ...(activeThemeCategory && activeThemeTab ? [{ id: activeThemeCategory, label: activeThemeTab.label, icon: activeThemeTab.icon }] : []),
+              { id: 'fun', label: 'Fun & Play', icon: undefined },
+              { id: 'calm', label: 'Calm & Rest', icon: undefined },
+              { id: 'food', label: 'Food & Drinks', icon: undefined },
+              { id: 'daily', label: 'Daily & Places', icon: undefined },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -396,7 +498,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                     setActiveTab(tab.id as typeof activeTab);
                     playChime('tap');
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
                     isActive
                       ? isTurtleTheme || isDinoTheme
                         ? 'bg-emerald-600 text-white shadow-xs'
@@ -410,7 +512,10 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
                       : 'bg-white hover:bg-amber-100/60 text-slate-600 border border-slate-200'
                   }`}
                 >
-                  {tab.label}
+                  {tab.icon && (
+                    <RoutineStickerIcon emoji={tab.icon} title={tab.label} className="w-4 h-4 object-contain shrink-0" />
+                  )}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}

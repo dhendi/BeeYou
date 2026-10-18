@@ -36,15 +36,45 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
   const isDinoTheme = activeTheme?.category === 'dinosaur' || activeTheme?.id === 'theme-dino';
   const isFrogTheme = activeTheme?.category === 'frog' || activeTheme?.id === 'theme-frog';
 
+  const activeThemeCategory: NonNullable<RoutineTemplate['themeCategory']> =
+    isTurtleTheme
+      ? 'turtle'
+      : isDinoTheme
+        ? 'dinosaur'
+        : isFrogTheme
+          ? 'frog'
+          : activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains'
+            ? 'train'
+            : activeTheme?.category === 'space' || activeTheme?.id === 'theme-space'
+              ? 'space'
+              : activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean'
+                ? 'ocean'
+                : activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fantasy'
+                  ? 'fantasy'
+                  : activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing'
+                    ? 'racing'
+                    : 'classic';
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedTemplateId, setExpandedTemplateId] = useState<string | null>(null);
 
+  const SPECIAL_PILL_BY_THEME: Record<string, { label: string; emoji: string }> = {
+    turtle: { label: 'Wise Turtle Sanctuary', emoji: '🐢' },
+    dinosaur: { label: 'Dino Kingdom', emoji: '🦖' },
+    frog: { label: 'Ribbit Pond', emoji: '🐸' },
+    train: { label: 'Steam Express', emoji: '🚂' },
+    space: { label: 'Cosmic Explorer', emoji: '🚀' },
+    ocean: { label: 'Ocean Splash', emoji: '🐬' },
+    fantasy: { label: 'Magic Fairytale', emoji: '🦄' },
+    racing: { label: 'Turbo Speedway', emoji: '🏎️' },
+  };
+
+  const activeSpecialPill = SPECIAL_PILL_BY_THEME[activeThemeCategory];
+
   const categories = [
-    { id: 'all', label: 'All Templates', emoji: isTurtleTheme ? '🐢' : isDinoTheme ? '🦖' : isFrogTheme ? '🐸' : '⭐' },
-    ...(isTurtleTheme ? [{ id: 'special', label: 'Turtle Sanctuary', emoji: '🐢' }] : []),
-    ...(isDinoTheme ? [{ id: 'special', label: 'Dino Kingdom', emoji: '🦖' }] : []),
-    ...(isFrogTheme ? [{ id: 'special', label: 'Ribbit Pond', emoji: '🐸' }] : []),
+    { id: 'all', label: 'All Templates', emoji: activeSpecialPill?.emoji || '⭐' },
+    ...(activeSpecialPill ? [{ id: 'special', label: activeSpecialPill.label, emoji: activeSpecialPill.emoji }] : []),
     { id: 'morning', label: 'Morning', emoji: '🌅' },
     { id: 'school', label: 'School Day', emoji: '🏫' },
     { id: 'bedtime', label: 'Bedtime', emoji: '🌙' },
@@ -55,6 +85,10 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
   ];
 
   const filteredTemplates = PREBUILT_ROUTINE_TEMPLATES.filter((tmpl) => {
+    // Only include the special themed routine that matches the user's active theme
+    if (tmpl.category === 'special' && tmpl.themeCategory !== activeThemeCategory) {
+      return false;
+    }
     const matchesCategory = selectedCategory === 'all' || tmpl.category === selectedCategory;
     const matchesSearch = 
       tmpl.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,22 +129,16 @@ export const RoutineTemplatesLibrary: React.FC<RoutineTemplatesLibraryProps> = (
             }`}>
               {isTurtleTheme ? (
                 <TurtleWebbedPawStampSticker className="w-7 h-7 object-contain" />
-              ) : isDinoTheme ? (
-                <span className="text-xl select-none leading-none">🦖</span>
-              ) : isFrogTheme ? (
-                <span className="text-xl select-none leading-none">🐸</span>
+              ) : activeSpecialPill ? (
+                <RoutineStickerIcon emoji={activeSpecialPill.emoji} title={activeSpecialPill.label} className="w-7 h-7 object-contain" />
               ) : (
                 <Star className="w-5 h-5" />
               )}
             </div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900">
-              {isTurtleTheme
-                ? 'Wise Turtle Sanctuary Routine Library'
-                : isDinoTheme
-                  ? 'Dino Kingdom Routine Library'
-                  : isFrogTheme
-                    ? 'Ribbit Pond Routine Library'
-                    : 'Pre-Built Routine Templates Library'}
+              {activeSpecialPill
+                ? `${activeSpecialPill.label} Routine Library`
+                : 'Pre-Built Routine Templates Library'}
             </h3>
           </div>
           <p className="text-xs text-slate-600 font-medium mt-1">
