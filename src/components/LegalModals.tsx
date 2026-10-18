@@ -145,16 +145,39 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  4. Security, Encryption &amp; On-Device Sanitization
+                  4. Sensitive Health, Prescription &amp; Menstrual Cycle Data (Apple Guideline 5.1.3)
                 </h3>
                 <p>
-                  All network traffic is encrypted using TLS 1.3 (HTTPS &amp; Secure WebSockets). Caregiver PINs are salt-hashed using SHA-256 before being stored in local device memory. For shared school loaner tablets, our 1-tap &ldquo;Erase &amp; Reset Device&rdquo; tool purges all local medication records, routines, and journal entries.
+                  BeeYou includes specialized tools to support neurodivergent individuals and families with executive function, sensory awareness, and daily health routines. We treat this data with the highest level of privacy and sensitivity:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>
+                    <strong>Prescription &amp; Medication Reminders:</strong> Names of medications, custom dosages, scheduled reminder times, administration notes (such as &ldquo;take with food&rdquo;), and dosage confirmation logs are strictly private family data.
+                  </li>
+                  <li>
+                    <strong>Menstrual Cycle &amp; Period Tracking:</strong> Cycle dates, flow intensity, physical and emotional symptoms, and body awareness logs are maintained solely for personal sensory pacing and routine preparation.
+                  </li>
+                  <li>
+                    <strong>Strict Anti-Monetization &amp; Non-Disclosure Guarantee:</strong> In accordance with Apple App Store Guideline 5.1.3 and global health data protections, your health, medication, and cycle records are <strong>NEVER sold, NEVER rented, NEVER shared with third-party advertisers, data brokers, or health insurance companies</strong>, and are NEVER used for behavioral targeting or commercial profiling.
+                  </li>
+                  <li>
+                    <strong>Discreet Mode for Sensory &amp; Social Privacy:</strong> A built-in discreet toggle allows users to disguise cycle tracking as &ldquo;Wellness Rhythm&rdquo; with neutral icons, preventing unintentional disclosure on shared screens in classrooms or public settings.
+                  </li>
+                </ul>
+              </section>
+
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+                  5. Security, Encryption &amp; On-Device Sanitization
+                </h3>
+                <p>
+                  All network traffic is encrypted using TLS 1.3 (HTTPS &amp; Secure WebSockets). Caregiver PINs are salt-hashed using SHA-256 before being stored in local device memory. For shared school loaner tablets, our 1-tap &ldquo;Erase &amp; Reset Device&rdquo; tool purges all local medication records, routines, cycle logs, and journal entries.
                 </p>
               </section>
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  5. Apple Guideline 5.1.1(v) Mandatory In-App Account Deletion
+                  6. Apple Guideline 5.1.1(v) Mandatory In-App Account Deletion
                 </h3>
                 <p>
                   Caregivers have the right to permanently delete their account and all associated data at any time directly within the app. Tapping &ldquo;Delete Family Account&rdquo; in the Caregiver Link Tab removes your Firebase Auth record, purges your cloud database channel, and wipes local device storage immediately.
@@ -163,7 +186,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  6. Contact Our Privacy Officer
+                  7. Contact Our Privacy Officer
                 </h3>
                 <p>
                   If you have questions regarding this Privacy Policy or your child&apos;s data, please contact our support team at <strong className="text-amber-600 dark:text-amber-400">privacy@beeyou.app</strong>.
@@ -192,7 +215,27 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  2. User Ownership of Custom Content
+                  2. Health, Medication &amp; Menstrual Cycle Disclaimer (Non-Clinical Tool)
+                </h3>
+                <p>
+                  BeeYou features organizational tools for daily living, including medication reminders and cycle tracking. Please note the following legal and safety limitations:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>
+                    <strong>Medication Reminders:</strong> The medication reminder feature is solely an organizational scheduling and prompt tool. BeeYou is NOT a clinical dispensary, medical device, or dosage calculation engine. It does NOT screen for adverse drug interactions, allergies, or contraindications. Caregivers and adult users remain solely responsible for verifying correct medications, dosages, and administration with a licensed physician or pharmacist.
+                  </li>
+                  <li>
+                    <strong>Menstrual Cycle / Period Tracking:</strong> The cycle tracker is designed strictly for personal sensory pacing, routine planning, and emotional self-awareness. It is NOT a clinical diagnostic tool and must NEVER be used or relied upon for contraception, pregnancy prevention, or fertility planning.
+                  </li>
+                  <li>
+                    <strong>Always Seek Professional Advice:</strong> Never disregard professional medical advice or delay seeking medical attention because of information or reminders in BeeYou. If you or your child experience a medical emergency, immediately call emergency services (such as 911 or 112).
+                  </li>
+                </ul>
+              </section>
+
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+                  3. User Ownership of Custom Content
                 </h3>
                 <p>
                   You and your child retain 100% intellectual property ownership of all custom words, uploaded photographs, voice audio recordings, personal routines, and journal reflections created within BeeYou. We claim zero ownership or commercial rights over your private family content.
@@ -201,7 +244,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  3. Free Basic Tier &amp; 15-Day Free Trial Terms
+                  4. Free Basic Tier &amp; 15-Day Free Trial Terms
                 </h3>
                 <p>
                   BeeYou believes essential communication access is a fundamental right:
@@ -214,7 +257,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  4. Caregiver Account Security
+                  5. Caregiver Account Security
                 </h3>
                 <p>
                   Caregivers are responsible for safeguarding their 4-digit PIN and account credentials. BeeYou employs salt-hashed cryptographic PIN storage to protect sensitive caregiver controls from unauthorized access.
@@ -223,7 +266,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  5. Termination &amp; Account Deletion
+                  6. Termination &amp; Account Deletion
                 </h3>
                 <p>
                   You may terminate these terms at any time by utilizing the in-app &ldquo;Delete Family Account&rdquo; feature, which permanently erases your credentials and cloud database channels.
@@ -232,7 +275,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
               <section className="space-y-2">
                 <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
-                  6. Contact &amp; Support
+                  7. Contact &amp; Support
                 </h3>
                 <p>
                   For inquiries regarding terms, licensing, or educational installations, contact us at <strong className="text-indigo-600 dark:text-indigo-400">support@beeyou.app</strong>.
