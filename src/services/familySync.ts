@@ -666,6 +666,7 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
   let fbFamilyUnsub: Unsubscribe | null = null;
   let fbAlertUnsub: Unsubscribe | null = null;
   let fbMsgsUnsub: Unsubscribe | null = null;
+  let fbEventsUnsub: Unsubscribe | null = null;
 
   try {
     const familyRef = ref(db, `beeyou/families/${code}`);
@@ -709,6 +710,23 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
             messageListeners.forEach((fn) => fn(latest));
           }
         }
+      }
+    });
+
+    // Universal Pub/Sub: Listen for real-time events published across servers
+    const latestEventRef = ref(db, `beeyou/events/${code}/latest`);
+    let initialFamilyEventLoaded = false;
+    fbEventsUnsub = onValue(latestEventRef, (snapshot) => {
+      const ev = snapshot.val();
+      if (ev && typeof ev === 'object') {
+        if (!initialFamilyEventLoaded) {
+          initialFamilyEventLoaded = true;
+          if (Date.now() - (ev.sentAt || 0) < 20000) {
+            handleIncomingEvent(ev);
+          }
+          return;
+        }
+        handleIncomingEvent(ev);
       }
     });
   } catch (fbErr) {
@@ -770,6 +788,7 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
     if (fbFamilyUnsub) fbFamilyUnsub();
     if (fbAlertUnsub) fbAlertUnsub();
     if (fbMsgsUnsub) fbMsgsUnsub();
+    if (fbEventsUnsub) fbEventsUnsub();
     if (activeEventSource) {
       try { activeEventSource.close(); } catch {}
       activeEventSource = null;

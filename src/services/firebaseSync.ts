@@ -37,11 +37,13 @@ type MessageCallback = (msg: CaregiverMessage) => void;
 type StatusCallback = (status: CaregiverChildStatus) => void;
 type PresenceCallback = (info: { isConnected: boolean; peerName: string; peerRole: 'caregiver' | 'child_device' | null; lastPingAgo: number }) => void;
 type ResolveCallback = (info: { pairingCode: string }) => void;
+type GenericEventCallback = (event: any) => void;
 
 let activeAlertUnsub: Unsubscribe | null = null;
 let activeMessagesUnsub: Unsubscribe | null = null;
 let activePingsUnsub: Unsubscribe | null = null;
 let activeStatusUnsub: Unsubscribe | null = null;
+let activeEventUnsub: Unsubscribe | null = null;
 let currentCode: string | null = null;
 
 const alertListeners: Set<AlertCallback> = new Set();
@@ -50,6 +52,7 @@ const messageListeners: Set<MessageCallback> = new Set();
 const statusListeners: Set<StatusCallback> = new Set();
 const presenceListeners: Set<PresenceCallback> = new Set();
 const resolveListeners: Set<ResolveCallback> = new Set();
+const eventListeners: Set<GenericEventCallback> = new Set();
 
 let lastKnownPeerPing = 0;
 let lastKnownPeerRole: 'caregiver' | 'child_device' | null = null;
@@ -86,6 +89,7 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
   if (activeMessagesUnsub) activeMessagesUnsub();
   if (activePingsUnsub) activePingsUnsub();
   if (activeStatusUnsub) activeStatusUnsub();
+  if (activeEventUnsub) activeEventUnsub();
 
   currentCode = code;
 
@@ -228,6 +232,22 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
     if (val) {
       statusListeners.forEach((fn) => fn(val));
     }
+  });
+
+  // 5. Listen for Universal Real-Time Event Stream (Multi-server & Pub/Sub)
+  const eventRef = ref(db, `beeyou/events/${code}/latest`);
+  let initialEventLoaded = false;
+  activeEventUnsub = onValue(eventRef, (snapshot) => {
+    const val = snapshot.val();
+    if (!val) return;
+    if (!initialEventLoaded) {
+      initialEventLoaded = true;
+      if (Date.now() - (val.sentAt || 0) < 20000) {
+        eventListeners.forEach((fn) => fn(val));
+      }
+      return;
+    }
+    eventListeners.forEach((fn) => fn(val));
   });
 }
 
@@ -387,4 +407,9 @@ export function onFirebaseMessage(listener: MessageCallback): () => void {
 export function onFirebaseStatus(listener: StatusCallback): () => void {
   statusListeners.add(listener);
   return () => statusListeners.delete(listener);
+}
+
+export function onFirebaseGenericEvent(listener: GenericEventCallback): () => void {
+  eventListeners.add(listener);
+  return () => eventListeners.delete(listener);
 }

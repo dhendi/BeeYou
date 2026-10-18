@@ -569,6 +569,93 @@ const sseClientsByCode = new Map<string, Set<express.Response>>();
 const lastAlertTimeByFamily = new Map<string, number>();
 const lastAckTimeByFamily = new Map<string, number>();
 
+// Asynchronously publish event to Firebase Realtime Database for cross-server & cloud pub/sub
+async function publishEventToFirebase(code: string, event: CloudSyncEvent): Promise<void> {
+  if (!FIREBASE_DB_URL) return;
+  const cleanCode = code.trim().toUpperCase();
+
+  try {
+    const promises: Promise<any>[] = [];
+
+    // 1. Publish to latest event channel for instant (<50ms) listener wakeup
+    const latestUrl = `${FIREBASE_DB_URL}/beeyou/events/${encodeURIComponent(cleanCode)}/latest.json`;
+    promises.push(
+      fetch(latestUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      })
+    );
+
+    // 2. Publish to event history log for multi-server polling & offline catch-up
+    const logUrl = `${FIREBASE_DB_URL}/beeyou/events/${encodeURIComponent(cleanCode)}/log/${encodeURIComponent(event.eventId)}.json`;
+    promises.push(
+      fetch(logUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      })
+    );
+
+    // 3. Keep legacy session paths synchronized for cross-component compatibility
+    if (event.type === 'CAREGIVER_ALERT' && event.alert) {
+      const alertUrl = `${FIREBASE_DB_URL}/beeyou/sessions/${encodeURIComponent(cleanCode)}/activeAlert.json`;
+      promises.push(
+        fetch(alertUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event.alert),
+        })
+      );
+    } else if (event.type === 'CAREGIVER_ALERT_ACK' && event.ack) {
+      const alertUrl = `${FIREBASE_DB_URL}/beeyou/sessions/${encodeURIComponent(cleanCode)}/activeAlert.json`;
+      promises.push(
+        fetch(alertUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status: 'acknowledged',
+            responseMessage: event.ack.responseMessage,
+            responseId: event.ack.responseId,
+            acknowledgedBy: event.ack.by,
+            acknowledgedAt: new Date().toISOString(),
+          }),
+        })
+      );
+    } else if (event.type === 'ALERT_RESOLVED') {
+      const alertUrl = `${FIREBASE_DB_URL}/beeyou/sessions/${encodeURIComponent(cleanCode)}/activeAlert.json`;
+      promises.push(
+        fetch(alertUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(null),
+        })
+      );
+    } else if (event.type === 'CAREGIVER_MESSAGE' && event.message) {
+      const msgId = event.message.id || `msg-${Date.now()}`;
+      const msgUrl = `${FIREBASE_DB_URL}/beeyou/sessions/${encodeURIComponent(cleanCode)}/messages/${encodeURIComponent(msgId)}.json`;
+      promises.push(
+        fetch(msgUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event.message),
+        })
+      );
+    } else if (event.type === 'CHILD_STATUS_UPDATE' && event.status) {
+      const statusUrl = `${FIREBASE_DB_URL}/beeyou/sessions/${encodeURIComponent(cleanCode)}/childStatus.json`;
+      promises.push(
+        fetch(statusUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event.status),
+        })
+      );
+    }
+
+    await Promise.allSettled(promises);
+  } catch {}
+}
+
 function broadcastEvent(code: string, event: CloudSyncEvent): void {
   const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
   event.pairingCode = cleanCode;
@@ -595,6 +682,9 @@ function broadcastEvent(code: string, event: CloudSyncEvent): void {
       }
     });
   }
+
+  // Broadcast to Firebase Realtime Database for cross-server & cloud pub/sub
+  publishEventToFirebase(cleanCode, event).catch(() => {});
 }
 
 // Helper to generate a clean, readable temporary pairing code (e.g., K7P4-92)
@@ -947,12 +1037,31 @@ app.get('/api/caregiver/events/:code', (req, res) => {
   });
 });
 
-// Short-polling endpoint for background reliability & environments where SSE drops
-app.get('/api/caregiver/poll/:code', (req, res) => {
+// Short-polling endpoint for background reliability & multi-server distributed sync
+app.get('/api/caregiver/poll/:code', async (req, res) => {
   const code = (req.params.code || '').trim().toUpperCase();
   const since = Number(req.query.since) || 0;
   const history = eventHistoryByCode.get(code) || [];
-  const newEvents = history.filter((e) => e.sentAt > since);
+  let newEvents = history.filter((e) => e.sentAt > since);
+
+  // Distributed multi-server catch-up: if local server instance has no new events since timestamp, check Firebase
+  if (newEvents.length === 0 && since > 0 && FIREBASE_DB_URL) {
+    try {
+      const fbRes = await fetch(`${FIREBASE_DB_URL}/beeyou/events/${encodeURIComponent(code)}/latest.json`);
+      if (fbRes.ok) {
+        const latestEv = await fbRes.json();
+        if (latestEv && latestEv.sentAt > since) {
+          newEvents = [latestEv];
+          if (!history.some((h) => h.eventId === latestEv.eventId)) {
+            history.push(latestEv);
+            if (history.length > 60) history.shift();
+            eventHistoryByCode.set(code, history);
+          }
+        }
+      }
+    } catch {}
+  }
+
   const familyState = getOrCreateFamilyState(code);
   const session = caregiverSessions.get(code);
 

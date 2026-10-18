@@ -23,6 +23,7 @@ import {
   onFirebaseMessage,
   onFirebaseStatus,
   onFirebaseResolve,
+  onFirebaseGenericEvent,
   parseTimestampMs
 } from './firebaseSync';
 
@@ -454,6 +455,12 @@ export function subscribeToCloudChannel(code: string): void {
           type: 'ALERT_RESOLVED',
           pairingCode: info.pairingCode,
         });
+      })
+    );
+
+    firebaseUnsubs.push(
+      onFirebaseGenericEvent((ev) => {
+        handleIncomingSyncEnvelope(ev);
       })
     );
   } catch (e) {
