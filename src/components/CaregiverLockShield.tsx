@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Lock, Shield, KeyRound, X, Check, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
+import { verifyPin } from '../utils/security';
 
 interface CaregiverLockShieldProps {
   children: React.ReactNode;
@@ -96,7 +97,7 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
     setShowPinModal(true);
   };
 
-  const handlePinDigit = (digit: string) => {
+  const handlePinDigit = async (digit: string) => {
     if (pinInput.length < 4) {
       const next = pinInput + digit;
       setPinInput(next);
@@ -105,7 +106,8 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
 
       if (next.length === 4) {
         const correctPin = settings?.pin || '1234';
-        if (next === correctPin) {
+        const { valid } = await verifyPin(next, correctPin);
+        if (valid) {
           triggerSuccess();
         } else {
           setPinError(true);

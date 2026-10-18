@@ -8,6 +8,7 @@ import {
   getStoredFamilyAccount, 
   sendAccountPasswordResetEmail, 
   updateCaregiverPin,
+  verifyPin,
   auth
 } from '../services/authService';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -66,7 +67,7 @@ export const PinModal: React.FC = () => {
     setRecoverySuccess(null);
   };
 
-  const handleDigit = (digit: string) => {
+  const handleDigit = async (digit: string) => {
     if (cooldownSeconds > 0) return;
 
     if (pinInput.length < 4) {
@@ -76,7 +77,16 @@ export const PinModal: React.FC = () => {
       setError(false);
 
       if (next.length === 4) {
-        if (next === settings.pin) {
+        const { valid, shouldUpgrade, upgradedHash } = await verifyPin(next, settings.pin);
+        if (valid) {
+          if (shouldUpgrade && upgradedHash) {
+            try {
+              const raw = localStorage.getItem('beeyou_settings');
+              const s = raw ? JSON.parse(raw) : {};
+              s.pin = upgradedHash;
+              localStorage.setItem('beeyou_settings', JSON.stringify(s));
+            } catch {}
+          }
           playChime('complete');
           setIsParentMode(true);
           handleCloseModal();
@@ -139,7 +149,7 @@ export const PinModal: React.FC = () => {
   };
 
   // Save the new 4-digit PIN
-  const handleSaveNewPin = (e: React.FormEvent) => {
+  const handleSaveNewPin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPinInput.length !== 4 || !/^\d{4}$/.test(newPinInput)) {
       setRecoveryError('PIN must be exactly 4 digits (numbers only).');
@@ -150,7 +160,7 @@ export const PinModal: React.FC = () => {
       return;
     }
 
-    const ok = updateCaregiverPin(newPinInput);
+    const ok = await updateCaregiverPin(newPinInput);
     if (ok) {
       try {
         localStorage.removeItem('beeyou_pending_pin_reset');

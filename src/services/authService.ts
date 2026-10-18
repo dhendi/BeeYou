@@ -15,6 +15,9 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 
+import { hashPin, verifyPin } from '../utils/security';
+
+export { hashPin, verifyPin };
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
@@ -202,11 +205,13 @@ export async function loginWithSharedEmail(
 
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
   let firebaseUid: string;
+  let isEmailVerified = false;
 
   // 2. Real Firebase Authentication
   try {
     const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
     firebaseUid = userCredential.user.uid;
+    isEmailVerified = userCredential.user.emailVerified;
   } catch (err: any) {
     console.warn('Firebase signIn notice:', err?.code, err?.message);
     if (
@@ -257,8 +262,8 @@ export async function loginWithSharedEmail(
           pronouns: '',
           pin: '1234',
         },
-    subscriptionTier: userCredential.user.emailVerified ? 'premium' : 'free',
-    emailVerified: userCredential.user.emailVerified,
+    subscriptionTier: isEmailVerified ? 'premium' : 'free',
+    emailVerified: isEmailVerified,
     createdAt: existingMatches ? existing.createdAt : new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
@@ -406,6 +411,7 @@ export async function registerSharedFamilyAccount(params: {
     };
   }
 
+  const hashedPin = await hashPin(params.pin || '1234');
   let newAccount: FamilyAccount = {
     id: firebaseUid,
     email: cleanEmail,
@@ -418,7 +424,7 @@ export async function registerSharedFamilyAccount(params: {
       ageGroup: params.childAgeGroup || 'kid',
       interests: [],
       pronouns: '',
-      pin: params.pin || '1234',
+      pin: hashedPin,
     },
     subscriptionTier: 'free',
     emailVerified: false,
@@ -700,21 +706,23 @@ export async function sendAccountPasswordResetEmail(
 }
 
 /**
- * Update the 4-digit caregiver PIN across stored family account and app settings
+ * Update the 4-digit caregiver PIN across stored family account and app settings.
+ * Securely hashes the PIN with salt before persisting to local storage.
  */
-export function updateCaregiverPin(newPin: string): boolean {
+export async function updateCaregiverPin(newPin: string): Promise<boolean> {
   if (!newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
     return false;
   }
+  const hashedPin = await hashPin(newPin);
   const account = getStoredFamilyAccount();
   if (account) {
-    account.childProfile.pin = newPin;
+    account.childProfile.pin = hashedPin;
     saveStoredFamilyAccount(account);
   }
   try {
     const settingsRaw = localStorage.getItem('beeyou_settings');
     const settings = settingsRaw ? JSON.parse(settingsRaw) : {};
-    settings.pin = newPin;
+    settings.pin = hashedPin;
     localStorage.setItem('beeyou_settings', JSON.stringify(settings));
     window.dispatchEvent(new CustomEvent('beeyou_settings_updated', { detail: settings }));
   } catch {}

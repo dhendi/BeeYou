@@ -5,8 +5,19 @@ const config: CapacitorConfig = {
   appName: 'BeeYou',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
-  }
+    androidScheme: 'https',
+    cleartext: false,
+    hostname: 'localhost',
+  },
+  android: {
+    allowMixedContent: false,
+    captureInput: true,
+  },
+  ios: {
+    limitsNavigationsToAppBoundDomains: true,
+    preferredContentMode: 'mobile',
+    allowsLinkPreview: false,
+  },
 };
 
 export default config;
