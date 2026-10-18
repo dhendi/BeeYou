@@ -53,8 +53,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('demo@beeyou.app');
-  const [loginPassword, setLoginPassword] = useState('beeyou2026');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginDeviceRole, setLoginDeviceRole] = useState<'child' | 'caregiver'>('caregiver');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -191,6 +191,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!loginEmail.trim()) {
+        setLoginError('Please enter your family account email address.');
+        return;
+      }
+      if (!loginPassword) {
+        setLoginError('Please enter your account password.');
+        return;
+      }
+
       setLoginLoading(true);
       setLoginError(null);
 
@@ -200,7 +209,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       if (res.success && res.account) {
         applyAccountToContext(res.account, loginDeviceRole);
       } else {
-        setLoginError(res.message || 'Login failed. Please verify email.');
+        setLoginError(res.message || 'Login failed. Please verify email and password.');
         try {
           playChime('tap');
         } catch {}
@@ -214,8 +223,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!regPassword || regPassword.length < 6) {
-        setRegError('Please choose a password with at least 6 characters to secure your family space.');
+      if (!regPassword || regPassword.length < 8) {
+        setRegError('Please choose a password with at least 8 characters to secure your family space.');
         return;
       }
 
@@ -670,7 +679,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       type="password"
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder="Min. 6 characters"
+                      placeholder="Min. 8 characters"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                       required
                     />

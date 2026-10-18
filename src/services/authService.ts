@@ -164,45 +164,69 @@ export async function loginWithSharedEmail(
     };
   }
 
+  if (!password || password.length === 0) {
+    return { success: false, message: 'Please enter your password to sign in.' };
+  }
+
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
-  const effectivePassword = password && password.length >= 6 ? password : 'beeyou2026';
-  let firebaseUid = 'fam-' + Date.now();
+  let firebaseUid: string;
 
   // 2. Real Firebase Authentication
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+    const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
     firebaseUid = userCredential.user.uid;
   } catch (err: any) {
-    // If user does not exist in Firebase Auth yet, automatically create the account for smooth onboarding
-    if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-      try {
-        const newCredential = await createUserWithEmailAndPassword(auth, cleanEmail, effectivePassword);
-        firebaseUid = newCredential.user.uid;
-      } catch (createErr: any) {
-        if (createErr.code !== 'auth/email-already-in-use') {
-          console.warn('Firebase Auth auto-provision notice:', createErr.message);
-        }
-      }
-    } else {
-      console.warn('Firebase signIn notice:', err.message);
+    console.warn('Firebase signIn notice:', err?.code, err?.message);
+    if (
+      err.code === 'auth/invalid-credential' ||
+      err.code === 'auth/user-not-found' ||
+      err.code === 'auth/wrong-password' ||
+      err.code === 'auth/invalid-login-credentials'
+    ) {
+      return {
+        success: false,
+        message: 'Incorrect email or password. Please verify your credentials or register a new account.',
+      };
     }
+    if (err.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        message: 'Access temporarily disabled due to too many failed login attempts. Please wait a few moments and try again.',
+      };
+    }
+    if (err.code === 'auth/network-request-failed') {
+      return {
+        success: false,
+        message: 'Network connection error. Please check your internet connection and try again.',
+      };
+    }
+    return {
+      success: false,
+      message: err.message || 'Login failed. Please verify your credentials.',
+    };
   }
+
+  // Preserve existing local account profiles if this user previously signed in here
+  const existing = getStoredFamilyAccount();
+  const existingMatches = existing && existing.email === cleanEmail;
 
   let account: FamilyAccount = {
     id: firebaseUid,
     email: cleanEmail,
-    caregiverName: 'Caregiver',
-    caregiverRole: 'Parent / Caregiver',
+    caregiverName: existingMatches ? existing.caregiverName : 'Caregiver',
+    caregiverRole: existingMatches ? existing.caregiverRole : 'Parent / Caregiver',
     familyCode: deterministicCode,
-    childProfile: {
-      name: '',
-      ageGroup: 'kid',
-      interests: [],
-      pronouns: '',
-      pin: '1234',
-    },
+    childProfile: existingMatches
+      ? existing.childProfile
+      : {
+          name: '',
+          ageGroup: 'kid',
+          interests: [],
+          pronouns: '',
+          pin: '1234',
+        },
     subscriptionTier: 'premium',
-    createdAt: new Date().toISOString(),
+    createdAt: existingMatches ? existing.createdAt : new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
 
@@ -302,30 +326,41 @@ export async function registerSharedFamilyAccount(params: {
     return { success: false, message: 'Please enter a valid email address.' };
   }
 
-  if (params.password && params.password.length < 6) {
-    return { success: false, message: 'Password must be at least 6 characters long.' };
+  if (!params.password || params.password.length < 8) {
+    return { success: false, message: 'Password must be at least 8 characters long.' };
   }
 
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
-  const effectivePassword = params.password && params.password.length >= 6 ? params.password : 'beeyou2026';
-  let firebaseUid = 'fam-' + Date.now();
-
+  let firebaseUid: string;
 
   // 1. Create User in Firebase Auth
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+    const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, params.password);
     firebaseUid = userCredential.user.uid;
   } catch (err: any) {
+    console.warn('Firebase createUser notice:', err?.code, err?.message);
     if (err.code === 'auth/email-already-in-use') {
-      try {
-        const signinRes = await signInWithEmailAndPassword(auth, cleanEmail, effectivePassword);
-        firebaseUid = signinRes.user.uid;
-      } catch (signinErr: any) {
-        console.warn('Firebase signin fallback notice:', signinErr.message);
-      }
-    } else {
-      console.warn('Firebase createUser notice:', err.message);
+      return {
+        success: false,
+        message: 'An account with this email already exists. Please sign in instead.',
+      };
     }
+    if (err.code === 'auth/weak-password') {
+      return {
+        success: false,
+        message: 'The password is too weak. Please choose a password with at least 8 characters.',
+      };
+    }
+    if (err.code === 'auth/network-request-failed') {
+      return {
+        success: false,
+        message: 'Network connection error. Please check your internet connection and try again.',
+      };
+    }
+    return {
+      success: false,
+      message: err.message || 'Account registration failed. Please try again.',
+    };
   }
 
   let newAccount: FamilyAccount = {
