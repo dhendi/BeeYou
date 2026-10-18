@@ -996,7 +996,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   type="text"
                   value={mascotName}
                   onChange={(e) => setMascotName(e.target.value)}
-                  placeholder="e.g. Barnaby"
+                  placeholder="e.g. Honey Bee"
                   className="w-full px-3.5 py-2.5 rounded-2xl border-2 border-slate-200 font-bold text-sm focus:border-amber-500 focus:outline-hidden"
                 />
               </div>

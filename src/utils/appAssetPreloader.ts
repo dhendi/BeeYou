@@ -1,13 +1,13 @@
 /**
  * BeeYou Global Asset Preloader
- * Proactively fetches and decodes 100% of app icons, wallpapers, mascots,
+ * Proactively fetches and caches 100% of app icons, wallpapers, mascots,
  * and theme collections before revealing the app, ensuring 0ms instantaneous
  * icon rendering and zero pop-in when using the app or switching themes.
  */
 
 import assetsData from '../data/allPreloadAssets.json';
 
-// In-memory cache holding HTMLImageElements to keep GPU/render textures hot
+// In-memory cache holding HTMLImageElements to keep browser & GPU textures hot
 const memoryImageCache = new Map<string, HTMLImageElement>();
 let isPreloadCompleted = false;
 
@@ -19,13 +19,13 @@ export interface PreloadProgress {
   percent: number;
   loaded: number;
   total: number;
-  currentLabel: string;
 }
 
 /**
- * Preload and decode a single image URL.
+ * Preload a single image URL into browser cache & memoryImageCache.
+ * Resolves safely on load or error without blocking if an asset is delayed.
  */
-function preloadSingleImage(url: string): Promise<void> {
+function preloadSingleImage(url: string, shouldDecode: boolean = false): Promise<void> {
   return new Promise<void>((resolve) => {
     if (typeof window === 'undefined') {
       resolve();
@@ -37,22 +37,32 @@ function preloadSingleImage(url: string): Promise<void> {
       return;
     }
 
-    const img = new Image();
-    img.decoding = 'async';
-
-    const onDone = () => {
-      memoryImageCache.set(url, img);
-      if ('decode' in img && typeof img.decode === 'function') {
-        img.decode().then(() => resolve()).catch(() => resolve());
-      } else {
+    let settled = false;
+    const finish = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
         resolve();
       }
     };
 
-    img.onload = onDone;
+    // Safety timeout per individual image (3s) so one slow asset never stalls the batch
+    const timer = setTimeout(finish, 3000);
+
+    const img = new Image();
+    img.decoding = shouldDecode ? 'sync' : 'async';
+
+    img.onload = () => {
+      memoryImageCache.set(url, img);
+      if (shouldDecode && 'decode' in img && typeof img.decode === 'function') {
+        img.decode().then(finish).catch(finish);
+      } else {
+        finish();
+      }
+    };
+
     img.onerror = () => {
-      // Gracefully resolve on error to avoid blocking the queue
-      resolve();
+      finish();
     };
 
     img.src = url;
@@ -65,15 +75,17 @@ function preloadSingleImage(url: string): Promise<void> {
 async function preloadPool(
   urls: string[],
   concurrency: number,
+  decode: boolean,
   onItemDone: () => void
 ): Promise<void> {
   let index = 0;
 
-  const workers = Array.from({ length: concurrency }, async () => {
+  const poolSize = Math.min(concurrency, urls.length);
+  const workers = Array.from({ length: poolSize }, async () => {
     while (index < urls.length) {
       const currentIndex = index++;
       const url = urls[currentIndex];
-      await preloadSingleImage(url);
+      await preloadSingleImage(url, decode);
       onItemDone();
     }
   });
@@ -82,7 +94,7 @@ async function preloadPool(
 }
 
 /**
- * Preload all verified app assets across all 9 themes, wallpapers, and tools.
+ * Preload all verified app assets across all themes, wallpapers, and tools.
  * Resolves ONLY when all assets have been preloaded.
  */
 export async function preloadAllAppAssets(
@@ -90,58 +102,41 @@ export async function preloadAllAppAssets(
 ): Promise<void> {
   if (typeof window === 'undefined') return;
 
+  const allUrls = assetsData.allAssets;
+  const total = allUrls.length;
+
   if (isPreloadCompleted) {
     onProgress?.({
       percent: 100,
-      loaded: assetsData.allAssets.length,
-      total: assetsData.allAssets.length,
-      currentLabel: 'Ready! Welcome back!',
+      loaded: total,
+      total,
     });
     return;
   }
 
-  const allUrls = assetsData.allAssets;
-  const total = allUrls.length;
   let loaded = 0;
 
   const notify = () => {
     const percent = Math.min(100, Math.round((loaded / total) * 100));
-    let label = 'Warming up cozy space...';
-    if (percent < 25) {
-      label = 'Waking up Barnaby and the cozy crew...';
-    } else if (percent < 60) {
-      label = `Loading themes & wallpapers (${loaded}/${total})...`;
-    } else if (percent < 90) {
-      label = `Caching sticker collections (${loaded}/${total})...`;
-    } else if (percent < 100) {
-      label = 'Finalizing sensory space...';
-    } else {
-      label = 'Ready! Welcome back!';
-    }
-
     onProgress?.({
       percent,
       loaded,
       total,
-      currentLabel: label,
     });
   };
 
   notify();
 
-  // Run with 20 parallel connections for fast local disk/network loading
-  const CONCURRENCY = 20;
-
   // Phase 1: High Priority (Wallpapers, Mascots, Core Tools)
   const priorityUrls = assetsData.priorityAssets;
-  await preloadPool(priorityUrls, CONCURRENCY, () => {
+  await preloadPool(priorityUrls, 16, true, () => {
     loaded++;
     notify();
   });
 
-  // Phase 2: All Theme Collections & Routine Stickers
+  // Phase 2: All Theme Collections, Emotion Avatars & Routine Stickers
   const remainingUrls = assetsData.remainingAssets;
-  await preloadPool(remainingUrls, CONCURRENCY, () => {
+  await preloadPool(remainingUrls, 32, false, () => {
     loaded++;
     notify();
   });

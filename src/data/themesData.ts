@@ -277,7 +277,7 @@ export const PRESET_THEMES: AppTheme[] = [
     category: 'classic',
     emoji: '🐝',
     icon: '/assets/stickers/bee_mascot.png',
-    mascotName: 'Barnaby the Cozy Bee',
+    mascotName: 'Honey Bee',
     mascotEmoji: '🐝',
     mascotIcon: '/assets/stickers/bee_mascot.png',
     greetingMessage: 'Welcome to your sensory space! You can be yourself here.',
