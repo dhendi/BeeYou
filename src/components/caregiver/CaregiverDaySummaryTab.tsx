@@ -23,15 +23,19 @@ export const CaregiverDaySummaryTab: React.FC<CaregiverDaySummaryTabProps> = ({
     clearAllDailyRecollections,
     moodJournalEntries,
     routines,
-    habitsCompletedToday,
-    totalHabits,
-    stars,
+    habits,
+    earnedStickers,
     currentMood,
     medications,
     getCyclePhaseInfo,
     isPremium,
     triggerUpgrade,
   } = useApp();
+
+  const habitsCompletedToday = habits.filter((h) => h.completedToday).length;
+  const totalHabits = habits.length;
+  const stars = earnedStickers.length;
+  const completedRoutinesCount = routines.filter((r) => r.steps.length > 0 && r.steps.every((s) => s.completed)).length;
 
   const [copiedReport, setCopiedReport] = useState(false);
   const [filterPeriod, setFilterPeriod] = useState<'7days' | '30days' | 'all'>('7days');
@@ -69,7 +73,7 @@ export const CaregiverDaySummaryTab: React.FC<CaregiverDaySummaryTabProps> = ({
 
     // Routine & Habit Completion Rate
     const routineStats = routines.length > 0
-      ? `${routines.filter(r => r.completedToday).length}/${routines.length} routines completed today (${Math.round((routines.filter(r => r.completedToday).length / routines.length) * 100)}%)`
+      ? `${completedRoutinesCount}/${routines.length} routines completed today (${Math.round((completedRoutinesCount / routines.length) * 100)}%)`
       : 'Routines logged on child device';
 
     // Top challenges & triggers
@@ -271,7 +275,7 @@ export const CaregiverDaySummaryTab: React.FC<CaregiverDaySummaryTabProps> = ({
           <div className="p-3 bg-white/90 rounded-2xl border border-amber-200 shadow-2xs">
             <span className="text-[11px] font-bold text-slate-500 uppercase">{t('Routines Finished')}</span>
             <div className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
-              {routines.filter(r => r.completedToday).length} / {routines.length || 1}
+              {completedRoutinesCount} / {routines.length || 1}
             </div>
           </div>
 
@@ -386,7 +390,7 @@ export const CaregiverDaySummaryTab: React.FC<CaregiverDaySummaryTabProps> = ({
             const ratingClass = 
               entry.overallDay === 'great' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' :
               entry.overallDay === 'good' ? 'bg-blue-100 text-blue-900 border-blue-300' :
-              entry.overallDay === 'neutral' ? 'bg-stone-100 text-stone-800 border-stone-300' :
+              entry.overallDay === 'okay' ? 'bg-stone-100 text-stone-800 border-stone-300' :
               entry.overallDay === 'difficult' ? 'bg-amber-100 text-amber-900 border-amber-300' :
               'bg-rose-100 text-rose-900 border-rose-300';
 

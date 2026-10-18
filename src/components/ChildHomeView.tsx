@@ -60,9 +60,9 @@ import {
 import { getCurrentTimeRoutine } from '../utils/routineTimeHelper';
 import { CaregiverLockShield } from './CaregiverLockShield';
 import { getPersonaLabel, getPersonaTokens } from '../utils/personaHelpers';
-import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
-import { getGrammaticalCategoryLabel } from './AACView';
+import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
+import { t } from '../services/translator';
 import { getThemeWidgetStyles } from '../utils/themeWidgetHelper';
 import { getThemeIcon } from '../data/themesData';
 import { IconLibraryModal } from './common/IconLibraryModal';

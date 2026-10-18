@@ -44,12 +44,40 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,webp,svg,woff,woff2,mp3,wav,ogg,webm,json}'],
-          maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
           runtimeCaching: [
+            {
+              urlPattern: /\/assets\/(stickers|wallpapers)\/.*\.webp$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'beeyou-stickers-cache',
+                expiration: {
+                  maxEntries: 1500,
+                  maxAgeSeconds: 60 * 60 * 24 * 90,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\/sounds\/.*\.(mp3|wav|ogg|webm)$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'beeyou-audio-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 90,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
@@ -124,6 +152,12 @@ export default defineConfig(() => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
+            if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
+              return 'vendor-react';
+            }
+            if (id.includes('allPreloadAssets.json')) {
+              return 'assets-manifest';
+            }
             if (id.includes('node_modules/firebase')) {
               return 'vendor-firebase';
             }

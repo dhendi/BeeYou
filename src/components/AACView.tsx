@@ -14,17 +14,9 @@ import { t } from '../services/translator';
 import { AccessibleTile } from './common/AccessibleTile';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
-export const getGrammaticalCategoryLabel = (colorType: AACItem['colorType']): string => {
-  switch (colorType) {
-    case 'subject': return 'Person';
-    case 'verb': return 'Verb';
-    case 'noun': return 'Noun';
-    case 'adjective': return 'Descriptor';
-    case 'social': return 'Social';
-    case 'emergency': return 'Alert';
-    default: return 'Word';
-  }
-};
+import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
+export { getGrammaticalCategoryLabel };
+
 
 const AAC_COACH_STEPS: CoachMarkStep[] = [
   {
@@ -301,7 +293,7 @@ export const AACView: React.FC = () => {
   const isTrainTheme = activeTheme?.category === 'train' || activeTheme?.id === 'theme-trains';
   const isSpaceTheme = activeTheme?.category === 'space' || activeTheme?.id === 'theme-space';
   const isOceanTheme = activeTheme?.category === 'ocean' || activeTheme?.id === 'theme-ocean';
-  const isFairytaleTheme = activeTheme?.category === 'fantasy' || activeTheme?.category === 'magic' || activeTheme?.id === 'theme-fantasy';
+  const isFairytaleTheme = activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fantasy';
   const isRacingTheme = activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing';
 
   const TRAIN_CATEGORY_ICONS: Record<string, string> = {

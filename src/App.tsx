@@ -3,11 +3,12 @@
  * Strictly isolates Caregiver Controller and Child/User Tablet environments.
  */
 
-import React, { useState, useEffect } from 'react';
-import { CaregiverApp } from './components/CaregiverApp';
-import { ChildApp } from './components/ChildApp';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { isAllAssetsPreloaded } from './utils/appAssetPreloader';
+
+const CaregiverApp = lazy(() => import('./components/CaregiverApp').then((m) => ({ default: m.CaregiverApp })));
+const ChildApp = lazy(() => import('./components/ChildApp').then((m) => ({ default: m.ChildApp })));
 
 function getActiveRole(): 'caregiver' | 'child' {
   if (typeof window === 'undefined') return 'child';
@@ -63,11 +64,13 @@ export default function App() {
         <AppLoadingScreen onLoaded={() => setIsReady(true)} />
       )}
       <div className={!isReady ? 'invisible' : 'visible animate-fade-in'}>
-        {role === 'caregiver' ? (
-          <CaregiverApp key="caregiver-root-app" />
-        ) : (
-          <ChildApp key="child-root-app" />
-        )}
+        <Suspense fallback={null}>
+          {role === 'caregiver' ? (
+            <CaregiverApp key="caregiver-root-app" />
+          ) : (
+            <ChildApp key="child-root-app" />
+          )}
+        </Suspense>
       </div>
     </>
   );

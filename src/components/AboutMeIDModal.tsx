@@ -299,9 +299,8 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   </div>
                   <a
                     href={`tel:${aboutMe.emergencyContacts[0].phone.replace(/[^0-9+]/g, '')}`}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md tap-effect"
+                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center justify-center shadow-md tap-effect"
                   >
-                    <Phone className="w-3.5 h-3.5" />
                     <span>Call</span>
                   </a>
                 </div>

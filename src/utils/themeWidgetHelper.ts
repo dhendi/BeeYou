@@ -252,8 +252,7 @@ export function getThemeWidgetStyles(theme?: AppTheme | null): ThemeWidgetStyles
     themeId?.includes('fantasy') ||
     themeId?.includes('fairytale') ||
     themeId?.includes('magic') ||
-    category === 'fantasy' ||
-    category === 'magic'
+    category === 'fantasy'
   ) {
     return {
       card: 'w-full text-left p-4 sm:p-4.5 rounded-2xl border-2 border-pink-300/80 bg-pink-50/40 hover:bg-pink-50/80 text-pink-950 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_14px_rgba(219,39,119,0.08)] active:scale-[0.98] cursor-pointer transition-all col-span-1 flex items-center justify-between gap-3 group',
@@ -484,8 +483,7 @@ export function getThemeCustomizerHeaderStyles(theme?: AppTheme | null): ThemeCu
     themeId?.includes('fantasy') ||
     themeId?.includes('fairytale') ||
     themeId?.includes('magic') ||
-    category === 'fantasy' ||
-    category === 'magic'
+    category === 'fantasy'
   ) {
     return {
       modalBorder: 'border-pink-300',

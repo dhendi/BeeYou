@@ -135,9 +135,8 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
             <button
               type="button"
               onClick={onStartTour}
-              className="px-3 py-2 rounded-2xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-black text-xs flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
+              className="px-3 py-2 rounded-2xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-black text-xs flex items-center justify-center shadow-xs transition active:scale-95 cursor-pointer"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
               <span>How This Works</span>
             </button>
           )}
@@ -146,13 +145,12 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
               setShowRecollectionModal(true);
               playChime('tap');
             }}
-            className={`px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer ${
               loggedToday
                 ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300'
                 : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 animate-pulse'
             }`}
           >
-            <PlusCircle className="w-4 h-4 text-amber-700" />
             <span>{loggedToday ? "Edit Today's Log" : "Log Today's Reflection"}</span>
           </button>
         </div>
@@ -253,9 +251,8 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
           {!isPremium ? (
             <button
               onClick={() => triggerUpgrade('Therapist Clinical Summaries & IEP reports are a BeeYou Premium feature! Start your 15-day free trial.')}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-bold text-xs flex items-center justify-center shadow-sm active:scale-95 transition-all cursor-pointer shrink-0"
             >
-              <Crown className="w-4 h-4 text-amber-200" />
               <span>Unlock Therapist Summary (15d Trial)</span>
             </button>
           ) : (
@@ -304,7 +301,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
               }`}
             >
               <span>14 Days</span>
-              {!isPremium && <Crown className="w-3 h-3 text-amber-500" />}
+              {!isPremium && <span className="text-[10px] font-black uppercase text-amber-600 bg-amber-100 px-1 py-0.5 rounded">Pro</span>}
             </button>
             <button
               onClick={() => {
@@ -319,7 +316,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
               }`}
             >
               <span>All</span>
-              {!isPremium && <Crown className="w-3 h-3 text-amber-500" />}
+              {!isPremium && <span className="text-[10px] font-black uppercase text-amber-600 bg-amber-100 px-1 py-0.5 rounded">Pro</span>}
             </button>
           </div>
         </div>
@@ -404,8 +401,8 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
                     {energy && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200">
                         {energy.value === 'low' && <BatteryLow className="w-3.5 h-3.5 text-emerald-500" />}
-                        {energy.value === 'calm_steady' && <Activity className="w-3.5 h-3.5 text-sky-500" />}
-                        {energy.value === 'high_bouncy' && <Zap className="w-3.5 h-3.5 text-amber-500" />}
+                        {energy.value === 'calm' && <Activity className="w-3.5 h-3.5 text-sky-500" />}
+                        {energy.value === 'high' && <Zap className="w-3.5 h-3.5 text-amber-500" />}
                         {energy.value === 'overstimulated' && <Flame className="w-3.5 h-3.5 text-rose-500" />}
                         <span>{energy.label}</span>
                       </span>
@@ -439,10 +436,10 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
 
                     {sleep && (
                       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px]">
-                        {sleep.value === 'great' && <Moon className="w-3.5 h-3.5 text-indigo-500" />}
+                        {sleep.value === 'slept_well' && <Moon className="w-3.5 h-3.5 text-indigo-500" />}
                         {sleep.value === 'restless' && <CloudMoon className="w-3.5 h-3.5 text-slate-500" />}
-                        {sleep.value === 'hard_wind_down' && <Hourglass className="w-3.5 h-3.5 text-purple-500" />}
-                        {sleep.value === 'early_waking' && <Clock className="w-3.5 h-3.5 text-amber-500" />}
+                        {sleep.value === 'trouble_falling_asleep' && <Hourglass className="w-3.5 h-3.5 text-purple-500" />}
+                        {sleep.value === 'woke_early' && <Clock className="w-3.5 h-3.5 text-amber-500" />}
                         <span>{sleep.label}</span>
                       </span>
                     )}

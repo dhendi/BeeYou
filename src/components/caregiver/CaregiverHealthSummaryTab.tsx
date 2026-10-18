@@ -33,7 +33,7 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
 
   // Filter today's administration logs
   const todayStr = new Date().toISOString().split('T')[0];
-  const todayLogs = (medicationLogs || []).filter((l) => l.date === todayStr);
+  const todayLogs = (medicationLogs || []).filter((l) => l.timestamp?.startsWith(todayStr));
 
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
@@ -289,7 +289,7 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
                 <div className="flex items-center gap-2">
                   <span className="font-black text-slate-900">{log.medicationName}</span>
                 </div>
-                <span className="text-slate-500 font-bold">{log.scheduledTime}</span>
+                <span className="text-slate-500 font-bold">{log.doseTime}</span>
               </div>
             ))}
           </div>

@@ -1822,7 +1822,6 @@ export const TRAIN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/story_birthday.webp': '/assets/stickers/train_story_birthday.webp',
   '/assets/stickers/story_plans_change.webp': '/assets/stickers/train_circular_track.webp',
   '/assets/stickers/plans_changed.webp': '/assets/stickers/train_circular_track.webp',
-  '/assets/stickers/story_sharing.webp': '/assets/stickers/train_toy_chest.webp',
   '/assets/stickers/sharing_toys.webp': '/assets/stickers/train_toy_chest.webp',
   // Batch 5 New Train Swaps
   '/assets/stickers/adventure_dentist.webp': '/assets/stickers/train_adventure_dentist.webp',
@@ -1950,7 +1949,6 @@ export const TRAIN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/pancakes_breakfast.webp': '/assets/stickers/train_dining_pancakes.webp',
   '/assets/stickers/school_bus.webp': '/assets/stickers/train_passenger_car.webp',
   '/assets/stickers/backpack_school.webp': '/assets/stickers/train_conductor_satchel.webp',
-  '/assets/stickers/homework_study.webp': '/assets/stickers/train_ticket_punch.webp',
   '/assets/stickers/folder_schoolwork.webp': '/assets/stickers/train_ticket_punch.webp',
   '/assets/stickers/pencil_write.webp': '/assets/stickers/train_pencil.webp',
   '/assets/stickers/sandwich_lunch.webp': '/assets/stickers/train_tin_lunchbox.webp',
@@ -1969,7 +1967,6 @@ export const TRAIN_STICKER_SWAPS: Record<string, string> = {
 export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   // Batch 1 Core Routine Swaps
   '/assets/stickers/alarm_clock.webp': '/assets/stickers/ocean_porthole_alarm.webp',
-  '/assets/stickers/clock_time.webp': '/assets/stickers/ocean_porthole_alarm.webp',
   '/assets/stickers/routine_alarm_clock.webp': '/assets/stickers/ocean_porthole_alarm.webp',
 
   '/assets/stickers/toothbrush.webp': '/assets/stickers/ocean_coral_toothbrush.webp',
@@ -2189,7 +2186,6 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
 export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   // Batch 1 Core Routine Swaps
   '/assets/stickers/alarm_clock.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
-  '/assets/stickers/clock_time.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
   '/assets/stickers/routine_alarm_clock.webp': '/assets/stickers/fairytale_tower_alarm_clock.webp',
 
   '/assets/stickers/toothbrush.webp': '/assets/stickers/fairytale_magic_toothbrush.webp',
@@ -2243,7 +2239,6 @@ export const FAIRYTALE_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/drink_cup.webp': '/assets/stickers/fairytale_castle_hot_cocoa.webp',
 
   '/assets/stickers/chocolate_bar.webp': '/assets/stickers/fairytale_royal_chocolate_bar.webp',
-  '/assets/stickers/candy_treat.webp': '/assets/stickers/fairytale_royal_chocolate_bar.webp',
 
   '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/fairytale_storybook_jigsaw_puzzle.webp',
 
@@ -2482,7 +2477,6 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/drink_cup.webp': '/assets/stickers/racing_hot_cocoa.webp',
 
   '/assets/stickers/chocolate_bar.webp': '/assets/stickers/racing_chocolate_bar.webp',
-  '/assets/stickers/candy_treat.webp': '/assets/stickers/racing_chocolate_bar.webp',
 
   '/assets/stickers/jigsaw_puzzle.webp': '/assets/stickers/racing_jigsaw_puzzle.webp',
 
@@ -2505,7 +2499,6 @@ export const RACING_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/spoons_energy.webp': '/assets/stickers/racing_spoons_energy.webp',
 
   '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/racing_routine_writing_journal.webp',
-  '/assets/stickers/passport_book.webp': '/assets/stickers/racing_routine_writing_journal.webp',
 
   '/assets/stickers/toy_box.webp': '/assets/stickers/racing_toy_box.webp',
 

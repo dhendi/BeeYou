@@ -707,6 +707,8 @@ export interface HelpAlertPreset {
   colorClass: string;
   borderClass: string;
   ttsAnnouncement: string;
+  iconBgClass?: string;
+  iconColorClass?: string;
   isCustom?: boolean;
   priority?: 'high' | 'medium' | 'low';
 }

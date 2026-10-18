@@ -324,13 +324,12 @@ export const CopingToolkitModal: React.FC = () => {
             isFrogTheme ? 'border-lime-200/80 bg-[#F4F9F1]' : isDinoTheme ? 'border-green-200/80 bg-[#F2F8F1]' : isTurtleTheme ? 'border-emerald-200/80 bg-[#EEF7F2]' : 'border-amber-200/80 bg-[#FFF9EE]'
           } p-2 gap-2 overflow-x-auto shrink-0 scrollbar-none`}>
             {[
-              { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.webp', icon: Wind },
-              { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.webp', icon: Heart },
-              { id: 'timer', label: 'Break Timer', stickerSrc: '/assets/stickers/timer_clock.webp', icon: Timer },
-              { id: 'grounding', label: '5-4-3-2-1', stickerSrc: '/assets/stickers/eye_see.webp', icon: Eye },
+              { id: 'breathing', label: 'Deep Breathing', stickerSrc: '/assets/stickers/breathing_cloud.webp' },
+              { id: 'strategies', label: 'Calm Tools', stickerSrc: '/assets/stickers/fav_love_heart.webp' },
+              { id: 'timer', label: 'Break Timer', stickerSrc: '/assets/stickers/timer_clock.webp' },
+              { id: 'grounding', label: '5-4-3-2-1', stickerSrc: '/assets/stickers/eye_see.webp' },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
-              const TabIcon = tab.icon;
               return (
                 <button
                   key={tab.id}

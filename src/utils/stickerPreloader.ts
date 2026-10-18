@@ -4,7 +4,7 @@
  * with zero pop-in flickering across themes, routines, and views.
  */
 
-import { TURTLE_SANCTUARY_ICONS, DINO_KINGDOM_ICONS, RIBBIT_POND_ICONS, STEAM_EXPRESS_ICONS, COSMIC_SPACE_ICONS, OCEAN_SPLASH_ICONS, FAIRYTALE_MAGIC_ICONS, RACING_SPEEDWAY_ICONS } from '../data/themedIconsData';
+import { preloadThemeAssetsImmediate } from './appAssetPreloader';
 
 const loadedCache = new Set<string>();
 
@@ -56,67 +56,57 @@ export function preloadStickerUrls(urls: string[], immediate = false) {
  * Preloads all Turtle Sanctuary stickers immediately into the browser's cache.
  */
 export function preloadTurtleThemeStickers() {
-  const turtleUrls = TURTLE_SANCTUARY_ICONS.map((i) => i.value);
-  preloadStickerUrls(turtleUrls, false);
+  preloadThemeAssetsImmediate('turtle');
 }
 
 /**
  * Preloads all Dino Kingdom stickers into the browser's cache during idle cycles.
  */
 export function preloadDinoThemeStickers() {
-  const dinoUrls = DINO_KINGDOM_ICONS.map((i) => i.value);
-  preloadStickerUrls(dinoUrls, false);
+  preloadThemeAssetsImmediate('dinosaur');
 }
 
 /**
  * Preloads all Ribbit Pond stickers into the browser's cache during idle cycles.
  */
 export function preloadFrogThemeStickers() {
-  const frogUrls = RIBBIT_POND_ICONS.map((i) => i.value);
-  preloadStickerUrls(frogUrls, false);
+  preloadThemeAssetsImmediate('frog');
 }
 
 /**
  * Preloads all Steam Express stickers into the browser's cache during idle cycles.
  */
 export function preloadSteamThemeStickers() {
-  const trainUrls = STEAM_EXPRESS_ICONS.map((i) => i.value);
-  preloadStickerUrls(trainUrls, false);
+  preloadThemeAssetsImmediate('train');
 }
 
 /**
  * Preloads all Cosmic Explorer (Space) stickers into the browser's cache during idle cycles.
  */
 export function preloadSpaceThemeStickers() {
-  const spaceUrls = COSMIC_SPACE_ICONS.map((i) => i.value);
-  preloadStickerUrls(spaceUrls, false);
+  preloadThemeAssetsImmediate('space');
 }
 
 /**
  * Preloads all Ocean Splash stickers into the browser's cache during idle cycles.
  */
 export function preloadOceanThemeStickers() {
-  const oceanUrls = OCEAN_SPLASH_ICONS.map((i) => i.value);
-  preloadStickerUrls(oceanUrls, false);
+  preloadThemeAssetsImmediate('ocean');
 }
 
 /**
  * Preloads all Magic Fairytale stickers into the browser's cache during idle cycles.
  */
 export function preloadFairytaleThemeStickers() {
-  const fairytaleUrls = FAIRYTALE_MAGIC_ICONS.map((i) => i.value);
-  preloadStickerUrls(fairytaleUrls, false);
+  preloadThemeAssetsImmediate('fantasy');
 }
 
 /**
  * Preloads all Turbo Speedway stickers into the browser's cache during idle cycles.
  */
 export function preloadRacingThemeStickers() {
-  const racingUrls = RACING_SPEEDWAY_ICONS.map((i) => i.value);
-  preloadStickerUrls(racingUrls, false);
+  preloadThemeAssetsImmediate('racing');
 }
-
-import { preloadThemeAssetsImmediate } from './appAssetPreloader';
 
 /**
  * Preloads stickers for a specific theme ID.
@@ -124,23 +114,6 @@ import { preloadThemeAssetsImmediate } from './appAssetPreloader';
 export function preloadThemeStickers(themeId?: string) {
   if (!themeId) return;
   preloadThemeAssetsImmediate(themeId);
-  if (themeId === 'theme-turtle' || themeId === 'turtle') {
-    preloadTurtleThemeStickers();
-  } else if (themeId === 'theme-dino' || themeId === 'dinosaur') {
-    preloadDinoThemeStickers();
-  } else if (themeId === 'theme-frog' || themeId === 'frog') {
-    preloadFrogThemeStickers();
-  } else if (themeId === 'theme-trains' || themeId === 'train') {
-    preloadSteamThemeStickers();
-  } else if (themeId === 'theme-space' || themeId === 'space') {
-    preloadSpaceThemeStickers();
-  } else if (themeId === 'theme-ocean' || themeId === 'ocean') {
-    preloadOceanThemeStickers();
-  } else if (themeId === 'theme-fantasy' || themeId === 'fantasy' || themeId === 'magic') {
-    preloadFairytaleThemeStickers();
-  } else if (themeId === 'theme-racing' || themeId === 'racing') {
-    preloadRacingThemeStickers();
-  }
 }
 
 /**
@@ -218,9 +191,6 @@ export function preloadAllStickersOnIdle() {
   } catch (e) {}
 
   // Background idle pre-warming for remaining theme collections so subsequent switches are instant
-  const turtleUrls = TURTLE_SANCTUARY_ICONS.map((i) => i.value);
-  const dinoUrls = DINO_KINGDOM_ICONS.map((i) => i.value);
-
-  preloadStickerUrls(turtleUrls, false);
-  preloadStickerUrls(dinoUrls, false);
+  preloadTurtleThemeStickers();
+  preloadDinoThemeStickers();
 }

@@ -11,15 +11,8 @@ import { ChildHeader } from './ChildHeader';
 import { t } from '../services/translator';
 import { ChildNavBar } from './ChildNavBar';
 import { ChildHomeView } from './ChildHomeView';
-import { AACView } from './AACView';
-import { CommunicateView } from './CommunicateView';
-import { MeView } from './MeView';
 import { MyRoutineView } from './MyRoutineView';
-import { ToolsView } from './ToolsView';
 import { MyDayView } from './MyDayView';
-import { AdventuresView } from './AdventuresView';
-import { SkillsView } from './SkillsView';
-import { FeelingsView } from './FeelingsView';
 import { QuickPhrasesDrawer } from './QuickPhrasesDrawer';
 import { PinModal } from './PinModal';
 import { CaregiverMessageToast } from './CaregiverMessageToast';
@@ -35,6 +28,15 @@ import { CaregiverHelpHub } from './caregiver/CaregiverHelpHub';
 import { AACExperiencePromptModal } from './onboarding/AACExperiencePromptModal';
 import { useModalBackHandler } from '../services/modalBackHandler';
 import { useMobileHardwareBack } from '../hooks/useMobileHardwareBack';
+
+// Lazy-loaded child views
+const AACView = lazy(() => import('./AACView').then((m) => ({ default: m.AACView })));
+const CommunicateView = lazy(() => import('./CommunicateView').then((m) => ({ default: m.CommunicateView })));
+const MeView = lazy(() => import('./MeView').then((m) => ({ default: m.MeView })));
+const ToolsView = lazy(() => import('./ToolsView').then((m) => ({ default: m.ToolsView })));
+const AdventuresView = lazy(() => import('./AdventuresView').then((m) => ({ default: m.AdventuresView })));
+const SkillsView = lazy(() => import('./SkillsView').then((m) => ({ default: m.SkillsView })));
+const FeelingsView = lazy(() => import('./FeelingsView').then((m) => ({ default: m.FeelingsView })));
 
 // Lazy-loaded child tools and modals
 const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
@@ -254,18 +256,20 @@ const ChildAppContent: React.FC = () => {
         ref={mainScrollRef} 
         className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col p-1 sm:p-2' : 'overflow-y-auto p-2 sm:p-4'} overscroll-contain relative z-10`}
       >
-        {childView === 'home' && <ChildHomeView />}
-        {childView === 'aac' && <AACView />}
-        {childView === 'communicate' && <CommunicateView />}
-        {childView === 'me' && <MeView />}
-        {childView === 'my-routine' && <MyRoutineView />}
-        {childView === 'tools' && <ToolsView />}
-        {childView === 'my-day' && <MyDayView />}
-        {childView === 'adventures' && <AdventuresView />}
-        {childView === 'skills' && <SkillsView />}
-        {childView === 'feelings' && <FeelingsView />}
-        {childView === 'rewards' && <Rewards />}
-        {childView === 'scrapbook' && <StickerScrapbookView />}
+        <Suspense fallback={null}>
+          {childView === 'home' && <ChildHomeView />}
+          {childView === 'aac' && <AACView />}
+          {childView === 'communicate' && <CommunicateView />}
+          {childView === 'me' && <MeView />}
+          {childView === 'my-routine' && <MyRoutineView />}
+          {childView === 'tools' && <ToolsView />}
+          {childView === 'my-day' && <MyDayView />}
+          {childView === 'adventures' && <AdventuresView />}
+          {childView === 'skills' && <SkillsView />}
+          {childView === 'feelings' && <FeelingsView />}
+          {childView === 'rewards' && <Rewards />}
+          {childView === 'scrapbook' && <StickerScrapbookView />}
+        </Suspense>
       </main>
 
       {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, Search, RotateCcw } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { CaregiverFeatureWalkthrough } from './CaregiverFeatureWalkthrough';
 
@@ -37,11 +37,11 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
 
   // Sample Routine Interactive Sandbox State
   const [sampleSteps, setSampleSteps] = useState([
-    { id: '1', title: 'Wake up & stretch', duration: 2, completed: false },
-    { id: '2', title: 'Brush teeth', duration: 2, completed: false },
-    { id: '3', title: 'Get dressed', duration: 5, completed: false },
-    { id: '4', title: 'Eat breakfast', duration: 15, completed: false },
-    { id: '5', title: 'Pack backpack', duration: 3, completed: false },
+    { id: '1', title: 'Wake up & stretch', duration: 2, completed: false, sticker: '/assets/stickers/alarm_clock.webp' },
+    { id: '2', title: 'Brush teeth', duration: 2, completed: false, sticker: '/assets/stickers/toothbrush.webp' },
+    { id: '3', title: 'Get dressed', duration: 5, completed: false, sticker: '/assets/stickers/clothes_dressed.webp' },
+    { id: '4', title: 'Eat breakfast', duration: 15, completed: false, sticker: '/assets/stickers/pancakes_breakfast.webp' },
+    { id: '5', title: 'Pack backpack', duration: 3, completed: false, sticker: '/assets/stickers/backpack_school.webp' },
   ]);
   const [sampleTimerActive, setSampleTimerActive] = useState(false);
   const [sampleTimerSec, setSampleTimerSec] = useState(120);
@@ -124,8 +124,8 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
         {/* HEADER */}
         <div className="bg-slate-900 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center">
-              <BeeMascot size="sm" pose="reading" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center p-1.5">
+              <img src="/assets/stickers/about_id.webp" alt="Help Guide" className="w-7 h-7 object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -179,7 +179,6 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
           {/* SIDEBAR NAVIGATION */}
           <div className="w-full md:w-64 bg-slate-50/80 dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 p-2 overflow-x-auto md:overflow-y-auto shrink-0 flex md:flex-col gap-1">
             {filteredTopics.map((topic) => {
-              const Icon = topic.icon;
               const isSelected = activeTopic === topic.id;
               return (
                 <button
@@ -195,7 +194,6 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-amber-950' : 'text-amber-600'}`} />
                     <span className="truncate">{topic.title}</span>
                   </div>
                   {topic.badge && (
@@ -414,14 +412,14 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                     'Wants an easy, non-intimidating way to ask for help',
                   ].map((sign, idx) => (
                     <div key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-200">{sign}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-950 dark:text-amber-200 text-xs font-medium">
-                  ℹ️ <strong>Note:</strong> BeeYou is a daily support tool for autonomy and calm. It does not replace medical or therapy services.
+                  <strong>Note:</strong> BeeYou is a daily support tool for autonomy and calm. It does not replace medical or therapy services.
                 </div>
               </div>
             )}
@@ -690,7 +688,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
-                    <Eye className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <div className="w-3 h-3 rounded-full bg-indigo-500 shrink-0 mt-1" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Visual Alerts</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -700,7 +698,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   </div>
 
                   <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
-                    <Volume2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="w-3 h-3 rounded-full bg-amber-500 shrink-0 mt-1" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Sound Effects</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -710,7 +708,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   </div>
 
                   <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
-                    <Vibrate className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+                    <div className="w-3 h-3 rounded-full bg-teal-500 shrink-0 mt-1" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Vibration</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -720,7 +718,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   </div>
 
                   <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-start gap-2.5">
-                    <Volume2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                    <div className="w-3 h-3 rounded-full bg-purple-500 shrink-0 mt-1" />
                     <div>
                       <h4 className="font-bold text-xs text-slate-900 dark:text-white">Voice Alerts</h4>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -731,7 +729,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                 </div>
 
                 <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-xs text-emerald-900 dark:text-emerald-200 font-medium">
-                  ⚙️ <strong>Where to change:</strong> Adjust anytime in <strong>Sensory Preferences</strong> or <strong>Parent Dashboard &gt; Settings</strong>.
+                  <strong>Where to change:</strong> Adjust anytime in <strong>Sensory Preferences</strong> or <strong>Parent Dashboard &gt; Settings</strong>.
                 </div>
               </div>
             )}
@@ -750,9 +748,8 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                   </div>
                   <button
                     onClick={handleResetSample}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
                     <span>Reset Sample</span>
                   </button>
                 </div>
@@ -760,7 +757,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                 {/* Sample Timer Card */}
                 <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 border-2 border-amber-300/80 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">🪥</span>
+                    <img src="/assets/stickers/toothbrush.webp" alt="Toothbrush" className="w-10 h-10 object-contain" />
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
                         Interactive Step Timer
@@ -810,7 +807,9 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl" aria-hidden="true">{step.emoji}</span>
+                        {step.sticker && (
+                          <img src={step.sticker} alt={step.title} className="w-7 h-7 object-contain" />
+                        )}
                         <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                           {step.title}
                         </span>
@@ -819,8 +818,10 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
                         <span className="text-[11px] font-bold text-slate-500 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700">
                           {step.duration}m
                         </span>
-                        <span className="text-sm" aria-hidden="true">
-                          {step.completed ? '✅' : '⬜'}
+                        <span className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs font-black ${
+                          step.completed ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-white border-slate-300'
+                        }`}>
+                          {step.completed ? '✓' : ''}
                         </span>
                       </div>
                     </button>
@@ -829,7 +830,7 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
 
                 {sampleSteps.every((s) => s.completed) && (
                   <div className="p-3.5 rounded-2xl bg-emerald-500 text-white text-center font-black text-xs animate-in zoom-in-95">
-                    🎉 Great job! You completed all steps in the sample routine!
+                    Great job! You completed all steps in the sample routine!
                   </div>
                 )}
               </div>

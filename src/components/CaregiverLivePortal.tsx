@@ -190,9 +190,10 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
   }, [code, senderName, childName]);
 
   const handleEnableDeviceAlerts = async () => {
-    const perm = await pushNotificationService.requestPermission();
+    const granted = await pushNotificationService.requestPermission();
+    const perm = pushNotificationService.getPermissionStatus();
     setDeviceNotificationStatus(perm);
-    if (perm === 'granted') {
+    if (granted) {
       setMessageSentNotice('Device alerts and sound enabled!');
       setTimeout(() => setMessageSentNotice(null), 3500);
       pushNotificationService.sendTestNotification(childName);
@@ -344,10 +345,9 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
               <button
                 type="button"
                 onClick={handleEnableDeviceAlerts}
-                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95 shadow-2xs"
                 title="Enable push notifications and audible alert banners on this device"
               >
-                <Bell className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Enable Device Alerts</span>
                 <span className="sm:hidden">Alerts</span>
               </button>
@@ -585,9 +585,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 <button
                   type="submit"
                   disabled={!typedAlertReply.trim()}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition shrink-0"
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center cursor-pointer shadow-2xs active:scale-95 transition shrink-0"
                 >
-                  <Send className="w-3.5 h-3.5 text-amber-300" />
                   <span>Send Reply</span>
                 </button>
               </form>
@@ -600,8 +599,8 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
           <div className="p-4 rounded-3xl bg-emerald-50 border-2 border-emerald-300 shadow-xs space-y-2 animate-in fade-in">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs text-sm font-black">
+                  ✓
                 </div>
                 <div>
                   <span className="text-xs font-bold text-emerald-900 block">

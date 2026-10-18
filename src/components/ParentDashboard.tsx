@@ -375,7 +375,7 @@ export const ParentDashboard: React.FC = () => {
   const navGroups: {
     id: string;
     title: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon?: React.ComponentType<{ className?: string }>;
     items: Array<{
       id: TabType;
       label: string;
@@ -582,12 +582,8 @@ export const ParentDashboard: React.FC = () => {
               value={activeTab}
               onChange={(e) => {
                 const newTab = e.target.value as TabType;
-                if (newTab === 'guide') {
-                  handleStartTour();
-                } else {
-                  setActiveTab(newTab);
-                  playChime('tap');
-                }
+                setActiveTab(newTab);
+                playChime('tap');
               }}
               className="w-full px-3.5 py-2.5 bg-stone-50 hover:bg-stone-100 focus:bg-white text-slate-900 font-black text-xs sm:text-sm rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 outline-none transition-all appearance-none cursor-pointer"
             >
@@ -619,10 +615,6 @@ export const ParentDashboard: React.FC = () => {
                       key={item.id}
                       data-tour={`caregiver-tab-${item.id}`}
                       onClick={() => {
-                        if (item.id === 'guide') {
-                          handleStartTour();
-                          return;
-                        }
                         setActiveTab(item.id);
                         playChime('tap');
                       }}
@@ -638,9 +630,7 @@ export const ParentDashboard: React.FC = () => {
                       {item.badge && (
                         <span
                           className={`px-1.5 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
-                            item.id === 'routines'
-                              ? 'bg-sky-100 text-sky-950 border border-sky-200'
-                              : isActive
+                            isActive
                               ? 'bg-white/25 text-white'
                               : `${activeTheme?.palette?.badgeBg || 'bg-amber-200'} ${activeTheme?.palette?.textAccent || 'text-amber-950'}`
                           }`}

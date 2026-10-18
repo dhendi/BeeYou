@@ -3,7 +3,7 @@ export interface ThemedIconItem {
   value: string;
   label: string;
   shortLabel: string;
-  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'frog' | 'space' | 'magic' | 'train' | 'rocker' | 'ocean' | 'all';
+  themeCategory: 'turtle' | 'classic' | 'dinosaur' | 'frog' | 'space' | 'magic' | 'fantasy' | 'train' | 'rocker' | 'ocean' | 'racing' | 'all';
   keywords: string[];
 }
 

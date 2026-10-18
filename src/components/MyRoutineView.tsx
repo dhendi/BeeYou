@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Calendar as CalendarIcon, 
@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { MyDayView } from './MyDayView';
-import { AdventuresView } from './AdventuresView';
-import { SkillsView } from './SkillsView';
+const AdventuresView = lazy(() => import('./AdventuresView').then((m) => ({ default: m.AdventuresView })));
+const SkillsView = lazy(() => import('./SkillsView').then((m) => ({ default: m.SkillsView })));
 import { RoutineCalendarStrip } from './RoutineCalendarStrip';
 import { RoutineTemplatesLibrary } from './RoutineTemplatesLibrary';
 import { RoutineCustomizerModal } from './RoutineCustomizerModal';
@@ -423,8 +423,16 @@ export const MyRoutineView: React.FC = () => {
           </div>
         )}
 
-        {activeSubTab === 'adventures' && <AdventuresView />}
-        {activeSubTab === 'skills' && <SkillsView />}
+        {activeSubTab === 'adventures' && (
+          <Suspense fallback={<div className="p-8 text-center text-warm-stone animate-pulse">Loading...</div>}>
+            <AdventuresView />
+          </Suspense>
+        )}
+        {activeSubTab === 'skills' && (
+          <Suspense fallback={<div className="p-8 text-center text-warm-stone animate-pulse">Loading...</div>}>
+            <SkillsView />
+          </Suspense>
+        )}
       </div>
 
       {/* Routine Customizer Modal */}

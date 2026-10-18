@@ -43,7 +43,7 @@ export const CaregiverCycleSummaryTab: React.FC<CaregiverCycleSummaryTabProps> =
 
     lines.push(
       `1. CURRENT CYCLE PHASE & TIMELINE:`,
-      `- Current Cycle Day: Day ${cycleInfo.currentCycleDay} of ${cycleSettings?.cycleLength || 28} days`,
+      `- Current Cycle Day: Day ${cycleInfo.currentCycleDay} of ${cycleSettings?.averageCycleLength || 28} days`,
       `- Active Phase: ${cycleInfo.phaseLabel}`,
       `- Phase Overview: ${cycleInfo.phaseDescription}`,
       `- Estimated Next Period: ${cycleInfo.daysUntilNextPeriod > 0 ? `In ${cycleInfo.daysUntilNextPeriod} days` : 'Active / expected today'}\n`,
@@ -198,7 +198,7 @@ export const CaregiverCycleSummaryTab: React.FC<CaregiverCycleSummaryTabProps> =
           </div>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="text-2xl sm:text-3xl font-black text-slate-900">
-              {cycleSettings?.cycleLength || 28}
+              {cycleSettings?.averageCycleLength || 28}
             </span>
             <span className="text-xs text-slate-500 font-bold">{t('days')}</span>
           </div>
