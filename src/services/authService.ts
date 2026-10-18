@@ -24,7 +24,7 @@ export interface FamilyAccount {
   email: string;
   caregiverName: string;
   caregiverRole: string; // e.g. 'Mom', 'Dad', 'Caregiver', 'Educator'
-  familyCode: string; // e.g. 'BEE-DEMO' or 6-char family sync code
+  familyCode: string; // e.g. 'BEE-DEMO' or 7-char family sync code
   childProfile: {
     name: string;
     ageGroup: UserAgeGroup;
@@ -132,20 +132,20 @@ export function setActiveDeviceView(view: 'child' | 'caregiver'): void {
 
 /**
  * Generate a cryptographically random, unguessable pairing code.
- * E.g., 'BEE-7K9M4X' (over 1 billion unique combinations).
+ * E.g., 'BEE-7K9M4X2' (over 34 billion unique combinations with 7 characters).
  * Uses unambiguous uppercase alphanumeric characters (no confusing 0/O, 1/I/L).
  */
-export function generateSecureFamilyCode(): string {
+export function generateSecureFamilyCode(length: number = 7): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let randomPart = '';
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const bytes = new Uint8Array(6);
+    const bytes = new Uint8Array(length);
     crypto.getRandomValues(bytes);
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < length; i++) {
       randomPart += chars[bytes[i] % chars.length];
     }
   } else {
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < length; i++) {
       randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
   }
