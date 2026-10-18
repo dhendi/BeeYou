@@ -17,17 +17,17 @@ import {
 import { CaregiverAlert, CaregiverChildStatus, CaregiverMessage, PredefinedCaregiverResponseId } from '../types';
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyBQ9VPr9uSiJrOHrybnT4K24INfP9BIYHg",
-  authDomain: "beeyou-23d7d.firebaseapp.com",
-  databaseURL: "https://beeyou-23d7d-default-rtdb.firebaseio.com",
-  projectId: "beeyou-23d7d",
-  storageBucket: "beeyou-23d7d.firebasestorage.app",
-  messagingSenderId: "985183179557",
-  appId: "1:985183179557:web:085de960ef227a087f40cc",
-  measurementId: "G-VR0VWBRJ7J"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBQ9VPr9uSiJrOHrybnT4K24INfP9BIYHg",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "beeyou-23d7d.firebaseapp.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://beeyou-23d7d-default-rtdb.firebaseio.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "beeyou-23d7d",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "beeyou-23d7d.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "985183179557",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:985183179557:web:085de960ef227a087f40cc",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-VR0VWBRJ7J"
 };
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 
 // Event Callbacks
@@ -174,18 +174,30 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
     entries.forEach(([key, msg]) => {
       if (!seenMessageKeys.has(key)) {
         seenMessageKeys.add(key);
-        lastKnownPeerPing = Date.now();
-        lastKnownPeerRole = isCaregiver ? 'child_device' : 'caregiver';
-        notifyPresence();
-
         const rawSender = msg?.senderName || 'Caregiver';
         const rawText = msg?.text || '';
         const isActuallyInverted =
           (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
           rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
-        const normalizedMsg: CaregiverMessage = isActuallyInverted
-          ? { ...msg, senderName: rawText, text: rawSender }
-          : msg;
+        const finalSender = isActuallyInverted ? rawText : rawSender;
+        const finalText = isActuallyInverted ? rawSender : rawText;
+
+        const isFromChild = msg?.senderRole === 'child' || (
+          finalSender.trim().toLowerCase() !== 'caregiver' &&
+          finalSender.trim().toLowerCase() !== 'parent'
+        );
+
+        lastKnownPeerPing = Date.now();
+        lastKnownPeerRole = isFromChild ? 'child_device' : 'caregiver';
+        lastKnownPeerName = finalSender;
+        notifyPresence();
+
+        const normalizedMsg: CaregiverMessage = {
+          ...msg,
+          senderName: finalSender,
+          text: finalText,
+          senderRole: isFromChild ? 'child' : 'caregiver',
+        };
 
         messageListeners.forEach((fn) => fn(normalizedMsg));
       }
@@ -299,7 +311,7 @@ export async function acknowledgeFirebaseAlert(params: {
       id: params.alertId,
       status: 'acknowledged',
       acknowledgedBy: params.acknowledgedBy,
-      responseMessage: params.responseMessage || "I'm on my way ❤️",
+      responseMessage: params.responseMessage || "I'm on my way.",
       responseId: params.responseId || null,
       acknowledgedAt: new Date().toISOString(),
       sentAt: Date.now(),

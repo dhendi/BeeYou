@@ -702,6 +702,8 @@ export interface HelpAlertPreset {
   label: string;
   sublabel: string;
   emoji: string;
+  stickerSrc?: string;
+  iconName?: string;
   colorClass: string;
   borderClass: string;
   ttsAnnouncement: string;
@@ -761,6 +763,7 @@ export interface CaregiverMessage {
   timestamp: string;
   read: boolean;
   responseId?: PredefinedCaregiverResponseId;
+  senderRole?: 'caregiver' | 'child';
 }
 
 export interface CaregiverAlert {

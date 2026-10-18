@@ -37,13 +37,15 @@ function playAudioSample(src: string, volume = 0.35): boolean {
 }
 
 // Gentle pleasant musical chime for AAC taps and successes
-export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
+export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' | 'alert' = 'tap') {
   // Fire sensory haptics if enabled by user (default OFF)
   if (type === 'tap') {
     triggerHaptic('light');
     return; // Silent audio on button taps per user request (removes navigation button press noise)
   }
-  if (type === 'star' || type === 'complete') {
+  if (type === 'alert') {
+    triggerHaptic('warning', true);
+  } else if (type === 'star' || type === 'complete') {
     triggerHaptic('success');
   } else if (type === 'breathe') {
     triggerHaptic('selection');
@@ -52,7 +54,7 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
   try {
     const file = CHIME_AUDIO_FILES[type];
     if (file) {
-      const vol = type === 'star' || type === 'complete' ? 0.35 : 0.20;
+      const vol = type === 'alert' ? 0.45 : (type === 'star' || type === 'complete' ? 0.35 : 0.20);
       const played = playAudioSample(file, vol);
       if (played) return;
     }
@@ -62,7 +64,7 @@ export function playChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe
 }
 
 // Procedural synthesizer for clean, subtle, soothing UI feedback (zero retro/arcade noise)
-export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' = 'tap') {
+export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' | 'breathe' | 'clear' | 'alert' = 'tap') {
   // Silent on button taps per user request
   if (type === 'tap') return;
   try {
@@ -128,6 +130,20 @@ export function playProceduralChime(type: 'tap' | 'speak' | 'star' | 'complete' 
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       osc.start(now);
       osc.stop(now + 0.12);
+    } else if (type === 'alert') {
+      // Warm, distinct attention chime: G5 -> C6 harmonic ping
+      [783.99, 1046.5].forEach((freq, idx) => {
+        const noteOsc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        noteOsc.type = 'sine';
+        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        noteGain.gain.setValueAtTime(0.18, now + idx * 0.12);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+        noteOsc.connect(noteGain);
+        noteGain.connect(ctx.destination);
+        noteOsc.start(now + idx * 0.12);
+        noteOsc.stop(now + idx * 0.12 + 0.35);
+      });
     }
   } catch (e) {
     // Audio context not allowed or failed

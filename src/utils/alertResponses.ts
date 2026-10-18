@@ -22,21 +22,21 @@ export function getQuickRepliesForAlert(
       {
         id: 'coming',
         label: t("I'm On My Way"),
-        text: t("I'm on my way! 🚗"),
+        text: t("I'm on my way! Keep breathing, help is coming."),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
         iconSrc: '/assets/stickers/car_on_my_way.webp',
       },
       {
         id: 'im_here',
         label: t("I'm Here For You"),
-        text: t("I'm here for you ❤️ Take a deep breath."),
+        text: t("I'm here for you. Take a deep breath."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
         iconSrc: '/assets/stickers/heart_here_for_you.webp',
       },
       {
         id: 'give_minutes',
         label: t("5 Minutes"),
-        text: t("Give me 5 minutes, finish what you're doing ⏳"),
+        text: t("Give me 5 minutes, finish what you're doing."),
         className: 'bg-slate-100 hover:bg-slate-200 text-slate-700',
         iconSrc: '/assets/stickers/wall_clock.webp',
       },
@@ -66,20 +66,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'good_job',
-        label: t("🌟 Great Job!"),
-        text: t("Super proud of you! Great job finishing your task! ⭐"),
+        label: t("Great Job!"),
+        text: t("Super proud of you! Great job finishing your task!"),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
       },
       {
         id: 'awesome_work',
-        label: t("🎉 Awesome Work!"),
-        text: t("Awesome work! You did it, take a fun break! 🎉"),
+        label: t("Awesome Work!"),
+        text: t("Awesome work! You did it, take a fun break!"),
         className: 'bg-purple-600 hover:bg-purple-700 text-white',
       },
       {
         id: 'proud',
-        label: t("👏 Proud of You!"),
-        text: t("Super proud of you! Keep up the great work! 💫"),
+        label: t("Proud of You!"),
+        text: t("Super proud of you! Keep up the great work!"),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },
     ];
@@ -99,20 +99,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'love_you',
-        label: t("❤️ Love You Too!"),
-        text: t("Love you so much! Sending you the biggest hugs! ❤️"),
+        label: t("Love You Too!"),
+        text: t("Love you so much! Sending you the biggest hugs!"),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
       },
       {
         id: 'hug_back',
-        label: t("🤗 Big Hug Back!"),
+        label: t("Big Hug Back!"),
         text: t("Big warm hug right back to you! You make me smile!"),
         className: 'bg-amber-600 hover:bg-amber-700 text-white',
       },
       {
         id: 'proud_day',
         label: t("You Are Awesome!"),
-        text: t("Thinking of you too! You are doing amazing today! 🌟"),
+        text: t("Thinking of you too! You are doing amazing today!"),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },
     ];
@@ -133,20 +133,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'coming',
-        label: t("🚗 I'm On My Way"),
-        text: t("I'm on my way to get you! See you very soon 🚗"),
+        label: t("I'm On My Way"),
+        text: t("I'm on my way to get you! See you very soon."),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
       },
       {
         id: 'leaving_5m',
-        label: t("⏳ Leaving in 5 Mins"),
-        text: t("Leaving in 5 minutes! Wait safely inside 🏫"),
+        label: t("Leaving in 5 Mins"),
+        text: t("Leaving in 5 minutes! Wait safely inside."),
         className: 'bg-amber-600 hover:bg-amber-700 text-white',
       },
       {
         id: 'almost_there',
-        label: t("📍 Almost There"),
-        text: t("Almost there! Wait right where you are 🚗"),
+        label: t("Almost There"),
+        text: t("Almost there! Wait right where you are."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },
     ];
@@ -169,20 +169,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'snack_coming',
-        label: t("🍎 Snack Coming Up!"),
-        text: t("Snack is coming right up! Getting it ready for you 🍎"),
+        label: t("Snack Coming Up!"),
+        text: t("Snack is coming right up! Getting it ready for you."),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
       },
       {
         id: 'drink_water',
-        label: t("💧 Drink Some Water"),
-        text: t("Take a sip of water, grabbing food for you now! 🥤"),
+        label: t("Drink Some Water"),
+        text: t("Take a sip of water, grabbing food for you now!"),
         className: 'bg-sky-600 hover:bg-sky-700 text-white',
       },
       {
         id: 'ready_5m',
-        label: t("⏰ Ready in 5 Mins"),
-        text: t("Got it! Food will be ready in 5 minutes 🥪"),
+        label: t("Ready in 5 Mins"),
+        text: t("Got it! Food will be ready in 5 minutes."),
         className: 'bg-amber-600 hover:bg-amber-700 text-white',
       },
     ];
@@ -200,20 +200,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'go_ahead',
-        label: t("🚻 Go Right Ahead"),
-        text: t("Go right ahead! Take your time, you are all good 👍"),
+        label: t("Go Right Ahead"),
+        text: t("Go right ahead! Take your time, you are all good."),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
       },
       {
         id: 'coming_help',
-        label: t("🏃 Coming to Help"),
-        text: t("I'm coming to help you right now! 🏃"),
+        label: t("Coming to Help"),
+        text: t("I'm coming to help you right now!"),
         className: 'bg-indigo-600 hover:bg-indigo-700 text-white',
       },
       {
         id: 'got_it_restroom',
-        label: t("👍 Got It, Go Ahead"),
-        text: t("Got your message! Go ahead to the restroom 👍"),
+        label: t("Got It, Go Ahead"),
+        text: t("Got your message! Go ahead to the restroom."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
         iconSrc: '/assets/stickers/caregiver_response_okay.webp',
       },
@@ -233,21 +233,21 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'take_time',
-        label: t("🧘 Take All Time You Need"),
-        text: t("Take all the time you need! You've got this 🌿"),
+        label: t("Take All Time You Need"),
+        text: t("Take all the time you need! You've got this."),
         className: 'bg-teal-600 hover:bg-teal-700 text-white',
       },
       {
         id: 'good_choice',
-        label: t("👍 Great Choice to Rest"),
-        text: t("Great job listening to your body and taking a break 👍"),
+        label: t("Great Choice to Rest"),
+        text: t("Great job listening to your body and taking a break."),
         className: 'bg-emerald-600 hover:bg-emerald-700 text-white',
         iconSrc: '/assets/stickers/caregiver_response_okay.webp',
       },
       {
         id: 'im_here',
-        label: t("❤️ I'm Here If Needed"),
-        text: t("Rest up and relax. I'm right here if you need anything ❤️"),
+        label: t("I'm Here If Needed"),
+        text: t("Rest up and relax. I'm right here if you need anything."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },
     ];
@@ -269,20 +269,20 @@ export function getQuickRepliesForAlert(
     return [
       {
         id: 'headphones',
-        label: t("🎧 Put On Headphones"),
-        text: t("Put on your headphones and close your eyes. You are safe 🎧"),
+        label: t("Put On Headphones"),
+        text: t("Put on your headphones and close your eyes. You are safe."),
         className: 'bg-purple-600 hover:bg-purple-700 text-white',
       },
       {
         id: 'coming_now',
-        label: t("🚗 Coming Right Now"),
-        text: t("I am coming to help you right now. You are not alone ❤️"),
+        label: t("Coming Right Now"),
+        text: t("I am coming to help you right now. You are not alone."),
         className: 'bg-rose-600 hover:bg-rose-700 text-white',
       },
       {
         id: 'breathe_together',
-        label: t("🫁 Breathe With Me"),
-        text: t("Find a cozy spot. Let's take 3 slow, deep breaths together 🫁"),
+        label: t("Breathe With Me"),
+        text: t("Find a cozy spot. Let's take 3 slow, deep breaths together."),
         className: 'bg-slate-900 hover:bg-slate-800 text-white',
       },
     ];
@@ -293,23 +293,24 @@ export function getQuickRepliesForAlert(
     {
       id: 'coming',
       label: t("I'm On My Way"),
-      text: t("I'm on my way! 🚗 Keep breathing, help is coming."),
+      text: t("I'm on my way! Keep breathing, help is coming."),
       className: 'bg-rose-600 hover:bg-rose-700 text-white',
       iconSrc: '/assets/stickers/car_on_my_way.webp',
     },
     {
       id: 'im_here',
       label: t("I'm Here For You"),
-      text: t("I'm here for you ❤️ Take a slow deep breath, you are safe."),
+      text: t("I'm here for you. Take a slow deep breath, you are safe."),
       className: 'bg-slate-900 hover:bg-slate-800 text-white',
       iconSrc: '/assets/stickers/heart_here_for_you.webp',
     },
     {
       id: 'give_minutes',
       label: t("5 Minutes, Stay Safe"),
-      text: t("Give me 5 minutes, stay safe right where you are ⏳"),
+      text: t("Give me 5 minutes, stay safe right where you are."),
       className: 'bg-amber-600 hover:bg-amber-700 text-white',
       iconSrc: '/assets/stickers/wall_clock.webp',
     },
   ];
 }
+

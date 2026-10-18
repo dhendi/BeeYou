@@ -116,7 +116,18 @@ export function useCustomToolsState({ userAgeGroup, soundEffects }: UseCustomToo
       const saved = localStorage.getItem('beeyou_help_alert_presets');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((item: HelpAlertPreset) => {
+            const def = DEFAULT_HELP_ALERT_PRESETS.find((d) => d.id === item.id);
+            return {
+              ...def,
+              ...item,
+              stickerSrc: item.stickerSrc || def?.stickerSrc,
+              iconName: item.iconName || def?.iconName || item.id,
+              emoji: '',
+            };
+          });
+        }
       }
     } catch (e) {}
     return DEFAULT_HELP_ALERT_PRESETS;

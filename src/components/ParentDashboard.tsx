@@ -2,15 +2,8 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useApp } from '../context/AppContext';
 
 // Caregiver portal lazy-loaded modals
-const MoodJournalModal = lazy(() => import('./MoodJournalModal').then(m => ({ default: m.MoodJournalModal })));
-const CycleTrackerModal = lazy(() => import('./CycleTrackerModal').then(m => ({ default: m.CycleTrackerModal })));
-const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
-const DailyRecollectionChart = lazy(() => import('./DailyRecollectionChart').then(m => ({ default: m.DailyRecollectionChart })));
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
-const EditAlertsModal = lazy(() => import('./EditAlertsModal').then(m => ({ default: m.EditAlertsModal })));
-const EditCalmModal = lazy(() => import('./EditCalmModal').then(m => ({ default: m.EditCalmModal })));
-const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
 import {
   ArrowLeft,
   Crown,
@@ -36,7 +29,8 @@ import {
   Settings as SettingsIcon,
   Star,
   ChevronDown,
-  Radio
+  Radio,
+  Bell
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -51,6 +45,7 @@ import {
   getPairingCode,
   subscribeToCloudChannel,
   sendCaregiverMessage,
+  onCaregiverMessage,
   acknowledgeCaregiverAlert,
   onCaregiverAlert,
   onChildStatusUpdate,
@@ -65,29 +60,21 @@ import {
 } from '../services/caregiverSync';
 import { resolveEmergencyAlert } from '../services/familySync';
 import { setActiveDeviceView } from '../services/authService';
+import { pushNotificationService } from '../services/pushNotificationService';
+import { triggerHaptic } from '../services/haptics';
 
 // Modular Caregiver Tabs
 import { CaregiverLiveHubTab } from './caregiver/CaregiverLiveHubTab';
 import { CaregiverAlertsTab } from './caregiver/CaregiverAlertsTab';
-import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
-import { CaregiverGuideTab } from './caregiver/CaregiverGuideTab';
-import { CaregiverMedicationsTab } from './caregiver/CaregiverMedicationsTab';
-import { CaregiverMoodJournalTab } from './caregiver/CaregiverMoodJournalTab';
-import { CaregiverCycleTrackerTab } from './caregiver/CaregiverCycleTrackerTab';
 import { CaregiverDeviceLinkTab } from './caregiver/CaregiverDeviceLinkTab';
-import { CaregiverOfflineTab } from './caregiver/CaregiverOfflineTab';
 import { CaregiverPlansChangedTab } from './caregiver/CaregiverPlansChangedTab';
-import { CaregiverRoutinesTab } from './caregiver/CaregiverRoutinesTab';
-import { CaregiverAacStudioTab } from './caregiver/CaregiverAacStudioTab';
-import { CaregiverVoiceTab } from './caregiver/CaregiverVoiceTab';
-import { CaregiverAdventuresTab } from './caregiver/CaregiverAdventuresTab';
-import { CaregiverSkillsTab } from './caregiver/CaregiverSkillsTab';
-import { CaregiverProfileTab } from './caregiver/CaregiverProfileTab';
-import { CaregiverSettingsTab } from './caregiver/CaregiverSettingsTab';
+import { CaregiverHealthSummaryTab } from './caregiver/CaregiverHealthSummaryTab';
+import { CaregiverDaySummaryTab } from './caregiver/CaregiverDaySummaryTab';
+import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
+import { CaregiverIncomingAlertModal } from './caregiver/CaregiverIncomingAlertModal';
 
 // Shared Components
 import { FamilyAuthModal } from './FamilyAuthModal';
-import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 
 export const ParentDashboard: React.FC = () => {
   const {
@@ -112,28 +99,17 @@ export const ParentDashboard: React.FC = () => {
     showAboutMeModal,
     setShowAboutMeModal,
     getCyclePhaseInfo,
+    caregiverResponses,
   } = useApp();
 
   type TabType =
     | 'home'
     | 'alerts'
-    | 'subscription'
-    | 'guide'
     | 'caregiver'
-    | 'medications'
-    | 'mood-journal'
-    | 'cycle-tracker'
-    | 'recollection'
-    | 'offline'
     | 'plans-changed'
-    | 'routines'
-    | 'aac'
-    | 'voice'
-    | 'adventures'
-    | 'skills'
-    | 'profile'
-    | 'themes'
-    | 'settings';
+    | 'health-summary'
+    | 'day-summary'
+    | 'subscription';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const cyclePhaseInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : { currentCycleDay: 1 };
@@ -191,6 +167,27 @@ export const ParentDashboard: React.FC = () => {
   });
   const [alertHistoryList, setAlertHistoryList] = useState<CaregiverAlert[]>(() => getAlertHistory());
   const [liveChildStatus, setLiveChildStatus] = useState<CaregiverChildStatus | null>(null);
+  const [incomingChildReply, setIncomingChildReply] = useState<{
+    senderName: string;
+    text: string;
+    timestamp: string;
+  } | null>(null);
+
+  // Incoming Alert Pop-Up Modal & Device Push Notification State
+  const [popupAlert, setPopupAlert] = useState<CaregiverAlert | null>(() => {
+    try {
+      const raw = localStorage.getItem('beeyou_active_caregiver_alert');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && (parsed.status === 'active' || !parsed.status)) return parsed;
+      }
+    } catch {}
+    return null;
+  });
+  const [dismissedPopupAlertIds, setDismissedPopupAlertIds] = useState<Set<string>>(() => new Set());
+  const dismissedPopupAlertIdsRef = useRef(dismissedPopupAlertIds);
+  dismissedPopupAlertIdsRef.current = dismissedPopupAlertIds;
+  const [deviceNotificationStatus, setDeviceNotificationStatus] = useState<string>(() => pushNotificationService.getPermissionStatus());
 
   const deduplicateAlerts = (alerts: CaregiverAlert[]): CaregiverAlert[] => {
     const seen = new Set<string>();
@@ -217,6 +214,7 @@ export const ParentDashboard: React.FC = () => {
   useEffect(() => {
     const code = getPairingCode();
     subscribeToCloudChannel(code);
+    setDeviceNotificationStatus(pushNotificationService.getPermissionStatus());
 
     const refreshSession = () => {
       fetchCaregiverSession(code).then((session) => {
@@ -230,6 +228,11 @@ export const ParentDashboard: React.FC = () => {
             };
             setActiveAlerts((prev) => deduplicateAlerts([current, ...prev]));
             setAlertHistoryList(getAlertHistory());
+
+            // Open pop-up modal if not dismissed
+            if (!dismissedPopupAlertIdsRef.current.has(current.id)) {
+              setPopupAlert((existing) => (existing?.id === current.id ? existing : current));
+            }
           }
         }
       });
@@ -253,6 +256,20 @@ export const ParentDashboard: React.FC = () => {
         };
         setActiveAlerts((prev) => deduplicateAlerts([fullAlert, ...prev]));
         setAlertHistoryList(getAlertHistory());
+
+        // Immediately show the pop-up modal on screen!
+        setPopupAlert(fullAlert);
+        playChime('alert');
+        triggerHaptic('warning', true);
+
+        // Fire native device push notification with vibration & sound
+        pushNotificationService.triggerAlertNotification({
+          title: `BeeYou Alert: ${fullAlert.childName || childProfile.name || 'Child'}`,
+          body: `${fullAlert.label}: ${fullAlert.note || 'Help requested'}${fullAlert.location ? ` • At ${fullAlert.location}` : ''}`,
+          priority: 'emergency',
+          tag: 'beeyou-alert-' + fullAlert.id,
+        });
+
         showNotification(`Incoming Alert from ${alert.childName || childProfile.name || 'Child'}: ${alert.label}`);
       }
     });
@@ -265,10 +282,42 @@ export const ParentDashboard: React.FC = () => {
     const unsubStatus = onChildStatusUpdate((status) => {
       setLiveChildStatus(status);
     });
+
+    const seenMsgKeys = new Set<string>();
+    const unsubMessage = onCaregiverMessage((msg) => {
+      if (!msg || !msg.text) return;
+      const rawSender = msg.senderName || childProfile.name || 'Child';
+      const rawText = msg.text || '';
+      const isFromChild = msg.senderRole === 'child' || (
+        rawSender.trim().toLowerCase() !== 'caregiver' &&
+        rawSender.trim().toLowerCase() !== 'parent'
+      );
+
+      if (isFromChild) {
+        const msgKey = `${rawSender}:${rawText}:${msg.timestamp || ''}`;
+        if (seenMsgKeys.has(msgKey)) return;
+        seenMsgKeys.add(msgKey);
+
+        const cleanText = rawText
+          .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        setIncomingChildReply({
+          senderName: rawSender,
+          text: cleanText,
+          timestamp: msg.timestamp || new Date().toISOString(),
+        });
+        showNotification(`${rawSender} replied: "${cleanText}"`);
+        playChime('star');
+      }
+    });
+
     return () => {
       unsubAlert();
       unsubResolve();
       unsubStatus();
+      unsubMessage();
       clearInterval(pollInterval);
     };
   }, []);
@@ -281,7 +330,9 @@ export const ParentDashboard: React.FC = () => {
 
   const handleAcknowledgeAlert = async (alertId: string, responseMessage: string, responseId?: PredefinedCaregiverResponseId) => {
     await acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', responseMessage, responseId, alertId);
+    await sendCaregiverMessage(getPairingCode(), responseMessage, 'Caregiver', '');
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    setPopupAlert((prev) => (prev?.id === alertId ? null : prev));
     try {
       localStorage.removeItem('beeyou_active_caregiver_alert');
     } catch {}
@@ -291,11 +342,19 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleTriggerTestAlert = async () => {
-    const testAlert = await sendTestCaregiverAlert(childProfile.name || 'Child');
+    const testAlert = await sendTestCaregiverAlert(getPairingCode(), childProfile.name || 'Child');
     setActiveAlerts((prev) => [testAlert, ...prev.filter((a) => a.id !== testAlert.id)]);
     setAlertHistoryList(getAlertHistory());
-    playChime('complete');
-    showNotification(`Test alert triggered successfully${childProfile.name ? ` for ${childProfile.name}` : ''}!`);
+    setPopupAlert(testAlert);
+    playChime('alert');
+    triggerHaptic('warning', true);
+    pushNotificationService.triggerAlertNotification({
+      title: `BeeYou Alert: Test from ${childProfile.name || 'Child'}`,
+      body: `${testAlert.label}: ${testAlert.note}`,
+      priority: 'emergency',
+      tag: 'beeyou-alert-' + testAlert.id,
+    });
+    showNotification(`Test alert triggered! Check pop-up and device notification.`);
   };
 
   const handleClearAlertHistory = () => {
@@ -308,13 +367,33 @@ export const ParentDashboard: React.FC = () => {
   const handleResolveAlert = (alertId: string) => {
     resolveEmergencyAlert(alertId, getPairingCode());
     resolveCaregiverAlert(getPairingCode(), alertId);
+    acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', 'Resolved by Caregiver', 'im_here', alertId);
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    setPopupAlert((prev) => (prev?.id === alertId ? null : prev));
     try {
       localStorage.removeItem('beeyou_active_caregiver_alert');
     } catch {}
     setAlertHistoryList(getAlertHistory());
-    showNotification('Alert marked as resolved and safely archived.');
+    showNotification(t('Alert marked as resolved.'));
     playChime('tap');
+  };
+
+  const handleEnableDeviceNotifications = async () => {
+    const granted = await pushNotificationService.requestPermission();
+    setDeviceNotificationStatus(pushNotificationService.getPermissionStatus());
+    if (granted) {
+      showNotification(t('Device notifications enabled! Push alerts & sound are active.'));
+      playChime('star');
+      await pushNotificationService.sendTestNotification(childProfile.name || 'Child');
+    } else {
+      showNotification(t('Permission was not granted. Please check browser notification settings.'));
+    }
+  };
+
+  const handleTestDeviceNotification = async () => {
+    showNotification(t('Sending test notification to this device...'));
+    playChime('alert');
+    await pushNotificationService.sendTestNotification(childProfile.name || 'Child');
   };
 
   useEffect(() => {
@@ -366,106 +445,34 @@ export const ParentDashboard: React.FC = () => {
       ],
     },
     {
-      id: 'routines',
-      title: 'Routines & Health',
+      id: 'summaries',
+      title: 'Summaries & Health',
       icon: Calendar,
       items: [
         {
-          id: 'routines',
-          label: 'Routine Library',
-          icon: Calendar,
-          badge: t('Library'),
-        },
-        {
-          id: 'recollection',
-          label: 'Daily Mood & Therapist Summary',
-          icon: FileText,
-          badge: t('Therapy'),
-        },
-        {
-          id: 'medications',
-          label: 'Medication Reminders',
-          icon: Pill,
-          badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? t('Low Stock') : undefined,
-        },
-        {
-          id: 'mood-journal',
-          label: 'Mood & Reflection Journal',
-          icon: BookOpen,
-          badge: `${moodJournalEntries.length} ${t('Entries')}`,
-        },
-        {
-          id: 'cycle-tracker',
-          label: 'Cycle & Hormonal Rhythm',
+          id: 'health-summary',
+          label: 'Health Summary',
           icon: HeartPulse,
-          badge: `${t('Day')} ${cyclePhaseInfo.currentCycleDay}`,
+          badge: medications.some((m) => m.totalQuantity <= m.refillThreshold) ? t('Refill') : undefined,
+        },
+        {
+          id: 'day-summary',
+          label: 'Day-to-Day Summary',
+          icon: FileText,
+          badge: isPremium ? t('Clinical') : t('7 Days'),
         },
       ],
     },
     {
-      id: 'skills',
-      title: 'Speech & Skills',
-      icon: MessageSquare,
+      id: 'account',
+      title: 'Account & Plan',
+      icon: Crown,
       items: [
-        {
-          id: 'aac',
-          label: 'AAC & Vocabulary Studio',
-          icon: MessageSquare,
-        },
-        {
-          id: 'voice',
-          label: 'Custom Voice Testing Tool',
-          icon: Volume2,
-        },
-        {
-          id: 'adventures',
-          label: 'Life Adventures & Roleplay',
-          icon: Compass,
-        },
-        {
-          id: 'skills',
-          label: 'Life Skills & Tasks',
-          icon: CheckCircle2,
-        },
-      ],
-    },
-    {
-      id: 'system',
-      title: 'Setup & System',
-      icon: SettingsIcon,
-      items: [
-        {
-          id: 'profile',
-          label: 'Child Profile & Persona',
-          icon: User,
-        },
-        {
-          id: 'themes',
-          label: 'Themes & Visual Studio',
-          icon: Palette,
-          badge: 'Studio',
-        },
-        {
-          id: 'offline',
-          label: 'Offline & Storage Sync',
-          icon: Database,
-        },
-        {
-          id: 'settings',
-          label: 'Settings & Parent PIN',
-          icon: SettingsIcon,
-        },
         {
           id: 'subscription',
           label: 'Membership & Plan',
           icon: Crown,
           badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '15d Free',
-        },
-        {
-          id: 'guide',
-          label: 'Feature Tour (Guide)',
-          icon: Star,
-          badge: 'Tour',
         },
       ],
     },
@@ -515,8 +522,33 @@ export const ParentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Feature Guide & Plans Changed Status */}
+        {/* Right: Device Alerts, Feature Guide & Plans Changed Status */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Device Push Notifications Toggle / Test Pill */}
+          {deviceNotificationStatus === 'granted' ? (
+            <button
+              type="button"
+              onClick={handleTestDeviceNotification}
+              className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+              title={t('Device notifications are enabled. Tap to test vibration and sound.')}
+            >
+              <Bell className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">{t('Alerts Active')}</span>
+              <span className="sm:hidden">{t('Alerts')}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleEnableDeviceNotifications}
+              className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs animate-pulse"
+              title={t('Enable sound and notification alerts on this device')}
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-700" />
+              <span className="hidden sm:inline">{t('Enable Device Alerts')}</span>
+              <span className="sm:hidden">{t('Alerts')}</span>
+            </button>
+          )}
+
           {/* Language Dropdown Choices */}
           <LanguageDropdown />
 
@@ -688,6 +720,37 @@ export const ParentDashboard: React.FC = () => {
         {/* Content Area */}
         <main className="flex-1 min-w-0 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 border-2 border-stone-200/80 shadow-xs">
 
+          {/* INCOMING CHILD REPLY BANNER (Instant notification when child replies or sends a note) */}
+          {incomingChildReply && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 border-2 border-amber-400 shadow-md flex items-center justify-between gap-4 animate-in slide-in-from-top-2 ring-2 ring-amber-200">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-amber-200/80 border border-amber-300 flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-5 h-5 text-amber-900" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-black text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>{t('Reply from')} {incomingChildReply.senderName || childProfile.name || 'Child'}</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-black text-slate-900 mt-0.5 break-words">
+                    "{incomingChildReply.text}"
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIncomingChildReply(null);
+                  playChime('tap');
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-950 font-bold text-xs border border-amber-300 shadow-2xs flex items-center gap-1.5 cursor-pointer transition active:scale-95 shrink-0"
+                title={t('Dismiss')}
+              >
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span>{t('Got it')}</span>
+              </button>
+            </div>
+          )}
+
           {/* URGENT LIVE ALERT PERSISTENT BANNER (Visible on all tabs) */}
           {activeAlerts.length > 0 && activeTab !== 'alerts' && (
             <div className="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in ring-2 ring-rose-200">
@@ -736,6 +799,17 @@ export const ParentDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    setPopupAlert(activeAlerts[0]);
+                    playChime('tap');
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer transition whitespace-nowrap active:scale-95"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>{t('Reply in Pop-Up')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     setActiveTab('alerts');
                     playChime('tap');
                   }}
@@ -773,6 +847,7 @@ export const ParentDashboard: React.FC = () => {
               setActiveTab={(tab: any) => setActiveTab(tab)}
               showNotification={showNotification}
               onStartTour={() => handleStartSectionTour('alerts')}
+              onOpenAlertPopup={(alert) => setPopupAlert(alert)}
             />
           )}
 
@@ -784,61 +859,11 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
-          {/* TAB: HOW BEEYOU WORKS & CAREGIVER GUIDE */}
-          {activeTab === 'guide' && (
-            <CaregiverGuideTab
-              onNavigateTab={(tab) => setActiveTab(tab as TabType)}
-              onStartTour={handleOpenTourDirectory}
-            />
-          )}
-
-          {/* TAB: MEDICATION REMINDERS & SUPPLY MANAGEMENT */}
-          {activeTab === 'medications' && (
-            <CaregiverMedicationsTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('medications')}
-            />
-          )}
-
-          {/* TAB: DAILY MOOD & THERAPIST CLINICAL RECOLLECTION */}
-          {activeTab === 'recollection' && (
-            <div className="space-y-6">
-              <Suspense fallback={<div className="p-8 text-center text-stone-500 font-bold">{t('Loading Clinical Reports...')}</div>}>
-                <DailyRecollectionChart 
-                  isParentPortal={true}
-                  onStartTour={() => handleStartSectionTour('moodJournal')}
-                />
-              </Suspense>
-            </div>
-          )}
-
-          {/* TAB: MOOD JOURNAL & SELF-REFLECTION */}
-          {activeTab === 'mood-journal' && (
-            <CaregiverMoodJournalTab 
-              onStartTour={() => handleStartSectionTour('moodJournal')}
-            />
-          )}
-
-          {/* TAB: CYCLE TRACKER & HORMONAL RHYTHM */}
-          {activeTab === 'cycle-tracker' && (
-            <CaregiverCycleTrackerTab 
-              onStartTour={() => handleStartSectionTour('moodJournal')}
-            />
-          )}
-
           {/* TAB: CAREGIVER LIVE LINK & REMOTE MONITOR */}
           {activeTab === 'caregiver' && (
             <CaregiverDeviceLinkTab
               onShowNotification={showNotification}
               onStartTour={() => handleStartSectionTour('pairing')}
-            />
-          )}
-
-          {/* TAB: OFFLINE & PWA STORAGE DIAGNOSTICS */}
-          {activeTab === 'offline' && (
-            <CaregiverOfflineTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('offline')}
             />
           )}
 
@@ -850,69 +875,45 @@ export const ParentDashboard: React.FC = () => {
             />
           )}
 
-          {/* TAB: ROUTINES & MY DAY */}
-          {activeTab === 'routines' && (
-            <CaregiverRoutinesTab 
+          {/* TAB: HEALTH & MEDICATION REFILL SUMMARY */}
+          {activeTab === 'health-summary' && (
+            <CaregiverHealthSummaryTab 
               onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('routines')}
+              onStartTour={() => handleStartSectionTour('healthSummary')}
             />
           )}
 
-          {/* TAB: AAC & VOCABULARY */}
-          {activeTab === 'aac' && (
-            <CaregiverAacStudioTab 
+          {/* TAB: DAY-TO-DAY SUMMARY & THERAPIST REPORT */}
+          {activeTab === 'day-summary' && (
+            <CaregiverDaySummaryTab 
               onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('aac')}
-            />
-          )}
-
-          {/* TAB: VOICE SETTINGS & TESTING TOOL */}
-          {activeTab === 'voice' && (
-            <CaregiverVoiceTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('voice')}
-            />
-          )}
-
-          {/* TAB: LIFE ADVENTURES & CONTEXTUAL PHRASES */}
-          {activeTab === 'adventures' && (
-            <CaregiverAdventuresTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('adventures')}
-            />
-          )}
-
-          {/* TAB: SKILLS */}
-          {activeTab === 'skills' && (
-            <CaregiverSkillsTab 
-              onStartTour={() => handleStartSectionTour('skills')}
-            />
-          )}
-
-          {/* TAB: CHILD PROFILE & PERSONALIZATION */}
-          {activeTab === 'profile' && (
-            <CaregiverProfileTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('profile')}
-            />
-          )}
-
-          {/* TAB: THEMES & VISUAL CUSTOMIZER STUDIO */}
-          {activeTab === 'themes' && (
-            <ThemeShopAndStudio 
-              onStartTour={() => handleStartSectionTour('themes')}
-            />
-          )}
-
-          {/* TAB: SETTINGS & PIN */}
-          {activeTab === 'settings' && (
-            <CaregiverSettingsTab 
-              onShowNotification={showNotification}
-              onStartTour={() => handleStartSectionTour('settings')}
+              onStartTour={() => handleStartSectionTour('daySummary')}
             />
           )}
         </main>
       </div>
+
+      {/* Live Incoming Alert Pop-Up Modal with Quick & Custom Reply */}
+      <CaregiverIncomingAlertModal
+        isOpen={!!popupAlert}
+        alert={popupAlert}
+        childName={popupAlert?.childName || childProfile.name || 'Child'}
+        customResponses={caregiverResponses}
+        onClose={() => {
+          if (popupAlert) {
+            setDismissedPopupAlertIds((prev) => new Set(prev).add(popupAlert.id));
+          }
+          setPopupAlert(null);
+        }}
+        onResolve={(alertId) => {
+          handleResolveAlert(alertId);
+          setPopupAlert(null);
+        }}
+        onReply={async (alertId, text, responseId) => {
+          await handleAcknowledgeAlert(alertId, text, responseId as any);
+          setPopupAlert(null);
+        }}
+      />
 
       {/* Shared Family Email & 1-Click Demo Modal */}
       <FamilyAuthModal
@@ -939,17 +940,11 @@ export const ParentDashboard: React.FC = () => {
 
       {/* Caregiver Portal Modals */}
       <Suspense fallback={null}>
-        <DailyRecollectionModal />
-        <MoodJournalModal />
-        <CycleTrackerModal />
         <PlansChangedModal />
         <AboutMeIDModal
           isOpen={showAboutMeModal}
           onClose={() => setShowAboutMeModal(false)}
         />
-        <EditAlertsModal />
-        <EditCalmModal />
-        <PrintScheduleModal />
       </Suspense>
     </div>
   );

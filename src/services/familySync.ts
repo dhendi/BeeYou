@@ -80,6 +80,9 @@ export interface SharedFamilyState {
   childProfile: RemoteChildProfile;
   childState: RemoteChildState;
   routines: any[];
+  adventures?: any[];
+  socialStories?: any[];
+  medicationLogs?: any[];
   aacItems: any[];
   plansChanged: RemotePlansChanged;
   activeAlert: RemoteFamilyAlert | null;
@@ -374,7 +377,7 @@ export async function ackEmergencyAlert(params: {
   const ackData = {
     status: 'acknowledged',
     acknowledgedBy: params.acknowledgedBy,
-    responseMessage: params.responseMessage || "I'm on my way ❤️",
+    responseMessage: params.responseMessage || "I'm on my way.",
     responseId: params.responseId || null,
     acknowledgedAt: new Date().toISOString(),
   };
@@ -459,6 +462,49 @@ export async function resolveEmergencyAlert(alertId?: string, familyCode?: strin
     console.error('resolveEmergencyAlert error:', err);
   }
   return false;
+}
+
+/**
+ * Synchronize custom adventures & social stories to Firebase Cloud
+ */
+export async function syncAdventuresToCloud(
+  adventures: any[],
+  socialStories?: any[],
+  familyCode?: string
+): Promise<void> {
+  const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  try {
+    const payload: Record<string, any> = {
+      adventures: cleanFirebaseObject(adventures),
+      lastUpdated: Date.now(),
+    };
+    if (socialStories) {
+      payload.socialStories = cleanFirebaseObject(socialStories);
+    }
+    const familyRef = ref(db, `beeyou/families/${code}`);
+    await update(familyRef, payload);
+  } catch (err) {
+    console.warn('Firebase syncAdventuresToCloud error:', err);
+  }
+}
+
+/**
+ * Synchronize routines to Firebase Cloud
+ */
+export async function syncRoutinesToCloud(
+  routines: any[],
+  familyCode?: string
+): Promise<void> {
+  const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  try {
+    const familyRef = ref(db, `beeyou/families/${code}`);
+    await update(familyRef, {
+      routines: cleanFirebaseObject(routines),
+      lastUpdated: Date.now(),
+    });
+  } catch (err) {
+    console.warn('Firebase syncRoutinesToCloud error:', err);
+  }
 }
 
 /**

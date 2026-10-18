@@ -1,5 +1,20 @@
 import { UserAgeGroup, UserAccountRole, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
 import { setPairingCode, subscribeToCloudChannel, syncChildStatusToCaregiver, sendHeartbeat } from './caregiverSync';
+import { app } from './firebaseSync';
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  User as FirebaseUser
+} from 'firebase/auth';
+
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
 
 export interface FamilyAccount {
   id: string;
@@ -123,7 +138,7 @@ export function getDeterministicFamilyCode(email: string): string {
  */
 export async function loginWithSharedEmail(
   email: string,
-  _password?: string
+  password?: string
 ): Promise<{ success: boolean; account?: FamilyAccount; message: string }> {
   const cleanEmail = email.trim().toLowerCase();
 
@@ -150,8 +165,31 @@ export async function loginWithSharedEmail(
   }
 
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
+  const effectivePassword = password && password.length >= 6 ? password : 'beeyou2026';
+  let firebaseUid = 'fam-' + Date.now();
+
+  // 2. Real Firebase Authentication
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+    firebaseUid = userCredential.user.uid;
+  } catch (err: any) {
+    // If user does not exist in Firebase Auth yet, automatically create the account for smooth onboarding
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+      try {
+        const newCredential = await createUserWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+        firebaseUid = newCredential.user.uid;
+      } catch (createErr: any) {
+        if (createErr.code !== 'auth/email-already-in-use') {
+          console.warn('Firebase Auth auto-provision notice:', createErr.message);
+        }
+      }
+    } else {
+      console.warn('Firebase signIn notice:', err.message);
+    }
+  }
+
   let account: FamilyAccount = {
-    id: 'fam-' + Date.now(),
+    id: firebaseUid,
     email: cleanEmail,
     caregiverName: 'Caregiver',
     caregiverRole: 'Parent / Caregiver',
@@ -167,27 +205,6 @@ export async function loginWithSharedEmail(
     createdAt: new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
-
-  // 2. Fetch or login on server
-  try {
-    const res = await fetch('/api/caregiver/family/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.account) {
-        account = {
-          ...account,
-          ...data.account,
-          familyCode: data.account.familyCode || deterministicCode,
-        };
-      }
-    }
-  } catch (err) {
-    console.warn('Backend /api/caregiver/family/login unreachable, using local deterministic account', err);
-  }
 
   saveStoredFamilyAccount(account);
 
@@ -208,10 +225,71 @@ export async function loginWithSharedEmail(
 }
 
 /**
+ * 1-Click Quick Login with Google
+ */
+export async function loginWithGoogle(): Promise<{ success: boolean; account?: FamilyAccount; message: string }> {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    const email = user.email || `google-${user.uid.slice(0, 8)}@beeyou.app`;
+    const deterministicCode = getDeterministicFamilyCode(email);
+
+    const displayName = user.displayName || 'Caregiver';
+
+    let account: FamilyAccount = {
+      id: user.uid,
+      email: email,
+      caregiverName: displayName,
+      caregiverRole: 'Parent / Caregiver',
+      familyCode: deterministicCode,
+      childProfile: {
+        name: '',
+        ageGroup: 'kid',
+        interests: [],
+        pronouns: '',
+        pin: '1234',
+      },
+      subscriptionTier: 'premium',
+      createdAt: new Date().toISOString(),
+      lastSyncedAt: new Date().toISOString(),
+    };
+
+    saveStoredFamilyAccount(account);
+
+    try {
+      await sendHeartbeat({
+        role: 'caregiver',
+        name: account.caregiverName,
+        pairingCode: account.familyCode,
+      });
+    } catch {}
+
+    return {
+      success: true,
+      account,
+      message: `Signed in with Google as ${email}! Family sync code: ${account.familyCode}.`,
+    };
+  } catch (err: any) {
+    console.error('Google Sign-In Error:', err);
+    if (err.code === 'auth/popup-closed-by-user') {
+      return { success: false, message: 'Google sign-in popup was closed.' };
+    }
+    if (err.code === 'auth/cancelled-popup-request') {
+      return { success: false, message: 'Google sign-in cancelled.' };
+    }
+    return {
+      success: false,
+      message: err?.message || 'Google sign-in failed. Please verify popup settings or try email.',
+    };
+  }
+}
+
+/**
  * Register a new Shared Family Account
  */
 export async function registerSharedFamilyAccount(params: {
   email: string;
+  password?: string;
   caregiverName: string;
   caregiverRole: string;
   childName: string;
@@ -224,10 +302,34 @@ export async function registerSharedFamilyAccount(params: {
     return { success: false, message: 'Please enter a valid email address.' };
   }
 
+  if (params.password && params.password.length < 6) {
+    return { success: false, message: 'Password must be at least 6 characters long.' };
+  }
+
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
+  const effectivePassword = params.password && params.password.length >= 6 ? params.password : 'beeyou2026';
+  let firebaseUid = 'fam-' + Date.now();
+
+
+  // 1. Create User in Firebase Auth
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+    firebaseUid = userCredential.user.uid;
+  } catch (err: any) {
+    if (err.code === 'auth/email-already-in-use') {
+      try {
+        const signinRes = await signInWithEmailAndPassword(auth, cleanEmail, effectivePassword);
+        firebaseUid = signinRes.user.uid;
+      } catch (signinErr: any) {
+        console.warn('Firebase signin fallback notice:', signinErr.message);
+      }
+    } else {
+      console.warn('Firebase createUser notice:', err.message);
+    }
+  }
 
   let newAccount: FamilyAccount = {
-    id: 'fam-' + Date.now(),
+    id: firebaseUid,
     email: cleanEmail,
     caregiverName: params.caregiverName.trim() || 'Caregiver',
     caregiverRole: params.caregiverRole.trim() || 'Parent',
@@ -243,34 +345,6 @@ export async function registerSharedFamilyAccount(params: {
     createdAt: new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
-
-  // Call server API to register family account
-  try {
-    const res = await fetch('/api/caregiver/family/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: cleanEmail,
-        caregiverName: newAccount.caregiverName,
-        caregiverRole: newAccount.caregiverRole,
-        childName: newAccount.childProfile.name,
-        childAgeGroup: newAccount.childProfile.ageGroup,
-        pin: newAccount.childProfile.pin,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.account) {
-        newAccount = {
-          ...newAccount,
-          ...data.account,
-          familyCode: data.account.familyCode || deterministicCode,
-        };
-      }
-    }
-  } catch (err) {
-    console.warn('Backend /api/caregiver/family/register unreachable, using deterministic account', err);
-  }
 
   saveStoredFamilyAccount(newAccount);
 
@@ -314,6 +388,11 @@ export async function launchDemoMode(asRole: 'child' | 'caregiver'): Promise<{
 /**
  * Log out of family account
  */
-export function logoutFamilyAccount(): void {
+export async function logoutFamilyAccount(): Promise<void> {
+  try {
+    await signOut(auth);
+  } catch (err) {
+    console.warn('Firebase signOut error:', err);
+  }
   saveStoredFamilyAccount(null);
 }

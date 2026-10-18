@@ -21,7 +21,13 @@ export const CaregiverMessageToast: React.FC = () => {
     (rawText.trim().toLowerCase() === 'caregiver' || rawText.trim().toLowerCase() === 'child') &&
     rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
   const senderName = isInverted ? rawText : rawSender;
-  const messageText = isInverted ? rawSender : rawText;
+  const rawClean = (isInverted ? rawSender : rawText)
+    // Remove unicode emojis: emoticons, symbols, pictographs, transport, flags, etc.
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const messageText = rawClean || 'Here for you';
+
 
   const handleListen = () => {
     playChime('tap');
@@ -31,7 +37,7 @@ export const CaregiverMessageToast: React.FC = () => {
   const handleQuickReply = async (replyText: string, emoji: string) => {
     playChime('complete');
     const code = getPairingCode();
-    await sendCaregiverMessage(code, replyText, childProfile.name || 'Child', emoji);
+    await sendCaregiverMessage(code, replyText, childProfile.name || 'Child', emoji, undefined, 'child');
     speak(`Sent reply: ${replyText}`, { force: true });
     dismissIncomingCaregiverMessage();
   };
@@ -43,11 +49,11 @@ export const CaregiverMessageToast: React.FC = () => {
     >
       <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-2 border-rose-300 ring-4 ring-rose-400/20 text-slate-800 shadow-xl">
         <div className="flex items-start gap-3.5">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 text-rose-600 flex items-center justify-center text-3xl shrink-0 shadow-sm border border-amber-200 animate-bounce p-1 overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 text-rose-600 flex items-center justify-center text-3xl shrink-0 shadow-sm border border-amber-200 p-1 overflow-hidden">
             {incomingCaregiverMessage.emoji && (incomingCaregiverMessage.emoji.startsWith('/') || incomingCaregiverMessage.emoji.includes('.webp') || incomingCaregiverMessage.emoji.includes('.png')) ? (
               <img src={incomingCaregiverMessage.emoji.replace(/^(\/assets\/stickers\/.+)\.png$/i, '$1.webp')} alt="" className="w-full h-full object-contain drop-shadow-2xs" />
             ) : (
-              incomingCaregiverMessage.emoji || '❤️'
+              <Heart className="w-7 h-7 fill-rose-500 text-rose-500" />
             )}
           </div>
 
@@ -89,15 +95,15 @@ export const CaregiverMessageToast: React.FC = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {[
-                  { text: 'Got it! 👍', emoji: '👍', bg: 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100' },
-                  { text: 'Love you! ❤️', emoji: '❤️', bg: 'bg-rose-50 text-rose-900 border-rose-300 hover:bg-rose-100' },
-                  { text: 'Waiting! 🚗', emoji: '🚗', bg: 'bg-indigo-50 text-indigo-900 border-indigo-300 hover:bg-indigo-100' },
-                  { text: '2 mins! ⏳', emoji: '⏳', bg: 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' },
+                  { text: 'Got it!', bg: 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100' },
+                  { text: 'Love you!', bg: 'bg-rose-50 text-rose-900 border-rose-300 hover:bg-rose-100' },
+                  { text: 'Waiting!', bg: 'bg-indigo-50 text-indigo-900 border-indigo-300 hover:bg-indigo-100' },
+                  { text: '2 mins!', bg: 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' },
                 ].map((r, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => handleQuickReply(r.text, r.emoji)}
+                    onClick={() => handleQuickReply(r.text, '')}
                     className={`px-2.5 py-2 rounded-xl border font-black text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-2xs ${r.bg}`}
                   >
                     <span>{r.text}</span>

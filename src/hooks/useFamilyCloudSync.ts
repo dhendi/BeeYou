@@ -41,9 +41,13 @@ interface UseFamilyCloudSyncProps {
   habitsCompletedToday: number;
   totalHabits: number;
   routines: Routine[];
+  adventures?: any[];
+  socialStories?: any[];
   aacItems: AACItem[];
   plansChanged: PlansChangedState;
   onRemoteRoutinesSync: (remoteRoutines: Routine[]) => void;
+  onRemoteAdventuresSync?: (remoteAdventures: any[]) => void;
+  onRemoteSocialStoriesSync?: (remoteStories: any[]) => void;
   onRemoteAacSync: (remoteAac: AACItem[]) => void;
   onRemotePlansChangedSync: (plans: Partial<PlansChangedState>) => void;
   speak: (text: string) => Promise<void>;
@@ -59,9 +63,13 @@ export function useFamilyCloudSync({
   habitsCompletedToday,
   totalHabits,
   routines,
+  adventures,
+  socialStories,
   aacItems,
   plansChanged,
   onRemoteRoutinesSync,
+  onRemoteAdventuresSync,
+  onRemoteSocialStoriesSync,
   onRemoteAacSync,
   onRemotePlansChangedSync,
   speak,
@@ -168,6 +176,14 @@ export function useFamilyCloudSync({
         onRemoteRoutinesSync(remoteState.routines);
       }
 
+      if (Array.isArray(remoteState.adventures) && remoteState.adventures.length > 0 && onRemoteAdventuresSync) {
+        onRemoteAdventuresSync(remoteState.adventures);
+      }
+
+      if (Array.isArray(remoteState.socialStories) && remoteState.socialStories.length > 0 && onRemoteSocialStoriesSync) {
+        onRemoteSocialStoriesSync(remoteState.socialStories);
+      }
+
       if (Array.isArray(remoteState.aacItems) && remoteState.aacItems.length > 0) {
         onRemoteAacSync(remoteState.aacItems);
       }
@@ -193,8 +209,17 @@ export function useFamilyCloudSync({
     const timeout = setTimeout(() => {
       pushFamilyStateUpdate({
         routines,
+        adventures,
+        socialStories,
         aacItems,
         plansChanged,
+        childProfile: {
+          name: childName || 'Child',
+          ageGroup: 'kid',
+          pin: '1234',
+          interests: [],
+          pronouns: '',
+        },
         childState: {
           lastActiveTime: new Date().toISOString(),
           currentActivity: `In ${childView === 'my-day' ? 'Visual Schedule' : childView === 'aac' ? 'AAC Speech Board' : 'BeeYou'}`,
@@ -208,7 +233,7 @@ export function useFamilyCloudSync({
     }, 1200);
 
     return () => clearTimeout(timeout);
-  }, [routines, aacItems, plansChanged, currentMood, childView, stars, habitsCompletedToday, totalHabits]);
+  }, [routines, adventures, socialStories, aacItems, plansChanged, currentMood, childView, stars, habitsCompletedToday, totalHabits, childName]);
 
   // Caregiver Message & Heartbeat Listeners
   const liveChildStatusRef = useRef({
@@ -235,7 +260,6 @@ export function useFamilyCloudSync({
           sessionStorage.getItem('beeyou_active_device_view') === 'caregiver'));
 
     const unsubCaregiver = onCaregiverMessage((msg) => {
-      if (isCaregiver) return;
       if (msg.responseId) return;
       const rawSender = msg.senderName || 'Caregiver';
       const rawText = msg.text || '';
@@ -244,11 +268,31 @@ export function useFamilyCloudSync({
         rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
       const sender = isInverted ? rawText : rawSender;
       const text = isInverted ? rawSender : rawText;
-      const normalizedMsg = { ...msg, senderName: sender, text };
 
-      setIncomingCaregiverMessage(normalizedMsg);
-      playChime('star');
-      speak(`${sender} sent you a message: ${text}`);
+      const isFromChild = msg.senderRole === 'child' || (
+        sender.trim().toLowerCase() !== 'caregiver' &&
+        sender.trim().toLowerCase() !== 'parent'
+      );
+
+      // On Child Tablet: ONLY accept messages from Caregiver (silence own replies)
+      if (!isCaregiver) {
+        if (isFromChild) return;
+        const normalizedMsg = { ...msg, senderName: sender, text, senderRole: 'caregiver' as const };
+        setIncomingCaregiverMessage(normalizedMsg);
+        playChime('star');
+        speak(`${sender} sent you a message: ${text}`);
+        return;
+      }
+
+      // On Caregiver Device: ONLY accept messages from Child
+      if (isCaregiver) {
+        if (!isFromChild) return;
+        const normalizedMsg = { ...msg, senderName: sender, text, senderRole: 'child' as const };
+        setIncomingCaregiverMessage(normalizedMsg);
+        playChime('star');
+        speak(`${sender} replied: ${text}`);
+        return;
+      }
     });
 
     const unsubAlert = onCaregiverAlert((alert) => {
@@ -262,10 +306,11 @@ export function useFamilyCloudSync({
       setIncomingCaregiverMessage({
         id: 'alert-' + alert.id,
         senderName: alert.childName || 'Child',
-        text: `🚨 ALERT: ${alert.label} (${alert.location || 'Location shared'})`,
-        emoji: alert.emoji || '🚨',
+        text: `ALERT: ${alert.label} (${alert.location || 'Location shared'})`,
+        emoji: '',
         timestamp: alert.timestamp || new Date().toISOString(),
         read: false,
+        senderRole: 'child',
       });
     });
 

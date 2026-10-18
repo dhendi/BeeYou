@@ -14,6 +14,10 @@ import {
   FAIRYTALE_MAGIC_ICONS,
   RACING_SPEEDWAY_ICONS,
 } from '../../data/themedIconsData';
+import { uploadCustomIconToCloud } from '../../services/firebaseStorageService';
+import { db } from '../../services/firebaseSync';
+import { ref as dbRef, onValue } from 'firebase/database';
+
 
 export type ThemeIconCategory = 'turtle' | 'dinosaur' | 'frog' | 'train' | 'space' | 'ocean' | 'fantasy' | 'racing';
 
@@ -431,6 +435,41 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
       } else {
         setActiveTab('all');
       }
+
+      // Live Realtime Database sync for custom icons across family devices
+      try {
+        const familyCode = localStorage.getItem('beeyou_pairing_code') || 'BEE-DEMO';
+        const iconsRef = dbRef(db, `beeyou/families/${familyCode}/customIcons`);
+        const unsub = onValue(iconsRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data && typeof data === 'object') {
+              const cloudList: UploadedCustomIcon[] = Object.values(data).map((item: any) => ({
+                id: item.id || `custom-${Date.now()}`,
+                emoji: item.dataUrl || item.emoji || '',
+                label: item.label || 'Custom Icon',
+                createdAt: item.createdAt || Date.now(),
+              })).filter((item) => Boolean(item.emoji));
+
+              if (cloudList.length > 0) {
+                setUploadedIcons((prev) => {
+                  const existingIds = new Set(prev.map((p) => p.emoji));
+                  const merged = [...prev];
+                  for (const cloudItem of cloudList) {
+                    if (!existingIds.has(cloudItem.emoji)) {
+                      merged.push(cloudItem);
+                    }
+                  }
+                  return merged;
+                });
+              }
+            }
+          }
+        });
+        return () => unsub();
+      } catch (err) {
+        console.warn('Realtime custom icons sync listener notice:', err);
+      }
     }
   }, [isOpen, initialTab, activeThemeCategory]);
 
@@ -502,6 +541,7 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         ? rawName.charAt(0).toUpperCase() + rawName.slice(1, 32)
         : 'Custom Icon';
 
+      // 1. Optimize image into lightweight WebP (<25KB)
       const dataUrl = await optimizeImageFile(file, {
         maxWidth: 256,
         maxHeight: 256,
@@ -509,17 +549,28 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
         outputFormat: 'image/webp',
       });
 
+      // 2. Optimistic UI: Save locally and select icon immediately so user experiences ZERO lag
       const updatedList = saveUploadedCustomIcon(dataUrl, cleanLabel);
       setUploadedIcons(updatedList);
       playChime('star');
       onSelectIcon(dataUrl, cleanLabel);
       onClose();
+
+      // 3. Background Cloud Sync: Upload to Firebase Storage in background without blocking the UI
+      uploadCustomIconToCloud(dataUrl, cleanLabel).then((cloudUrl) => {
+        if (cloudUrl && cloudUrl !== dataUrl) {
+          saveUploadedCustomIcon(cloudUrl, cleanLabel);
+        }
+      }).catch((err) => {
+        console.warn('Background icon cloud sync deferred:', err);
+      });
     } catch (err) {
       console.error('Failed to upload custom icon:', err);
     } finally {
       setIsUploading(false);
     }
   };
+
 
   const handleDeleteUploaded = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();

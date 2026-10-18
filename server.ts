@@ -129,6 +129,7 @@ interface CaregiverMessageItem {
   timestamp: string;
   read: boolean;
   responseId?: string;
+  senderRole?: 'caregiver' | 'child';
 }
 
 interface TemporaryPairingSessionData {
@@ -353,10 +354,10 @@ function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState
       caregiverName: 'Sarah (Mom)',
       caregiverRole: 'Mom',
       childProfile: {
-        name: 'Leo',
+        name: 'Child',
         ageGroup: 'kid',
         pin: '1234',
-        interests: ['Lego building', 'Visual schedules'],
+        interests: ['Visual schedules', 'Creative play'],
         pronouns: 'they/them',
       },
       childState: {
@@ -413,11 +414,11 @@ familyAccounts.set('demo@beeyou.app', {
   caregiverName: 'Sarah (Mom)',
   caregiverRole: 'Mom',
   childProfile: {
-    name: 'Leo',
+    name: 'Child',
     ageGroup: 'kid',
     pin: '1234',
-    interests: ['Lego building', 'Visual schedules'],
-    pronouns: 'he/him',
+    interests: ['Visual schedules'],
+    pronouns: 'they/them',
   },
   subscriptionTier: 'premium',
   createdAt: '2026-10-01T00:00:00.000Z',
@@ -682,11 +683,15 @@ app.post('/api/caregiver/event', (req, res) => {
   }
 
   if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
+    const familyState = getOrCreateFamilyState(pairingCode);
+    if (envelope.alert.childName && envelope.alert.childName !== 'Leo') {
+      session.childName = envelope.alert.childName;
+      familyState.childProfile.name = envelope.alert.childName;
+    }
     session.activeAlert = envelope.alert;
     session.quickAlert = `ALERT: ${envelope.alert.label}`;
     session.lastActiveTime = new Date().toISOString();
     session.lastChildActiveTime = new Date().toISOString();
-    const familyState = getOrCreateFamilyState(pairingCode);
     familyState.activeAlert = envelope.alert;
     familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
     const allStates = loadAllFamilyStates();
@@ -824,11 +829,16 @@ app.get('/api/caregiver/poll/:code', (req, res) => {
   const familyState = getOrCreateFamilyState(code);
   const session = caregiverSessions.get(code);
 
+  const rawActiveAlert = familyState.activeAlert || session?.activeAlert || null;
   const mergedSession = {
     ...(session || {}),
     ...(familyState.childState || {}),
-    activeAlert: familyState.activeAlert || session?.activeAlert || null,
-    childName: familyState.childProfile?.name || session?.childName || 'Leo',
+    activeAlert: rawActiveAlert && rawActiveAlert.status !== 'resolved' ? rawActiveAlert : null,
+    childName: (familyState.childProfile?.name && familyState.childProfile.name !== 'Leo')
+      ? familyState.childProfile.name
+      : (session?.childName && session.childName !== 'Leo')
+        ? session.childName
+        : 'Child',
   };
 
   return res.json({
@@ -863,7 +873,13 @@ app.post('/api/family/state/:code', (req, res) => {
   if (Array.isArray(aacItems)) current.aacItems = aacItems;
   if (plansChanged && typeof plansChanged === 'object') current.plansChanged = { ...current.plansChanged, ...plansChanged };
   if (childState && typeof childState === 'object') current.childState = { ...current.childState, ...childState };
-  if (childProfile && typeof childProfile === 'object') current.childProfile = { ...current.childProfile, ...childProfile };
+  if (childProfile && typeof childProfile === 'object') {
+    current.childProfile = { ...current.childProfile, ...childProfile };
+    if (childProfile.name && childProfile.name !== 'Leo') {
+      const sess = caregiverSessions.get(code);
+      if (sess) sess.childName = childProfile.name;
+    }
+  }
   if (caregiverName) current.caregiverName = caregiverName;
   current.lastUpdated = Date.now();
 
@@ -898,7 +914,7 @@ app.post('/api/family/alert/:code', (req, res) => {
   const alert = {
     id: id || ('alert-' + Date.now()),
     familyCode: code,
-    childName: childName || current.childProfile.name || 'Leo',
+    childName: childName || (current.childProfile?.name && current.childProfile.name !== 'Leo' ? current.childProfile.name : 'Child'),
     emotion: emotion || 'need_help',
     alertId: alertId || 'need_help',
     label: label || 'Needs Support',
@@ -971,10 +987,11 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
       id: 'msg-' + Date.now(),
       senderName: acknowledgedBy || current.caregiverName || 'Caregiver',
       text: responseMessage,
-      emoji: '❤️',
+      emoji: '',
       timestamp: new Date().toISOString(),
       read: false,
       responseId,
+      senderRole: 'caregiver',
     };
     current.messages = [...(current.messages || []).slice(-29), newMsg];
   }
@@ -1043,19 +1060,28 @@ app.post('/api/family/message/:code', (req, res) => {
   const allStates = loadAllFamilyStates();
   const current = getOrCreateFamilyState(code);
 
-  const { senderName, text, emoji, responseId } = req.body || {};
+  const { senderName, text, emoji, responseId, senderRole } = req.body || {};
   if (!text || !text.trim()) {
     return res.status(400).json({ error: 'Message text is required' });
   }
 
+  const determinedRole = senderRole || (
+    typeof senderName === 'string' &&
+    senderName.trim().toLowerCase() !== 'caregiver' &&
+    senderName.trim().toLowerCase() !== 'parent'
+      ? 'child'
+      : 'caregiver'
+  );
+
   const newMsg: CaregiverMessageItem = {
     id: 'msg-' + Date.now(),
-    senderName: senderName || current.caregiverName || 'Caregiver',
+    senderName: senderName || (determinedRole === 'child' ? 'Child' : current.caregiverName || 'Caregiver'),
     text: text.trim(),
-    emoji: emoji || '❤️',
+    emoji: emoji || '',
     timestamp: new Date().toISOString(),
     read: false,
     responseId,
+    senderRole: determinedRole,
   };
 
   current.messages = [...(current.messages || []).slice(-29), newMsg];
@@ -1096,7 +1122,7 @@ app.post('/api/caregiver/family/register', (req, res) => {
     caregiverName: caregiverName?.trim() || 'Caregiver',
     caregiverRole: caregiverRole?.trim() || 'Parent',
     childProfile: {
-      name: childName?.trim() || 'Leo',
+      name: childName?.trim() || 'Child',
       ageGroup: childAgeGroup || 'kid',
       pin: pin || '1234',
       interests: ['Visual Schedules', 'Calm Activities'],
@@ -1150,7 +1176,7 @@ app.post('/api/caregiver/family/login', (req, res) => {
       caregiverName: 'Caregiver',
       caregiverRole: 'Parent',
       childProfile: {
-        name: 'Leo',
+        name: 'Child',
         ageGroup: 'kid',
         pin: '1234',
         interests: ['Visual Schedules'],
@@ -1213,7 +1239,7 @@ app.get('/api/caregiver/session/:code', (req, res) => {
     const pairing = pairingSessions.get(code);
     session = {
       pairingCode: code,
-      childName: pairing?.childName || familyState.childProfile?.name || 'Leo',
+      childName: pairing?.childName || (familyState.childProfile?.name && familyState.childProfile.name !== 'Leo' ? familyState.childProfile.name : 'Child'),
       lastActiveTime: new Date().toISOString(),
       currentActivity: familyState.childState?.currentActivity || 'Active in BeeYou',
       currentMood: (familyState.childState?.currentMood as any) || 'calm',
@@ -1225,13 +1251,16 @@ app.get('/api/caregiver/session/:code', (req, res) => {
       messages: familyState.messages || [],
       caregiverPhone: pairing?.caregiverPhone,
       permissions: pairing?.permissions,
-      activeAlert: familyState.activeAlert || null,
+      activeAlert: familyState.activeAlert && familyState.activeAlert.status !== 'resolved' ? familyState.activeAlert : null,
       unlinked: false,
     };
     caregiverSessions.set(code, session);
   } else {
-    session.activeAlert = familyState.activeAlert || session.activeAlert || null;
-    if (familyState.childProfile?.name) session.childName = familyState.childProfile.name;
+    const rawActiveAlert = familyState.activeAlert || session.activeAlert || null;
+    session.activeAlert = rawActiveAlert && rawActiveAlert.status !== 'resolved' ? rawActiveAlert : null;
+    if (familyState.childProfile?.name && familyState.childProfile.name !== 'Leo') {
+      session.childName = familyState.childProfile.name;
+    }
     if (familyState.childState) {
       session.currentActivity = familyState.childState.currentActivity || session.currentActivity;
       session.currentMood = familyState.childState.currentMood || session.currentMood;
@@ -1311,7 +1340,7 @@ app.post('/api/caregiver/sync', (req, res) => {
 
 // Caregiver sends a predefined or custom message to child
 app.post('/api/caregiver/message', (req, res) => {
-  let { pairingCode, senderName, text, emoji, responseId } = req.body;
+  let { pairingCode, senderName, text, emoji, responseId, senderRole } = req.body;
   const code = (pairingCode || '').trim().toUpperCase();
 
   // Defensive auto-healing: if text is "Caregiver" and senderName is the message phrase, swap them
@@ -1329,6 +1358,14 @@ app.post('/api/caregiver/message', (req, res) => {
   if (!code || !text) {
     return res.status(400).json({ error: 'Pairing code and message text are required' });
   }
+
+  const determinedRole = senderRole || (
+    typeof senderName === 'string' &&
+    senderName.trim().toLowerCase() !== 'caregiver' &&
+    senderName.trim().toLowerCase() !== 'parent'
+      ? 'child'
+      : 'caregiver'
+  );
 
   let session = caregiverSessions.get(code);
   if (!session) {
@@ -1355,12 +1392,13 @@ app.post('/api/caregiver/message', (req, res) => {
 
   const newMessage: CaregiverMessageItem = {
     id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-    senderName: senderName || 'Caregiver',
+    senderName: senderName || (determinedRole === 'child' ? 'Child' : 'Caregiver'),
     text: text.trim(),
-    emoji: emoji || '❤️',
+    emoji: emoji || '',
     timestamp: new Date().toISOString(),
     read: false,
     responseId,
+    senderRole: determinedRole,
   };
 
   session.messages.push(newMessage);
@@ -1526,10 +1564,11 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
       id: 'msg-ack-' + Date.now(),
       senderName: acknowledgedBy || 'Caregiver',
       text: responseMessage,
-      emoji: responseId === 'coming' ? '🚗' : responseId === 'im_here' ? '❤️' : '👍',
+      emoji: '',
       timestamp: new Date().toISOString(),
       read: false,
       responseId,
+      senderRole: 'caregiver',
     };
     if (session) session.messages.push(newMessage);
     familyState.messages = [...(familyState.messages || []).slice(-29), newMessage];

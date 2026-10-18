@@ -795,10 +795,6 @@ function handleIncomingSyncEnvelope(envelope: any): void {
 
   // 3. Caregiver Message (Caregiver -> Child)
   if (type === 'CAREGIVER_MESSAGE' && envelope.message) {
-    lastPeerPingTimestamp = Date.now();
-    lastPeerRole = 'caregiver';
-    notifyConnectionStatus();
-
     const m = envelope.message;
     const rawSender = m.senderName || 'Caregiver';
     const rawText = m.text || '';
@@ -807,16 +803,36 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       rawSender.trim().toLowerCase() !== rawText.trim().toLowerCase();
     const finalSender = isActuallyInverted ? rawText : rawSender;
     const finalText = isActuallyInverted ? rawSender : rawText;
+
+    const isFromChild = m.senderRole === 'child' || (
+      finalSender.trim().toLowerCase() !== 'caregiver' &&
+      finalSender.trim().toLowerCase() !== 'parent'
+    );
+
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = isFromChild ? 'child_device' : 'caregiver';
+    lastPeerName = finalSender;
+    notifyConnectionStatus();
+
     const normalizedMessage: CaregiverMessage = {
       ...m,
       senderName: finalSender,
       text: finalText,
+      senderRole: isFromChild ? 'child' : 'caregiver',
     };
 
     messageListeners.forEach((fn) => fn(normalizedMessage));
-    triggerWebNotification(`Message from ${finalSender}`, {
-      body: finalText,
-    });
+
+    // Only notify if message is destined for this device role
+    const isCaregiver = isCurrentDeviceCaregiver();
+    if ((isCaregiver && isFromChild) || (!isCaregiver && !isFromChild)) {
+      triggerWebNotification(
+        isCaregiver ? `Reply from ${finalSender}` : `Message from ${finalSender}`,
+        {
+          body: finalText,
+        }
+      );
+    }
     return;
   }
 
@@ -833,7 +849,7 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(envelope.alert));
     } catch {}
     triggerWebNotification(`BeeYou Alert: ${envelope.alert.childName}`, {
-      body: `${envelope.alert.emoji || '🚨'} ${envelope.alert.label}: ${envelope.alert.note || 'Help requested'}`,
+      body: `${envelope.alert.label}: ${envelope.alert.note || 'Help requested'}`,
       requireInteraction: true,
     });
     return;
@@ -856,7 +872,7 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       }
     } catch {}
     triggerWebNotification(`Caregiver Response: ${envelope.ack.by || 'Caregiver'}`, {
-      body: envelope.ack.responseMessage || "I'm here for you ❤️",
+      body: envelope.ack.responseMessage || "I'm here for you",
     });
     return;
   }
@@ -1233,8 +1249,9 @@ export async function sendCaregiverMessage(
   code: string,
   text: string,
   senderName = 'Caregiver',
-  emoji = '❤️',
-  responseId?: PredefinedCaregiverResponseId
+  emoji = '',
+  responseId?: PredefinedCaregiverResponseId,
+  senderRole?: 'caregiver' | 'child'
 ): Promise<CaregiverMessage> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
@@ -1250,14 +1267,21 @@ export async function sendCaregiverMessage(
     finalText = tmp;
   }
 
+  const determinedRole: 'caregiver' | 'child' = senderRole || (
+    finalSender.trim().toLowerCase() === 'caregiver' || finalSender.trim().toLowerCase() === 'parent'
+      ? 'caregiver'
+      : 'child'
+  );
+
   const newMsg: CaregiverMessage = {
     id: 'msg-' + Date.now(),
     senderName: finalSender,
     text: finalText,
-    emoji,
+    emoji: emoji || '',
     timestamp: new Date().toISOString(),
     read: false,
     responseId,
+    senderRole: determinedRole,
   };
 
   // 1. Send to server message endpoint
@@ -1269,8 +1293,9 @@ export async function sendCaregiverMessage(
         pairingCode: safeCode,
         senderName: finalSender,
         text: finalText,
-        emoji,
+        emoji: emoji || '',
         responseId,
+        senderRole: determinedRole,
       }),
     }).catch(() => {});
   } catch {}
@@ -1377,7 +1402,7 @@ export async function sendTestCaregiverAlert(pairingCodeOrChildName = 'Child', c
     emotion: 'need_help',
     alertId: 'need_help',
     label: 'Test Emergency Alert',
-    emoji: '🚨',
+    emoji: '',
     location: 'home',
     note: 'Real-time test alert to verify instant notification, sound, and response controls.',
   });
@@ -1398,7 +1423,7 @@ export async function acknowledgeCaregiverAlert(
 
   const ackData = {
     alertId: targetAlertId,
-    responseMessage: responseMessage || "I'm on my way ❤️",
+    responseMessage: responseMessage || "I'm on my way.",
     responseId,
     by: acknowledgedBy || 'Caregiver',
   };

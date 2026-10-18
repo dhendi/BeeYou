@@ -50,20 +50,55 @@ class PushNotificationService {
   }
 
   /**
+   * Get current permission status
+   */
+  getPermissionStatus(): NotificationPermission | 'unsupported' {
+    if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
+    return Notification.permission;
+  }
+
+  /**
+   * Sends a test alert notification to verify device sound, banner, and vibration
+   */
+  async sendTestNotification(childName = 'Child'): Promise<boolean> {
+    if (!this.isSupported) return false;
+    if (Notification.permission !== 'granted') {
+      const granted = await this.requestPermission();
+      if (!granted) return false;
+    }
+
+    await this.triggerAlertNotification({
+      title: `BeeYou Alert: Test from ${childName}`,
+      body: `Sound & push notifications are working on this device!`,
+      priority: 'high',
+      tag: 'beeyou-test-' + Date.now(),
+    });
+    return true;
+  }
+
+  /**
    * Dispatches a high-priority native notification with vibration pattern
    */
   async triggerAlertNotification(payload: PushNotificationPayload): Promise<void> {
     if (!this.isSupported) return;
 
     if (Notification.permission !== 'granted') {
-      const granted = await this.requestPermission();
-      if (!granted) return;
+      // Note: Calling requestPermission outside user gesture is blocked by browsers,
+      // so if permission is not granted, we silently return here
+      return;
     }
 
     const isEmergency = payload.priority === 'emergency' || payload.priority === 'high';
     const vibrationPattern = isEmergency 
       ? [300, 100, 300, 100, 500, 150, 500] 
       : [150, 75, 150];
+
+    // Trigger physical hardware vibration if available on mobile/tablet
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(vibrationPattern);
+      } catch {}
+    }
 
     const notificationOptions: any = {
       body: payload.body,
@@ -74,7 +109,7 @@ class PushNotificationService {
       requireInteraction: isEmergency, // Stays on screen until caregiver interacts
       silent: false,
       data: {
-        url: window.location.origin + '/?role=caregiver',
+        url: typeof window !== 'undefined' ? window.location.origin + '/?role=caregiver' : '/',
         ...payload.data
       },
       actions: payload.actions || [
@@ -98,9 +133,12 @@ class PushNotificationService {
 
     // Fallback to standard window Notification
     try {
-      new Notification(payload.title, notificationOptions);
+      const windowOptions: any = { ...notificationOptions };
+      // Standard window Notification does not support actions array in desktop browsers
+      delete windowOptions.actions;
+      new Notification(payload.title, windowOptions);
     } catch (err) {
-      console.warn('Native notification failed:', err);
+      console.warn('Native notification fallback failed:', err);
     }
   }
 }

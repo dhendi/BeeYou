@@ -7,7 +7,10 @@ import {
   Send, 
   Bell,
   Star,
-  Smile
+  Smile,
+  Plus,
+  X,
+  MessageSquare
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
@@ -44,8 +47,21 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
   showNotification,
   onStartTour,
 }) => {
-  const { childProfile, connectionStatus, currentMood, routines, activeTheme } = useApp();
+  const { 
+    childProfile, 
+    connectionStatus, 
+    currentMood, 
+    routines, 
+    activeTheme,
+    caregiverResponses,
+    addCaregiverResponse,
+    deleteCaregiverResponse
+  } = useApp();
   const [customMsgText, setCustomMsgText] = useState('');
+  const [typedAlertReplies, setTypedAlertReplies] = useState<Record<string, string>>({});
+  const [showAddQuickReplyForAlertId, setShowAddQuickReplyForAlertId] = useState<string | null>(null);
+  const [newReplyLabel, setNewReplyLabel] = useState('');
+  const [newReplyText, setNewReplyText] = useState('');
 
   const handleResolveAlert = (alertId: string) => {
     resolveEmergencyAlert(alertId, getPairingCode());
@@ -59,6 +75,7 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
 
   const handleAcknowledgeAlert = (alertId: string, replyText: string, replyId?: any) => {
     acknowledgeCaregiverAlert(getPairingCode(), 'Caregiver', replyText, replyId, alertId);
+    sendCaregiverMessage(getPairingCode(), replyText, 'Caregiver', '');
     setActiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     setAlertHistoryList(getAlertHistory());
     showNotification(`Sent reassurance reply: "${replyText}"`);
@@ -280,27 +297,183 @@ export const CaregiverLiveHubTab: React.FC<CaregiverLiveHubTabProps> = ({
                   <span className="text-slate-400 font-medium">{t("Auto-synced")}</span>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100">
-                  <span className="text-xs font-bold text-slate-500">{t("Quick Reply:")}</span>
-                  {getQuickRepliesForAlert(alert, t).map((reply) => {
-                    const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
-                                      reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
-                                      reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
-                                      reply.iconSrc;
-                    const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
-                    return (
-                      <button
-                        key={reply.id}
-                        type="button"
-                        onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
-                        className={`px-3 py-1.5 rounded-xl font-black text-xs shadow-2xs cursor-pointer active:scale-95 transition flex items-center gap-1.5 ${reply.className}`}
-                      >
-                        {replyIcon && <img src={replyIcon} alt="" className="w-3.5 h-3.5 object-contain drop-shadow-2xs shrink-0" />}
-                        <span>{cleanLabel || reply.label}</span>
-                      </button>
-                    );
-                  })}
+                {/* Quick Reply & Custom Quick Replies */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-xs font-bold text-slate-500">{t("Quick Reply:")}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddQuickReplyForAlertId(showAddQuickReplyForAlertId === alert.id ? null : alert.id);
+                        setNewReplyLabel('');
+                        setNewReplyText('');
+                      }}
+                      className="text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100/80 border border-amber-200/80 px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition active:scale-95 shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{t("Add quick reply")}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Contextual quick replies */}
+                    {getQuickRepliesForAlert(alert, t).map((reply) => {
+                      const replyIcon = reply.id === 'coming' ? '/assets/stickers/car_on_my_way.webp' :
+                                        reply.id === 'im_here' ? '/assets/stickers/heart_here_for_you.webp' :
+                                        reply.id === 'okay' ? '/assets/stickers/caregiver_response_okay.webp' :
+                                        reply.iconSrc;
+                      const cleanLabel = reply.label.replace(/^[🚗❤️💖⏳🌟🎉👏👍 ]+/, '');
+                      return (
+                        <button
+                          key={reply.id}
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, reply.text, reply.id)}
+                          className={`px-3 py-1.5 rounded-xl font-black text-xs shadow-2xs cursor-pointer active:scale-95 transition flex items-center gap-1.5 ${reply.className}`}
+                        >
+                          {replyIcon && <img src={replyIcon} alt="" className="w-3.5 h-3.5 object-contain drop-shadow-2xs shrink-0" />}
+                          <span>{cleanLabel || reply.label}</span>
+                        </button>
+                      );
+                    })}
+
+                    {/* Custom quick replies */}
+                    {caregiverResponses.filter((r) => r.isCustom).map((customResp) => (
+                      <div key={customResp.id} className="inline-flex items-center bg-amber-50 hover:bg-amber-100/80 border border-amber-300 rounded-xl shadow-2xs overflow-hidden transition">
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeAlert(alert.id, customResp.text, customResp.id)}
+                          className="px-3 py-1.5 font-black text-xs text-amber-950 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          title={customResp.text}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                          <span>{customResp.label}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCaregiverResponse(customResp.id);
+                            showNotification(t("Quick reply removed."));
+                          }}
+                          className="px-1.5 py-1.5 text-amber-600 hover:text-rose-600 hover:bg-rose-50 border-l border-amber-200 cursor-pointer transition"
+                          title={t("Delete quick reply")}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Inline Add Quick Reply Panel */}
+                  {showAddQuickReplyForAlertId === alert.id && (
+                    <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/90 space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                          <Plus className="w-3.5 h-3.5 text-amber-700" />
+                          <span>{t("New Custom Quick Reply")}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddQuickReplyForAlertId(null)}
+                          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                            {t("Button Short Label")}
+                          </label>
+                          <input
+                            type="text"
+                            value={newReplyLabel}
+                            onChange={(e) => setNewReplyLabel(e.target.value)}
+                            placeholder={t("e.g. 10 Minutes, On The Porch")}
+                            className="w-full px-3 py-1.5 rounded-xl border border-amber-200 bg-white text-xs text-slate-900 outline-hidden focus:ring-2 focus:ring-amber-300 font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                            {t("Spoken Message (Sent to Child)")}
+                          </label>
+                          <input
+                            type="text"
+                            value={newReplyText}
+                            onChange={(e) => setNewReplyText(e.target.value)}
+                            placeholder={t("e.g. I am 10 minutes away, stay calm.")}
+                            className="w-full px-3 py-1.5 rounded-xl border border-amber-200 bg-white text-xs text-slate-900 outline-hidden focus:ring-2 focus:ring-amber-300 font-medium"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddQuickReplyForAlertId(null)}
+                          className="px-3 py-1 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 cursor-pointer"
+                        >
+                          {t("Cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!newReplyLabel.trim()}
+                          onClick={() => {
+                            if (!newReplyLabel.trim()) return;
+                            addCaregiverResponse({
+                              label: newReplyLabel.trim(),
+                              text: (newReplyText.trim() || newReplyLabel.trim()),
+                              emoji: '',
+                              isCustom: true,
+                            });
+                            showNotification(t("New quick reply added."));
+                            setNewReplyLabel('');
+                            setNewReplyText('');
+                            setShowAddQuickReplyForAlertId(null);
+                            playChime('complete');
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-black shadow-2xs active:scale-95 transition cursor-pointer"
+                        >
+                          {t("Save Quick Reply")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Direct Type Area */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const text = typedAlertReplies[alert.id]?.trim();
+                    if (!text) return;
+                    handleAcknowledgeAlert(alert.id, text, 'custom_typed');
+                    setTypedAlertReplies((prev) => {
+                      const next = { ...prev };
+                      delete next[alert.id];
+                      return next;
+                    });
+                  }}
+                  className="flex items-center gap-2 pt-2 border-t border-slate-100"
+                >
+                  <input
+                    type="text"
+                    value={typedAlertReplies[alert.id] || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setTypedAlertReplies((prev) => ({ ...prev, [alert.id]: val }));
+                    }}
+                    placeholder={`${t("Type a reply to")} ${alert.childName || childProfile.name || 'Child'}...`}
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 outline-hidden focus:ring-2 focus:ring-amber-300 font-medium transition"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!typedAlertReplies[alert.id]?.trim()}
+                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition shrink-0"
+                  >
+                    <Send className="w-3.5 h-3.5 text-amber-300" />
+                    <span>{t("Send Reply")}</span>
+                  </button>
+                </form>
               </div>
             ))}
           </div>

@@ -17,7 +17,9 @@ import {
   Crown,
   Share2,
   Check,
-  Globe
+  Globe,
+  AlertCircle,
+  Users
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { useApp } from '../context/AppContext';
@@ -25,6 +27,7 @@ import { SUPPORTED_LANGUAGES } from './LanguageDropdown';
 import { AppLanguage } from '../types';
 import { 
   loginWithSharedEmail, 
+  loginWithGoogle,
   registerSharedFamilyAccount, 
   launchDemoMode, 
   DEMO_FAMILY_ACCOUNT,
@@ -76,6 +79,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
   // Register form state
   const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
   const [regCaregiverName, setRegCaregiverName] = useState('');
   const [regCaregiverRole, setRegCaregiverRole] = useState('Parent');
   const [regChildName, setRegChildName] = useState('');
@@ -185,6 +189,23 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setLoginLoading(true);
+      setLoginError(null);
+      const res = await loginWithGoogle();
+      setLoginLoading(false);
+      if (res.success && res.account) {
+        applyAccountToContext(res.account, loginDeviceRole);
+      } else {
+        setLoginError(res.message || 'Google sign-in was not completed.');
+      }
+    } catch (err: any) {
+      setLoginLoading(false);
+      setLoginError(err?.message || 'Google sign-in error occurred.');
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -211,6 +232,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!regPassword || regPassword.length < 6) {
+        setRegError('Please choose a password with at least 6 characters to secure your family space.');
+        return;
+      }
+
       setRegLoading(true);
       setRegError(null);
 
@@ -220,6 +246,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
       const res = await registerSharedFamilyAccount({
         email: regEmail,
+        password: regPassword,
         caregiverName: regCaregiverName,
         caregiverRole: regCaregiverRole,
         childName: regChildName,
@@ -241,6 +268,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       setRegError(err?.message || 'Registration failed unexpectedly. Please try again.');
     }
   };
+
 
   const handleLogout = () => {
     try {
@@ -306,7 +334,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
             }`}
           >
             <Zap className="w-4 h-4 text-amber-200" />
-            <span>⚡ 1-Click Demo Account</span>
+            <span>1-Click Demo Account</span>
           </button>
 
           <button
@@ -354,9 +382,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
             </div>
           )}
 
-          {/* ══════════════════════════════════════════════════════
-              TAB 1: 1-CLICK DEMO ACCOUNT (TESTING PLAYGROUND)
-          ══════════════════════════════════════════════════════ */}
+          {/* TAB 1: 1-CLICK DEMO ACCOUNT (TESTING PLAYGROUND) */}
           {activeTab === 'demo' && (
             <div className="space-y-4 animate-in fade-in">
               <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-50 via-amber-100/50 to-indigo-50 dark:bg-slate-800 border-2 border-amber-300 dark:border-slate-700 space-y-3">
@@ -401,8 +427,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     className="p-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-left shadow-md transition cursor-pointer flex flex-col justify-between gap-3 group"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
-                        🧒
+                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
                       </div>
                       <span className="text-xs bg-amber-600/60 px-2 py-0.5 rounded-full text-amber-100">
                         Tablet Mode
@@ -429,8 +455,8 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     className="p-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-left shadow-md transition cursor-pointer flex flex-col justify-between gap-3 group"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
-                        👩‍👦
+                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
                       </div>
                       <span className="text-xs bg-indigo-700/60 px-2 py-0.5 rounded-full text-indigo-100">
                         Caregiver Hub
@@ -451,16 +477,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   </button>
                 </div>
 
-                <p className="text-[11px] text-slate-500 text-center italic">
-                  💡 <strong>Tip:</strong> Open BeeYou in a second window or phone and launch both to watch them sync live in real-time!
+                <p className="text-[11px] text-slate-500 text-center">
+                  <strong>Tip:</strong> Open BeeYou in a second window or phone and launch both to watch them sync live in real-time!
                 </p>
               </div>
             </div>
           )}
 
-          {/* ══════════════════════════════════════════════════════
-              TAB 2: SIGN IN WITH EXISTING EMAIL
-          ══════════════════════════════════════════════════════ */}
+          {/* TAB 2: SIGN IN WITH EXISTING EMAIL */}
           {activeTab === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-4 animate-in fade-in">
               <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-stone-200 dark:border-slate-700 shadow-xs space-y-4">
@@ -522,7 +546,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                           : 'border-slate-200 dark:border-slate-700 opacity-70'
                       }`}
                     >
-                      <span className="text-xl">🧒</span>
+                      <User className="w-5 h-5 text-amber-600 shrink-0" />
                       <div>
                         <span className="text-xs font-black block">Child's Tablet</span>
                         <span className="text-[10px] text-slate-500 block">Schedules &amp; AAC</span>
@@ -538,7 +562,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                           : 'border-slate-200 dark:border-slate-700 opacity-70'
                       }`}
                     >
-                      <span className="text-xl">👩‍👦</span>
+                      <Users className="w-5 h-5 text-indigo-600 shrink-0" />
                       <div>
                         <span className="text-xs font-black block">Caregiver Phone</span>
                         <span className="text-[10px] text-slate-500 block">Alerts &amp; Hub</span>
@@ -548,28 +572,15 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                 </div>
 
                 {loginError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
-                    ⚠️ {loginError}
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{loginError}</span>
                   </div>
                 )}
-
-                <div className="flex items-center justify-between pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginEmail('demo@beeyou.app');
-                      setLoginPassword('beeyou2026');
-                    }}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
-                  >
-                    ⚡ Fill Demo Credentials (demo@beeyou.app)
-                  </button>
-                </div>
 
                 <button
                   type="submit"
                   onClick={(e) => {
-                    // Ensures click also submits even if inside non-standard form container
                     if (loginEmail.trim()) {
                       handleLoginSubmit(e);
                     }
@@ -580,13 +591,58 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   {loginLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   <span>Sign In &amp; Sync Device</span>
                 </button>
+
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                  <span className="flex-shrink mx-3 text-slate-400 text-[11px] font-bold uppercase tracking-wider">or quick sign-in</span>
+                  <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+
+                {/* Google Sign In Button */}
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loginLoading}
+                  className="w-full py-3 rounded-2xl bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs border-2 border-stone-300 dark:border-slate-600 shadow-2xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-2.5"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+
+                <div className="flex items-center justify-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginEmail('demo@beeyou.app');
+                      setLoginPassword('beeyou2026');
+                    }}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+                  >
+                    Fill Demo Credentials (demo@beeyou.app)
+                  </button>
+                </div>
               </div>
             </form>
           )}
 
-          {/* ══════════════════════════════════════════════════════
-              TAB 3: REGISTER NEW FAMILY ACCOUNT
-          ══════════════════════════════════════════════════════ */}
+          {/* TAB 3: REGISTER NEW FAMILY ACCOUNT */}
           {activeTab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-4 animate-in fade-in">
               <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border-2 border-stone-200 dark:border-slate-700 shadow-xs space-y-4">
@@ -595,8 +651,42 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     Create Your Shared Family Space
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                    Only 1 shared email is needed. Both devices will link automatically.
+                    Set up your secured family account. Both devices will link automatically.
                   </p>
+                </div>
+
+                {/* Google Sign In Shortcut in Register */}
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={regLoading}
+                  className="w-full py-3 rounded-2xl bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs border-2 border-stone-300 dark:border-slate-600 shadow-2xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-2.5"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>Quick Sign Up with Google</span>
+                </button>
+
+                <div className="relative flex py-0.5 items-center">
+                  <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                  <span className="flex-shrink mx-3 text-slate-400 text-[11px] font-bold uppercase tracking-wider">or create with email</span>
+                  <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -608,12 +698,28 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       type="email"
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder="e.g. smithfamily@gmail.com"
+                      placeholder="e.g. family@gmail.com"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                       required
                     />
                   </div>
 
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                      Account Password *
+                    </label>
+                    <input
+                      type="password"
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                       Caregiver Name *
@@ -627,9 +733,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       required
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                       Child's Name *
@@ -641,6 +745,21 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                       placeholder=""
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                       required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
+                      Caregiver Role
+                    </label>
+                    <input
+                      type="text"
+                      value={regCaregiverRole}
+                      onChange={(e) => setRegCaregiverRole(e.target.value)}
+                      placeholder="Parent / Caregiver"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs"
                     />
                   </div>
 
@@ -679,7 +798,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   >
                     {SUPPORTED_LANGUAGES.map((lang) => (
                       <option key={lang.code} value={lang.code}>
-                        {lang.flag} {lang.name} — {lang.nativeName}
+                        {lang.name} — {lang.nativeName}
                       </option>
                     ))}
                   </select>
@@ -703,8 +822,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                 </div>
 
                 {regError && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
-                    ⚠️ {regError}
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{regError}</span>
                   </div>
                 )}
 
@@ -714,45 +834,42 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {regLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
-                  <span>Create Shared Family Account 🎉</span>
+                  <span>Create Shared Family Account</span>
                 </button>
               </div>
             </form>
           )}
 
-          {/* ══════════════════════════════════════════════════════
-              HIGHLIGHT: ADVANTAGES OF HAVING A SHARED FAMILY EMAIL
-          ══════════════════════════════════════════════════════ */}
+          {/* HIGHLIGHT: ADVANTAGES OF HAVING A SHARED FAMILY EMAIL */}
           <div className="p-4 sm:p-5 rounded-3xl bg-emerald-50/90 dark:bg-slate-800 border-2 border-emerald-300 dark:border-slate-700 space-y-3">
-            <div className="flex items-center gap-2 text-emerald-950 dark:text-emerald-200 font-black text-sm">
-              <Star className="w-4 h-4 text-emerald-600" />
-              <span>🌟 Advantages of Having a Shared Family Email:</span>
+            <div className="text-emerald-950 dark:text-emerald-200 font-black text-sm">
+              Advantages of Having a Shared Family Email:
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
               <div className="flex items-start gap-2">
-                <span className="text-emerald-600 font-black shrink-0">✓</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
                 <p className="text-slate-700 dark:text-slate-300 font-medium">
                   <strong>Only 1 Email Needed:</strong> Children do not need their own email or password.
                 </p>
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-emerald-600 font-black shrink-0">✓</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
                 <p className="text-slate-700 dark:text-slate-300 font-medium">
                   <strong>Permanent Device Sync:</strong> No QR codes or expiring codes required. Log in once to stay linked.
                 </p>
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-emerald-600 font-black shrink-0">✓</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
                 <p className="text-slate-700 dark:text-slate-300 font-medium">
                   <strong>Cloud Routine Backup:</strong> Schedules, photo tiles &amp; AAC voices are safely backed up in the cloud.
                 </p>
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-emerald-600 font-black shrink-0">✓</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
                 <p className="text-slate-700 dark:text-slate-300 font-medium">
                   <strong>Real-Time Help SOS:</strong> Instant 1-tap alerts stream to the caregiver's phone from school or therapy.
                 </p>
