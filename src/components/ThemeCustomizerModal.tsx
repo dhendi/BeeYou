@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { X, RotateCcw } from 'lucide-react';
+import { X, RotateCcw, Palette } from 'lucide-react';
 import { ThemeShopAndStudio } from './ThemeShopAndStudio';
 import { playChime } from '../utils/audio';
 import { getThemeCustomizerHeaderStyles } from '../utils/themeWidgetHelper';
@@ -30,8 +30,8 @@ export const ThemeCustomizerModal: React.FC = () => {
         {/* Modal Top Bar */}
         <div className={`${headerStyles.topBarGradient} px-4 sm:px-6 py-3 border-b ${headerStyles.topBarBorder} flex items-center justify-between shrink-0 transition-all duration-300`}>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-white/80 shadow-xs text-lg">
-              🎨
+            <span className="p-2 rounded-xl bg-white/80 shadow-xs flex items-center justify-center">
+              <Palette className="w-5 h-5 text-amber-600" />
             </span>
             <div>
               <h2 id="theme-modal-title" className={`font-black ${headerStyles.topBarText} text-base sm:text-lg leading-tight`}>
