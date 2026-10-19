@@ -336,7 +336,17 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     }
   };
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return (
+        params.get('action') === 'delete-account' ||
+        params.get('delete') === 'true' ||
+        window.location.pathname === '/delete-account'
+      );
+    }
+    return false;
+  });
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);

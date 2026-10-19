@@ -312,6 +312,44 @@ async function runTests() {
     'FamilyAuthModal provides a Retry Remaining Steps button for partial failure recovery'
   );
 
+  // -------------------------------------------------------------
+  // Suite 6: External Account-Deletion Webpage (HTTP GET /delete-account)
+  // -------------------------------------------------------------
+  console.log('\n--- Suite 6: External Account-Deletion Webpage Verification ---');
+
+  const webPageRes = await fetch(`${baseUrl}/delete-account`);
+  assert(webPageRes.status === 200, 'GET /delete-account returns HTTP 200 OK');
+  const webPageHtml = await webPageRes.text();
+
+  assert(
+    webPageHtml.includes('BeeYou Account &amp; Data Deletion') || webPageHtml.includes('BeeYou Account & Data Deletion'),
+    'External webpage contains official Account & Data Deletion heading'
+  );
+  assert(
+    webPageHtml.includes('Permanent Data Erasure Warning'),
+    'External webpage displays permanent cloud erasure warning'
+  );
+  assert(
+    webPageHtml.includes('https://apps.apple.com/account/subscriptions'),
+    'External webpage provides direct Apple App Store subscription cancellation link'
+  );
+  assert(
+    webPageHtml.includes('https://play.google.com/store/account/subscriptions'),
+    'External webpage provides direct Google Play Store subscription cancellation link'
+  );
+  assert(
+    webPageHtml.includes('does not automatically cancel') || webPageHtml.includes('does not necessarily cancel'),
+    'External webpage explicitly explains that deleting account does not cancel store subscriptions'
+  );
+  assert(
+    webPageHtml.includes('/?action=delete-account'),
+    'External webpage links to in-app deletion launcher'
+  );
+  assert(
+    webPageHtml.includes('privacy@beeyou.app'),
+    'External webpage provides fallback DPO email address for manual requests'
+  );
+
   // Close test server
   server.close();
 

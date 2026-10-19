@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeeYou - Account &amp; Data Deletion (Apple Guideline 5.1.1(v) &amp; Google Play)</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    :root {
+      --bg: #FAF8F5;
+      --card-bg: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --amber: #F59E0B;
+      --amber-dark: #B45309;
+      --rose-bg: #FFF1F2;
+      --rose-border: #FECDD3;
+      --rose-text: #9F1239;
+      --indigo: #4F46E5;
+      --border: #E2E8F0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A;
+        --card-bg: #1E293B;
+        --text: #F1F5F9;
+        --text-muted: #94A3B8;
+        --rose-bg: #4C0519;
+        --rose-border: #881337;
+        --rose-text: #FECDD3;
+        --border: #334155;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 1.5rem 1rem;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: #FEE2E2;
+      color: #991B1B;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin: 0 0 0.5rem 0;
+      color: var(--text);
+    }
+    .warning-box {
+      background: var(--rose-bg);
+      border: 1px solid var(--rose-border);
+      color: var(--rose-text);
+      padding: 1.25rem;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .warning-box strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .subscription-notice {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      color: #92400E;
+      padding: 1.25rem;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .subscription-notice strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #78350F;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #E11D48;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .action-btn:hover {
+      background-color: #BE123C;
+    }
+    .store-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .store-btn {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      background: #F1F5F9;
+      color: #334155;
+      text-decoration: none;
+      border: 1px solid #CBD5E1;
+    }
+    .store-btn:hover {
+      background: #E2E8F0;
+    }
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    p, li {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+    ul {
+      padding-left: 1.25rem;
+    }
+    li {
+      margin-bottom: 0.35rem;
+    }
+    footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Apple Guideline 5.1.1(v) &amp; Google Play Compliance</span>
+      <h1>BeeYou Account &amp; Data Deletion</h1>
+      <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
+        Self-Service &amp; Web Request Portal
+      </p>
+    </header>
+
+    <div class="warning-box">
+      <strong>Permanent Data Erasure Warning</strong>
+      Deleting your BeeYou family account is permanent and irreversible. It immediately purges your family login credentials, all uploaded custom speech photos and voice recordings, cloud Realtime Database channels, backend server pairing sessions, and wipes all local cached data from this device.
+    </div>
+
+    <div class="subscription-notice">
+      <strong>Important: App Store &amp; Google Play Subscription Advisory</strong>
+      Deleting your BeeYou account <strong>does not automatically cancel</strong> an active Apple App Store or Google Play Store subscription. Because payments and renewals are managed directly by Apple or Google under your personal store account, you must cancel your subscription directly through your device settings to prevent future renewals:
+      <div class="store-links">
+        <a class="store-btn" href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener noreferrer">
+          Manage Apple App Store Subscription &rarr;
+        </a>
+        <a class="store-btn" href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener noreferrer">
+          Manage Google Play Subscription &rarr;
+        </a>
+      </div>
+    </div>
+
+    <h2>How to Delete Your Account</h2>
+    
+    <h3>Method 1: In-App Instant Deletion (Recommended)</h3>
+    <p>
+      If you have the BeeYou app installed or opened in your browser, you can initiate immediate self-service account deletion:
+    </p>
+    <p>
+      <a class="action-btn" href="/?action=delete-account">
+        Launch In-App Account Deletion
+      </a>
+    </p>
+    <p style="font-size: 0.85rem; color: var(--text-muted);">
+      Or inside the app: Navigate to <strong>Caregiver Hub &gt; Link Device &gt; Delete Family Account</strong>, enter your account password, and confirm deletion.
+    </p>
+
+    <h3>Method 2: Email Deletion Request</h3>
+    <p>
+      If you no longer have access to the app or device, you may request manual deletion by emailing our Data Protection Officer:
+    </p>
+    <ul>
+      <li>Email: <a href="mailto:privacy@beeyou.app?subject=Account%20Deletion%20Request">privacy@beeyou.app</a></li>
+      <li>Include: Your registered parent/caregiver account email address and family sync code.</li>
+      <li>Processing Time: Completed within 48 business hours with confirmation email.</li>
+    </ul>
+
+    <h2>Data Types Deleted vs. Retained</h2>
+    <ul>
+      <li><strong>Parent Account Email &amp; Password Hash:</strong> Permanently deleted immediately.</li>
+      <li><strong>Child Profile, Mood Logs &amp; Visual Schedules:</strong> Permanently purged from cloud databases.</li>
+      <li><strong>Uploaded AAC Photos &amp; Voice Recordings:</strong> Permanently deleted from storage buckets.</li>
+      <li><strong>Linked Caregiver &amp; Child Devices:</strong> Access revoked instantly; real-time sessions disconnected.</li>
+      <li><strong>Retained Data:</strong> None. Zero personal data is retained following completion of account deletion.</li>
+    </ul>
+
+    <footer>
+      &copy; 2026 BeeYou. All rights reserved. Assistive companion for neurodivergent families.
+    </footer>
+  </div>
+</body>
+</html>

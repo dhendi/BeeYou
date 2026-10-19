@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import {
   defaultRateLimitStore,
   getClientIp,
@@ -3233,6 +3237,13 @@ app.get(['/privacy', '/privacy.html'], (_req, res) => {
   const filePath = isProd && fs.existsSync(path.resolve(__dirname, 'dist', 'privacy.html'))
     ? path.resolve(__dirname, 'dist', 'privacy.html')
     : path.resolve(__dirname, 'public', 'privacy.html');
+  return res.sendFile(filePath);
+});
+
+app.get(['/delete-account', '/delete-account.html'], (_req, res) => {
+  const filePath = isProd && fs.existsSync(path.resolve(__dirname, 'dist', 'delete-account.html'))
+    ? path.resolve(__dirname, 'dist', 'delete-account.html')
+    : path.resolve(__dirname, 'public', 'delete-account.html');
   return res.sendFile(filePath);
 });
 
