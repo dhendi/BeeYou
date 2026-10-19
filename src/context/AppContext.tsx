@@ -332,9 +332,15 @@ export interface AppContextType {
   // Subscription & Membership Tiering
   subscription: SubscriptionInfo;
   isPremium: boolean;
+  isRestoring: boolean;
   startFreeTrial: (cycle?: BillingCycle) => void;
   activateSubscription: (cycle?: BillingCycle) => void;
   cancelSubscription: () => void;
+  restorePurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
+  purchaseSubscription: (
+    cycle: BillingCycle,
+    simulateScenario?: 'success' | 'payment_declined' | 'user_cancelled' | 'network_interrupted' | 'parental_approval_pending'
+  ) => Promise<{ success: boolean; subscription: SubscriptionInfo; error?: string; errorCode?: string }>;
   setSubscriptionTier: (tier: SubscriptionTier) => void;
   setBillingCycle: (cycle: BillingCycle) => void;
   showPaywallModal: boolean;
@@ -1231,9 +1237,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     // Subscription & Membership Tiering
     subscription: subscriptionState.subscription,
     isPremium: subscriptionState.isPremium,
+    isRestoring: subscriptionState.isRestoring,
     startFreeTrial: subscriptionState.startFreeTrial,
     activateSubscription: subscriptionState.activateSubscription,
     cancelSubscription: subscriptionState.cancelSubscription,
+    restorePurchases: subscriptionState.restorePurchases,
+    purchaseSubscription: subscriptionState.purchaseSubscription,
     setSubscriptionTier: subscriptionState.setSubscriptionTier,
     setBillingCycle: subscriptionState.setBillingCycle,
     showPaywallModal: subscriptionState.showPaywallModal,

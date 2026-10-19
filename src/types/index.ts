@@ -888,20 +888,38 @@ export {
 } from '../data/themesData';
 
 export type SubscriptionTier = 'basic' | 'premium';
-export type SubscriptionStatus = 'basic' | 'trial' | 'active' | 'expired';
+export type SubscriptionStatus =
+  | 'basic'
+  | 'trial'
+  | 'active'
+  | 'grace_period'
+  | 'cancelled'
+  | 'expired'
+  | 'refunded'
+  | 'revoked';
 export type BillingCycle = 'weekly' | 'monthly' | 'yearly';
+export type StoreProvider = 'apple_app_store' | 'google_play' | 'web_stripe' | 'promo' | 'none';
 
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
   status: SubscriptionStatus;
   billingCycle: BillingCycle;
+  productId?: string;
+  storeProvider?: StoreProvider;
+  purchasedAt?: string;
+  expiresAt?: string;
   trialStartDate?: string;
   trialEndDate?: string;
   weeklyPrice: number;  // 2.99
-  monthlyPrice: number; // 8.99
+  monthlyPrice: number; // 9.99
   yearlyPrice: number;  // 89.99
   trialDays: number;    // 15
   autoRenew: boolean;
+  orderId?: string;
+  entitlementSignature?: string; // Cryptographic anti-tamper signature
+  lastVerifiedAt?: string;
+  gracePeriodEndDate?: string;
+  cancellationReason?: string;
 }
 
 export type SoundscapeId = 

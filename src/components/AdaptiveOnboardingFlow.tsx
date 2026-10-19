@@ -753,7 +753,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
                       {t('Monthly')}
                     </span>
-                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$8.99</div>
+                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$9.99</div>
                     <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">/{t('month')}</span>
                   </div>
                   <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 leading-tight">

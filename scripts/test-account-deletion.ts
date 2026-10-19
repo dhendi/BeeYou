@@ -73,6 +73,7 @@ async function runTests() {
     childProfile: {
       name: 'Timmy',
       ageGroup: 'kid',
+      pin: 'sha256:1234',
       interests: ['Trains'],
       pronouns: 'he/him',
     },
