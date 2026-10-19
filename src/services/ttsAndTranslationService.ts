@@ -469,19 +469,19 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     } catch {}
   }
 
-  // Validate API key format (Standard Google AI Studio keys start with AIzaSy)
-  const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.startsWith('AIzaSy'));
+  // Accept both classic AIzaSy keys and Google AI Studio AQ. keys
+  const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.trim().length > 15);
 
   if (isValidGeminiKey && voiceKey !== 'system') {
     try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${geminiApiKey}`;
+      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent';
       const payload = {
         contents: [{
           role: 'user',
           parts: [{
             text: cleanText,
             speech_metadata: {
-              style: persona.style,
+              style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
             },
           }],
         }],
@@ -498,6 +498,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       const geminiRes = await fetch(endpoint, {
         method: 'POST',
         headers: {
+          'x-goog-api-key': geminiApiKey!,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),

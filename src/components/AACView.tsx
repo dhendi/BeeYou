@@ -16,7 +16,7 @@ import { ParentalGateModal } from './common/ParentalGateModal';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
-import { prewarmCoreAudioVocabulary } from '../utils/audio/speech';
+import { prewarmCoreAudioVocabulary, prewarmPhrases } from '../utils/audio/speech';
 export { getGrammaticalCategoryLabel };
 
 
@@ -254,8 +254,8 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    prewarmCoreAudioVocabulary(settings?.language || 'en');
-  }, [settings?.language]);
+    prewarmCoreAudioVocabulary(settings?.voicePersona || 'system', settings?.language || 'en');
+  }, [settings?.voicePersona, settings?.language]);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
@@ -524,6 +524,17 @@ export const AACView: React.FC = () => {
       return item.category === activeCategory;
     })
     .sort((a, b) => a.motorIndex - b.motorIndex);
+
+  // Predictive Pre-warming: Silently fetch audio for tiles visible on screen so clicks are 0ms instant
+  useEffect(() => {
+    if (filteredItems && filteredItems.length > 0) {
+      prewarmPhrases(
+        filteredItems.slice(0, 20).map((i) => i.label),
+        settings?.voicePersona || 'system',
+        settings?.language || 'en'
+      );
+    }
+  }, [activeCategory, filteredItems?.length, settings?.voicePersona, settings?.language]);
 
   // Styling based on AAC Button Color Mode: Fitzgerald Key (default) vs Theme Tinted vs High Contrast White vs Neutral Monochrome
   const getColorStyles = (colorType: AACItem['colorType']) => {

@@ -7,6 +7,7 @@ import {
   subscribeToSpeechState,
   subscribeToVoiceUpdates,
   getOfflineCapableVoices,
+  prewarmCoreAudioVocabulary,
 } from '../utils/audio';
 import { t, setLanguage } from '../services/translator';
 
@@ -50,6 +51,10 @@ export function useSpeechEngine({ settings, onLanguageChanged }: UseSpeechEngine
       window.removeEventListener('offline', handleOffline);
     };
   }, [settings.language]);
+
+  useEffect(() => {
+    prewarmCoreAudioVocabulary(settings.voicePersona || 'system', settings.language || 'en');
+  }, [settings.voicePersona, settings.language]);
 
   const speak = async (text: string, options?: { force?: boolean; voicePersona?: string }) => {
     if (settings.soundEffects) playChime('speak');

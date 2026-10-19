@@ -11,7 +11,7 @@ import {
   VolumeX,
   Zap,
 } from 'lucide-react';
-import { playChime } from '../utils/audio';
+import { playChime, prewarmCoreAudioVocabulary } from '../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
@@ -660,6 +660,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         key={persona.id}
                         onClick={() => {
                           updateSettings({ voicePersona: persona.id });
+                          prewarmCoreAudioVocabulary(persona.id, settings.language || 'en');
                           playChime('tap');
                         }}
                         className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${

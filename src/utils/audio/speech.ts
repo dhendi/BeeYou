@@ -12,7 +12,7 @@ let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 const audioMemoryCache = new Map<string, string>();
-const TTS_CACHE_NAME = 'beeyou-tts-v2';
+const TTS_CACHE_NAME = 'beeyou-tts-v3';
 
 /**
  * Multi-tier Audio Cache Loader (Memory -> Browser CacheStorage -> Edge Stream)
@@ -472,38 +472,46 @@ export function stopSpeaking() {
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
   system: { pitch: 1.0, rate: 1.0 },
 
-  // Kids (Bright, youthful, friendly, high pitch)
-  puck: { pitch: 1.35, rate: 0.95 },
-  leda: { pitch: 1.40, rate: 0.88 },
-  sadachbia: { pitch: 1.25, rate: 1.05 },
-  alchiba: { pitch: 1.30, rate: 0.98 },
+  // Kids (Youthful tone, steady even pitch for AAC)
+  puck: { pitch: 1.15, rate: 0.95 },
+  leda: { pitch: 1.18, rate: 0.92 },
+  sadachbia: { pitch: 1.12, rate: 0.98 },
+  achernar: { pitch: 1.06, rate: 0.90 },
+  alchiba: { pitch: 1.14, rate: 0.96 },
 
-  // Teens (Youthful, casual, modern)
-  zephyr: { pitch: 0.95, rate: 0.82 },
-  fenrir: { pitch: 0.78, rate: 0.90 },
-  sulafat: { pitch: 1.12, rate: 0.88 },
+  // Teens (Youthful, casual, steady)
+  zephyr: { pitch: 0.96, rate: 0.88 },
+  fenrir: { pitch: 0.90, rate: 0.95 },
+  aoede: { pitch: 1.04, rate: 0.96 },
+  callirrhoe: { pitch: 1.00, rate: 0.92 },
+  autonoe: { pitch: 1.06, rate: 0.98 },
+  sulafat: { pitch: 1.02, rate: 0.92 },
 
-  // Caring Women (Warm, soothing, maternal)
-  kore: { pitch: 1.08, rate: 0.88 },
-  aoede: { pitch: 1.15, rate: 0.95 },
-  vindemiatrix: { pitch: 1.02, rate: 0.85 },
-  polaris: { pitch: 1.05, rate: 0.90 },
+  // Caring Women (Calm, steady, maternal)
+  kore: { pitch: 1.02, rate: 0.90 },
+  vindemiatrix: { pitch: 1.00, rate: 0.88 },
+  polaris: { pitch: 1.02, rate: 0.92 },
 
   // Professional Women (Crisp, articulate, structured)
-  charon: { pitch: 1.05, rate: 1.00 },
-  kalyke: { pitch: 0.98, rate: 0.98 },
-  vega: { pitch: 1.10, rate: 1.02 },
-  schedar: { pitch: 1.00, rate: 0.92 },
+  erinome: { pitch: 1.02, rate: 0.98 },
+  despina: { pitch: 1.00, rate: 0.96 },
+  algieba: { pitch: 0.98, rate: 0.94 },
+  charon: { pitch: 1.02, rate: 0.98 },
+  kalyke: { pitch: 0.98, rate: 0.96 },
+  vega: { pitch: 1.04, rate: 1.00 },
+  schedar: { pitch: 1.00, rate: 0.94 },
 
-  // Caring Men (Fatherly, supportive, warm)
-  achird: { pitch: 0.82, rate: 0.90 },
-  rasalas: { pitch: 0.86, rate: 0.92 },
-  capella: { pitch: 0.80, rate: 0.86 },
+  // Caring Men (Steady, grounded, calm)
+  achird: { pitch: 0.92, rate: 0.92 },
+  umbriel: { pitch: 0.86, rate: 0.90 },
+  zubenelgenubi: { pitch: 0.90, rate: 0.94 },
+  rasalas: { pitch: 0.92, rate: 0.94 },
+  capella: { pitch: 0.88, rate: 0.90 },
 
-  // Professional Men (Dignified, deep, articulate)
-  iapetus: { pitch: 0.72, rate: 0.95 },
-  tarazed: { pitch: 0.80, rate: 1.00 },
-  sadaltager: { pitch: 0.76, rate: 0.88 },
+  // Professional Men (Articulate, steady, direct)
+  iapetus: { pitch: 0.85, rate: 0.96 },
+  sadaltager: { pitch: 0.86, rate: 0.92 },
+  tarazed: { pitch: 0.88, rate: 0.98 },
 };
 
 export async function speakText(
@@ -862,48 +870,83 @@ function speakWithBrowserSpeechSynthesis(
  * Top high-frequency AAC vocabulary to pre-warm for 0ms instantaneous speech
  */
 export const CORE_AAC_VOCABULARY = [
-  'Help please',
-  'I need a break',
+  'Help',
   'Water',
-  'Food / Snack',
+  'Apple',
+  'Food',
   'Bathroom',
-  'I feel happy',
-  'I feel sad',
-  'I feel overwhelmed',
-  'Quiet space',
   'Yes',
   'No',
+  'Please',
   'Thank you',
   'I want',
+  'More',
+  'Stop',
   'All done',
-  'Stop please',
-  'More please',
-  'Hurts',
+  'Break',
+  'Happy',
+  'Sad',
   'Tired',
-  'Love you',
+  'Hurts',
+  'Play',
+  'Go',
+  'Like',
+  'Quiet',
 ];
 
 /**
- * Pre-warms core AAC vocabulary into persistent browser CacheStorage
+ * Pre-warms core AAC vocabulary into persistent browser CacheStorage & memory cache.
+ * Automatically runs for the active persona across any language.
  * Runs on idle priority so it never impacts UI responsiveness or app boot time.
  */
-export async function prewarmCoreAudioVocabulary(lang: string = 'en'): Promise<void> {
+export async function prewarmCoreAudioVocabulary(persona: string = 'system', lang: string = 'en'): Promise<void> {
   if (typeof window === 'undefined') return;
+  const personaObj = getVoicePersonaById(persona);
+  const selectedPersonaId = personaObj.id;
+
+  // System native voice runs directly on-device hardware with 0ms latency; no need to pre-warm network
+  if (selectedPersonaId === 'system') return;
+
   const normalizedLang =
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  // If language is English, system native voices handle it with 0ms latency; no need to stream
-  if (normalizedLang === 'en') return;
-
-  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 1200));
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 300));
   idleFn(async () => {
     for (const phrase of CORE_AAC_VOCABULARY) {
       const formatted = formatForNaturalSpeech(phrase);
-      const cacheKey = `${normalizedLang}_${formatted.toLowerCase()}`;
-      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}`;
-      await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
+      if (!formatted) continue;
+      const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formatted.toLowerCase()}`;
+      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}&voice=${encodeURIComponent(selectedPersonaId)}`;
+      await getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
+    }
+  });
+}
+
+/**
+ * Predictive Screen Pre-loader:
+ * Pre-warms words visible on the active view (e.g., Food board, Feelings, Tools) in the background
+ */
+export function prewarmPhrases(phrases: string[], persona: string = 'system', lang: string = 'en'): void {
+  if (typeof window === 'undefined' || !phrases || phrases.length === 0) return;
+  const personaObj = getVoicePersonaById(persona);
+  const selectedPersonaId = personaObj.id;
+  if (selectedPersonaId === 'system') return;
+
+  const normalizedLang =
+    (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
+    (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
+    lang.substring(0, 2);
+
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
+  idleFn(async () => {
+    for (const phrase of phrases.slice(0, 24)) {
+      const formatted = formatForNaturalSpeech(phrase);
+      if (!formatted) continue;
+      const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formatted.toLowerCase()}`;
+      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}&voice=${encodeURIComponent(selectedPersonaId)}`;
+      getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
     }
   });
 }

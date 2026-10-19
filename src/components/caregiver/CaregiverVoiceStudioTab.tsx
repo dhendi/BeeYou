@@ -14,7 +14,7 @@ import {
   Zap,
   RotateCcw
 } from 'lucide-react';
-import { playChime } from '../../utils/audio';
+import { playChime, prewarmCoreAudioVocabulary } from '../../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../../services/haptics';
 import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../../data/voicePersonasData';
 import { t } from '../../services/translator';
@@ -57,6 +57,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const handleSelectVoice = (persona: VoicePersona) => {
     updateSettings({ voicePersona: persona.id });
+    prewarmCoreAudioVocabulary(persona.id, settings.language || 'en');
     if (settings.soundEffects) playChime('star');
     triggerHaptic('light', true);
     onShowNotification(`Voice persona updated to ${persona.name}`);
