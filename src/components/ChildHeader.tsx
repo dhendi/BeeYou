@@ -33,6 +33,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
     isCaregiverConnected,
     plansChanged,
     setShowPlansChangedModal,
+    setShowAccessibilityModal,
     setChildView,
     activeTheme,
     enabledFeatures,
@@ -107,6 +108,21 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
           >
             <span className="text-sm">🐝</span>
             <span className={`hidden sm:inline font-bold ${effectiveTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Help')}</span>
+          </button>
+
+          {/* Sensory & Accessibility Preferences Hub Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowAccessibilityModal(true);
+              playChime('tap');
+            }}
+            className={`flex items-center gap-1 px-2 py-1 rounded-xl ${effectiveTheme?.palette?.primaryLight || 'bg-amber-50'} hover:opacity-90 ${effectiveTheme?.palette?.textAccent || 'text-amber-950'} font-black text-[10px] sm:text-xs border ${effectiveTheme?.palette?.primaryBorder || 'border-amber-300'} shadow-2xs active:scale-95 transition-all cursor-pointer`}
+            title={t('Sensory & Accessibility Preferences')}
+            aria-label="Sensory & Accessibility Preferences"
+          >
+            <span className="text-sm">♿</span>
+            <span className={`hidden sm:inline font-bold ${effectiveTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Sensory')}</span>
           </button>
         </div>
 

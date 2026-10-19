@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ default: m.PlansChangedModal })));
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
+const AccessibilityPreferencesModal = lazy(() => import('./AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
 import { ChevronDown } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -13,6 +14,7 @@ import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } f
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
+import { VOICE_PERSONAS, getVoicePersonaById } from '../data/voicePersonasData';
 
 import { LanguageDropdown } from './LanguageDropdown';
 import {
@@ -47,6 +49,7 @@ import { CaregiverCycleSummaryTab } from './caregiver/CaregiverCycleSummaryTab';
 import { CaregiverDaySummaryTab } from './caregiver/CaregiverDaySummaryTab';
 import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
 import { CaregiverResourcesTab } from './caregiver/CaregiverResourcesTab';
+import { CaregiverVoiceStudioTab } from './caregiver/CaregiverVoiceStudioTab';
 import { CaregiverIncomingAlertModal } from './caregiver/CaregiverIncomingAlertModal';
 
 // Shared Components
@@ -82,6 +85,9 @@ export const ParentDashboard: React.FC = () => {
     getCyclePhaseInfo,
     caregiverResponses,
     setDailyRecollections,
+    showAccessibilityModal,
+    setShowAccessibilityModal,
+    speak,
   } = useApp();
 
   type TabType =
@@ -93,9 +99,11 @@ export const ParentDashboard: React.FC = () => {
     | 'cycle-summary'
     | 'day-summary'
     | 'resources'
+    | 'voice-studio'
     | 'subscription';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
   const cyclePhaseInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : { currentCycleDay: 1 };
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCaregiverTour, setShowCaregiverTour] = useState(false);
@@ -448,6 +456,17 @@ export const ParentDashboard: React.FC = () => {
       ],
     },
     {
+      id: 'preferences',
+      title: 'Preferences & Voices',
+      items: [
+        {
+          id: 'voice-studio',
+          label: 'Voice Studio & Preferences',
+          badge: '21 Voices',
+        },
+      ],
+    },
+    {
       id: 'account',
       title: 'Account & Plan',
       items: [
@@ -529,6 +548,25 @@ export const ParentDashboard: React.FC = () => {
 
           {/* Language Dropdown Choices */}
           <LanguageDropdown />
+
+          {/* Sensory Preferences & 20-Voice Studio Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('voice-studio');
+              playChime('tap');
+            }}
+            className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-black transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center gap-1.5 border ${
+              activeTab === 'voice-studio'
+                ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                : 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-300'
+            }`}
+            title={t('Sensory, Accessibility & Voice Studio')}
+          >
+            <span>🎙️</span>
+            <span className="hidden sm:inline">{t('Voice Studio & Sensory')}</span>
+            <span className="sm:hidden">{t('Voices')}</span>
+          </button>
 
           <button
             type="button"
@@ -866,6 +904,13 @@ export const ParentDashboard: React.FC = () => {
               onStartTour={() => handleStartSectionTour('resources')}
             />
           )}
+
+          {/* TAB: VOICE STUDIO & SENSORY PREFERENCES */}
+          {activeTab === 'voice-studio' && (
+            <CaregiverVoiceStudioTab 
+              onShowNotification={showNotification}
+            />
+          )}
         </main>
       </div>
 
@@ -932,6 +977,9 @@ export const ParentDashboard: React.FC = () => {
           onClose={() => setShowAboutMeModal(false)}
         />
         <DailyRecollectionModal />
+        {showAccessibilityModal && (
+          <AccessibilityPreferencesModal />
+        )}
       </Suspense>
     </div>
   );

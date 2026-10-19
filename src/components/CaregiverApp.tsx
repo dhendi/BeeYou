@@ -16,6 +16,7 @@ const ParentDashboard = lazy(() => import('./ParentDashboard').then(m => ({ defa
 const ConnectCaregiverModal = lazy(() => import('./ConnectCaregiverModal').then(m => ({ default: m.ConnectCaregiverModal })));
 const AdaptiveOnboardingFlow = lazy(() => import('./AdaptiveOnboardingFlow').then(m => ({ default: m.AdaptiveOnboardingFlow })));
 const FamilyAuthModal = lazy(() => import('./FamilyAuthModal').then(m => ({ default: m.FamilyAuthModal })));
+const AccessibilityPreferencesModal = lazy(() => import('./AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
 
 const CaregiverAppContent: React.FC = () => {
   const {
@@ -27,6 +28,8 @@ const CaregiverAppContent: React.FC = () => {
     setShowFamilyAuthModal,
     showEmailVerificationModal,
     setShowEmailVerificationModal,
+    showAccessibilityModal,
+    setShowAccessibilityModal,
     activeTheme,
   } = useApp();
 
@@ -35,6 +38,7 @@ const CaregiverAppContent: React.FC = () => {
   useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
   useModalBackHandler(showFamilyAuthModal, () => setShowFamilyAuthModal(false));
   useModalBackHandler(showEmailVerificationModal, () => setShowEmailVerificationModal(false));
+  useModalBackHandler(showAccessibilityModal, () => setShowAccessibilityModal(false));
 
   useEffect(() => {
     setActiveDeviceView('caregiver');
@@ -83,6 +87,9 @@ const CaregiverAppContent: React.FC = () => {
           isOpen={showFamilyAuthModal}
           onClose={() => setShowFamilyAuthModal(false)}
         />
+        {showAccessibilityModal && (
+          <AccessibilityPreferencesModal />
+        )}
       </Suspense>
       </div>
     </div>
