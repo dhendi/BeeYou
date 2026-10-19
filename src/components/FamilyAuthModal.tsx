@@ -20,6 +20,7 @@ import {
   DeletionStepResult,
   setActiveDeviceView,
   sendAccountPasswordResetEmail,
+  sanitizeAuthErrorMessage,
   FamilyAccount
 } from '../services/authService';
 import { 
@@ -188,7 +189,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       applyAccountToContext(account, role);
     } catch (err: any) {
       setLoginLoading(false);
-      setLoginError(err?.message || 'Could not launch demo mode. Please try again.');
+      setLoginError(sanitizeAuthErrorMessage(err));
     }
   };
 
@@ -205,7 +206,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }
     } catch (err: any) {
       setLoginLoading(false);
-      setLoginError(err?.message || 'Google sign-in error occurred.');
+      setLoginError(sanitizeAuthErrorMessage(err));
     }
   };
 
@@ -237,7 +238,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }
     } catch (err: any) {
       setLoginLoading(false);
-      setLoginError(err?.message || 'Login failed unexpectedly. Please try again.');
+      setLoginError(sanitizeAuthErrorMessage(err));
     }
   };
 
@@ -283,7 +284,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }
     } catch (err: any) {
       setRegLoading(false);
-      setRegError(err?.message || 'Registration failed unexpectedly. Please try again.');
+      setRegError(sanitizeAuthErrorMessage(err));
     }
   };
 
@@ -313,7 +314,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       }
     } catch (err: any) {
       setForgotLoading(false);
-      setForgotError(err?.message || 'Could not send reset email. Please check your network.');
+      setForgotError(sanitizeAuthErrorMessage(err));
     }
   };
 

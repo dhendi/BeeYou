@@ -466,6 +466,80 @@ export function getDeterministicFamilyCode(email: string): string {
 }
 
 /**
+ * Sanitizes raw authentication, network, and pairing errors into clear,
+ * empathetic user-facing messages.
+ * Guarantees zero leakage of stack traces, internal database URLs, API keys, or private tokens.
+ */
+export function sanitizeAuthErrorMessage(err: any): string {
+  if (!err) return 'An unexpected issue occurred. Please try again or reach out to support@beeyou.app.';
+
+  const code = (typeof err === 'object' && err?.code ? String(err.code) : '').toLowerCase();
+  const rawMsg = (typeof err === 'string' ? err : err?.message ? String(err.message) : '').trim();
+
+  // 1. Standard Firebase Auth error codes
+  if (
+    code === 'auth/invalid-credential' ||
+    code === 'auth/user-not-found' ||
+    code === 'auth/wrong-password' ||
+    code === 'auth/invalid-login-credentials'
+  ) {
+    return 'Incorrect email or password. Please verify your credentials or register a new account.';
+  }
+  if (code === 'auth/too-many-requests') {
+    return 'Access temporarily disabled due to too many failed login attempts. Please wait a few moments and try again.';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Network connection error. Please check your internet connection and try again.';
+  }
+  if (code === 'auth/email-already-in-use') {
+    return 'An account with this email already exists. Please sign in instead.';
+  }
+  if (code === 'auth/weak-password') {
+    return 'The password is too weak. Please choose a password with at least 8 characters.';
+  }
+  if (code === 'auth/invalid-email') {
+    return 'Please enter a valid email address.';
+  }
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    return 'Sign-in popup was closed before completion.';
+  }
+  if (code === 'auth/requires-recent-login') {
+    return 'For your security, please sign in again before completing this action.';
+  }
+  if (code === 'auth/user-disabled') {
+    return 'This family account has been deactivated. Please contact support@beeyou.app for assistance.';
+  }
+
+  // 2. Scrub technical strings, runtime exception names, or stack traces
+  const isTechnicalException =
+    rawMsg.includes('\n') ||
+    rawMsg.includes(' at ') ||
+    /^[A-Za-z]+Error:/.test(rawMsg) ||
+    rawMsg.includes('TypeError') ||
+    rawMsg.includes('ReferenceError') ||
+    rawMsg.includes('SyntaxError') ||
+    rawMsg.includes('EvalError') ||
+    rawMsg.toLowerCase().includes('stack') ||
+    rawMsg.toLowerCase().includes('trace');
+
+  if (isTechnicalException) {
+    return 'We encountered a temporary connection issue. Please check your network or try again.';
+  }
+
+  let cleaned = rawMsg
+    .replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '')
+    .replace(/https?:\/\/[^\s]+/g, '')
+    .replace(/[a-zA-Z0-9_-]{20,}/g, '')
+    .trim();
+
+  if (!cleaned || cleaned.includes('{') || cleaned.length < 5) {
+    return 'We encountered a temporary connection issue. Please check your network or try again.';
+  }
+
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+/**
  * Perform login using Shared Email and Password (or Demo account)
  */
 export async function loginWithSharedEmail(
@@ -518,32 +592,9 @@ export async function loginWithSharedEmail(
     await syncUserFamilyMembership(firebaseUid, deterministicCode, false);
   } catch (err: any) {
     console.warn('Firebase signIn notice:', err?.code, err?.message);
-    if (
-      err.code === 'auth/invalid-credential' ||
-      err.code === 'auth/user-not-found' ||
-      err.code === 'auth/wrong-password' ||
-      err.code === 'auth/invalid-login-credentials'
-    ) {
-      return {
-        success: false,
-        message: 'Incorrect email or password. Please verify your credentials or register a new account.',
-      };
-    }
-    if (err.code === 'auth/too-many-requests') {
-      return {
-        success: false,
-        message: 'Access temporarily disabled due to too many failed login attempts. Please wait a few moments and try again.',
-      };
-    }
-    if (err.code === 'auth/network-request-failed') {
-      return {
-        success: false,
-        message: 'Network connection error. Please check your internet connection and try again.',
-      };
-    }
     return {
       success: false,
-      message: err.message || 'Login failed. Please verify your credentials.',
+      message: sanitizeAuthErrorMessage(err),
     };
   }
 
@@ -639,15 +690,9 @@ export async function loginWithGoogle(): Promise<{ success: boolean; account?: F
     };
   } catch (err: any) {
     console.error('Google Sign-In Error:', err);
-    if (err.code === 'auth/popup-closed-by-user') {
-      return { success: false, message: 'Google sign-in popup was closed.' };
-    }
-    if (err.code === 'auth/cancelled-popup-request') {
-      return { success: false, message: 'Google sign-in cancelled.' };
-    }
     return {
       success: false,
-      message: err?.message || 'Google sign-in failed. Please verify popup settings or try email.',
+      message: sanitizeAuthErrorMessage(err),
     };
   }
 }
@@ -699,27 +744,9 @@ export async function registerSharedFamilyAccount(params: {
     }
   } catch (err: any) {
     console.warn('Firebase createUser notice:', err?.code, err?.message);
-    if (err.code === 'auth/email-already-in-use') {
-      return {
-        success: false,
-        message: 'An account with this email already exists. Please sign in instead.',
-      };
-    }
-    if (err.code === 'auth/weak-password') {
-      return {
-        success: false,
-        message: 'The password is too weak. Please choose a password with at least 8 characters.',
-      };
-    }
-    if (err.code === 'auth/network-request-failed') {
-      return {
-        success: false,
-        message: 'Network connection error. Please check your internet connection and try again.',
-      };
-    }
     return {
       success: false,
-      message: err.message || 'Account registration failed. Please try again.',
+      message: sanitizeAuthErrorMessage(err),
     };
   }
 

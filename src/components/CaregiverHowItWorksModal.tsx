@@ -841,9 +841,16 @@ export const CaregiverHowItWorksModal: React.FC<CaregiverHowItWorksModalProps> =
 
         {/* FOOTER */}
         <div className="p-3 sm:p-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
-            BeeYou • All-in-one personalized daily support
-          </span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <span className="hidden sm:inline">BeeYou • All-in-one personalized daily support</span>
+            <span className="hidden sm:inline text-slate-300">•</span>
+            <a
+              href="mailto:support@beeyou.app?subject=BeeYou%20Question"
+              className="text-amber-700 dark:text-amber-400 font-bold hover:underline cursor-pointer"
+            >
+              <span>Support: support@beeyou.app</span>
+            </a>
+          </div>
           <button
             onClick={onClose}
             className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs sm:text-sm shadow-xs cursor-pointer active:scale-95 ml-auto"

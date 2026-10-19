@@ -17,7 +17,9 @@ import {
   Shield,
   MousePointer,
   Timer,
-  Lightbulb
+  Lightbulb,
+  Mail,
+  Copy
 } from 'lucide-react';
 import { DwellMode, STORAGE_KEYS, CaregiverHelpTopicId } from '../../types/aac';
 import { playChime, speakText } from '../../utils/audio';
@@ -135,6 +137,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
 }) => {
   const [selectedTopicId, setSelectedTopicId] = useState<CaregiverHelpTopicId>('create_folder');
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
   
   // Dwell mode state
   const [dwellMode, setDwellMode] = useState<DwellMode>(() => {
@@ -427,6 +430,53 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
               </span>
             </div>
 
+            {/* Customer Support & Contact Box */}
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-300 dark:border-amber-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-black text-amber-950 dark:text-amber-200 text-xs sm:text-sm">
+                    Customer Support &amp; Feedback
+                  </h4>
+                  <p className="text-[11px] text-amber-900/80 dark:text-amber-300/80 font-medium">
+                    Need help, encounter an issue, or want to request a feature? We respond within 24 hours.
+                  </p>
+                  <span className="font-mono font-bold text-amber-900 dark:text-amber-300 text-xs mt-0.5 inline-block">
+                    support@beeyou.app
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <a
+                  href="mailto:support@beeyou.app?subject=BeeYou%20Support%20Request"
+                  onClick={() => playChime('tap')}
+                  className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email Support</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playChime('star');
+                    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                      navigator.clipboard.writeText('support@beeyou.app');
+                    }
+                    setCopiedEmail(true);
+                    setTimeout(() => setCopiedEmail(false), 2500);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-200 font-bold text-xs flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                  title="Copy support email address"
+                  aria-label="Copy support email address"
+                >
+                  {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedEmail ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
@@ -455,6 +505,14 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
             >
               <span>Terms of Service</span>
             </button>
+            <span className="text-amber-300">•</span>
+            <a
+              href="mailto:support@beeyou.app"
+              onClick={() => playChime('tap')}
+              className="font-bold text-amber-900 hover:text-amber-700 underline cursor-pointer"
+            >
+              <span>support@beeyou.app</span>
+            </a>
           </div>
 
           <button
