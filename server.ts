@@ -9,6 +9,13 @@ import {
   createCompositeRateLimiter,
   createSingleRateLimiter,
 } from './src/services/sharedRateLimitStore';
+import {
+  handleTranslateRequest,
+  handleTtsRequest,
+  usageBudgetTracker,
+  validateTextInput,
+  normalizeLanguageCode,
+} from './src/services/ttsAndTranslationService';
 
 dotenv.config();
 
@@ -255,117 +262,28 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
 });
 
-// Lightweight On-Demand Translation Endpoint (Google Translate API fallback)
-app.get('/api/translate', async (req, res) => {
-  const text = String(req.query.text || '').trim();
-  const to = String(req.query.to || 'es').trim();
-  if (!text) return res.json({ translated: text });
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=en&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-    });
-    const data: any = await response.json();
-    const translated = data?.[0]?.[0]?.[0] || text;
-    res.json({ translated });
-  } catch (err: any) {
-    res.json({ translated: text });
-  }
+// Lightweight On-Demand Translation Endpoint with Input Validation, Timeouts & Multi-Tier Caching
+app.get('/api/translate', handleTranslateRequest);
+
+// Authentic High-Fidelity Audio Streaming Endpoint with Abuse Protection, Quotas & Caching
+app.get('/api/tts', handleTtsRequest);
+
+// Usage Metrics & Budget Status Endpoint (Admin & Diagnostic Health)
+app.get('/api/admin/usage', (_req, res) => {
+  res.json({
+    success: true,
+    metrics: usageBudgetTracker.getMetrics(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Authentic High-Fidelity Audio Streaming Endpoint (Google Neural TTS Stream)
-// Provides authentic native Spanish, French, German, Greek, Russian, Vietnamese, Chinese, Japanese, Korean pronunciation
-// Backed by multi-tier L1 in-memory cache + L2 persistent disk cache + 1-year immutable edge CDN headers
-const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
-const TTS_CACHE_DIR = path.join(process.cwd(), '.data', 'tts_cache');
-
-try {
-  if (!fs.existsSync(TTS_CACHE_DIR)) {
-    fs.mkdirSync(TTS_CACHE_DIR, { recursive: true });
-  }
-} catch {}
-
-app.get('/api/tts', async (req, res) => {
-  const text = String(req.query.text || '').trim();
-  const lang = String(req.query.lang || 'es').trim().toLowerCase();
-  if (!text) {
-    return res.status(400).send('Missing text parameter');
-  }
-
-  // Normalize language codes (e.g., fr_ca -> fr-CA, zh -> zh-CN)
-  let normalizedLang = 'en';
-  if (lang === 'fr_ca' || lang === 'fr-ca') {
-    normalizedLang = 'fr-CA';
-  } else if (lang === 'zh' || lang.startsWith('zh')) {
-    normalizedLang = 'zh-CN';
-  } else {
-    normalizedLang = lang.substring(0, 2);
-  }
-
-  const safeText = text.length > 200 ? text.slice(0, 200) : text;
-  const hashKey = crypto.createHash('md5').update(`${normalizedLang}_${safeText.toLowerCase()}`).digest('hex');
-  const cacheKey = `${normalizedLang}_${safeText.toLowerCase()}`;
-  const diskPath = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
-
-  // 1. L1 In-Memory Cache (0ms latency, zero I/O)
-  if (ttsAudioCache.has(cacheKey)) {
-    const cached = ttsAudioCache.get(cacheKey)!;
-    res.setHeader('Content-Type', cached.contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
-    res.setHeader('ETag', `"${hashKey}"`);
-    return res.send(cached.buffer);
-  }
-
-  // 2. L2 Persistent Disk Cache (Survives server restarts and redeployments)
-  if (fs.existsSync(diskPath)) {
-    try {
-      const fileBuffer = await fs.promises.readFile(diskPath);
-      ttsAudioCache.set(cacheKey, { buffer: fileBuffer, contentType: 'audio/mpeg' });
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
-      res.setHeader('ETag', `"${hashKey}"`);
-      return res.send(fileBuffer);
-    } catch {}
-  }
-
-  // 3. L3 Upstream Generation (Google Neural TTS Stream)
-  try {
-    const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(safeText)}`;
-    const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://translate.google.com/',
-      },
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).send('TTS upstream error');
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const contentType = response.headers.get('content-type') || 'audio/mpeg';
-
-    if (ttsAudioCache.size > 1000) {
-      const firstKey = ttsAudioCache.keys().next().value;
-      if (firstKey) ttsAudioCache.delete(firstKey);
-    }
-    ttsAudioCache.set(cacheKey, { buffer, contentType });
-
-    // Asynchronously write to persistent disk cache (non-blocking)
-    fs.promises.writeFile(diskPath, buffer).catch(() => {});
-
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
-    res.setHeader('ETag', `"${hashKey}"`);
-    return res.send(buffer);
-  } catch (err: any) {
-    console.error('[TTS Proxy Error]:', err);
-    return res.status(500).send('TTS internal error');
-  }
-});
+export {
+  handleTranslateRequest,
+  handleTtsRequest,
+  usageBudgetTracker,
+  validateTextInput,
+  normalizeLanguageCode,
+};
 
 // -------------------------------------------------------------
 // Live Caregiver Companion & Sync Endpoints
