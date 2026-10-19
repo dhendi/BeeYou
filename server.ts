@@ -19,6 +19,7 @@ import {
   usageBudgetTracker,
   validateTextInput,
   normalizeLanguageCode,
+  verifyLevel3DiskCache,
 } from './src/services/ttsAndTranslationService';
 
 dotenv.config();
@@ -278,6 +279,16 @@ app.get('/api/admin/usage', (_req, res) => {
   res.json({
     success: true,
     metrics: usageBudgetTracker.getMetrics(),
+    level3DiskCache: verifyLevel3DiskCache(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Explicit Level 3 Server-Side Disk Cache Deployment Verification Endpoint
+app.get('/api/admin/cache-status', (_req, res) => {
+  res.json({
+    success: true,
+    cache: verifyLevel3DiskCache(),
     timestamp: new Date().toISOString(),
   });
 });
@@ -288,6 +299,7 @@ export {
   usageBudgetTracker,
   validateTextInput,
   normalizeLanguageCode,
+  verifyLevel3DiskCache,
 };
 
 // -------------------------------------------------------------
@@ -3261,6 +3273,9 @@ async function startServer() {
       res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
     });
   }
+
+  const cacheVerif = verifyLevel3DiskCache();
+  console.log(`💾 Level 3 Disk Cache: ${cacheVerif.status} (${cacheVerif.cachedFilesCount} files, ${(cacheVerif.totalSizeBytes / 1024 / 1024).toFixed(2)} MB) @ ${cacheVerif.path}`);
 
   const host = '0.0.0.0';
   app.listen(childPort, host, () => {

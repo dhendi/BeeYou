@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import crypto from 'crypto';
 import type { Request, Response } from 'express';
 import { defaultRateLimitStore, getClientIp } from './sharedRateLimitStore';
@@ -213,18 +214,107 @@ export class UsageBudgetTracker {
 export const usageBudgetTracker = new UsageBudgetTracker();
 
 // -------------------------------------------------------------
-// Multi-Tier Caching Infrastructure (L1 Memory + L2 Disk Cache)
+// Multi-Tier Caching Infrastructure (L1 Memory + L3 Disk Cache)
+// Resilient storage verified for local dev & cloud deployment (Render, Railway, Vercel, Docker)
 // -------------------------------------------------------------
+export function resolveCacheDirectory(subdir: string): string {
+  const preferred = process.env.DATA_DIR
+    ? path.join(process.env.DATA_DIR, subdir)
+    : path.join(process.cwd(), '.data', subdir);
+
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    const probe = path.join(preferred, `.probe_${Date.now()}.tmp`);
+    fs.writeFileSync(probe, 'ok');
+    fs.unlinkSync(probe);
+    return preferred;
+  } catch (err) {
+    const fallback = path.join(os.tmpdir(), 'beeyou_data', subdir);
+    try {
+      if (!fs.existsSync(fallback)) {
+        fs.mkdirSync(fallback, { recursive: true });
+      }
+      return fallback;
+    } catch {
+      return preferred;
+    }
+  }
+}
+
+export const TTS_CACHE_DIR = resolveCacheDirectory('tts_cache');
+export const TRANSLATE_CACHE_DIR = resolveCacheDirectory('translate_cache');
+
 const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
-const TTS_CACHE_DIR = path.join(process.cwd(), '.data', 'tts_cache');
-
 const translateTextCache = new Map<string, string>();
-const TRANSLATE_CACHE_DIR = path.join(process.cwd(), '.data', 'translate_cache');
 
-try {
-  if (!fs.existsSync(TTS_CACHE_DIR)) fs.mkdirSync(TTS_CACHE_DIR, { recursive: true });
-  if (!fs.existsSync(TRANSLATE_CACHE_DIR)) fs.mkdirSync(TRANSLATE_CACHE_DIR, { recursive: true });
-} catch {}
+/**
+ * Diagnostic helper to verify Level 3 server-side disk cache deployment readiness
+ */
+export function verifyLevel3DiskCache(): {
+  status: 'VERIFIED_READY' | 'DEGRADED';
+  path: string;
+  cachedFilesCount: number;
+  totalSizeBytes: number;
+  writable: boolean;
+} {
+  let writable = false;
+  let cachedFilesCount = 0;
+  let totalSizeBytes = 0;
+
+  try {
+    const probe = path.join(TTS_CACHE_DIR, `.probe_${Date.now()}.tmp`);
+    fs.writeFileSync(probe, 'test');
+    fs.unlinkSync(probe);
+    writable = true;
+  } catch {
+    writable = false;
+  }
+
+  try {
+    const files = fs.readdirSync(TTS_CACHE_DIR);
+    for (const f of files) {
+      if (f.endsWith('.wav') || f.endsWith('.mp3')) {
+        cachedFilesCount++;
+        const stat = fs.statSync(path.join(TTS_CACHE_DIR, f));
+        totalSizeBytes += stat.size;
+      }
+    }
+  } catch {}
+
+  const status = writable ? 'VERIFIED_READY' : 'DEGRADED';
+  return {
+    status,
+    path: TTS_CACHE_DIR,
+    cachedFilesCount,
+    totalSizeBytes,
+    writable,
+  };
+}
+
+/**
+ * Wraps raw linear PCM (e.g. Gemini 2.5) into a standard 44-byte RIFF WAV container
+ * so all modern browsers can decode and play the audio seamlessly.
+ */
+export function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1, bitDepth = 16): Buffer {
+  const dataSize = pcmBuffer.length;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + dataSize, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16); // Subchunk1Size (16 for PCM)
+  header.writeUInt16LE(1, 20); // AudioFormat (1 = PCM)
+  header.writeUInt16LE(numChannels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(sampleRate * numChannels * (bitDepth / 8), 28); // ByteRate
+  header.writeUInt16LE(numChannels * (bitDepth / 8), 32); // BlockAlign
+  header.writeUInt16LE(bitDepth, 34); // BitsPerSample
+  header.write('data', 36);
+  header.writeUInt32LE(dataSize, 40);
+  return Buffer.from(Buffer.concat([header, pcmBuffer]));
+}
 
 // Per-User Quota Constants
 const TTS_BURST_LIMIT_PER_MIN = 120; // Max 120 speech generations per minute per IP/user
@@ -399,6 +489,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     usageBudgetTracker.recordTtsCacheHit();
     const cached = ttsAudioCache.get(cacheKey)!;
     console.log(`[TTS Cache HIT L1] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
+    if (req.headers['if-none-match'] === `"${hashKey}"`) {
+      res.status(304).end();
+      return;
+    }
     res.setHeader('Content-Type', cached.contentType);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
     res.setHeader('ETag', `"${hashKey}"`);
@@ -406,7 +500,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 4. L2 Persistent Disk Cache Check
+  // 4. L3 Persistent Disk Cache Check
   const diskFile = fs.existsSync(diskPathWav)
     ? diskPathWav
     : (fs.existsSync(diskPathMp3) ? diskPathMp3 : (fs.existsSync(legacyDiskPathMp3) ? legacyDiskPathMp3 : null));
@@ -417,7 +511,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       const contentType = diskFile.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg';
       ttsAudioCache.set(cacheKey, { buffer: fileBuffer, contentType });
       usageBudgetTracker.recordTtsCacheHit();
-      console.log(`[TTS Cache HIT L2 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
+      console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
+      if (req.headers['if-none-match'] === `"${hashKey}"`) {
+        res.status(304).end();
+        return;
+      }
       res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
       res.setHeader('ETag', `"${hashKey}"`);
@@ -456,7 +554,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 7. Upstream Audio Generation (Gemini 3.8 Flash TTS)
+  // 7. Upstream Audio Generation (Gemini 3.8 Flash-Lite -> Gemini 2.5 Flash Preview -> Gemini 3.8 Flash)
   let geminiApiKey = process.env.GEMINI_API_KEY;
   if (!geminiApiKey) {
     try {
@@ -482,15 +580,17 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     for (const model of candidateModels) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        const textPart: any = { text: cleanText };
+        // speech_metadata is exclusively supported on Gemini 3.8 models (Gemini 2.5 throws 400 Invalid Argument)
+        if (model.includes('3.8')) {
+          textPart.speech_metadata = {
+            style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
+          };
+        }
         const payload = {
           contents: [{
             role: 'user',
-            parts: [{
-              text: cleanText,
-              speech_metadata: {
-                style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
-              },
-            }],
+            parts: [textPart],
           }],
           generationConfig: {
             responseModalities: ['AUDIO'],
@@ -515,13 +615,20 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         if (geminiRes.ok) {
           usageBudgetTracker.recordTtsUpstream();
           const geminiData: any = await geminiRes.json();
+          const inline = geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
           const audioBase64 =
-            geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ||
+            inline?.data ||
             geminiData?.output_audio?.data ||
             geminiData?.outputAudio?.data;
 
           if (audioBase64) {
-            const buffer = Buffer.from(audioBase64, 'base64');
+            let buffer: any = Buffer.from(audioBase64, 'base64');
+            const mime = inline?.mimeType || '';
+
+            // If audio is raw PCM (e.g. Gemini 2.5 returns audio/L16;codec=pcm;rate=24000 without RIFF header), wrap in WAV container
+            if (mime.includes('pcm') || mime.includes('L16') || !buffer.subarray(0, 4).toString('ascii').startsWith('RIFF')) {
+              buffer = pcmToWav(buffer, 24000, 1, 16);
+            }
             const contentType = 'audio/wav';
 
             console.log(`[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) - 1 API call`);
