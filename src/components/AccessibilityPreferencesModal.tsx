@@ -15,6 +15,7 @@ import { playChime } from '../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
+import { VOICE_PERSONAS, getVoicePersonaById } from '../data/voicePersonasData';
 
 export const AccessibilityPreferencesModal: React.FC = () => {
   const {
@@ -28,6 +29,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
 
   if (!showAccessibilityModal) return null;
 
@@ -587,6 +589,134 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
+              {/* Voice Studio: 20 Curated Neural Personas & System Voice */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🎙️</span>
+                      <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                        Voice Studio ({VOICE_PERSONAS.length} Personas)
+                      </h4>
+                    </div>
+                    <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                      Choose from 20 natural AI voices across kids, teens, caring caregivers, and professionals.
+                    </p>
+                  </div>
+
+                  {/* Active Voice Pill */}
+                  <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
+                    <span>Active:</span>
+                    <span>{getVoicePersonaById(settings.voicePersona).emoji}</span>
+                    <span className="truncate max-w-[130px]">{getVoicePersonaById(settings.voicePersona).name}</span>
+                  </div>
+                </div>
+
+                {/* Category Filter Pills (Silicone Tray Style) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  {[
+                    { key: 'all', label: 'All Voices (21)' },
+                    { key: 'kids', label: '🧸 Kids & Children' },
+                    { key: 'teens', label: '🎧 Teens & Youth' },
+                    { key: 'caring', label: '💖 Caring & Warm' },
+                    { key: 'pro', label: '💼 Professional' },
+                  ].map((filter) => {
+                    const isActive = voiceCategoryFilter === filter.key;
+                    return (
+                      <button
+                        key={filter.key}
+                        type="button"
+                        onClick={() => {
+                          setVoiceCategoryFilter(filter.key as any);
+                          playChime('tap');
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
+                          isActive
+                            ? 'bg-[#E28743] border-[#C87332] text-white shadow-xs'
+                            : 'bg-[#EFE9DF] border-[#E0D8CB] text-[#6B5E52] hover:bg-[#E5DFD4]'
+                        }`}
+                      >
+                        {filter.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Voice Persona Cards List */}
+                <div className="max-h-72 overflow-y-auto pr-1 space-y-2.5 rounded-2xl">
+                  {VOICE_PERSONAS.filter((p) => {
+                    if (voiceCategoryFilter === 'all') return true;
+                    if (voiceCategoryFilter === 'kids') return p.category === 'kids';
+                    if (voiceCategoryFilter === 'teens') return p.category === 'teens';
+                    if (voiceCategoryFilter === 'caring') return p.category === 'caring_women' || p.category === 'caring_men';
+                    if (voiceCategoryFilter === 'pro') return p.category === 'pro_women' || p.category === 'pro_men';
+                    return true;
+                  }).map((persona) => {
+                    const isSelected = (settings.voicePersona || 'puck').toLowerCase() === persona.id.toLowerCase();
+                    return (
+                      <div
+                        key={persona.id}
+                        onClick={() => {
+                          updateSettings({ voicePersona: persona.id });
+                          playChime('tap');
+                        }}
+                        className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-[#FDF4E7] border-[#E2A44E] shadow-xs'
+                            : 'bg-white hover:bg-[#FAF7F2] border-[#E0D8CB]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="w-10 h-10 rounded-xl bg-[#EFE9DF] border border-[#E0D8CB] flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                            {persona.emoji}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
+                                {persona.label}
+                              </h5>
+                              <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
+                                {persona.categoryLabel}
+                              </span>
+                              {isSelected && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black">
+                                  ✓ Active
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-[#7A6C60] font-semibold truncate mt-0.5">
+                              {persona.tagline}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              speak(persona.previewText, { voicePersona: persona.id, force: true });
+                            }}
+                            className="px-2.5 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 flex items-center gap-1 shadow-2xs"
+                            title={`Audition ${persona.name}`}
+                          >
+                            <span>Audition</span>
+                            <span>🔊</span>
+                          </button>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                              isSelected ? 'border-[#E2A44E] bg-[#E2A44E] text-white' : 'border-[#C8BFB3]'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Voice Speed & Test Speech */}
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
                 <div className="flex items-center justify-between">
@@ -616,6 +746,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   className="w-full accent-[#5B8E7D] cursor-pointer"
                 />
               </div>
+
             </div>
           )}
 

@@ -593,7 +593,7 @@ export interface AppSettings {
   voiceRate: number;
   voicePitch: number;
   selectedVoiceURI: string;
-  voicePersona?: 'Kore' | 'Puck' | 'Zephyr' | 'Fenrir' | 'system';
+  voicePersona?: string; // e.g. 'puck' | 'leda' | 'fenrir' | 'kore' | 'zephyr' | 'achird' | 'iapetus' | 'system'
   language: AppLanguage;
   gridColumns: 2 | 3 | 4 | 6 | 8;
   largeButtonMode: boolean;

@@ -1,4 +1,5 @@
 import { playChime } from './chimes';
+import { getVoicePersonaById } from '../../data/voicePersonasData';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -297,12 +298,14 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
   const candidates = matchingVoices.length > 0 ? matchingVoices : (targetPrefix === 'en' ? voices : []);
   if (candidates.length === 0) return null;
 
-  // Persona gender orientation: Kore & Zephyr = Female; Puck & Fenrir = Male
-  const isPreferFemale = !persona || persona === 'Kore' || persona === 'Zephyr';
-  const isPreferMale = persona === 'Puck' || persona === 'Fenrir';
+  const personaObj = getVoicePersonaById(persona);
+  const isPreferFemale = personaObj.gender === 'female';
+  const isPreferMale = personaObj.gender === 'male';
+  const isChild = personaObj.gender === 'child';
 
   const femaleKeywords = ['female', 'zira', 'jenny', 'aria', 'samantha', 'ava', 'zoe', 'allison', 'karen', 'serena', 'victoria', 'moira', 'fiona', 'tessa', 'ana', 'hazel', 'susan', 'cathy', 'agnes'];
   const maleKeywords = ['male', 'david', 'puck', 'guy', 'ryan', 'daniel', 'oliver', 'evan', 'tom', 'alex', 'george', 'mark', 'christopher', 'fred', 'bruce', 'ralph'];
+  const childKeywords = ['child', 'junior', 'kid', 'youth', 'puck', 'samantha', 'ava', 'zoe', 'daniel'];
 
   const scoreVoice = (v: SpeechSynthesisVoice): number => {
     let score = rateVoiceNaturalness(v);
@@ -312,7 +315,9 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
       if (v.lang.toLowerCase().includes('ca') || n.includes('canada')) score += 100;
     }
 
-    if (isPreferFemale) {
+    if (isChild) {
+      if (childKeywords.some((k) => n.includes(k))) score += 90;
+    } else if (isPreferFemale) {
       if (femaleKeywords.some((k) => n.includes(k))) score += 80;
       if (maleKeywords.some((k) => n.includes(k))) score -= 80;
     } else if (isPreferMale) {
@@ -483,70 +488,42 @@ export async function speakText(
   // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
   stopSpeaking();
 
-  const selectedPersona = options?.voicePersona || 'Kore';
+  const rawPersona = options?.voicePersona || 'puck';
+  const personaObj = getVoicePersonaById(rawPersona);
+  const selectedPersonaId = personaObj.id;
 
-  // Check if we already have a cached audio blob for this phrase
-  if (selectedPersona !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
-    const cacheKey = `${selectedPersona}_${formattedText}`;
-    if (audioMemoryCache.has(cacheKey)) {
-      try {
-        const audioSrc = audioMemoryCache.get(cacheKey)!;
-        const played = await playAudioUrl(audioSrc, formattedText, options?.rate);
-        if (played) return;
-      } catch (e) {
-        // Fallback to device speech synthesis below
-      }
-    }
-  }
-
-  // Authentic Native Pronunciation Audio Stream:
-  // When speaking non-English languages where device browsers lack high-quality local voices,
-  // stream authentic Google Neural audio for genuine native inflection.
   const lang = (options?.lang || 'en').toLowerCase();
   const normalizedLang = 
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  if (normalizedLang !== 'en' && !options?.preferOfflineOnly) {
-    const voices = getAvailableVoices();
-    const explicitVoice = options?.voiceURI ? voices.find(v => v.voiceURI === options.voiceURI) : null;
-    const isExplicitVoiceAuthenticForLang = explicitVoice && (
-      normalizedLang === 'fr_ca'
-        ? explicitVoice.lang.toLowerCase().startsWith('fr')
-        : explicitVoice.lang.toLowerCase().startsWith(normalizedLang)
-    );
+  // High-Fidelity Neural Audio Stream (Multi-Tier Caching: RAM -> Browser CacheStorage -> Edge Server):
+  // When using any of the 20 neural voices and not restricted to system-only or explicit voiceURI:
+  if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
+    const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formattedText.toLowerCase()}`;
+    const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}&voice=${encodeURIComponent(selectedPersonaId)}`;
 
-    // If no authentic local voice is explicitly chosen, check if OS has any authentic local voice installed
-    if (!isExplicitVoiceAuthenticForLang) {
-      const localVoice = getBestSystemVoice(normalizedLang);
-      const hasAuthenticLocalVoice = localVoice && (
-        normalizedLang === 'fr_ca'
-          ? localVoice.lang.toLowerCase().startsWith('fr')
-          : localVoice.lang.toLowerCase().startsWith(normalizedLang)
-      );
-
-      // When device lacks native voice pack for this language, stream authentic neural audio
-      if (!hasAuthenticLocalVoice) {
-        const cacheKey = `${normalizedLang}_${formattedText.toLowerCase()}`;
-        const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}`;
-        try {
-          const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
-          if (blobUrl) {
-            const played = await playAudioUrl(blobUrl, formattedText, options?.rate);
-            if (played) return;
-          }
-        } catch (err) {
-          console.warn(`[Audio] Authentic ${normalizedLang} audio stream playback failed, falling back to local speech synthesis:`, err);
-        }
+    try {
+      const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
+      if (blobUrl) {
+        const played = await playAudioUrl(blobUrl, formattedText, options?.rate);
+        if (played) return;
       }
+    } catch (err) {
+      console.warn(`[Audio] Neural stream (${selectedPersonaId}) failed, falling back to local speech synthesis:`, err);
     }
   }
 
-  // Speak immediately via on-device Web Speech API for 0ms latency and 100% Android user gesture reliability
+  // Fallback to on-device Web Speech API for 0ms offline capability
+  const fallbackPitch = options?.pitch ?? (personaObj.gender === 'child' ? 1.2 : (personaObj.gender === 'female' ? 1.05 : 0.95));
+  const fallbackRate = options?.rate ?? (personaObj.gender === 'child' ? 0.88 : 0.9);
+
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
-    voicePersona: selectedPersona,
+    voicePersona: selectedPersonaId,
+    pitch: fallbackPitch,
+    rate: fallbackRate,
     force: options?.force,
   });
 }
