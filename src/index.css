@@ -197,4 +197,65 @@
   }
 }
 
+/* ==========================================================================
+   Accessibility & Ease of Use (Section 6 Audit Enhancements)
+   ========================================================================== */
+
+/* Text Scaling & Dynamic Type */
+.beeyou-text-large {
+  font-size: 1.12rem;
+}
+.beeyou-text-large button,
+.beeyou-text-large p,
+.beeyou-text-large h1,
+.beeyou-text-large h2,
+.beeyou-text-large h3,
+.beeyou-text-large h4 {
+  font-size: 112% !important;
+}
+
+.beeyou-text-xl {
+  font-size: 1.25rem;
+}
+.beeyou-text-xl button,
+.beeyou-text-xl p,
+.beeyou-text-xl h1,
+.beeyou-text-xl h2,
+.beeyou-text-xl h3,
+.beeyou-text-xl h4 {
+  font-size: 125% !important;
+}
+
+/* High Contrast Tactile Outlines */
+.beeyou-high-contrast button,
+.beeyou-high-contrast [role="button"],
+.beeyou-high-contrast a,
+.beeyou-high-contrast input {
+  border-width: 2.5px !important;
+  border-color: #1E293B !important;
+}
+.beeyou-high-contrast .card,
+.beeyou-high-contrast [data-tile="true"] {
+  border-width: 3px !important;
+  border-color: #0F172A !important;
+  box-shadow: 0 4px 0 #0F172A !important;
+}
+
+/* Dyslexia-Friendly Letterforms */
+.beeyou-dyslexia-font,
+.beeyou-dyslexia-font * {
+  font-family: 'Atkinson Hyperlegible', 'OpenDyslexic', 'Comic Neue', -apple-system, sans-serif !important;
+  letter-spacing: 0.04em !important;
+  word-spacing: 0.08em !important;
+  line-height: 1.6 !important;
+}
+
+/* Large Touch Target Expansion */
+.beeyou-large-targets button,
+.beeyou-large-targets [role="button"] {
+  min-height: 56px !important;
+  min-width: 56px !important;
+}
+
+
 

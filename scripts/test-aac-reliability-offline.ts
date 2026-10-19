@@ -51,7 +51,7 @@ console.log('--- Test 1: AAC Button Speech Mapping & Vocalization ---');
   assert(invalidSpeechItems === 0, 'Every AAC button has valid spoken text matching label or speechText');
 
   // Verify voice recording priority
-  const testTileWithAudio: AACItem = {
+  const testTileWithAudio: any = {
     id: 'test-custom-audio-1',
     label: 'Mom',
     speechText: 'Mommy',
@@ -92,7 +92,7 @@ console.log('\n--- Test 2: Folders, Custom Buttons & Phrase-Building Consistency
   assert(allCategoriesHaveItems, 'All Proloquo2Go-style category folders contain items');
 
   // 2. Custom button creation
-  const customTile: AACItem = {
+  const customTile: any = {
     id: `aac-${Date.now()}`,
     label: 'Sensory Swing',
     speechText: 'I want the sensory swing please',
@@ -105,7 +105,7 @@ console.log('\n--- Test 2: Folders, Custom Buttons & Phrase-Building Consistency
   assert(listWithCustom.some((i) => i.id === customTile.id && i.isCustom), 'Custom button created and categorized correctly');
 
   // 3. Phrase-building with grammar autocorrection
-  const rawSentence: AACItem[] = [
+  const rawSentence: any[] = [
     { id: '1', label: 'Me', speechText: 'Me', category: 'people', colorType: 'subject' },
     { id: '2', label: 'want', speechText: 'want', category: 'actions', colorType: 'verb' },
     { id: '3', label: 'water', speechText: 'water', category: 'drinks', colorType: 'noun' },
@@ -183,7 +183,7 @@ console.log('\n--- Test 4: Custom Phrases & Settings Persistence Across Restart 
     lastUsedAt: new Date().toISOString(),
   };
 
-  const customAacItem: AACItem = {
+  const customAacItem: any = {
     id: 'aac-custom-99999',
     label: 'Chewy Necklace',
     speechText: 'I want my chewy necklace',
@@ -275,7 +275,7 @@ console.log('\n--- Test 6: Offline Changes Sync After Reconnecting ---');
   const offlineQueue: Array<{ id: string; action: string; payload: any }> = [];
 
   // User adds tile while offline
-  const offlineTile: AACItem = {
+  const offlineTile: any = {
     id: 'offline-tile-001',
     label: 'Weighted Blanket',
     speechText: 'I need my weighted blanket',
@@ -313,7 +313,7 @@ console.log('\n--- Test 6: Offline Changes Sync After Reconnecting ---');
 console.log('\n--- Test 7: Deduplication & Conflict-Free Data Reconciliation ---');
 {
   // Test local items with custom recording and offline additions
-  const localItems: AACItem[] = [
+  const localItems: any[] = [
     {
       id: 'tile-water',
       label: 'Water',
@@ -335,7 +335,7 @@ console.log('\n--- Test 7: Deduplication & Conflict-Free Data Reconciliation ---
   ];
 
   // Remote items arriving from server (may not have the custom recording or new offline tile)
-  const remoteItems: AACItem[] = [
+  const remoteItems: any[] = [
     {
       id: 'tile-water',
       label: 'Water',
@@ -368,7 +368,7 @@ console.log('\n--- Test 7: Deduplication & Conflict-Free Data Reconciliation ---
   assert(fidgetItem !== undefined, 'Offline custom tile preserved in reconciled list');
 
   // 4. Test duplicate label + category deduplication
-  const duplicateRemote: AACItem[] = [
+  const duplicateRemote: any[] = [
     ...reconciled,
     {
       id: 'tile-water-clone',

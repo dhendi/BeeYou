@@ -257,8 +257,20 @@ const ChildAppContent: React.FC = () => {
     );
   }
 
+  const a11yClasses = [
+    settings.highContrast ? 'beeyou-high-contrast' : '',
+    settings.textSize === 'large' ? 'beeyou-text-large' : settings.textSize === 'extra_large' ? 'beeyou-text-xl' : '',
+    settings.dyslexiaFont ? 'beeyou-dyslexia-font' : '',
+    settings.largeButtonMode ? 'beeyou-large-targets' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}>
+    <div 
+      data-high-contrast={settings.highContrast ? 'true' : 'false'}
+      data-text-size={settings.textSize || 'standard'}
+      data-reduce-motion={settings.reduceMotion ? 'true' : 'false'}
+      className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} ${a11yClasses} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}
+    >
       {/* Theme Art Layer */}
       <ThemeWallpaperArt
         themeId={activeTheme?.id}

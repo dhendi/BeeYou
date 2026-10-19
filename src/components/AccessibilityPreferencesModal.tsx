@@ -321,6 +321,71 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
+              {/* Text Scaling & Dynamic Type */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
+                <div>
+                  <h4 className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-1.5">
+                    <span className="text-base">🔤</span>
+                    <span>Text Size & Dynamic Scaling</span>
+                  </h4>
+                  <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                    Adjust text scaling for comfortable reading and visual clarity across all cards and schedules.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2.5">
+                  {[
+                    { key: 'standard', label: 'Standard', scale: '100%', desc: 'Default' },
+                    { key: 'large', label: 'Large', scale: '112%', desc: '+12% Larger' },
+                    { key: 'extra_large', label: 'Jumbo', scale: '125%', desc: '+25% Jumbo' },
+                  ].map((sizeOpt) => {
+                    const isSelected = (settings.textSize || 'standard') === sizeOpt.key;
+                    return (
+                      <button
+                        key={sizeOpt.key}
+                        type="button"
+                        onClick={() => {
+                          updateSettings({ textSize: sizeOpt.key as any });
+                          try {
+                            localStorage.setItem('beeyou_text_size', sizeOpt.key);
+                          } catch {}
+                          playChime('tap');
+                        }}
+                        className={`p-3 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-[#E2A44E] bg-[#FDF4E7] text-[#4A2F0F] shadow-xs font-black'
+                            : 'border-[#E0D8CB] bg-[#FAF7F2] hover:bg-white text-[#6B5E52]'
+                        }`}
+                      >
+                        <span className="font-black text-xs sm:text-sm block">{sizeOpt.label}</span>
+                        <span className="text-[10px] text-[#7A6C60] font-bold block mt-0.5">{sizeOpt.scale}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dyslexia-Friendly Typography */}
+              <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                    Dyslexia-Friendly Letterforms
+                  </h4>
+                  <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
+                    High-legibility typeface with weighted bottoms and distinct character shapes to prevent letter flipping.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={settings.dyslexiaFont || false}
+                    onChange={(e) => updateSettings({ dyslexiaFont: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-12 h-7 bg-[#E0D8CB] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-xs peer-checked:bg-[#E28743]"></div>
+                </label>
+              </div>
+
               {/* AAC Button Size / Grid Density */}
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
                 <div>

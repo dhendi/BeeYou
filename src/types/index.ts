@@ -614,6 +614,8 @@ export interface AppSettings {
   hapticsEnabled?: boolean;
   spokenAlerts?: boolean;
   temperatureUnit?: 'F' | 'C';
+  textSize?: 'standard' | 'large' | 'extra_large';
+  dyslexiaFont?: boolean;
 }
 
 export type UserAccountRole = 
