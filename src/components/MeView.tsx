@@ -9,6 +9,7 @@ import {
   ReadingBookSticker,
   ConnectHeartSticker,
   SpoonSticker,
+  TurtleBambooSpoonsSticker,
   EveningMoonSticker,
 } from './icons/JournalStickers';
 
@@ -33,6 +34,7 @@ export const MeView: React.FC = () => {
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
   const isColorCoded = settings?.colorCodedActionCards === true;
+  const isTurtleTheme = activeTheme?.category === 'turtle' || activeTheme?.id === 'theme-turtle';
   const isTeenOrAdult = userAgeGroup === 'teen' || userAgeGroup === 'adult';
   const cycleInfo = getCyclePhaseInfo ? getCyclePhaseInfo() : null;
   const todaySpoon = getTodaySpoonEntry();
@@ -122,16 +124,16 @@ export const MeView: React.FC = () => {
     },
     {
       id: 'spoon-budget',
-      title: 'Spoon Energy Budget',
+      title: 'Spoon Theory Stamina Budget',
       desc: todaySpoon 
         ? `${Math.max(0, todaySpoon.totalSpoons - todaySpoon.usedSpoons)} of ${todaySpoon.totalSpoons} spoons remaining today.`
-        : 'Check your morning stamina and manage energy costs for the day.',
+        : 'Track daily physical and social energy spoons to pace yourself and prevent burnout.',
       badge: 'Energy Tracker',
       badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
       color: 'border-2 border-purple-300/80 bg-purple-50/40 hover:bg-purple-50/80 text-purple-950',
       stickerBox: 'bg-white border-purple-200/90 shadow-2xs',
-      Sticker: SpoonSticker,
-      show: isTeenOrAdult,
+      Sticker: isTurtleTheme ? TurtleBambooSpoonsSticker : SpoonSticker,
+      show: true,
       action: () => {
         setShowSpoonModal(true);
         playChime('tap');

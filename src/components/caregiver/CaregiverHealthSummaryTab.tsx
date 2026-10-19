@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../services/translator';
 import { playChime } from '../../utils/audio';
+import { SpoonSticker } from '../icons/JournalStickers';
 
 interface CaregiverHealthSummaryTabProps {
   onShowNotification?: (msg: string) => void;
@@ -18,7 +19,11 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
     medications,
     medicationLogs,
     childProfile,
+    getTodaySpoonEntry,
+    setShowSpoonModal,
   } = useApp();
+
+  const todaySpoon = getTodaySpoonEntry ? getTodaySpoonEntry() : null;
 
   // Compute medication refill metrics
   const activeMeds = medications.filter((m) => m.active);
@@ -292,6 +297,77 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
                 <span className="text-slate-500 font-bold">{log.doseTime}</span>
               </div>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* SECTION 3: SPOON THEORY ENERGY BUDGET */}
+      <section className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-stone-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1 shrink-0">
+              <SpoonSticker className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <h3 className="font-black text-base sm:text-lg text-slate-900">{t("Spoon Theory Stamina Budget")}</h3>
+              <p className="text-xs text-slate-500 font-medium">{t("Daily physical and social energy pacing to prevent burnout")}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              playChime('tap');
+              if (setShowSpoonModal) setShowSpoonModal(true);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-black transition cursor-pointer border border-stone-200 shrink-0"
+          >
+            {todaySpoon ? t('Open Budget') : t('Log Spoons')}
+          </button>
+        </div>
+
+        {todaySpoon ? (
+          <div className="p-4 rounded-2xl border-2 border-stone-200 bg-stone-50/50 space-y-3">
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-slate-600">{t("Today's Available Energy")}:</span>
+              <span className="text-amber-800 font-black text-sm">
+                {Math.max(0, todaySpoon.totalSpoons - todaySpoon.usedSpoons)} / {todaySpoon.totalSpoons} {t("spoons left")}
+              </span>
+            </div>
+
+            <div className="w-full h-3 rounded-full bg-stone-200 overflow-hidden">
+              <div
+                className="h-full bg-amber-500 transition-all duration-500"
+                style={{
+                  width: `${Math.min(100, Math.round((Math.max(0, todaySpoon.totalSpoons - todaySpoon.usedSpoons) / Math.max(1, todaySpoon.totalSpoons)) * 100))}%`
+                }}
+              />
+            </div>
+
+            {todaySpoon.activityLog && todaySpoon.activityLog.length > 0 && (
+              <div className="pt-2 border-t border-stone-200/80 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">
+                  {t("Energy Cost Activity Log")}:
+                </span>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {todaySpoon.activityLog.map((act, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-stone-200 text-xs font-bold text-slate-700 shadow-2xs"
+                    >
+                      <span>{act.emoji}</span>
+                      <span>{act.label}</span>
+                      <span className="text-amber-700 font-black">(-{act.cost})</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-6 text-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50">
+            <p className="text-xs font-bold text-slate-600">
+              {t("No morning spoon stamina check-in logged yet today for")} {childProfile.name || 'Child'}.
+            </p>
           </div>
         )}
       </section>

@@ -10,14 +10,12 @@ import {
   MusicSensorySticker,
   ConnectHeartSticker,
   EyeSeeSticker,
-  SpoonSticker,
   TurtlePondReedsSticker,
   TurtleRiverStoneSticker,
   TurtlePottedFernSticker,
   TurtlePondFidgetBubblesSticker,
   TurtleSandTimerSticker,
   TurtleWoodenWheelSticker,
-  TurtleBambooSpoonsSticker,
   TurtleBambooThermometerSticker,
 } from './icons/JournalStickers';
 import { playChime } from '../utils/audio';
@@ -33,7 +31,6 @@ export const ToolsView: React.FC = () => {
     setShowDecisionWheelModal,
     setShowPieTimerModal,
     setShowFivePointModal,
-    setShowSpoonModal,
     openCopingToolkit,
     setChildView,
   } = useApp();
@@ -50,7 +47,7 @@ export const ToolsView: React.FC = () => {
     { id: 'all', label: 'All Tools' },
     { id: 'calm', label: 'Calm & Reset' },
     { id: 'play', label: 'Sensory Play' },
-    { id: 'focus', label: 'Time & Energy' },
+    { id: 'focus', label: 'Time & Focus' },
     { id: 'sos', label: 'Emotion & SOS' },
   ];
 
@@ -152,25 +149,6 @@ export const ToolsView: React.FC = () => {
       color: 'border-2 border-blue-300/80 bg-blue-50/40 hover:bg-blue-50/80 text-blue-950',
       Sticker: isTurtleTheme ? TurtleBambooThermometerSticker : ThermometerSticker,
       action: () => setShowFivePointModal(true),
-    },
-
-    // Time & Energy: Spoon Theory Budget
-    {
-      id: 'spoon-budget',
-      category: 'focus' as ToolCategory,
-      title: 'Spoon Theory Stamina Budget',
-      desc: 'Track daily physical and social energy spoons to pace yourself and prevent burnout.',
-      badge: 'Energy Tracker',
-      badgeClass: isFrogTheme ? 'bg-lime-100 text-lime-800 border-lime-300' : 'bg-amber-100 text-amber-800 border-amber-200',
-      color: isFrogTheme
-        ? 'border-2 border-lime-400/90 bg-lime-50/50 hover:bg-lime-50/90 text-lime-950'
-        : isDinoTheme
-          ? 'border-2 border-green-300/80 bg-green-50/40 hover:bg-green-50/80 text-green-950'
-          : isTurtleTheme
-            ? 'border-2 border-emerald-300/80 bg-emerald-50/40 hover:bg-emerald-50/80 text-emerald-950'
-            : 'border-2 border-amber-300/80 bg-amber-50/40 hover:bg-amber-50/80 text-amber-950',
-      Sticker: isTurtleTheme ? TurtleBambooSpoonsSticker : SpoonSticker,
-      action: () => setShowSpoonModal(true),
     },
   ];
 
