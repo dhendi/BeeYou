@@ -102,7 +102,7 @@ export const DailyRecollectionChart: React.FC<{ isParentPortal?: boolean; onStar
     }
     const text = generateTherapistSummaryText(filteredEntries, childProfile.name);
     if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text).catch(() => {});
       setCopiedReport(true);
       playChime('star');
       setTimeout(() => setCopiedReport(false), 3000);

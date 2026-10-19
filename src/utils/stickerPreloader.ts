@@ -131,7 +131,6 @@ export function preloadAllStickersOnIdle() {
     '/assets/stickers/turtle_mascot.webp',
     '/assets/stickers/frog_mascot.webp',
     '/assets/stickers/train_mascot.webp',
-    '/assets/stickers/dino_rex_mascot.webp',
     '/assets/stickers/dino_rex.webp',
     '/assets/stickers/turtle_welcome_sign.webp',
 
@@ -147,7 +146,7 @@ export function preloadAllStickersOnIdle() {
     '/assets/stickers/story_plans_change.webp',
     '/assets/stickers/turtle_arched_bridge.webp',
     '/assets/stickers/dino_footprint_loop.webp',
-    '/assets/stickers/turtle_seedling.webp',
+    '/assets/stickers/turtle_sprouting_seedling.webp',
     '/assets/stickers/turtle_lily_pads.webp',
 
     // Core High-Frequency Routines & Steps

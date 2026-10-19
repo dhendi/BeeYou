@@ -1682,7 +1682,7 @@ export const OCEAN_SPLASH_ICONS: ThemedIconItem[] = [
   },
   {
     id: 'ocean_laundry_hamper',
-    value: '/assets/stickers/ocean_seaglass_basket.webp',
+    value: '/assets/stickers/ocean_nautical_travel_trunk.webp',
     label: 'Woven Seagrass Linen Basket',
     shortLabel: 'Seagrass Hamper',
     themeCategory: 'ocean',

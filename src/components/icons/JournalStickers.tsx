@@ -2033,7 +2033,7 @@ export const OCEAN_STICKER_SWAPS: Record<string, string> = {
   '/assets/stickers/decision_wheel.webp': '/assets/stickers/ocean_ships_helm_wheel.webp',
   '/assets/stickers/spoons_energy.webp': '/assets/stickers/ocean_energy_spoons.webp',
   '/assets/stickers/routine_writing_journal.webp': '/assets/stickers/ocean_captains_logbook.webp',
-  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/ocean_seaglass_basket.webp',
+  '/assets/stickers/laundry_hamper.webp': '/assets/stickers/ocean_nautical_travel_trunk.webp',
   '/assets/stickers/refresh_repeat.webp': '/assets/stickers/ocean_wave_loop.webp',
   '/assets/stickers/circular_arrow.webp': '/assets/stickers/ocean_wave_loop.webp',
   '/assets/stickers/toy_box.webp': '/assets/stickers/ocean_treasure_toy_chest.webp',

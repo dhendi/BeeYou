@@ -462,7 +462,7 @@ export const CaregiverHelpHub: React.FC<CaregiverHelpHubProps> = ({
                   onClick={() => {
                     playChime('star');
                     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                      navigator.clipboard.writeText('support@beeyou.app');
+                      navigator.clipboard.writeText('support@beeyou.app').catch(() => {});
                     }
                     setCopiedEmail(true);
                     setTimeout(() => setCopiedEmail(false), 2500);

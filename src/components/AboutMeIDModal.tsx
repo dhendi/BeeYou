@@ -85,7 +85,9 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   if (!isOpen) return null;
 
   const handleCopyPhone = (phone: string, id: string) => {
-    navigator.clipboard.writeText(phone);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(phone).catch(() => {});
+    }
     setCopiedPhoneId(id);
     playChime('tap');
     setTimeout(() => setCopiedPhoneId(null), 2500);
