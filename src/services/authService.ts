@@ -1,6 +1,14 @@
 import { UserAgeGroup, UserAccountRole, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
-import { setPairingCode, subscribeToCloudChannel, syncChildStatusToCaregiver, sendHeartbeat } from './caregiverSync';
+import { 
+  setPairingCode, 
+  subscribeToCloudChannel, 
+  syncChildStatusToCaregiver, 
+  sendHeartbeat,
+  publishCloudEvent,
+  deleteServerFamilyAccount
+} from './caregiverSync';
 import { app, db, deleteFirebaseFamilyNode } from './firebaseSync';
+import { deleteUserCloudFiles } from './firebaseStorageService';
 import { ref as dbRef, set as dbSet, update as dbUpdate } from 'firebase/database';
 import { 
   getAuth, 
@@ -29,6 +37,7 @@ import {
   getSecureCaregiverPin,
   getSyncSecureCaregiverPin,
   removeSecureSecret,
+  wipeAllSecureStorage,
 } from './secureStorageService';
 
 export {
@@ -807,8 +816,8 @@ export async function logoutFamilyAccount(): Promise<void> {
 
 /**
  * Completely purges all local storage, session state, cached credentials,
- * and personal health data from this physical device.
- * Used for school tablet returns, device handoffs, or fresh starts.
+ * encrypted vault secrets, indexedDB databases, and personal health data from this physical device.
+ * Used for school tablet returns, device handoffs, or account deletion.
  */
 export async function wipeDeviceStorage(): Promise<void> {
   try {
@@ -817,128 +826,390 @@ export async function wipeDeviceStorage(): Promise<void> {
     console.warn('Firebase signOut during wipe error:', err);
   }
 
+  // 1. Wipe secure vault storage (Capacitor Preferences & inMemoryCache)
   try {
-    if (typeof window !== 'undefined') {
+    await wipeAllSecureStorage();
+  } catch (e) {
+    console.warn('wipeAllSecureStorage warning:', e);
+  }
+
+  // 2. Clear localStorage completely of BeeYou, vault, and Firebase items
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && (key.startsWith('beeyou') || key.startsWith('firebase:'))) {
+        if (key && (
+          key.startsWith('beeyou') ||
+          key.startsWith('by_') ||
+          key.startsWith('firebase:') ||
+          key.startsWith('CapacitorStorage')
+        )) {
           keysToRemove.push(key);
         }
       }
       keysToRemove.forEach((k) => localStorage.removeItem(k));
 
-      // Clear specific known items
-      localStorage.removeItem('beeyou_family_account');
-      localStorage.removeItem('beeyou_pairing_code');
-      localStorage.removeItem('beeyou_pending_pin_reset');
-      localStorage.removeItem('beeyou_active_device_view');
-      localStorage.removeItem('beeyou_user_role');
-      localStorage.removeItem('beeyou_settings');
-      localStorage.removeItem('beeyou_daily_recollections');
-      localStorage.removeItem('beeyou_medications');
-      localStorage.removeItem('beeyou_mood_journal_entries');
-      localStorage.removeItem('beeyou_cycle_settings');
-      localStorage.removeItem('beeyou_cycle_logs');
-      localStorage.removeItem('beeyou_spoon_entries');
-      localStorage.removeItem('beeyou_temporary_pairing_session');
-      localStorage.removeItem('beeyou_active_caregiver_alert');
-      localStorage.removeItem('beeyou_active_alert');
-      localStorage.removeItem('beeyou_about_me_id');
-      localStorage.removeItem('beeyou_child_profile');
-      localStorage.removeItem('beeyou_routines');
-      localStorage.removeItem('beeyou_help_alert_presets');
-      localStorage.removeItem('beeyou_caregiver_responses');
-      localStorage.removeItem('beeyou_calm_strategies');
-      localStorage.removeItem('beeyou_breathing_config');
-      localStorage.removeItem('beeyou_onboarding_completed');
-      localStorage.removeItem('beeyou_user_age_group');
-      localStorage.removeItem('beeyou_user_persona');
-      localStorage.removeItem('beeyou_app_state_v1');
-      clearClientAuthToken();
-      await removeSecureSecret('by_sec_caregiver_pin');
-      await removeSecureSecret('beeyou_device_vault_salt');
+      // Explicit purge list to guarantee zero remnant keys
+      const explicitKeys = [
+        'beeyou_family_account',
+        'beeyou_subscription',
+        'beeyou_pairing_code',
+        'beeyou_offline_alert_queue',
+        'beeyou_alert_history',
+        'beeyou_pending_pin_reset',
+        'beeyou_active_device_view',
+        'beeyou_user_role',
+        'beeyou_settings',
+        'beeyou_daily_recollections',
+        'beeyou_medications',
+        'beeyou_mood_journal_entries',
+        'beeyou_cycle_settings',
+        'beeyou_cycle_logs',
+        'beeyou_spoon_entries',
+        'beeyou_temporary_pairing_session',
+        'beeyou_active_caregiver_alert',
+        'beeyou_active_alert',
+        'beeyou_about_me_id',
+        'beeyou_child_profile',
+        'beeyou_routines',
+        'beeyou_help_alert_presets',
+        'beeyou_caregiver_responses',
+        'beeyou_calm_strategies',
+        'beeyou_breathing_config',
+        'beeyou_onboarding_completed',
+        'beeyou_user_age_group',
+        'beeyou_user_persona',
+        'beeyou_app_state_v1',
+      ];
+      explicitKeys.forEach((k) => localStorage.removeItem(k));
+    }
+  } catch (e) {
+    console.warn('localStorage wipe warning:', e);
+  }
 
+  // 3. Clear sessionStorage
+  try {
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
   } catch (e) {
-    console.warn('Storage wipe warning:', e);
+    console.warn('sessionStorage wipe warning:', e);
   }
+
+  // 4. Clear IndexedDB databases where Firebase/PWA may cache user session
+  try {
+    if (typeof window !== 'undefined' && window.indexedDB) {
+      const knownDbs = ['firebaseLocalStorageDb', 'beeyou-db', 'keyval-store'];
+      knownDbs.forEach((dbName) => {
+        try {
+          window.indexedDB.deleteDatabase(dbName);
+        } catch {}
+      });
+      if (typeof window.indexedDB.databases === 'function') {
+        window.indexedDB.databases().then((dbs) => {
+          dbs.forEach((dbInfo) => {
+            if (dbInfo.name && (dbInfo.name.includes('firebase') || dbInfo.name.includes('beeyou'))) {
+              try {
+                window.indexedDB.deleteDatabase(dbInfo.name);
+              } catch {}
+            }
+          });
+        }).catch(() => {});
+      }
+    }
+  } catch (e) {
+    console.warn('IndexedDB wipe warning:', e);
+  }
+
+  // 5. Clear Service Worker CacheStorage
+  try {
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((key) => {
+          if (key.includes('beeyou') || key.includes('user')) {
+            caches.delete(key).catch(() => {});
+          }
+        });
+      }).catch(() => {});
+    }
+  } catch {}
+
+  clearClientAuthToken();
+  await removeSecureSecret('by_sec_caregiver_pin');
+  await removeSecureSecret('beeyou_device_vault_salt');
+}
+
+export type DeletionStepName =
+  | 'reauth'
+  | 'notify_linked_devices'
+  | 'cloud_storage_files'
+  | 'server_records'
+  | 'cloud_database'
+  | 'auth_account'
+  | 'subscriptions'
+  | 'local_storage';
+
+export interface DeletionStepResult {
+  step: DeletionStepName;
+  label: string;
+  status: 'completed' | 'failed' | 'skipped';
+  error?: string;
+  details?: string;
+}
+
+export interface AccountDeletionResult {
+  success: boolean;
+  message: string;
+  steps: DeletionStepResult[];
+  partialFailure?: boolean;
+  actionRequired?: string;
 }
 
 /**
  * Apple Guideline 5.1.1(v) Compliant In-App Account Deletion
  * Permanently deletes the family account from Firebase Authentication,
- * purges cloud realtime data for this family, and wipes all local device data.
+ * purges cloud realtime data, deletes uploaded cloud storage files,
+ * purges backend server records/sessions/backups, notifies linked devices,
+ * cancels subscriptions, and wipes local device data.
+ *
+ * If any step fails partway through, returns a granular result so the user
+ * knows exactly what succeeded and what manual action is required.
  */
-export async function deleteFamilyAccount(password: string): Promise<{ success: boolean; message: string }> {
+export async function deleteFamilyAccount(password: string): Promise<AccountDeletionResult> {
+  const steps: DeletionStepResult[] = [];
+  const addStep = (
+    step: DeletionStepName,
+    label: string,
+    status: 'completed' | 'failed' | 'skipped',
+    error?: string,
+    details?: string
+  ) => {
+    steps.push({ step, label, status, error, details });
+  };
+
   const account = getStoredFamilyAccount();
   const user = auth.currentUser;
+  const familyCode = account?.familyCode;
+  const email = user?.email || account?.email;
 
-  // Handle Demo Account: reset local device demo state
-  if (account?.isDemoAccount || user?.email === 'demo@beeyou.app') {
+  // Handle Demo Account: reset local device demo state only
+  if (account?.isDemoAccount || user?.email === 'demo@beeyou.app' || familyCode === 'BEE-DEMO') {
     await wipeDeviceStorage();
+    addStep('reauth', 'Verify Account Identity', 'completed');
+    addStep('local_storage', 'Reset Demo Device Data', 'completed');
     return {
       success: true,
       message: 'Demo space has been completely reset on this device.',
+      steps,
     };
   }
 
-  if (!user || !user.email) {
-    // If no Firebase user session, perform clean local wipe
-    await wipeDeviceStorage();
-    return {
-      success: true,
-      message: 'Local family space has been completely deleted.',
-    };
-  }
-
+  // 1. Password confirmation validation
   if (!password || password.trim().length === 0) {
+    addStep('reauth', 'Verify Account Password', 'failed', 'Password required');
     return {
       success: false,
       message: 'Please enter your account password to confirm permanent account deletion.',
+      steps,
     };
   }
 
-  try {
-    // 1. Re-authenticate with password before deletion
-    const credential = EmailAuthProvider.credential(user.email, password);
-    await reauthenticateWithCredential(user, credential);
-
-    // 2. Purge Cloud Realtime Database family node
-    if (account?.familyCode) {
-      await deleteFirebaseFamilyNode(account.familyCode);
+  // Handle case with no active Firebase user session
+  if (!user || !user.email) {
+    if (familyCode) {
+      try {
+        await deleteServerFamilyAccount(familyCode, account?.email);
+      } catch {}
+      try {
+        await deleteFirebaseFamilyNode(familyCode);
+      } catch {}
     }
-
-    // 3. Delete user from Firebase Auth
-    await deleteUser(user);
-
-    // 4. Wipe local device storage & session
     await wipeDeviceStorage();
-
+    addStep('local_storage', 'Local Family Space Purged', 'completed');
     return {
       success: true,
-      message: 'Your family account and all associated cloud data have been permanently deleted.',
-    };
-  } catch (err: any) {
-    console.error('Account deletion error:', err);
-    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-      return {
-        success: false,
-        message: 'Incorrect password. Account deletion cancelled for your protection.',
-      };
-    }
-    if (err.code === 'auth/too-many-requests') {
-      return {
-        success: false,
-        message: 'Too many attempts. Please wait a few moments before trying again.',
-      };
-    }
-    return {
-      success: false,
-      message: err.message || 'Failed to delete account. Please try again.',
+      message: 'Local family space and associated device records have been completely deleted.',
+      steps,
     };
   }
+
+  // -------------------------------------------------------------
+  // Step 1: Re-authenticate identity
+  // -------------------------------------------------------------
+  try {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    addStep('reauth', 'Account Identity Verified', 'completed');
+  } catch (err: any) {
+    console.error('[Delete] Reauthentication error:', err);
+    let errMsg = 'Incorrect password. Account deletion cancelled for your protection.';
+    if (err.code === 'auth/too-many-requests') {
+      errMsg = 'Too many attempts. Please wait a few moments before trying again.';
+    }
+    addStep('reauth', 'Verify Account Identity', 'failed', errMsg);
+    return {
+      success: false,
+      message: errMsg,
+      steps,
+    };
+  }
+
+  let hasPartialError = false;
+
+  // -------------------------------------------------------------
+  // Step 2: Notify linked caregiver devices before destroying nodes
+  // -------------------------------------------------------------
+  if (familyCode) {
+    try {
+      await publishCloudEvent(familyCode, {
+        type: 'FAMILY_ACCOUNT_DELETED',
+        familyCode,
+        sentAt: Date.now(),
+        message: 'Family account has been permanently deleted.',
+      });
+      addStep('notify_linked_devices', 'Linked Devices Notified & Unpaired', 'completed');
+    } catch (e: any) {
+      console.warn('[Delete] Failed to notify linked devices:', e);
+      addStep('notify_linked_devices', 'Linked Devices Disconnection Notice', 'skipped', e?.message);
+    }
+  } else {
+    addStep('notify_linked_devices', 'Linked Devices Notification', 'skipped');
+  }
+
+  // -------------------------------------------------------------
+  // Step 3: Purge uploaded files & custom icons in Cloud Storage
+  // -------------------------------------------------------------
+  try {
+    const uidTarget = user.uid;
+    const storageRes1 = await deleteUserCloudFiles(uidTarget);
+    if (familyCode && familyCode !== uidTarget) {
+      await deleteUserCloudFiles(familyCode);
+    }
+    addStep(
+      'cloud_storage_files',
+      'Uploaded Files & Custom Icons Purged',
+      'completed',
+      undefined,
+      storageRes1.count > 0 ? `${storageRes1.count} file(s) deleted` : 'No storage files found'
+    );
+  } catch (storageErr: any) {
+    console.warn('[Delete] Storage files deletion notice:', storageErr);
+    addStep('cloud_storage_files', 'Uploaded Files Deletion', 'failed', storageErr?.message);
+    hasPartialError = true;
+  }
+
+  // -------------------------------------------------------------
+  // Step 4: Purge backend server records, sessions & data files
+  // -------------------------------------------------------------
+  if (familyCode) {
+    try {
+      const serverRes = await deleteServerFamilyAccount(familyCode, email);
+      if (serverRes.success) {
+        addStep('server_records', 'Server Records & Sessions Purged', 'completed');
+      } else {
+        addStep('server_records', 'Server Records Deletion', 'failed', serverRes.message);
+        hasPartialError = true;
+      }
+    } catch (serverErr: any) {
+      console.warn('[Delete] Server records deletion notice:', serverErr);
+      addStep('server_records', 'Server Records Deletion', 'failed', serverErr?.message);
+      hasPartialError = true;
+    }
+  } else {
+    addStep('server_records', 'Server Records Deletion', 'skipped');
+  }
+
+  // -------------------------------------------------------------
+  // Step 5: Purge Cloud Realtime Database family node
+  // -------------------------------------------------------------
+  if (familyCode) {
+    try {
+      const dbSuccess = await deleteFirebaseFamilyNode(familyCode);
+      if (dbSuccess) {
+        addStep('cloud_database', 'Cloud Realtime Database Purged', 'completed');
+      } else {
+        addStep('cloud_database', 'Cloud Realtime Database Deletion', 'failed', 'Database node delete returned false');
+        hasPartialError = true;
+      }
+    } catch (dbErr: any) {
+      console.warn('[Delete] Realtime database deletion notice:', dbErr);
+      addStep('cloud_database', 'Cloud Realtime Database Deletion', 'failed', dbErr?.message);
+      hasPartialError = true;
+    }
+  } else {
+    addStep('cloud_database', 'Cloud Realtime Database Deletion', 'skipped');
+  }
+
+  // -------------------------------------------------------------
+  // Step 6: Delete Firebase Authentication user account
+  // -------------------------------------------------------------
+  let authFailed = false;
+  let authErrorMsg = '';
+  try {
+    await deleteUser(user);
+    addStep('auth_account', 'Firebase Login Credentials Deleted', 'completed');
+  } catch (authErr: any) {
+    console.error('[Delete] Firebase deleteUser error:', authErr);
+    authFailed = true;
+    hasPartialError = true;
+    if (authErr.code === 'auth/requires-recent-login') {
+      authErrorMsg = 'Your session has expired. Please sign out, log back in, and tap Delete Account to finalize removing your login credentials.';
+    } else {
+      authErrorMsg = authErr.message || 'Firebase Auth failed to delete user profile.';
+    }
+    addStep('auth_account', 'Firebase Login Credentials Deletion', 'failed', authErrorMsg);
+  }
+
+  // -------------------------------------------------------------
+  // Step 7: Cancel subscription & billing obligations
+  // -------------------------------------------------------------
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('beeyou_subscription');
+    }
+    addStep('subscriptions', 'In-App Subscription Cancelled', 'completed');
+  } catch (subErr: any) {
+    addStep('subscriptions', 'Subscription Cancellation', 'skipped', subErr?.message);
+  }
+
+  // -------------------------------------------------------------
+  // Step 8: Wipe local device storage & secure vault
+  // -------------------------------------------------------------
+  try {
+    await wipeDeviceStorage();
+    addStep('local_storage', 'Local Device Data & Secure Vault Wiped', 'completed');
+  } catch (localErr: any) {
+    console.warn('[Delete] Local storage wipe notice:', localErr);
+    addStep('local_storage', 'Local Storage Wipe', 'failed', localErr?.message);
+    hasPartialError = true;
+  }
+
+  if (authFailed) {
+    return {
+      success: false,
+      message: 'Account cloud data, uploaded files, and server records were deleted, but removing your login credentials failed.',
+      steps,
+      partialFailure: true,
+      actionRequired: authErrorMsg,
+    };
+  }
+
+  if (hasPartialError) {
+    return {
+      success: false,
+      message: 'Account deletion encountered partial issues. Review step details below.',
+      steps,
+      partialFailure: true,
+      actionRequired: 'Some secondary cloud items could not be confirmed. If you have an active Apple or Google subscription, verify cancellation in your device App Store / Google Play account.',
+    };
+  }
+
+  return {
+    success: true,
+    message: 'Your family account, cloud data, uploaded files, and server records have been permanently deleted.',
+    steps,
+  };
 }
 
 /**

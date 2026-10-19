@@ -523,7 +523,7 @@ const DEFAULT_DEMO_PLANS_CHANGED = {
   ],
 };
 
-const DATA_DIR = path.join(process.cwd(), '.data');
+export const DATA_DIR = path.join(process.cwd(), '.data');
 const STATE_FILE = path.join(DATA_DIR, 'shared_families.json');
 const FAMILIES_DIR = path.join(DATA_DIR, 'families');
 const FAMILY_ACCOUNTS_FILE = path.join(DATA_DIR, 'family_accounts.json');
@@ -1007,6 +1007,8 @@ export function signFamilyToken(
   return `by_tok.${payloadB64}.${sig}`;
 }
 
+export const revokedFamilyCodes = new Set<string>();
+
 export function verifyFamilyToken(token: string): AuthenticatedUser | null {
   if (!token || typeof token !== 'string') return null;
   const trimmed = token.trim();
@@ -1029,7 +1031,7 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
           const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf-8'));
           if (parsed && parsed.familyCode) {
             const cleanCode = sanitizeFamilyCode(parsed.familyCode);
-            if (!cleanCode) return null;
+            if (!cleanCode || revokedFamilyCodes.has(cleanCode)) return null;
             return {
               familyCode: cleanCode,
               role: cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver'),
@@ -1047,7 +1049,7 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
     for (const [code, session] of pairingSessions.entries()) {
       if (session.token === trimmed && (session.status === 'paired' || session.status === 'pending')) {
         const cleanCode = sanitizeFamilyCode(code);
-        if (!cleanCode) continue;
+        if (!cleanCode || revokedFamilyCodes.has(cleanCode)) continue;
         return {
           familyCode: cleanCode,
           role: session.initiatedBy === 'caregiver' ? 'caregiver' : 'child',
@@ -1073,7 +1075,7 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
 
         if (decoded.familyCode) {
           const cleanCode = sanitizeFamilyCode(decoded.familyCode);
-          if (cleanCode) {
+          if (cleanCode && !revokedFamilyCodes.has(cleanCode)) {
             return {
               familyCode: cleanCode,
               role: decoded.role || 'caregiver',
@@ -1086,13 +1088,15 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
 
         if (email && familyAccounts.has(email)) {
           const acc = familyAccounts.get(email)!;
-          return {
-            familyCode: acc.familyCode,
-            role: 'caregiver',
-            email,
-            uid,
-            isDemo: acc.familyCode === 'BEE-DEMO',
-          };
+          if (!revokedFamilyCodes.has(acc.familyCode)) {
+            return {
+              familyCode: acc.familyCode,
+              role: 'caregiver',
+              email,
+              uid,
+              isDemo: acc.familyCode === 'BEE-DEMO',
+            };
+          }
         }
       }
     } catch {}
@@ -2316,6 +2320,134 @@ app.get('/api/caregiver/family/:email', requireFamilyAuth(), (req, res) => {
     backupEmail: undefined,
   };
   return res.json({ success: true, account: safeAccount });
+});
+
+// Permanently delete family account, sessions, disk state, and purge records (Finding #7)
+app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) => {
+  const user = (req as any).user as AuthenticatedUser;
+  const { email, familyCode } = req.body || {};
+  const cleanEmail = (email || user.email || '').trim().toLowerCase();
+  const targetCode = sanitizeFamilyCode(familyCode || user.familyCode);
+
+  if (!targetCode) {
+    return res.status(400).json({ success: false, message: 'Invalid or missing family code.' });
+  }
+
+  // Protect DEMO account from permanent destruction
+  if (targetCode === 'BEE-DEMO' || cleanEmail === 'demo@beeyou.app') {
+    return res.status(403).json({
+      success: false,
+      message: 'Demo reviewer account cannot be permanently deleted. Use local device reset instead.'
+    });
+  }
+
+  // Cross-family authorization check
+  if (user.role !== 'admin' && user.familyCode !== targetCode) {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'Access denied: Cannot delete another family account.'
+    });
+  }
+
+  const results: Record<string, boolean> = {
+    broadcastNotified: false,
+    familyAccountDeleted: false,
+    caregiverSessionDeleted: false,
+    pairingSessionsDeleted: false,
+    diskFilesPurged: false,
+    sseClientsTerminated: false,
+  };
+
+  try {
+    // 1. Broadcast FAMILY_ACCOUNT_DELETED to all connected devices before purging
+    try {
+      broadcastEvent(targetCode, {
+        eventId: `del_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        pairingCode: targetCode,
+        type: 'FAMILY_ACCOUNT_DELETED',
+        sentAt: Date.now(),
+        message: 'Family account has been permanently deleted.',
+      });
+      results.broadcastNotified = true;
+    } catch (e) {
+      console.warn('[Delete] Broadcast notice:', e);
+    }
+
+    // 2. Terminate active SSE clients for this family
+    const sseClients = sseClientsByCode.get(targetCode);
+    if (sseClients) {
+      sseClients.forEach((clientRes) => {
+        try {
+          clientRes.write(`data: ${JSON.stringify({ type: 'FAMILY_ACCOUNT_DELETED', disconnected: true })}\n\n`);
+          clientRes.end();
+        } catch {}
+      });
+      sseClientsByCode.delete(targetCode);
+      results.sseClientsTerminated = true;
+    }
+
+    // 3. Remove in-memory and disk family account
+    if (cleanEmail && familyAccounts.has(cleanEmail)) {
+      familyAccounts.delete(cleanEmail);
+      results.familyAccountDeleted = true;
+    } else {
+      // Find by familyCode if email was different or unspecified
+      for (const [em, acc] of familyAccounts.entries()) {
+        if (acc.familyCode === targetCode) {
+          familyAccounts.delete(em);
+          results.familyAccountDeleted = true;
+          break;
+        }
+      }
+    }
+    await saveFamilyAccounts();
+
+    // 4. Remove caregiver session
+    if (caregiverSessions.has(targetCode)) {
+      caregiverSessions.delete(targetCode);
+      results.caregiverSessionDeleted = true;
+    }
+    await saveCaregiverSessions();
+
+    // 5. Remove any pairing sessions
+    for (const [pCode, pSess] of pairingSessions.entries()) {
+      if (pCode === targetCode || pSess.pairingCode === targetCode || (cleanEmail && pSess.caregiverEmail === cleanEmail)) {
+        pairingSessions.delete(pCode);
+        results.pairingSessionsDeleted = true;
+      }
+    }
+    await savePairingSessions();
+
+    // 6. Delete family disk state files
+    try {
+      const familyFile = path.join(DATA_DIR, 'families', `${targetCode}.json`);
+      if (fs.existsSync(familyFile)) {
+        fs.unlinkSync(familyFile);
+        results.diskFilesPurged = true;
+      } else {
+        results.diskFilesPurged = true;
+      }
+    } catch (fileErr) {
+      console.warn('[Delete] Disk file deletion warning:', fileErr);
+    }
+
+    // 7. Revoke family code and tokens
+    revokedFamilyCodes.add(targetCode);
+
+    return res.json({
+      success: true,
+      message: `Family ${targetCode} records, sessions, and files permanently deleted.`,
+      details: results,
+    });
+  } catch (err: any) {
+    console.error('[Delete] Server account deletion error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server failed to delete all family records.',
+      error: err?.message,
+      partialResults: results,
+    });
+  }
 });
 
 // -------------------------------------------------------------

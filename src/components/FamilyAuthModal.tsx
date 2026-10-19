@@ -16,6 +16,8 @@ import {
   getStoredFamilyAccount,
   logoutFamilyAccount,
   deleteFamilyAccount,
+  AccountDeletionResult,
+  DeletionStepResult,
   setActiveDeviceView,
   sendAccountPasswordResetEmail,
   FamilyAccount
@@ -50,6 +52,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     speak,
     settings,
     updateSettings,
+    subscription,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register' | 'forgot_password'>(initialTab);
@@ -331,23 +334,36 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteResult, setDeleteResult] = useState<AccountDeletionResult | null>(null);
+  const [acknowledgedSubNotice, setAcknowledgedSubNotice] = useState(false);
+
+  const hasActiveSubscription = Boolean(
+    subscription && (
+      subscription.tier === 'premium' ||
+      subscription.status === 'active' ||
+      subscription.status === 'trial'
+    )
+  );
 
   const handleExecuteDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setDeleteLoading(true);
       setDeleteError(null);
+      setDeleteResult(null);
+
       const res = await deleteFamilyAccount(deletePassword);
       setDeleteLoading(false);
+      setDeleteResult(res);
+
       if (res.success) {
         playChime('clear');
-        setShowDeleteModal(false);
         setCurrentAccount(null);
         setTimeout(() => {
           if (typeof window !== 'undefined') {
             window.location.reload();
           }
-        }, 400);
+        }, 1800);
       } else {
         setDeleteError(res.message);
         playChime('clear');
@@ -1123,46 +1139,164 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
               </div>
 
               {showDeleteModal && (
-                <form onSubmit={handleExecuteDeleteAccount} className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-200 space-y-2.5 animate-in fade-in">
+                <form onSubmit={handleExecuteDeleteAccount} className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-200 space-y-3 animate-in fade-in">
                   <div>
-                    <span className="text-[11px] font-black uppercase tracking-wider block text-rose-900 dark:text-rose-300">
-                      Permanently Delete Account (Apple Rule 5.1.1v)
-                    </span>
-                    <p className="text-[11px] text-rose-800 dark:text-rose-300 font-medium mt-0.5 leading-relaxed">
-                      This will permanently delete your family account, wipe your cloud channel, and reset this device. This cannot be undone.
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">🗑️</span>
+                      <span className="text-xs font-black uppercase tracking-wider block text-rose-900 dark:text-rose-200">
+                        Permanently Delete Account & All Data (Apple Guideline 5.1.1v)
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-rose-800 dark:text-rose-300 font-medium mt-1 leading-relaxed">
+                      This will permanently delete your family login credentials, uploaded custom icons and media, cloud databases, backend server sessions, and wipe all local storage from this device. <strong>This action cannot be undone.</strong>
                     </p>
                   </div>
 
+                  {/* Active Subscription & Billing Obligations Notice */}
+                  {hasActiveSubscription && (
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-100 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-base shrink-0">⚠️</span>
+                        <div className="space-y-1 text-xs">
+                          <p className="font-black text-amber-900 dark:text-amber-200">
+                            Active Subscription / Free Trial Notice
+                          </p>
+                          <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed font-medium">
+                            Deleting your account immediately terminates your BeeYou in-app membership. However, subscriptions purchased via Apple App Store or Google Play Billing must be cancelled directly in your device store settings to prevent ongoing recurring billing by Apple or Google.
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <a
+                              href="https://apps.apple.com/account/subscriptions"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-amber-400 dark:border-amber-700 text-[11px] font-bold text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-slate-700 transition"
+                            >
+                              <span>🍎 Manage Apple Subscriptions</span>
+                            </a>
+                            <a
+                              href="https://play.google.com/store/account/subscriptions"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-amber-400 dark:border-amber-700 text-[11px] font-bold text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-slate-700 transition"
+                            >
+                              <span>▶️ Manage Google Play Subscriptions</span>
+                            </a>
+                          </div>
+                          <label className="flex items-center gap-2 pt-1.5 cursor-pointer text-[11px] font-bold text-amber-950 dark:text-amber-200">
+                            <input
+                              type="checkbox"
+                              checked={acknowledgedSubNotice}
+                              onChange={(e) => setAcknowledgedSubNotice(e.target.checked)}
+                              className="rounded border-amber-400 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                            />
+                            <span>I acknowledge and have reviewed my app store subscription obligations.</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-rose-900 dark:text-rose-200 block">
+                      Confirm Account Password:
+                    </label>
                     <input
                       type="password"
                       required
                       value={deletePassword}
                       onChange={(e) => setDeletePassword(e.target.value)}
-                      placeholder="Enter account password to confirm"
-                      className="w-full px-3 py-2 rounded-lg border border-rose-300 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-medium focus:outline-rose-500"
+                      placeholder="Enter account password to confirm permanent deletion"
+                      className="w-full px-3 py-2 rounded-lg border border-rose-300 dark:border-rose-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-medium focus:outline-rose-500"
                     />
                   </div>
 
                   {deleteError && (
-                    <p className="text-[11px] font-bold text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/40 p-2 rounded-md">
+                    <p className="text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/40 p-2.5 rounded-lg border border-rose-300 dark:border-rose-800">
                       {deleteError}
                     </p>
                   )}
 
-                  <div className="flex items-center gap-2 pt-0.5">
+                  {/* Deletion Step-by-Step Audit Results */}
+                  {deleteResult && deleteResult.steps && deleteResult.steps.length > 0 && (
+                    <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+                      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                        <span className="font-black text-[11px] uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                          Deletion Lifecycle Progress
+                        </span>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                          deleteResult.success 
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
+                            : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                        }`}>
+                          {deleteResult.success ? 'Purge Complete' : 'Action Required'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {deleteResult.steps.map((st, idx) => (
+                          <div key={idx} className="flex items-start justify-between gap-2 text-[11px]">
+                            <div className="flex items-center gap-1.5">
+                              {st.status === 'completed' && <span className="text-emerald-600 dark:text-emerald-400 font-black">✓</span>}
+                              {st.status === 'failed' && <span className="text-rose-600 dark:text-rose-400 font-black">✗</span>}
+                              {st.status === 'skipped' && <span className="text-slate-400 font-bold">—</span>}
+                              <span className={st.status === 'failed' ? 'font-bold text-rose-700 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}>
+                                {st.label}
+                              </span>
+                            </div>
+                            {st.details && (
+                              <span className="text-[10px] text-slate-400 shrink-0">
+                                {st.details}
+                              </span>
+                            )}
+                            {st.error && (
+                              <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold text-right shrink-0 max-w-[200px]">
+                                {st.error}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {deleteResult.partialFailure && deleteResult.actionRequired && (
+                        <div className="mt-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 text-[11px] space-y-1">
+                          <p className="font-bold flex items-center gap-1 text-amber-900 dark:text-amber-100">
+                            <span>⚠️</span> Action Required to Complete Deletion:
+                          </p>
+                          <p className="leading-relaxed font-medium">
+                            {deleteResult.actionRequired}
+                          </p>
+                        </div>
+                      )}
+
+                      {deleteResult.success && (
+                        <div className="mt-2 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-[11px] font-bold text-center">
+                          ✓ All family cloud data, server sessions, and local storage permanently wiped. Resetting device in a moment...
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 pt-1">
                     <button
                       type="submit"
-                      disabled={deleteLoading}
-                      className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer"
+                      disabled={deleteLoading || (hasActiveSubscription && !acknowledgedSubNotice)}
+                      className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs transition cursor-pointer shadow-sm"
                     >
-                      <span>{deleteLoading ? 'Deleting...' : 'Yes, Delete My Account'}</span>
+                      <span>
+                        {deleteLoading 
+                          ? 'Purging Records...' 
+                          : (deleteResult?.partialFailure ? 'Retry Remaining Steps' : 'Yes, Permanently Delete Account')}
+                      </span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShowDeleteModal(false)}
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        setDeleteResult(null);
+                        setDeleteError(null);
+                      }}
                       disabled={deleteLoading}
-                      className="px-3.5 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs border border-slate-300 dark:border-slate-700 transition cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition cursor-pointer"
                     >
                       <span>Cancel</span>
                     </button>

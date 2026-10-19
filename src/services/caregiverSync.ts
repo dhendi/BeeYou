@@ -506,6 +506,31 @@ function isCurrentDeviceCaregiver(): boolean {
 let firebaseUnsubs: Array<() => void> = [];
 
 /**
+ * Cleanly detaches from all active cloud sync channels, WebRTC peers, SSE streams, and polling timers.
+ */
+export function disconnectCloudSync(): void {
+  if (activePeer) {
+    try { activePeer.destroy(); } catch {}
+    activePeer = null;
+    activePeerConn = null;
+  }
+  if (activeEventSource) {
+    try { activeEventSource.close(); } catch {}
+    activeEventSource = null;
+  }
+  if (activePollingInterval) {
+    clearTimeout(activePollingInterval);
+    clearInterval(activePollingInterval);
+    activePollingInterval = null;
+  }
+  firebaseUnsubs.forEach((unsub) => {
+    try { unsub(); } catch {}
+  });
+  firebaseUnsubs = [];
+  currentSubscribedCode = '';
+}
+
+/**
  * Subscribes to the live cloud channel (Firebase Realtime DB + WebRTC PeerJS + Server SSE stream + Short-polling backup)
  */
 export function subscribeToCloudChannel(code: string): void {
@@ -514,25 +539,7 @@ export function subscribeToCloudChannel(code: string): void {
 
   // If no pairing code is configured, cleanly detach from cloud channels and remain in local-only mode
   if (!safeCode) {
-    if (activePeer) {
-      try { activePeer.destroy(); } catch {}
-      activePeer = null;
-      activePeerConn = null;
-    }
-    if (activeEventSource) {
-      try { activeEventSource.close(); } catch {}
-      activeEventSource = null;
-    }
-    if (activePollingInterval) {
-      clearTimeout(activePollingInterval);
-      clearInterval(activePollingInterval);
-      activePollingInterval = null;
-    }
-    firebaseUnsubs.forEach((unsub) => {
-      try { unsub(); } catch {}
-    });
-    firebaseUnsubs = [];
-    currentSubscribedCode = '';
+    disconnectCloudSync();
     return;
   }
 
@@ -1162,6 +1169,84 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     }
     pairingListeners.forEach((fn) => fn(envelope));
     return;
+  }
+
+  // 6b. Family Account Deleted (Remote Admin Account Deletion)
+  if (type === 'FAMILY_ACCOUNT_DELETED') {
+    console.warn('[Sync] Family account deleted by administrator.');
+    try {
+      localStorage.removeItem('beeyou_pairing_code');
+      localStorage.removeItem('beeyou_active_caregiver_alert');
+      localStorage.removeItem('beeyou_temporary_pairing_session');
+      localStorage.removeItem('beeyou_family_account');
+      sessionStorage.clear();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('beeyou_account_deleted', { detail: envelope }));
+      }
+    } catch {}
+
+    lastPeerPingTimestamp = 0;
+    lastPeerRole = null;
+    lastPeerName = '';
+    notifyConnectionStatus();
+
+    disconnectCloudSync();
+
+    triggerWebNotification('BeeYou Family Space Deleted', {
+      body: 'Your family administrator has deleted this family account. Linked devices have been disconnected.',
+    });
+    return;
+  }
+}
+
+/**
+ * Permanently deletes family account, sessions, and files from the server.
+ * Returns structured results of all purged server components.
+ */
+export async function deleteServerFamilyAccount(
+  familyCode: string,
+  email?: string
+): Promise<{ success: boolean; message: string; details?: any }> {
+  const safeCode = (familyCode || '').trim().toUpperCase();
+  if (!safeCode || safeCode === 'BEE-DEMO') {
+    return { success: true, message: 'Demo account bypass' };
+  }
+
+  try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch('/api/caregiver/family/delete', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        familyCode: safeCode,
+        email: email || undefined,
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.success) {
+      return {
+        success: true,
+        message: data.message || 'Server records permanently deleted.',
+        details: data.details,
+      };
+    }
+    return {
+      success: false,
+      message: data.message || `Server returned error (${res.status})`,
+      details: data.partialResults,
+    };
+  } catch (err: any) {
+    console.warn('deleteServerFamilyAccount warning:', err);
+    return {
+      success: false,
+      message: err?.message || 'Network error communicating with family server',
+    };
   }
 }
 

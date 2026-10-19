@@ -391,6 +391,49 @@ export async function sanitizeAndMigrateLocalStorage(): Promise<void> {
   }
 }
 
+/**
+ * Permanently wipes all secure vault credentials, encrypted secrets,
+ * and native device preferences from this device.
+ * Used for Apple Rule 5.1.1(v) account deletion and device handoffs.
+ */
+export async function wipeAllSecureStorage(): Promise<void> {
+  // 1. Wipe in-memory session cache
+  inMemoryCache.clear();
+  webCryptoKey = null;
+
+  // 2. Wipe native sandboxed storage (Capacitor Preferences)
+  try {
+    if (Capacitor.isNativePlatform()) {
+      await Preferences.clear();
+    }
+  } catch (err) {
+    console.warn('[SecureStorage] Preferences.clear warning:', err);
+  }
+
+  // 3. Wipe secure keys from sessionStorage & localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.removeItem(SECURE_TOKEN_KEY);
+      sessionStorage.removeItem(SECURE_PAIRING_TOKEN_KEY);
+      sessionStorage.removeItem(SECURE_PIN_KEY);
+      sessionStorage.removeItem('beeyou_family_token');
+      sessionStorage.removeItem('beeyou_pairing_token');
+
+      // Remove all encrypted vault items and salts
+      const keysToPurge: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('by_') || k.startsWith('by_sec_') || k === 'beeyou_device_vault_salt')) {
+          keysToPurge.push(k);
+        }
+      }
+      keysToPurge.forEach((k) => localStorage.removeItem(k));
+    } catch (e) {
+      console.warn('[SecureStorage] Vault purge notice:', e);
+    }
+  }
+}
+
 // Immediately initialize in-memory cache and trigger sanitization on import
 if (typeof window !== 'undefined') {
   // Pre-seed in-memory cache from sessionStorage
