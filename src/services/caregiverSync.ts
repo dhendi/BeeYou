@@ -26,6 +26,7 @@ import {
   onFirebaseGenericEvent,
   parseTimestampMs
 } from './firebaseSync';
+import { getClientAuthToken, getSyncClientAuthToken, saveClientAuthToken } from './authService';
 
 const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
 const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
@@ -351,9 +352,13 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
 
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/event', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(envelope),
       signal: controller.signal,
     }).catch(() => {});
@@ -581,22 +586,27 @@ export function subscribeToCloudChannel(code: string): void {
   }
 
   // 2. Live SSE Stream from App Server (/api/caregiver/events/:code)
-  if ('EventSource' in window) {
-    try {
-      const sseUrl = `/api/caregiver/events/${encodeURIComponent(safeCode)}`;
-      const es = new EventSource(sseUrl);
-      activeEventSource = es;
+  const connectSSE = async () => {
+    if ('EventSource' in window) {
+      try {
+        const token = await getClientAuthToken(safeCode);
+        const tokenQuery = token ? `?token=${encodeURIComponent(token)}` : '';
+        const sseUrl = `/api/caregiver/events/${encodeURIComponent(safeCode)}${tokenQuery}`;
+        const es = new EventSource(sseUrl);
+        activeEventSource = es;
 
-      es.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          handleIncomingSyncEnvelope(payload);
-        } catch (e) {}
-      };
+        es.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            handleIncomingSyncEnvelope(payload);
+          } catch (e) {}
+        };
 
-      es.onerror = () => {};
-    } catch (e) {}
-  }
+        es.onerror = () => {};
+      } catch (e) {}
+    }
+  };
+  connectSSE();
 
   // 3. Short-Polling Backup (every 1.5s - guarantees delivery on iOS Safari / backgrounded mobile apps)
   const pollServer = async () => {
@@ -606,7 +616,13 @@ export function subscribeToCloudChannel(code: string): void {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(safeCode)}?since=${lastPollTimestamp}`, {
+      const token = await getClientAuthToken(safeCode);
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
+
+      const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(safeCode)}?since=${lastPollTimestamp}${tokenParam}`, {
+        headers,
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -1110,6 +1126,33 @@ export async function claimPairingSession(params: {
     permissions: params.permissions,
   };
 
+  // Contact server claim endpoint to get cryptographically signed session token
+  try {
+    const res = await fetch('/api/caregiver/pairing/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: safeCode,
+        claimerRole: params.claimerRole,
+        childName: params.childName,
+        childAge: params.childAge,
+        ageGroup: params.ageGroup,
+        caregiverName: params.caregiverName,
+        caregiverPhone: params.caregiverPhone,
+        caregiverEmail: params.caregiverEmail,
+        permissions: params.permissions,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.token) {
+        claimedSession.token = data.token;
+      }
+    }
+  } catch {}
+
+  saveClientAuthToken(claimedSession.token);
+
   try {
     localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(claimedSession));
   } catch {}
@@ -1236,9 +1279,13 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
 
   // 1. Send to server sync endpoint
   try {
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     }).catch(() => {});
   } catch {}
@@ -1258,7 +1305,11 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
 
   // 1. Fetch live from server
   try {
-    const res = await fetch(`/api/caregiver/session/${encodeURIComponent(safeCode)}`);
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`/api/caregiver/session/${encodeURIComponent(safeCode)}`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (data && data.session) {
@@ -1330,9 +1381,13 @@ export async function sendCaregiverMessage(
 
   // 1. Send to server message endpoint
   try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/message', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         pairingCode: safeCode,
         senderName: finalSender,
@@ -1359,7 +1414,11 @@ export async function sendCaregiverMessage(
 export async function pollCaregiverMessages(code: string): Promise<CaregiverMessage[]> {
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
   try {
-    const res = await fetch(`/api/caregiver/messages/${encodeURIComponent(safeCode)}`);
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`/api/caregiver/messages/${encodeURIComponent(safeCode)}`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data?.messages)) {
@@ -1430,9 +1489,14 @@ export async function sendCaregiverAlert(alertData: {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/alert', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         id: alertUniqueId,
         pairingCode: code,
@@ -1493,9 +1557,13 @@ export async function acknowledgeCaregiverAlert(
 
   // 2. Direct Server fallback
   try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/alert/acknowledge', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         pairingCode: safeCode,
         alertId: targetAlertId,
@@ -1522,14 +1590,18 @@ export async function resolveCaregiverAlert(code: string, alertId?: string): Pro
     pairingCode: safeCode,
   });
   try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/alert/resolve', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ pairingCode: safeCode, alertId }),
     }).catch(() => {});
     fetch(`/api/family/alert/${encodeURIComponent(safeCode)}/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ alertId }),
     }).catch(() => {});
   } catch {}
@@ -1585,9 +1657,13 @@ export async function sendEmergencySafeModeEvent(payload: {
 
   // Direct server fallback
   try {
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     fetch('/api/caregiver/alert', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(alert),
     }).catch(() => {});
   } catch {}

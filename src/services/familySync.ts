@@ -9,6 +9,7 @@
 import { EmotionType, UserAgeGroup } from '../types';
 import { db } from './firebaseSync';
 import { ref, get, set, update, onValue, push, Unsubscribe } from 'firebase/database';
+import { getClientAuthToken, getSyncClientAuthToken } from './authService';
 
 function cleanFirebaseObject<T>(obj: T): T {
   if (obj === null || obj === undefined) return null as any;
@@ -221,7 +222,11 @@ export async function fetchFamilyState(familyCode?: string): Promise<SharedFamil
 
   // 2. Secondary Fallback: Local Express server (if running on localhost)
   try {
-    const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`);
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (data?.success && data?.state) {
@@ -298,9 +303,13 @@ export async function pushFamilyStateUpdate(
 
       // 2. Secondary fallback: Local Express server
       try {
+        const token = await getClientAuthToken(code);
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(`/api/family/state/${encodeURIComponent(code)}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify(payloadToSend),
         });
         if (res.ok) {
@@ -376,9 +385,13 @@ export async function sendEmergencyAlert(params: {
 
     // 2. Secondary fallback: Local Express server
     try {
+      const token = await getClientAuthToken(code);
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(params),
       });
       if (res.ok) {
@@ -439,9 +452,13 @@ export async function ackEmergencyAlert(params: {
 
   // 2. Secondary fallback: Local Express server
   try {
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}/ack`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(params),
     });
     if (res.ok) {
@@ -483,9 +500,13 @@ export async function resolveEmergencyAlert(alertId?: string, familyCode?: strin
 
   // 2. Secondary fallback: Local Express server
   try {
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch(`/api/family/alert/${encodeURIComponent(code)}/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ alertId }),
     });
     if (res.ok) {
@@ -579,9 +600,13 @@ export async function sendNudgeMessage(params: {
 
   // 2. Secondary fallback: Local Express server
   try {
+    const token = await getClientAuthToken(code);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch(`/api/family/message/${encodeURIComponent(code)}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(params),
     });
     if (res.ok) {
@@ -772,34 +797,46 @@ export function startFamilyLiveSync(familyCode?: string): () => void {
   }
 
   // 3. Establish Server-Sent Events (SSE) Stream (if local server is running)
-  if ('EventSource' in window) {
-    try {
-      const sseUrl = `/api/caregiver/events/${encodeURIComponent(code)}`;
-      const es = new EventSource(sseUrl);
-      activeEventSource = es;
+  const connectSSE = async () => {
+    if ('EventSource' in window) {
+      try {
+        const token = await getClientAuthToken(code);
+        const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+        const sseUrl = `/api/caregiver/events/${encodeURIComponent(code)}${tokenParam}`;
+        const es = new EventSource(sseUrl);
+        activeEventSource = es;
 
-      es.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          handleIncomingEvent(payload);
-        } catch {}
-      };
+        es.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            handleIncomingEvent(payload);
+          } catch {}
+        };
 
-      es.onerror = () => {
-        // SSE reconnects automatically
-      };
-    } catch (err) {
-      // Expected on static hosts
+        es.onerror = () => {
+          // SSE reconnects automatically
+        };
+      } catch (err) {
+        // Expected on static hosts
+      }
     }
-  }
+  };
+  connectSSE();
 
-  // 4. Polling Fallback (runs every 5s on localhost)
+  // 4. Polling Fallback (runs every 10s on localhost)
   let lastPollTime = Date.now() - 30000;
   const poll = async () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     try {
-      const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(code)}?since=${lastPollTime}`);
+      const token = await getClientAuthToken(code);
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
+
+      const res = await fetch(`/api/caregiver/poll/${encodeURIComponent(code)}?since=${lastPollTime}${tokenParam}`, {
+        headers,
+      });
       if (res.ok) {
         const data = await res.json();
         lastPollTime = data.serverTime || Date.now();

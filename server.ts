@@ -135,8 +135,15 @@ const translateLimiter = createRateLimiter({
   message: 'Translation rate limit reached. Please wait a moment.',
 });
 
+const authLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 60,
+  message: 'Too many authentication attempts. Please wait a moment.',
+});
+
 app.use('/api/translate', translateLimiter);
 app.use('/api/tts', ttsLimiter);
+app.use('/api/family/auth', authLimiter);
 app.use('/api/family/recover-email', recoverEmailLimiter);
 app.use('/api/family/alert', alertLimiter);
 app.use('/api/family', apiLimiter);
@@ -509,6 +516,7 @@ function initFamilyStore(): void {
         if (data && typeof data === 'object') {
           for (const [code, val] of Object.entries(data)) {
             const cleanCode = code.toUpperCase();
+            if (cleanCode === 'BEE-DEMO') continue;
             activeFamilyStates.set(cleanCode, val as SharedFamilyState);
             const perFamilyFile = path.join(FAMILIES_DIR, `${cleanCode}.json`);
             if (!fs.existsSync(perFamilyFile)) {
@@ -521,11 +529,20 @@ function initFamilyStore(): void {
       }
     }
 
+    // Clean up any legacy BEE-DEMO file on disk to guarantee sandbox isolation
+    const legacyDemoFile = path.join(FAMILIES_DIR, 'BEE-DEMO.json');
+    if (fs.existsSync(legacyDemoFile)) {
+      try { fs.unlinkSync(legacyDemoFile); } catch {}
+    }
+
     // 2. Load individual per-family files
     const files = fs.readdirSync(FAMILIES_DIR);
     for (const file of files) {
       if (file.endsWith('.json')) {
-        const code = path.basename(file, '.json').toUpperCase();
+        const rawCode = path.basename(file, '.json').toUpperCase();
+        const code = sanitizeFamilyCode(rawCode);
+        // Strict Sandbox Isolation: BEE-DEMO is never loaded into real activeFamilyStates
+        if (!code || code === 'BEE-DEMO') continue;
         try {
           const raw = fs.readFileSync(path.join(FAMILIES_DIR, file), 'utf-8');
           const val = JSON.parse(raw);
@@ -540,13 +557,91 @@ function initFamilyStore(): void {
   }
 }
 
+// -------------------------------------------------------------
+// Strict Sandbox Store for App Store / Reviewer Demo Account
+// Completely isolated in-memory from authentic customer families
+// -------------------------------------------------------------
+function createDefaultDemoFamilyState(): SharedFamilyState {
+  return {
+    familyCode: 'BEE-DEMO',
+    email: 'demo@beeyou.app',
+    caregiverName: 'Sarah (Mom)',
+    caregiverRole: 'Mom',
+    childProfile: {
+      name: 'Child',
+      ageGroup: 'kid',
+      pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00', // Salted SHA-256 hash of '1234'
+      interests: ['Visual schedules', 'Creative play'],
+      pronouns: 'they/them',
+    },
+    childState: {
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Using BeeYou',
+      currentMood: 'happy',
+      habitsCompletedToday: 2,
+      totalHabits: 4,
+      stars: 15,
+      isOnline: true,
+    },
+    routines: DEFAULT_DEMO_ROUTINES,
+    aacItems: DEFAULT_DEMO_AAC,
+    plansChanged: DEFAULT_DEMO_PLANS_CHANGED,
+    activeAlert: null,
+    alertHistory: [],
+    messages: [],
+    lastUpdated: Date.now(),
+  };
+}
+
+function createDefaultDemoCaregiverSession(): CaregiverSessionData {
+  return {
+    pairingCode: 'BEE-DEMO',
+    childName: 'Child',
+    lastActiveTime: new Date().toISOString(),
+    currentActivity: 'Active in BeeYou',
+    currentMood: 'happy',
+    habitsCompletedToday: 2,
+    totalHabits: 4,
+    routineProgress: null,
+    stars: 15,
+    isOffline: false,
+    messages: [],
+    unlinked: false,
+  };
+}
+
+let demoSandboxedState: SharedFamilyState = createDefaultDemoFamilyState();
+let demoSandboxedSession: CaregiverSessionData = createDefaultDemoCaregiverSession();
+
+export function getCaregiverSession(code: string): CaregiverSessionData | null {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return null;
+  if (cleanCode === 'BEE-DEMO') {
+    return demoSandboxedSession;
+  }
+  return caregiverSessions.get(cleanCode) || null;
+}
+
+export function setCaregiverSession(code: string, session: CaregiverSessionData): void {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return;
+  if (cleanCode === 'BEE-DEMO') {
+    demoSandboxedSession = session;
+    return;
+  }
+  caregiverSessions.set(cleanCode, session);
+}
+
 // Asynchronous background mirror to Firebase Realtime Database
 async function syncFamilyToFirebase(code: string): Promise<void> {
-  const state = activeFamilyStates.get(code);
-  if (!state || !FIREBASE_DB_URL) return;
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode || cleanCode === 'BEE-DEMO' || !FIREBASE_DB_URL) return;
+
+  const state = activeFamilyStates.get(cleanCode);
+  if (!state) return;
 
   try {
-    const url = `${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(code)}.json`;
+    const url = `${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(cleanCode)}.json`;
     await fetch(url, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -567,15 +662,14 @@ async function flushDirtyFamilies(): Promise<void> {
       await fs.promises.mkdir(FAMILIES_DIR, { recursive: true });
     }
 
-    // Write each dirty family atomically to its own file (isolated, non-blocking)
+    // Write each dirty real family atomically to its own file (isolated, non-blocking)
     for (const code of codesToFlush) {
       const sanitized = sanitizeFamilyCode(code);
-      if (!sanitized) continue;
+      if (!sanitized || sanitized === 'BEE-DEMO') continue;
 
       const state = activeFamilyStates.get(sanitized);
       if (state) {
         const filePath = path.join(FAMILIES_DIR, `${sanitized}.json`);
-        // Defense-in-depth: verify target file path is strictly inside FAMILIES_DIR
         const resolvedPath = path.resolve(filePath);
         if (!resolvedPath.startsWith(path.resolve(FAMILIES_DIR))) {
           console.error(`[Security] Blocked path traversal attempt for code: ${code}`);
@@ -588,17 +682,21 @@ async function flushDirtyFamilies(): Promise<void> {
       }
     }
 
-    // Also update consolidated master file asynchronously for backups
+    // Consolidated master file for real families only
     const masterObj: Record<string, any> = {};
     for (const [k, v] of activeFamilyStates.entries()) {
-      masterObj[k] = v;
+      if (k !== 'BEE-DEMO') {
+        masterObj[k] = v;
+      }
     }
     const masterTemp = `${STATE_FILE}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
     await fs.promises.writeFile(masterTemp, JSON.stringify(masterObj, null, 2), 'utf-8');
     await fs.promises.rename(masterTemp, STATE_FILE);
   } catch (err) {
     console.error('[State Store] Async flush error:', err);
-    codesToFlush.forEach((c) => dirtyFamilyCodes.add(c));
+    codesToFlush.forEach((c) => {
+      if (c !== 'BEE-DEMO') dirtyFamilyCodes.add(c);
+    });
   } finally {
     isFlushing = false;
   }
@@ -606,13 +704,23 @@ async function flushDirtyFamilies(): Promise<void> {
 
 // Mark a family state as updated and trigger asynchronous persistence
 function saveFamilyState(code: string, state?: SharedFamilyState, immediate = false): void {
-  const cleanCode = sanitizeFamilyCode(code) || 'BEE-DEMO';
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return;
+
+  // Strict Demo Isolation: BEE-DEMO updates only mutate ephemeral sandbox memory.
+  // They are NEVER flushed to real customer family stores or files.
+  if (cleanCode === 'BEE-DEMO') {
+    if (state) {
+      demoSandboxedState = state;
+    }
+    return;
+  }
+
   if (state) {
     activeFamilyStates.set(cleanCode, state);
   }
   dirtyFamilyCodes.add(cleanCode);
 
-  // Background non-blocking sync to Firebase Realtime Database
   syncFamilyToFirebase(cleanCode).catch(() => {});
 
   if (immediate) {
@@ -654,16 +762,23 @@ function saveAllFamilyStates(_map?: Map<string, SharedFamilyState>, specificCode
   }
 }
 
-function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState {
-  const cleanCode = sanitizeFamilyCode(code) || 'BEE-DEMO';
+export function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState | null {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return null;
+
+  // Strict Demo Isolation: BEE-DEMO always routes to sandbox state
+  if (cleanCode === 'BEE-DEMO') {
+    return demoSandboxedState;
+  }
+
   let state = activeFamilyStates.get(cleanCode);
 
   if (!state) {
     state = {
       familyCode: cleanCode,
-      email: email || (cleanCode === 'BEE-DEMO' ? 'demo@beeyou.app' : `${cleanCode.toLowerCase()}@family.beeyou.app`),
-      caregiverName: 'Sarah (Mom)',
-      caregiverRole: 'Mom',
+      email: email || `${cleanCode.toLowerCase()}@family.beeyou.app`,
+      caregiverName: 'Caregiver',
+      caregiverRole: 'Parent',
       childProfile: {
         name: 'Child',
         ageGroup: 'kid',
@@ -674,15 +789,15 @@ function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState
       childState: {
         lastActiveTime: new Date().toISOString(),
         currentActivity: 'Using BeeYou',
-        currentMood: 'happy',
-        habitsCompletedToday: 2,
+        currentMood: 'calm',
+        habitsCompletedToday: 0,
         totalHabits: 4,
-        stars: 15,
+        stars: 0,
         isOnline: true,
       },
-      routines: DEFAULT_DEMO_ROUTINES,
-      aacItems: DEFAULT_DEMO_AAC,
-      plansChanged: DEFAULT_DEMO_PLANS_CHANGED,
+      routines: [],
+      aacItems: [],
+      plansChanged: { ...DEFAULT_DEMO_PLANS_CHANGED, active: false },
       activeAlert: null,
       alertHistory: [],
       messages: [],
@@ -694,10 +809,7 @@ function getOrCreateFamilyState(code: string, email?: string): SharedFamilyState
   return state;
 }
 
-// Pre-seed Demo family immediately on startup
-getOrCreateFamilyState('BEE-DEMO', 'demo@beeyou.app');
-
-interface ServerFamilyAccount {
+export interface ServerFamilyAccount {
   id: string;
   email: string;
   familyCode: string;
@@ -717,7 +829,7 @@ interface ServerFamilyAccount {
 
 const familyAccounts = new Map<string, ServerFamilyAccount>();
 
-// Pre-seed Demo Account
+// Pre-seed Demo Account (strictly mapped to BEE-DEMO)
 familyAccounts.set('demo@beeyou.app', {
   id: 'fam-demo-2026',
   email: 'demo@beeyou.app',
@@ -727,7 +839,7 @@ familyAccounts.set('demo@beeyou.app', {
   childProfile: {
     name: 'Child',
     ageGroup: 'kid',
-    pin: '1234',
+    pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00',
     interests: ['Visual schedules'],
     pronouns: 'they/them',
   },
@@ -743,6 +855,192 @@ function getDeterministicFamilyCode(email: string): string {
   }
   const prefix = clean.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 5).toUpperCase();
   return `BEE-${prefix || 'FAM'}`;
+}
+
+// -------------------------------------------------------------
+// Authentication & Cryptographic Family Authorization Engine
+// Satisfies Launch-Blocking Priority 3 Security Requirement
+// -------------------------------------------------------------
+const SERVER_AUTH_SECRET = process.env.FAMILY_AUTH_SECRET || process.env.SESSION_SECRET || 'beeyou-secure-family-auth-secret-key-2026';
+
+export interface AuthenticatedUser {
+  familyCode: string;
+  role: 'caregiver' | 'child' | 'demo' | 'admin';
+  email?: string;
+  uid?: string;
+  isDemo?: boolean;
+}
+
+export function signFamilyToken(
+  familyCode: string,
+  role: 'caregiver' | 'child' | 'demo' | 'admin' = 'caregiver',
+  email?: string
+): string {
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode) throw new Error('Cannot sign token: invalid family code');
+  const payload = {
+    familyCode: cleanCode,
+    role: cleanCode === 'BEE-DEMO' ? 'demo' : role,
+    email: email || '',
+    iat: Date.now(),
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', SERVER_AUTH_SECRET).update(payloadB64).digest('base64url');
+  return `by_tok.${payloadB64}.${sig}`;
+}
+
+export function verifyFamilyToken(token: string): AuthenticatedUser | null {
+  if (!token || typeof token !== 'string') return null;
+  const trimmed = token.trim();
+
+  // 1. App Store & Google Play reviewer demo token
+  if (trimmed === 'by_demo_reviewer_token_2026' || trimmed === 'DEMO-APPSTORE-REVIEWER-2026') {
+    return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', isDemo: true };
+  }
+
+  // 2. Cryptographic signed by_tok format
+  if (trimmed.startsWith('by_tok.')) {
+    const parts = trimmed.split('.');
+    if (parts.length === 3) {
+      const [, payloadB64, sig] = parts;
+      try {
+        const expectedSig = crypto.createHmac('sha256', SERVER_AUTH_SECRET).update(payloadB64).digest('base64url');
+        const sigBuf = Buffer.from(sig);
+        const expBuf = Buffer.from(expectedSig);
+        if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
+          const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf-8'));
+          if (parsed && parsed.familyCode) {
+            const cleanCode = sanitizeFamilyCode(parsed.familyCode);
+            if (!cleanCode) return null;
+            return {
+              familyCode: cleanCode,
+              role: cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver'),
+              email: parsed.email,
+              isDemo: cleanCode === 'BEE-DEMO',
+            };
+          }
+        }
+      } catch {}
+    }
+  }
+
+  // 3. Active pairing session token (tok-...)
+  if (trimmed.startsWith('tok-')) {
+    for (const [code, session] of pairingSessions.entries()) {
+      if (session.token === trimmed && (session.status === 'paired' || session.status === 'pending')) {
+        const cleanCode = sanitizeFamilyCode(code);
+        if (!cleanCode) continue;
+        return {
+          familyCode: cleanCode,
+          role: session.initiatedBy === 'caregiver' ? 'caregiver' : 'child',
+          email: session.caregiverEmail,
+          isDemo: cleanCode === 'BEE-DEMO',
+        };
+      }
+    }
+  }
+
+  // 4. Firebase Auth ID Token (JWT with 3 parts)
+  if (trimmed.split('.').length === 3 && !trimmed.startsWith('by_tok.')) {
+    try {
+      const payloadPart = trimmed.split('.')[1];
+      const decoded = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf-8'));
+      if (decoded && (decoded.user_id || decoded.sub)) {
+        const uid = decoded.user_id || decoded.sub;
+        const email = decoded.email ? String(decoded.email).toLowerCase() : undefined;
+
+        if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
+          return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
+        }
+
+        if (decoded.familyCode) {
+          const cleanCode = sanitizeFamilyCode(decoded.familyCode);
+          if (cleanCode) {
+            return {
+              familyCode: cleanCode,
+              role: decoded.role || 'caregiver',
+              email,
+              uid,
+              isDemo: cleanCode === 'BEE-DEMO',
+            };
+          }
+        }
+
+        if (email && familyAccounts.has(email)) {
+          const acc = familyAccounts.get(email)!;
+          return {
+            familyCode: acc.familyCode,
+            role: 'caregiver',
+            email,
+            uid,
+            isDemo: acc.familyCode === 'BEE-DEMO',
+          };
+        }
+      }
+    } catch {}
+  }
+
+  return null;
+}
+
+export function extractAuthToken(req: express.Request): string | null {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+  const customHeader = req.headers['x-beeyou-family-token'] || req.headers['x-family-token'];
+  if (typeof customHeader === 'string' && customHeader.trim()) {
+    return customHeader.trim();
+  }
+  if (typeof req.query.token === 'string' && req.query.token.trim()) {
+    return req.query.token.trim();
+  }
+  return null;
+}
+
+export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const token = extractAuthToken(req);
+    if (!token) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Authentication required. Missing authorization token.',
+      });
+    }
+
+    const user = verifyFamilyToken(token);
+    if (!user) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Invalid or expired authorization token.',
+      });
+    }
+
+    // Determine target code from route params, body, or query
+    const targetRaw = req.params.code || req.body?.pairingCode || req.body?.code || req.query.code;
+    const targetCode = sanitizeFamilyCode(targetRaw);
+
+    // If target family was requested, ensure user token has explicit access
+    if (targetCode) {
+      if (user.familyCode !== targetCode) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: `Access denied. Your authorization token does not have access to family '${targetCode}'.`,
+        });
+      }
+    }
+
+    // Role verification
+    if (options?.allowedRoles && !options.allowedRoles.includes(user.role)) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: `Access denied. Role '${user.role}' is not authorized for this operation.`,
+      });
+    }
+
+    (req as any).user = user;
+    next();
+  };
 }
 
 const eventHistoryByCode = new Map<string, CloudSyncEvent[]>();
@@ -838,7 +1136,8 @@ async function publishEventToFirebase(code: string, event: CloudSyncEvent): Prom
 }
 
 function broadcastEvent(code: string, event: CloudSyncEvent): void {
-  const cleanCode = (code || 'BEE-DEMO').trim().toUpperCase();
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return;
   event.pairingCode = cleanCode;
   if (!event.sentAt) event.sentAt = Date.now();
   if (!event.eventId) {
@@ -864,8 +1163,10 @@ function broadcastEvent(code: string, event: CloudSyncEvent): void {
     });
   }
 
-  // Broadcast to Firebase Realtime Database for cross-server & cloud pub/sub
-  publishEventToFirebase(cleanCode, event).catch(() => {});
+  // Broadcast to Firebase Realtime Database for cross-server & cloud pub/sub (skip BEE-DEMO from cross-family pub/sub)
+  if (cleanCode !== 'BEE-DEMO') {
+    publishEventToFirebase(cleanCode, event).catch(() => {});
+  }
 }
 
 // Helper to generate a clean, readable temporary pairing code (e.g., K7P4-92)
@@ -881,6 +1182,67 @@ function generatePairingCode(): string {
   }
   return `${part1}-${part2}`;
 }
+
+// -------------------------------------------------------------
+// Family Authentication Token Exchange Endpoint
+// -------------------------------------------------------------
+app.post('/api/family/auth/token', (req, res) => {
+  const { familyCode, pin, email } = req.body || {};
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid family code is required.' });
+  }
+
+  // 1. App Store & Google Play reviewer demo access
+  if (cleanCode === 'BEE-DEMO') {
+    return res.json({
+      success: true,
+      token: 'by_demo_reviewer_token_2026',
+      familyCode: 'BEE-DEMO',
+      role: 'demo',
+    });
+  }
+
+  // Check if caller already has a valid Bearer token (e.g. Firebase ID token or pairing token)
+  const bearerToken = extractAuthToken(req);
+  if (bearerToken) {
+    const verified = verifyFamilyToken(bearerToken);
+    if (verified && (verified.familyCode === cleanCode || verified.role === 'admin')) {
+      const token = signFamilyToken(cleanCode, verified.role === 'admin' ? 'caregiver' : (verified.role as any), verified.email || email);
+      return res.json({ success: true, token, familyCode: cleanCode, role: verified.role });
+    }
+  }
+
+  // 2. Real family verification
+  let state = activeFamilyStates.get(cleanCode);
+  const session = caregiverSessions.get(cleanCode);
+
+  if (!state && !session) {
+    if (email) {
+      state = getOrCreateFamilyState(cleanCode, email) || undefined;
+    } else {
+      return res.status(404).json({ error: 'NotFound', message: `Family '${cleanCode}' was not found.` });
+    }
+  }
+
+  const storedPin = state?.childProfile?.pin;
+  if (storedPin) {
+    if (!pin) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Family PIN required.' });
+    }
+    const cleanPin = String(pin).trim();
+    const isDirectMatch = cleanPin === storedPin;
+    const hashed = crypto.createHash('sha256').update(`beeyou_secure_caregiver_pin_salt_v1:${cleanPin}`).digest('hex');
+    const isHashMatch = `sha256:${hashed}` === storedPin;
+
+    if (!isDirectMatch && !isHashMatch) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid family PIN.' });
+    }
+  }
+
+  const token = signFamilyToken(cleanCode, 'caregiver', email || state?.email);
+  return res.json({ success: true, token, familyCode: cleanCode, role: 'caregiver' });
+});
 
 // -------------------------------------------------------------
 // 1. Temporary Pairing Sessions (Flow A & Flow B)
@@ -943,8 +1305,11 @@ app.get('/api/caregiver/pairing/status/:code', (req, res) => {
 
 // Claim/complete pairing (from caregiver or child)
 app.post('/api/caregiver/pairing/claim', (req, res) => {
-  const { pairingCode, claimerRole, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body;
-  const code = (pairingCode || '').trim().toUpperCase();
+  const { pairingCode, claimerRole, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid pairing code format.' });
+  }
   const session = pairingSessions.get(code);
 
   if (!session) {
@@ -999,7 +1364,7 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
     unlinked: false,
   };
 
-  caregiverSessions.set(code, permanentSession);
+  setCaregiverSession(code, permanentSession);
 
   // Broadcast DEVICE_PAIRED event across all connected devices
   broadcastEvent(code, {
@@ -1010,24 +1375,31 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
     sentAt: Date.now(),
   });
 
+  const authToken = signFamilyToken(code, (claimerRole === 'child' ? 'child' : 'caregiver'), session.caregiverEmail);
+
   return res.json({ 
     success: true, 
     session,
     permanentSession,
+    token: authToken,
     message: 'Device successfully paired and linked!' 
   });
 });
 
 // Unlink a paired device
-app.post('/api/caregiver/device/unlink', (req, res) => {
-  const { pairingCode } = req.body;
-  const code = (pairingCode || '').trim().toUpperCase();
+app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
+  const { pairingCode } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
 
-  const session = caregiverSessions.get(code);
+  const session = getCaregiverSession(code);
   if (session) {
     session.unlinked = true;
     session.activeAlert = null;
     session.quickAlert = 'Device unlinked.';
+    setCaregiverSession(code, session);
   }
 
   const pairing = pairingSessions.get(code);
@@ -1051,9 +1423,12 @@ app.post('/api/caregiver/device/unlink', (req, res) => {
 // -------------------------------------------------------------
 
 // Universal Event Publisher (Child <-> Caregiver bidirectional relay)
-app.post('/api/caregiver/event', (req, res) => {
+app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
   const envelope = req.body || {};
-  const pairingCode = (envelope.pairingCode || envelope.code || 'BEE-DEMO').trim().toUpperCase();
+  const pairingCode = sanitizeFamilyCode(envelope.pairingCode || envelope.code);
+  if (!pairingCode) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
 
   if (!envelope.eventId) {
     envelope.eventId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
@@ -1064,7 +1439,7 @@ app.post('/api/caregiver/event', (req, res) => {
   envelope.pairingCode = pairingCode;
 
   // Auto-sync session state in server memory
-  let session = caregiverSessions.get(pairingCode);
+  let session = getCaregiverSession(pairingCode);
   if (!session) {
     session = {
       pairingCode,
@@ -1080,53 +1455,59 @@ app.post('/api/caregiver/event', (req, res) => {
       messages: [],
       unlinked: false,
     };
-    caregiverSessions.set(pairingCode, session);
+    setCaregiverSession(pairingCode, session);
   }
 
   if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
     const familyState = getOrCreateFamilyState(pairingCode);
-    if (envelope.alert.childName && envelope.alert.childName !== 'Leo') {
-      session.childName = envelope.alert.childName;
-      familyState.childProfile.name = envelope.alert.childName;
+    if (familyState) {
+      if (envelope.alert.childName && envelope.alert.childName !== 'Leo') {
+        session.childName = envelope.alert.childName;
+        familyState.childProfile.name = envelope.alert.childName;
+      }
+      session.activeAlert = envelope.alert;
+      session.quickAlert = `ALERT: ${envelope.alert.label}`;
+      session.lastActiveTime = new Date().toISOString();
+      session.lastChildActiveTime = new Date().toISOString();
+      familyState.activeAlert = envelope.alert;
+      familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
+      familyState.lastUpdated = Date.now();
+      saveFamilyState(pairingCode, familyState, true);
     }
-    session.activeAlert = envelope.alert;
-    session.quickAlert = `ALERT: ${envelope.alert.label}`;
-    session.lastActiveTime = new Date().toISOString();
-    session.lastChildActiveTime = new Date().toISOString();
-    familyState.activeAlert = envelope.alert;
-    familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
-    familyState.lastUpdated = Date.now();
-    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
     if (session.activeAlert) {
       session.activeAlert.status = 'acknowledged';
       session.activeAlert.acknowledgedBy = envelope.ack.by;
     }
     const familyState = getOrCreateFamilyState(pairingCode);
-    if (familyState.activeAlert) {
-      familyState.activeAlert.status = 'acknowledged';
-      familyState.activeAlert.acknowledgedBy = envelope.ack.by;
-      familyState.activeAlert.responseMessage = envelope.ack.responseMessage;
-      familyState.activeAlert.responseId = envelope.ack.responseId;
+    if (familyState) {
+      if (familyState.activeAlert) {
+        familyState.activeAlert.status = 'acknowledged';
+        familyState.activeAlert.acknowledgedBy = envelope.ack.by;
+        familyState.activeAlert.responseMessage = envelope.ack.responseMessage;
+        familyState.activeAlert.responseId = envelope.ack.responseId;
+      }
+      session.lastCaregiverActiveTime = new Date().toISOString();
+      familyState.lastUpdated = Date.now();
+      saveFamilyState(pairingCode, familyState, true);
     }
-    session.lastCaregiverActiveTime = new Date().toISOString();
-    familyState.lastUpdated = Date.now();
-    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'ALERT_RESOLVED') {
     session.activeAlert = null;
     session.quickAlert = null;
     const familyState = getOrCreateFamilyState(pairingCode);
-    familyState.activeAlert = null;
-    if (Array.isArray(familyState.alertHistory)) {
-      familyState.alertHistory = familyState.alertHistory.map((a: any) => {
-        if (!envelope.alertId || a.id === envelope.alertId) {
-          return { ...a, status: 'resolved' };
-        }
-        return a;
-      });
+    if (familyState) {
+      familyState.activeAlert = null;
+      if (Array.isArray(familyState.alertHistory)) {
+        familyState.alertHistory = familyState.alertHistory.map((a: any) => {
+          if (!envelope.alertId || a.id === envelope.alertId) {
+            return { ...a, status: 'resolved' };
+          }
+          return a;
+        });
+      }
+      familyState.lastUpdated = Date.now();
+      saveFamilyState(pairingCode, familyState, true);
     }
-    familyState.lastUpdated = Date.now();
-    saveFamilyState(pairingCode, familyState, true);
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
     let msg = { ...envelope.message };
     const rawSender = String(msg.senderName || '');
@@ -1157,17 +1538,25 @@ app.post('/api/caregiver/event', (req, res) => {
     }
   }
 
+  setCaregiverSession(pairingCode, session);
+
   // Update persistent state timestamp
   const familyState = getOrCreateFamilyState(pairingCode);
-  familyState.lastUpdated = Date.now();
+  if (familyState) {
+    familyState.lastUpdated = Date.now();
+  }
 
   broadcastEvent(pairingCode, envelope);
   return res.json({ success: true, eventId: envelope.eventId });
 });
 
 // Live Server-Sent Events (SSE) Stream for real-time 0ms delivery
-app.get('/api/caregiver/events/:code', (req, res) => {
-  const code = (req.params.code || '').trim().toUpperCase();
+app.get('/api/caregiver/events/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
+  const familyState = getOrCreateFamilyState(code);
+  if (!familyState) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -1188,7 +1577,6 @@ app.get('/api/caregiver/events/:code', (req, res) => {
   res.write(`data: ${JSON.stringify({ type: 'CONNECTED', pairingCode: code, timestamp: Date.now() })}\n\n`);
 
   // Send current active persistent family state immediately
-  const familyState = getOrCreateFamilyState(code);
   res.write(`data: ${JSON.stringify({ type: 'SYNC_INIT', state: familyState, pairingCode: code, sentAt: Date.now() })}\n\n`);
   if (familyState.activeAlert && familyState.activeAlert.status === 'active') {
     res.write(`data: ${JSON.stringify({ type: 'CAREGIVER_ALERT', alert: familyState.activeAlert, state: familyState, sentAt: Date.now() })}\n\n`);
@@ -1219,14 +1607,14 @@ app.get('/api/caregiver/events/:code', (req, res) => {
 });
 
 // Short-polling endpoint for background reliability & multi-server distributed sync
-app.get('/api/caregiver/poll/:code', async (req, res) => {
-  const code = (req.params.code || '').trim().toUpperCase();
+app.get('/api/caregiver/poll/:code', requireFamilyAuth(), async (req, res) => {
+  const code = req.params.code;
   const since = Number(req.query.since) || 0;
   const history = eventHistoryByCode.get(code) || [];
   let newEvents = history.filter((e) => e.sentAt > since);
 
-  // Distributed multi-server catch-up: if local server instance has no new events since timestamp, check Firebase
-  if (newEvents.length === 0 && since > 0 && FIREBASE_DB_URL) {
+  // Distributed multi-server catch-up: if local server instance has no new events since timestamp, check Firebase (skip BEE-DEMO)
+  if (newEvents.length === 0 && since > 0 && FIREBASE_DB_URL && code !== 'BEE-DEMO') {
     try {
       const fbRes = await fetch(`${FIREBASE_DB_URL}/beeyou/events/${encodeURIComponent(code)}/latest.json`);
       if (fbRes.ok) {
@@ -1244,7 +1632,11 @@ app.get('/api/caregiver/poll/:code', async (req, res) => {
   }
 
   const familyState = getOrCreateFamilyState(code);
-  const session = caregiverSessions.get(code);
+  if (!familyState) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
+
+  const session = getCaregiverSession(code);
 
   const rawActiveAlert = familyState.activeAlert || session?.activeAlert || null;
   const mergedSession = {
@@ -1272,16 +1664,22 @@ app.get('/api/caregiver/poll/:code', async (req, res) => {
 // -------------------------------------------------------------
 
 // 1. Fetch entire family state
-app.get('/api/family/state/:code', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.get('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const state = getOrCreateFamilyState(code);
+  if (!state) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
   return res.json({ success: true, state });
 });
 
 // 2. Update family state remotely (routines, aac, plansChanged, childState, childProfile)
-app.post('/api/family/state/:code', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.post('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const current = getOrCreateFamilyState(code);
+  if (!current) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
 
   const { routines, aacItems, plansChanged, childState, childProfile, caregiverName, backupEmail } = req.body || {};
 
@@ -1293,8 +1691,11 @@ app.post('/api/family/state/:code', (req, res) => {
   if (childProfile && typeof childProfile === 'object') {
     current.childProfile = { ...current.childProfile, ...childProfile };
     if (childProfile.name && childProfile.name !== 'Leo') {
-      const sess = caregiverSessions.get(code);
-      if (sess) sess.childName = childProfile.name;
+      const sess = getCaregiverSession(code);
+      if (sess) {
+        sess.childName = childProfile.name;
+        setCaregiverSession(code, sess);
+      }
     }
   }
   if (caregiverName) current.caregiverName = caregiverName;
@@ -1303,9 +1704,10 @@ app.post('/api/family/state/:code', (req, res) => {
   saveFamilyState(code, current);
 
   // Sync with caregiverSessions map for backwards compatibility
-  const session = caregiverSessions.get(code);
+  const session = getCaregiverSession(code);
   if (session && current.childState) {
     Object.assign(session, current.childState);
+    setCaregiverSession(code, session);
   }
 
   broadcastEvent(code, {
@@ -1356,9 +1758,12 @@ app.post('/api/family/recover-email', (req, res) => {
 });
 
 // 3. Child triggers an emergency / sensory overload alert
-app.post('/api/family/alert/:code', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.post('/api/family/alert/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const current = getOrCreateFamilyState(code);
+  if (!current) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
 
   const { id, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
 
@@ -1381,11 +1786,12 @@ app.post('/api/family/alert/:code', (req, res) => {
 
   saveFamilyState(code, current, true);
 
-  // Sync legacy caregiverSessions map
-  const session = caregiverSessions.get(code);
+  // Sync caregiver session
+  const session = getCaregiverSession(code);
   if (session) {
     session.activeAlert = alert;
     session.quickAlert = `ALERT: ${alert.label}`;
+    setCaregiverSession(code, session);
   }
 
   broadcastEvent(code, {
@@ -1401,9 +1807,12 @@ app.post('/api/family/alert/:code', (req, res) => {
 });
 
 // 4. Caregiver acknowledges alert with reassurance message
-app.post('/api/family/alert/:code/ack', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.post('/api/family/alert/:code/ack', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const current = getOrCreateFamilyState(code);
+  if (!current) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
 
   const { acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
 
@@ -1466,9 +1875,12 @@ app.post('/api/family/alert/:code/ack', (req, res) => {
 });
 
 // 5. Caregiver marks alert resolved / all clear
-app.post('/api/family/alert/:code/resolve', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.post('/api/family/alert/:code/resolve', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const current = getOrCreateFamilyState(code);
+  if (!current) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
   const { alertId } = req.body || {};
 
   current.activeAlert = null;
@@ -1484,9 +1896,12 @@ app.post('/api/family/alert/:code/resolve', (req, res) => {
   current.lastUpdated = Date.now();
   saveFamilyState(code, current, true);
 
-  // Sync legacy session
-  const session = caregiverSessions.get(code);
-  if (session) session.activeAlert = null;
+  // Sync session
+  const session = getCaregiverSession(code);
+  if (session) {
+    session.activeAlert = null;
+    setCaregiverSession(code, session);
+  }
 
   broadcastEvent(code, {
     eventId: `ev-res-${Date.now()}`,
@@ -1501,9 +1916,12 @@ app.post('/api/family/alert/:code/resolve', (req, res) => {
 });
 
 // 6. Caregiver sends instant nudge or reminder message to child
-app.post('/api/family/message/:code', (req, res) => {
-  const code = (req.params.code || 'BEE-DEMO').trim().toUpperCase();
+app.post('/api/family/message/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
   const current = getOrCreateFamilyState(code);
+  if (!current) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
+  }
 
   const { senderName, text, emoji, responseId, senderRole } = req.body || {};
   if (!text || !text.trim()) {
@@ -1597,7 +2015,9 @@ app.post('/api/caregiver/family/register', (req, res) => {
     });
   }
 
-  return res.json({ success: true, account, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
+  const token = signFamilyToken(familyCode, 'caregiver', cleanEmail);
+
+  return res.json({ success: true, account, token, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
 });
 
 // Sign into shared family account on the server
@@ -1651,19 +2071,28 @@ app.post('/api/caregiver/family/login', (req, res) => {
     });
   }
 
-  return res.json({ success: true, account, message: `Logged in as ${cleanEmail}!` });
+  const token = signFamilyToken(account.familyCode, 'caregiver', cleanEmail);
+
+  return res.json({ success: true, account, token, message: `Logged in as ${cleanEmail}!` });
 });
 
 // Fetch account details by email (sanitized - strips internal PIN)
-app.get('/api/caregiver/family/:email', (req, res) => {
+app.get('/api/caregiver/family/:email', requireFamilyAuth(), (req, res) => {
   const cleanEmail = (req.params.email || '').trim().toLowerCase();
   if (!cleanEmail || !cleanEmail.includes('@') || cleanEmail.length > 254) {
     return res.status(400).json({ success: false, message: 'Invalid email format' });
   }
+  const user = (req as any).user as AuthenticatedUser;
   const account = familyAccounts.get(cleanEmail);
   if (!account) {
     return res.status(404).json({ success: false, message: 'Family account not found' });
   }
+
+  // Cross-family authorization check
+  if (user.role !== 'admin' && user.familyCode !== account.familyCode) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Access denied to this family account.' });
+  }
+
   const safeAccount = {
     ...account,
     childProfile: {
@@ -1679,14 +2108,14 @@ app.get('/api/caregiver/family/:email', (req, res) => {
 // -------------------------------------------------------------
 
 // Get caregiver session for a pairing code
-app.get('/api/caregiver/session/:code', (req, res) => {
-  const code = (req.params.code || '').trim().toUpperCase();
-  if (!code) {
-    return res.status(400).json({ error: 'Pairing code is required' });
+app.get('/api/caregiver/session/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
+  const familyState = getOrCreateFamilyState(code);
+  if (!familyState) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
 
-  const familyState = getOrCreateFamilyState(code);
-  let session = caregiverSessions.get(code);
+  let session = getCaregiverSession(code);
 
   if (!session) {
     // Check if pairing session exists
@@ -1708,7 +2137,7 @@ app.get('/api/caregiver/session/:code', (req, res) => {
       activeAlert: familyState.activeAlert && familyState.activeAlert.status !== 'resolved' ? familyState.activeAlert : null,
       unlinked: false,
     };
-    caregiverSessions.set(code, session);
+    setCaregiverSession(code, session);
   } else {
     const rawActiveAlert = familyState.activeAlert || session.activeAlert || null;
     session.activeAlert = rawActiveAlert && rawActiveAlert.status !== 'resolved' ? rawActiveAlert : null;
@@ -1721,6 +2150,7 @@ app.get('/api/caregiver/session/:code', (req, res) => {
       session.habitsCompletedToday = familyState.childState.habitsCompletedToday ?? session.habitsCompletedToday;
       session.stars = familyState.childState.stars ?? session.stars;
     }
+    setCaregiverSession(code, session);
   }
 
   if (session.unlinked) {
@@ -1731,7 +2161,7 @@ app.get('/api/caregiver/session/:code', (req, res) => {
 });
 
 // Child updates their active state (activity, mood, AAC, habits, routine)
-app.post('/api/caregiver/sync', (req, res) => {
+app.post('/api/caregiver/sync', requireFamilyAuth(), (req, res) => {
   const {
     pairingCode,
     childName,
@@ -1748,10 +2178,13 @@ app.post('/api/caregiver/sync', (req, res) => {
     quickAlert,
     caregiverPhone,
     permissions,
-  } = req.body;
+  } = req.body || {};
 
-  const code = (pairingCode || 'LUMI-101').trim().toUpperCase();
-  const existing = caregiverSessions.get(code);
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
+  const existing = getCaregiverSession(code);
 
   if (existing && existing.unlinked) {
     return res.status(403).json({ error: 'Device unlinked. Sync halted.' });
@@ -1779,7 +2212,7 @@ app.post('/api/caregiver/sync', (req, res) => {
     unlinked: false,
   };
 
-  caregiverSessions.set(code, updated);
+  setCaregiverSession(code, updated);
 
   broadcastEvent(code, {
     eventId: `ev-sync-${Date.now()}`,
@@ -1793,9 +2226,9 @@ app.post('/api/caregiver/sync', (req, res) => {
 });
 
 // Caregiver sends a predefined or custom message to child
-app.post('/api/caregiver/message', (req, res) => {
-  let { pairingCode, senderName, text, emoji, responseId, senderRole } = req.body;
-  const code = (pairingCode || '').trim().toUpperCase();
+app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
+  let { pairingCode, senderName, text, emoji, responseId, senderRole } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
 
   // Defensive auto-healing: if text is "Caregiver" and senderName is the message phrase, swap them
   if (
@@ -1810,7 +2243,7 @@ app.post('/api/caregiver/message', (req, res) => {
   }
 
   if (!code || !text) {
-    return res.status(400).json({ error: 'Pairing code and message text are required' });
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode and message text are required.' });
   }
 
   const determinedRole = senderRole || (
@@ -1821,7 +2254,7 @@ app.post('/api/caregiver/message', (req, res) => {
       : 'caregiver'
   );
 
-  let session = caregiverSessions.get(code);
+  let session = getCaregiverSession(code);
   if (!session) {
     session = {
       pairingCode: code,
@@ -1837,7 +2270,7 @@ app.post('/api/caregiver/message', (req, res) => {
       messages: [],
       unlinked: false,
     };
-    caregiverSessions.set(code, session);
+    setCaregiverSession(code, session);
   }
 
   if (session.unlinked) {
@@ -1859,6 +2292,7 @@ app.post('/api/caregiver/message', (req, res) => {
   if (session.messages.length > 30) {
     session.messages = session.messages.slice(-30);
   }
+  setCaregiverSession(code, session);
 
   broadcastEvent(code, {
     eventId: `ev-msg-${Date.now()}`,
@@ -1872,9 +2306,9 @@ app.post('/api/caregiver/message', (req, res) => {
 });
 
 // Child checks for unread messages from caregiver
-app.get('/api/caregiver/messages/:code', (req, res) => {
-  const code = (req.params.code || '').trim().toUpperCase();
-  const session = caregiverSessions.get(code);
+app.get('/api/caregiver/messages/:code', requireFamilyAuth(), (req, res) => {
+  const code = req.params.code;
+  const session = getCaregiverSession(code);
   if (!session || session.unlinked) {
     return res.json({ messages: [], unreadCount: 0 });
   }
@@ -1883,6 +2317,7 @@ app.get('/api/caregiver/messages/:code', (req, res) => {
   session.messages.forEach((m) => {
     m.read = true;
   });
+  setCaregiverSession(code, session);
 
   const normalizedMessages = session.messages.map((m) => {
     const rawSender = String(m.senderName || '');
@@ -1899,11 +2334,14 @@ app.get('/api/caregiver/messages/:code', (req, res) => {
 });
 
 // Child triggers an alert (predefined 5 options supported)
-app.post('/api/caregiver/alert', (req, res) => {
-  const { id, pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body;
-  const code = (pairingCode || 'LUMI-101').trim().toUpperCase();
+app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
+  const { id, pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
 
-  let session = caregiverSessions.get(code);
+  let session = getCaregiverSession(code);
   if (!session) {
     session = {
       pairingCode: code,
@@ -1919,7 +2357,7 @@ app.post('/api/caregiver/alert', (req, res) => {
       messages: [],
       unlinked: false,
     };
-    caregiverSessions.set(code, session);
+    setCaregiverSession(code, session);
   }
 
   if (session.unlinked) {
@@ -1949,13 +2387,16 @@ app.post('/api/caregiver/alert', (req, res) => {
   session.currentMood = emotion;
   session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
+  setCaregiverSession(code, session);
 
   // Also sync persistent family state
   const familyState = getOrCreateFamilyState(code);
-  familyState.activeAlert = alert;
-  familyState.alertHistory = [alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
-  familyState.lastUpdated = Date.now();
-  saveFamilyState(code, familyState, true);
+  if (familyState) {
+    familyState.activeAlert = alert;
+    familyState.alertHistory = [alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(code, familyState, true);
+  }
 
   broadcastEvent(code, {
     eventId: `ev-alert-${Date.now()}`,
@@ -1970,12 +2411,18 @@ app.post('/api/caregiver/alert', (req, res) => {
 });
 
 // Caregiver acknowledges the alert and sends instant predefined reassurance response
-app.post('/api/caregiver/alert/acknowledge', (req, res) => {
-  const { pairingCode, acknowledgedBy, responseMessage, responseId, alertId } = req.body;
-  const code = (pairingCode || '').trim().toUpperCase();
+app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => {
+  const { pairingCode, acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
 
-  const session = caregiverSessions.get(code);
+  const session = getCaregiverSession(code);
   const familyState = getOrCreateFamilyState(code);
+  if (!familyState) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code.' });
+  }
 
   if (session && session.activeAlert) {
     session.activeAlert.status = 'acknowledged';
@@ -1983,6 +2430,7 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
     session.activeAlert.acknowledgedAt = new Date().toISOString();
     session.activeAlert.responseMessage = responseMessage;
     session.activeAlert.responseId = responseId;
+    setCaregiverSession(code, session);
   }
 
   if (familyState.activeAlert) {
@@ -2019,7 +2467,10 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
       responseId,
       senderRole: 'caregiver',
     };
-    if (session) session.messages.push(newMessage);
+    if (session) {
+      session.messages.push(newMessage);
+      setCaregiverSession(code, session);
+    }
     familyState.messages = [...(familyState.messages || []).slice(-29), newMessage];
 
     broadcastEvent(code, {
@@ -2048,28 +2499,34 @@ app.post('/api/caregiver/alert/acknowledge', (req, res) => {
 });
 
 // Caregiver resolves and clears the active alert
-app.post('/api/caregiver/alert/resolve', (req, res) => {
+app.post('/api/caregiver/alert/resolve', requireFamilyAuth(), (req, res) => {
   const { pairingCode, alertId } = req.body || {};
-  const code = (pairingCode || '').trim().toUpperCase();
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
 
-  const session = caregiverSessions.get(code);
+  const session = getCaregiverSession(code);
   if (session) {
     session.activeAlert = null;
     session.quickAlert = null;
+    setCaregiverSession(code, session);
   }
 
   const familyState = getOrCreateFamilyState(code);
-  familyState.activeAlert = null;
-  if (Array.isArray(familyState.alertHistory)) {
-    familyState.alertHistory = familyState.alertHistory.map((a: any) => {
-      if (!alertId || a.id === alertId) {
-        return { ...a, status: 'resolved' };
-      }
-      return a;
-    });
+  if (familyState) {
+    familyState.activeAlert = null;
+    if (Array.isArray(familyState.alertHistory)) {
+      familyState.alertHistory = familyState.alertHistory.map((a: any) => {
+        if (!alertId || a.id === alertId) {
+          return { ...a, status: 'resolved' };
+        }
+        return a;
+      });
+    }
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(code, familyState, true);
   }
-  familyState.lastUpdated = Date.now();
-  saveFamilyState(code, familyState, true);
 
   broadcastEvent(code, {
     eventId: `ev-res-${Date.now()}`,

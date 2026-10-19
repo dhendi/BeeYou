@@ -149,6 +149,132 @@ export function getStoredFamilyAccount(): FamilyAccount | null {
   return null;
 }
 
+export const FAMILY_TOKEN_KEY = 'beeyou_family_token';
+export const PAIRING_TOKEN_KEY = 'beeyou_pairing_token';
+
+/**
+ * Synchronous client auth token lookup.
+ * Returns cached token immediately (0ms) if available.
+ */
+export function getSyncClientAuthToken(familyCode?: string): string {
+  const code = (familyCode || getStoredFamilyAccount()?.familyCode || 'BEE-DEMO').trim().toUpperCase();
+
+  // 1. Reviewer Demo Account
+  if (code === 'BEE-DEMO' || code === 'DEMO') {
+    return 'by_demo_reviewer_token_2026';
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(FAMILY_TOKEN_KEY);
+      if (stored) {
+        if (stored.startsWith('by_tok.')) {
+          const parts = stored.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.familyCode === code && payload.iat) {
+              return stored;
+            }
+          }
+        } else if (stored.startsWith('tok-') || stored === 'by_demo_reviewer_token_2026') {
+          return stored;
+        }
+      }
+      const pairTok = localStorage.getItem(PAIRING_TOKEN_KEY) || sessionStorage.getItem(PAIRING_TOKEN_KEY);
+      if (pairTok) return pairTok;
+    } catch {}
+  }
+
+  return '';
+}
+
+/**
+ * Asynchronously retrieve or exchange a verified family token.
+ */
+export async function getClientAuthToken(familyCode?: string): Promise<string> {
+  const code = (familyCode || getStoredFamilyAccount()?.familyCode || 'BEE-DEMO').trim().toUpperCase();
+
+  // 1. Reviewer Demo Account
+  if (code === 'BEE-DEMO' || code === 'DEMO') {
+    return 'by_demo_reviewer_token_2026';
+  }
+
+  // 2. Fast synchronous cache check
+  const syncTok = getSyncClientAuthToken(code);
+  if (syncTok) return syncTok;
+
+  // 3. If Firebase user is authenticated, exchange or use ID token
+  if (auth.currentUser) {
+    try {
+      const fbToken = await auth.currentUser.getIdToken();
+      if (fbToken) {
+        try {
+          const res = await fetch('/api/family/auth/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${fbToken}`,
+            },
+            body: JSON.stringify({ familyCode: code }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.token) {
+              saveClientAuthToken(data.token);
+              return data.token;
+            }
+          }
+        } catch {}
+        return fbToken;
+      }
+    } catch {}
+  }
+
+  // 4. Stored family account credentials exchange
+  const account = getStoredFamilyAccount();
+  if (account && account.familyCode === code) {
+    try {
+      const res = await fetch('/api/family/auth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          familyCode: code,
+          pin: account.childProfile?.pin,
+          email: account.email,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.token) {
+          saveClientAuthToken(data.token);
+          return data.token;
+        }
+      }
+    } catch {}
+  }
+
+  return '';
+}
+
+export function saveClientAuthToken(token: string): void {
+  if (typeof window === 'undefined' || !token) return;
+  try {
+    localStorage.setItem(FAMILY_TOKEN_KEY, token);
+    if (token.startsWith('tok-')) {
+      localStorage.setItem(PAIRING_TOKEN_KEY, token);
+    }
+  } catch {}
+}
+
+export function clearClientAuthToken(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(FAMILY_TOKEN_KEY);
+    localStorage.removeItem(PAIRING_TOKEN_KEY);
+    sessionStorage.removeItem(PAIRING_TOKEN_KEY);
+  } catch {}
+}
+
 export function saveStoredFamilyAccount(account: FamilyAccount | null): void {
   if (typeof window === 'undefined') return;
   try {
@@ -156,10 +282,14 @@ export function saveStoredFamilyAccount(account: FamilyAccount | null): void {
       localStorage.setItem(FAMILY_ACCOUNT_KEY, JSON.stringify(account));
       localStorage.setItem('beeyou_pairing_code', account.familyCode);
       localStorage.setItem('beeyou_device_linked_code', account.familyCode);
+      if (account.isDemoAccount || account.familyCode === 'BEE-DEMO') {
+        saveClientAuthToken('by_demo_reviewer_token_2026');
+      }
       setPairingCode(account.familyCode);
       subscribeToCloudChannel(account.familyCode);
     } else {
       localStorage.removeItem(FAMILY_ACCOUNT_KEY);
+      clearClientAuthToken();
     }
   } catch {}
 }
@@ -633,6 +763,7 @@ export async function wipeDeviceStorage(): Promise<void> {
       localStorage.removeItem('beeyou_user_age_group');
       localStorage.removeItem('beeyou_user_persona');
       localStorage.removeItem('beeyou_app_state_v1');
+      clearClientAuthToken();
 
       sessionStorage.clear();
     }
