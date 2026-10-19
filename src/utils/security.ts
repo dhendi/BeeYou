@@ -11,11 +11,15 @@ const PIN_SALT = 'beeyou_secure_caregiver_pin_salt_v1';
  */
 export async function hashPin(pin: string): Promise<string> {
   const cleanPin = (pin || '').trim();
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+  const subtleCrypto =
+    (typeof window !== 'undefined' ? window.crypto?.subtle : undefined) ||
+    (typeof globalThis !== 'undefined' ? globalThis.crypto?.subtle : undefined);
+
+  if (subtleCrypto) {
     try {
       const encoder = new TextEncoder();
       const data = encoder.encode(`${PIN_SALT}:${cleanPin}`);
-      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const hashBuffer = await subtleCrypto.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
       return `sha256:${hashHex}`;

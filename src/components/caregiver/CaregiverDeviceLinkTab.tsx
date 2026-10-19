@@ -3,12 +3,13 @@ import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
 import { getPairingCode } from '../../services/caregiverSync';
-import { logoutFamilyAccount, wipeDeviceStorage, deleteFamilyAccount } from '../../services/authService';
-import { ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { logoutFamilyAccount, wipeDeviceStorage, deleteFamilyAccount, updateCaregiverPin } from '../../services/authService';
+import { ShieldCheck, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 import { QRCodeView } from '../QRCodeView';
 import { CaregiverLivePortal } from '../CaregiverLivePortal';
 import { LegalModal } from '../LegalModals';
 import { hashPin } from '../../utils/security';
+import { runFullSecurityAudit, SecurityAuditReport, SecurityControlResult } from '../../services/securityAuditService';
 
 interface CaregiverDeviceLinkTabProps {
   onShowNotification: (msg: string) => void;
@@ -29,59 +30,127 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
   const [isWiping, setIsWiping] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms' | null>(null);
   const [isRunningAudit, setIsRunningAudit] = useState(false);
-  const [auditResult, setAuditResult] = useState<{
-    checkedAt: string;
-    tlsValid: boolean;
-    pinProtected: boolean;
-    entropyValid: boolean;
-    cspActive: boolean;
-    cloudRulesReady: boolean;
-  } | null>(null);
+  const [auditResult, setAuditResult] = useState<SecurityAuditReport | null>(null);
 
   const handleRunDiagnostics = async () => {
     setIsRunningAudit(true);
     playChime('tap');
 
-    await new Promise((r) => setTimeout(r, 600));
+    try {
+      const report = await runFullSecurityAudit({
+        pairingCode: getPairingCode(),
+        pin: settings?.pin,
+      });
 
-    const isSecureProtocol =
-      typeof window !== 'undefined' &&
-      (window.isSecureContext ||
-        window.location.protocol === 'https:' ||
-        window.location.protocol === 'capacitor:' ||
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1');
+      setAuditResult(report);
 
-    const currentPin = settings?.pin || '1234';
-    let isPinHashed = currentPin.startsWith('sha256:') || currentPin.startsWith('hash:');
+      if (report.overallStatus === 'passed') {
+        playChime('complete');
+        onShowNotification(t('Security audit complete: All 5 barriers independently verified!'));
+      } else if (report.overallStatus === 'warning') {
+        playChime('tap');
+        onShowNotification(t(`Security audit: ${report.verifiedCount} of ${report.totalControls} verified (${report.unverifiedCount} unverified).`));
+      } else {
+        playChime('clear');
+        onShowNotification(t(`Security audit warning: ${report.failedCount} barrier(s) failed validation!`));
+      }
+    } catch (e: any) {
+      console.error('Security audit execution error:', e);
+      onShowNotification(t('Security audit encountered an unexpected error.'));
+    } finally {
+      setIsRunningAudit(false);
+    }
+  };
 
-    if (!isPinHashed && currentPin.length === 4) {
-      try {
-        const hashed = await hashPin(currentPin);
-        const raw = localStorage.getItem('beeyou_settings');
-        const s = raw ? JSON.parse(raw) : {};
-        s.pin = hashed;
-        localStorage.setItem('beeyou_settings', JSON.stringify(s));
-        isPinHashed = true;
-      } catch {}
+  const handleUpgradeStoredPin = async () => {
+    try {
+      const current = settings?.pin || '1234';
+      const clean = current.replace(/[^0-9]/g, '').slice(0, 4) || '1234';
+      await updateCaregiverPin(clean);
+      playChime('complete');
+      onShowNotification(t('Caregiver PIN upgraded to salted SHA-256 hash.'));
+      // Re-run diagnostic to verify
+      handleRunDiagnostics();
+    } catch {
+      onShowNotification(t('Failed to upgrade PIN hash.'));
+    }
+  };
+
+  const renderAuditCard = (
+    key: 'tls' | 'pin' | 'entropy' | 'csp' | 'cloud',
+    fallbackTitle: string,
+    fallbackHeadline: string,
+    fallbackDetail: string,
+    spanClass?: string
+  ) => {
+    const ctrl: SecurityControlResult | undefined = auditResult?.controls[key];
+
+    let statusBadge = (
+      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+        {t("Pending Check")}
+      </span>
+    );
+    let cardStyle = "bg-slate-50/70 border-slate-200";
+    let titleColor = "text-slate-700";
+
+    if (ctrl) {
+      if (ctrl.status === 'verified') {
+        cardStyle = "bg-emerald-50/70 border-emerald-200";
+        titleColor = "text-emerald-800";
+        statusBadge = (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {t("Verified")}
+          </span>
+        );
+      } else if (ctrl.status === 'failed') {
+        cardStyle = "bg-rose-50/80 border-rose-300";
+        titleColor = "text-rose-800";
+        statusBadge = (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            {t("Failed")}
+          </span>
+        );
+      } else {
+        cardStyle = "bg-amber-50/70 border-amber-200";
+        titleColor = "text-amber-800";
+        statusBadge = (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            {t("Unverified")}
+          </span>
+        );
+      }
     }
 
-    const currentCode = getPairingCode();
-    const hasValidEntropy =
-      currentCode === 'BEE-DEMO' || /^BEE-[A-Z0-9-]{7,16}$/.test(currentCode);
-
-    setAuditResult({
-      checkedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      tlsValid: isSecureProtocol,
-      pinProtected: isPinHashed,
-      entropyValid: hasValidEntropy,
-      cspActive: true,
-      cloudRulesReady: true,
-    });
-
-    setIsRunningAudit(false);
-    playChime('complete');
-    onShowNotification(t('Security audit complete: All 5 barriers verified!'));
+    return (
+      <div className={`p-3.5 rounded-2xl border space-y-1.5 ${cardStyle} ${spanClass || ''}`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className={`text-[11px] font-black uppercase tracking-wider ${titleColor}`}>
+            {ctrl?.name || fallbackTitle}
+          </span>
+          {statusBadge}
+        </div>
+        <p className="text-xs font-bold text-slate-800">
+          {ctrl?.headline || fallbackHeadline}
+        </p>
+        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+          {ctrl?.detail || fallbackDetail}
+        </p>
+        {key === 'pin' && ctrl?.status === 'failed' && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={handleUpgradeStoredPin}
+              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold cursor-pointer transition active:scale-95"
+            >
+              <span>{t("Upgrade Stored PIN to Salted Hash")}</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const handleSignOut = async () => {
@@ -269,91 +338,70 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                {t("Transport Encryption")}
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-bold text-slate-800">
-              {t("Active (TLS 1.3 / HTTPS & WSS)")}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("All child check-ins and emergency alerts transmit over encrypted channels.")}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                {t("Caregiver PIN Protection")}
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-bold text-slate-800">
-              {t("Salt-Hashed (SHA-256)")}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("Caregiver PIN is stored as a cryptographic hash in device memory.")}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                {t("Pairing Code Entropy")}
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-bold text-slate-800">
-              {t("7-Character Unguessable")}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("34.35 billion combinations prevents automated code guessing.")}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                {t("Content Security Policy")}
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-bold text-slate-800">
-              {t("Enforced in WebView")}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("Network calls restricted strictly to official family endpoints.")}
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1 sm:col-span-2 lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                {t("Cloud Partitioning & Isolation")}
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-bold text-slate-800">
-              {t("Isolated Per-Family Rules (database.rules.json)")}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("Server-side identity enforced (auth != null); unauthenticated and cross-family access blocked.")}
-            </p>
-          </div>
+          {renderAuditCard(
+            'tls',
+            t('Transport Encryption'),
+            t('TLS 1.3 / HTTPS & WSS'),
+            t('Requires secure context and encrypted REST/WebSocket connections.')
+          )}
+          {renderAuditCard(
+            'pin',
+            t('Caregiver PIN Protection'),
+            t('Salt-Hashed SHA-256'),
+            t('PIN must be stored as a 256-bit salted hash digest in persistent storage.')
+          )}
+          {renderAuditCard(
+            'entropy',
+            t('Pairing Code Entropy'),
+            t('7-Character Base32 (34.35B)'),
+            t('Unguessable pairing code generated using cryptographic random values.')
+          )}
+          {renderAuditCard(
+            'csp',
+            t('Content Security Policy'),
+            t('Active DOM Meta Directives'),
+            t("Strict Content-Security-Policy with object-src 'none' and restricted endpoints.")
+          )}
+          {renderAuditCard(
+            'cloud',
+            t('Cloud Partitioning & Isolation'),
+            t('Server-Side Security Rules'),
+            t('Live probe verifies that unauthenticated root access is rejected with Permission denied.'),
+            'sm:col-span-2 lg:col-span-2'
+          )}
         </div>
 
         {auditResult && (
-          <div className="p-3.5 rounded-2xl bg-emerald-100/60 border border-emerald-300 text-emerald-900 flex items-center justify-between gap-3 text-xs font-bold animate-in fade-in">
+          <div className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-bold animate-in fade-in ${
+            auditResult.overallStatus === 'passed'
+              ? 'bg-emerald-100/70 border-emerald-300 text-emerald-900'
+              : auditResult.overallStatus === 'failed'
+              ? 'bg-rose-100/80 border-rose-300 text-rose-900'
+              : 'bg-amber-100/70 border-amber-300 text-amber-900'
+          }`}>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+              {auditResult.overallStatus === 'passed' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+              ) : auditResult.overallStatus === 'failed' ? (
+                <AlertTriangle className="w-4 h-4 text-rose-700 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+              )}
               <span>
-                {t("Diagnostic passed: All 5 security barriers verified and active on this device.")}
+                {auditResult.overallStatus === 'passed'
+                  ? t("Diagnostic passed: All 5 security controls independently verified on device & live cloud.")
+                  : auditResult.overallStatus === 'failed'
+                  ? t(`Diagnostic failed: ${auditResult.failedCount} of ${auditResult.totalControls} security controls failed validation.`)
+                  : t(`Diagnostic incomplete: ${auditResult.verifiedCount} of ${auditResult.totalControls} verified, ${auditResult.unverifiedCount} could not be confirmed.`)}
               </span>
             </div>
-            <span className="text-[11px] text-emerald-700 font-mono font-medium shrink-0">
+            <span className={`text-[11px] font-mono font-medium shrink-0 ${
+              auditResult.overallStatus === 'passed'
+                ? 'text-emerald-700'
+                : auditResult.overallStatus === 'failed'
+                ? 'text-rose-700'
+                : 'text-amber-700'
+            }`}>
               {t("Verified at")} {auditResult.checkedAt}
             </span>
           </div>

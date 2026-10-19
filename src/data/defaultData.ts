@@ -69,7 +69,7 @@ export const INITIAL_CHILD_PROFILE: ChildProfile = {
 };
 
 export const INITIAL_APP_SETTINGS: AppSettings = {
-  pin: '1234',
+  pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00', // Salted SHA-256 hash of '1234'
   voiceRate: 0.85,
   voicePitch: 1.0,
   selectedVoiceURI: '',

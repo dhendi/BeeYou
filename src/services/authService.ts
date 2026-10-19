@@ -130,7 +130,7 @@ export const DEMO_FAMILY_ACCOUNT: FamilyAccount = {
     ageGroup: 'kid',
     interests: [],
     pronouns: '',
-    pin: '1234',
+    pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00', // Salted SHA-256 hash of '1234'
   },
   subscriptionTier: 'premium',
   createdAt: '2026-10-01T00:00:00.000Z',
