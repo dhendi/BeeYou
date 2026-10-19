@@ -45,6 +45,8 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
   // Region selection
   const [selectedRegionCode, setSelectedRegionCode] = useState<string>(() => detectInitialRegion());
   const [showRegionModal, setShowRegionModal] = useState<boolean>(false);
+  const [regionModalSearch, setRegionModalSearch] = useState<string>('');
+  const [regionGroupFilter, setRegionGroupFilter] = useState<'All' | 'US States' | 'Canadian Provinces' | 'International'>('All');
 
   // Filters & Search
   const [selectedCategory, setSelectedCategory] = useState<ResourceCategory | 'all' | 'saved'>('all');
@@ -239,9 +241,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
       <div className="px-4 py-2.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center gap-2 text-xs font-bold text-amber-950">
         <MapPin className="w-4 h-4 text-amber-600 shrink-0" />
         <span>
-          {t('Location Active:')} <strong className="font-black">{currentRegion.name}</strong>. {t('Non-local programs (e.g. ')}
-          {selectedRegionCode === 'US-CA' ? 'Ontario AccessOAP' : selectedRegionCode === 'CA-ON' ? 'California Regional Centers / IHSS' : 'unrelated regional programs'}
-          {t(') are strictly hidden.')}
+          {t('Location Active:')} <strong className="font-black">{currentRegion.name}</strong> ({currentRegion.country === 'US' ? 'United States' : currentRegion.country === 'CA' ? 'Canada' : 'International'}). {t('Out-of-region programs (such as Ontario AccessOAP or other states) are strictly excluded.')}
         </span>
       </div>
 
@@ -542,40 +542,100 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
               </button>
             </div>
 
+            {/* Search Input for States / Provinces */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={regionModalSearch}
+                onChange={(e) => setRegionModalSearch(e.target.value)}
+                placeholder={t('Search your state or province (e.g. Virginia, Ontario, Florida)...')}
+                className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-100 border border-stone-200 focus:border-amber-400 focus:outline-none text-xs font-semibold text-slate-800 placeholder:text-stone-400"
+                autoFocus
+              />
+              {regionModalSearch && (
+                <button
+                  type="button"
+                  onClick={() => setRegionModalSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-600 rounded-md"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Region Group Filter Tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
+              {[
+                { id: 'All' as const, label: 'All (67)' },
+                { id: 'US States' as const, label: '🇺🇸 US States (51)' },
+                { id: 'Canadian Provinces' as const, label: '🇨🇦 Canada (13)' },
+                { id: 'International' as const, label: '🌐 International (3)' },
+              ].map((grp) => (
+                <button
+                  key={grp.id}
+                  type="button"
+                  onClick={() => setRegionGroupFilter(grp.id)}
+                  className={`px-2.5 py-1 rounded-lg font-bold whitespace-nowrap cursor-pointer transition-all ${
+                    regionGroupFilter === grp.id
+                      ? 'bg-amber-400 text-amber-950 font-black shadow-2xs'
+                      : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                  }`}
+                >
+                  {grp.label}
+                </button>
+              ))}
+            </div>
+
             {/* Region List */}
-            <div className="space-y-2 overflow-y-auto flex-1 pr-1">
-              {SUPPORTED_REGIONS.map((region) => {
-                const isSelected = region.code === selectedRegionCode;
-                return (
-                  <button
-                    key={region.code}
-                    type="button"
-                    onClick={() => handleSelectRegion(region.code)}
-                    className={`w-full p-3.5 rounded-2xl text-left border-2 flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                      isSelected
-                        ? 'bg-amber-100 border-amber-400 text-amber-950 font-black shadow-xs'
-                        : 'bg-white hover:bg-amber-50/50 border-stone-200 text-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-2xl">{region.flag}</span>
-                      <div className="min-w-0">
-                        <span className="text-sm font-black block text-slate-900 leading-tight">
-                          {region.name}
-                        </span>
-                        <span className="text-xs text-stone-600 font-medium block mt-0.5">
-                          {region.description}
-                        </span>
+            <div className="space-y-1.5 overflow-y-auto flex-1 pr-1">
+              {SUPPORTED_REGIONS
+                .filter((r) => {
+                  if (regionGroupFilter !== 'All' && r.group !== regionGroupFilter) {
+                    return false;
+                  }
+                  if (regionModalSearch.trim()) {
+                    const q = regionModalSearch.toLowerCase();
+                    return (
+                      r.name.toLowerCase().includes(q) ||
+                      r.code.toLowerCase().includes(q) ||
+                      r.description.toLowerCase().includes(q)
+                    );
+                  }
+                  return true;
+                })
+                .map((region) => {
+                  const isSelected = region.code === selectedRegionCode;
+                  return (
+                    <button
+                      key={region.code}
+                      type="button"
+                      onClick={() => handleSelectRegion(region.code)}
+                      className={`w-full p-3 rounded-2xl text-left border-2 flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-amber-100 border-amber-400 text-amber-950 font-black shadow-xs'
+                          : 'bg-white hover:bg-amber-50/50 border-stone-200 text-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-xl shrink-0">{region.flag}</span>
+                        <div className="min-w-0">
+                          <span className="text-xs sm:text-sm font-black block text-slate-900 leading-tight">
+                            {region.name}
+                          </span>
+                          <span className="text-[11px] text-stone-500 font-medium block truncate mt-0.5">
+                            {region.description}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    {isSelected && (
-                      <span className="w-6 h-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+                      {isSelected && (
+                        <span className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
             </div>
 
             <div className="pt-2 border-t border-stone-100 text-center">

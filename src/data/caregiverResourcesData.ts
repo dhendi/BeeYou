@@ -3,8 +3,12 @@
  * Up-to-date (2025/2026) verified data for regional funding, advocacy networks,
  * peer communities (Reddit), neurodiversity-affirming blogs, and helplines.
  *
- * Strict regional filtering ensures that users in California NEVER see Ontario-specific
- * programs (like AccessOAP), and vice versa.
+ * Strict isolation rules:
+ * - A user in Virginia (US-VA) NEVER sees Ontario (CA-ON), California (US-CA), or any other state/province.
+ * - A user in Ontario (CA-ON) NEVER sees Virginia, California, or any other province/state.
+ * - US National resources appear ONLY in US states.
+ * - Canada National resources appear ONLY in Canadian provinces.
+ * - Global resources (Subreddits, TPGA, Neuroclastic, 988) appear in all regions.
  */
 
 export type ResourceCategory = 
@@ -24,7 +28,7 @@ export interface ResourceItem {
   detailedNotes: string;
   category: ResourceCategory;
   scope: ResourceScope;
-  regionCode?: string; // e.g. 'CA-ON', 'US-CA', 'US-NY', 'US-TX', 'CA-BC'
+  regionCode?: string; // e.g. 'US-VA', 'CA-ON', 'US-CA', 'US-NY', 'US-TX', 'US-FL'
   countryCode?: 'CA' | 'US' | 'GB' | 'AU' | 'GLOBAL';
   url: string;
   phone?: string;
@@ -39,69 +43,171 @@ export interface RegionOption {
   name: string;
   flag: string;
   country: 'CA' | 'US' | 'GB' | 'AU' | 'GLOBAL';
+  group: 'US States' | 'Canadian Provinces' | 'International';
   description: string;
 }
 
+// -----------------------------------------------------------------------------
+// ALL 50 US STATES + DC
+// -----------------------------------------------------------------------------
+export const US_STATES: RegionOption[] = [
+  { code: 'US-VA', name: 'Virginia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DBHDS DD Waivers, CCC Plus Waiver & PEATC Special Ed Advocacy' },
+  { code: 'US-CA', name: 'California', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Regional Centers (DDS), IHSS Protective Supervision & DRC' },
+  { code: 'US-NY', name: 'New York', flag: '🇺🇸', country: 'US', group: 'US States', description: 'OPWDD Front Door, Care Design NY & INCLUDEnyc' },
+  { code: 'US-TX', name: 'Texas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Texas HHS CLASS & HCS Waivers & TxP2P' },
+  { code: 'US-FL', name: 'Florida', flag: '🇺🇸', country: 'US', group: 'US States', description: 'APD iBudget Florida Medicaid Waiver & CARD Autism Centers' },
+  { code: 'US-NC', name: 'North Carolina', flag: '🇺🇸', country: 'US', group: 'US States', description: 'NC Innovations Waiver, TEACCH Autism Program & ECAC' },
+  { code: 'US-GA', name: 'Georgia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'NOW & COMP Medicaid Waivers & Parent to Parent of Georgia' },
+  { code: 'US-PA', name: 'Pennsylvania', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ODP Community Living Waiver, ASERT & HUNE Special Ed' },
+  { code: 'US-OH', name: 'Ohio', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DODD Individual Options Waiver, OCALI & OPI' },
+  { code: 'US-IL', name: 'Illinois', flag: '🇺🇸', country: 'US', group: 'US States', description: 'PUNS Database, Illinois Children\'s DD Waiver & Family Resource Center' },
+  { code: 'US-WA', name: 'Washington', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA Basic Plus & Core Waivers & PAVE Washington' },
+  { code: 'US-MD', name: 'Maryland', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA Community Pathways Waiver & Parents\' Place of Maryland' },
+  { code: 'US-MA', name: 'Massachusetts', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDS Children\'s Autism Waiver & Federation for Children with Special Needs' },
+  { code: 'US-MI', name: 'Michigan', flag: '🇺🇸', country: 'US', group: 'US States', description: 'MDHHS Autism Benefit & Michigan Alliance for Families' },
+  { code: 'US-NJ', name: 'New Jersey', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s System of Care (CSOC) & SPAN Parent Advocacy' },
+  { code: 'US-CO', name: 'Colorado', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s Extensive Support (CES) Waiver & PEAK Parent Center' },
+  { code: 'US-AZ', name: 'Arizona', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DES/DDD & ALTCS Medicaid Waiver & Raising Special Kids' },
+  { code: 'US-TN', name: 'Tennessee', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Katie Beckett Waiver & Tennessee Disability Pathfinder' },
+  { code: 'US-IN', name: 'Indiana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Family Supports Waiver (FSW) & IN*SOURCE' },
+  { code: 'US-MO', name: 'Missouri', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DMH DD Comprehensive Waiver & Missouri P&A' },
+  { code: 'US-MN', name: 'Minnesota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Developmental Disabilities (DD) Waiver & PACER Center' },
+  { code: 'US-WI', name: 'Wisconsin', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s Long-Term Support (CLTS) Waiver & WI FACETS' },
+  { code: 'US-SC', name: 'South Carolina', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDSN ID/RD Waiver & Family Connection SC' },
+  { code: 'US-AL', name: 'Alabama', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ADMH DD Waiver & Alabama PTI' },
+  { code: 'US-LA', name: 'Louisiana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'New Opportunities Waiver (NOW) & Families Helping Families' },
+  { code: 'US-KY', name: 'Kentucky', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Michelle P. Waiver & KY-SPIN' },
+  { code: 'US-OR', name: 'Oregon', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ODDS K-Plan In-Home Supports & FACT Oregon' },
+  { code: 'US-OK', name: 'Oklahoma', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DHS DDSD Community Waiver & Oklahoma PTI' },
+  { code: 'US-CT', name: 'Connecticut', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDS Autism Spectrum Waiver & CPAC' },
+  { code: 'US-UT', name: 'Utah', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DSPD Community Supports Waiver & Utah Parent Center' },
+  { code: 'US-NV', name: 'Nevada', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ATAP (Autism Treatment Assistance Program) & Nevada PEP' },
+  { code: 'US-AR', name: 'Arkansas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'CES Waiver (Community & Employment Supports) & Arkansas PTI' },
+  { code: 'US-MS', name: 'Mississippi', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ID/DD Waiver & Mississippi Coalition for Citizens with Disabilities' },
+  { code: 'US-KS', name: 'Kansas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Autism Waiver & Families Together Inc.' },
+  { code: 'US-NM', name: 'New Mexico', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DD Waiver & Parents Reaching Out' },
+  { code: 'US-NE', name: 'Nebraska', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DHHS DD Waiver & PTI Nebraska' },
+  { code: 'US-ID', name: 'Idaho', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s DD Waiver & Idaho Parents Unlimited' },
+  { code: 'US-WV', name: 'West Virginia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'I/DD Waiver & West Virginia PTI' },
+  { code: 'US-HI', name: 'Hawaii', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DOH Developmental Disabilities Division & Hawaii PTI' },
+  { code: 'US-NH', name: 'New Hampshire', flag: '🇺🇸', country: 'US', group: 'US States', description: 'BDS Developmental Services Waiver & Parent Information Center' },
+  { code: 'US-ME', name: 'Maine', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Section 28 Children with Cognitive Impairments & Maine Parent Federation' },
+  { code: 'US-MT', name: 'Montana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DPHHS DD Waiver & Parents, Let\'s Unite for Kids (PLUK)' },
+  { code: 'US-RI', name: 'Rhode Island', flag: '🇺🇸', country: 'US', group: 'US States', description: 'BHDDH DD Services & RIPIN' },
+  { code: 'US-DE', name: 'Delaware', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDDS Lifespan Waiver & Parent Information Center of Delaware' },
+  { code: 'US-SD', name: 'South Dakota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'CHOICES Waiver & South Dakota Parent Connection' },
+  { code: 'US-ND', name: 'North Dakota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Autism Spectrum Disorder Waiver & Pathfinder Services ND' },
+  { code: 'US-AK', name: 'Alaska', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Senior & Disabilities Services IDD Waiver & Stone Soup Group' },
+  { code: 'US-VT', name: 'Vermont', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DAIL Developmental Disabilities Services & Vermont Family Network' },
+  { code: 'US-WY', name: 'Wyoming', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Comprehensive & Supports Waiver & Wyoming PTI' },
+  { code: 'US-IA', name: 'Iowa', flag: '🇺🇸', country: 'US', group: 'US States', description: 'HCBS Children\'s Mental Health & ID Waiver & ASK Resource Center' },
+  { code: 'US-DC', name: 'District of Columbia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA IFS Waiver & Advocates for Justice and Education' },
+];
+
+// -----------------------------------------------------------------------------
+// ALL 10 CANADIAN PROVINCES + 3 TERRITORIES
+// -----------------------------------------------------------------------------
+export const CA_PROVINCES: RegionOption[] = [
+  { code: 'CA-ON', name: 'Ontario', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'AccessOAP, Autism Ontario, SSAH, ADP & Canada DTC' },
+  { code: 'CA-BC', name: 'British Columbia', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Funding Unit (AFU) & ACT Autism Community Training' },
+  { code: 'CA-AB', name: 'Alberta', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Family Support for Children with Disabilities (FSCD) & Autism Alberta' },
+  { code: 'CA-QC', name: 'Quebec', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Fédération québécoise de l\'autisme & CISSS/CIUSSS CRD Services' },
+  { code: 'CA-MB', name: 'Manitoba', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Children\'s disABILITY Services (CdS) & Autism Manitoba' },
+  { code: 'CA-SK', name: 'Saskatchewan', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Individualized Funding (AIF) & Autism Services of Saskatoon' },
+  { code: 'CA-NS', name: 'Nova Scotia', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Direct Family Support for Children (DFSC) & Autism Nova Scotia' },
+  { code: 'CA-NB', name: 'New Brunswick', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Learning Partnership & Early Intensive Intervention (EII)' },
+  { code: 'CA-NL', name: 'Newfoundland and Labrador', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Society of Newfoundland and Labrador (ASNL) & CSSD' },
+  { code: 'CA-PE', name: 'Prince Edward Island', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Services Program & Stars for Life Foundation' },
+  { code: 'CA-NT', name: 'Northwest Territories', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'NWT Disability Services & Yellowknife Association for Community Living' },
+  { code: 'CA-YT', name: 'Yukon', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Yukon Children\'s Disability Services & Autism Yukon' },
+  { code: 'CA-NU', name: 'Nunavut', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Nunavut Department of Family Services & Disability Support Services' },
+];
+
+// -----------------------------------------------------------------------------
+// INTERNATIONAL & GLOBAL
+// -----------------------------------------------------------------------------
+export const INTL_REGIONS: RegionOption[] = [
+  { code: 'GB-ALL', name: 'United Kingdom', flag: '🇬🇧', country: 'GB', group: 'International', description: 'National Autistic Society, NHS Assessment & DLA Child' },
+  { code: 'AU-ALL', name: 'Australia', flag: '🇦🇺', country: 'AU', group: 'International', description: 'NDIS Early Childhood, Amaze & Aspect Australia' },
+  { code: 'GLOBAL', name: 'All / Global Resources', flag: '🌐', country: 'GLOBAL', group: 'International', description: 'Global online communities, affirming blogs & international guides' },
+];
+
 export const SUPPORTED_REGIONS: RegionOption[] = [
-  {
-    code: 'CA-ON',
-    name: 'Ontario, Canada',
-    flag: '🇨🇦',
-    country: 'CA',
-    description: 'AccessOAP, Autism Ontario, SSAH, ADP & Canada DTC',
-  },
-  {
-    code: 'US-CA',
-    name: 'California, United States',
-    flag: '🇺🇸',
-    country: 'US',
-    description: 'Regional Centers (DDS), IHSS Protective Supervision & DRC',
-  },
-  {
-    code: 'US-NY',
-    name: 'New York, United States',
-    flag: '🇺🇸',
-    country: 'US',
-    description: 'OPWDD Front Door, Care Design NY & INCLUDEnyc',
-  },
-  {
-    code: 'US-TX',
-    name: 'Texas, United States',
-    flag: '🇺🇸',
-    country: 'US',
-    description: 'Texas HHS CLASS / HCS Waivers & TxP2P',
-  },
-  {
-    code: 'CA-BC',
-    name: 'British Columbia, Canada',
-    flag: '🇨🇦',
-    country: 'CA',
-    description: 'Autism Funding Unit (AFU) & ACT Autism Community',
-  },
-  {
-    code: 'GB-ALL',
-    name: 'United Kingdom',
-    flag: '🇬🇧',
-    country: 'GB',
-    description: 'National Autistic Society, NHS Pathways & DLA Child',
-  },
-  {
-    code: 'AU-ALL',
-    name: 'Australia',
-    flag: '🇦🇺',
-    country: 'AU',
-    description: 'NDIS Early Childhood, Amaze & Aspect Australia',
-  },
-  {
-    code: 'GLOBAL',
-    name: 'All / Global Resources',
-    flag: '🌐',
-    country: 'GLOBAL',
-    description: 'Global online communities, affirming blogs & international guides',
-  },
+  ...US_STATES,
+  ...CA_PROVINCES,
+  ...INTL_REGIONS,
 ];
 
 export const CAREGIVER_RESOURCES: ResourceItem[] = [
+  // =========================================================================
+  // VIRGINIA, UNITED STATES (US-VA)
+  // =========================================================================
+  {
+    id: 'virginia_dbhds_dd_waivers',
+    title: 'Virginia DBHDS Developmental Disabilities (DD) Waivers',
+    organization: 'Virginia Department of Behavioral Health and Developmental Services (DBHDS)',
+    summary: 'Virginia’s Community Living (CL) and Family and Individual Supports (FIS) Medicaid Waivers for children & adults.',
+    detailedNotes: 'Administered through your local Community Services Board (CSB). The Family and Individual Supports (FIS) Waiver and Community Living (CL) Waiver provide funding for in-home respite, personal care attendants, assistive communication technology, environmental modifications, and therapeutic consultation. Crucial: Contact your local Virginia CSB to be screened and placed on the waiver waiting list immediately upon diagnosis.',
+    category: 'funding',
+    scope: 'regional',
+    regionCode: 'US-VA',
+    countryCode: 'US',
+    url: 'https://dbhds.virginia.gov/developmental-services/waiver-services/',
+    phone: '1-804-786-3921',
+    badges: ['FIS & CL Waivers', 'Respite Funding', 'In-Home Supports', 'Virginia CSB Screening'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'virginia_ccc_plus_waiver',
+    title: 'Commonwealth Coordinated Care Plus (CCC Plus) Waiver - Virginia',
+    organization: 'Virginia Department of Medical Assistance Services (DMAS)',
+    summary: 'Waives parental income so children with autism and high support needs receive full Virginia Medicaid and in-home care.',
+    detailedNotes: 'For children who require assistance with activities of daily living (bathing, dressing, wandering supervision) or medical care. The CCC Plus waiver does NOT look at parent income or household assets — eligibility is based solely on the child’s care needs. Covers in-home personal care, respite hours for caregivers, and private duty nursing.',
+    category: 'funding',
+    scope: 'regional',
+    regionCode: 'US-VA',
+    countryCode: 'US',
+    url: 'https://www.dmas.virginia.gov/for-members/cardinal-care/',
+    phone: '1-855-242-8282',
+    badges: ['Zero Parent Income Test', 'Personal Care Hours', 'Respite Care', 'Virginia Medicaid'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'virginia_peatc_special_ed_advocacy',
+    title: 'PEATC (Parent Educational Advocacy Training Center) - Virginia',
+    organization: 'Virginia’s Federally Designated Parent Training & Information Center (PTI)',
+    summary: 'Free, confidential parent guidance for Virginia IEPs, 504 accommodations, dispute resolution, and school rights.',
+    detailedNotes: 'Virginia’s official PTI center. Helps parents partner effectively with Virginia public school districts. Provides free one-on-one IEP reviews, workshops on special education rights, AAC accommodation advocacy, transition planning guides, and Spanish bilingual support specialists.',
+    category: 'organizations',
+    scope: 'regional',
+    regionCode: 'US-VA',
+    countryCode: 'US',
+    url: 'https://peatc.org',
+    phone: '1-800-869-6782',
+    email: 'partners@peatc.org',
+    badges: ['Free IEP Advocacy', 'Virginia Official PTI', 'Bilingual Support', 'Parent Navigators'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'virginia_autism_society_chapters',
+    title: 'Autism Society of Virginia (Central, Northern, Tidewater Chapters)',
+    organization: 'Autism Society Chapters of Virginia',
+    summary: 'Local Virginia caregiver circles, sensory friendly events, camp scholarships, and community navigation.',
+    detailedNotes: 'Unites regional chapters across the Commonwealth: Autism Society of Central Virginia (ASCV, Richmond area), Autism Society of Northern Virginia (ASNV), and Autism Society of Tidewater (Hampton Roads). Provides parent coffee chats, social clubs for autistic youth, recreational scholarships, and crisis navigation.',
+    category: 'organizations',
+    scope: 'regional',
+    regionCode: 'US-VA',
+    countryCode: 'US',
+    url: 'https://ascv.org',
+    phone: '1-804-257-0192',
+    badges: ['Virginia Local Chapters', 'Sensory Events', 'Parent Support Circles', 'Scholarships'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
   // =========================================================================
   // ONTARIO, CANADA (CA-ON)
   // =========================================================================
@@ -185,21 +291,6 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
     isVerified: true,
     lastVerifiedYear: '2025/2026',
   },
-  {
-    id: 'canada_disability_tax_credit_cdb',
-    title: 'Canada Disability Tax Credit (DTC) & Child Disability Benefit',
-    organization: 'Canada Revenue Agency (CRA)',
-    summary: 'Federal non-refundable tax credit unlocking monthly CDB payouts (~$3,300+/yr) and retroactive refunds up to 10 years.',
-    detailedNotes: 'Requires CRA Form T2201 signed by a medical practitioner (pediatrician/psychologist). Approval reduces annual household income taxes, automatically adds the monthly Child Disability Benefit to your Canada Child Benefit, and opens eligibility for the Registered Disability Savings Plan (RDSP) with up to $70,000 in federal matching grants.',
-    category: 'funding',
-    scope: 'national',
-    countryCode: 'CA',
-    url: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/disability-tax-credit.html',
-    phone: '1-800-959-8281',
-    badges: ['CRA Form T2201', 'Monthly Child Benefit', '10-Yr Retroactive Payout', 'RDSP Grants'],
-    isVerified: true,
-    lastVerifiedYear: '2025/2026',
-  },
 
   // =========================================================================
   // CALIFORNIA, UNITED STATES (US-CA)
@@ -252,21 +343,6 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
     lastVerifiedYear: '2025/2026',
   },
   {
-    id: 'california_autism_society_ca',
-    title: 'Autism Society of California (Statewide Network)',
-    organization: 'Autism Society of California',
-    summary: 'Connects parents with local California chapters (LA, San Diego, Bay Area, Inland Empire) for support circles and outings.',
-    detailedNotes: 'Unites regional chapters across California. Coordinates monthly parent coffee chats, sibling workshops, sensory-friendly community outings (museums, theme parks, movies), and community navigation.',
-    category: 'organizations',
-    scope: 'regional',
-    regionCode: 'US-CA',
-    countryCode: 'US',
-    url: 'https://autismsocietyca.org',
-    badges: ['Local CA Chapters', 'Parent Support Circles', 'Sensory Outings', 'Advocacy'],
-    isVerified: true,
-    lastVerifiedYear: '2025/2026',
-  },
-  {
     id: 'california_dd_medi_cal_waiver',
     title: 'California DD Medi-Cal HCBS Waiver & CCS',
     organization: 'California Department of Health Care Services (DHCS)',
@@ -281,35 +357,6 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
     isVerified: true,
     lastVerifiedYear: '2025/2026',
   },
-  {
-    id: 'us_idea_iep_rights',
-    title: 'Individuals with Disabilities Education Act (IDEA) & IEP Guide',
-    organization: 'U.S. Department of Education / Wrightslaw',
-    summary: 'Federal law guaranteeing Free Appropriate Public Education (FAPE) with IEP accommodations, speech therapy, and 1:1 aides.',
-    detailedNotes: 'Guarantees that every child with an autism diagnosis is entitled to an Individualized Education Program (IEP) tailored to their unique communication and sensory needs. Covers school-based speech-language therapy, occupational therapy, AAC evaluation, sensory room accommodations, and 1:1 behavioral paraprofessionals.',
-    category: 'organizations',
-    scope: 'national',
-    countryCode: 'US',
-    url: 'https://sites.ed.gov/idea/',
-    badges: ['Federal Special Ed Law', 'FAPE & IEP Rights', 'AAC in Schools', 'Wrightslaw Guides'],
-    isVerified: true,
-    lastVerifiedYear: '2025/2026',
-  },
-  {
-    id: 'us_ssi_childhood_disability',
-    title: 'Supplemental Security Income (SSI) for Children',
-    organization: 'U.S. Social Security Administration (SSA)',
-    summary: 'Federal monthly cash payments for eligible children with disabilities meeting medical and family income guidelines.',
-    detailedNotes: 'Provides monthly financial assistance to help low- and moderate-income families meet daily care expenses for a disabled child. In almost all states, SSI approval also automatically confers state Medicaid coverage.',
-    category: 'funding',
-    scope: 'national',
-    countryCode: 'US',
-    url: 'https://www.ssa.gov/benefits/disability/apply-child.html',
-    phone: '1-800-772-1213',
-    badges: ['Federal Monthly Cash', 'Social Security Admin', 'Automatic Medicaid'],
-    isVerified: true,
-    lastVerifiedYear: '2025/2026',
-  },
 
   // =========================================================================
   // NEW YORK, UNITED STATES (US-NY)
@@ -319,7 +366,7 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
     title: 'OPWDD Front Door & Care Coordination Organizations (CCO)',
     organization: 'New York State Office for People With Developmental Disabilities',
     summary: 'Entryway to NY state-funded respite, Self-Direction budgets, and HCBS Medicaid Waiver services.',
-    detailedNotes: 'OPWDD guides families through the Front Door process to determine eligibility for Care Coordination, environmental modifications, assistive communication technology, respite hours, and Self-Direction (which lets families hire their own support staff and select tailored activities).',
+    detailedNotes: 'OPWDD guides families through the Front Door process to determine eligibility for Care Coordination, environmental modifications, assistive communication technology, respite hours, and Self-Direction.',
     category: 'funding',
     scope: 'regional',
     regionCode: 'US-NY',
@@ -384,6 +431,26 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
   },
 
   // =========================================================================
+  // FLORIDA, UNITED STATES (US-FL)
+  // =========================================================================
+  {
+    id: 'florida_ibudget_waiver',
+    title: 'Florida iBudget Medicaid Waiver (APD Florida)',
+    organization: 'Agency for Persons with Disabilities (APD Florida)',
+    summary: 'Home & community-based waiver funding respite, behavioral services, life skills, and adaptive equipment.',
+    detailedNotes: 'Florida’s primary Medicaid waiver for developmental disabilities. Provides individualized budgets for personal supports, behavior analysis, respite care, and adaptive equipment for eligible autistic children.',
+    category: 'funding',
+    scope: 'regional',
+    regionCode: 'US-FL',
+    countryCode: 'US',
+    url: 'https://apd.myflorida.com/ibudget/',
+    phone: '1-866-273-2273',
+    badges: ['iBudget Waiver', 'APD Florida', 'Respite Care', 'Behavioral Analysis'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
+  // =========================================================================
   // BRITISH COLUMBIA, CANADA (CA-BC)
   // =========================================================================
   {
@@ -399,6 +466,106 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
     url: 'https://www2.gov.bc.ca/gov/content/health/managing-your-health/child-behaviour-development/special-needs/autism-spectrum-disorder/autism-funding',
     phone: '1-877-777-3530',
     badges: ['AFU Direct Funding', 'Up to $22k/yr Under 6', 'RASP Providers', 'B.C. Ministry'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
+  // =========================================================================
+  // ALBERTA, CANADA (CA-AB)
+  // =========================================================================
+  {
+    id: 'alberta_fscd_program',
+    title: 'Family Support for Children with Disabilities (FSCD) - Alberta',
+    organization: 'Alberta Ministry of Assisted Services',
+    summary: 'Direct provincial funding for in-home respite, behavioral developmental aides, and specialized therapies.',
+    detailedNotes: 'Provides family support services, counseling, respite care, and specialized behavioral intervention aides for children with a diagnosed disability under age 18 in Alberta.',
+    category: 'funding',
+    scope: 'regional',
+    regionCode: 'CA-AB',
+    countryCode: 'CA',
+    url: 'https://www.alberta.ca/family-support-for-children-with-disabilities',
+    phone: '1-877-644-9992',
+    badges: ['FSCD Alberta', 'Respite Funding', 'Behavioral Aides', 'Provincial Grants'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
+  // =========================================================================
+  // UNITED STATES NATIONAL RESOURCES (Visible across all 50 US States)
+  // =========================================================================
+  {
+    id: 'us_idea_iep_rights',
+    title: 'Individuals with Disabilities Education Act (IDEA) & IEP Guide',
+    organization: 'U.S. Department of Education / Wrightslaw',
+    summary: 'Federal law guaranteeing Free Appropriate Public Education (FAPE) with IEP accommodations, speech therapy, and 1:1 aides.',
+    detailedNotes: 'Guarantees that every child with an autism diagnosis is entitled to an Individualized Education Program (IEP) tailored to their unique communication and sensory needs. Covers school-based speech-language therapy, occupational therapy, AAC evaluation, sensory room accommodations, and 1:1 behavioral paraprofessionals.',
+    category: 'organizations',
+    scope: 'national',
+    countryCode: 'US',
+    url: 'https://sites.ed.gov/idea/',
+    badges: ['Federal Special Ed Law', 'FAPE & IEP Rights', 'AAC in Schools', 'Wrightslaw Guides'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'us_ssi_childhood_disability',
+    title: 'Supplemental Security Income (SSI) for Children',
+    organization: 'U.S. Social Security Administration (SSA)',
+    summary: 'Federal monthly cash payments for eligible children with disabilities meeting medical and family income guidelines.',
+    detailedNotes: 'Provides monthly financial assistance to help families meet daily care expenses for a disabled child. In almost all states, SSI approval also automatically confers state Medicaid coverage.',
+    category: 'funding',
+    scope: 'national',
+    countryCode: 'US',
+    url: 'https://www.ssa.gov/benefits/disability/apply-child.html',
+    phone: '1-800-772-1213',
+    badges: ['Federal Monthly Cash', 'Social Security Admin', 'Automatic Medicaid'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'us_parent_center_hub',
+    title: 'Center for Parent Information & Resources (National PTI Directory)',
+    organization: 'U.S. Office of Special Education Programs (OSEP)',
+    summary: 'Locate your state\'s federally funded Parent Training and Information (PTI) Center for free local special education help.',
+    detailedNotes: 'Every U.S. state has at least one federally funded Parent Center (like PEATC in Virginia, DRC in California, or INCLUDEnyc in New York) that provides parents with free, confidential guidance regarding special education rights, IEP meetings, and community resources.',
+    category: 'organizations',
+    scope: 'national',
+    countryCode: 'US',
+    url: 'https://www.parentcenterhub.org/find-your-center/',
+    badges: ['All 50 States', 'Find Your PTI Center', 'Free IEP Help', 'OSEP Funded'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
+  // =========================================================================
+  // CANADA NATIONAL RESOURCES (Visible across all 13 Canadian Provinces/Territories)
+  // =========================================================================
+  {
+    id: 'canada_disability_tax_credit_cdb',
+    title: 'Canada Disability Tax Credit (DTC) & Child Disability Benefit',
+    organization: 'Canada Revenue Agency (CRA)',
+    summary: 'Federal non-refundable tax credit unlocking monthly CDB payouts (~$3,300+/yr) and retroactive refunds up to 10 years.',
+    detailedNotes: 'Requires CRA Form T2201 signed by a medical practitioner (pediatrician/psychologist). Approval reduces annual household income taxes, automatically adds the monthly Child Disability Benefit to your Canada Child Benefit, and opens eligibility for the Registered Disability Savings Plan (RDSP) with up to $70,000 in federal matching grants.',
+    category: 'funding',
+    scope: 'national',
+    countryCode: 'CA',
+    url: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/disability-tax-credit.html',
+    phone: '1-800-959-8281',
+    badges: ['CRA Form T2201', 'Monthly Child Benefit', '10-Yr Retroactive Payout', 'RDSP Grants'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'canada_autism_alliance_canada',
+    title: 'Autism Alliance of Canada',
+    organization: 'Autism Alliance of Canada (National Leadership Coalition)',
+    summary: 'Pan-Canadian network advancing the National Autism Strategy, federal policy, and cross-provincial healthcare navigation.',
+    detailedNotes: 'National alliance of organizations, autistic individuals, families, and researchers championing federal initiatives, disability financial security, and national health policy.',
+    category: 'organizations',
+    scope: 'national',
+    countryCode: 'CA',
+    url: 'https://www.autismalliance.ca',
+    badges: ['National Strategy', 'Pan-Canadian Network', 'Federal Advocacy'],
     isVerified: true,
     lastVerifiedYear: '2025/2026',
   },
@@ -443,7 +610,7 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
   },
 
   // =========================================================================
-  // GLOBAL COMMUNITIES, REDDIT & PEER SUPPORT (Universal)
+  // GLOBAL COMMUNITIES, REDDIT & PEER SUPPORT (Universal across all regions)
   // =========================================================================
   {
     id: 'reddit_autism_parenting',
@@ -489,7 +656,7 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
   },
 
   // =========================================================================
-  // AFFIRMING BLOGS, GUIDES & ADVOCACY (Universal)
+  // AFFIRMING BLOGS, GUIDES & ADVOCACY (Universal across all regions)
   // =========================================================================
   {
     id: 'blog_thinking_persons_guide',
@@ -566,6 +733,23 @@ export function detectInitialRegion(): string {
 
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    
+    // Virginia / Eastern US
+    if (tz.includes('New_York') || tz.includes('Detroit') || tz.includes('Kentucky') || tz.includes('Indiana')) {
+      return 'US-VA'; // Default to Virginia for Eastern US
+    }
+    // California / Pacific US
+    if (tz.includes('Los_Angeles')) {
+      return 'US-CA';
+    }
+    // Texas / Central US
+    if (tz.includes('Chicago')) {
+      return 'US-TX';
+    }
+    // Mountain US
+    if (tz.includes('Denver')) {
+      return 'US-CO';
+    }
     // Ontario / Eastern Canada
     if (tz.includes('Toronto') || tz.includes('Thunder_Bay') || tz.includes('Nipigon') || tz.includes('Atikokan')) {
       return 'CA-ON';
@@ -574,17 +758,9 @@ export function detectInitialRegion(): string {
     if (tz.includes('Vancouver')) {
       return 'CA-BC';
     }
-    // California / Pacific US
-    if (tz.includes('Los_Angeles')) {
-      return 'US-CA';
-    }
-    // New York / Eastern US
-    if (tz.includes('New_York')) {
-      return 'US-NY';
-    }
-    // Texas / Central US
-    if (tz.includes('Chicago') || tz.includes('Center') || tz.includes('Menominee')) {
-      return 'US-TX';
+    // Alberta
+    if (tz.includes('Edmonton')) {
+      return 'CA-AB';
     }
     // United Kingdom
     if (tz.includes('London')) {
@@ -602,20 +778,21 @@ export function detectInitialRegion(): string {
     if (lang.endsWith('-AU')) return 'AU-ALL';
   } catch {}
 
-  // Safe default: California or Ontario
-  return 'US-CA';
+  // Safe default: Virginia
+  return 'US-VA';
 }
 
 /**
  * Filter resources strictly based on active location.
  *
  * Rules:
- * - If selectedRegion is 'US-CA':
- *   - Only items with regionCode === 'US-CA', countryCode === 'US', or scope === 'global' are included.
- *   - Ontario items (CA-ON, CA) are 100% EXCLUDED.
- * - If selectedRegion is 'CA-ON':
- *   - Only items with regionCode === 'CA-ON', countryCode === 'CA', or scope === 'global' are included.
- *   - California items (US-CA, US) are 100% EXCLUDED.
+ * - If selectedRegion is ANY US state (e.g. 'US-VA', 'US-CA', 'US-FL'):
+ *   - Only items with regionCode === selectedRegion, countryCode === 'US' (national), or scope === 'global' are included.
+ *   - Ontario items (CA-ON) and Canadian national items (CA) are 100% EXCLUDED!
+ *   - Other state items (e.g. California when Virginia is selected) are 100% EXCLUDED!
+ * - If selectedRegion is ANY Canadian province (e.g. 'CA-ON', 'CA-BC', 'CA-AB'):
+ *   - Only items with regionCode === selectedRegion, countryCode === 'CA' (national), or scope === 'global' are included.
+ *   - Virginia and all other US state items are 100% EXCLUDED!
  * - If selectedRegion is 'GLOBAL':
  *   - All global items are shown, plus all regions are available.
  */
@@ -635,7 +812,7 @@ export function filterResources(
     if (selectedRegionCode !== 'GLOBAL') {
       if (item.scope === 'regional') {
         if (item.regionCode !== selectedRegionCode) {
-          return false; // Mismatched region -> Strictly exclude!
+          return false; // Mismatched state/province -> Strictly exclude!
         }
       } else if (item.scope === 'national') {
         if (item.countryCode !== selectedCountry) {
