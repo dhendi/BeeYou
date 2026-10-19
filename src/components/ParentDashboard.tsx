@@ -46,6 +46,7 @@ import { CaregiverHealthSummaryTab } from './caregiver/CaregiverHealthSummaryTab
 import { CaregiverCycleSummaryTab } from './caregiver/CaregiverCycleSummaryTab';
 import { CaregiverDaySummaryTab } from './caregiver/CaregiverDaySummaryTab';
 import { CaregiverSubscriptionTab } from './caregiver/CaregiverSubscriptionTab';
+import { CaregiverResourcesTab } from './caregiver/CaregiverResourcesTab';
 import { CaregiverIncomingAlertModal } from './caregiver/CaregiverIncomingAlertModal';
 
 // Shared Components
@@ -91,6 +92,7 @@ export const ParentDashboard: React.FC = () => {
     | 'health-summary'
     | 'cycle-summary'
     | 'day-summary'
+    | 'resources'
     | 'subscription';
 
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -431,6 +433,17 @@ export const ParentDashboard: React.FC = () => {
           id: 'day-summary',
           label: 'Day-to-Day Summary',
           badge: isPremium ? t('Clinical') : t('7 Days'),
+        },
+      ],
+    },
+    {
+      id: 'resources',
+      title: 'Community & Resources',
+      items: [
+        {
+          id: 'resources',
+          label: 'Regional Resources',
+          badge: t('Directory'),
         },
       ],
     },
@@ -843,6 +856,14 @@ export const ParentDashboard: React.FC = () => {
             <CaregiverDaySummaryTab 
               onShowNotification={showNotification}
               onStartTour={() => handleStartSectionTour('daySummary')}
+            />
+          )}
+
+          {/* TAB: CAREGIVER & REGIONAL RESOURCES */}
+          {activeTab === 'resources' && (
+            <CaregiverResourcesTab 
+              onShowNotification={showNotification}
+              onStartTour={() => handleStartSectionTour('resources')}
             />
           )}
         </main>

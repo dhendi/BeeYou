@@ -9,6 +9,7 @@ export type TourSectionId =
   | 'plansChanged'
   | 'healthSummary'
   | 'daySummary'
+  | 'resources'
   | 'subscription';
 
 export interface TourSectionMeta {
@@ -254,6 +255,22 @@ export const SECTION_TOURS: Record<TourSectionId, TourSectionMeta> = {
         title: 'Clinical Summary & 1-Tap Copy',
         instruction: 'Copy a full clinical summary of routines, mood trends, and sensory triggers ready for IEP or therapy meetings.',
         mascotHint: 'One-click copy for therapists and educators.',
+      },
+    ],
+  },
+
+  resources: {
+    id: 'resources',
+    title: 'Caregiver & Regional Resources',
+    stickerSrc: '/assets/stickers/language_globe.webp',
+    description: 'Explore verified government funding programs, peer subreddits, affirming blogs, and helplines tailored to your location.',
+    tabId: 'resources',
+    steps: [
+      {
+        targetSelector: '[data-tour="caregiver-tab-resources"]',
+        title: 'Location-Tailored Resources',
+        instruction: 'Switch regions anytime to view verified local programs (like AccessOAP in Ontario or Regional Centers in California) without non-local clutter.',
+        mascotHint: 'Always verified and strictly location-specific.',
       },
     ],
   },
