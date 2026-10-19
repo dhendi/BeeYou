@@ -75,6 +75,7 @@ import { useCycleTrackerState } from '../hooks/useCycleTrackerState';
 import { useRecollectionsState } from '../hooks/useRecollectionsState';
 import { useThemeState } from '../hooks/useThemeState';
 import { useFamilyCloudSync } from '../hooks/useFamilyCloudSync';
+import { reconcileAacItems, reconcileRoutines } from '../utils/aacHelpers';
 
 export type ChildViewType =
   | 'home'
@@ -843,10 +844,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     socialStories: gamification.socialStories,
     aacItems: aacComm.aacItems,
     plansChanged: routinesSchedule.plansChanged,
-    onRemoteRoutinesSync: (remoteRoutines) => routinesSchedule.setRoutines(remoteRoutines),
+    onRemoteRoutinesSync: (remoteRoutines) => routinesSchedule.setRoutines((prev) => reconcileRoutines(prev, remoteRoutines)),
     onRemoteAdventuresSync: (remoteAdventures) => gamification.setAdventures(remoteAdventures),
     onRemoteSocialStoriesSync: (remoteStories) => gamification.setSocialStories(remoteStories),
-    onRemoteAacSync: (remoteAac) => aacComm.setAacItems(remoteAac),
+    onRemoteAacSync: (remoteAac) => aacComm.setAacItems((prev) => reconcileAacItems(prev, remoteAac)),
     onRemotePlansChangedSync: (plans) => routinesSchedule.syncRemotePlansChanged(plans),
     speak: speechEngine.speak,
   });
