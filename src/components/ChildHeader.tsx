@@ -118,7 +118,6 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
           type="button"
           onClick={() => {
             playChime('tap');
-            setIsParentMode(true);
             setActiveDeviceView('caregiver');
             try {
               sessionStorage.setItem('beeyou_active_device_view', 'caregiver');

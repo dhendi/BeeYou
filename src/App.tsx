@@ -3,9 +3,9 @@
  * Strictly isolates Caregiver Controller and Child/User Tablet environments.
  */
 
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
-import { isAllAssetsPreloaded } from './utils/appAssetPreloader';
+import { isAllAssetsPreloaded, isAppOpenedInSession, markAppOpenedInSession } from './utils/appAssetPreloader';
 
 const CaregiverApp = lazy(() => import('./components/CaregiverApp').then((m) => ({ default: m.CaregiverApp })));
 const ChildApp = lazy(() => import('./components/ChildApp').then((m) => ({ default: m.ChildApp })));
@@ -39,7 +39,19 @@ function getActiveRole(): 'caregiver' | 'child' {
 
 export default function App() {
   const [role, setRole] = useState<'caregiver' | 'child'>(getActiveRole);
-  const [isReady, setIsReady] = useState<boolean>(() => isAllAssetsPreloaded());
+  // The loading screen ONLY appears when opening the app (first time in the session).
+  // Once opened, it never appears again while navigating through the website.
+  const [isReady, setIsReady] = useState<boolean>(() => {
+    if (isAppOpenedInSession()) {
+      return true;
+    }
+    return isAllAssetsPreloaded();
+  });
+
+  const handleLoaded = useCallback(() => {
+    markAppOpenedInSession();
+    setIsReady(true);
+  }, []);
 
   useEffect(() => {
     const handleRoleUpdate = (e?: any) => {
@@ -58,10 +70,22 @@ export default function App() {
     };
   }, []);
 
+  // Eagerly prefetch child & caregiver view chunks after initial mount so view switching is instant (0ms)
+  useEffect(() => {
+    if (isReady && typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        import('./components/CaregiverApp').catch(() => {});
+        import('./components/ChildApp').catch(() => {});
+        import('./components/ParentDashboard').catch(() => {});
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady]);
+
   return (
     <>
       {!isReady && (
-        <AppLoadingScreen onLoaded={() => setIsReady(true)} />
+        <AppLoadingScreen onLoaded={handleLoaded} />
       )}
       <div className={!isReady ? 'invisible' : 'visible animate-fade-in'}>
         <Suspense fallback={null}>

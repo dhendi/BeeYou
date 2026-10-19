@@ -225,9 +225,7 @@ const ChildAppContent: React.FC = () => {
     return (
       <div className="min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
         <Suspense fallback={
-          <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-amber-400 font-bold text-lg">
-            Loading Caregiver Hub...
-          </div>
+          <div className="h-screen w-screen bg-slate-950" />
         }>
           <ParentDashboard />
           <ConnectCaregiverModal 

@@ -64,9 +64,7 @@ const CaregiverAppContent: React.FC = () => {
       />
       <div className="relative z-10">
         <Suspense fallback={
-          <div className={`h-screen w-screen flex items-center justify-center ${activeTheme?.palette?.appBg || 'bg-[#FEF9F1]'} text-amber-600 font-bold text-lg`}>
-            Loading Caregiver Controller Hub...
-          </div>
+          <div className={`h-screen w-screen ${activeTheme?.palette?.appBg || 'bg-[#FEF9F1]'}`} />
         }>
         <ParentDashboard />
         <ConnectCaregiverModal 

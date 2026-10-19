@@ -39,7 +39,28 @@ export function isWarmCacheVisit(): boolean {
   }
 }
 
+export const APP_SESSION_OPENED_KEY = 'beeyou_app_session_opened';
+
+export function isAppOpenedInSession(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return sessionStorage.getItem(APP_SESSION_OPENED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function markAppOpenedInSession(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(APP_SESSION_OPENED_KEY, 'true');
+  } catch {}
+}
+
 export function isAllAssetsPreloaded(): boolean {
+  if (isAppOpenedInSession()) {
+    return true;
+  }
   return isTier1Completed;
 }
 
@@ -280,7 +301,7 @@ export async function preloadAllAppAssets(
   const tier1Urls = getTier1Assets();
   const total = tier1Urls.length;
 
-  if (isTier1Completed) {
+  if (isTier1Completed || isAppOpenedInSession()) {
     onProgress?.({
       percent: 100,
       loaded: total,
@@ -312,6 +333,7 @@ export async function preloadAllAppAssets(
   });
 
   isTier1Completed = true;
+  markAppOpenedInSession();
   try {
     localStorage.setItem(ASSET_CACHE_VERSION_KEY, CURRENT_ASSET_CACHE_VERSION);
   } catch {}

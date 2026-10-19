@@ -66,13 +66,11 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   // Local Form State for Edit Mode
   const [formData, setFormData] = useState<AboutMeCardData>(aboutMe);
   const [profileName, setProfileName] = useState(childProfile.name || '');
-  const [profilePronouns, setProfilePronouns] = useState(childProfile.pronouns || '');
 
   useEffect(() => {
     if (isOpen) {
       setFormData(childProfile.aboutMe || defaultAboutMe);
       setProfileName(childProfile.name || '');
-      setProfilePronouns(childProfile.pronouns || '');
       setIsEditing(false);
     }
   }, [isOpen, childProfile]);
@@ -102,7 +100,7 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
   const handleSave = () => {
     updateChildProfile({
       name: profileName.trim() || childProfile.name,
-      pronouns: profilePronouns.trim(),
+      pronouns: '',
       aboutMe: formData,
     });
     setIsEditing(false);
@@ -242,7 +240,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
               } else {
                 setFormData(aboutMe);
                 setProfileName(childProfile.name);
-                setProfilePronouns(childProfile.pronouns || 'they/them');
                 setIsEditing(true);
               }
               playChime('tap');
@@ -266,7 +263,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                   </div>
                   <div>
                     <h3 className="text-xl font-black">{childProfile.name}</h3>
-                    <p className="text-xs text-indigo-200 font-medium">Pronouns: {childProfile.pronouns || 'they/them'}</p>
                     <span className="inline-block mt-1 text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-indigo-800 text-indigo-200">
                       AAC Communicator • ID Passport
                     </span>
@@ -323,11 +319,6 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
                         {childProfile.name}
                       </h3>
-                      {childProfile.pronouns && (
-                        <span className="text-xs font-bold text-slate-500 bg-white/80 px-2 py-0.5 rounded-full border border-slate-200">
-                          {childProfile.pronouns}
-                        </span>
-                      )}
                       <span className="text-[11px] font-black uppercase text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
                         {userAgeGroup === 'adult' ? 'Adult • 18+' : userAgeGroup === 'teen' ? 'Teen • 12–17' : 'Child • 3–11'}
                       </span>
@@ -509,23 +500,14 @@ export const AboutMeIDModal: React.FC<AboutMeIDModalProps> = ({ isOpen, onClose 
                 <span>You are editing this profile's About Me ID card. Save your changes at the bottom.</span>
               </div>
 
-              {/* Name, Pronouns & Character */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Name */}
+              <div className="grid grid-cols-1 gap-3">
                 <div>
                   <label className="text-xs font-black uppercase text-slate-600 block mb-1">Name:</label>
                   <input
                     type="text"
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-bold text-sm outline-none focus:border-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase text-slate-600 block mb-1">Pronouns:</label>
-                  <input
-                    type="text"
-                    value={profilePronouns}
-                    onChange={(e) => setProfilePronouns(e.target.value)}
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-bold text-sm outline-none focus:border-amber-500"
                   />
                 </div>

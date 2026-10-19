@@ -112,8 +112,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) return childProfile.name;
     return '';
   });
-  const [pronouns, setPronouns] = useState<string>(childProfile.pronouns || 'they/them');
-  const [customPronoun, setCustomPronoun] = useState<string>('');
 
   // Step 3 Modular Toolkit Customization State
   const [featuresState, setFeaturesState] = useState<EnabledFeatures>(() => ({
@@ -204,7 +202,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     setUserPersona(selectedPersona);
     updateChildProfile({
       name: name.trim(),
-      pronouns: customPronoun.trim() || pronouns,
+      pronouns: '',
       ageGroup: personaToAgeGroup(selectedPersona),
     });
 
@@ -553,50 +551,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-base focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition"
                   />
                 </div>
-              </div>
-
-              {/* Pronoun Preferences */}
-              <div className="space-y-2">
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  {t('Pronouns Preference')}
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {[
-                    { key: 'they/them', label: t('They/Them') },
-                    { key: 'she/her', label: t('She/Her') },
-                    { key: 'he/him', label: t('He/Him') },
-                    { key: 'other', label: t('Other') },
-                  ].map((p) => {
-                    const isSelected = pronouns === p.key;
-                    return (
-                      <button
-                        key={p.key}
-                        type="button"
-                        onClick={() => {
-                          playChime('tap');
-                          setPronouns(p.key);
-                        }}
-                        className={`py-2.5 px-3 rounded-xl font-bold text-sm border-2 transition cursor-pointer ${
-                          isSelected
-                            ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {pronouns === 'other' && (
-                  <input
-                    type="text"
-                    value={customPronoun}
-                    onChange={(e) => setCustomPronoun(e.target.value)}
-                    placeholder={t('Enter custom pronouns (e.g. ze/zir)')}
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium text-sm focus:border-amber-500 focus:outline-none mt-2"
-                  />
-                )}
               </div>
             </div>
           )}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { preloadAllAppAssets, getTier1Assets, isWarmCacheVisit, PreloadProgress } from '../utils/appAssetPreloader';
+import React, { useState, useEffect, useRef } from 'react';
+import { preloadAllAppAssets, getTier1Assets, isWarmCacheVisit, isAppOpenedInSession, markAppOpenedInSession, PreloadProgress } from '../utils/appAssetPreloader';
 
 interface AppLoadingScreenProps {
   onLoaded: () => void;
@@ -14,22 +14,38 @@ export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) 
   }));
 
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const onLoadedRef = useRef(onLoaded);
+  onLoadedRef.current = onLoaded;
+  const hasFinishedRef = useRef(false);
 
   useEffect(() => {
+    // If already opened in this browser session, finish immediately without showing loading screen
+    if (isAppOpenedInSession()) {
+      hasFinishedRef.current = true;
+      onLoadedRef.current();
+      return;
+    }
+
     let isMounted = true;
 
     preloadAllAppAssets((p) => {
-      if (!isMounted) return;
+      if (!isMounted || hasFinishedRef.current) return;
       setProgress(p);
 
       // Gate: ONLY finish when 100% of all Tier 1 startup assets are preloaded
       if (p.percent >= 100 && p.loaded >= p.total) {
-        const holdMs = warmCache ? 60 : 200;
-        const fadeMs = warmCache ? 220 : 400;
+        hasFinishedRef.current = true;
+        markAppOpenedInSession();
+        const holdMs = warmCache ? 40 : 120;
+        const fadeMs = warmCache ? 150 : 250;
         setTimeout(() => {
           if (isMounted) {
             setIsFadingOut(true);
-            setTimeout(onLoaded, fadeMs);
+            setTimeout(() => {
+              if (isMounted) {
+                onLoadedRef.current();
+              }
+            }, fadeMs);
           }
         }, holdMs);
       }
@@ -38,7 +54,7 @@ export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({ onLoaded }) 
     return () => {
       isMounted = false;
     };
-  }, [onLoaded, warmCache]);
+  }, [warmCache]);
 
   return (
     <div
