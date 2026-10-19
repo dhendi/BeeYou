@@ -54,6 +54,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     settings,
     updateSettings,
     subscription,
+    setShowOnboardingModal,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register' | 'forgot_password'>(initialTab);
@@ -102,13 +103,24 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         setLinkedDeviceCode(code);
       }
 
+      // Mark onboarding as fully completed upon authenticated family account login/registration
+      try {
+        localStorage.setItem('beeyou_onboarding_completed', 'true');
+        sessionStorage.removeItem('beeyou_onboarding_current_step');
+        sessionStorage.removeItem('beeyou_onboarding_name');
+        sessionStorage.removeItem('beeyou_onboarding_persona');
+        sessionStorage.removeItem('beeyou_onboarding_pairing');
+      } catch {}
+      if (setShowOnboardingModal) {
+        setShowOnboardingModal(false);
+      }
+
       if (asRole === 'caregiver') {
         setActiveDeviceView('caregiver');
         try {
           localStorage.setItem('beeyou_user_role', 'caregiver');
           localStorage.setItem('beeyou_active_device_view', 'caregiver');
         } catch {}
-        setIsParentMode(true);
         if (setUserRole) setUserRole('caregiver');
         updateChildProfile({
           name: account.childProfile.name,
@@ -154,26 +166,21 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       try {
         playChime('complete');
       } catch {}
-      setTimeout(() => {
-        const safeCode = account.familyCode || '';
+
+      onClose();
+      const safeCode = account.familyCode || '';
+      if (typeof window !== 'undefined') {
         if (asRole === 'caregiver') {
-          setActiveDeviceView('caregiver');
-          if (typeof window !== 'undefined') {
-            window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(safeCode)}`);
-            window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
-          }
+          window.history.replaceState(null, '', `/?role=caregiver&code=${encodeURIComponent(safeCode)}`);
+          window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'caregiver' } }));
         } else {
-          setActiveDeviceView('child');
-          if (typeof window !== 'undefined') {
-            window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(safeCode)}`);
-            window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
-          }
+          window.history.replaceState(null, '', `/?role=child&code=${encodeURIComponent(safeCode)}`);
+          window.dispatchEvent(new CustomEvent('beeyou_role_change', { detail: { role: 'child' } }));
         }
-        onClose();
-        if (typeof window !== 'undefined' && localStorage.getItem('beeyou_pending_pin_reset') === 'true') {
-          setShowPinModal(true);
-        }
-      }, 200);
+      }
+      if (typeof window !== 'undefined' && localStorage.getItem('beeyou_pending_pin_reset') === 'true') {
+        setShowPinModal(true);
+      }
     } catch (err) {
       console.error('Failed to apply account context:', err);
       onClose();

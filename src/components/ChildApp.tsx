@@ -221,34 +221,6 @@ const ChildAppContent: React.FC = () => {
     }
   }, [childView]);
 
-  if (isParentMode) {
-    return (
-      <div className="min-h-screen w-full bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
-        <Suspense fallback={
-          <div className="h-screen w-screen bg-slate-950" />
-        }>
-          <ParentDashboard />
-          <ConnectCaregiverModal 
-            isOpen={showCaregiverModal} 
-            onClose={() => setShowCaregiverModal(false)} 
-            initialTab="enter_code"
-          />
-          <AdaptiveOnboardingFlow
-            isOpen={showOnboardingModal}
-            onClose={() => setShowOnboardingModal(false)}
-            canDismiss={true}
-          />
-          <FamilyAuthModal
-            isOpen={showFamilyAuthModal}
-            onClose={() => setShowFamilyAuthModal(false)}
-          />
-          <CaregiverMessageToast />
-          <OfflineIndicator />
-        </Suspense>
-      </div>
-    );
-  }
-
   if (isSafeModeActive) {
     return (
       <div className="h-[100dvh] max-h-[100dvh] w-full bg-black overflow-hidden relative select-none touch-none">
@@ -269,58 +241,68 @@ const ChildAppContent: React.FC = () => {
       data-high-contrast={settings.highContrast ? 'true' : 'false'}
       data-text-size={settings.textSize || 'standard'}
       data-reduce-motion={settings.reduceMotion ? 'true' : 'false'}
-      className={`h-[100dvh] max-h-[100dvh] w-full ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} ${a11yClasses} text-slate-800 flex flex-col font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}
+      className={`w-full ${isParentMode ? 'min-h-screen bg-slate-950 text-slate-100' : `h-[100dvh] max-h-[100dvh] ${activeTheme?.palette?.appBg || 'bg-amber-50/40'} ${a11yClasses} text-slate-800 flex flex-col`} font-sans selection:bg-amber-200 overflow-hidden relative transition-colors duration-500`}
     >
-      {/* Theme Art Layer */}
-      <ThemeWallpaperArt
-        themeId={activeTheme?.id}
-        pattern={activeTheme?.wallpaperPattern}
-        category={activeTheme?.category}
-        wallpaperUrl={activeTheme?.palette?.wallpaperUrl}
-        reduceMotion={settings.reduceMotion}
-      />
-
-      {/* Child Top Header */}
-      <header className="shrink-0 z-30 relative">
-        <ChildHeader />
-      </header>
-
-      {/* Main Content View Switcher */}
-      <main 
-        ref={mainScrollRef} 
-        className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col p-1 sm:p-2' : 'overflow-y-auto p-2 sm:p-4'} overscroll-contain relative z-10`}
-      >
-        <Suspense fallback={null}>
-          {childView === 'home' && <ChildHomeView />}
-          {childView === 'aac' && <AACView />}
-          {childView === 'communicate' && <CommunicateView />}
-          {childView === 'me' && <MeView />}
-          {childView === 'my-routine' && <MyRoutineView />}
-          {childView === 'tools' && <ToolsView />}
-          {childView === 'my-day' && <MyDayView />}
-          {childView === 'adventures' && <AdventuresView />}
-          {childView === 'skills' && <SkillsView />}
-          {childView === 'feelings' && <FeelingsView />}
-          {childView === 'rewards' && <Rewards />}
-          {childView === 'scrapbook' && <StickerScrapbookView />}
+      {isParentMode ? (
+        <Suspense fallback={<div className="h-screen w-screen bg-slate-950" />}>
+          <ParentDashboard />
+          <CaregiverMessageToast />
+          <OfflineIndicator />
         </Suspense>
-      </main>
+      ) : (
+        <>
+          {/* Theme Art Layer */}
+          <ThemeWallpaperArt
+            themeId={activeTheme?.id}
+            pattern={activeTheme?.wallpaperPattern}
+            category={activeTheme?.category}
+            wallpaperUrl={activeTheme?.palette?.wallpaperUrl}
+            reduceMotion={settings.reduceMotion}
+          />
 
-      {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}
-      {enabledFeatures?.emergencyAlertSOS === true && (
-        <SensoryEmergencyButton />
+          {/* Child Top Header */}
+          <header className="shrink-0 z-30 relative">
+            <ChildHeader />
+          </header>
+
+          {/* Main Content View Switcher */}
+          <main 
+            ref={mainScrollRef} 
+            className={`flex-1 ${childView === 'aac' ? 'overflow-hidden flex flex-col p-1 sm:p-2' : 'overflow-y-auto p-2 sm:p-4'} overscroll-contain relative z-10`}
+          >
+            <Suspense fallback={null}>
+              {childView === 'home' && <ChildHomeView />}
+              {childView === 'aac' && <AACView />}
+              {childView === 'communicate' && <CommunicateView />}
+              {childView === 'me' && <MeView />}
+              {childView === 'my-routine' && <MyRoutineView />}
+              {childView === 'tools' && <ToolsView />}
+              {childView === 'my-day' && <MyDayView />}
+              {childView === 'adventures' && <AdventuresView />}
+              {childView === 'skills' && <SkillsView />}
+              {childView === 'feelings' && <FeelingsView />}
+              {childView === 'rewards' && <Rewards />}
+              {childView === 'scrapbook' && <StickerScrapbookView />}
+            </Suspense>
+          </main>
+
+          {/* Persistent High-Contrast Sensory Emergency Button (only if user explicitly turned it on) */}
+          {enabledFeatures?.emergencyAlertSOS === true && (
+            <SensoryEmergencyButton />
+          )}
+
+          {/* Navigation Footer */}
+          <footer className="shrink-0 z-20">
+            <ChildNavBar />
+          </footer>
+
+          {/* Real-time Caregiver Message Toast */}
+          <CaregiverMessageToast />
+
+          {/* Offline Status & Diagnostic Indicator */}
+          <OfflineIndicator />
+        </>
       )}
-
-      {/* Navigation Footer */}
-      <footer className="shrink-0 z-20">
-        <ChildNavBar />
-      </footer>
-
-      {/* Real-time Caregiver Message Toast */}
-      <CaregiverMessageToast />
-
-      {/* Offline Status & Diagnostic Indicator */}
-      <OfflineIndicator />
 
       {/* Global Modals & Drawers */}
       <QuickPhrasesDrawer />
@@ -334,6 +316,7 @@ const ChildAppContent: React.FC = () => {
           <ConnectCaregiverModal 
             isOpen={showCaregiverModal} 
             onClose={() => setShowCaregiverModal(false)} 
+            initialTab="enter_code"
           />
         )}
         {showCaregiverAlertModal && (

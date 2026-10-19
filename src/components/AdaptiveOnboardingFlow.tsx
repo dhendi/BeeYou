@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, 
   Users, 
@@ -82,10 +82,64 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     setShowEmailVerificationModal,
   } = useApp();
 
-  const [step, setStep] = useState<number>(1);
+  const ONBOARDING_STEP_KEY = 'beeyou_onboarding_current_step';
+  const ONBOARDING_NAME_KEY = 'beeyou_onboarding_name';
+  const ONBOARDING_PERSONA_KEY = 'beeyou_onboarding_persona';
+  const ONBOARDING_PAIRING_KEY = 'beeyou_onboarding_pairing';
+
+  const [step, setStepState] = useState<number>(() => {
+    try {
+      const saved = sessionStorage.getItem(ONBOARDING_STEP_KEY);
+      if (saved) {
+        const num = parseInt(saved, 10);
+        if (num >= 1 && num <= 5) return num;
+      }
+    } catch {}
+    return 1;
+  });
+
+  const setStep = (valOrFn: number | ((prev: number) => number)) => {
+    setStepState((prev) => {
+      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+      try {
+        sessionStorage.setItem(ONBOARDING_STEP_KEY, String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const totalSteps = 5;
-  const [selectedPersona, setSelectedPersona] = useState<UserPersona>(userPersona || 'child');
-  const [pairingMode, setPairingMode] = useState<PairingMode>('caregiver_hub');
+
+  const [selectedPersona, setSelectedPersonaState] = useState<UserPersona>(() => {
+    try {
+      const saved = sessionStorage.getItem(ONBOARDING_PERSONA_KEY) as UserPersona;
+      if (saved === 'child' || saved === 'teen' || saved === 'adult') return saved;
+    } catch {}
+    return userPersona || 'child';
+  });
+
+  const setSelectedPersona = (persona: UserPersona) => {
+    setSelectedPersonaState(persona);
+    try {
+      sessionStorage.setItem(ONBOARDING_PERSONA_KEY, persona);
+    } catch {}
+  };
+
+  const [pairingMode, setPairingModeState] = useState<PairingMode>(() => {
+    try {
+      const saved = sessionStorage.getItem(ONBOARDING_PAIRING_KEY) as PairingMode;
+      if (saved === 'caregiver_hub' || saved === 'standalone') return saved;
+    } catch {}
+    return 'caregiver_hub';
+  });
+
+  const setPairingMode = (mode: PairingMode) => {
+    setPairingModeState(mode);
+    try {
+      sessionStorage.setItem(ONBOARDING_PAIRING_KEY, mode);
+    } catch {}
+  };
+
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('yearly');
   
   // Real-time re-render listener when language is changed
@@ -96,22 +150,38 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     return () => window.removeEventListener('beeyou_lang_changed', handleLangChange);
   }, []);
 
-  // Reset to Step 1 whenever the setup wizard is reopened
-  useEffect(() => {
-    if (isOpen) {
-      setStep(1);
-      setSelectedPersona(userPersona || 'child');
-      if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) {
-        setName(childProfile.name);
-      }
-    }
-  }, [isOpen]);
-
-  // Step 2 Form State
-  const [name, setName] = useState<string>(() => {
+  // Step 2 Form State (Child / User Name)
+  const [name, setNameState] = useState<string>(() => {
+    try {
+      const saved = sessionStorage.getItem(ONBOARDING_NAME_KEY);
+      if (saved !== null && saved !== undefined && saved !== '') return saved;
+    } catch {}
     if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) return childProfile.name;
     return '';
   });
+
+  const setName = (newName: string) => {
+    setNameState(newName);
+    try {
+      sessionStorage.setItem(ONBOARDING_NAME_KEY, newName);
+    } catch {}
+  };
+
+  // Only reset if transitioning from closed (false) to open (true) AND no step was in progress
+  const prevIsOpenRef = useRef(isOpen);
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      const saved = sessionStorage.getItem(ONBOARDING_STEP_KEY);
+      if (!saved) {
+        setStep(1);
+        setSelectedPersona(userPersona || 'child');
+        if (childProfile.name && !['Leo','Alex','Jordan','Sarah (Mom)','Mom'].includes(childProfile.name)) {
+          setName(childProfile.name);
+        }
+      }
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, userPersona, childProfile.name]);
 
   // Step 3 Modular Toolkit Customization State
   const [featuresState, setFeaturesState] = useState<EnabledFeatures>(() => ({
@@ -218,13 +288,27 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       setLinkedDeviceCode(currentPairingCode);
     }
 
-    // 5. Mark onboarding as complete in localStorage
+    // 5. Mark onboarding as complete in localStorage and clear session keys
     try {
       localStorage.setItem('beeyou_onboarding_completed', 'true');
       localStorage.setItem('beeyou_user_persona', selectedPersona);
       localStorage.setItem('beeyou_pairing_mode', pairingMode);
+      sessionStorage.removeItem(ONBOARDING_STEP_KEY);
+      sessionStorage.removeItem(ONBOARDING_NAME_KEY);
+      sessionStorage.removeItem(ONBOARDING_PERSONA_KEY);
+      sessionStorage.removeItem(ONBOARDING_PAIRING_KEY);
     } catch {}
 
+    onClose();
+  };
+
+  const handleDismiss = () => {
+    try {
+      sessionStorage.removeItem(ONBOARDING_STEP_KEY);
+      sessionStorage.removeItem(ONBOARDING_NAME_KEY);
+      sessionStorage.removeItem(ONBOARDING_PERSONA_KEY);
+      sessionStorage.removeItem(ONBOARDING_PAIRING_KEY);
+    } catch {}
     onClose();
   };
 
@@ -262,7 +346,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               {canDismiss && (
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleDismiss}
                   className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
                   aria-label="Dismiss setup"
                 >

@@ -72,11 +72,13 @@ const CaregiverAppContent: React.FC = () => {
           onClose={() => setShowCaregiverModal(false)} 
           initialTab="enter_code"
         />
-        <AdaptiveOnboardingFlow
-          isOpen={showOnboardingModal}
-          onClose={() => setShowOnboardingModal(false)}
-          canDismiss={true}
-        />
+        {showOnboardingModal && (
+          <AdaptiveOnboardingFlow
+            isOpen={showOnboardingModal}
+            onClose={() => setShowOnboardingModal(false)}
+            canDismiss={true}
+          />
+        )}
         <FamilyAuthModal
           isOpen={showFamilyAuthModal}
           onClose={() => setShowFamilyAuthModal(false)}

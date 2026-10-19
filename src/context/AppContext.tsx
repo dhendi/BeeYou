@@ -677,9 +677,24 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   });
 
   const [showOnboardingModal, setShowOnboardingModal] = useState<boolean>(() => {
+    if (initialRole === 'caregiver') return false;
     try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('role') === 'caregiver' || params.get('mode') === 'caregiver') return false;
+        if (window.location.port === '3001' || window.location.pathname.startsWith('/caregiver')) return false;
+        const sessionView = sessionStorage.getItem('beeyou_active_device_view');
+        if (sessionView === 'caregiver') return false;
+      }
       const completed = localStorage.getItem('beeyou_onboarding_completed');
       if (completed === 'true') return false;
+      const localView = localStorage.getItem('beeyou_active_device_view');
+      if (localView === 'caregiver') return false;
+      const famAccount = localStorage.getItem('beeyou_family_account');
+      if (famAccount) {
+        const parsed = JSON.parse(famAccount);
+        if (parsed?.email && !parsed.isDemoAccount) return false;
+      }
     } catch (e) {}
     return true;
   });
