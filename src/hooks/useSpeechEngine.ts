@@ -54,11 +54,12 @@ export function useSpeechEngine({ settings, onLanguageChanged }: UseSpeechEngine
   const speak = async (text: string, options?: { force?: boolean; voicePersona?: string }) => {
     if (settings.soundEffects) playChime('speak');
     const spoken = t(text);
+    const personaToUse = options?.voicePersona || settings.voicePersona || 'system';
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
-      voiceURI: settings.selectedVoiceURI,
-      voicePersona: options?.voicePersona || settings.voicePersona || 'system',
+      voiceURI: personaToUse === 'system' ? settings.selectedVoiceURI : undefined,
+      voicePersona: personaToUse,
       lang: settings.language,
       force: options?.force,
     });

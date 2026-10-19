@@ -12,7 +12,7 @@ let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 const audioMemoryCache = new Map<string, string>();
-const TTS_CACHE_NAME = 'beeyou-tts-v1';
+const TTS_CACHE_NAME = 'beeyou-tts-v2';
 
 /**
  * Multi-tier Audio Cache Loader (Memory -> Browser CacheStorage -> Edge Stream)
@@ -99,9 +99,6 @@ function notifyVoiceUpdates(voices: SpeechSynthesisVoice[]) {
 const ROBOTIC_VOICE_NAMES = [
   'espeak',
   'espeak-ng',
-  'microsoft david desktop',
-  'microsoft zira desktop',
-  'microsoft mark desktop',
   'albert',
   'bad news',
   'bahh',
@@ -315,14 +312,16 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
       if (v.lang.toLowerCase().includes('ca') || n.includes('canada')) score += 100;
     }
 
-    if (isChild) {
-      if (childKeywords.some((k) => n.includes(k))) score += 90;
+    if (isPreferMale) {
+      if (maleKeywords.some((k) => n.includes(k))) score += 500;
+      if (femaleKeywords.some((k) => n.includes(k))) score -= 500;
     } else if (isPreferFemale) {
-      if (femaleKeywords.some((k) => n.includes(k))) score += 80;
-      if (maleKeywords.some((k) => n.includes(k))) score -= 80;
-    } else if (isPreferMale) {
-      if (maleKeywords.some((k) => n.includes(k))) score += 80;
-      if (femaleKeywords.some((k) => n.includes(k))) score -= 80;
+      if (femaleKeywords.some((k) => n.includes(k))) score += 500;
+      if (maleKeywords.some((k) => n.includes(k))) score -= 500;
+    } else if (isChild) {
+      if (childKeywords.some((k) => n.includes(k))) score += 500;
+      else if (femaleKeywords.some((k) => n.includes(k))) score += 200;
+      if (maleKeywords.some((k) => n.includes(k))) score -= 300;
     }
     return score;
   };
@@ -470,6 +469,43 @@ export function stopSpeaking() {
  * 2. If memory-cached audio exists from previous server synthesis, plays it immediately.
  * 3. Never blocks user-gesture activation behind failing network calls.
  */
+export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
+  system: { pitch: 1.0, rate: 1.0 },
+
+  // Kids (Bright, youthful, friendly, high pitch)
+  puck: { pitch: 1.35, rate: 0.95 },
+  leda: { pitch: 1.40, rate: 0.88 },
+  sadachbia: { pitch: 1.25, rate: 1.05 },
+  alchiba: { pitch: 1.30, rate: 0.98 },
+
+  // Teens (Youthful, casual, modern)
+  zephyr: { pitch: 0.95, rate: 0.82 },
+  fenrir: { pitch: 0.78, rate: 0.90 },
+  sulafat: { pitch: 1.12, rate: 0.88 },
+
+  // Caring Women (Warm, soothing, maternal)
+  kore: { pitch: 1.08, rate: 0.88 },
+  aoede: { pitch: 1.15, rate: 0.95 },
+  vindemiatrix: { pitch: 1.02, rate: 0.85 },
+  polaris: { pitch: 1.05, rate: 0.90 },
+
+  // Professional Women (Crisp, articulate, structured)
+  charon: { pitch: 1.05, rate: 1.00 },
+  kalyke: { pitch: 0.98, rate: 0.98 },
+  vega: { pitch: 1.10, rate: 1.02 },
+  schedar: { pitch: 1.00, rate: 0.92 },
+
+  // Caring Men (Fatherly, supportive, warm)
+  achird: { pitch: 0.82, rate: 0.90 },
+  rasalas: { pitch: 0.86, rate: 0.92 },
+  capella: { pitch: 0.80, rate: 0.86 },
+
+  // Professional Men (Dignified, deep, articulate)
+  iapetus: { pitch: 0.72, rate: 0.95 },
+  tarazed: { pitch: 0.80, rate: 1.00 },
+  sadaltager: { pitch: 0.76, rate: 0.88 },
+};
+
 export async function speakText(
   text: string,
   options?: {
@@ -499,8 +535,8 @@ export async function speakText(
     lang.substring(0, 2);
 
   // High-Fidelity Neural Audio Stream (Multi-Tier Caching: RAM -> Browser CacheStorage -> Edge Server):
-  // When using any of the 20 neural voices and not restricted to system-only or explicit voiceURI:
-  if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly && !options?.voiceURI) {
+  // When using any of the 20 neural voices and not restricted to offline-only:
+  if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly) {
     const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formattedText.toLowerCase()}`;
     const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}&voice=${encodeURIComponent(selectedPersonaId)}`;
 
@@ -515,22 +551,19 @@ export async function speakText(
     }
   }
 
-  // Fallback to on-device Web Speech API for 0ms offline capability
-  const defaultPitchForPersona = 
-    personaObj.gender === 'child' ? 1.2 : 
-    personaObj.gender === 'female' ? 1.05 : 
-    personaObj.gender === 'male' ? 0.95 : 1.0;
-  const defaultRateForPersona = 
-    personaObj.gender === 'child' ? 0.88 : 1.0;
+  // Fallback to on-device Web Speech API with rich persona acoustic calibration
+  const userBasePitch = options?.pitch ?? 1.0;
+  const userBaseRate = options?.rate ?? 1.0;
+  const profile = PERSONA_ACOUSTIC_PROFILES[selectedPersonaId] || { pitch: 1.0, rate: 1.0 };
 
-  const fallbackPitch = options?.pitch ?? defaultPitchForPersona;
-  const fallbackRate = options?.rate ?? defaultRateForPersona;
+  const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
+  const calibratedRate = Math.max(0.55, Math.min(1.4, userBaseRate * profile.rate));
 
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
-    pitch: fallbackPitch,
-    rate: fallbackRate,
+    pitch: calibratedPitch,
+    rate: calibratedRate,
     force: options?.force,
   });
 }
@@ -665,9 +698,9 @@ function speakWithBrowserSpeechSynthesis(
       activeUtterance = utterance;
       activeUtterancesSet.add(utterance);
 
-      // Natural Human Cadence Calibration (Deliberate & gentle for AAC clarity)
-      utterance.pitch = Math.max(0.85, Math.min(1.15, options?.pitch ?? 1.0));
-      utterance.rate = Math.max(0.65, Math.min(1.2, options?.rate ?? 0.85));
+      // Natural Human Cadence Calibration (Calibrated for persona acoustic differentiation)
+      utterance.pitch = Math.max(0.5, Math.min(1.85, options?.pitch ?? 1.0));
+      utterance.rate = Math.max(0.55, Math.min(1.4, options?.rate ?? 0.85));
 
       const langMap: Record<string, string> = {
         en: 'en-US',

@@ -456,7 +456,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 7. Upstream Audio Generation (Gemini 3.8 Flash-Lite TTS with Fallback)
+  // 7. Upstream Audio Generation (Gemini 3.8 Flash TTS)
   let geminiApiKey = process.env.GEMINI_API_KEY;
   if (!geminiApiKey) {
     try {
@@ -469,31 +469,35 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     } catch {}
   }
 
-  if (geminiApiKey) {
+  // Validate API key format (Standard Google AI Studio keys start with AIzaSy)
+  const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.startsWith('AIzaSy'));
+
+  if (isValidGeminiKey && voiceKey !== 'system') {
     try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${geminiApiKey}`;
       const payload = {
-        model: 'gemini-3.8-flash-lite-tts',
-        input: [{
-          type: 'user_input',
-          content: [{
-            type: 'text',
+        contents: [{
+          role: 'user',
+          parts: [{
             text: cleanText,
-            annotations: [{
-              type: 'speech_metadata',
+            speech_metadata: {
               style: persona.style,
-            }],
+            },
           }],
         }],
-        response_format: { type: 'audio' },
-        generation_config: {
-          speech_config: [{ voice: persona.geminiVoice || persona.name }],
+        generationConfig: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              voice: persona.geminiVoice || persona.name,
+            },
+          },
         },
       };
 
-      const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+      const geminiRes = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'x-goog-api-key': geminiApiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -504,19 +508,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
       if (geminiRes.ok) {
         const geminiData: any = await geminiRes.json();
-        let audioBase64: string | null = null;
-        if (geminiData?.steps) {
-          for (const step of geminiData.steps) {
-            if (step?.content) {
-              for (const item of step.content) {
-                if (item?.type === 'audio' && item?.data) {
-                  audioBase64 = item.data;
-                  break;
-                }
-              }
-            }
-          }
-        }
+        const audioBase64 =
+          geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ||
+          geminiData?.output_audio?.data ||
+          geminiData?.outputAudio?.data;
 
         if (audioBase64) {
           const buffer = Buffer.from(audioBase64, 'base64');
@@ -543,11 +538,22 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         console.warn(`[Gemini TTS Error] Status ${geminiRes.status}:`, await geminiRes.text().catch(() => ''));
       }
     } catch (err: any) {
-      console.warn('[Gemini TTS] Upstream call failed, falling back:', err?.message || err);
+      console.warn('[Gemini TTS] Upstream call failed:', err?.message || err);
     }
   }
 
-  // Graceful Fallback
+  // If a neural persona was requested and Gemini was unavailable (invalid/missing key or network error),
+  // do NOT fall back to Google Translate's single static voice.
+  // Instead, return 503 so client-side speech synthesis uses its acoustic persona profile!
+  if (voiceKey !== 'system') {
+    res.status(503).json({
+      error: 'NeuralVoiceUnavailable',
+      message: 'Gemini neural voice requires a valid API key. Falling back to calibrated on-device speech.',
+    });
+    return;
+  }
+
+  // Default system fallback for non-persona translation speech
   try {
     const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
     const response = await fetch(targetUrl, {
