@@ -386,7 +386,8 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
 
       {/* 2. MAIN WORKSPACE: 2-Column with Silicone AAC Tray OR Full-Width Bento Grid */}
       {(() => {
-        const isAacActive = enabledFeatures?.aacCommunication !== false && isWidgetEnabled('quick_aac');
+        const isAacFeatureEnabled = enabledFeatures?.aacCommunication !== false && enabledFeatures?.aac !== false;
+        const isAacActive = isAacFeatureEnabled && isWidgetEnabled('quick_aac');
 
         const renderWidgetCard = (widget: (typeof enabledWidgets)[0], isFullWidth = false) => {
           switch (widget.id) {
@@ -459,6 +460,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
             }
 
             case 'quick_aac':
+              if (!isAacFeatureEnabled) return null;
               return !isAacActive ? (
                 <div key={widget.id} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 col-span-1">
                   <button

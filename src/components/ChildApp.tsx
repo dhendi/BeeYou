@@ -125,6 +125,18 @@ const ChildAppContent: React.FC = () => {
   // 6-Step Gradual Interactive AAC Onboarding Tour State (Only triggered when clicking AAC / requested, never automatically upon signup)
   const [showInteractiveOnboarding, setShowInteractiveOnboarding] = useState<boolean>(false);
 
+  const isAacEnabled = 
+    enabledFeatures?.aacCommunication !== false && 
+    enabledFeatures?.aac !== false && 
+    settings?.features?.aacCommunication !== false && 
+    settings?.features?.aac !== false;
+
+  useEffect(() => {
+    if (!isAacEnabled && (childView === 'aac' || childView === 'communicate')) {
+      setChildView('home');
+    }
+  }, [isAacEnabled, childView, setChildView]);
+
   // First-Time AAC Experience Knowledge Prompt Modal State ("Do you know how AAC works?")
   const [showAacExperiencePrompt, setShowAacExperiencePrompt] = useState<boolean>(false);
 

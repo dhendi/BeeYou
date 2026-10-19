@@ -30,6 +30,7 @@ import {
 } from '../services/caregiverSync';
 import { BeeMascot } from './BeeYouLogo';
 import { LegalModal } from './LegalModals';
+import { AacVoiceLoadingScreen } from './common/AacVoiceLoadingScreen';
 
 interface FamilyAuthModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     updateSettings,
     subscription,
     setShowOnboardingModal,
+    updateEnabledFeatures,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'demo' | 'login' | 'register' | 'forgot_password'>(initialTab);
@@ -85,6 +87,9 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [regChildAgeGroup, setRegChildAgeGroup] = useState<'kid' | 'teen' | 'adult'>('kid');
   const [regLanguage, setRegLanguage] = useState<AppLanguage>(() => settings?.language || 'en');
   const [regPin, setRegPin] = useState('1234');
+  const [regNeedsAac, setRegNeedsAac] = useState<boolean>(true);
+  const [showAacLoadingScreen, setShowAacLoadingScreen] = useState<boolean>(false);
+  const [pendingAccountContext, setPendingAccountContext] = useState<{ account: FamilyAccount; asRole: 'child' | 'caregiver' } | null>(null);
   const [regParentalConsent, setRegParentalConsent] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
@@ -269,6 +274,16 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         updateSettings({ language: regLanguage });
       }
 
+      if (updateEnabledFeatures) {
+        updateEnabledFeatures({
+          aacCommunication: regNeedsAac,
+          aac: regNeedsAac,
+        });
+      }
+      try {
+        localStorage.setItem('beeyou_aac_enabled', String(regNeedsAac));
+      } catch {}
+
       const res = await registerSharedFamilyAccount({
         email: regEmail,
         password: regPassword,
@@ -282,7 +297,12 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
       setRegLoading(false);
 
       if (res.success && res.account) {
-        applyAccountToContext(res.account, 'caregiver');
+        if (regNeedsAac) {
+          setPendingAccountContext({ account: res.account, asRole: 'caregiver' });
+          setShowAacLoadingScreen(true);
+        } else {
+          applyAccountToContext(res.account, 'caregiver');
+        }
       } else {
         setRegError(res.message || 'Registration failed. Please check fields.');
         try {
@@ -970,6 +990,80 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                   </p>
                 </div>
 
+                {/* AAC Communication Choice Card */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-slate-700/50 border border-amber-200 dark:border-slate-600 space-y-2.5">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-wider text-amber-950 dark:text-amber-200 block">
+                      Does the person using this app need AAC (Speech Board &amp; Voices)? *
+                    </label>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                      Choose whether to include the speech communication board and voice engine.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegNeedsAac(true);
+                        try { playChime('tap'); } catch {}
+                      }}
+                      className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer relative ${
+                        regNeedsAac
+                          ? 'border-amber-500 bg-white dark:bg-slate-800 shadow-sm ring-2 ring-amber-400/30'
+                          : 'border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-2xl shrink-0 p-1 bg-amber-100 dark:bg-amber-950/60 rounded-xl">🗣️</span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-black text-slate-900 dark:text-white block">
+                              Yes, Include AAC
+                            </span>
+                            {regNeedsAac && (
+                              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-snug">
+                            Speech board, symbol talker &amp; voice engine for non-speaking users. Pre-loads voices upfront.
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegNeedsAac(false);
+                        try { playChime('tap'); } catch {}
+                      }}
+                      className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer relative ${
+                        !regNeedsAac
+                          ? 'border-indigo-500 bg-white dark:bg-slate-800 shadow-sm ring-2 ring-indigo-400/30'
+                          : 'border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-2xl shrink-0 p-1 bg-indigo-100 dark:bg-indigo-950/60 rounded-xl">🚀</span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-black text-slate-900 dark:text-white block">
+                              No, Skip AAC
+                            </span>
+                            {!regNeedsAac && (
+                              <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-snug">
+                            Lighter app with faster load time. AAC can be turned on anytime in Caregiver Settings.
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1">
                     Caregiver PIN (to protect settings):
@@ -1360,6 +1454,21 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           isOpen={Boolean(legalModalTab)}
           onClose={() => setLegalModalTab(null)}
           initialTab={legalModalTab}
+        />
+      )}
+
+      {showAacLoadingScreen && (
+        <AacVoiceLoadingScreen
+          isOpen={showAacLoadingScreen}
+          onComplete={() => {
+            setShowAacLoadingScreen(false);
+            if (pendingAccountContext) {
+              applyAccountToContext(pendingAccountContext.account, pendingAccountContext.asRole);
+              setPendingAccountContext(null);
+            }
+          }}
+          persona={settings?.voicePersona || 'puck'}
+          language={regLanguage || settings?.language || 'en'}
         />
       )}
     </div>

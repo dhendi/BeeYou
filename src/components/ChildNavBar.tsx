@@ -60,7 +60,7 @@ export const ChildNavBar: React.FC<ChildNavBarProps> = ({ previewTheme }) => {
       emoji: '💬',
       icon: MessageSquare,
       activeBg: 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-300',
-      show: true,
+      show: isAacEnabled,
     },
     {
       id: 'me',

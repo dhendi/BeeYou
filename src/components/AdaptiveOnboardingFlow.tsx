@@ -52,6 +52,7 @@ import {
   FidgetBubblesSticker,
   ConnectHeartSticker,
 } from './icons/JournalStickers';
+import { AacVoiceLoadingScreen } from './common/AacVoiceLoadingScreen';
 
 interface AdaptiveOnboardingFlowProps {
   isOpen: boolean;
@@ -208,6 +209,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     }
   }, [isOpen, linkedDeviceCode, userPersona]);
 
+  const [showAacLoadingScreen, setShowAacLoadingScreen] = useState<boolean>(false);
+  const [pendingTrialChoice, setPendingTrialChoice] = useState<boolean>(false);
+
   // Adjust defaults when persona changes in Step 1
   const handlePersonaSelect = (persona: UserPersona) => {
     setSelectedPersona(persona);
@@ -222,17 +226,28 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       ...prev,
       spoonBudget: persona === 'adult' || persona === 'teen' ? true : prev.spoonBudget,
       emergencyAlertSOS: prev.emergencyAlertSOS === true,
-      aacCommunication: true,
+      aacCommunication: prev.aacCommunication !== undefined ? prev.aacCommunication : true,
+      aac: prev.aac !== undefined ? prev.aac : true,
       firstThenSchedules: true,
     }));
   };
 
   const toggleFeature = (key: keyof EnabledFeatures) => {
     playChime('tap');
-    setFeaturesState((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setFeaturesState((prev) => {
+      const nextVal = !prev[key];
+      if (key === 'aacCommunication') {
+        return {
+          ...prev,
+          aacCommunication: nextVal,
+          aac: nextVal,
+        };
+      }
+      return {
+        ...prev,
+        [key]: nextVal,
+      };
+    });
   };
 
   const handleNext = () => {
@@ -251,21 +266,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     }
   };
 
-  const handleComplete = async (withTrial = false) => {
-    playChime('star');
-
+  const finalizeOnboarding = (withTrial = false) => {
     if (withTrial) {
-      const isVerified = getStoredEmailVerificationStatus();
-      if (!isVerified) {
-        const liveCheck = await checkEmailVerificationStatus();
-        if (!liveCheck.isVerified) {
-          setShowEmailVerificationModal(true);
-        } else {
-          startFreeTrial(selectedCycle);
-        }
-      } else {
-        startFreeTrial(selectedCycle);
-      }
+      startFreeTrial(selectedCycle);
     }
 
     // 1. Commit persona & profile to state
@@ -278,6 +281,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
     // 2. Commit modular features
     updateEnabledFeatures(featuresState);
+    try {
+      localStorage.setItem('beeyou_aac_enabled', String(featuresState.aacCommunication !== false && featuresState.aac !== false));
+    } catch {}
 
     // 3. Set active theme
     const tokens = getPersonaTokens(selectedPersona);
@@ -300,6 +306,28 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     } catch {}
 
     onClose();
+  };
+
+  const handleComplete = async (withTrial = false) => {
+    playChime('star');
+
+    if (withTrial) {
+      const isVerified = getStoredEmailVerificationStatus();
+      if (!isVerified) {
+        const liveCheck = await checkEmailVerificationStatus();
+        if (!liveCheck.isVerified) {
+          setShowEmailVerificationModal(true);
+          return;
+        }
+      }
+    }
+
+    if (featuresState.aacCommunication !== false && featuresState.aac !== false) {
+      setPendingTrialChoice(withTrial);
+      setShowAacLoadingScreen(true);
+    } else {
+      finalizeOnboarding(withTrial);
+    }
   };
 
   const handleDismiss = () => {
@@ -1025,6 +1053,18 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           )}
         </div>
       </div>
+
+      {showAacLoadingScreen && (
+        <AacVoiceLoadingScreen
+          isOpen={showAacLoadingScreen}
+          onComplete={() => {
+            setShowAacLoadingScreen(false);
+            finalizeOnboarding(pendingTrialChoice);
+          }}
+          persona={settings?.voicePersona || 'puck'}
+          language={settings?.language || 'en'}
+        />
+      )}
     </div>
   );
 };

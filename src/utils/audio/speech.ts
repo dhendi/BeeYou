@@ -514,6 +514,8 @@ export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: nu
   tarazed: { pitch: 0.88, rate: 0.98 },
 };
 
+let latestSpeechRequestId = 0;
+
 export async function speakText(
   text: string,
   options?: {
@@ -528,6 +530,8 @@ export async function speakText(
 ): Promise<void> {
   const formattedText = formatForNaturalSpeech(text);
   if (!formattedText) return;
+
+  const speechId = ++latestSpeechRequestId;
 
   // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
   stopSpeaking();
@@ -550,13 +554,23 @@ export async function speakText(
 
     try {
       const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
+      // If a newer tap arrived while fetching audio, cancel cleanly without falling back
+      if (speechId !== latestSpeechRequestId) {
+        return;
+      }
       if (blobUrl) {
-        const played = await playAudioUrl(blobUrl, formattedText, options?.rate);
-        if (played) return;
+        const played = await playAudioUrl(blobUrl, formattedText, options?.rate, speechId);
+        // Either it played successfully or was intentionally superseded by a newer tap
+        if (played || speechId !== latestSpeechRequestId) return;
       }
     } catch (err) {
       console.warn(`[Audio] Neural stream (${selectedPersonaId}) failed, falling back to local speech synthesis:`, err);
     }
+  }
+
+  // If superseded by a newer tap, do not play fallback system speech
+  if (speechId !== latestSpeechRequestId) {
+    return;
   }
 
   // Fallback to on-device Web Speech API with rich persona acoustic calibration
@@ -579,7 +593,7 @@ export async function speakText(
 /**
  * Audio playback helper for base64 / audio URL
  */
-export function playAudioUrl(src: string, originalText: string = '', rate?: number): Promise<boolean> {
+export function playAudioUrl(src: string, originalText: string = '', rate?: number, speechId?: number): Promise<boolean> {
   return new Promise((resolve) => {
     try {
       stopSpeaking();
@@ -630,9 +644,14 @@ export function playAudioUrl(src: string, originalText: string = '', rate?: numb
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn('[Audio] playAudioUrl rejected:', err);
           cleanupAudio();
           notifySpeechState(false, null);
+          // If aborted by a newer tap or pause, resolve true so it does NOT drop into default system voice!
+          if (err?.name === 'AbortError' || (speechId !== undefined && speechId !== latestSpeechRequestId)) {
+            resolve(true);
+            return;
+          }
+          console.warn('[Audio] playAudioUrl rejected:', err);
           resolve(false);
         });
       }

@@ -34,6 +34,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     speak,
     setShowAccessibilityModal,
     activeTheme,
+    enabledFeatures,
+    updateEnabledFeatures,
   } = useApp();
 
   const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
@@ -73,6 +75,27 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     return true;
   });
 
+  const isAacActive = enabledFeatures?.aacCommunication !== false && enabledFeatures?.aac !== false;
+
+  const handleToggleAac = () => {
+    const next = !isAacActive;
+    updateEnabledFeatures({
+      aacCommunication: next,
+      aac: next,
+    });
+    try {
+      localStorage.setItem('beeyou_aac_enabled', String(next));
+    } catch {}
+    if (next) {
+      prewarmCoreAudioVocabulary(settings.voicePersona || 'puck', settings.language || 'en');
+      onShowNotification('AAC communication enabled! Speech voices pre-warmed for instant playback.');
+    } else {
+      onShowNotification('AAC communication turned off. Interface simplified for child device.');
+    }
+    if (settings.soundEffects) playChime('tap');
+    triggerHaptic('light', true);
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12 animate-fade-in">
       {/* Header Banner */}
@@ -107,6 +130,50 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             </button>
           </div>
         </div>
+      </div>
+
+      {/* AAC Feature Master Switch Banner */}
+      <div className={`rounded-3xl border-2 p-5 shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        isAacActive
+          ? 'bg-emerald-50/70 border-emerald-300 dark:bg-emerald-950/20'
+          : 'bg-stone-50 border-stone-300 dark:bg-stone-900/40'
+      }`}>
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-2xs border ${
+            isAacActive ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-200 border-stone-300 text-stone-600'
+          }`}>
+            {isAacActive ? '🗣️' : '🔇'}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm sm:text-base font-black text-slate-900">
+                {t('AAC Speech & Communication Board')}
+              </h4>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                isAacActive ? 'bg-emerald-200 text-emerald-950' : 'bg-stone-200 text-stone-700'
+              }`}>
+                {isAacActive ? t('Active') : t('Disabled / Hidden')}
+              </span>
+            </div>
+            <p className="text-xs text-stone-600 font-medium mt-0.5">
+              {isAacActive
+                ? t('Speech communication tiles are visible on the child device. Turn off if not needed to lighten device load.')
+                : t('Turned off. Speech tiles and voice pre-loading are removed from child device for lighter, faster operation.')}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleToggleAac}
+          className={`px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 flex items-center justify-center gap-2 border ${
+            isAacActive
+              ? 'bg-white hover:bg-rose-50 text-rose-800 border-rose-300'
+              : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+          }`}
+        >
+          <span>{isAacActive ? t('Turn Off AAC (Simplify Device)') : t('Turn On AAC (Load Voices)')}</span>
+        </button>
       </div>
 
       {/* Active Voice Spotlight Banner */}

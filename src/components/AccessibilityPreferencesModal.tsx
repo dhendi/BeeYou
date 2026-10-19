@@ -813,7 +813,18 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                 type="checkbox"
                                 checked={isEnabled}
                                 onChange={(e) => {
-                                  updateEnabledFeatures({ [f.key]: e.target.checked });
+                                  const isChecked = e.target.checked;
+                                  if (f.key === 'aacCommunication') {
+                                    updateEnabledFeatures({ aacCommunication: isChecked, aac: isChecked });
+                                    try {
+                                      localStorage.setItem('beeyou_aac_enabled', String(isChecked));
+                                    } catch {}
+                                    if (isChecked) {
+                                      prewarmCoreAudioVocabulary(settings?.voicePersona || 'puck', settings?.language || 'en');
+                                    }
+                                  } else {
+                                    updateEnabledFeatures({ [f.key]: isChecked });
+                                  }
                                   playChime('tap');
                                 }}
                                 className="sr-only peer"
