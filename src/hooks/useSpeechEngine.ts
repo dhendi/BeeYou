@@ -58,7 +58,7 @@ export function useSpeechEngine({ settings, onLanguageChanged }: UseSpeechEngine
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
       voiceURI: settings.selectedVoiceURI,
-      voicePersona: options?.voicePersona || settings.voicePersona || 'puck',
+      voicePersona: options?.voicePersona || settings.voicePersona || 'system',
       lang: settings.language,
       force: options?.force,
     });

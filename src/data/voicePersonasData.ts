@@ -14,6 +14,22 @@ export interface VoicePersona {
 }
 
 export const VOICE_PERSONAS: VoicePersona[] = [
+  // --- Group 0: Default Free System Voice (100% Free • On-Device • Zero Credits) ---
+  {
+    id: 'system',
+    name: 'Default Free Voice (System Native)',
+    label: 'Default Free Voice (System Native)',
+    geminiVoice: '',
+    style: 'standard',
+    category: 'system',
+    categoryLabel: 'Default Free Voice',
+    gender: 'system',
+    emoji: '📱',
+    tagline: 'Default • 100% Free • On-Device',
+    description: 'Uses your phone or computer’s built-in speech engine. Completely free with zero API credits used.',
+    previewText: 'This is the default free voice built into your device.',
+  },
+
   // --- Group 1: Kids & Little Ones (Soft, Gentle, Playful) ---
   {
     id: 'puck',
@@ -305,29 +321,16 @@ export const VOICE_PERSONAS: VoicePersona[] = [
     description: 'Dignified, articulate, patient guidance with steady warmth.',
     previewText: 'Every small step forward is a victory to be proud of.',
   },
-
-  // --- Group 7: System Native Voice (100% Offline) ---
-  {
-    id: 'system',
-    name: 'System',
-    label: 'System Native Voice',
-    geminiVoice: '',
-    style: 'standard',
-    category: 'system',
-    categoryLabel: 'Device Speech',
-    gender: 'system',
-    emoji: '📱',
-    tagline: 'On-Device • 100% Offline',
-    description: 'Uses your phone or computer’s built-in speech engine with zero data usage.',
-    previewText: 'This is your device’s built-in local speech voice.',
-  },
 ];
 
-export const DEFAULT_VOICE_PERSONA_ID = 'puck';
+export const DEFAULT_VOICE_PERSONA_ID = 'system';
 
 export function getVoicePersonaById(id?: string | null): VoicePersona {
   if (!id) return VOICE_PERSONAS[0];
   const clean = id.trim().toLowerCase();
+  if (clean === 'default' || clean === 'free' || clean === 'system') {
+    return VOICE_PERSONAS[0];
+  }
   const found = VOICE_PERSONAS.find(
     (p) => p.id.toLowerCase() === clean || p.name.toLowerCase() === clean || p.geminiVoice.toLowerCase() === clean
   );

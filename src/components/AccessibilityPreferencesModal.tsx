@@ -29,7 +29,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
 
   if (!showAccessibilityModal) return null;
 
@@ -616,6 +616,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {[
                     { key: 'all', label: 'All Voices (21)' },
+                    { key: 'free', label: '📱 Free (On-Device)' },
                     { key: 'kids', label: '🧸 Kids & Children' },
                     { key: 'teens', label: '🎧 Teens & Youth' },
                     { key: 'caring', label: '💖 Caring & Warm' },
@@ -646,13 +647,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="max-h-72 overflow-y-auto pr-1 space-y-2.5 rounded-2xl">
                   {VOICE_PERSONAS.filter((p) => {
                     if (voiceCategoryFilter === 'all') return true;
+                    if (voiceCategoryFilter === 'free') return p.category === 'system';
                     if (voiceCategoryFilter === 'kids') return p.category === 'kids';
                     if (voiceCategoryFilter === 'teens') return p.category === 'teens';
                     if (voiceCategoryFilter === 'caring') return p.category === 'caring_women' || p.category === 'caring_men';
                     if (voiceCategoryFilter === 'pro') return p.category === 'pro_women' || p.category === 'pro_men';
                     return true;
                   }).map((persona) => {
-                    const isSelected = (settings.voicePersona || 'puck').toLowerCase() === persona.id.toLowerCase();
+                    const isSelected = (settings.voicePersona || 'system').toLowerCase() === persona.id.toLowerCase();
                     return (
                       <div
                         key={persona.id}
@@ -675,6 +677,11 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
                                 {persona.label}
                               </h5>
+                              {persona.category === 'system' && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-[9px] font-black">
+                                  🆓 100% Free
+                                </span>
+                              )}
                               <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
                                 {persona.categoryLabel}
                               </span>

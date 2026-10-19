@@ -36,10 +36,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     activeTheme,
   } = useApp();
 
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
 
   const activePersona = getVoicePersonaById(settings.voicePersona);
+  const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
 
   const handleAudition = async (persona: VoicePersona) => {
     setPlayingVoiceId(persona.id);
@@ -63,6 +64,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const filteredPersonas = VOICE_PERSONAS.filter((p) => {
     if (voiceCategoryFilter === 'all') return true;
+    if (voiceCategoryFilter === 'free') return p.category === 'system';
     if (voiceCategoryFilter === 'kids') return p.category === 'kids';
     if (voiceCategoryFilter === 'teens') return p.category === 'teens';
     if (voiceCategoryFilter === 'caring') return p.category === 'caring_women' || p.category === 'caring_men';
@@ -152,16 +154,71 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         </div>
       </div>
 
+      {/* Featured Free Default Voice Card */}
+      <div className={`rounded-3xl border-2 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+        (settings.voicePersona || 'system') === 'system'
+          ? 'bg-emerald-50/90 border-emerald-400 shadow-xs'
+          : 'bg-white border-emerald-300 hover:border-emerald-400'
+      }`}>
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-13 h-13 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-xs">
+            📱
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
+                100% Free • Zero API Credits • Offline
+              </span>
+              {(settings.voicePersona || 'system') === 'system' && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
+                  ✓ Active Default Voice
+                </span>
+              )}
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+              {t('Default Free Voice (System Native Speech)')}
+            </h3>
+            <p className="text-xs text-stone-600 font-medium">
+              {t('Uses your phone, tablet, or computer\'s built-in speech engine with 0ms delay, full offline reliability, and zero credit usage.')}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            disabled={playingVoiceId === 'system'}
+            onClick={() => handleAudition(systemVoiceObj)}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+          >
+            <Volume2 className={`w-3.5 h-3.5 text-emerald-600 ${playingVoiceId === 'system' ? 'animate-bounce' : ''}`} />
+            <span>{playingVoiceId === 'system' ? t('Speaking...') : t('Audition Free Voice')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSelectVoice(systemVoiceObj)}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+              (settings.voicePersona || 'system') === 'system'
+                ? 'bg-emerald-600 text-white border border-emerald-700'
+                : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300'
+            }`}
+          >
+            {(settings.voicePersona || 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
+          </button>
+        </div>
+      </div>
+
       {/* 20 Neural Voices Grid Section */}
       <div className="rounded-3xl bg-white border-2 border-stone-200/90 p-5 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
-              <span>{t('Choose Neural Voice Persona')}</span>
+              <span>{t('All Voices & Neural Personas')}</span>
             </h3>
             <p className="text-xs text-stone-500 font-medium">
-              {t('Tap any card to audition the voice or set it as the primary speech output.')}
+              {t('Choose between the free standard on-device voice or 20 curated Gemini neural voices.')}
             </p>
           </div>
 
@@ -169,6 +226,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
               { key: 'all', label: `All (${VOICE_PERSONAS.length})` },
+              { key: 'free', label: '📱 Free (On-Device)' },
               { key: 'kids', label: '🧸 Kids' },
               { key: 'teens', label: '🎧 Teens' },
               { key: 'caring', label: '💖 Caring' },
@@ -199,7 +257,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         {/* Personas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
           {filteredPersonas.map((persona) => {
-            const isSelected = (settings.voicePersona || 'puck') === persona.id;
+            const isSelected = (settings.voicePersona || 'system') === persona.id;
             const isPlaying = playingVoiceId === persona.id;
 
             return (
@@ -222,6 +280,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                           <h4 className="font-black text-sm text-slate-900 truncate">
                             {persona.name}
                           </h4>
+                          {persona.category === 'system' && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-[10px] font-black text-emerald-950 shrink-0">
+                              🆓 Free Voice
+                            </span>
+                          )}
                           {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
                             <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0">
                               ⭐ Fav

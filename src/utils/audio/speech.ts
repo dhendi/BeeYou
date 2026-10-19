@@ -488,7 +488,7 @@ export async function speakText(
   // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
   stopSpeaking();
 
-  const rawPersona = options?.voicePersona || 'puck';
+  const rawPersona = options?.voicePersona || 'system';
   const personaObj = getVoicePersonaById(rawPersona);
   const selectedPersonaId = personaObj.id;
 
@@ -516,8 +516,15 @@ export async function speakText(
   }
 
   // Fallback to on-device Web Speech API for 0ms offline capability
-  const fallbackPitch = options?.pitch ?? (personaObj.gender === 'child' ? 1.2 : (personaObj.gender === 'female' ? 1.05 : 0.95));
-  const fallbackRate = options?.rate ?? (personaObj.gender === 'child' ? 0.88 : 0.9);
+  const defaultPitchForPersona = 
+    personaObj.gender === 'child' ? 1.2 : 
+    personaObj.gender === 'female' ? 1.05 : 
+    personaObj.gender === 'male' ? 0.95 : 1.0;
+  const defaultRateForPersona = 
+    personaObj.gender === 'child' ? 0.88 : 1.0;
+
+  const fallbackPitch = options?.pitch ?? defaultPitchForPersona;
+  const fallbackRate = options?.rate ?? defaultRateForPersona;
 
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
