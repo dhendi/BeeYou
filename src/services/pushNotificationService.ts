@@ -15,6 +15,18 @@ export interface PushNotificationPayload {
   actions?: Array<{ action: string; title: string; icon?: string }>;
 }
 
+export interface DeviceReliabilityReport {
+  isSupported: boolean;
+  permission: NotificationPermission | 'unsupported';
+  isStandalonePwa: boolean;
+  isServiceWorkerActive: boolean;
+  isVibrationSupported: boolean;
+  platform: 'ios' | 'android' | 'desktop';
+  reliabilityRating: 'optimal' | 'moderate' | 'limited';
+  recommendations: string[];
+  disclaimer: string;
+}
+
 class PushNotificationService {
   private isSupported: boolean = false;
   private hasPermission: boolean = false;
@@ -58,6 +70,117 @@ class PushNotificationService {
   }
 
   /**
+   * Assess device notification reliability & background wake-up readiness
+   */
+  getReliabilityReport(): DeviceReliabilityReport {
+    if (typeof window === 'undefined') {
+      return {
+        isSupported: false,
+        permission: 'unsupported',
+        isStandalonePwa: false,
+        isServiceWorkerActive: false,
+        isVibrationSupported: false,
+        platform: 'desktop',
+        reliabilityRating: 'limited',
+        recommendations: ['Running in non-browser environment'],
+        disclaimer: 'IMPORTANT: Notification delivery cannot be guaranteed if the phone is powered off, in deep sleep/Do Not Disturb, or offline. Never use BeeYou as a sole emergency or 911 dispatch system.',
+      };
+    }
+
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isAndroid = /android/.test(ua);
+    const platform = isIOS ? 'ios' : isAndroid ? 'android' : 'desktop';
+
+    const isStandalone = 
+      window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator as any).standalone === true;
+
+    const hasSw = 'serviceWorker' in navigator && !!navigator.serviceWorker.controller;
+    const hasVibrate = 'vibrate' in navigator;
+    const permission = this.getPermissionStatus();
+
+    const recommendations: string[] = [];
+    let rating: 'optimal' | 'moderate' | 'limited' = 'optimal';
+
+    if (permission !== 'granted') {
+      rating = 'limited';
+      recommendations.push('Notification permissions are not granted. Enable notifications in browser settings.');
+    }
+
+    if (isIOS) {
+      if (!isStandalone) {
+        rating = 'limited';
+        recommendations.push(
+          'On iOS, Safari requires adding BeeYou to the Home Screen ("Share" -> "Add to Home Screen") for Web Push and background alerts to function.'
+        );
+      }
+      recommendations.push(
+        'Check iOS Focus / Do Not Disturb modes to ensure BeeYou is in the "Allowed Notifications" list.'
+      );
+    } else if (isAndroid) {
+      recommendations.push(
+        'For reliable alerts when the screen is locked, ensure Android Battery Optimization is set to "Unrestricted" for BeeYou.'
+      );
+    }
+
+    if (!hasSw) {
+      if (rating === 'optimal') rating = 'moderate';
+      recommendations.push('Service worker is caching. Keep tab active or install app to ensure background wakes.');
+    }
+
+    return {
+      isSupported: this.isSupported,
+      permission,
+      isStandalonePwa: isStandalone,
+      isServiceWorkerActive: hasSw,
+      isVibrationSupported: hasVibrate,
+      platform,
+      reliabilityRating: rating,
+      recommendations,
+      disclaimer:
+        'IMPORTANT: Notification delivery cannot be guaranteed if the phone is powered off, in deep sleep/Do Not Disturb, or offline. Never use BeeYou as a sole emergency or 911 dispatch system.',
+    };
+  }
+
+  /**
+   * Schedules a delayed notification to allow testing background wake-up and locked screen alerts
+   */
+  scheduleDelayedAlert(
+    seconds: number = 5,
+    payload?: PushNotificationPayload,
+    onTick?: (secRemaining: number) => void
+  ): () => void {
+    let remaining = seconds;
+    if (onTick) onTick(remaining);
+
+    const intervalId = setInterval(() => {
+      remaining -= 1;
+      if (onTick) onTick(Math.max(0, remaining));
+      if (remaining <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 1000);
+
+    const timeoutId = setTimeout(async () => {
+      clearInterval(intervalId);
+      await this.triggerAlertNotification(
+        payload || {
+          title: 'BeeYou Alert: Lock-Screen Test',
+          body: 'Success! Your device woke up and displayed this background alert.',
+          priority: 'emergency',
+          tag: 'beeyou-lock-test-' + Date.now(),
+        }
+      );
+    }, seconds * 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }
+
+  /**
    * Sends a test alert notification to verify device sound, banner, and vibration
    */
   async sendTestNotification(childName = 'Child'): Promise<boolean> {
@@ -83,8 +206,6 @@ class PushNotificationService {
     if (!this.isSupported) return;
 
     if (Notification.permission !== 'granted') {
-      // Note: Calling requestPermission outside user gesture is blocked by browsers,
-      // so if permission is not granted, we silently return here
       return;
     }
 
@@ -134,7 +255,6 @@ class PushNotificationService {
     // Fallback to standard window Notification
     try {
       const windowOptions: any = { ...notificationOptions };
-      // Standard window Notification does not support actions array in desktop browsers
       delete windowOptions.actions;
       new Notification(payload.title, windowOptions);
     } catch (err) {

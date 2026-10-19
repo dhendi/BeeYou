@@ -4,6 +4,7 @@ import { CaregiverAlert, CaregiverResponsePreset } from '../../types';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
+import { confirmCaregiverAlertDelivered } from '../../services/caregiverSync';
 
 interface CaregiverIncomingAlertModalProps {
   isOpen: boolean;
@@ -35,6 +36,12 @@ export const CaregiverIncomingAlertModal: React.FC<CaregiverIncomingAlertModalPr
       playChime('alert');
       setSentConfirmation(null);
       setTypedReply('');
+
+      // Auto-confirm physical delivery receipt to child device
+      if (alert.pairingCode && alert.id) {
+        confirmCaregiverAlertDelivered(alert.pairingCode, alert.id).catch(() => {});
+      }
+
       // Focus the text input for immediate typing if desired
       setTimeout(() => {
         inputRef.current?.focus();

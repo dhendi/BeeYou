@@ -80,6 +80,117 @@ export function clearAlertHistory(): void {
   } catch {}
 }
 
+const OFFLINE_ALERT_QUEUE_KEY = 'beeyou_offline_alert_queue';
+
+export function getOfflineAlertQueue(): CaregiverAlert[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(OFFLINE_ALERT_QUEUE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+export function queueOfflineAlert(alert: CaregiverAlert): void {
+  if (typeof window === 'undefined' || !alert) return;
+  try {
+    const queue = getOfflineAlertQueue();
+    const updated = [alert, ...queue.filter((a) => a.id !== alert.id)].slice(0, 10);
+    localStorage.setItem(OFFLINE_ALERT_QUEUE_KEY, JSON.stringify(updated));
+    notifyAlertQueueListeners(updated);
+  } catch {}
+}
+
+export function removeAlertFromOfflineQueue(alertId: string): void {
+  if (typeof window === 'undefined' || !alertId) return;
+  try {
+    const queue = getOfflineAlertQueue();
+    const updated = queue.filter((a) => a.id !== alertId);
+    localStorage.setItem(OFFLINE_ALERT_QUEUE_KEY, JSON.stringify(updated));
+    notifyAlertQueueListeners(updated);
+  } catch {}
+}
+
+export type AlertQueueListener = (queue: CaregiverAlert[]) => void;
+const alertQueueListeners: Set<AlertQueueListener> = new Set();
+
+export function onAlertQueueUpdated(listener: AlertQueueListener): () => void {
+  alertQueueListeners.add(listener);
+  return () => alertQueueListeners.delete(listener);
+}
+
+function notifyAlertQueueListeners(queue: CaregiverAlert[]): void {
+  alertQueueListeners.forEach((fn) => fn(queue));
+}
+
+export async function flushOfflineAlertQueue(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+
+  const queue = getOfflineAlertQueue();
+  if (queue.length === 0) return;
+
+  for (const queuedAlert of queue) {
+    try {
+      const code = queuedAlert.pairingCode || getPairingCode();
+      if (!code) continue;
+
+      const dispatchedAlert: CaregiverAlert = {
+        ...queuedAlert,
+        deliveryStatus: 'dispatched',
+        dispatchedAt: new Date().toISOString(),
+      };
+
+      await publishCloudEvent(code, {
+        type: 'CAREGIVER_ALERT',
+        alert: dispatchedAlert,
+        pairingCode: code,
+      });
+
+      const token = await getClientAuthToken(code);
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/caregiver/alert', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          id: queuedAlert.id,
+          pairingCode: code,
+          childName: queuedAlert.childName,
+          emotion: queuedAlert.emotion,
+          alertId: queuedAlert.alertId,
+          label: queuedAlert.label,
+          emoji: queuedAlert.emoji,
+          location: queuedAlert.location,
+          note: queuedAlert.note,
+        }),
+      });
+
+      if (res.ok) {
+        removeAlertFromOfflineQueue(queuedAlert.id);
+        const activeRaw = localStorage.getItem(ACTIVE_ALERT_KEY);
+        if (activeRaw) {
+          const active = JSON.parse(activeRaw);
+          if (active.id === queuedAlert.id) {
+            active.deliveryStatus = 'dispatched';
+            active.dispatchedAt = new Date().toISOString();
+            localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(active));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to flush offline alert:', queuedAlert.id, e);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    flushOfflineAlertQueue().catch(() => {});
+  });
+}
+
 // Generate or retrieve unique Device ID for echo suppression
 export function getDeviceId(): string {
   if (typeof window === 'undefined') return 'dev-server';
@@ -209,7 +320,7 @@ function getTopicForCode(code: string): string {
   return `beeyou-sync-${sanitized || 'default'}`;
 }
 
-import { Peer, DataConnection } from 'peerjs';
+import Peer, { type DataConnection } from 'peerjs';
 
 let activePeer: Peer | null = null;
 let activePeerConn: DataConnection | null = null;
@@ -795,6 +906,14 @@ export function onCaregiverAlertAck(listener: AlertAckListener): () => void {
   return () => alertAckListeners.delete(listener);
 }
 
+export type AlertDeliveryListener = (delivery: { alertId: string; deliveredAt: string; deviceId?: string }) => void;
+const alertDeliveryListeners: Set<AlertDeliveryListener> = new Set();
+
+export function onCaregiverAlertDelivered(listener: AlertDeliveryListener): () => void {
+  alertDeliveryListeners.add(listener);
+  return () => alertDeliveryListeners.delete(listener);
+}
+
 export type AlertResolveListener = (alertId?: string) => void;
 const alertResolveListeners: Set<AlertResolveListener> = new Set();
 
@@ -939,10 +1058,40 @@ function handleIncomingSyncEnvelope(envelope: any): void {
     try {
       localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(envelope.alert));
     } catch {}
+
+    // If this receiving device is a caregiver, confirm physical receipt back to child
+    if (isCurrentDeviceCaregiver()) {
+      confirmCaregiverAlertDelivered(
+        envelope.alert.pairingCode || envelope.pairingCode,
+        envelope.alert.id
+      ).catch(() => {});
+    }
+
     triggerWebNotification(`BeeYou Alert: ${envelope.alert.childName}`, {
       body: `${envelope.alert.label}: ${envelope.alert.note || 'Help requested'}`,
       requireInteraction: true,
     });
+    return;
+  }
+
+  // 4b. Caregiver Alert Delivered to Device (Receipt Confirmation: Caregiver -> Child)
+  if (type === 'CAREGIVER_ALERT_DELIVERED' && envelope.delivery) {
+    lastPeerPingTimestamp = Date.now();
+    lastPeerRole = 'caregiver';
+    notifyConnectionStatus();
+
+    alertDeliveryListeners.forEach((fn) => fn(envelope.delivery));
+    try {
+      const activeRaw = localStorage.getItem(ACTIVE_ALERT_KEY);
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        if (active.id === envelope.delivery.alertId || envelope.delivery.alertId === active.pairingCode) {
+          active.deliveryStatus = 'delivered_to_device';
+          active.deliveredToDeviceAt = envelope.delivery.deliveredAt || new Date().toISOString();
+          localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(active));
+        }
+      }
+    } catch {}
     return;
   }
 
@@ -958,7 +1107,13 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       if (activeRaw) {
         const active = JSON.parse(activeRaw);
         if (active.id === envelope.ack.alertId || envelope.ack.alertId === active.pairingCode) {
-          localStorage.removeItem(ACTIVE_ALERT_KEY);
+          active.status = 'acknowledged';
+          active.deliveryStatus = 'acknowledged';
+          active.acknowledgedBy = envelope.ack.by || 'Caregiver';
+          active.acknowledgedAt = new Date().toISOString();
+          active.responseMessage = envelope.ack.responseMessage;
+          active.responseId = envelope.ack.responseId;
+          localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(active));
         }
       }
     } catch {}
@@ -1500,6 +1655,15 @@ export async function fetchCaregiverSession(code: string): Promise<CaregiverChil
         try {
           localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(data.session));
         } catch {}
+
+        // Auto-confirm delivery if caregiver device polls an unconfirmed active alert
+        if (data.session.activeAlert && isCurrentDeviceCaregiver()) {
+          const alert = data.session.activeAlert;
+          if (alert.deliveryStatus !== 'delivered_to_device' && alert.deliveryStatus !== 'acknowledged') {
+            confirmCaregiverAlertDelivered(safeCode, alert.id).catch(() => {});
+          }
+        }
+
         return data.session;
       }
     }
@@ -1647,12 +1811,15 @@ export async function sendCaregiverAlert(alertData: {
   }
   lastCaregiverAlertSentAt = now;
 
+  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
   const alertUniqueId = alertData.id || ('alert-' + Date.now());
   const alert: CaregiverAlert = {
     id: alertUniqueId,
     pairingCode: code,
     timestamp: new Date().toISOString(),
     status: 'active',
+    deliveryStatus: isOffline ? 'queued_offline' : 'dispatching',
+    dispatchedAt: isOffline ? undefined : new Date().toISOString(),
     ...alertData,
   };
   lastCaregiverAlertObj = alert;
@@ -1662,23 +1829,29 @@ export async function sendCaregiverAlert(alertData: {
     saveAlertToHistory(alert);
   } catch {}
 
+  // If client is currently offline, queue locally and return immediately
+  if (isOffline) {
+    queueOfflineAlert(alert);
+    return alert;
+  }
+
   // 1. Firebase Cloud & Multi-channel Relay
-  await publishCloudEvent(code, {
+  publishCloudEvent(code, {
     type: 'CAREGIVER_ALERT',
     alert,
     pairingCode: code,
-  });
+  }).catch(() => {});
 
   // 2. Direct Server fallback
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
     const token = await getClientAuthToken(code);
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    fetch('/api/caregiver/alert', {
+    const res = await fetch('/api/caregiver/alert', {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -1687,13 +1860,99 @@ export async function sendCaregiverAlert(alertData: {
         ...alertData,
       }),
       signal: controller.signal,
-    }).catch(() => {});
+    });
     clearTimeout(timeoutId);
+
+    if (res.ok) {
+      alert.deliveryStatus = 'dispatched';
+      alert.dispatchedAt = new Date().toISOString();
+      try {
+        localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+      } catch {}
+    } else if (res.status === 401 || res.status === 403) {
+      // Session / token expired: force re-authentication and retry
+      const freshToken = await getClientAuthToken(code);
+      if (freshToken) {
+        const retryHeaders: Record<string, string> = { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${freshToken}`
+        };
+        const retryRes = await fetch('/api/caregiver/alert', {
+          method: 'POST',
+          headers: retryHeaders,
+          body: JSON.stringify({ id: alertUniqueId, pairingCode: code, ...alertData }),
+          signal: AbortSignal.timeout(3000),
+        });
+        if (retryRes.ok) {
+          alert.deliveryStatus = 'dispatched';
+          alert.dispatchedAt = new Date().toISOString();
+          try {
+            localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+          } catch {}
+        }
+      }
+    } else {
+      // Upstream / network error: queue offline for retry
+      alert.deliveryStatus = 'queued_offline';
+      queueOfflineAlert(alert);
+      try {
+        localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+      } catch {}
+    }
   } catch (err) {
-    console.warn('Server alert sync error:', err);
+    console.warn('Server alert sync error (queuing offline):', err);
+    alert.deliveryStatus = 'queued_offline';
+    queueOfflineAlert(alert);
+    try {
+      localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
+    } catch {}
   }
 
   return alert;
+}
+
+/**
+ * Caregiver device confirms physical receipt of the alert (delivery receipt)
+ */
+export async function confirmCaregiverAlertDelivered(
+  code: string,
+  alertId: string,
+  deviceId?: string
+): Promise<void> {
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
+  if (!safeCode || !alertId) return;
+
+  const deliveryData = {
+    alertId,
+    deliveredAt: new Date().toISOString(),
+    deviceId: deviceId || getDeviceId(),
+  };
+
+  // 1. Firebase Cloud & Multi-channel Relay
+  await publishCloudEvent(safeCode, {
+    type: 'CAREGIVER_ALERT_DELIVERED',
+    pairingCode: safeCode,
+    delivery: deliveryData,
+  });
+
+  // 2. Direct Server fallback
+  try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    fetch('/api/caregiver/alert/delivered', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        pairingCode: safeCode,
+        alertId,
+        deviceId: deliveryData.deviceId,
+      }),
+    }).catch(() => {});
+  } catch (err) {
+    console.warn('Confirm alert delivered error:', err);
+  }
 }
 
 /**

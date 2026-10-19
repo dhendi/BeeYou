@@ -2596,6 +2596,10 @@ app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
     note: note || '',
     timestamp: new Date().toISOString(),
     status: 'active',
+    deliveryStatus: 'dispatched', // Dispatched to relay; not yet confirmed received on caregiver device
+    dispatchedAt: new Date().toISOString(),
+    deliveredToDeviceAt: null,
+    acknowledgedAt: null,
   };
 
   session.activeAlert = alert;
@@ -2622,7 +2626,52 @@ app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
     sentAt: Date.now(),
   });
 
-  return res.json({ success: true, alert, deliveryStatus: 'delivered', state: familyState });
+  return res.json({ success: true, alert, deliveryStatus: 'dispatched', state: familyState });
+});
+
+// Caregiver device confirms physical receipt of the alert
+app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), (req, res) => {
+  const { pairingCode, alertId, deviceId } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
+  }
+
+  const session = getCaregiverSession(code);
+  const familyState = getOrCreateFamilyState(code);
+  const deliveredAt = new Date().toISOString();
+
+  if (session && session.activeAlert && (!alertId || session.activeAlert.id === alertId)) {
+    if (session.activeAlert.deliveryStatus !== 'acknowledged') {
+      session.activeAlert.deliveryStatus = 'delivered_to_device';
+      session.activeAlert.deliveredToDeviceAt = deliveredAt;
+    }
+    setCaregiverSession(code, session);
+  }
+
+  if (familyState && familyState.activeAlert && (!alertId || familyState.activeAlert.id === alertId)) {
+    if (familyState.activeAlert.deliveryStatus !== 'acknowledged') {
+      familyState.activeAlert.deliveryStatus = 'delivered_to_device';
+      familyState.activeAlert.deliveredToDeviceAt = deliveredAt;
+    }
+    familyState.lastUpdated = Date.now();
+    saveFamilyState(code, familyState, true);
+  }
+
+  broadcastEvent(code, {
+    eventId: `ev-deliv-${Date.now()}`,
+    type: 'CAREGIVER_ALERT_DELIVERED',
+    pairingCode: code,
+    delivery: {
+      alertId: alertId || (session?.activeAlert?.id) || code,
+      deliveredAt,
+      deviceId: deviceId || 'caregiver-device',
+    },
+    state: familyState,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, deliveredAt });
 });
 
 // Caregiver acknowledges the alert and sends instant predefined reassurance response
@@ -2641,6 +2690,7 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
 
   if (session && session.activeAlert) {
     session.activeAlert.status = 'acknowledged';
+    session.activeAlert.deliveryStatus = 'acknowledged';
     session.activeAlert.acknowledgedBy = acknowledgedBy || 'Caregiver';
     session.activeAlert.acknowledgedAt = new Date().toISOString();
     session.activeAlert.responseMessage = responseMessage;
@@ -2650,6 +2700,7 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
 
   if (familyState.activeAlert) {
     familyState.activeAlert.status = 'acknowledged';
+    familyState.activeAlert.deliveryStatus = 'acknowledged';
     familyState.activeAlert.acknowledgedBy = acknowledgedBy || familyState.caregiverName || 'Caregiver';
     familyState.activeAlert.acknowledgedAt = new Date().toISOString();
     familyState.activeAlert.responseMessage = responseMessage;

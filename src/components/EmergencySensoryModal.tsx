@@ -187,6 +187,11 @@ export const EmergencySensoryModal: React.FC = () => {
           <p className="mt-5 text-gray-500 text-xs text-center">
             {t('Press the Close button or take some deep breaths when you feel ready.')}
           </p>
+
+          {/* Safety Disclaimer */}
+          <div className="mt-3 px-3.5 py-2 rounded-2xl bg-gray-900 border border-gray-800 text-gray-400 text-[11px] text-center leading-relaxed max-w-sm">
+            {t('Safety Notice: BeeYou is an assistive aid and does not guarantee delivery or connect to 911. In an emergency, speak directly to an adult or call emergency services.')}
+          </div>
         </div>
       </div>
     </div>

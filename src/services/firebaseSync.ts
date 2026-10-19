@@ -18,14 +18,14 @@ import {
 import { CaregiverAlert, CaregiverChildStatus, CaregiverMessage, PredefinedCaregiverResponseId } from '../types';
 
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBQ9VPr9uSiJrOHrybnT4K24INfP9BIYHg",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "beeyou-23d7d.firebaseapp.com",
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://beeyou-23d7d-default-rtdb.firebaseio.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "beeyou-23d7d",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "beeyou-23d7d.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "985183179557",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:985183179557:web:085de960ef227a087f40cc",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-VR0VWBRJ7J"
+  apiKey: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_API_KEY) || "AIzaSyBQ9VPr9uSiJrOHrybnT4K24INfP9BIYHg",
+  authDomain: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN) || "beeyou-23d7d.firebaseapp.com",
+  databaseURL: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_DATABASE_URL) || "https://beeyou-23d7d-default-rtdb.firebaseio.com",
+  projectId: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID) || "beeyou-23d7d",
+  storageBucket: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET) || "beeyou-23d7d.firebasestorage.app",
+  messagingSenderId: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID) || "985183179557",
+  appId: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_APP_ID) || "1:985183179557:web:085de960ef227a087f40cc",
+  measurementId: (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_FIREBASE_MEASUREMENT_ID) || "G-VR0VWBRJ7J"
 };
 
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

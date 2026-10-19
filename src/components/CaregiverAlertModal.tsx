@@ -35,20 +35,25 @@ import {
   Droplet,
   Moon,
   Smile,
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  WifiOff
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
   sendCaregiverAlert, 
   sendCaregiverMessage,
   onCaregiverAlertAck,
+  onCaregiverAlertDelivered,
   onCaregiverAlertResolve,
+  flushOfflineAlertQueue,
+  getOfflineAlertQueue,
   launchNativePhoneCall,
   launchNativeSms,
   getPairingCode
 } from '../services/caregiverSync';
 import { playChime } from '../utils/audio';
-import { PredefinedAlertId, PredefinedCaregiverResponseId, HelpAlertPreset } from '../types';
+import { PredefinedAlertId, PredefinedCaregiverResponseId, HelpAlertPreset, AlertDeliveryStatus } from '../types';
 import { DEFAULT_HELP_ALERT_PRESETS } from '../data/defaultData';
 import { BeeMascot } from './BeeYouLogo';
 import { ContextualHelpButton } from './ContextualHelpButton';
@@ -121,7 +126,11 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   } | null>(null);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
   
-  const [deliveryStage, setDeliveryStage] = useState<'idle' | 'sending' | 'delivered' | 'acknowledged'>('idle');
+  const [deliveryStage, setDeliveryStage] = useState<'idle' | 'sending' | 'queued_offline' | 'dispatched' | 'delivered_to_device' | 'acknowledged'>('idle');
+  const [deliveredAtTime, setDeliveredAtTime] = useState<string | null>(null);
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const [isRetryingOffline, setIsRetryingOffline] = useState(false);
+
   const [caregiverResponse, setCaregiverResponse] = useState<{
     text: string;
     responseId?: PredefinedCaregiverResponseId;
@@ -176,13 +185,14 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
   const isAdult = userAgeGroup === 'adult';
   const activePhone = emergencyContact?.phone;
 
+  // Restore active or unacknowledged alert from localStorage
   useEffect(() => {
     if (!isOpen) return;
     try {
       const activeRaw = localStorage.getItem('beeyou_active_caregiver_alert');
       if (activeRaw) {
         const active = JSON.parse(activeRaw);
-        if (active && active.status === 'active') {
+        if (active && (active.status === 'active' || active.status === 'acknowledged')) {
           const timeStr = active.timestamp ? new Date(active.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
           setSentAlert({
             alertId: active.alertId || active.id,
@@ -191,7 +201,23 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
             time: timeStr,
             location: active.location || 'school',
           });
-          setDeliveryStage('delivered');
+          if (active.status === 'acknowledged') {
+            setDeliveryStage('acknowledged');
+            setCaregiverResponse({
+              text: active.responseMessage || 'Response received.',
+              responseId: active.responseId,
+              by: active.acknowledgedBy || 'Caregiver',
+            });
+          } else if (active.deliveryStatus === 'queued_offline') {
+            setDeliveryStage('queued_offline');
+          } else if (active.deliveryStatus === 'delivered_to_device') {
+            setDeliveryStage('delivered_to_device');
+            if (active.deliveredToDeviceAt) {
+              setDeliveredAtTime(new Date(active.deliveredToDeviceAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+            }
+          } else {
+            setDeliveryStage('dispatched');
+          }
         }
       }
     } catch {}
@@ -199,6 +225,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
 
   const acknowledgedAlertKeysRef = useRef<Set<string>>(new Set());
 
+  // Listen for alert resolved (cleared by caregiver)
   useEffect(() => {
     const unsubResolve = onCaregiverAlertResolve(() => {
       handleReset();
@@ -207,6 +234,27 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     return () => unsubResolve();
   }, [onClose]);
 
+  // Delivery confirmation listener: Caregiver device received the alert
+  useEffect(() => {
+    const unsubDelivered = onCaregiverAlertDelivered((deliv) => {
+      if (sentAlert && (deliv.alertId === sentAlert.alertId || deliv.alertId.startsWith('alert-'))) {
+        setDeliveryStage('delivered_to_device');
+        setDeliveredAtTime(new Date(deliv.deliveredAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+      }
+    });
+    return () => unsubDelivered();
+  }, [sentAlert]);
+
+  // Timer: Count elapsed seconds to detect unacknowledged condition
+  useEffect(() => {
+    if (!sentAlert || deliveryStage === 'acknowledged') return;
+    const timer = setInterval(() => {
+      setSecondsElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [sentAlert, deliveryStage]);
+
+  // Breathing cycle & Caregiver ACK listener
   useEffect(() => {
     if (!sentAlert) return;
 
@@ -260,6 +308,8 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     const stickerSrc = getStickerForAlert(choice);
 
     setDeliveryStage('sending');
+    setSecondsElapsed(0);
+    setDeliveredAtTime(null);
     setSentAlert({
       alertId: choice.id,
       label: choice.label,
@@ -270,7 +320,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     });
 
     const alertUid = 'alert-' + Date.now();
-    await sendCaregiverAlert({
+    const result = await sendCaregiverAlert({
       id: alertUid,
       childName: childProfile.name || 'Child',
       emotion: choice.id as any,
@@ -280,10 +330,27 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
       location: selectedLocation,
       note: choice.sublabel || '',
     });
-    setDeliveryStage('delivered');
+
+    if (result.deliveryStatus === 'queued_offline') {
+      setDeliveryStage('queued_offline');
+    } else {
+      setDeliveryStage('dispatched');
+    }
 
     if (settings?.spokenAlerts !== false) {
       speak(choice.ttsAnnouncement || `Alert sent to your caregiver. You are safe. Take a slow breath.`);
+    }
+  };
+
+  const handleRetryOfflineAlert = async () => {
+    setIsRetryingOffline(true);
+    try {
+      await flushOfflineAlertQueue();
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        setDeliveryStage('dispatched');
+      }
+    } finally {
+      setIsRetryingOffline(false);
     }
   };
 
@@ -296,6 +363,8 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     const code = getPairingCode();
 
     setDeliveryStage('sending');
+    setSecondsElapsed(0);
+    setDeliveredAtTime(null);
     setSentAlert({
       alertId: 'custom-note',
       label: customText.trim(),
@@ -305,7 +374,7 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
     });
 
     await sendCaregiverMessage(code, customText.trim(), childProfile.name || 'Child', '', undefined, 'child');
-    setDeliveryStage('delivered');
+    setDeliveryStage('dispatched');
     setCustomText('');
 
     if (settings?.spokenAlerts !== false) {
@@ -378,13 +447,17 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                     Live Delivery Status:
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-xs flex items-center gap-1.5 ${
+                    deliveryStage === 'queued_offline' ? 'bg-amber-100 text-amber-950 border border-amber-300' :
                     deliveryStage === 'sending' ? 'bg-amber-100 text-amber-900 animate-pulse' :
-                    deliveryStage === 'delivered' ? 'bg-blue-100 text-blue-900' :
+                    deliveryStage === 'dispatched' ? 'bg-blue-100 text-blue-900' :
+                    deliveryStage === 'delivered_to_device' ? 'bg-teal-100 text-teal-900' :
                     'bg-emerald-100 text-emerald-900'
                   }`}>
-                    {deliveryStage === 'sending' && <><span><Clock className="w-3.5 h-3.5 inline" /></span><span>1. Sending to Cloud...</span></>}
-                    {deliveryStage === 'delivered' && <><span><Smartphone className="w-3.5 h-3.5 inline" /></span><span>2. Delivered to Caregiver</span></>}
-                    {deliveryStage === 'acknowledged' && <><span><Heart className="w-3.5 h-3.5 inline text-rose-600 fill-rose-600" /></span><span>3. Acknowledged by Caregiver!</span></>}
+                    {deliveryStage === 'queued_offline' && <><span><WifiOff className="w-3.5 h-3.5 inline text-amber-700" /></span><span>⚠️ Offline • Queued on Device</span></>}
+                    {deliveryStage === 'sending' && <><span><Clock className="w-3.5 h-3.5 inline" /></span><span>1. Sending to Cloud Relay...</span></>}
+                    {deliveryStage === 'dispatched' && <><span><Smartphone className="w-3.5 h-3.5 inline animate-pulse" /></span><span>1. Dispatched • Awaiting Device...</span></>}
+                    {deliveryStage === 'delivered_to_device' && <><span><Smartphone className="w-3.5 h-3.5 inline text-teal-600" /></span><span>2. Delivered to Caregiver's Phone {deliveredAtTime ? `(${deliveredAtTime})` : ''}</span></>}
+                    {deliveryStage === 'acknowledged' && <><span><Heart className="w-3.5 h-3.5 inline text-rose-600 fill-rose-600" /></span><span>3. Caregiver Replied!</span></>}
                   </span>
                 </div>
 
@@ -393,28 +466,43 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                     <div 
                       className="h-full bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-500 transition-all duration-700 rounded-full"
                       style={{
-                        width: deliveryStage === 'sending' ? '25%' : deliveryStage === 'delivered' ? '65%' : '100%'
+                        width: 
+                          deliveryStage === 'queued_offline' ? '15%' :
+                          deliveryStage === 'sending' ? '25%' :
+                          deliveryStage === 'dispatched' ? '50%' :
+                          deliveryStage === 'delivered_to_device' ? '75%' : '100%'
                       }}
                     />
                   </div>
 
                   <div className="flex flex-col items-center gap-1 relative z-10">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                      deliveryStage === 'queued_offline' ? 'bg-amber-500 text-white' :
                       deliveryStage === 'sending' ? 'bg-amber-500 text-white animate-pulse' : 'bg-emerald-600 text-white'
                     }`}>
-                      {deliveryStage === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      {deliveryStage === 'queued_offline' ? <WifiOff className="w-3.5 h-3.5" /> :
+                       deliveryStage === 'sending' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     </div>
-                    <span className="text-[10px] font-bold text-slate-700">Sending</span>
+                    <span className="text-[10px] font-bold text-slate-700">
+                      {deliveryStage === 'queued_offline' ? 'Queued' : 'Dispatched'}
+                    </span>
                   </div>
 
                   <div className="flex flex-col items-center gap-1 relative z-10">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                      deliveryStage === 'delivered' ? 'bg-blue-600 text-white ring-4 ring-blue-100 animate-pulse' :
-                      deliveryStage === 'acknowledged' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400'
+                      deliveryStage === 'delivered_to_device' ? 'bg-teal-600 text-white ring-4 ring-teal-100 animate-pulse' :
+                      deliveryStage === 'acknowledged' ? 'bg-emerald-600 text-white' :
+                      deliveryStage === 'dispatched' ? 'bg-blue-500 text-white animate-pulse' : 'bg-slate-200 text-slate-400'
                     }`}>
-                      <Smartphone className="w-3.5 h-3.5" />
+                      {deliveryStage === 'delivered_to_device' || deliveryStage === 'acknowledged' ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <Smartphone className="w-3.5 h-3.5" />
+                      )}
                     </div>
-                    <span className="text-[10px] font-bold text-slate-700">Delivered</span>
+                    <span className="text-[10px] font-bold text-slate-700">
+                      {deliveryStage === 'delivered_to_device' || deliveryStage === 'acknowledged' ? 'Delivered' : 'Waiting'}
+                    </span>
                   </div>
 
                   <div className="flex flex-col items-center gap-1 relative z-10">
@@ -430,6 +518,84 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </div>
                 </div>
               </div>
+
+              {/* Offline Notice (If queued offline) */}
+              {deliveryStage === 'queued_offline' && (
+                <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-300 text-amber-950 space-y-2 shadow-xs animate-in fade-in">
+                  <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-amber-900">
+                    <WifiOff className="w-4 h-4 text-amber-700" />
+                    <span>Device Is Currently Offline</span>
+                  </div>
+                  <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                    Your alert is saved safely on this device. Once internet connection returns, it will send automatically.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleRetryOfflineAlert}
+                      disabled={isRetryingOffline}
+                      className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                    >
+                      {isRetryingOffline ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                      <span>Try Sending Now</span>
+                    </button>
+                    {activePhone && (
+                      <button
+                        type="button"
+                        onClick={() => launchNativePhoneCall(activePhone)}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>Direct Phone Call</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Unacknowledged Timeout Notice (If >30s without response and not acknowledged) */}
+              {secondsElapsed >= 30 && deliveryStage !== 'acknowledged' && deliveryStage !== 'queued_offline' && (
+                <div className="p-4 rounded-3xl bg-amber-50 border-2 border-amber-400 text-slate-900 space-y-2 shadow-xs animate-in fade-in">
+                  <div className="flex items-center justify-between text-xs font-black text-amber-900">
+                    <div className="flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Caregiver Has Not Responded Yet ({secondsElapsed}s)</span>
+                    </div>
+                    <span className="text-[10px] bg-amber-200/90 text-amber-900 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider">
+                      Unconfirmed
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-950 font-medium leading-relaxed">
+                    Their phone may be asleep, offline, or set to Do Not Disturb. If you need support right now, please reach out directly:
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    {activePhone ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => launchNativePhoneCall(activePhone)}
+                          className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>Call {emergencyContact?.name || 'Caregiver'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => launchNativeSms(activePhone, `BeeYou Urgent Alert: ${sentAlert.label}. Please check in.`)}
+                          className="py-2.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Text SMS</span>
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-xs font-bold text-amber-900">
+                        👉 Please talk to an adult or teacher nearby for help.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Delivery Banner */}
               <div className="p-4 rounded-3xl bg-amber-50/90 border-2 border-amber-300 text-amber-950 flex items-center justify-between gap-3 shadow-xs">
@@ -457,8 +623,17 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                   </div>
                 </div>
 
-                <div className="px-3 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-black shrink-0">
-                  Delivered
+                <div className={`px-3 py-1.5 rounded-full text-xs font-black shrink-0 border ${
+                  deliveryStage === 'queued_offline' ? 'bg-amber-100 border-amber-300 text-amber-900' :
+                  deliveryStage === 'sending' ? 'bg-amber-100 border-amber-300 text-amber-900' :
+                  deliveryStage === 'dispatched' ? 'bg-blue-100 border-blue-300 text-blue-900' :
+                  deliveryStage === 'delivered_to_device' ? 'bg-teal-100 border-teal-300 text-teal-900' :
+                  'bg-emerald-100 border-emerald-300 text-emerald-900'
+                }`}>
+                  {deliveryStage === 'queued_offline' ? 'Queued Offline' :
+                   deliveryStage === 'sending' ? 'Sending...' :
+                   deliveryStage === 'dispatched' ? 'Dispatched' :
+                   deliveryStage === 'delivered_to_device' ? 'Delivered to Phone' : 'Replied'}
                 </div>
               </div>
 
@@ -499,7 +674,13 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
                 <div className="p-4 rounded-2xl bg-white border border-stone-200 text-center shadow-xs">
                   <p className="text-xs sm:text-sm text-slate-600 font-bold flex items-center justify-center gap-2">
                     <BeeMascot size="xs" pose="listening" />
-                    <span>Waiting for response... Your caregiver received this on their phone/hub.</span>
+                    <span>
+                      {deliveryStage === 'queued_offline' 
+                        ? 'Waiting for internet connection to reach caregiver...'
+                        : deliveryStage === 'delivered_to_device'
+                        ? 'Caregiver phone received the notification! Waiting for reply...'
+                        : 'Dispatched to relay. Waiting for caregiver device to connect...'}
+                    </span>
                   </p>
                 </div>
               )}
@@ -919,6 +1100,14 @@ export const CaregiverAlertModal: React.FC<CaregiverAlertModalProps> = ({ isOpen
               )}
             </div>
           )}
+        </div>
+
+        {/* Prominent Non-Emergency Safety Disclaimer */}
+        <div className="mt-3 px-3.5 py-2.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-[#7A4D05] text-[11px] leading-relaxed flex items-start gap-2 shrink-0">
+          <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div>
+            <strong className="text-[#2D241E]">Safety Notice:</strong> BeeYou is an assistive communication companion and <strong>does not guarantee emergency delivery</strong>. Alerts rely on active network connectivity and may be delayed if the caregiver's device is asleep, offline, or set to Do Not Disturb. In a life-threatening or medical emergency, always speak to an adult nearby or call emergency services (911).
+          </div>
         </div>
 
       </div>

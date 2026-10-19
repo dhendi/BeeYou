@@ -771,6 +771,14 @@ export interface CaregiverMessage {
   senderRole?: 'caregiver' | 'child';
 }
 
+export type AlertDeliveryStatus = 
+  | 'queued_offline'
+  | 'dispatching'
+  | 'dispatched'
+  | 'delivered_to_device'
+  | 'acknowledged'
+  | 'unacknowledged';
+
 export interface CaregiverAlert {
   id: string;
   childName: string;
@@ -782,7 +790,10 @@ export interface CaregiverAlert {
   location?: 'school' | 'therapy' | 'bus' | 'home' | 'other';
   note?: string;
   timestamp: string;
-  status: 'active' | 'acknowledged';
+  status: 'active' | 'acknowledged' | 'resolved';
+  deliveryStatus?: AlertDeliveryStatus;
+  dispatchedAt?: string;
+  deliveredToDeviceAt?: string;
   acknowledgedBy?: string;
   acknowledgedAt?: string;
   responseMessage?: string;

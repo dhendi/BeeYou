@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell, Check } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell, Check, Smartphone, Clock, AlertTriangle } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
@@ -76,6 +76,25 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
     } else {
       showNotification(t('Permission was not granted. Please check browser notification settings.'));
     }
+  };
+
+  const [delayedSeconds, setDelayedSeconds] = useState<number | null>(null);
+
+  const handleTestLockScreenAlert = () => {
+    showNotification(t('Lock your screen now! Test alert will fire in 5 seconds.'));
+    playChime('tap');
+    pushNotificationService.scheduleDelayedAlert(
+      5,
+      {
+        title: `BeeYou Alert: Lock-Screen Test (${childProfile.name || 'Child'})`,
+        body: t('Success! This alert woke your device screen with sound & vibration.'),
+        priority: 'emergency',
+        tag: 'beeyou-lock-test-' + Date.now(),
+      },
+      (sec) => {
+        setDelayedSeconds(sec > 0 ? sec : null);
+      }
+    );
   };
 
   const handleTestDeviceAlert = async () => {
@@ -234,21 +253,31 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
             </div>
             <p className="text-slate-600 font-medium mt-0.5">
               {deviceNotificationStatus === 'granted'
-                ? `${t('This device will ring, vibrate, and show pop-up notifications whenever')} ${childProfile.name} ${t('sends an alert, even when the screen is locked or tab is minimized.')}`
-                : `${t('Enable device push notifications and chime alerts so you never miss an urgent help call from')} ${childProfile.name}.`}
+                ? `${t('Device notifications and chimes are active. To test background wake-up on locked screens, use the 5-second test below.')}`
+                : `${t('Enable device push notifications and chime alerts so you can receive check-in alerts from')} ${childProfile.name}.`}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
           {deviceNotificationStatus === 'granted' ? (
-            <button
-              type="button"
-              onClick={handleTestDeviceAlert}
-              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-xs cursor-pointer transition active:scale-95 shadow-2xs"
-            >
-              <span>{t('Test Device Alert')}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleTestDeviceAlert}
+                className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-xs cursor-pointer transition active:scale-95 shadow-2xs"
+              >
+                <span>{t('Test Now')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleTestLockScreenAlert}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs cursor-pointer transition active:scale-95 shadow-2xs flex items-center gap-1.5"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>{delayedSeconds !== null ? `${t('Lock Screen')} (${delayedSeconds}s)...` : t('Test Lock Screen (5s)')}</span>
+              </button>
+            </>
           ) : (
             <button
               type="button"
@@ -258,6 +287,25 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               <span>{t('Enable Device Notifications')}</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Alert Dependability Notice & Guidelines Card */}
+      <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-amber-950 text-xs space-y-2 shadow-2xs">
+        <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-amber-900">
+          <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>{t('Alert Dependability & Emergency Disclaimer')}</span>
+        </div>
+        <p className="text-amber-900/90 leading-relaxed font-medium">
+          {t('BeeYou is an assistive communication companion and ')}<strong>{t('does not guarantee emergency notification delivery')}</strong>. {t('Notifications rely on device network access and operating system settings. Alerts cannot be guaranteed if the phone is asleep, offline, in deep battery saver mode, or set to Do Not Disturb. For critical life-safety emergencies, always maintain an in-person safety plan.')}
+        </p>
+        <div className="pt-1 flex flex-wrap gap-2 text-[11px] text-amber-900">
+          <span className="bg-amber-100/90 border border-amber-300 px-2.5 py-1 rounded-lg">
+            <strong>iOS tip:</strong> Add to Home Screen (PWA) &amp; exempt from Focus modes
+          </span>
+          <span className="bg-amber-100/90 border border-amber-300 px-2.5 py-1 rounded-lg">
+            <strong>Android tip:</strong> Set Battery Optimization to "Unrestricted"
+          </span>
         </div>
       </div>
 
