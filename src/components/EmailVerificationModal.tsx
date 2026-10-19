@@ -100,7 +100,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 border-2 border-stone-200 dark:border-slate-700 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95">
         {/* Header */}
         <div className="p-5 border-b border-stone-200 dark:border-slate-800 flex items-center justify-between bg-amber-50/50 dark:bg-slate-800/50">

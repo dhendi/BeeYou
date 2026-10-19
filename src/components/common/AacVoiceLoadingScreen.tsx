@@ -79,7 +79,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="aac-loading-title"
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-[#2B231D]/85 backdrop-blur-md animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-[#2B231D]/85 backdrop-blur-md animate-in fade-in duration-200 select-none"
     >
       <div className="relative w-full max-w-md bg-[#FAF8F5] border-3 border-amber-300 rounded-[32px] p-6 sm:p-8 shadow-[0_25px_60px_rgba(217,119,6,0.25)] text-center overflow-hidden flex flex-col items-center">
         {/* Subtle background glow */}

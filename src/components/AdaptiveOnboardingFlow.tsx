@@ -30,10 +30,6 @@ import { UserPersona, EnabledFeatures, getDefaultFeaturesForAge, BillingCycle } 
 import { getPersonaLabel, getPersonaTokens, personaToAgeGroup } from '../utils/personaHelpers';
 import { QRCodeView } from './QRCodeView';
 import { getPairingCode } from '../services/caregiverSync';
-import { 
-  getStoredEmailVerificationStatus, 
-  checkEmailVerificationStatus 
-} from '../services/authService';
 import { playChime } from '../utils/audio';
 import { LanguageDropdown } from './LanguageDropdown';
 import { t } from '../services/translator';
@@ -310,17 +306,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
   const handleComplete = async (withTrial = false) => {
     playChime('star');
-
-    if (withTrial) {
-      const isVerified = getStoredEmailVerificationStatus();
-      if (!isVerified) {
-        const liveCheck = await checkEmailVerificationStatus();
-        if (!liveCheck.isVerified) {
-          setShowEmailVerificationModal(true);
-          return;
-        }
-      }
-    }
 
     if (featuresState.aacCommunication !== false && featuresState.aac !== false) {
       setPendingTrialChoice(withTrial);
