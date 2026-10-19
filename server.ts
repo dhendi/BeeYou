@@ -2094,7 +2094,16 @@ app.post('/api/caregiver/family/register', (req, res) => {
 
   const token = signFamilyToken(familyCode, 'caregiver', cleanEmail);
 
-  return res.json({ success: true, account, token, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
+  const safeAccount = {
+    ...account,
+    childProfile: {
+      ...account.childProfile,
+      pin: undefined,
+    },
+    backupEmail: undefined,
+  };
+
+  return res.json({ success: true, account: safeAccount, token, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
 });
 
 // Sign into shared family account on the server
@@ -2150,7 +2159,16 @@ app.post('/api/caregiver/family/login', (req, res) => {
 
   const token = signFamilyToken(account.familyCode, 'caregiver', cleanEmail);
 
-  return res.json({ success: true, account, token, message: `Logged in as ${cleanEmail}!` });
+  const safeAccount = {
+    ...account,
+    childProfile: {
+      ...account.childProfile,
+      pin: undefined,
+    },
+    backupEmail: undefined,
+  };
+
+  return res.json({ success: true, account: safeAccount, token, message: `Logged in as ${cleanEmail}!` });
 });
 
 // Fetch account details by email (sanitized - strips internal PIN)
@@ -2176,6 +2194,7 @@ app.get('/api/caregiver/family/:email', requireFamilyAuth(), (req, res) => {
       ...account.childProfile,
       pin: undefined,
     },
+    backupEmail: undefined,
   };
   return res.json({ success: true, account: safeAccount });
 });

@@ -20,8 +20,26 @@ import {
 } from 'firebase/auth';
 
 import { hashPin, verifyPin, getPinRateLimitStatus, resetPinRateLimit } from '../utils/security';
+import {
+  saveSecureAuthToken,
+  getSecureAuthToken,
+  getSyncSecureAuthToken,
+  clearSecureAuthTokens,
+  saveSecureCaregiverPin,
+  getSecureCaregiverPin,
+  getSyncSecureCaregiverPin,
+  removeSecureSecret,
+} from './secureStorageService';
 
-export { hashPin, verifyPin, getPinRateLimitStatus, resetPinRateLimit };
+export {
+  hashPin,
+  verifyPin,
+  getPinRateLimitStatus,
+  resetPinRateLimit,
+  saveSecureCaregiverPin,
+  getSecureCaregiverPin,
+  getSyncSecureCaregiverPin,
+};
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
@@ -149,12 +167,22 @@ export const DEMO_FAMILY_ACCOUNT: FamilyAccount = {
   emailVerified: true,
 };
 
-// Check if user is currently signed in with a Family Account
+// Check if user is currently signed in with a Family Account (sanitized - credentials stripped)
 export function getStoredFamilyAccount(): FamilyAccount | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(FAMILY_ACCOUNT_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const acc = JSON.parse(raw);
+      if (acc && typeof acc === 'object') {
+        // Guarantee credentials and sensitive records never leak into runtime
+        if (acc.childProfile) {
+          acc.childProfile.pin = '';
+        }
+        delete acc.backupEmail;
+        return acc;
+      }
+    }
   } catch {}
   return null;
 }
@@ -164,7 +192,7 @@ export const PAIRING_TOKEN_KEY = 'beeyou_pairing_token';
 
 /**
  * Synchronous client auth token lookup.
- * Returns cached token immediately (0ms) if available.
+ * Returns cached token immediately (0ms) from secure storage in-memory cache.
  */
 export function getSyncClientAuthToken(familyCode?: string): string {
   const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
@@ -179,24 +207,29 @@ export function getSyncClientAuthToken(familyCode?: string): string {
     return '';
   }
 
-  if (typeof window !== 'undefined') {
-    try {
-      const stored = localStorage.getItem(FAMILY_TOKEN_KEY);
-      if (stored) {
-        if (stored.startsWith('by_tok.')) {
-          const parts = stored.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            if (payload.familyCode === code && payload.iat) {
-              return stored;
-            }
+  // 2. Read from secure storage synchronous memory cache
+  const secureTok = getSyncSecureAuthToken();
+  if (secureTok) {
+    if (secureTok.startsWith('by_tok.')) {
+      const parts = secureTok.split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.familyCode === code && payload.iat) {
+            return secureTok;
           }
-        } else if (stored.startsWith('tok-') || stored === 'by_demo_reviewer_token_2026') {
-          return stored;
-        }
+        } catch {}
       }
-      const pairTok = localStorage.getItem(PAIRING_TOKEN_KEY) || sessionStorage.getItem(PAIRING_TOKEN_KEY);
-      if (pairTok) return pairTok;
+    } else if (secureTok.startsWith('tok-') || secureTok === 'by_demo_reviewer_token_2026') {
+      return secureTok;
+    }
+  }
+
+  // 3. Fallback: check sessionStorage during active tab session
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      const sessTok = sessionStorage.getItem(FAMILY_TOKEN_KEY) || sessionStorage.getItem(PAIRING_TOKEN_KEY);
+      if (sessTok) return sessTok;
     } catch {}
   }
 
@@ -204,7 +237,7 @@ export function getSyncClientAuthToken(familyCode?: string): string {
 }
 
 /**
- * Asynchronously retrieve or exchange a verified family token.
+ * Asynchronously retrieve or exchange a verified family token using secure storage.
  */
 export async function getClientAuthToken(familyCode?: string): Promise<string> {
   const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
@@ -223,7 +256,13 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
   const syncTok = getSyncClientAuthToken(code);
   if (syncTok) return syncTok;
 
-  // 3. If Firebase user is authenticated, exchange or use ID token
+  // 3. Asynchronous secure storage lookup
+  const secTok = await getSecureAuthToken();
+  if (secTok) {
+    return secTok;
+  }
+
+  // 4. If Firebase user is authenticated, exchange or use ID token
   if (auth.currentUser) {
     try {
       const fbToken = await auth.currentUser.getIdToken();
@@ -250,16 +289,17 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
     } catch {}
   }
 
-  // 4. Stored family account credentials exchange
+  // 5. Stored family account credentials exchange with secure PIN if available
   const account = getStoredFamilyAccount();
   if (account && account.familyCode === code) {
     try {
+      const secPin = getSyncSecureCaregiverPin() || (await getSecureCaregiverPin());
       const res = await fetch('/api/family/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           familyCode: code,
-          pin: account.childProfile?.pin,
+          pin: secPin || undefined,
           email: account.email,
         }),
       });
@@ -278,20 +318,23 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
 
 export function saveClientAuthToken(token: string): void {
   if (typeof window === 'undefined' || !token) return;
+  saveSecureAuthToken(token).catch(() => {});
   try {
-    localStorage.setItem(FAMILY_TOKEN_KEY, token);
+    sessionStorage.setItem(FAMILY_TOKEN_KEY, token);
     if (token.startsWith('tok-')) {
-      localStorage.setItem(PAIRING_TOKEN_KEY, token);
+      sessionStorage.setItem(PAIRING_TOKEN_KEY, token);
     }
   } catch {}
 }
 
 export function clearClientAuthToken(): void {
   if (typeof window === 'undefined') return;
+  clearSecureAuthTokens().catch(() => {});
   try {
+    sessionStorage.removeItem(FAMILY_TOKEN_KEY);
+    sessionStorage.removeItem(PAIRING_TOKEN_KEY);
     localStorage.removeItem(FAMILY_TOKEN_KEY);
     localStorage.removeItem(PAIRING_TOKEN_KEY);
-    sessionStorage.removeItem(PAIRING_TOKEN_KEY);
   } catch {}
 }
 
@@ -299,9 +342,31 @@ export function saveStoredFamilyAccount(account: FamilyAccount | null): void {
   if (typeof window === 'undefined') return;
   try {
     if (account) {
-      localStorage.setItem(FAMILY_ACCOUNT_KEY, JSON.stringify(account));
+      // Data Minimization: Store only the minimum necessary data locally, stripping credentials
+      const sanitizedAccount: FamilyAccount = {
+        id: account.id,
+        email: account.email,
+        caregiverName: account.caregiverName || 'Caregiver',
+        caregiverRole: account.caregiverRole || 'Parent',
+        familyCode: account.familyCode,
+        childProfile: {
+          name: account.childProfile?.name || 'Child',
+          ageGroup: account.childProfile?.ageGroup || 'kid',
+          interests: account.childProfile?.interests || [],
+          pronouns: '',
+          pin: '', // Never persist PIN or credentials in localStorage
+        },
+        subscriptionTier: account.subscriptionTier || 'premium',
+        createdAt: account.createdAt || new Date().toISOString(),
+        lastSyncedAt: new Date().toISOString(),
+        isDemoAccount: account.isDemoAccount,
+        emailVerified: account.emailVerified,
+      };
+
+      localStorage.setItem(FAMILY_ACCOUNT_KEY, JSON.stringify(sanitizedAccount));
       localStorage.setItem('beeyou_pairing_code', account.familyCode);
       localStorage.setItem('beeyou_device_linked_code', account.familyCode);
+
       if (account.isDemoAccount || account.familyCode === 'BEE-DEMO') {
         saveClientAuthToken('by_demo_reviewer_token_2026');
       }
@@ -791,6 +856,8 @@ export async function wipeDeviceStorage(): Promise<void> {
       localStorage.removeItem('beeyou_user_persona');
       localStorage.removeItem('beeyou_app_state_v1');
       clearClientAuthToken();
+      await removeSecureSecret('by_sec_caregiver_pin');
+      await removeSecureSecret('beeyou_device_vault_salt');
 
       sessionStorage.clear();
     }
@@ -1028,25 +1095,50 @@ export async function sendAccountPasswordResetEmail(
 }
 
 /**
- * Update the 4-digit caregiver PIN across stored family account and app settings.
- * Securely hashes the PIN with salt before persisting to local storage.
+ * Update the 4-digit caregiver PIN.
+ * Securely hashes the PIN using PBKDF2 (100k iterations) and stores in secure device storage.
+ * Strictly avoids persisting credentials or PIN hashes to unencrypted browser localStorage.
+ * Authoritative PIN hash is synchronized to the server.
  */
 export async function updateCaregiverPin(newPin: string): Promise<boolean> {
   if (!newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
     return false;
   }
   const hashedPin = await hashPin(newPin);
+
+  // 1. Store hashed PIN in secure storage (native sandbox on iOS/Android or encrypted vault on Web)
+  await saveSecureCaregiverPin(hashedPin);
+
+  // 2. Ensure credentials are never kept in localStorage
   const account = getStoredFamilyAccount();
   if (account) {
-    account.childProfile.pin = hashedPin;
+    account.childProfile.pin = '';
     saveStoredFamilyAccount(account);
   }
+
   try {
     const settingsRaw = localStorage.getItem('beeyou_settings');
     const settings = settingsRaw ? JSON.parse(settingsRaw) : {};
-    settings.pin = hashedPin;
+    delete settings.pin; // Guarantee PIN is deleted from localStorage
     localStorage.setItem('beeyou_settings', JSON.stringify(settings));
-    window.dispatchEvent(new CustomEvent('beeyou_settings_updated', { detail: settings }));
+    window.dispatchEvent(new CustomEvent('beeyou_settings_updated', { detail: { ...settings, pin: hashedPin } }));
   } catch {}
+
+  // 3. Keep authoritative permissions and sensitive records on the server
+  if (account?.familyCode) {
+    try {
+      const token = await getClientAuthToken(account.familyCode);
+      await fetch(`/api/family/state/${encodeURIComponent(account.familyCode)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          childProfile: { pin: hashedPin },
+        }),
+      });
+    } catch {}
+  }
   return true;
 }

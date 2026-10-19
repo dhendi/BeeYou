@@ -330,6 +330,48 @@ async function runTests() {
     const rejectData = await resReject.json();
     assert(rejectData?.session?.status === 'rejected', `Reject transitions session to 'rejected'`);
 
+    // Suite 10: Data Minimization & Secret Sanitization (Security Audit Finding #3)
+    console.log('\n--- Suite 10: Data Minimization & Secret Sanitization ---');
+    const testRegEmail = `audit_test_${Date.now()}@example.com`;
+    const resReg = await fetch(`${baseUrl}/api/caregiver/family/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: testRegEmail,
+        caregiverName: 'Auditor',
+        caregiverRole: 'Parent',
+        childName: 'SafeChild',
+        pin: '9876',
+        backupEmail: 'leak_check@example.com',
+      }),
+    });
+    assert(resReg.status === 200, 'POST /api/caregiver/family/register returns 200 OK', `got ${resReg.status}`);
+    const regData = await resReg.json();
+    assert(regData.success === true, 'Registration succeeded');
+    assert(regData.account?.childProfile?.pin === undefined, 'Registration response strips childProfile.pin');
+    assert(regData.account?.backupEmail === undefined, 'Registration response strips backupEmail');
+    assert(typeof regData.token === 'string' && regData.token.startsWith('by_tok.'), 'Registration returns signed auth token');
+
+    // Login test
+    const resLogin = await fetch(`${baseUrl}/api/caregiver/family/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: testRegEmail }),
+    });
+    assert(resLogin.status === 200, 'POST /api/caregiver/family/login returns 200 OK', `got ${resLogin.status}`);
+    const loginData = await resLogin.json();
+    assert(loginData.account?.childProfile?.pin === undefined, 'Login response strips childProfile.pin');
+    assert(loginData.account?.backupEmail === undefined, 'Login response strips backupEmail');
+
+    // Fetch account details
+    const resGetAccount = await fetch(`${baseUrl}/api/caregiver/family/${encodeURIComponent(testRegEmail)}`, {
+      headers: { 'Authorization': `Bearer ${regData.token}` },
+    });
+    assert(resGetAccount.status === 200, 'GET /api/caregiver/family/:email returns 200 OK', `got ${resGetAccount.status}`);
+    const getData = await resGetAccount.json();
+    assert(getData.account?.childProfile?.pin === undefined, 'GET family account response strips childProfile.pin');
+    assert(getData.account?.backupEmail === undefined, 'GET family account response strips backupEmail');
+
   } finally {
     server.close();
   }

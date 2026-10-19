@@ -10,6 +10,7 @@ import {
   updateCaregiverPin,
   verifyPin,
   getPinRateLimitStatus,
+  saveSecureCaregiverPin,
   auth
 } from '../services/authService';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -94,10 +95,11 @@ export const PinModal: React.FC = () => {
 
         if (result.valid) {
           if (result.shouldUpgrade && result.upgradedHash) {
+            saveSecureCaregiverPin(result.upgradedHash).catch(() => {});
             try {
               const raw = localStorage.getItem('beeyou_settings');
               const s = raw ? JSON.parse(raw) : {};
-              s.pin = result.upgradedHash;
+              delete s.pin;
               localStorage.setItem('beeyou_settings', JSON.stringify(s));
             } catch {}
           }

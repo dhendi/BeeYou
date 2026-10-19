@@ -59,7 +59,7 @@ import {
   syncChildStatusToCaregiver,
   ConnectionStatusInfo,
 } from '../services/caregiverSync';
-import { wipeDeviceStorage } from '../services/authService';
+import { wipeDeviceStorage, getSyncSecureCaregiverPin, getSecureCaregiverPin, saveSecureCaregiverPin } from '../services/authService';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -553,25 +553,42 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   });
 
   const [settings, setSettings] = useState<AppSettings>(() => {
+    const secPin = getSyncSecureCaregiverPin();
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.settings) {
           const loaded = { ...INITIAL_APP_SETTINGS, ...parsed.settings };
+          if (secPin) loaded.pin = secPin;
           if (loaded.voiceRate >= 0.95) loaded.voiceRate = 0.85;
           return loaded;
         }
       }
     } catch (e) {}
-    return INITIAL_APP_SETTINGS;
+    return {
+      ...INITIAL_APP_SETTINGS,
+      pin: secPin || INITIAL_APP_SETTINGS.pin,
+    };
   });
+
+  // Re-sync secure PIN from device storage asynchronously
+  useEffect(() => {
+    getSecureCaregiverPin().then((secPin) => {
+      if (secPin) {
+        setSettings((prev) => (prev.pin !== secPin ? { ...prev, pin: secPin } : prev));
+      }
+    });
+  }, []);
 
   const updateChildProfile = (profile: Partial<ChildProfile>) => {
     setChildProfile((prev) => ({ ...prev, ...profile }));
   };
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
+    if (newSettings.pin) {
+      saveSecureCaregiverPin(newSettings.pin).catch(() => {});
+    }
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
@@ -836,6 +853,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // Root Storage Persistence Effect
   useEffect(() => {
     try {
+      // Data Minimization: strip PIN and credentials before saving to unencrypted localStorage
+      const { pin: _pin, ...safeSettings } = settings;
+      const safeChildProfile = { ...childProfile, pin: undefined };
+
       const stateToSave = {
         aacItems: aacComm.aacItems,
         quickPhrases: aacComm.quickPhrases,
@@ -847,8 +868,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         socialStories: gamification.socialStories,
         emotionHistory: gamification.emotionHistory,
         currentMood: gamification.currentMood,
-        childProfile,
-        settings,
+        childProfile: safeChildProfile,
+        settings: safeSettings,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
 

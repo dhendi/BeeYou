@@ -4,7 +4,7 @@ import { ShieldAlert, X, ExternalLink, KeyRound } from 'lucide-react';
 import { useModalBackHandler } from '../../services/modalBackHandler';
 import { playChime } from '../../utils/audio';
 import { useApp } from '../../context/AppContext';
-import { verifyPin } from '../../services/authService';
+import { verifyPin, saveSecureCaregiverPin } from '../../services/authService';
 
 export interface ParentalGateModalProps {
   isOpen: boolean;
@@ -81,10 +81,11 @@ export const ParentalGateModal: React.FC<ParentalGateModalProps> = ({
     }
     if (valid) {
       if (shouldUpgrade && upgradedHash) {
+        saveSecureCaregiverPin(upgradedHash).catch(() => {});
         try {
           const raw = localStorage.getItem('beeyou_settings');
           const s = raw ? JSON.parse(raw) : {};
-          s.pin = upgradedHash;
+          delete s.pin;
           localStorage.setItem('beeyou_settings', JSON.stringify(s));
         } catch {}
       }

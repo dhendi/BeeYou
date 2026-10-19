@@ -4,6 +4,7 @@ import { Lock, Shield, KeyRound, X, Check, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
 import { verifyPin } from '../utils/security';
+import { saveSecureCaregiverPin } from '../services/authService';
 
 interface CaregiverLockShieldProps {
   children: React.ReactNode;
@@ -109,10 +110,11 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
         const { valid, shouldUpgrade, upgradedHash } = await verifyPin(next, correctPin);
         if (valid) {
           if (shouldUpgrade && upgradedHash) {
+            saveSecureCaregiverPin(upgradedHash).catch(() => {});
             try {
               const raw = localStorage.getItem('beeyou_settings');
               const s = raw ? JSON.parse(raw) : {};
-              s.pin = upgradedHash;
+              delete s.pin;
               localStorage.setItem('beeyou_settings', JSON.stringify(s));
             } catch {}
           }
