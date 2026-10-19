@@ -53,7 +53,7 @@ export const ParentalGateModal: React.FC<ParentalGateModalProps> = ({
     if (e) e.preventDefault();
     const expected = num1 * num2;
     if (parseInt(mathAnswer.trim(), 10) === expected) {
-      playChime('chime');
+      playChime('complete');
       onSuccess();
       onClose();
     } else {
@@ -72,9 +72,23 @@ export const ParentalGateModal: React.FC<ParentalGateModalProps> = ({
       setErrorMsg('PIN must be 4 digits.');
       return;
     }
-    const { valid } = await verifyPin(pinAnswer, settings.pin);
+    const { valid, shouldUpgrade, upgradedHash, isLocked, remainingLockoutSeconds } = await verifyPin(pinAnswer, settings.pin);
+    if (isLocked) {
+      playChime('tap');
+      setErrorMsg(`Too many incorrect attempts. Please wait ${remainingLockoutSeconds || 30}s.`);
+      setPinAnswer('');
+      return;
+    }
     if (valid) {
-      playChime('chime');
+      if (shouldUpgrade && upgradedHash) {
+        try {
+          const raw = localStorage.getItem('beeyou_settings');
+          const s = raw ? JSON.parse(raw) : {};
+          s.pin = upgradedHash;
+          localStorage.setItem('beeyou_settings', JSON.stringify(s));
+        } catch {}
+      }
+      playChime('complete');
       onSuccess();
       onClose();
     } else {

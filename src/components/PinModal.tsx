@@ -9,6 +9,7 @@ import {
   sendAccountPasswordResetEmail, 
   updateCaregiverPin,
   verifyPin,
+  getPinRateLimitStatus,
   auth
 } from '../services/authService';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -33,10 +34,15 @@ export const PinModal: React.FC = () => {
     handleCloseModal();
   });
 
-  // Switch to set_new_pin if user recently requested an email PIN/password reset
+  // Switch to set_new_pin if user recently requested an email PIN/password reset or load existing lockout
   useEffect(() => {
     if (showPinModal) {
       try {
+        const rateStatus = getPinRateLimitStatus();
+        if (rateStatus.isLocked && rateStatus.remainingLockoutSeconds > 0) {
+          setCooldownSeconds(rateStatus.remainingLockoutSeconds);
+          setError(true);
+        }
         if (localStorage.getItem('beeyou_pending_pin_reset') === 'true') {
           setView('set_new_pin');
         }
@@ -77,13 +83,21 @@ export const PinModal: React.FC = () => {
       setError(false);
 
       if (next.length === 4) {
-        const { valid, shouldUpgrade, upgradedHash } = await verifyPin(next, settings.pin);
-        if (valid) {
-          if (shouldUpgrade && upgradedHash) {
+        const result = await verifyPin(next, settings.pin);
+        if (result.isLocked) {
+          setError(true);
+          playChime('clear');
+          setCooldownSeconds(result.remainingLockoutSeconds || 30);
+          setTimeout(() => setPinInput(''), 600);
+          return;
+        }
+
+        if (result.valid) {
+          if (result.shouldUpgrade && result.upgradedHash) {
             try {
               const raw = localStorage.getItem('beeyou_settings');
               const s = raw ? JSON.parse(raw) : {};
-              s.pin = upgradedHash;
+              s.pin = result.upgradedHash;
               localStorage.setItem('beeyou_settings', JSON.stringify(s));
             } catch {}
           }
@@ -102,9 +116,10 @@ export const PinModal: React.FC = () => {
           const nextAttempts = failedAttempts + 1;
           setFailedAttempts(nextAttempts);
 
-          if (nextAttempts >= 5) {
+          if (result.remainingLockoutSeconds && result.remainingLockoutSeconds > 0) {
+            setCooldownSeconds(result.remainingLockoutSeconds);
+          } else if (nextAttempts >= 5) {
             setCooldownSeconds(30);
-            setFailedAttempts(0);
           }
 
           setTimeout(() => setPinInput(''), 600);

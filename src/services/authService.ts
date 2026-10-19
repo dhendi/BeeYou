@@ -19,9 +19,9 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 
-import { hashPin, verifyPin } from '../utils/security';
+import { hashPin, verifyPin, getPinRateLimitStatus, resetPinRateLimit } from '../utils/security';
 
-export { hashPin, verifyPin };
+export { hashPin, verifyPin, getPinRateLimitStatus, resetPinRateLimit };
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

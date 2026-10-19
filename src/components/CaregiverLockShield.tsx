@@ -106,8 +106,16 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
 
       if (next.length === 4) {
         const correctPin = settings?.pin || '1234';
-        const { valid } = await verifyPin(next, correctPin);
+        const { valid, shouldUpgrade, upgradedHash } = await verifyPin(next, correctPin);
         if (valid) {
+          if (shouldUpgrade && upgradedHash) {
+            try {
+              const raw = localStorage.getItem('beeyou_settings');
+              const s = raw ? JSON.parse(raw) : {};
+              s.pin = upgradedHash;
+              localStorage.setItem('beeyou_settings', JSON.stringify(s));
+            } catch {}
+          }
           triggerSuccess();
         } else {
           setPinError(true);
