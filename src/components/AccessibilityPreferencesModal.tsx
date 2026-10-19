@@ -660,7 +660,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         key={persona.id}
                         onClick={() => {
                           updateSettings({ voicePersona: persona.id });
-                          prewarmCoreAudioVocabulary(persona.id, settings.language || 'en');
                           playChime('tap');
                         }}
                         className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${

@@ -886,32 +886,16 @@ function speakWithBrowserSpeechSynthesis(
 }
 
 /**
- * Top high-frequency AAC vocabulary to pre-warm for 0ms instantaneous speech
+ * Top high-frequency AAC survival vocabulary to pre-warm for 0ms instantaneous speech
  */
 export const CORE_AAC_VOCABULARY = [
-  'Help',
-  'Water',
-  'Apple',
-  'Food',
-  'Bathroom',
   'Yes',
   'No',
-  'Please',
-  'Thank you',
-  'I want',
-  'More',
-  'Stop',
-  'All done',
-  'Break',
-  'Happy',
-  'Sad',
-  'Tired',
-  'Hurts',
-  'Play',
-  'Go',
-  'Like',
-  'Quiet',
+  'Help',
+  'Water',
 ];
+
+const prewarmThrottleMap = new Map<string, number>();
 
 /**
  * Pre-warms core AAC vocabulary into persistent browser CacheStorage & memory cache.
@@ -931,12 +915,20 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 300));
+  const throttleKey = `${selectedPersonaId}_${normalizedLang}`;
+  const now = Date.now();
+  if (prewarmThrottleMap.has(throttleKey) && now - prewarmThrottleMap.get(throttleKey)! < 60000) {
+    return;
+  }
+  prewarmThrottleMap.set(throttleKey, now);
+
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
   idleFn(async () => {
     for (const phrase of CORE_AAC_VOCABULARY) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
       const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formatted.toLowerCase()}`;
+      if (audioMemoryCache.has(cacheKey)) continue;
       const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}&voice=${encodeURIComponent(selectedPersonaId)}`;
       await getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
     }

@@ -59,7 +59,6 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const handleSelectVoice = (persona: VoicePersona) => {
     updateSettings({ voicePersona: persona.id });
-    prewarmCoreAudioVocabulary(persona.id, settings.language || 'en');
     if (settings.soundEffects) playChime('star');
     triggerHaptic('light', true);
     onShowNotification(`Voice persona updated to ${persona.name}`);

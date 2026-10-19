@@ -227,8 +227,8 @@ try {
 } catch {}
 
 // Per-User Quota Constants
-const TTS_BURST_LIMIT_PER_MIN = 30; // Max 30 speech generations per minute per IP/user
-const TTS_DAILY_LIMIT_PER_USER = 300; // Max 300 speech generations per 24 hours per IP/user
+const TTS_BURST_LIMIT_PER_MIN = 120; // Max 120 speech generations per minute per IP/user
+const TTS_DAILY_LIMIT_PER_USER = 1000; // Max 1000 speech generations per 24 hours per IP/user
 
 const TRANSLATE_BURST_LIMIT_PER_MIN = 20; // Max 20 dynamic translations per minute per IP/user
 const TRANSLATE_DAILY_LIMIT_PER_USER = 200; // Max 200 dynamic translations per 24 hours per IP/user
@@ -473,73 +473,81 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.trim().length > 15);
 
   if (isValidGeminiKey && voiceKey !== 'system') {
-    try {
-      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent';
-      const payload = {
-        contents: [{
-          role: 'user',
-          parts: [{
-            text: cleanText,
-            speech_metadata: {
-              style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
-            },
+    const candidateModels = [
+      'gemini-3.8-flash-lite-tts',
+      'gemini-2.5-flash-preview-tts',
+      'gemini-3.8-flash-tts',
+    ];
+
+    for (const model of candidateModels) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        const payload = {
+          contents: [{
+            role: 'user',
+            parts: [{
+              text: cleanText,
+              speech_metadata: {
+                style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
+              },
+            }],
           }],
-        }],
-        generationConfig: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              voice: persona.geminiVoice || persona.name,
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                voice: persona.geminiVoice || persona.name,
+              },
             },
           },
-        },
-      };
+        };
 
-      const geminiRes = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'x-goog-api-key': geminiApiKey!,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
-      });
+        const geminiRes = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'x-goog-api-key': geminiApiKey!,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
+        });
 
-      usageBudgetTracker.recordTtsUpstream();
+        if (geminiRes.ok) {
+          usageBudgetTracker.recordTtsUpstream();
+          const geminiData: any = await geminiRes.json();
+          const audioBase64 =
+            geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ||
+            geminiData?.output_audio?.data ||
+            geminiData?.outputAudio?.data;
 
-      if (geminiRes.ok) {
-        const geminiData: any = await geminiRes.json();
-        const audioBase64 =
-          geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ||
-          geminiData?.output_audio?.data ||
-          geminiData?.outputAudio?.data;
+          if (audioBase64) {
+            const buffer = Buffer.from(audioBase64, 'base64');
+            const contentType = 'audio/wav';
 
-        if (audioBase64) {
-          const buffer = Buffer.from(audioBase64, 'base64');
-          const contentType = 'audio/wav';
+            console.log(`[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) - 1 API call`);
 
-          console.log(`[TTS Upstream] Generated from Gemini: "${cleanText}" (${persona.label}) - 1 API call`);
+            if (ttsAudioCache.size > 1000) {
+              const firstKey = ttsAudioCache.keys().next().value;
+              if (firstKey) ttsAudioCache.delete(firstKey);
+            }
+            ttsAudioCache.set(cacheKey, { buffer, contentType });
 
-          if (ttsAudioCache.size > 1000) {
-            const firstKey = ttsAudioCache.keys().next().value;
-            if (firstKey) ttsAudioCache.delete(firstKey);
+            // Asynchronously write to persistent disk cache
+            fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
+
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+            res.setHeader('ETag', `"${hashKey}"`);
+            res.send(buffer);
+            return;
           }
-          ttsAudioCache.set(cacheKey, { buffer, contentType });
-
-          // Asynchronously write to persistent disk cache
-          fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
-
-          res.setHeader('Content-Type', contentType);
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
-          res.setHeader('ETag', `"${hashKey}"`);
-          res.send(buffer);
-          return;
+        } else {
+          const errText = await geminiRes.text().catch(() => '');
+          console.warn(`[Gemini TTS (${model}) Error] Status ${geminiRes.status}: ${errText.slice(0, 150)}... Trying next model.`);
         }
-      } else {
-        console.warn(`[Gemini TTS Error] Status ${geminiRes.status}:`, await geminiRes.text().catch(() => ''));
+      } catch (err: any) {
+        console.warn(`[Gemini TTS (${model})] Upstream call failed:`, err?.message || err);
       }
-    } catch (err: any) {
-      console.warn('[Gemini TTS] Upstream call failed:', err?.message || err);
     }
   }
 
