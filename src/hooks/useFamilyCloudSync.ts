@@ -117,13 +117,18 @@ export function useFamilyCloudSync({
 
   const [linkedDeviceCode, setLinkedDeviceCodeState] = useState<string>(() => {
     try {
-      return (
+      const code = (
         localStorage.getItem('beeyou_device_linked_code') ||
         localStorage.getItem('beeyou_caregiver_pairing_code') ||
-        'BEE-DEMO'
-      );
+        ''
+      ).trim().toUpperCase();
+      if (code === 'BEE-DEMO') {
+        const fam = localStorage.getItem('beeyou_family_account');
+        if (!fam || !JSON.parse(fam)?.isDemoAccount) return '';
+      }
+      return code;
     } catch {
-      return 'BEE-DEMO';
+      return '';
     }
   });
 

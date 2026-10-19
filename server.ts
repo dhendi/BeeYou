@@ -314,7 +314,7 @@ interface TemporaryPairingSessionData {
   token: string;
   createdAt: number;
   expiresAt: number;
-  status: 'pending' | 'paired' | 'expired' | 'revoked';
+  status: 'pending' | 'awaiting_approval' | 'paired' | 'rejected' | 'expired' | 'revoked';
   initiatedBy: 'child_device' | 'caregiver';
   childName?: string;
   childAge?: number;
@@ -323,6 +323,9 @@ interface TemporaryPairingSessionData {
   caregiverPhone?: string;
   caregiverEmail?: string;
   permissions?: any;
+  requestingDeviceName?: string;
+  requestingDeviceRole?: 'caregiver' | 'child_device';
+  requestedAt?: number;
 }
 
 interface CaregiverSessionData {
@@ -850,11 +853,16 @@ familyAccounts.set('demo@beeyou.app', {
 
 function getDeterministicFamilyCode(email: string): string {
   const clean = email.trim().toLowerCase();
-  if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
+  if (clean === 'demo@beeyou.app' || clean === 'reviewer@beeyou.app') {
     return 'BEE-DEMO';
   }
-  const prefix = clean.split('@')[0].replace(/[^a-z0-9]/g, '').slice(0, 5).toUpperCase();
-  return `BEE-${prefix || 'FAM'}`;
+  const hmac = crypto.createHmac('sha256', SERVER_AUTH_SECRET).update(clean).digest();
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let code = '';
+  for (let i = 0; i < 7; i++) {
+    code += chars[hmac[i] % chars.length];
+  }
+  return `BEE-${code}`;
 }
 
 // -------------------------------------------------------------
@@ -1169,18 +1177,14 @@ function broadcastEvent(code: string, event: CloudSyncEvent): void {
   }
 }
 
-// Helper to generate a clean, readable temporary pairing code (e.g., K7P4-92)
+// Helper to generate an unguessable high-entropy temporary pairing code (e.g., BEE-K7P492)
 function generatePairingCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let part1 = '';
-  for (let i = 0; i < 4; i++) {
-    part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let part = '';
+  for (let i = 0; i < 6; i++) {
+    part += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  let part2 = '';
-  for (let i = 0; i < 2; i++) {
-    part2 += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `${part1}-${part2}`;
+  return `BEE-${part}`;
 }
 
 // -------------------------------------------------------------
@@ -1193,14 +1197,17 @@ app.post('/api/family/auth/token', (req, res) => {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid family code is required.' });
   }
 
-  // 1. App Store & Google Play reviewer demo access
+  // 1. App Store & Google Play reviewer demo access (strictly isolated sandbox)
   if (cleanCode === 'BEE-DEMO') {
-    return res.json({
-      success: true,
-      token: 'by_demo_reviewer_token_2026',
-      familyCode: 'BEE-DEMO',
-      role: 'demo',
-    });
+    if (email === 'demo@beeyou.app' || req.headers['x-reviewer-demo'] === 'true') {
+      return res.json({
+        success: true,
+        token: 'by_demo_reviewer_token_2026',
+        familyCode: 'BEE-DEMO',
+        role: 'demo',
+      });
+    }
+    return res.status(403).json({ error: 'Forbidden', message: 'Demo access requires valid reviewer credentials.' });
   }
 
   // Check if caller already has a valid Bearer token (e.g. Firebase ID token or pairing token)
@@ -1245,16 +1252,16 @@ app.post('/api/family/auth/token', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 1. Temporary Pairing Sessions (Flow A & Flow B)
+// 1. Temporary Pairing Sessions (Explicit, Expiring, Intended Account Approval)
 // -------------------------------------------------------------
 
-// Create a new temporary single-use expirable pairing session
+// Create a new temporary single-use expirable pairing session (15-min TTL)
 app.post('/api/caregiver/pairing/create', (req, res) => {
-  const { initiatedBy, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body;
+  const { initiatedBy, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body || {};
   
   let pairingCode = generatePairingCode();
-  // Ensure unique
-  while (pairingSessions.has(pairingCode)) {
+  // Ensure unique and never BEE-DEMO
+  while (pairingSessions.has(pairingCode) || pairingCode === 'BEE-DEMO') {
     pairingCode = generatePairingCode();
   }
 
@@ -1264,7 +1271,7 @@ app.post('/api/caregiver/pairing/create', (req, res) => {
     pairingCode,
     token,
     createdAt: now,
-    expiresAt: now + 10 * 60 * 1000, // 10 minutes
+    expiresAt: now + 15 * 60 * 1000, // 15 minutes TTL
     status: 'pending',
     initiatedBy: initiatedBy === 'caregiver' ? 'caregiver' : 'child_device',
     childName: childName || (initiatedBy === 'caregiver' ? 'Child' : undefined),
@@ -1296,18 +1303,18 @@ app.get('/api/caregiver/pairing/status/:code', (req, res) => {
     return res.status(404).json({ error: 'Pairing session not found or expired', status: 'not_found' });
   }
 
-  if (Date.now() > session.expiresAt && session.status === 'pending') {
+  if (Date.now() > session.expiresAt && session.status !== 'paired') {
     session.status = 'expired';
   }
 
   return res.json({ success: true, session });
 });
 
-// Claim/complete pairing (from caregiver or child)
+// Request to pair (submits claiming device details and enters awaiting_approval state)
 app.post('/api/caregiver/pairing/claim', (req, res) => {
   const { pairingCode, claimerRole, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
-  if (!code) {
+  if (!code || code === 'BEE-DEMO') {
     return res.status(400).json({ error: 'Invalid pairing code format.' });
   }
   const session = pairingSessions.get(code);
@@ -1318,14 +1325,22 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
   if (Date.now() > session.expiresAt || session.status === 'expired') {
     session.status = 'expired';
-    return res.status(400).json({ error: 'Pairing code has expired. Please generate a new code.' });
+    return res.status(400).json({ error: 'Pairing code has expired. Please generate a fresh code on the companion device.' });
   }
 
   if (session.status === 'paired') {
-    return res.status(400).json({ error: 'This pairing code has already been used.' });
+    return res.status(400).json({ error: 'This pairing code has already been claimed.' });
   }
 
-  // Update session with claimed details
+  if (session.status === 'rejected' || session.status === 'revoked') {
+    return res.status(400).json({ error: 'This pairing request was declined.' });
+  }
+
+  // Update session with claiming party details
+  const requestingName = claimerRole === 'caregiver' ? (caregiverName || 'Caregiver') : (childName || 'Child');
+  session.requestingDeviceName = requestingName;
+  session.requestingDeviceRole = claimerRole === 'caregiver' ? 'caregiver' : 'child_device';
+  session.requestedAt = Date.now();
   if (childName) session.childName = childName;
   if (childAge) session.childAge = Number(childAge);
   if (ageGroup) session.ageGroup = ageGroup;
@@ -1334,9 +1349,47 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
   if (caregiverEmail) session.caregiverEmail = caregiverEmail;
   if (permissions) session.permissions = permissions;
 
+  // Status transitions to awaiting_approval: requires intended account confirmation
+  session.status = 'awaiting_approval';
+
+  // Broadcast PAIRING_APPROVAL_REQUESTED to the host device
+  broadcastEvent(code, {
+    eventId: `ev-pair-req-${Date.now()}`,
+    type: 'PAIRING_APPROVAL_REQUESTED',
+    pairingCode: code,
+    session,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ 
+    success: true, 
+    status: 'awaiting_approval',
+    session,
+    message: 'Pairing request submitted! Please tap Approve on the companion device to complete connection.' 
+  });
+});
+
+// Explicit approval endpoint called by the intended account on the host device
+app.post('/api/caregiver/pairing/approve', (req, res) => {
+  const { pairingCode } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid pairing code.' });
+  }
+
+  const session = pairingSessions.get(code);
+  if (!session) {
+    return res.status(404).json({ error: 'Pairing session not found.' });
+  }
+
+  if (Date.now() > session.expiresAt || session.status === 'expired') {
+    session.status = 'expired';
+    return res.status(400).json({ error: 'Pairing code has expired. Please generate a new code.' });
+  }
+
   session.status = 'paired';
 
-  // Initialize or update the permanent live caregiver session for this linked pairing
+  // Initialize the permanent live caregiver session for this linked pairing
   const permanentSession: CaregiverSessionData = {
     pairingCode: code,
     childName: session.childName || 'Child',
@@ -1366,24 +1419,48 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
   setCaregiverSession(code, permanentSession);
 
-  // Broadcast DEVICE_PAIRED event across all connected devices
+  // Broadcast DEVICE_PAIRED & PAIRING_APPROVED events across all connected devices
   broadcastEvent(code, {
-    eventId: `ev-pair-${Date.now()}`,
+    eventId: `ev-pair-approved-${Date.now()}`,
     type: 'DEVICE_PAIRED',
     pairingCode: code,
     session: permanentSession,
     sentAt: Date.now(),
   });
 
-  const authToken = signFamilyToken(code, (claimerRole === 'child' ? 'child' : 'caregiver'), session.caregiverEmail);
+  const authToken = signFamilyToken(code, (session.initiatedBy === 'caregiver' ? 'caregiver' : 'child'), session.caregiverEmail);
 
   return res.json({ 
     success: true, 
+    status: 'paired',
     session,
     permanentSession,
     token: authToken,
-    message: 'Device successfully paired and linked!' 
+    message: 'Pairing approved and device connected successfully!' 
   });
+});
+
+// Explicit decline endpoint called when the intended account rejects the pairing request
+app.post('/api/caregiver/pairing/reject', (req, res) => {
+  const { pairingCode } = req.body || {};
+  const code = sanitizeFamilyCode(pairingCode);
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid pairing code.' });
+  }
+
+  const session = pairingSessions.get(code);
+  if (session) {
+    session.status = 'rejected';
+  }
+
+  broadcastEvent(code, {
+    eventId: `ev-pair-rejected-${Date.now()}`,
+    type: 'PAIRING_REJECTED',
+    pairingCode: code,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, status: 'rejected', session, message: 'Pairing request was declined.' });
 });
 
 // Unlink a paired device

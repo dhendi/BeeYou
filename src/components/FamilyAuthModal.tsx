@@ -87,9 +87,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
 
   const applyAccountToContext = (account: FamilyAccount, asRole: 'child' | 'caregiver') => {
     try {
-      const code = account.familyCode || 'BEE-DEMO';
+      const code = account.familyCode || '';
       setPairingCode(code);
-      subscribeToCloudChannel(code);
+      if (code) {
+        subscribeToCloudChannel(code);
+      }
 
       if (setLinkedDeviceCode) {
         setLinkedDeviceCode(code);
@@ -148,7 +150,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         playChime('complete');
       } catch {}
       setTimeout(() => {
-        const safeCode = account.familyCode || 'BEE-DEMO';
+        const safeCode = account.familyCode || '';
         if (asRole === 'caregiver') {
           setActiveDeviceView('caregiver');
           if (typeof window !== 'undefined') {

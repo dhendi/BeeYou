@@ -76,7 +76,7 @@ export function parseTimestampMs(val: any): number {
 }
 
 function cleanCode(code: string): string {
-  return (code || 'BEE-DEMO').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return (code || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
 }
 
 /**
@@ -84,6 +84,18 @@ function cleanCode(code: string): string {
  */
 export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): void {
   const code = cleanCode(rawCode);
+
+  // If no pairing code, cleanly unsubscribe all active listeners and exit
+  if (!code) {
+    if (activeAlertUnsub) { activeAlertUnsub(); activeAlertUnsub = null; }
+    if (activeMessagesUnsub) { activeMessagesUnsub(); activeMessagesUnsub = null; }
+    if (activePingsUnsub) { activePingsUnsub(); activePingsUnsub = null; }
+    if (activeStatusUnsub) { activeStatusUnsub(); activeStatusUnsub = null; }
+    if (activeEventUnsub) { activeEventUnsub(); activeEventUnsub = null; }
+    currentCode = '';
+    return;
+  }
+
   if (currentCode === code && activePingsUnsub) return;
 
   // Cleanup existing listeners
@@ -94,13 +106,6 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
   if (activeEventUnsub) activeEventUnsub();
 
   currentCode = code;
-
-  // Auto-authenticate demo session if accessing BEE-DEMO
-  if (code === 'BEE-DEMO' && !auth.currentUser) {
-    signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026').catch((err) => {
-      console.warn('Demo auto-auth notice:', err?.message);
-    });
-  }
 
   // 1. Listen for Active Alerts & Acknowledgments
   const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
@@ -292,6 +297,7 @@ export async function sendFirebaseHeartbeat(params: {
   childStatus?: Partial<CaregiverChildStatus>;
 }): Promise<void> {
   const code = cleanCode(params.code);
+  if (!code) return;
   const isCaregiver = params.role === 'caregiver';
   const roleKey = isCaregiver ? 'caregiver' : 'child';
 
@@ -320,6 +326,7 @@ export async function sendFirebaseHeartbeat(params: {
  */
 export async function sendFirebaseAlert(alert: CaregiverAlert): Promise<void> {
   const code = cleanCode(alert.pairingCode);
+  if (!code) return;
   try {
     const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
     await set(alertRef, removeUndefined({
@@ -344,6 +351,7 @@ export async function acknowledgeFirebaseAlert(params: {
   responseId?: PredefinedCaregiverResponseId;
 }): Promise<void> {
   const code = cleanCode(params.code);
+  if (!code) return;
   try {
     const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
     await set(alertRef, removeUndefined({
@@ -365,6 +373,7 @@ export async function acknowledgeFirebaseAlert(params: {
  */
 export async function resolveFirebaseAlert(code: string): Promise<void> {
   const c = cleanCode(code);
+  if (!c) return;
   try {
     const alertRef = ref(db, `beeyou/sessions/${c}/activeAlert`);
     await set(alertRef, null);
@@ -378,6 +387,7 @@ export async function resolveFirebaseAlert(code: string): Promise<void> {
  */
 export async function sendFirebaseMessage(code: string, message: CaregiverMessage): Promise<void> {
   const c = cleanCode(code);
+  if (!c) return;
   try {
     const rawSender = message?.senderName || 'Caregiver';
     const rawText = message?.text || '';

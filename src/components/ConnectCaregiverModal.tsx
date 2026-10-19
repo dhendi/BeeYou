@@ -33,6 +33,8 @@ import {
   createTemporaryPairingSession,
   pollPairingSessionStatus,
   claimPairingSession,
+  approvePairingSession,
+  rejectPairingSession,
   unlinkDeviceSession,
   launchNativePhoneCall,
   launchNativeSms,
@@ -88,14 +90,14 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     }
   }, [initialTab]);
 
-  const [pairingCode, setPairingCode] = useState<string>(linkedDeviceCode || 'BEE-101');
+  const [pairingCode, setPairingCode] = useState<string>(linkedDeviceCode || '');
   const [copied, setCopied] = useState(false);
   const [sentSuccess, setSentSuccess] = useState<string | null>(null);
   const [messages, setMessages] = useState<CaregiverMessage[]>([]);
   
   // Temporary session state
   const [tempSession, setTempSession] = useState<TemporaryPairingSession | null>(null);
-  const [timeLeftSec, setTimeLeftSec] = useState<number>(600);
+  const [timeLeftSec, setTimeLeftSec] = useState<number>(900);
   const [showQr, setShowQr] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -105,6 +107,7 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
   const [inputCaregiverPhone, setInputCaregiverPhone] = useState('');
   const [inputChildName, setInputChildName] = useState(childProfile.name || 'Emma');
   const [claimLoading, setClaimLoading] = useState(false);
+  const [claimWaitingApproval, setClaimWaitingApproval] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
 
   // Adult Support Contact form
@@ -156,10 +159,18 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
       setLinkedDeviceCode(session.pairingCode);
     });
 
-    // Listen for device pairing
+    // Listen for device pairing & approval requests
     const unsubPairing = onDevicePairingEvent((evt) => {
-      if (evt.type === 'DEVICE_PAIRED') {
+      if (evt.type === 'PAIRING_APPROVAL_REQUESTED') {
+        if (evt.session) {
+          setTempSession(evt.session);
+          playChime('alert');
+          speak(`${evt.session.requestingDeviceName || 'Caregiver'} is requesting to link with this device.`);
+        }
+      } else if (evt.type === 'DEVICE_PAIRED' || evt.type === 'PAIRING_APPROVED') {
         setIsConnected(true);
+        setClaimWaitingApproval(false);
+        setTempSession((prev) => prev ? { ...prev, status: 'paired' } : null);
         const caregiverName = evt.session?.caregiverName || 'Caregiver';
         const childName = evt.session?.childName || childProfile.name || 'Child';
         const isCaregiverUser = userRole === 'caregiver';
@@ -179,6 +190,10 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
         }
 
         setSentSuccess(isCaregiverUser ? `Connected to ${childName}!` : `${caregiverName} is connected to your device!`);
+      } else if (evt.type === 'PAIRING_REJECTED') {
+        setClaimWaitingApproval(false);
+        setClaimError('Pairing request was declined by the companion device.');
+        playChime('tap');
       } else if (evt.type === 'DEVICE_UNLINKED') {
         setIsConnected(false);
         setSentSuccess('Device has been unlinked.');
@@ -196,9 +211,9 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     };
   }, [isOpen, childProfile.name, currentMood, userAgeGroup, userRole]);
 
-  // Expiration countdown
+  // Expiration countdown & approval polling
   useEffect(() => {
-    if (!tempSession || tempSession.status !== 'pending') return;
+    if (!tempSession || (tempSession.status !== 'pending' && tempSession.status !== 'awaiting_approval')) return;
 
     const timer = setInterval(() => {
       const remaining = Math.max(0, Math.floor((tempSession.expiresAt - Date.now()) / 1000));
@@ -208,7 +223,24 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
       }
     }, 1000);
 
-    return () => clearInterval(timer);
+    // Periodic status poll in case WebSockets/SSE miss the event
+    const pollTimer = setInterval(async () => {
+      if (tempSession?.pairingCode) {
+        const s = await pollPairingSessionStatus(tempSession.pairingCode);
+        if (s && s.status === 'awaiting_approval' && tempSession.status === 'pending') {
+          setTempSession(s);
+          playChime('alert');
+        } else if (s && s.status === 'paired' && tempSession.status !== 'paired') {
+          setIsConnected(true);
+          setTempSession(s);
+        }
+      }
+    }, 2500);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(pollTimer);
+    };
   }, [tempSession]);
 
   if (!isOpen) return null;
@@ -244,22 +276,57 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setClaimLoading(false);
 
     if (res.success) {
-      setPairingCode(cleanCode);
-      setLinkedDeviceCode(cleanCode);
-      setIsConnected(true);
-      setFeedbackState({
-        isOpen: true,
-        type: 'success',
-        role: isCaregiverUser ? 'caregiver' : 'child_device',
-        peerName: isCaregiverUser ? targetChildName : targetCaregiverName,
-        pairingCode: cleanCode,
-      });
-      if (isCaregiverUser) {
-        speak(`You are connected to ${targetChildName}`);
+      if (res.status === 'awaiting_approval') {
+        setClaimWaitingApproval(true);
+        setSentSuccess('Pairing request sent! Waiting for approval on the companion device...');
+        // Poll status until host approves or rejects
+        const approvalPoller = setInterval(async () => {
+          const s = await pollPairingSessionStatus(cleanCode);
+          if (s?.status === 'paired') {
+            clearInterval(approvalPoller);
+            setClaimWaitingApproval(false);
+            setPairingCode(cleanCode);
+            setLinkedDeviceCode(cleanCode);
+            setIsConnected(true);
+            playChime('complete');
+            setFeedbackState({
+              isOpen: true,
+              type: 'success',
+              role: isCaregiverUser ? 'caregiver' : 'child_device',
+              peerName: isCaregiverUser ? targetChildName : targetCaregiverName,
+              pairingCode: cleanCode,
+            });
+            setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${targetChildName}'s Tablet` : targetCaregiverName}!`);
+          } else if (s?.status === 'rejected') {
+            clearInterval(approvalPoller);
+            setClaimWaitingApproval(false);
+            setClaimError('Pairing request was declined by the companion device.');
+            playChime('tap');
+          } else if (s?.status === 'expired') {
+            clearInterval(approvalPoller);
+            setClaimWaitingApproval(false);
+            setClaimError('Pairing code has expired. Please ask for a new code.');
+            playChime('tap');
+          }
+        }, 2000);
       } else {
-        speak(`${targetCaregiverName} is connected to your device`);
+        setPairingCode(cleanCode);
+        setLinkedDeviceCode(cleanCode);
+        setIsConnected(true);
+        setFeedbackState({
+          isOpen: true,
+          type: 'success',
+          role: isCaregiverUser ? 'caregiver' : 'child_device',
+          peerName: isCaregiverUser ? targetChildName : targetCaregiverName,
+          pairingCode: cleanCode,
+        });
+        if (isCaregiverUser) {
+          speak(`You are connected to ${targetChildName}`);
+        } else {
+          speak(`${targetCaregiverName} is connected to your device`);
+        }
+        setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${targetChildName}'s Tablet` : targetCaregiverName}!`);
       }
-      setSentSuccess(`Connected successfully to ${isCaregiverUser ? `${targetChildName}'s Tablet` : targetCaregiverName}! 🎉`);
     } else {
       setClaimError(res.message);
       setFeedbackState({
@@ -514,6 +581,57 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                     </span>
                   </div>
                 )}
+
+                {/* Explicit Device Approval Request */}
+                {tempSession?.status === 'awaiting_approval' && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-100 via-amber-50 to-orange-100 border-2 border-amber-400 text-left space-y-3 shadow-md animate-in zoom-in-95">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                        <UserCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-wider text-amber-950">
+                          Connection Approval Request
+                        </h4>
+                        <p className="text-xs text-slate-800 font-bold mt-0.5">
+                          <strong>{tempSession.requestingDeviceName || 'Caregiver'}</strong> ({tempSession.requestingDeviceRole === 'caregiver' ? 'Caregiver' : 'Companion'}) is requesting to link with this device.
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                      Explicit authorization from this device is required before any alerts or routines can be shared.
+                    </p>
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          playChime('complete');
+                          await approvePairingSession(tempSession.pairingCode);
+                          setTempSession((prev) => prev ? { ...prev, status: 'paired' } : null);
+                          setIsConnected(true);
+                          setSentSuccess('Pairing approved! Device connected.');
+                          speak('Pairing approved. Device connected.');
+                        }}
+                        className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Approve Pairing</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          playChime('tap');
+                          await rejectPairingSession(tempSession.pairingCode);
+                          setTempSession((prev) => prev ? { ...prev, status: 'rejected' } : null);
+                          setSentSuccess('Pairing request declined.');
+                        }}
+                        className="py-2.5 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-slate-700 font-bold text-xs transition cursor-pointer"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Native Calling & Texting Direct Access */}
@@ -637,13 +755,35 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                     </div>
                   )}
 
+                  {claimWaitingApproval && (
+                    <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-center space-y-2.5 animate-in fade-in">
+                      <div className="flex items-center justify-center gap-2 text-amber-900 font-bold text-xs">
+                        <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+                        <span>Waiting for Approval on Companion Device...</span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 font-medium">
+                        Please tap <strong>Approve Pairing</strong> on the other device's screen to complete this connection.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClaimWaitingApproval(false);
+                          setClaimError(null);
+                        }}
+                        className="text-xs text-stone-500 hover:text-stone-800 underline font-medium cursor-pointer"
+                      >
+                        Cancel request
+                      </button>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={claimLoading || !inputCode.trim()}
+                    disabled={claimLoading || claimWaitingApproval || !inputCode.trim()}
                     className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                   >
                     {claimLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    <span>Connect Device</span>
+                    <span>{claimWaitingApproval ? 'Awaiting Host Approval...' : 'Connect Device'}</span>
                   </button>
                 </div>
               </form>

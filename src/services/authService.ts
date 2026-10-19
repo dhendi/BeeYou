@@ -30,8 +30,18 @@ export const googleProvider = new GoogleAuthProvider();
  * Satisfies server-side identity & family authorization rules
  */
 export async function syncUserFamilyMembership(uid: string, familyCode: string, isOwner = false): Promise<void> {
-  const safeCode = (familyCode || 'BEE-DEMO').trim().toUpperCase();
+  const safeCode = (familyCode || '').trim().toUpperCase();
   if (!uid || !safeCode) return;
+
+  // Real accounts cannot join or poll the demo sandbox
+  if (safeCode === 'BEE-DEMO') {
+    const stored = getStoredFamilyAccount();
+    if (!stored?.isDemoAccount || stored?.email !== 'demo@beeyou.app') {
+      console.warn('Real user accounts cannot join the demo sandbox.');
+      return;
+    }
+  }
+
   try {
     const userRef = dbRef(db, `beeyou/users/${uid}`);
     await dbSet(userRef, {
@@ -57,12 +67,12 @@ export async function syncUserFamilyMembership(uid: string, familyCode: string, 
 
 /**
  * Ensure an active authenticated Firebase session exists.
- * If demo mode is active or BEE-DEMO is linked, authenticates with pre-seeded demo credentials.
+ * If demo mode is explicitly active, authenticates with pre-seeded demo credentials.
  */
 export async function ensureAuthenticatedSession(): Promise<FirebaseUser | null> {
   if (auth.currentUser) return auth.currentUser;
   const stored = getStoredFamilyAccount();
-  if (stored?.isDemoAccount || stored?.email === 'demo@beeyou.app' || stored?.familyCode === 'BEE-DEMO') {
+  if (stored?.isDemoAccount && stored?.email === 'demo@beeyou.app') {
     try {
       const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
       await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
@@ -84,7 +94,7 @@ if (typeof window !== 'undefined') {
       }
     } else {
       const stored = getStoredFamilyAccount();
-      if (stored?.isDemoAccount || stored?.email === 'demo@beeyou.app') {
+      if (stored?.isDemoAccount && stored?.email === 'demo@beeyou.app') {
         try {
           const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
           await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
@@ -157,11 +167,16 @@ export const PAIRING_TOKEN_KEY = 'beeyou_pairing_token';
  * Returns cached token immediately (0ms) if available.
  */
 export function getSyncClientAuthToken(familyCode?: string): string {
-  const code = (familyCode || getStoredFamilyAccount()?.familyCode || 'BEE-DEMO').trim().toUpperCase();
+  const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
+  if (!code) return '';
 
-  // 1. Reviewer Demo Account
+  // 1. Reviewer Demo Account (strictly isolated sandbox)
   if (code === 'BEE-DEMO' || code === 'DEMO') {
-    return 'by_demo_reviewer_token_2026';
+    const stored = getStoredFamilyAccount();
+    if (stored?.isDemoAccount && stored?.email === 'demo@beeyou.app') {
+      return 'by_demo_reviewer_token_2026';
+    }
+    return '';
   }
 
   if (typeof window !== 'undefined') {
@@ -192,11 +207,16 @@ export function getSyncClientAuthToken(familyCode?: string): string {
  * Asynchronously retrieve or exchange a verified family token.
  */
 export async function getClientAuthToken(familyCode?: string): Promise<string> {
-  const code = (familyCode || getStoredFamilyAccount()?.familyCode || 'BEE-DEMO').trim().toUpperCase();
+  const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
+  if (!code) return '';
 
-  // 1. Reviewer Demo Account
+  // 1. Reviewer Demo Account (strictly isolated sandbox)
   if (code === 'BEE-DEMO' || code === 'DEMO') {
-    return 'by_demo_reviewer_token_2026';
+    const stored = getStoredFamilyAccount();
+    if (stored?.isDemoAccount && stored?.email === 'demo@beeyou.app') {
+      return 'by_demo_reviewer_token_2026';
+    }
+    return '';
   }
 
   // 2. Fast synchronous cache check
@@ -360,12 +380,12 @@ export function generateSecureFamilyCode(length: number = 7): string {
 
 export function getDeterministicFamilyCode(email: string): string {
   const clean = email.trim().toLowerCase();
-  if (clean === 'demo@beeyou.app' || clean === 'demo' || clean === 'test@beeyou.app') {
+  if (clean === 'demo@beeyou.app' || clean === 'reviewer@beeyou.app') {
     return 'BEE-DEMO';
   }
-  // If this device already has an existing saved family account with a code, preserve it
+  // If this device already has an existing saved family account with a valid code, preserve it
   const existing = getStoredFamilyAccount();
-  if (existing && existing.email === clean && existing.familyCode) {
+  if (existing && existing.email === clean && existing.familyCode && existing.familyCode !== 'BEE-DEMO') {
     return existing.familyCode;
   }
   return generateSecureFamilyCode();
@@ -384,8 +404,8 @@ export async function loginWithSharedEmail(
     return { success: false, message: 'Please enter a valid email address.' };
   }
 
-  // 1. If Demo Email
-  if (cleanEmail === 'demo@beeyou.app' || cleanEmail === 'demo' || cleanEmail === 'test@beeyou.app') {
+  // 1. If Explicit Reviewer Demo Email (App Store & Google Play reviewer sandbox)
+  if (cleanEmail === 'demo@beeyou.app') {
     const demo = { ...DEMO_FAMILY_ACCOUNT, lastSyncedAt: new Date().toISOString() };
     saveStoredFamilyAccount(demo);
     try {
@@ -404,7 +424,7 @@ export async function loginWithSharedEmail(
     return {
       success: true,
       account: demo,
-      message: 'Logged into Demo Family Account! Both devices are now linked to "BEE-DEMO".',
+      message: 'Logged into Reviewer Demo Sandbox. All demo data is strictly isolated from real accounts.',
     };
   }
 
@@ -582,7 +602,14 @@ export async function registerSharedFamilyAccount(params: {
     return { success: false, message: 'Password must be at least 8 characters long.' };
   }
 
+  if (cleanEmail === 'demo@beeyou.app') {
+    return { success: false, message: 'demo@beeyou.app is reserved for App Store review and cannot be registered.' };
+  }
+
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
+  if (deterministicCode === 'BEE-DEMO') {
+    return { success: false, message: 'BEE-DEMO is reserved for App Store review.' };
+  }
   let firebaseUid: string;
 
   // 1. Create User in Firebase Auth

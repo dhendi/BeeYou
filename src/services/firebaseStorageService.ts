@@ -47,7 +47,11 @@ export async function uploadCustomIconToCloud(
   filename: string
 ): Promise<string> {
   const account = getStoredFamilyAccount();
-  const familyCode = account?.familyCode || 'BEE-DEMO';
+  const familyCode = account?.familyCode;
+  if (!familyCode) {
+    // If no family account is connected, icon remains stored locally without exposing to shared cloud
+    return dataUrl;
+  }
   const cleanFilename = filename.toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 32);
   const iconId = `icon_${Date.now()}_${cleanFilename}`;
 

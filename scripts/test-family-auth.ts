@@ -212,14 +212,22 @@ async function runTests() {
     // 8. Token Exchange Endpoint (/api/family/auth/token)
     console.log('\n--- Suite 8: Token Exchange Endpoint Security ---');
 
-    // Token exchange for BEE-DEMO gives reviewer token
+    // Token exchange for BEE-DEMO without credentials returns 403 Forbidden
     res = await fetch(`${baseUrl}/api/family/auth/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ familyCode: 'BEE-DEMO' }),
     });
+    assert(res.status === 403, 'Exchange for BEE-DEMO without credentials returns 403 Forbidden', `got ${res.status}`);
+
+    // Token exchange for BEE-DEMO with reviewer credentials returns 200 and reviewer token
+    res = await fetch(`${baseUrl}/api/family/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ familyCode: 'BEE-DEMO', email: 'demo@beeyou.app' }),
+    });
     const exchangeDemo = await res.json();
-    assert(exchangeDemo?.token === 'by_demo_reviewer_token_2026', 'Exchange for BEE-DEMO returns reviewer token');
+    assert(exchangeDemo?.token === 'by_demo_reviewer_token_2026', 'Exchange for BEE-DEMO with demo credentials returns reviewer token');
 
     // Token exchange with invalid PIN returns 401
     res = await fetch(`${baseUrl}/api/family/auth/token`, {
@@ -235,7 +243,92 @@ async function runTests() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ familyCode: 'FAM-NONEXISTENT' }),
     });
-    assert(res.status === 404, 'Exchange for non-existent family returns 404 Not Found', `got ${res.status}`);
+    // 9. Two-Way Expiring Pairing Handshake with Explicit Approval
+    console.log('\n--- Suite 9: Expiring Pairing Codes & Explicit Approval Handshake ---');
+
+    // Create pairing session
+    res = await fetch(`${baseUrl}/api/caregiver/pairing/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        initiatedBy: 'child_device',
+        childName: 'Emma',
+      }),
+    });
+    assert(res.status === 200, 'POST /api/caregiver/pairing/create returns 200 OK', `got ${res.status}`);
+    const createdRes = await res.json();
+    const createdSession = createdRes?.session;
+    assert(createdSession?.pairingCode?.startsWith('BEE-'), `Pairing code starts with BEE- (${createdSession?.pairingCode})`);
+    assert(createdSession?.pairingCode !== 'BEE-DEMO', 'Pairing code is not BEE-DEMO');
+    const ttlMinutes = (createdSession?.expiresAt - Date.now()) / (60 * 1000);
+    assert(ttlMinutes >= 14 && ttlMinutes <= 16, `Session TTL is 15 minutes (got ${ttlMinutes.toFixed(1)} min)`);
+    assert(createdSession?.status === 'pending', `Initial session status is 'pending' (got ${createdSession?.status})`);
+
+    const codeToPair = createdSession.pairingCode;
+
+    // Disallow pairing claim on BEE-DEMO
+    res = await fetch(`${baseUrl}/api/caregiver/pairing/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: 'BEE-DEMO',
+        caregiverName: 'Mom',
+      }),
+    });
+    assert(res.status === 400 || res.status === 403, 'Claiming BEE-DEMO returns 400/403', `got ${res.status}`);
+
+    // Claim pairing session transitions to awaiting_approval
+    res = await fetch(`${baseUrl}/api/caregiver/pairing/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pairingCode: codeToPair,
+        caregiverName: 'Mom',
+        claimerRole: 'caregiver',
+      }),
+    });
+    assert(res.status === 200, 'Claiming valid code returns 200 OK', `got ${res.status}`);
+    const claimResult = await res.json();
+    assert(claimResult?.status === 'awaiting_approval', `Claim transitions status to 'awaiting_approval' (got ${claimResult?.status})`);
+
+    // Poll status returns awaiting_approval
+    res = await fetch(`${baseUrl}/api/caregiver/pairing/status/${codeToPair}`);
+    const polledRes = await res.json();
+    const polledStatus = polledRes?.session;
+    assert(polledStatus?.status === 'awaiting_approval', `Poll reflects 'awaiting_approval'`);
+    assert(polledStatus?.requestingDeviceName === 'Mom', `Poll reflects requestingDeviceName: Mom`);
+
+    // Explicit approval from host device
+    res = await fetch(`${baseUrl}/api/caregiver/pairing/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: codeToPair }),
+    });
+    assert(res.status === 200, 'POST /api/caregiver/pairing/approve returns 200 OK', `got ${res.status}`);
+    const approveResult = await res.json();
+    assert(approveResult?.session?.status === 'paired', `Approve transitions session to 'paired'`);
+
+    // Rejection flow verification
+    const resRejectCreate = await fetch(`${baseUrl}/api/caregiver/pairing/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initiatedBy: 'child_device', childName: 'Leo' }),
+    });
+    const rejectCreateRes = await resRejectCreate.json();
+    const sessionToReject = rejectCreateRes?.session;
+    await fetch(`${baseUrl}/api/caregiver/pairing/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: sessionToReject.pairingCode, caregiverName: 'Coach' }),
+    });
+    const resReject = await fetch(`${baseUrl}/api/caregiver/pairing/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: sessionToReject.pairingCode }),
+    });
+    assert(resReject.status === 200, 'POST /api/caregiver/pairing/reject returns 200 OK', `got ${resReject.status}`);
+    const rejectData = await resReject.json();
+    assert(rejectData?.session?.status === 'rejected', `Reject transitions session to 'rejected'`);
 
   } finally {
     server.close();

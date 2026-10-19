@@ -26,7 +26,7 @@ import {
   onFirebaseGenericEvent,
   parseTimestampMs
 } from './firebaseSync';
-import { getClientAuthToken, getSyncClientAuthToken, saveClientAuthToken } from './authService';
+import { getClientAuthToken, getSyncClientAuthToken, saveClientAuthToken, generateSecureFamilyCode } from './authService';
 
 const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
 const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
@@ -145,10 +145,12 @@ export function launchNativeSms(phoneNumber: string, prefillMessage?: string): v
 }
 
 /**
- * Gets the current active pairing code (defaults to BEE-DEMO for instant 2-device pairing)
+ * Gets the current active pairing code.
+ * Returns empty string ('') if device is standalone / unpaired.
+ * Never defaults to BEE-DEMO to ensure real family devices remain strictly separate.
  */
 export function getPairingCode(): string {
-  if (typeof window === 'undefined') return 'BEE-DEMO';
+  if (typeof window === 'undefined') return '';
   try {
     const params = new URLSearchParams(window.location.search);
     const urlCode = params.get('code');
@@ -166,13 +168,22 @@ export function getPairingCode(): string {
         return safeFam;
       }
     }
+    const code = localStorage.getItem(PAIRING_KEY);
+    if (code) {
+      const safe = code.trim().toUpperCase();
+      // If legacy BEE-DEMO was stored on an unauthenticated device, clean it up
+      if (safe === 'BEE-DEMO') {
+        const famRaw = localStorage.getItem('beeyou_family_account');
+        const isDemo = famRaw && JSON.parse(famRaw)?.isDemoAccount;
+        if (!isDemo) {
+          localStorage.removeItem(PAIRING_KEY);
+          return '';
+        }
+      }
+      return safe;
+    }
   } catch {}
-  let code = localStorage.getItem(PAIRING_KEY);
-  if (!code) {
-    code = 'BEE-DEMO';
-    localStorage.setItem(PAIRING_KEY, code);
-  }
-  return code.toUpperCase();
+  return '';
 }
 
 /**
@@ -389,6 +400,31 @@ let firebaseUnsubs: Array<() => void> = [];
 export function subscribeToCloudChannel(code: string): void {
   if (typeof window === 'undefined') return;
   const safeCode = (code || getPairingCode()).trim().toUpperCase();
+
+  // If no pairing code is configured, cleanly detach from cloud channels and remain in local-only mode
+  if (!safeCode) {
+    if (activePeer) {
+      try { activePeer.destroy(); } catch {}
+      activePeer = null;
+      activePeerConn = null;
+    }
+    if (activeEventSource) {
+      try { activeEventSource.close(); } catch {}
+      activeEventSource = null;
+    }
+    if (activePollingInterval) {
+      clearTimeout(activePollingInterval);
+      clearInterval(activePollingInterval);
+      activePollingInterval = null;
+    }
+    firebaseUnsubs.forEach((unsub) => {
+      try { unsub(); } catch {}
+    });
+    firebaseUnsubs = [];
+    currentSubscribedCode = '';
+    return;
+  }
+
   const subscribeStartTime = Date.now();
   lastPollTimestamp = Date.now();
 
@@ -721,10 +757,13 @@ export function subscribeToCloudChannel(code: string): void {
   pollServer().then(scheduleNextAdaptivePoll);
 }
 
-// Initialize cloud subscription on startup
+// Initialize cloud subscription on startup only if an explicit pairing code is configured
 if (typeof window !== 'undefined') {
   setTimeout(() => {
-    subscribeToCloudChannel(getPairingCode());
+    const code = getPairingCode();
+    if (code) {
+      subscribeToCloudChannel(code);
+    }
   }, 300);
 }
 
@@ -764,7 +803,8 @@ export function onCaregiverAlertResolve(listener: AlertResolveListener): () => v
   return () => alertResolveListeners.delete(listener);
 }
 
-export type PairingListener = (event: { type: 'DEVICE_PAIRED' | 'DEVICE_UNLINKED'; pairingCode: string; session?: any }) => void;
+export type PairingEventType = 'DEVICE_PAIRED' | 'DEVICE_UNLINKED' | 'PAIRING_APPROVAL_REQUESTED' | 'PAIRING_APPROVED' | 'PAIRING_REJECTED';
+export type PairingListener = (event: { type: PairingEventType; pairingCode: string; session?: any }) => void;
 const pairingListeners: Set<PairingListener> = new Set();
 
 export function onDevicePairingEvent(listener: PairingListener): () => void {
@@ -939,8 +979,14 @@ function handleIncomingSyncEnvelope(envelope: any): void {
   }
 
   // 6. Pairing & Unlink Events
-  if (type === 'DEVICE_PAIRED' || type === 'DEVICE_UNLINKED') {
-    if (type === 'DEVICE_PAIRED') {
+  if (
+    type === 'DEVICE_PAIRED' || 
+    type === 'DEVICE_UNLINKED' || 
+    type === 'PAIRING_APPROVAL_REQUESTED' || 
+    type === 'PAIRING_APPROVED' || 
+    type === 'PAIRING_REJECTED'
+  ) {
+    if (type === 'DEVICE_PAIRED' || type === 'PAIRING_APPROVED') {
       lastPeerPingTimestamp = Date.now();
       const session = envelope.session;
       if (session) {
@@ -976,7 +1022,8 @@ if (broadcastChannel) {
 // -------------------------------------------------------------
 
 /**
- * Creates a single-use expirable pairing session (10 min expiry)
+ * Creates an unguessable, single-use expirable pairing session (15 min TTL)
+ * Requires explicit approval from the companion device to complete connection.
  */
 export async function createTemporaryPairingSession(params: {
   initiatedBy: 'child_device' | 'caregiver';
@@ -989,13 +1036,35 @@ export async function createTemporaryPairingSession(params: {
   permissions?: CaregiverPermissions;
 }): Promise<TemporaryPairingSession> {
   const now = Date.now();
-  const fallbackCode = getPairingCode();
 
+  // 1. Try server-side registration
+  try {
+    const res = await fetch('/api/caregiver/pairing/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.session) {
+        try {
+          localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(data.session));
+        } catch {}
+        subscribeToCloudChannel(data.session.pairingCode);
+        return data.session;
+      }
+    }
+  } catch (err) {
+    console.warn('Server pairing create offline, generating high-entropy CSPRNG local session:', err);
+  }
+
+  // 2. High-entropy CSPRNG local fallback (never BEE-DEMO)
+  const freshCode = generateSecureFamilyCode(6);
   const session: TemporaryPairingSession = {
-    pairingCode: fallbackCode,
-    token: 'tok-local-' + now,
+    pairingCode: freshCode,
+    token: 'tok-local-' + now + '-' + Math.random().toString(36).substring(2, 8),
     createdAt: now,
-    expiresAt: now + 10 * 60 * 1000,
+    expiresAt: now + 15 * 60 * 1000, // 15 minutes TTL
     status: 'pending',
     initiatedBy: params.initiatedBy,
     childName: params.childName,
@@ -1018,8 +1087,10 @@ export async function createTemporaryPairingSession(params: {
     localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(session));
   } catch {}
 
-  // Publish pairing session creation event
-  await publishCloudEvent(fallbackCode, {
+  // Subscribe host device to listen for PAIRING_APPROVAL_REQUESTED
+  subscribeToCloudChannel(freshCode);
+
+  await publishCloudEvent(freshCode, {
     type: 'PAIRING_SESSION_CREATED',
     session,
   });
@@ -1031,14 +1102,30 @@ export async function createTemporaryPairingSession(params: {
  * Checks the status of a temporary pairing session
  */
 export async function pollPairingSessionStatus(code: string): Promise<TemporaryPairingSession | null> {
-  const safeCode = code.trim().toUpperCase();
+  const safeCode = (code || '').trim().toUpperCase();
+  if (!safeCode) return null;
 
+  // 1. Check server status
+  try {
+    const res = await fetch(`/api/caregiver/pairing/status/${encodeURIComponent(safeCode)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.session) {
+        try {
+          localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(data.session));
+        } catch {}
+        return data.session;
+      }
+    }
+  } catch {}
+
+  // 2. Check local session
   try {
     const raw = localStorage.getItem('beeyou_temporary_pairing_session');
     if (raw) {
-      const parsed = JSON.parse(raw);
+      const parsed: TemporaryPairingSession = JSON.parse(raw);
       if (parsed.pairingCode === safeCode) {
-        if (Date.now() > parsed.expiresAt && parsed.status === 'pending') {
+        if (Date.now() > parsed.expiresAt && parsed.status !== 'paired') {
           parsed.status = 'expired';
         }
         return parsed;
@@ -1066,7 +1153,8 @@ export function extractPairingCodeFromScan(rawScan: string): string {
 }
 
 /**
- * Claims and connects a temporary pairing code
+ * Submits a request to pair with a companion device.
+ * Enters awaiting_approval state until explicitly approved by the intended account on the host device.
  */
 export async function claimPairingSession(params: {
   pairingCode: string;
@@ -1078,7 +1166,7 @@ export async function claimPairingSession(params: {
   caregiverPhone?: string;
   caregiverEmail?: string;
   permissions?: CaregiverPermissions;
-}): Promise<{ success: boolean; message: string; session?: TemporaryPairingSession }> {
+}): Promise<{ success: boolean; message: string; status?: string; session?: TemporaryPairingSession }> {
   if (!params.pairingCode || !params.pairingCode.trim()) {
     return { 
       success: false, 
@@ -1092,7 +1180,14 @@ export async function claimPairingSession(params: {
   if (alphanumericOnly.length < 3) {
     return { 
       success: false, 
-      message: `Invalid pairing code format ("${cleanCode}"). BeeYou pairing codes have 6 characters (e.g. K7P4-92).` 
+      message: `Invalid pairing code format ("${cleanCode}").` 
+    };
+  }
+
+  if (cleanCode === 'BEE-DEMO') {
+    return {
+      success: false,
+      message: 'BEE-DEMO is reserved for App Store review and cannot be paired manually.'
     };
   }
 
@@ -1104,29 +1199,11 @@ export async function claimPairingSession(params: {
   }
 
   const safeCode = cleanCode;
-  setPairingCode(safeCode);
+
+  // Subscribe to channel so we can receive approval events (DEVICE_PAIRED / PAIRING_APPROVED)
   subscribeToCloudChannel(safeCode);
 
-  lastPeerPingTimestamp = Date.now();
-  lastPeerRole = params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver';
-  lastPeerName = params.claimerRole === 'caregiver' ? (params.childName || 'Child') : (params.caregiverName || 'Caregiver');
-
-  const claimedSession: TemporaryPairingSession = {
-    pairingCode: safeCode,
-    token: 'tok-claimed-' + Date.now(),
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-    status: 'paired',
-    initiatedBy: params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver',
-    childName: params.childName || 'Child',
-    childAge: params.childAge || 10,
-    ageGroup: params.ageGroup || 'kid',
-    caregiverName: params.caregiverName || 'Caregiver',
-    caregiverPhone: params.caregiverPhone,
-    permissions: params.permissions,
-  };
-
-  // Contact server claim endpoint to get cryptographically signed session token
+  // 1. Send claim/request to server
   try {
     const res = await fetch('/api/caregiver/pairing/claim', {
       method: 'POST',
@@ -1143,36 +1220,143 @@ export async function claimPairingSession(params: {
         permissions: params.permissions,
       }),
     });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return {
+        success: false,
+        message: data?.error || data?.message || 'Failed to submit pairing request.',
+      };
+    }
+
+    if (data.status === 'awaiting_approval') {
+      return {
+        success: true,
+        status: 'awaiting_approval',
+        session: data.session,
+        message: data.message || 'Pairing request submitted! Please tap Approve on the companion device to complete connection.',
+      };
+    }
+
+    if (data.status === 'paired') {
+      if (data?.token) saveClientAuthToken(data.token);
+      setPairingCode(safeCode);
+      return {
+        success: true,
+        status: 'paired',
+        session: data.session,
+        message: 'Device connected successfully!',
+      };
+    }
+  } catch (err) {
+    console.warn('Online claim endpoint unreachable, falling back to direct cloud event dispatch:', err);
+  }
+
+  // 2. Direct event dispatch fallback
+  const requestedSession: TemporaryPairingSession = {
+    pairingCode: safeCode,
+    token: 'tok-req-' + Date.now(),
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 15 * 60 * 1000,
+    status: 'awaiting_approval',
+    initiatedBy: params.claimerRole === 'caregiver' ? 'child_device' : 'caregiver',
+    childName: params.childName || 'Child',
+    childAge: params.childAge || 10,
+    ageGroup: params.ageGroup || 'kid',
+    caregiverName: params.caregiverName || 'Caregiver',
+    caregiverPhone: params.caregiverPhone,
+    permissions: params.permissions,
+    requestingDeviceName: params.claimerRole === 'caregiver' ? (params.caregiverName || 'Caregiver') : (params.childName || 'Child'),
+    requestingDeviceRole: params.claimerRole,
+    requestedAt: Date.now(),
+  };
+
+  await publishCloudEvent(safeCode, {
+    type: 'PAIRING_APPROVAL_REQUESTED',
+    pairingCode: safeCode,
+    session: requestedSession,
+  });
+
+  return {
+    success: true,
+    status: 'awaiting_approval',
+    session: requestedSession,
+    message: 'Pairing request submitted! Please tap Approve on the companion device to complete connection.',
+  };
+}
+
+/**
+ * Intended account explicitly approves the incoming pairing request
+ */
+export async function approvePairingSession(code: string): Promise<{ success: boolean; message: string }> {
+  const safeCode = (code || '').trim().toUpperCase();
+  if (!safeCode) return { success: false, message: 'Invalid pairing code.' };
+
+  try {
+    const res = await fetch('/api/caregiver/pairing/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: safeCode }),
+    });
     if (res.ok) {
       const data = await res.json();
       if (data?.token) {
-        claimedSession.token = data.token;
+        saveClientAuthToken(data.token);
       }
     }
   } catch {}
 
-  saveClientAuthToken(claimedSession.token);
-
+  // Update local session
   try {
-    localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(claimedSession));
+    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.pairingCode === safeCode) {
+        s.status = 'paired';
+        localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(s));
+      }
+    }
   } catch {}
 
+  setPairingCode(safeCode);
+  subscribeToCloudChannel(safeCode);
+
+  lastPeerPingTimestamp = Date.now();
   notifyConnectionStatus();
 
   await publishCloudEvent(safeCode, {
     type: 'DEVICE_PAIRED',
     pairingCode: safeCode,
-    session: claimedSession,
   });
 
-  // Send an immediate heartbeat to confirm connection
-  await sendHeartbeat({
-    role: params.claimerRole,
-    name: params.claimerRole === 'caregiver' ? params.caregiverName || 'Caregiver' : params.childName || 'Child',
+  return { success: true, message: 'Device paired and connected successfully!' };
+}
+
+/**
+ * Intended account explicitly declines the incoming pairing request
+ */
+export async function rejectPairingSession(code: string): Promise<{ success: boolean; message: string }> {
+  const safeCode = (code || '').trim().toUpperCase();
+  if (!safeCode) return { success: false, message: 'Invalid pairing code.' };
+
+  try {
+    await fetch('/api/caregiver/pairing/reject', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairingCode: safeCode }),
+    });
+  } catch {}
+
+  try {
+    localStorage.removeItem('beeyou_temporary_pairing_session');
+  } catch {}
+
+  await publishCloudEvent(safeCode, {
+    type: 'PAIRING_REJECTED',
     pairingCode: safeCode,
   });
 
-  return { success: true, message: 'Device connected successfully!', session: claimedSession };
+  return { success: true, message: 'Pairing request declined.' };
 }
 
 /**

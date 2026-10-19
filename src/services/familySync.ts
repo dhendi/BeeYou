@@ -125,7 +125,7 @@ export function getTabId(): string {
 }
 
 export function getActiveFamilyCode(): string {
-  if (typeof window === 'undefined') return 'BEE-DEMO';
+  if (typeof window === 'undefined') return '';
   try {
     const rawFam = localStorage.getItem('beeyou_family_account');
     if (rawFam) {
@@ -133,9 +133,16 @@ export function getActiveFamilyCode(): string {
       if (fam?.familyCode) return fam.familyCode.trim().toUpperCase();
     }
     const legacyCode = localStorage.getItem('beeyou_caregiver_pairing_code');
-    if (legacyCode) return legacyCode.trim().toUpperCase();
+    if (legacyCode) {
+      const safe = legacyCode.trim().toUpperCase();
+      if (safe === 'BEE-DEMO') {
+        const isDemo = rawFam && JSON.parse(rawFam)?.isDemoAccount;
+        if (!isDemo) return '';
+      }
+      return safe;
+    }
   } catch {}
-  return 'BEE-DEMO';
+  return '';
 }
 
 export function setActiveFamilyCode(code: string): void {

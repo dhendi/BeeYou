@@ -647,11 +647,11 @@ export interface EmergencySupportContact {
 }
 
 export interface TemporaryPairingSession {
-  pairingCode: string; // e.g. "K7P4-92"
+  pairingCode: string; // e.g. "BEE-K7P492"
   token: string;
   createdAt: number;
-  expiresAt: number; // 10 minutes from creation
-  status: 'pending' | 'paired' | 'expired' | 'revoked';
+  expiresAt: number; // Expiration timestamp
+  status: 'pending' | 'awaiting_approval' | 'paired' | 'rejected' | 'expired' | 'revoked';
   initiatedBy: 'child_device' | 'caregiver';
   childName?: string;
   childAge?: number;
@@ -660,6 +660,9 @@ export interface TemporaryPairingSession {
   caregiverPhone?: string;
   caregiverEmail?: string;
   permissions?: CaregiverPermissions;
+  requestingDeviceName?: string;
+  requestingDeviceRole?: 'caregiver' | 'child_device';
+  requestedAt?: number;
 }
 
 export interface LinkedDeviceProfile {

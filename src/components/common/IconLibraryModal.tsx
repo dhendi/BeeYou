@@ -438,35 +438,37 @@ export const IconLibraryModal: React.FC<IconLibraryModalProps> = ({
 
       // Live Realtime Database sync for custom icons across family devices
       try {
-        const familyCode = localStorage.getItem('beeyou_pairing_code') || 'BEE-DEMO';
-        const iconsRef = dbRef(db, `beeyou/families/${familyCode}/customIcons`);
-        const unsub = onValue(iconsRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            if (data && typeof data === 'object') {
-              const cloudList: UploadedCustomIcon[] = Object.values(data).map((item: any) => ({
-                id: item.id || `custom-${Date.now()}`,
-                emoji: item.dataUrl || item.emoji || '',
-                label: item.label || 'Custom Icon',
-                createdAt: item.createdAt || Date.now(),
-              })).filter((item) => Boolean(item.emoji));
+        const familyCode = (localStorage.getItem('beeyou_pairing_code') || '').trim();
+        if (familyCode && familyCode !== 'BEE-DEMO') {
+          const iconsRef = dbRef(db, `beeyou/families/${familyCode}/customIcons`);
+          const unsub = onValue(iconsRef, (snapshot) => {
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              if (data && typeof data === 'object') {
+                const cloudList: UploadedCustomIcon[] = Object.values(data).map((item: any) => ({
+                  id: item.id || `custom-${Date.now()}`,
+                  emoji: item.dataUrl || item.emoji || '',
+                  label: item.label || 'Custom Icon',
+                  createdAt: item.createdAt || Date.now(),
+                })).filter((item) => Boolean(item.emoji));
 
-              if (cloudList.length > 0) {
-                setUploadedIcons((prev) => {
-                  const existingIds = new Set(prev.map((p) => p.emoji));
-                  const merged = [...prev];
-                  for (const cloudItem of cloudList) {
-                    if (!existingIds.has(cloudItem.emoji)) {
-                      merged.push(cloudItem);
+                if (cloudList.length > 0) {
+                  setUploadedIcons((prev) => {
+                    const existingIds = new Set(prev.map((p) => p.emoji));
+                    const merged = [...prev];
+                    for (const cloudItem of cloudList) {
+                      if (!existingIds.has(cloudItem.emoji)) {
+                        merged.push(cloudItem);
+                      }
                     }
-                  }
-                  return merged;
-                });
+                    return merged;
+                  });
+                }
               }
             }
-          }
-        });
-        return () => unsub();
+          });
+          return () => unsub();
+        }
       } catch (err) {
         console.warn('Realtime custom icons sync listener notice:', err);
       }
