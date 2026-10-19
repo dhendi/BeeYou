@@ -4,13 +4,21 @@
       ".read": false,
       ".write": false,
 
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['familyCode'])"
+        }
+      },
+
       "families": {
         ".read": false,
         ".write": false,
 
         "$familyCode": {
-          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
-          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".read": "auth != null && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+          ".write": "auth != null && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid || (!data.exists() && newData.child('ownerUid').val() === auth.uid) || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
           ".validate": "newData.hasChildren(['familyCode']) && newData.child('familyCode').val() === $familyCode",
 
           "customIcons": {
@@ -37,13 +45,13 @@
         ".write": false,
 
         "$familyCode": {
-          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
-          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".read": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+          ".write": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
           ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
 
           "pings": {
             "$role": {
-              ".validate": "$role === 'caregiver' || $role === 'child'",
+              ".validate": "$role === 'caregiver' || $role === 'child' || $role === 'child_device'",
               "timestamp": {
                 ".validate": "newData.isNumber()"
               }
@@ -72,8 +80,8 @@
         ".write": false,
 
         "$familyCode": {
-          ".read": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
-          ".write": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
+          ".read": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+          ".write": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || root.child('beeyou/users/' + auth.uid + '/familyCode').val() === $familyCode || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
           ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
 
           "latest": {

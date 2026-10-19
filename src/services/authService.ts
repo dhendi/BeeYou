@@ -1,6 +1,7 @@
 import { UserAgeGroup, UserAccountRole, EnabledFeatures, getDefaultFeaturesForAge } from '../types';
 import { setPairingCode, subscribeToCloudChannel, syncChildStatusToCaregiver, sendHeartbeat } from './caregiverSync';
-import { app, deleteFirebaseFamilyNode } from './firebaseSync';
+import { app, db, deleteFirebaseFamilyNode } from './firebaseSync';
+import { ref as dbRef, set as dbSet, update as dbUpdate } from 'firebase/database';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -23,6 +24,75 @@ import { hashPin, verifyPin } from '../utils/security';
 export { hashPin, verifyPin };
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+/**
+ * Synchronize user's family membership to Realtime Database
+ * Satisfies server-side identity & family authorization rules
+ */
+export async function syncUserFamilyMembership(uid: string, familyCode: string, isOwner = false): Promise<void> {
+  const safeCode = (familyCode || 'BEE-DEMO').trim().toUpperCase();
+  if (!uid || !safeCode) return;
+  try {
+    const userRef = dbRef(db, `beeyou/users/${uid}`);
+    await dbSet(userRef, {
+      uid,
+      familyCode: safeCode,
+      updatedAt: Date.now(),
+    });
+
+    const memberRef = dbRef(db, `beeyou/families/${safeCode}/members/${uid}`);
+    await dbSet(memberRef, true);
+
+    if (isOwner) {
+      const familyRef = dbRef(db, `beeyou/families/${safeCode}`);
+      await dbUpdate(familyRef, {
+        familyCode: safeCode,
+        ownerUid: uid,
+      });
+    }
+  } catch (err) {
+    console.warn('syncUserFamilyMembership notice:', err);
+  }
+}
+
+/**
+ * Ensure an active authenticated Firebase session exists.
+ * If demo mode is active or BEE-DEMO is linked, authenticates with pre-seeded demo credentials.
+ */
+export async function ensureAuthenticatedSession(): Promise<FirebaseUser | null> {
+  if (auth.currentUser) return auth.currentUser;
+  const stored = getStoredFamilyAccount();
+  if (stored?.isDemoAccount || stored?.email === 'demo@beeyou.app' || stored?.familyCode === 'BEE-DEMO') {
+    try {
+      const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
+      await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
+      return cred.user;
+    } catch (e) {
+      console.warn('ensureAuthenticatedSession demo signin notice:', e);
+    }
+  }
+  return null;
+}
+
+// Keep Firebase Auth state and RTDB family membership synchronized across device reloads
+if (typeof window !== 'undefined') {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const stored = getStoredFamilyAccount();
+      if (stored?.familyCode) {
+        await syncUserFamilyMembership(user.uid, stored.familyCode, false);
+      }
+    } else {
+      const stored = getStoredFamilyAccount();
+      if (stored?.isDemoAccount || stored?.email === 'demo@beeyou.app') {
+        try {
+          const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
+          await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
+        } catch {}
+      }
+    }
+  });
+}
 
 
 export interface FamilyAccount {
@@ -189,6 +259,12 @@ export async function loginWithSharedEmail(
     const demo = { ...DEMO_FAMILY_ACCOUNT, lastSyncedAt: new Date().toISOString() };
     saveStoredFamilyAccount(demo);
     try {
+      const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
+      await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
+    } catch (demoErr) {
+      console.warn('Demo sign-in notice:', demoErr);
+    }
+    try {
       await sendHeartbeat({
         role: 'caregiver',
         name: demo.caregiverName,
@@ -215,6 +291,7 @@ export async function loginWithSharedEmail(
     const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
     firebaseUid = userCredential.user.uid;
     isEmailVerified = userCredential.user.emailVerified;
+    await syncUserFamilyMembership(firebaseUid, deterministicCode, false);
   } catch (err: any) {
     console.warn('Firebase signIn notice:', err?.code, err?.message);
     if (
@@ -321,6 +398,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; account?: F
     };
 
     saveStoredFamilyAccount(account);
+    await syncUserFamilyMembership(user.uid, deterministicCode, false);
 
     try {
       await sendHeartbeat({
@@ -436,6 +514,7 @@ export async function registerSharedFamilyAccount(params: {
   };
 
   saveStoredFamilyAccount(newAccount);
+  await syncUserFamilyMembership(firebaseUid, deterministicCode, true);
 
   // Send initial heartbeat & sync status
   try {
@@ -463,6 +542,13 @@ export async function launchDemoMode(asRole: 'child' | 'caregiver'): Promise<{
   const demo = { ...DEMO_FAMILY_ACCOUNT, lastSyncedAt: new Date().toISOString() };
   saveStoredFamilyAccount(demo);
   setActiveDeviceView(asRole);
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026');
+    await syncUserFamilyMembership(cred.user.uid, 'BEE-DEMO', true);
+  } catch (demoErr) {
+    console.warn('Demo sign-in notice in launchDemoMode:', demoErr);
+  }
 
   // Sync initial heartbeat
   await sendHeartbeat({

@@ -4,6 +4,7 @@
  */
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { 
   getDatabase, 
   ref, 
@@ -29,6 +30,7 @@ export const firebaseConfig = {
 
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getDatabase(app);
+export const auth = getAuth(app);
 
 // Event Callbacks
 type AlertCallback = (alert: CaregiverAlert) => void;
@@ -93,6 +95,13 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
 
   currentCode = code;
 
+  // Auto-authenticate demo session if accessing BEE-DEMO
+  if (code === 'BEE-DEMO' && !auth.currentUser) {
+    signInWithEmailAndPassword(auth, 'demo@beeyou.app', 'beeyou2026').catch((err) => {
+      console.warn('Demo auto-auth notice:', err?.message);
+    });
+  }
+
   // 1. Listen for Active Alerts & Acknowledgments
   const alertRef = ref(db, `beeyou/sessions/${code}/activeAlert`);
   const subscriptionStartTime = Date.now();
@@ -151,6 +160,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       }
     }
     initialAlertLoaded = true;
+  }, (err) => {
+    console.warn('activeAlert subscription notice:', err?.message);
   });
 
   // 2. Listen for Real-Time Messages
@@ -206,6 +217,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
         messageListeners.forEach((fn) => fn(normalizedMsg));
       }
     });
+  }, (err) => {
+    console.warn('messages subscription notice:', err?.message);
   });
 
   // 3. Listen for Peer Presence & Heartbeats
@@ -223,6 +236,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       lastKnownPeerName = peerData.name || (isCaregiver ? 'Child Device' : 'Caregiver');
       notifyPresence();
     }
+  }, (err) => {
+    console.warn('pings subscription notice:', err?.message);
   });
 
   // 4. Listen for Child Status Updates
@@ -232,6 +247,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
     if (val) {
       statusListeners.forEach((fn) => fn(val));
     }
+  }, (err) => {
+    console.warn('childStatus subscription notice:', err?.message);
   });
 
   // 5. Listen for Universal Real-Time Event Stream (Multi-server & Pub/Sub)
@@ -248,6 +265,8 @@ export function initFirebaseLiveChannel(rawCode: string, isCaregiver: boolean): 
       return;
     }
     eventListeners.forEach((fn) => fn(val));
+  }, (err) => {
+    console.warn('event stream subscription notice:', err?.message);
   });
 }
 

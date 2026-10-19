@@ -340,7 +340,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
               {t("Isolated Per-Family Rules (database.rules.json)")}
             </p>
             <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              {t("Root database listing blocked; each family can only access their specific family channel.")}
+              {t("Server-side identity enforced (auth != null); unauthenticated and cross-family access blocked.")}
             </p>
           </div>
         </div>
