@@ -5,6 +5,11 @@ import crypto from 'crypto';
 import type { Request, Response } from 'express';
 import { defaultRateLimitStore, getClientIp } from './sharedRateLimitStore';
 import { getVoicePersonaById } from '../data/voicePersonasData';
+import {
+  getAudioFromCloudStorage,
+  saveAudioToCloudStorage,
+  getCloudStorageStatus,
+} from './cloudStorageTtsCache';
 
 // Strict allowlist of supported application languages
 export const ALLOWED_LANGUAGES = new Set([
@@ -258,6 +263,7 @@ export function verifyLevel3DiskCache(): {
   cachedFilesCount: number;
   totalSizeBytes: number;
   writable: boolean;
+  cloudStorage: ReturnType<typeof getCloudStorageStatus>;
 } {
   let writable = false;
   let cachedFilesCount = 0;
@@ -290,6 +296,7 @@ export function verifyLevel3DiskCache(): {
     cachedFilesCount,
     totalSizeBytes,
     writable,
+    cloudStorage: getCloudStorageStatus(),
   };
 }
 
@@ -494,7 +501,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       return;
     }
     res.setHeader('Content-Type', cached.contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
     res.setHeader('ETag', `"${hashKey}"`);
     res.send(cached.buffer);
     return;
@@ -517,12 +524,35 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         return;
       }
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
       res.setHeader('ETag', `"${hashKey}"`);
       res.send(fileBuffer);
       return;
     } catch {}
   }
+
+  // 4b. Persistent Cloud Object Storage Check (Firebase Storage / GCS / Vercel Durable Cache)
+  // Ensures audio persists across Vercel serverless container recycles and cold starts
+  try {
+    const cloudBuffer = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey);
+    if (cloudBuffer) {
+      const contentType = 'audio/wav';
+      ttsAudioCache.set(cacheKey, { buffer: cloudBuffer, contentType });
+      // Cache to local container disk/tmp for 0ms subsequent hits on this instance
+      fs.promises.writeFile(diskPathWav, cloudBuffer).catch(() => {});
+      usageBudgetTracker.recordTtsCacheHit();
+
+      if (req.headers['if-none-match'] === `"${hashKey}"`) {
+        res.status(304).end();
+        return;
+      }
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+      res.setHeader('ETag', `"${hashKey}"`);
+      res.send(cloudBuffer);
+      return;
+    }
+  } catch {}
 
   // 5. Per-User Quota Check (Only charged on cache miss that would trigger upstream call)
   const minuteQuota = await defaultRateLimitStore.hit(`tts:burst:${clientIp}`, TTS_BURST_LIMIT_PER_MIN, 60 * 1000, 'ip');
@@ -641,9 +671,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
             // Asynchronously write to persistent disk cache
             fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
+            saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType).catch(() => {});
 
             res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+            res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
             res.setHeader('ETag', `"${hashKey}"`);
             res.send(buffer);
             return;
@@ -699,7 +730,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     fs.promises.writeFile(diskPathMp3, buffer).catch(() => {});
 
     res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
     res.setHeader('ETag', `"${hashKey}"`);
     res.send(buffer);
   } catch (err: any) {
