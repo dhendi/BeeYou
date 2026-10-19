@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ShieldCheck, FileText, CheckCircle2, Lock } from 'lucide-react';
+import { X, ShieldCheck, FileText, CheckCircle2, Lock, Scale, ExternalLink } from 'lucide-react';
 import { useModalBackHandler } from '../services/modalBackHandler';
 import { playChime } from '../utils/audio';
 
 export interface LegalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'privacy' | 'terms';
+  initialTab?: 'privacy' | 'terms' | 'licenses';
 }
 
 export const LegalModal: React.FC<LegalModalProps> = ({
@@ -15,7 +15,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   onClose,
   initialTab = 'privacy',
 }) => {
-  const [activeTab, setActiveTab] = useState<'privacy' | 'terms'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'privacy' | 'terms' | 'licenses'>(initialTab);
 
   useModalBackHandler(isOpen, () => {
     onClose();
@@ -33,8 +33,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-white shadow-inner">
               {activeTab === 'privacy' ? (
                 <ShieldCheck className="w-5 h-5 text-white" />
-              ) : (
+              ) : activeTab === 'terms' ? (
                 <FileText className="w-5 h-5 text-white" />
+              ) : (
+                <Scale className="w-5 h-5 text-white" />
               )}
             </div>
             <div>
@@ -42,7 +44,11 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 Legal &amp; Child Safety Transparency
               </span>
               <h2 className="text-base sm:text-lg font-black text-white mt-0.5 tracking-tight">
-                {activeTab === 'privacy' ? 'Privacy Policy & COPPA Disclosure' : 'Terms of Service (EULA)'}
+                {activeTab === 'privacy' 
+                  ? 'Privacy Policy & COPPA Disclosure' 
+                  : activeTab === 'terms' 
+                  ? 'Terms of Service (EULA)' 
+                  : 'Third-Party Licenses & Commercial Rights'}
               </h2>
             </div>
           </div>
@@ -74,7 +80,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
             }`}
           >
-            <span>Privacy Policy (COPPA)</span>
+            <span>Privacy (COPPA)</span>
           </button>
 
           <button
@@ -90,6 +96,21 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             }`}
           >
             <span>Terms of Service</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('licenses');
+              playChime('tap');
+            }}
+            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
+              activeTab === 'licenses'
+                ? 'bg-emerald-600 text-white shadow-xs font-black'
+                : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
+            }`}
+          >
+            <span>Licenses &amp; Attribution</span>
           </button>
         </div>
 
@@ -279,6 +300,98 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 </h3>
                 <p>
                   For inquiries regarding terms, licensing, or educational installations, contact us at <strong className="text-indigo-600 dark:text-indigo-400">support@beeyou.app</strong>.
+                </p>
+              </section>
+            </div>
+          )}
+
+          {activeTab === 'licenses' && (
+            <div className="space-y-6">
+              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span className="font-bold text-sm">Commercial Rights &amp; Open-Source Compliance</span>
+                </div>
+                <p className="text-xs text-emerald-900 dark:text-emerald-300 mt-1 leading-relaxed">
+                  BeeYou is committed to complete transparency, respectful attribution, and full compliance with open-source and Creative Commons licenses. All third-party assets utilized in BeeYou explicitly authorize commercial production use.
+                </p>
+              </div>
+
+              {/* 1. AAC Symbols & Pictograms */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                  <span>1. AAC Symbols &amp; Pictograms (Mulberry Symbol Set)</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">CC BY-SA 2.0 / 4.0</span>
+                </h3>
+                <p>
+                  BeeYou utilizes the clinical <strong>Mulberry Symbols</strong> library for augmentative and alternative communication.
+                </p>
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs space-y-1">
+                  <p><strong>Created by:</strong> Straight Street / Paxtoncrafts Charitable Trust</p>
+                  <p><strong>License:</strong> Creative Commons Attribution-ShareAlike 2.0 / 4.0 (CC BY-SA)</p>
+                  <p><strong>Commercial Use:</strong> Fully permitted under CC BY-SA terms with attribution.</p>
+                  <p><strong>Repository:</strong> <span className="text-indigo-600 dark:text-indigo-400">github.com/mulberrysymbols/mulberry-symbols</span></p>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Notice: Mulberry Symbols are licensed under CC BY-SA. Any modified derivative symbol files are shared under the same license terms.
+                </p>
+              </section>
+
+              {/* 2. Original Proprietary Art & Mascots */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                  <span>2. Proprietary Stickers &amp; Mascots</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">All Rights Reserved</span>
+                </h3>
+                <p>
+                  All custom storybook watercolor stickers, badges, wallpapers, and character mascots (Barnaby the Bee, Shelly the Wise Turtle, Rex the Dino, Hoppy the Frog, Conductor Leo the Train, Orion the Astro-Pup, Splash the Shark, Turbo Racer, and Stardust Unicorn) are original proprietary works owned 100% by BeeYou. No copyrighted third-party characters (e.g. Disney, Boardmaker PCS, PECS) are reproduced.
+                </p>
+              </section>
+
+              {/* 3. Typography & Fonts */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                  <span>3. Typography &amp; Typefaces</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">SIL OFL 1.1</span>
+                </h3>
+                <ul className="list-disc pl-5 space-y-1 text-xs">
+                  <li><strong>Plus Jakarta Sans:</strong> Designed by Gumpita Rahayu (TokyoType / Tokotype). Licensed under the SIL Open Font License, Version 1.1.</li>
+                  <li><strong>Outfit:</strong> Designed by Rodrigo Fuenzalida. Licensed under the SIL Open Font License, Version 1.1.</li>
+                  <li><strong>Atkinson Hyperlegible:</strong> Designed by the Braille Institute of America to enhance character distinction for low-vision readers. Licensed under the SIL Open Font License, Version 1.1.</li>
+                  <li><strong>OpenDyslexic:</strong> Designed by Abbie Gonzalez to assist readers with dyslexia. Licensed under the SIL Open Font License, Version 1.1.</li>
+                </ul>
+              </section>
+
+              {/* 4. Software Icons */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                  <span>4. UI Icons &amp; Glyphs (Lucide)</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">ISC License</span>
+                </h3>
+                <p>
+                  Interface icons are provided by <strong>Lucide Icons</strong>, licensed under the permissive ISC License. Copyright &copy; 2022-2026 Lucide Contributors. Permitted for commercial and non-commercial application packaging.
+                </p>
+              </section>
+
+              {/* 5. Speech Synthesis & Audio Engine */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+                  5. Speech Synthesis &amp; Tactile Chimes
+                </h3>
+                <ul className="list-disc pl-5 space-y-1 text-xs">
+                  <li><strong>Operating System SpeechSynthesis (Web Speech API):</strong> Uses native Apple iOS AVSpeechSynthesizer and Android TTS voices licensed by their respective platform vendors for commercial third-party application usage.</li>
+                  <li><strong>Synthesized Tactile Chimes:</strong> Procedurally generated in real time using the W3C Web Audio API (sine/triangle oscillator decay waveforms) without external copyrighted audio samples.</li>
+                  <li><strong>Sensory Soundscapes:</strong> Public domain (CC0) and royalty-free ambient tracks licensed for commercial distribution.</li>
+                </ul>
+              </section>
+
+              {/* 6. Assistive Design Standards & Fitzgerald Key */}
+              <section className="space-y-2">
+                <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+                  6. Assistive Clinical Methodology (Fitzgerald Key)
+                </h3>
+                <p className="text-xs">
+                  The color-coded grammatical organization (Yellow for pronouns/people, Green for verbs, Orange for nouns, Blue for descriptors/feelings, Pink for social expressions) follows the historical Fitzgerald Key clinical methodology developed by Edith Fitzgerald, a widely recognized public domain standard in assistive and augmentative speech therapy.
                 </p>
               </section>
             </div>
