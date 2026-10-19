@@ -3,6 +3,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import {
+  defaultRateLimitStore,
+  getClientIp,
+  createCompositeRateLimiter,
+  createSingleRateLimiter,
+} from './src/services/sharedRateLimitStore';
 
 dotenv.config();
 
@@ -10,6 +16,13 @@ const app = express();
 const childPort = Number(process.env.PORT) || 3000;
 const caregiverPort = Number(process.env.CAREGIVER_PORT) || 3001;
 const isProd = process.env.NODE_ENV === 'production';
+
+// Configure trusted reverse proxies properly (Vercel, Cloudflare, AWS ALB, Nginx, Fly.io, etc.)
+// Prevents spoofing of client IP address via untrusted X-Forwarded-For headers
+const trustProxyConfig = process.env.TRUST_PROXY
+  ? (!isNaN(Number(process.env.TRUST_PROXY)) ? Number(process.env.TRUST_PROXY) : process.env.TRUST_PROXY)
+  : (isProd ? 1 : 'loopback');
+app.set('trust proxy', trustProxyConfig);
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -51,104 +64,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// -------------------------------------------------------------
-// Sliding-Window Rate Limiting Middleware
-// Protects backend server from runaway loops, stimming, and abuse
-// -------------------------------------------------------------
-interface RateLimitRecord {
-  count: number;
-  resetAt: number;
-}
-
-function createRateLimiter(options: { windowMs: number; maxRequests: number; message?: string }) {
-  const hits = new Map<string, RateLimitRecord>();
-
-  // Periodically clean up expired entries every 2 minutes
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, record] of hits.entries()) {
-      if (now > record.resetAt) {
-        hits.delete(key);
-      }
-    }
-  }, 2 * 60 * 1000).unref?.();
-
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (req.method === 'OPTIONS' || req.path === '/api/health') return next();
-
-    const rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.socket.remoteAddress || '127.0.0.1';
-    const now = Date.now();
-    let record = hits.get(rawIp);
-
-    if (!record || now > record.resetAt) {
-      record = { count: 1, resetAt: now + options.windowMs };
-      hits.set(rawIp, record);
-    } else {
-      record.count++;
-    }
-
-    res.setHeader('X-RateLimit-Limit', options.maxRequests);
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, options.maxRequests - record.count));
-    res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetAt / 1000));
-
-    if (record.count > options.maxRequests) {
-      const retryAfterSec = Math.ceil((record.resetAt - now) / 1000);
-      res.setHeader('Retry-After', retryAfterSec);
-      return res.status(429).json({
-        error: 'Too Many Requests',
-        message: options.message || 'Rate limit exceeded. Please slow down requests.',
-        retryAfter: retryAfterSec,
-      });
-    }
-
-    next();
-  };
-}
-
-const apiLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 300,
-  message: 'API rate limit exceeded. Please slow down.',
-});
-
-const alertLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 30,
-  message: 'Alert limit reached. Please wait a moment before sending more alerts.',
-});
-
-const recoverEmailLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 15,
-  message: 'Too many recovery attempts. Please wait a minute and try again.',
-});
-
-const ttsLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 120,
-  message: 'Audio generation limit reached. Please wait a moment.',
-});
-
-const translateLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 60,
-  message: 'Translation rate limit reached. Please wait a moment.',
-});
-
-const authLimiter = createRateLimiter({
-  windowMs: 60 * 1000,
-  maxRequests: 60,
-  message: 'Too many authentication attempts. Please wait a moment.',
-});
-
-app.use('/api/translate', translateLimiter);
-app.use('/api/tts', ttsLimiter);
-app.use('/api/family/auth', authLimiter);
-app.use('/api/family/recover-email', recoverEmailLimiter);
-app.use('/api/family/alert', alertLimiter);
-app.use('/api/family', apiLimiter);
-app.use('/api/caregiver', apiLimiter);
-
 /**
  * Strict validation and sanitization for family sync codes.
  * Ensures code matches safe alphanumeric format (3-32 characters),
@@ -162,6 +77,165 @@ export function sanitizeFamilyCode(code: unknown): string | null {
   }
   return clean;
 }
+
+// -------------------------------------------------------------
+// Scalable Persistent Rate Limiting Middleware
+// Protects backend server from runaway loops, stimming, credential stuffing, and abuse
+// Backed by L1 in-memory cache + L2 persistent disk store in .data/rate_limits.json
+// Supports trusted reverse proxies and strict per-account / per-target limits
+// -------------------------------------------------------------
+export { defaultRateLimitStore, getClientIp };
+
+export const apiLimiter = createSingleRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 300,
+  message: 'API rate limit exceeded. Please slow down requests.',
+  scope: 'ip',
+});
+
+export const ttsLimiter = createSingleRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 120,
+  message: 'Audio generation limit reached. Please wait a moment.',
+  scope: 'ip',
+});
+
+export const translateLimiter = createSingleRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 60,
+  message: 'Translation rate limit reached. Please wait a moment.',
+  scope: 'ip',
+});
+
+export function extractTargetCode(req: express.Request): string | null {
+  // 1. Direct body or query parameter
+  const candidate = req.body?.pairingCode || req.body?.familyCode || req.body?.code || req.query?.code || req.params?.code;
+  if (candidate) {
+    return sanitizeFamilyCode(candidate);
+  }
+  // 2. Trailing URL path parameter (e.g. /status/BEE-XYZ, /alert/BEE-XYZ, /state/BEE-XYZ)
+  const pathname = (req.originalUrl || req.url || '').split('?')[0];
+  const segments = pathname.split('/').filter(Boolean);
+  for (let i = segments.length - 1; i >= 0; i--) {
+    const seg = segments[i];
+    if (/^[A-Z0-9-]{3,32}$/i.test(seg) && !['api', 'caregiver', 'family', 'pairing', 'status', 'claim', 'create', 'approve', 'reject', 'alert', 'ack', 'resolve', 'events', 'poll', 'login', 'register'].includes(seg.toLowerCase())) {
+      return sanitizeFamilyCode(seg);
+    }
+  }
+  return null;
+}
+
+export const authLimiter = createCompositeRateLimiter([
+  {
+    scope: 'ip',
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 60,
+    message: 'Too many authentication attempts from this IP address. Please wait 15 minutes.',
+    keyGenerator: (req) => `auth:ip:${getClientIp(req)}`,
+  },
+  {
+    scope: 'account',
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 10,
+    message: 'Too many authentication attempts for this account. Please wait 15 minutes before trying again.',
+    keyGenerator: (req) => {
+      const email = String(req.body?.email || req.query?.email || '').trim().toLowerCase();
+      if (email && email.includes('@')) {
+        return `auth:account:${email}`;
+      }
+      const code = extractTargetCode(req);
+      if (code && code !== 'BEE-DEMO') {
+        return `auth:account:${code}`;
+      }
+      return null;
+    },
+  },
+]);
+
+export const pairingLimiter = createCompositeRateLimiter([
+  {
+    scope: 'ip',
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 30,
+    message: 'Too many pairing requests from this IP address. Please wait a while.',
+    keyGenerator: (req) => `pairing:ip:${getClientIp(req)}`,
+  },
+  {
+    scope: 'pairing',
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 5,
+    message: 'Too many pairing attempts for this code. Please verify the code or generate a fresh one.',
+    keyGenerator: (req) => {
+      const code = extractTargetCode(req);
+      if (code && code !== 'BEE-DEMO') {
+        return `pairing:code:${code}`;
+      }
+      return null;
+    },
+  },
+]);
+
+export const recoverEmailLimiter = createCompositeRateLimiter([
+  {
+    scope: 'ip',
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 15,
+    message: 'Too many recovery attempts from this IP. Please wait 15 minutes.',
+    keyGenerator: (req) => `recovery:ip:${getClientIp(req)}`,
+  },
+  {
+    scope: 'account',
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 3,
+    message: 'Too many recovery attempts for this email address. Please check your inbox or wait 15 minutes.',
+    keyGenerator: (req) => {
+      const email = String(req.body?.lookupEmail || req.body?.email || '').trim().toLowerCase();
+      if (email && email.includes('@')) {
+        return `recovery:account:${email}`;
+      }
+      return null;
+    },
+  },
+]);
+
+export const alertLimiter = createCompositeRateLimiter([
+  {
+    scope: 'ip',
+    windowMs: 60 * 1000,
+    maxRequests: 30,
+    message: 'Alert limit reached for this IP. Please wait a moment before sending more alerts.',
+    keyGenerator: (req) => `alert:ip:${getClientIp(req)}`,
+  },
+  {
+    scope: 'family',
+    windowMs: 60 * 1000,
+    maxRequests: 5,
+    message: 'Too many alerts sent for this family. Please wait a moment before sending another alert.',
+    keyGenerator: (req) => {
+      const code = extractTargetCode(req);
+      if (code && code !== 'BEE-DEMO') {
+        return `alert:family:${code}`;
+      }
+      return null;
+    },
+  },
+]);
+
+app.use('/api/translate', translateLimiter);
+app.use('/api/tts', ttsLimiter);
+
+// High-priority per-account and per-target limiters mounted before catch-alls
+app.use('/api/family/auth', authLimiter);
+app.use('/api/caregiver/family/login', authLimiter);
+app.use('/api/caregiver/family/register', authLimiter);
+app.use('/api/caregiver/pairing', pairingLimiter);
+app.use('/api/family/recover-email', recoverEmailLimiter);
+app.use('/api/family/alert', alertLimiter);
+app.use('/api/caregiver/alert', alertLimiter);
+
+// Fallthrough generic API limiters
+app.use('/api/family', apiLimiter);
+app.use('/api/caregiver', apiLimiter);
 
 // Global Express route param handler for :code across all family and caregiver endpoints
 app.param('code', (req, res, next, rawCode) => {
@@ -354,16 +428,60 @@ interface CaregiverSessionData {
   lastCaregiverActiveTime?: string;
 }
 
-const caregiverSessions = new Map<string, CaregiverSessionData>();
-const pairingSessions = new Map<string, TemporaryPairingSessionData>();
+export interface ServerFamilyAccount {
+  id: string;
+  email: string;
+  familyCode: string;
+  caregiverName: string;
+  caregiverRole: string;
+  childProfile: {
+    name: string;
+    ageGroup: string;
+    pin: string;
+    interests: string[];
+    pronouns: string;
+  };
+  subscriptionTier: 'free' | 'premium';
+  createdAt: string;
+  lastSyncedAt: string;
+}
+
+export const caregiverSessions = new Map<string, CaregiverSessionData>();
+export const pairingSessions = new Map<string, TemporaryPairingSessionData>();
+export const familyAccounts = new Map<string, ServerFamilyAccount>();
+
+export function seedDemoFamilyAccount(): void {
+  familyAccounts.set('demo@beeyou.app', {
+    id: 'fam-demo-2026',
+    email: 'demo@beeyou.app',
+    familyCode: 'BEE-DEMO',
+    caregiverName: 'Sarah (Mom)',
+    caregiverRole: 'Mom',
+    childProfile: {
+      name: 'Child',
+      ageGroup: 'kid',
+      pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00',
+      interests: ['Visual schedules'],
+      pronouns: 'they/them',
+    },
+    subscriptionTier: 'premium',
+    createdAt: '2026-10-01T00:00:00.000Z',
+    lastSyncedAt: new Date().toISOString(),
+  });
+}
 
 // Periodic cleanup for stale pairing sessions (> 24 hours old) to prevent memory leaks
 setInterval(() => {
   const now = Date.now();
+  let changed = false;
   for (const [code, session] of pairingSessions.entries()) {
     if (now - session.createdAt > 24 * 60 * 60 * 1000) {
       pairingSessions.delete(code);
+      changed = true;
     }
+  }
+  if (changed) {
+    savePairingSessions().catch(() => {});
   }
 }, 60 * 60 * 1000).unref?.();
 
@@ -490,7 +608,65 @@ const DEFAULT_DEMO_PLANS_CHANGED = {
 const DATA_DIR = path.join(process.cwd(), '.data');
 const STATE_FILE = path.join(DATA_DIR, 'shared_families.json');
 const FAMILIES_DIR = path.join(DATA_DIR, 'families');
+const FAMILY_ACCOUNTS_FILE = path.join(DATA_DIR, 'family_accounts.json');
+const PAIRING_SESSIONS_FILE = path.join(DATA_DIR, 'pairing_sessions.json');
+const CAREGIVER_SESSIONS_FILE = path.join(DATA_DIR, 'caregiver_sessions.json');
 const FIREBASE_DB_URL = process.env.VITE_FIREBASE_DATABASE_URL || 'https://beeyou-23d7d-default-rtdb.firebaseio.com';
+
+export async function saveFamilyAccounts(): Promise<void> {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      await fs.promises.mkdir(DATA_DIR, { recursive: true });
+    }
+    const data: Record<string, ServerFamilyAccount> = {};
+    for (const [email, account] of familyAccounts.entries()) {
+      if (email === 'demo@beeyou.app' || account.familyCode === 'BEE-DEMO') continue;
+      data[email] = account;
+    }
+    const tempPath = `${FAMILY_ACCOUNTS_FILE}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+    await fs.promises.writeFile(tempPath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.promises.rename(tempPath, FAMILY_ACCOUNTS_FILE);
+  } catch (err) {
+    console.error('[Session Store] saveFamilyAccounts error:', err);
+  }
+}
+
+export async function savePairingSessions(): Promise<void> {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      await fs.promises.mkdir(DATA_DIR, { recursive: true });
+    }
+    const data: Record<string, TemporaryPairingSessionData> = {};
+    const now = Date.now();
+    for (const [code, session] of pairingSessions.entries()) {
+      if (code === 'BEE-DEMO' || session.expiresAt < now) continue;
+      data[code] = session;
+    }
+    const tempPath = `${PAIRING_SESSIONS_FILE}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+    await fs.promises.writeFile(tempPath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.promises.rename(tempPath, PAIRING_SESSIONS_FILE);
+  } catch (err) {
+    console.error('[Session Store] savePairingSessions error:', err);
+  }
+}
+
+export async function saveCaregiverSessions(): Promise<void> {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      await fs.promises.mkdir(DATA_DIR, { recursive: true });
+    }
+    const data: Record<string, CaregiverSessionData> = {};
+    for (const [code, session] of caregiverSessions.entries()) {
+      if (code === 'BEE-DEMO') continue;
+      data[code] = session;
+    }
+    const tempPath = `${CAREGIVER_SESSIONS_FILE}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+    await fs.promises.writeFile(tempPath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.promises.rename(tempPath, CAREGIVER_SESSIONS_FILE);
+  } catch (err) {
+    console.error('[Session Store] saveCaregiverSessions error:', err);
+  }
+}
 
 // -------------------------------------------------------------
 // High-Performance In-Memory Family State Engine
@@ -555,6 +731,60 @@ function initFamilyStore(): void {
         } catch {}
       }
     }
+
+    // 3. Load persistent family accounts
+    if (fs.existsSync(FAMILY_ACCOUNTS_FILE)) {
+      try {
+        const raw = fs.readFileSync(FAMILY_ACCOUNTS_FILE, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          for (const [email, acc] of Object.entries(data)) {
+            if (email === 'demo@beeyou.app') continue;
+            familyAccounts.set(email, acc as ServerFamilyAccount);
+          }
+        }
+      } catch (e) {
+        console.warn('[Session Store] Family accounts parse error:', e);
+      }
+    }
+
+    // 4. Load persistent pairing sessions
+    if (fs.existsSync(PAIRING_SESSIONS_FILE)) {
+      try {
+        const raw = fs.readFileSync(PAIRING_SESSIONS_FILE, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          const now = Date.now();
+          for (const [code, sess] of Object.entries(data)) {
+            const s = sess as TemporaryPairingSessionData;
+            if (s && s.expiresAt > now && code !== 'BEE-DEMO') {
+              pairingSessions.set(code, s);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Session Store] Pairing sessions parse error:', e);
+      }
+    }
+
+    // 5. Load persistent caregiver sessions
+    if (fs.existsSync(CAREGIVER_SESSIONS_FILE)) {
+      try {
+        const raw = fs.readFileSync(CAREGIVER_SESSIONS_FILE, 'utf-8');
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object') {
+          for (const [code, sess] of Object.entries(data)) {
+            if (code === 'BEE-DEMO') continue;
+            caregiverSessions.set(code, sess as CaregiverSessionData);
+          }
+        }
+      } catch (e) {
+        console.warn('[Session Store] Caregiver sessions parse error:', e);
+      }
+    }
+
+    // Always seed demo family account in sandbox memory
+    seedDemoFamilyAccount();
   } catch (err) {
     console.warn('[State Store] Initial store boot warning:', err);
   }
@@ -633,6 +863,7 @@ export function setCaregiverSession(code: string, session: CaregiverSessionData)
     return;
   }
   caregiverSessions.set(cleanCode, session);
+  saveCaregiverSessions().catch(() => {});
 }
 
 // Asynchronous background mirror to Firebase Realtime Database
@@ -811,45 +1042,6 @@ export function getOrCreateFamilyState(code: string, email?: string): SharedFami
   }
   return state;
 }
-
-export interface ServerFamilyAccount {
-  id: string;
-  email: string;
-  familyCode: string;
-  caregiverName: string;
-  caregiverRole: string;
-  childProfile: {
-    name: string;
-    ageGroup: string;
-    pin: string;
-    interests: string[];
-    pronouns: string;
-  };
-  subscriptionTier: 'free' | 'premium';
-  createdAt: string;
-  lastSyncedAt: string;
-}
-
-const familyAccounts = new Map<string, ServerFamilyAccount>();
-
-// Pre-seed Demo Account (strictly mapped to BEE-DEMO)
-familyAccounts.set('demo@beeyou.app', {
-  id: 'fam-demo-2026',
-  email: 'demo@beeyou.app',
-  familyCode: 'BEE-DEMO',
-  caregiverName: 'Sarah (Mom)',
-  caregiverRole: 'Mom',
-  childProfile: {
-    name: 'Child',
-    ageGroup: 'kid',
-    pin: 'sha256:2ff234ff7ffc2e0d5fd76242632098701dede4e4d6b695a58e48cd8ce10d0c00',
-    interests: ['Visual schedules'],
-    pronouns: 'they/them',
-  },
-  subscriptionTier: 'premium',
-  createdAt: '2026-10-01T00:00:00.000Z',
-  lastSyncedAt: new Date().toISOString(),
-});
 
 function getDeterministicFamilyCode(email: string): string {
   const clean = email.trim().toLowerCase();
@@ -1291,6 +1483,7 @@ app.post('/api/caregiver/pairing/create', (req, res) => {
   };
 
   pairingSessions.set(pairingCode, session);
+  savePairingSessions().catch(() => {});
   return res.json({ success: true, session });
 });
 
@@ -1351,6 +1544,7 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
   // Status transitions to awaiting_approval: requires intended account confirmation
   session.status = 'awaiting_approval';
+  savePairingSessions().catch(() => {});
 
   // Broadcast PAIRING_APPROVAL_REQUESTED to the host device
   broadcastEvent(code, {
@@ -1388,6 +1582,7 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
   }
 
   session.status = 'paired';
+  savePairingSessions().catch(() => {});
 
   // Initialize the permanent live caregiver session for this linked pairing
   const permanentSession: CaregiverSessionData = {
@@ -1451,6 +1646,7 @@ app.post('/api/caregiver/pairing/reject', (req, res) => {
   const session = pairingSessions.get(code);
   if (session) {
     session.status = 'rejected';
+    savePairingSessions().catch(() => {});
   }
 
   broadcastEvent(code, {
@@ -1482,6 +1678,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
   const pairing = pairingSessions.get(code);
   if (pairing) {
     pairing.status = 'revoked';
+    savePairingSessions().catch(() => {});
   }
 
   // Broadcast DEVICE_UNLINKED event
@@ -2073,6 +2270,7 @@ app.post('/api/caregiver/family/register', (req, res) => {
   };
 
   familyAccounts.set(cleanEmail, account);
+  saveFamilyAccounts().catch(() => {});
 
   // Initialize caregiver session for this familyCode
   if (!caregiverSessions.has(familyCode)) {
@@ -2090,6 +2288,7 @@ app.post('/api/caregiver/family/register', (req, res) => {
       messages: [],
       unlinked: false,
     });
+    saveCaregiverSessions().catch(() => {});
   }
 
   const token = signFamilyToken(familyCode, 'caregiver', cleanEmail);
@@ -2137,6 +2336,7 @@ app.post('/api/caregiver/family/login', (req, res) => {
       lastSyncedAt: new Date().toISOString(),
     };
     familyAccounts.set(cleanEmail, account);
+    saveFamilyAccounts().catch(() => {});
   }
 
   // Ensure caregiver session is initialized
@@ -2155,6 +2355,7 @@ app.post('/api/caregiver/family/login', (req, res) => {
       messages: [],
       unlinked: false,
     });
+    saveCaregiverSessions().catch(() => {});
   }
 
   const token = signFamilyToken(account.familyCode, 'caregiver', cleanEmail);
