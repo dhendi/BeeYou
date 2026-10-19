@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell, Check, Smartphone, Clock, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Star, Radio, Plus, X, MessageSquare, Send, Trash2, RotateCcw, SlidersHorizontal, Bell, Check, Smartphone, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 import { t } from '../../services/translator';
 import { getQuickRepliesForAlert } from '../../utils/alertResponses';
@@ -16,7 +16,11 @@ import { resolveEmergencyAlert } from '../../services/familySync';
 import { CaregiverAlert } from '../../types';
 import { ALERT_ICON_OPTIONS, getIconForAlert, getStickerForAlert } from '../CaregiverAlertModal';
 import { DEFAULT_HELP_ALERT_PRESETS } from '../../data/defaultData';
-import { pushNotificationService } from '../../services/pushNotificationService';
+import { 
+  pushNotificationService, 
+  getStoredLockScreenPrivacyMode, 
+  setStoredLockScreenPrivacyMode 
+} from '../../services/pushNotificationService';
 
 interface CaregiverAlertsTabProps {
   activeAlerts: CaregiverAlert[];
@@ -65,6 +69,7 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
 
   const childQuickAlerts = helpAlertPresets && helpAlertPresets.length > 0 ? helpAlertPresets : DEFAULT_HELP_ALERT_PRESETS;
   const [deviceNotificationStatus, setDeviceNotificationStatus] = useState<string>(() => pushNotificationService.getPermissionStatus());
+  const [isLockScreenPrivacy, setIsLockScreenPrivacy] = useState<boolean>(() => getStoredLockScreenPrivacyMode());
 
   const handleRequestDeviceNotifications = async () => {
     const granted = await pushNotificationService.requestPermission();
@@ -287,6 +292,65 @@ export const CaregiverAlertsTab: React.FC<CaregiverAlertsTabProps> = ({
               <span>{t('Enable Device Notifications')}</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Lock Screen Privacy Mode Card (Item 5: Protect Sensitive Previews) */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-black text-sm text-slate-900 dark:text-white">
+                  {t("Lock Screen Notification Privacy Mode")}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                  isLockScreenPrivacy 
+                    ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300'
+                    : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                }`}>
+                  {isLockScreenPrivacy ? t("Protected") : t("Off")}
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 leading-relaxed">
+                {t("Protects your child's dignity and health privacy by masking sensitive details (such as specific medication names and meltdown reasons) on lock screen previews.")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                const nextVal = !isLockScreenPrivacy;
+                setIsLockScreenPrivacy(nextVal);
+                setStoredLockScreenPrivacyMode(nextVal);
+                playChime('tap');
+                showNotification(nextVal ? t("Lock screen privacy enabled: sensitive details will be masked.") : t("Lock screen privacy disabled."));
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer border ${
+                isLockScreenPrivacy 
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300 dark:bg-slate-700 dark:text-slate-200'
+              }`}
+            >
+              <span>{isLockScreenPrivacy ? t("Privacy Active") : t("Enable Privacy")}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Live Preview Display */}
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
+          <span className="font-bold text-slate-800 dark:text-slate-200">{t("Lock Screen Preview:")}</span>
+          <span className="italic">
+            {isLockScreenPrivacy 
+              ? '"BeeYou Family Alert: Assistance requested. Tap to respond securely."'
+              : `"${childProfile.name || 'Child'}: Sensory Overwhelmed - Needs Break"`
+            }
+          </span>
         </div>
       </div>
 

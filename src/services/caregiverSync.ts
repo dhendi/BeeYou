@@ -1165,6 +1165,16 @@ function handleIncomingSyncEnvelope(envelope: any): void {
       lastPeerPingTimestamp = 0;
       lastPeerRole = null;
       lastPeerName = '';
+      try {
+        localStorage.removeItem('beeyou_pairing_code');
+        localStorage.removeItem('beeyou_device_linked_code');
+        localStorage.removeItem('beeyou_temporary_pairing_session');
+        localStorage.removeItem(LOCAL_SESSION_KEY);
+        localStorage.removeItem(ACTIVE_ALERT_KEY);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('beeyou_device_unlinked', { detail: envelope }));
+        }
+      } catch {}
       notifyConnectionStatus();
     }
     pairingListeners.forEach((fn) => fn(envelope));
@@ -1603,20 +1613,44 @@ export async function rejectPairingSession(code: string): Promise<{ success: boo
  * Unlinks a paired device
  */
 export async function unlinkDeviceSession(code: string): Promise<boolean> {
-  const safeCode = code.trim().toUpperCase();
+  const safeCode = (code || getPairingCode()).trim().toUpperCase();
 
+  // 1. Notify server to revoke tokens and terminate active SSE streams
+  try {
+    const token = await getClientAuthToken(safeCode);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    await fetch('/api/caregiver/device/unlink', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ pairingCode: safeCode }),
+    });
+  } catch (err) {
+    console.warn('[Sync] Server unlink call notice:', err);
+  }
+
+  // 2. Broadcast cloud event
   await publishCloudEvent(safeCode, {
     type: 'DEVICE_UNLINKED',
     pairingCode: safeCode,
   });
 
+  // 3. Clear local pairing state
   try {
+    localStorage.removeItem('beeyou_pairing_code');
+    localStorage.removeItem('beeyou_device_linked_code');
     localStorage.removeItem('beeyou_temporary_pairing_session');
     localStorage.removeItem(LOCAL_SESSION_KEY);
     localStorage.removeItem(ACTIVE_ALERT_KEY);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('beeyou_device_unlinked', { detail: { pairingCode: safeCode } }));
+    }
   } catch {}
 
   lastPeerPingTimestamp = 0;
+  lastPeerRole = null;
+  lastPeerName = '';
   notifyConnectionStatus();
 
   return true;

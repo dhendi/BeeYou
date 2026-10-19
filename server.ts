@@ -1009,10 +1009,12 @@ export function signFamilyToken(
 }
 
 export const revokedFamilyCodes = new Set<string>();
+export const revokedFamilyTokens = new Set<string>();
 
 export function verifyFamilyToken(token: string): AuthenticatedUser | null {
   if (!token || typeof token !== 'string') return null;
   const trimmed = token.trim();
+  if (revokedFamilyTokens.has(trimmed)) return null;
 
   // 1. App Store & Google Play reviewer demo token
   if (trimmed === 'by_demo_reviewer_token_2026' || trimmed === 'DEMO-APPSTORE-REVIEWER-2026') {
@@ -1158,6 +1160,15 @@ export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
       return res.status(403).json({
         error: 'Forbidden',
         message: `Access denied. Role '${user.role}' is not authorized for this operation.`,
+      });
+    }
+
+    // Verify session has not been unlinked
+    const session = caregiverSessions.get(user.familyCode);
+    if (session && session.unlinked && !req.path.includes('/pairing/') && !req.path.includes('/auth/')) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'This device has been unlinked. Please re-pair your device to access family data.',
       });
     }
 
@@ -1590,6 +1601,12 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
+  // Revoke the caller's auth token
+  const callerToken = extractAuthToken(req);
+  if (callerToken) {
+    revokedFamilyTokens.add(callerToken);
+  }
+
   const session = getCaregiverSession(code);
   if (session) {
     session.unlinked = true;
@@ -1601,7 +1618,22 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
   const pairing = pairingSessions.get(code);
   if (pairing) {
     pairing.status = 'revoked';
+    if (pairing.token) {
+      revokedFamilyTokens.add(pairing.token);
+    }
     savePairingSessions().catch(() => {});
+  }
+
+  // Terminate any active SSE streams for this unlinked code immediately
+  const clients = sseClientsByCode.get(code);
+  if (clients) {
+    for (const clientRes of clients) {
+      try {
+        clientRes.write(`data: ${JSON.stringify({ type: 'DEVICE_UNLINKED', pairingCode: code, sentAt: Date.now() })}\n\n`);
+        clientRes.end();
+      } catch {}
+    }
+    sseClientsByCode.delete(code);
   }
 
   // Broadcast DEVICE_UNLINKED event
@@ -1612,7 +1644,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
     sentAt: Date.now(),
   });
 
-  return res.json({ success: true, message: 'Device unlinked successfully.' });
+  return res.json({ success: true, message: 'Device unlinked successfully and access revoked.' });
 });
 
 // -------------------------------------------------------------

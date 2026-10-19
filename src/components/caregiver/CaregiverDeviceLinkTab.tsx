@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
-import { getPairingCode } from '../../services/caregiverSync';
+import { getPairingCode, unlinkDeviceSession } from '../../services/caregiverSync';
 import { logoutFamilyAccount, wipeDeviceStorage, deleteFamilyAccount, updateCaregiverPin } from '../../services/authService';
 import { ShieldCheck, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
 import { QRCodeView } from '../QRCodeView';
@@ -181,6 +181,30 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
     } catch (e) {
       setIsWiping(false);
       console.error('Wipe error:', e);
+    }
+  };
+
+  const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const [isUnlinking, setIsUnlinking] = useState(false);
+
+  const handleExecuteUnlink = async () => {
+    try {
+      setIsUnlinking(true);
+      const code = getPairingCode();
+      await unlinkDeviceSession(code);
+      playChime('clear');
+      onShowNotification(t('Device unlinked and pairing session revoked successfully.'));
+      setConfirmUnlink(false);
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      }, 400);
+    } catch (e) {
+      console.error('Unlink error:', e);
+      onShowNotification(t('Failed to unlink device.'));
+    } finally {
+      setIsUnlinking(false);
     }
   };
 
@@ -441,7 +465,7 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
           <button
             type="button"
             onClick={handleSignOut}
@@ -458,7 +482,25 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
           <button
             type="button"
             onClick={() => {
+              setConfirmUnlink(true);
+              setConfirmWipe(false);
+              setConfirmDelete(false);
+            }}
+            className="p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100/60 text-left transition cursor-pointer"
+          >
+            <span className="text-xs font-black text-indigo-900 block">
+              {t("Unlink Paired Device")}
+            </span>
+            <span className="text-[11px] text-indigo-700 font-medium block mt-0.5">
+              {t("Revokes real-time tokens and closes active sync streams for this pairing code.")}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
               setConfirmWipe(true);
+              setConfirmUnlink(false);
               setConfirmDelete(false);
             }}
             className="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50/60 hover:bg-amber-100/60 text-left transition cursor-pointer"
@@ -475,11 +517,12 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             type="button"
             onClick={() => {
               setConfirmDelete(true);
+              setConfirmUnlink(false);
               setConfirmWipe(false);
               setDeletePassword('');
               setDeleteError(null);
             }}
-            className="p-4 rounded-2xl border-2 border-rose-300 bg-rose-50/70 hover:bg-rose-100/70 text-left transition cursor-pointer sm:col-span-2 lg:col-span-1"
+            className="p-4 rounded-2xl border-2 border-rose-300 bg-rose-50/70 hover:bg-rose-100/70 text-left transition cursor-pointer"
           >
             <span className="text-xs font-black text-rose-800 block">
               {t("Delete Family Account")}
@@ -489,6 +532,37 @@ export const CaregiverDeviceLinkTab: React.FC<CaregiverDeviceLinkTabProps> = ({
             </span>
           </button>
         </div>
+
+        {confirmUnlink && (
+          <div className="p-4 rounded-2xl bg-indigo-50 border-2 border-indigo-300 text-indigo-950 space-y-3 animate-in fade-in">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider block text-indigo-900">
+                {t("Confirm Device Unlinking & Token Revocation")}
+              </span>
+              <p className="text-xs text-indigo-800 font-medium mt-1 leading-relaxed">
+                {t("Are you sure? This will revoke active caregiver authentication tokens, close open live-monitoring streams, and sever real-time connection between this device and paired family devices.")}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExecuteUnlink}
+                disabled={isUnlinking}
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition cursor-pointer"
+              >
+                <span>{isUnlinking ? t("Unlinking & Revoking...") : t("Yes, Unlink & Revoke Access")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmUnlink(false)}
+                disabled={isUnlinking}
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 transition cursor-pointer"
+              >
+                <span>{t("Cancel")}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {confirmWipe && (
           <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 space-y-3 animate-in fade-in">

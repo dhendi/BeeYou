@@ -83,6 +83,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   const [regChildAgeGroup, setRegChildAgeGroup] = useState<'kid' | 'teen' | 'adult'>('kid');
   const [regLanguage, setRegLanguage] = useState<AppLanguage>(() => settings?.language || 'en');
   const [regPin, setRegPin] = useState('1234');
+  const [regParentalConsent, setRegParentalConsent] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
 
@@ -245,6 +246,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     try {
       if (!regPassword || regPassword.length < 8) {
         setRegError('Please choose a password with at least 8 characters to secure your family space.');
+        return;
+      }
+
+      if (!regParentalConsent) {
+        setRegError('Verified Parental Consent (COPPA / GDPR-K) is required to register and manage a child profile.');
         return;
       }
 
@@ -958,6 +964,27 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
                     placeholder="1234"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-bold text-xs tracking-widest font-mono"
                   />
+                </div>
+
+                {/* Verified Parental Consent & COPPA Compliance Checkbox */}
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 space-y-2">
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={regParentalConsent}
+                      onChange={(e) => setRegParentalConsent(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400 cursor-pointer"
+                      required
+                    />
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-black text-slate-800 dark:text-slate-100 block">
+                        Verified Parental Consent &amp; Safety Compliance (COPPA / GDPR-K) *
+                      </span>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                        I declare that I am the parent, legal guardian, or authorized caregiver (18+), and I grant verified consent for this child profile and encrypted family sync in compliance with Apple Kids Category and Google Play Families guidelines.
+                      </p>
+                    </div>
+                  </label>
                 </div>
 
                 {regError && (

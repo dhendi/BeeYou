@@ -27,6 +27,88 @@ export interface DeviceReliabilityReport {
   disclaimer: string;
 }
 
+export type CaregiverPushNotificationPayload = PushNotificationPayload;
+
+export const LOCK_SCREEN_PRIVACY_STORAGE_KEY = 'beeyou_lock_screen_privacy_mode';
+
+export function getStoredLockScreenPrivacyMode(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const saved = localStorage.getItem(LOCK_SCREEN_PRIVACY_STORAGE_KEY);
+    if (saved !== null) return saved === 'true';
+  } catch {}
+  return true; // Defaults to TRUE to safeguard child privacy on lock screens
+}
+
+export function setStoredLockScreenPrivacyMode(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(LOCK_SCREEN_PRIVACY_STORAGE_KEY, String(enabled));
+  } catch {}
+}
+
+/**
+ * Sanitizes a notification to mask sensitive personal child information
+ * (e.g. meltdown causes, private medical notes, specific prescription drug names)
+ * when displayed on lock screens or public notification banners.
+ */
+export function sanitizeNotificationForLockScreen(
+  payload: PushNotificationPayload,
+  protectPrivacy: boolean = getStoredLockScreenPrivacyMode()
+): PushNotificationPayload {
+  if (!protectPrivacy) {
+    return payload;
+  }
+
+  const rawTitle = payload.title || 'BeeYou';
+  const rawBody = payload.body || '';
+
+  let sanitizedTitle = 'BeeYou Alert';
+  let sanitizedBody = 'New message from your child. Tap to view securely in BeeYou.';
+
+  const lowerTitle = rawTitle.toLowerCase();
+  const lowerBody = rawBody.toLowerCase();
+
+  // Check alert category or context (Distress/Emergency takes highest priority)
+  if (
+    payload.priority === 'emergency' ||
+    lowerTitle.includes('sos') ||
+    lowerTitle.includes('urgent') ||
+    lowerTitle.includes('overwhelm') ||
+    lowerTitle.includes('meltdown') ||
+    lowerTitle.includes('support') ||
+    lowerBody.includes('overwhelm') ||
+    lowerBody.includes('meltdown') ||
+    lowerBody.includes('support')
+  ) {
+    sanitizedTitle = 'BeeYou Family Alert';
+    sanitizedBody = 'Your child needs your support or attention. Tap to respond securely in BeeYou.';
+  } else if (
+    lowerTitle.includes('medication') ||
+    lowerBody.includes('medication') ||
+    lowerBody.includes('dose') ||
+    lowerBody.includes('refill')
+  ) {
+    sanitizedTitle = 'BeeYou Health Reminder';
+    sanitizedBody = 'Scheduled routine reminder. Tap to view securely in app.';
+  } else if (lowerTitle.includes('test') || lowerBody.includes('test')) {
+    sanitizedTitle = 'BeeYou: Notification Test';
+    sanitizedBody = 'Sound & notification delivery confirmed.';
+  }
+
+  return {
+    ...payload,
+    title: sanitizedTitle,
+    body: sanitizedBody,
+    data: {
+      ...payload.data,
+      isLockScreenMasked: true,
+      originalTitle: rawTitle,
+      originalBody: rawBody,
+    },
+  };
+}
+
 class PushNotificationService {
   private isSupported: boolean = false;
   private hasPermission: boolean = false;
@@ -209,7 +291,8 @@ class PushNotificationService {
       return;
     }
 
-    const isEmergency = payload.priority === 'emergency' || payload.priority === 'high';
+    const safePayload = sanitizeNotificationForLockScreen(payload);
+    const isEmergency = safePayload.priority === 'emergency' || safePayload.priority === 'high';
     const vibrationPattern = isEmergency 
       ? [300, 100, 300, 100, 500, 150, 500] 
       : [150, 75, 150];
@@ -222,18 +305,18 @@ class PushNotificationService {
     }
 
     const notificationOptions: any = {
-      body: payload.body,
-      icon: payload.icon || '/pwa-192x192.png',
-      badge: payload.badge || '/pwa-192x192.png',
-      tag: payload.tag || 'beeyou-alert-' + Date.now(),
+      body: safePayload.body,
+      icon: safePayload.icon || '/pwa-192x192.png',
+      badge: safePayload.badge || '/pwa-192x192.png',
+      tag: safePayload.tag || 'beeyou-alert-' + Date.now(),
       vibrate: vibrationPattern as any,
       requireInteraction: isEmergency, // Stays on screen until caregiver interacts
       silent: false,
       data: {
         url: typeof window !== 'undefined' ? window.location.origin + '/?role=caregiver' : '/',
-        ...payload.data
+        ...safePayload.data
       },
-      actions: payload.actions || [
+      actions: safePayload.actions || [
         { action: 'im_here', title: "I'm Here" },
         { action: 'on_my_way', title: 'On My Way' }
       ]
@@ -244,7 +327,7 @@ class PushNotificationService {
       try {
         const registration = await navigator.serviceWorker.ready;
         if (registration && registration.showNotification) {
-          await registration.showNotification(payload.title, notificationOptions);
+          await registration.showNotification(safePayload.title, notificationOptions);
           return;
         }
       } catch (err) {
@@ -256,7 +339,7 @@ class PushNotificationService {
     try {
       const windowOptions: any = { ...notificationOptions };
       delete windowOptions.actions;
-      new Notification(payload.title, windowOptions);
+      new Notification(safePayload.title, windowOptions);
     } catch (err) {
       console.warn('Native notification fallback failed:', err);
     }
