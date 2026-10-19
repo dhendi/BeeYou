@@ -3229,6 +3229,13 @@ app.post('/api/subscription/webhook', (req, res) => {
   return res.json({ received: true, eventType });
 });
 
+app.get(['/privacy', '/privacy.html'], (_req, res) => {
+  const filePath = isProd && fs.existsSync(path.resolve(__dirname, 'dist', 'privacy.html'))
+    ? path.resolve(__dirname, 'dist', 'privacy.html')
+    : path.resolve(__dirname, 'public', 'privacy.html');
+  return res.sendFile(filePath);
+});
+
 async function startServer() {
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
