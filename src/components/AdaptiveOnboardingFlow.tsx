@@ -24,7 +24,6 @@ import {
   Crown,
   Headphones,
   Briefcase,
-  Clock,
   Bell
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -900,59 +899,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[2.5]" />
                   <span>{t('Cancel anytime in settings')}</span>
                 </span>
-              </div>
-
-              {/* 3-Step Free Trial Journey Timeline */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-[#E8E2D2] dark:border-slate-800 shadow-2xs">
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                  <h5 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider">
-                    {t('How Your 15-Day Free Trial Works')}
-                  </h5>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {/* Day 1 */}
-                  <div className="p-2 sm:p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 text-left">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[9px] font-black uppercase tracking-wider">
-                        {t('Day 1')}
-                      </span>
-                      <span className="text-[10px] font-black text-amber-800 dark:text-amber-300">$0.00</span>
-                    </div>
-                    <h6 className="font-bold text-xs text-slate-900 dark:text-white">{t('Instant Full Access')}</h6>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">
-                      {t('Explore all 20+ neural voices, unlimited visual routines, and all themes.')}
-                    </p>
-                  </div>
-
-                  {/* Day 13 */}
-                  <div className="p-2 sm:p-2.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/20 border border-sky-200/80 dark:border-sky-900/40 text-left">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="px-1.5 py-0.5 rounded-md bg-sky-500 text-white text-[9px] font-black uppercase tracking-wider">
-                        {t('Day 13')}
-                      </span>
-                      <span className="text-[10px] font-bold text-sky-800 dark:text-sky-300">{t('Reminder')}</span>
-                    </div>
-                    <h6 className="font-bold text-xs text-slate-900 dark:text-white">{t('Gentle Notice')}</h6>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">
-                      {t('In-app reminder sent 2 days before trial ends with zero surprise charges.')}
-                    </p>
-                  </div>
-
-                  {/* Day 15 */}
-                  <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 text-left">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider">
-                        {t('Day 15')}
-                      </span>
-                      <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300">{t('Flexible')}</span>
-                    </div>
-                    <h6 className="font-bold text-xs text-slate-900 dark:text-white">{t('Your Choice')}</h6>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-tight mt-0.5">
-                      {t('Continue with Plus, or keep the 100% Free Forever Basic tier with 1 tap.')}
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           )}
