@@ -20,7 +20,6 @@ import {
   BookOpen,
   HeartPulse,
   SlidersHorizontal,
-  LayoutGrid,
   Check,
   Clock,
   Palette,
@@ -291,20 +290,6 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
               <span>{t('Customize Dashboard')}</span>
             </button>
           </CaregiverLockShield>
-
-          {/* Quick Tools Tab Button */}
-          <button
-            type="button"
-            aria-label="Open Sensory Tools"
-            onClick={() => {
-              setChildView('tools');
-              playChime('tap');
-            }}
-            className={`p-2.5 min-w-[44px] min-h-[44px] rounded-xl ${themeStyles.headerButton} shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0 focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none`}
-            title="Open Sensory Tools"
-          >
-            <LayoutGrid className="w-4 h-4" aria-hidden="true" />
-          </button>
 
           {/* Morning Brief (if enabled) */}
           {enabledFeatures?.morningBrief !== false && (
