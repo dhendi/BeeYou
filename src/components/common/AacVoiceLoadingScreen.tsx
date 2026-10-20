@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Volume2, Loader2, CheckCircle2, ArrowRight, Mic } from 'lucide-react';
 import { prewarmCoreAudioVocabulary } from '../../utils/audio/speech';
 import { playChime } from '../../utils/audio/chimes';
 import { getVoicePersonaById } from '../../data/voicePersonasData';
@@ -87,8 +87,8 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-200/50 rounded-full blur-3xl pointer-events-none" />
 
         {/* Animated mascot / voice icon badge */}
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-amber-400 to-amber-300 border-3 border-amber-500 shadow-md flex items-center justify-center text-4xl mb-5 animate-pulse">
-          <span>{personaObj.emoji || '🗣️'}</span>
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-amber-400 to-amber-300 border-3 border-amber-500 shadow-md flex items-center justify-center mb-5 animate-pulse">
+          <Mic className="w-10 h-10 text-amber-950" />
           <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white shadow-xs">
             <Volume2 className="w-4 h-4" />
           </div>

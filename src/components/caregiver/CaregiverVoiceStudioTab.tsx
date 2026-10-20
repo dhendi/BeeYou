@@ -7,12 +7,16 @@ import {
   Check, 
   Play, 
   Eye, 
-  Sparkles, 
   Heart, 
   Star,
   SlidersHorizontal,
   Zap,
-  RotateCcw
+  RotateCcw,
+  Mic,
+  Smartphone,
+  Baby,
+  Headphones,
+  Briefcase
 } from 'lucide-react';
 import { playChime, prewarmCoreAudioVocabulary } from '../../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../../services/haptics';
@@ -103,7 +107,9 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🎙️</span>
+              <span className="w-8 h-8 rounded-xl bg-amber-200/80 border border-amber-300 text-amber-900 flex items-center justify-center shrink-0">
+                <Mic className="w-4 h-4 text-amber-800" />
+              </span>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 {t('Voice Studio & Sensory Preferences')}
               </h2>
@@ -139,10 +145,14 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           : 'bg-stone-50 border-stone-300 dark:bg-stone-900/40'
       }`}>
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-2xs border ${
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs border ${
             isAacActive ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-200 border-stone-300 text-stone-600'
           }`}>
-            {isAacActive ? '🗣️' : '🔇'}
+            {isAacActive ? (
+              <Volume2 className="w-6 h-6 text-emerald-800" />
+            ) : (
+              <VolumeX className="w-6 h-6 text-stone-600" />
+            )}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -229,8 +239,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           : 'bg-white border-emerald-300 hover:border-emerald-400'
       }`}>
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-13 h-13 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-xs">
-            📱
+          <div className="w-13 h-13 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Smartphone className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -238,8 +248,9 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 100% Free • Zero API Credits • Offline
               </span>
               {(settings.voicePersona || 'system') === 'system' && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
-                  ✓ Active Default Voice
+                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center gap-1">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                  <span>Active Default Voice</span>
                 </span>
               )}
             </div>
@@ -282,7 +293,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-500" />
+              <Mic className="w-5 h-5 text-amber-600" />
               <span>{t('All Voices & Neural Personas')}</span>
             </h3>
             <p className="text-xs text-stone-500 font-medium">
@@ -294,11 +305,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
               { key: 'all', label: `All (${VOICE_PERSONAS.length})` },
-              { key: 'free', label: '📱 Free (On-Device)' },
-              { key: 'kids', label: '🧸 Kids' },
-              { key: 'teens', label: '🎧 Teens' },
-              { key: 'caring', label: '💖 Caring' },
-              { key: 'pro', label: '💼 Professional' },
+              { key: 'free', label: 'Free (On-Device)' },
+              { key: 'kids', label: 'Kids' },
+              { key: 'teens', label: 'Teens' },
+              { key: 'caring', label: 'Caring' },
+              { key: 'pro', label: 'Professional' },
             ].map((cat) => {
               const isSelected = voiceCategoryFilter === cat.key;
               return (
@@ -328,6 +339,14 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             const isSelected = (settings.voicePersona || 'system') === persona.id;
             const isPlaying = playingVoiceId === persona.id;
 
+            const renderPersonaIcon = () => {
+              if (persona.category === 'system') return <Smartphone className="w-4 h-4 text-emerald-700" />;
+              if (persona.category === 'kids') return <Baby className="w-4 h-4 text-amber-700" />;
+              if (persona.category === 'teens') return <Headphones className="w-4 h-4 text-indigo-700" />;
+              if (persona.category.startsWith('caring')) return <Heart className="w-4 h-4 text-rose-700" />;
+              return <Briefcase className="w-4 h-4 text-sky-700" />;
+            };
+
             return (
               <div
                 key={persona.id}
@@ -340,22 +359,23 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-2xl shrink-0 p-1 rounded-xl bg-white border border-stone-200/80 shadow-2xs">
-                        {persona.emoji}
+                      <span className="w-9 h-9 shrink-0 rounded-xl bg-white border border-stone-200/80 shadow-2xs flex items-center justify-center">
+                        {renderPersonaIcon()}
                       </span>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="font-black text-sm text-slate-900 truncate">
                             {persona.name}
                           </h4>
                           {persona.category === 'system' && (
                             <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-[10px] font-black text-emerald-950 shrink-0">
-                              🆓 Free Voice
+                              Free Voice
                             </span>
                           )}
                           {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
-                            <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0">
-                              ⭐ Fav
+                            <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0 flex items-center gap-0.5">
+                              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                              <span>Fav</span>
                             </span>
                           )}
                         </div>
@@ -366,8 +386,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     </div>
 
                     {isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-2xs">
-                        ✓
+                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
                       </span>
                     )}
                   </div>

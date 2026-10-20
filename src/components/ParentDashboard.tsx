@@ -6,7 +6,7 @@ const PlansChangedModal = lazy(() => import('./PlansChangedModal').then(m => ({ 
 const AboutMeIDModal = lazy(() => import('./AboutMeIDModal').then(m => ({ default: m.AboutMeIDModal })));
 const DailyRecollectionModal = lazy(() => import('./DailyRecollectionModal').then(m => ({ default: m.DailyRecollectionModal })));
 const AccessibilityPreferencesModal = lazy(() => import('./AccessibilityPreferencesModal').then(m => ({ default: m.AccessibilityPreferencesModal })));
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Mic } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
 import { getQuickRepliesForAlert } from '../utils/alertResponses';
@@ -563,7 +563,7 @@ export const ParentDashboard: React.FC = () => {
             }`}
             title={t('Sensory, Accessibility & Voice Studio')}
           >
-            <span>🎙️</span>
+            <Mic className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t('Voice Studio & Sensory')}</span>
             <span className="sm:hidden">{t('Voices')}</span>
           </button>

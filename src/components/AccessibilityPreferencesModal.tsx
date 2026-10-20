@@ -10,12 +10,34 @@ import {
   Star,
   VolumeX,
   Zap,
+  Columns2,
+  Columns3,
+  LayoutGrid,
+  Grid3X3,
+  Palette,
+  Square,
+  Type,
+  Mic,
+  Calendar,
+  MessageSquare,
+  Award,
+  AlertCircle,
+  Wind,
+  Pill,
+  Heart,
+  Users,
+  CheckSquare,
+  Clock,
+  Baby,
+  Headphones,
+  Briefcase,
+  Smartphone,
 } from 'lucide-react';
 import { playChime, prewarmCoreAudioVocabulary } from '../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
-import { VOICE_PERSONAS, getVoicePersonaById } from '../data/voicePersonasData';
+import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../data/voicePersonasData';
 
 export const AccessibilityPreferencesModal: React.FC = () => {
   const {
@@ -42,67 +64,67 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     key: keyof EnabledFeatures;
     title: string;
     desc: string;
-    emoji: string;
+    icon: React.ComponentType<{ className?: string }>;
   }> = [
     {
       key: 'firstThenSchedules',
       title: 'First / Then Visual Schedules',
       desc: 'Step-by-step visual routines and task checklists',
-      emoji: '📅',
+      icon: Calendar,
     },
     {
       key: 'aacCommunication',
       title: 'AAC Picture & Word Communication',
       desc: 'Speech builder with customizable vocabulary tiles',
-      emoji: '💬',
+      icon: MessageSquare,
     },
     {
       key: 'starsAndRewards',
       title: 'Badges & Routine Stickers',
       desc: 'Achievement celebrations, stickers, and flair',
-      emoji: '🏆',
+      icon: Award,
     },
     {
       key: 'emergencyAlertSOS',
       title: 'Ask for help (caregiver alert)',
       desc: 'One-tap alert to a trusted person, plus the quiet sensory room',
-      emoji: '🚨',
+      icon: AlertCircle,
     },
     {
       key: 'sensoryBreathingPacer',
       title: 'Calming Toolkit & Breathing Pacer',
       desc: 'Guided deep breathing, soundscapes, and coping tools',
-      emoji: '🛋️',
+      icon: Wind,
     },
     {
       key: 'medicationReminders',
       title: 'Medication & Health Reminders',
       desc: 'Scheduled dose alerts and supply inventory tracking',
-      emoji: '💊',
+      icon: Pill,
     },
     {
       key: 'moodJournal',
       title: 'Mood Reflection Journal',
       desc: 'Nuanced emotion logging, energy tracking, and trigger notes',
-      emoji: '📖',
+      icon: Heart,
     },
     {
       key: 'socialStories',
       title: 'Social stories & scenarios',
       desc: 'Step-by-step walkthroughs for dentist, haircut, school, etc.',
-      emoji: '🚀',
+      icon: Users,
     },
     {
       key: 'lifeSkills',
       title: 'Life skills',
       desc: 'Break everyday skills into small steps',
-      emoji: '🧺',
+      icon: CheckSquare,
     },
     {
       key: 'visualCountdownTimer',
       title: 'Visual timers',
       desc: 'Pie clock and countdown timers',
-      emoji: '⏰',
+      icon: Clock,
     },
   ];
 
@@ -118,8 +140,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
         {/* Modal Top Header */}
         <div className="px-6 py-5 border-b border-[#E0D8CB] flex items-center justify-between shrink-0 bg-[#FCF9F2]">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-[#EFE9DF] text-[#4A2F0F] border border-[#E0D8CB] flex items-center justify-center text-xl shrink-0 shadow-2xs">
-              ♿
+            <span className="w-10 h-10 rounded-2xl bg-[#EFE9DF] text-[#4A2F0F] border border-[#E0D8CB] flex items-center justify-center shrink-0 shadow-2xs">
+              <SlidersHorizontal className="w-5 h-5 text-amber-800" />
             </span>
             <div>
               <h2 id="accessibility-modal-title" className="font-black text-[#2D241E] text-base sm:text-lg leading-tight">
@@ -225,7 +247,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         : 'border-[#E0D8CB] bg-[#FAF7F2] hover:bg-white text-[#6B5E52]'
                     }`}
                   >
-                    <span className="text-2xl shrink-0">🌈</span>
+                    <span className="w-9 h-9 rounded-xl bg-amber-100/80 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                      <Palette className="w-5 h-5" />
+                    </span>
                     <div>
                       <span className="font-black text-xs sm:text-sm block">Color-Coded</span>
                       <span className="text-[11px] text-[#7A6C60] font-semibold block leading-tight mt-0.5">
@@ -249,7 +273,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         : 'border-[#E0D8CB] bg-[#FAF7F2] hover:bg-white text-[#6B5E52]'
                     }`}
                   >
-                    <span className="text-2xl shrink-0">⚪</span>
+                    <span className="w-9 h-9 rounded-xl bg-stone-100 border border-stone-300 text-stone-600 flex items-center justify-center shrink-0">
+                      <Square className="w-5 h-5" />
+                    </span>
                     <div>
                       <span className="font-black text-xs sm:text-sm block">Neutral / Low-Stimulation</span>
                       <span className="text-[11px] text-[#7A6C60] font-semibold block leading-tight mt-0.5">
@@ -327,7 +353,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-1.5">
-                    <span className="text-base">🔤</span>
+                    <Type className="w-4 h-4 text-[#E28743]" />
                     <span>Text Size & Dynamic Scaling</span>
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
@@ -402,12 +428,13 @@ export const AccessibilityPreferencesModal: React.FC = () => {
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
-                    { cols: 2, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: '🔍' },
-                    { cols: 3, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: '📐' },
-                    { cols: 4, label: 'Standard', desc: 'Balanced grid (4 cols)', icon: '⚖️' },
-                    { cols: 6, label: 'Compact', desc: 'High density (6 cols)', icon: '📱' },
+                    { cols: 2, label: 'Jumbo', desc: 'Largest touch targets (2 cols)', icon: Columns2 },
+                    { cols: 3, label: 'Large', desc: 'Enlarged buttons (3 cols)', icon: Columns3 },
+                    { cols: 4, label: 'Standard', desc: 'Balanced grid (4 cols)', icon: LayoutGrid },
+                    { cols: 6, label: 'Compact', desc: 'High density (6 cols)', icon: Grid3X3 },
                   ].map((preset) => {
                     const isSelected = settings.gridColumns === preset.cols;
+                    const PresetIcon = preset.icon;
                     return (
                       <button
                         key={preset.cols}
@@ -431,10 +458,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xl">{preset.icon}</span>
+                          <span className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                            isSelected ? 'bg-amber-200/60 text-[#4A2F0F]' : 'bg-[#EFE9DF] text-[#7A6C60]'
+                          }`}>
+                            <PresetIcon className="w-4 h-4" />
+                          </span>
                           {isSelected && (
-                            <span className="w-4 h-4 rounded-full bg-[#E2A44E] text-white flex items-center justify-center text-[10px] font-black">
-                              ✓
+                            <span className="w-4 h-4 rounded-full bg-[#E2A44E] text-white flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 stroke-[3]" />
                             </span>
                           )}
                         </div>
@@ -594,7 +625,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">🎙️</span>
+                      <Mic className="w-5 h-5 text-amber-700" />
                       <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
                         Voice Studio ({VOICE_PERSONAS.length} Personas)
                       </h4>
@@ -607,7 +638,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   {/* Active Voice Pill */}
                   <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
                     <span>Active:</span>
-                    <span>{getVoicePersonaById(settings.voicePersona).emoji}</span>
                     <span className="truncate max-w-[130px]">{getVoicePersonaById(settings.voicePersona).name}</span>
                   </div>
                 </div>
@@ -616,11 +646,11 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {[
                     { key: 'all', label: 'All Voices (21)' },
-                    { key: 'free', label: '📱 Free (On-Device)' },
-                    { key: 'kids', label: '🧸 Kids & Children' },
-                    { key: 'teens', label: '🎧 Teens & Youth' },
-                    { key: 'caring', label: '💖 Caring & Warm' },
-                    { key: 'pro', label: '💼 Professional' },
+                    { key: 'free', label: 'Free (On-Device)' },
+                    { key: 'kids', label: 'Kids & Children' },
+                    { key: 'teens', label: 'Teens & Youth' },
+                    { key: 'caring', label: 'Caring & Warm' },
+                    { key: 'pro', label: 'Professional' },
                   ].map((filter) => {
                     const isActive = voiceCategoryFilter === filter.key;
                     return (
@@ -655,6 +685,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     return true;
                   }).map((persona) => {
                     const isSelected = (settings.voicePersona || 'system').toLowerCase() === persona.id.toLowerCase();
+                    const renderVoiceIcon = () => {
+                      if (persona.category === 'system') return <Smartphone className="w-4 h-4 text-emerald-700" />;
+                      if (persona.category === 'kids') return <Baby className="w-4 h-4 text-amber-700" />;
+                      if (persona.category === 'teens') return <Headphones className="w-4 h-4 text-indigo-700" />;
+                      if (persona.category.startsWith('caring')) return <Heart className="w-4 h-4 text-rose-700" />;
+                      return <Briefcase className="w-4 h-4 text-sky-700" />;
+                    };
+
                     return (
                       <div
                         key={persona.id}
@@ -669,8 +707,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-10 h-10 rounded-xl bg-[#EFE9DF] border border-[#E0D8CB] flex items-center justify-center text-xl shrink-0 shadow-2xs">
-                            {persona.emoji}
+                          <span className="w-10 h-10 rounded-xl bg-white border border-[#E0D8CB] flex items-center justify-center shrink-0 shadow-2xs">
+                            {renderVoiceIcon()}
                           </span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -679,15 +717,16 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               </h5>
                               {persona.category === 'system' && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-[9px] font-black">
-                                  🆓 100% Free
+                                  100% Free
                                 </span>
                               )}
                               <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
                                 {persona.categoryLabel}
                               </span>
                               {isSelected && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black">
-                                  ✓ Active
+                                <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black flex items-center gap-1">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                  <span>Active</span>
                                 </span>
                               )}
                             </div>
@@ -708,7 +747,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             title={`Audition ${persona.name}`}
                           >
                             <span>Audition</span>
-                            <span>🔊</span>
+                            <Volume2 className="w-3.5 h-3.5" />
                           </button>
                           <div
                             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
@@ -738,9 +777,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => speak('Hello! This is your BeeYou communication voice.')}
-                    className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5"
                   >
-                    Test Voice 🔊
+                    <span>Test Voice</span>
+                    <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <input
@@ -774,11 +814,27 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   .map((k) => featureList.find((f) => f.key === k))
                   .filter((f): f is NonNullable<typeof f> => !!f);
                 if (rows.length === 0) return null;
+
+                const getFeatureGroupIcon = (id: string) => {
+                  switch (id) {
+                    case 'communication': return MessageSquare;
+                    case 'routines': return Calendar;
+                    case 'sensory': return Wind;
+                    case 'feelings': return Heart;
+                    case 'skills': return Users;
+                    case 'caregiver': return AlertCircle;
+                    case 'health': return Pill;
+                    case 'rewards': return Award;
+                    default: return Sliders;
+                  }
+                };
+                const GroupIcon = getFeatureGroupIcon(group.id);
+
                 return (
                   <section key={group.id} aria-labelledby={`fg-${group.id}`} className="space-y-2.5">
                     <div>
-                      <h4 id={`fg-${group.id}`} className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-1.5">
-                        <span aria-hidden="true">{group.emoji}</span>
+                      <h4 id={`fg-${group.id}`} className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-2">
+                        <GroupIcon className="w-4 h-4 text-amber-700" />
                         <span>{group.title}</span>
                       </h4>
                       <p className="text-[11px] text-[#7A6C60] font-semibold">{group.blurb}</p>
@@ -787,14 +843,15 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     <div className="space-y-2">
                       {rows.map((f) => {
                         const isEnabled = enabledFeatures?.[f.key] !== false;
+                        const FeatIcon = f.icon;
                         return (
                           <div
                             key={f.key}
                             className="p-3.5 sm:p-4 rounded-2xl bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex items-center justify-between gap-3"
                           >
                             <div className="flex items-center gap-3.5 min-w-0">
-                              <span className="text-2xl shrink-0 p-2 bg-[#F5EFE6] rounded-xl border border-[#E0D8CB]" aria-hidden="true">
-                                {f.emoji}
+                              <span className="w-10 h-10 rounded-xl bg-[#F5EFE6] border border-[#E0D8CB] flex items-center justify-center shrink-0">
+                                <FeatIcon className="w-5 h-5 text-amber-800" />
                               </span>
                               <div className="min-w-0">
                                 <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
@@ -848,7 +905,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             onClick={handleClose}
             className="px-6 py-2.5 rounded-2xl bg-[#2D241E] hover:bg-[#1E1814] text-white font-black text-xs sm:text-sm cursor-pointer active:scale-95 transition-all shadow-md"
           >
-            Done ✓
+            Done
           </button>
         </div>
       </div>
