@@ -252,6 +252,7 @@ export const TTS_CACHE_DIR = resolveCacheDirectory('tts_cache');
 export const TRANSLATE_CACHE_DIR = resolveCacheDirectory('translate_cache');
 
 const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
+const inFlightTtsGenerations = new Map<string, Promise<{ buffer: Buffer; contentType: string } | null>>();
 const translateTextCache = new Map<string, string>();
 
 /**
@@ -264,6 +265,7 @@ export function verifyLevel3DiskCache(): {
   totalSizeBytes: number;
   writable: boolean;
   cloudStorage: ReturnType<typeof getCloudStorageStatus>;
+  singleFlightActiveRequests: number;
 } {
   let writable = false;
   let cachedFilesCount = 0;
@@ -297,6 +299,7 @@ export function verifyLevel3DiskCache(): {
     totalSizeBytes,
     writable,
     cloudStorage: getCloudStorageStatus(),
+    singleFlightActiveRequests: inFlightTtsGenerations.size,
   };
 }
 
@@ -507,6 +510,40 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
+  // 3b. Single-Flight Coalescing Early Check
+  // If another concurrent request is currently generating this exact voice/phrase, join and await its completion
+  // This avoids duplicate disk/cloud reads and ensures zero duplicate Gemini calls
+  if (inFlightTtsGenerations.has(cacheKey)) {
+    console.log(`[TTS Single-Flight JOIN] Concurrent request joined in-flight generation: "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 extra Gemini calls ($0.00)`);
+    try {
+      const joined = await inFlightTtsGenerations.get(cacheKey)!;
+      if (joined) {
+        usageBudgetTracker.recordTtsCacheHit();
+        if (req.headers['if-none-match'] === `"${hashKey}"`) {
+          res.status(304).end();
+          return;
+        }
+        res.setHeader('Content-Type', joined.contentType);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+        res.setHeader('ETag', `"${hashKey}"`);
+        res.send(joined.buffer);
+        return;
+      }
+    } catch (joinErr) {
+      console.warn('[TTS Single-Flight Early Join Error]:', joinErr);
+    }
+
+    if (voiceKey !== 'system') {
+      res.status(503).json({
+        error: 'NeuralVoiceUnavailable',
+        message: 'Gemini neural voice requires a valid API key. Falling back to calibrated on-device speech.',
+      });
+      return;
+    }
+    res.status(500).send('TTS internal error');
+    return;
+  }
+
   // 4. L3 Persistent Disk Cache Check
   const diskFile = fs.existsSync(diskPathWav)
     ? diskPathWav
@@ -554,6 +591,38 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     }
   } catch {}
 
+  // 4c. Single-Flight Coalescing Secondary Check (catches requests that arrived during disk/cloud checks)
+  if (inFlightTtsGenerations.has(cacheKey)) {
+    console.log(`[TTS Single-Flight JOIN] Concurrent request joined in-flight generation: "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 extra Gemini calls ($0.00)`);
+    try {
+      const joined = await inFlightTtsGenerations.get(cacheKey)!;
+      if (joined) {
+        usageBudgetTracker.recordTtsCacheHit();
+        if (req.headers['if-none-match'] === `"${hashKey}"`) {
+          res.status(304).end();
+          return;
+        }
+        res.setHeader('Content-Type', joined.contentType);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+        res.setHeader('ETag', `"${hashKey}"`);
+        res.send(joined.buffer);
+        return;
+      }
+    } catch (joinErr) {
+      console.warn('[TTS Single-Flight Secondary Join Error]:', joinErr);
+    }
+
+    if (voiceKey !== 'system') {
+      res.status(503).json({
+        error: 'NeuralVoiceUnavailable',
+        message: 'Gemini neural voice requires a valid API key. Falling back to calibrated on-device speech.',
+      });
+      return;
+    }
+    res.status(500).send('TTS internal error');
+    return;
+  }
+
   // 5. Per-User Quota Check (Only charged on cache miss that would trigger upstream call)
   const minuteQuota = await defaultRateLimitStore.hit(`tts:burst:${clientIp}`, TTS_BURST_LIMIT_PER_MIN, 60 * 1000, 'ip');
   if (!minuteQuota.allowed) {
@@ -584,114 +653,174 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 7. Upstream Audio Generation (Gemini 3.8 Flash-Lite -> Gemini 2.5 Flash Preview -> Gemini 3.8 Flash)
-  let geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    try {
-      const envPath = path.join(process.cwd(), '.env');
-      if (fs.existsSync(envPath)) {
-        const envContent = fs.readFileSync(envPath, 'utf8');
-        const match = envContent.match(/GEMINI_API_KEY=["']?([^"'\r\n]+)["']?/);
-        if (match) geminiApiKey = match[1].trim();
-      }
-    } catch {}
-  }
-
-  // Accept both classic AIzaSy keys and Google AI Studio AQ. keys
-  const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.trim().length > 15);
-
-  if (isValidGeminiKey && voiceKey !== 'system') {
-    const candidateModels = [
-      'gemini-3.8-flash-lite-tts',
-      'gemini-2.5-flash-preview-tts',
-      'gemini-3.8-flash-tts',
-    ];
-
-    for (const model of candidateModels) {
+  // 7. Single-Flight Registry: Register Leader Generation Promise
+  // Any concurrent requests arriving during this generation will join the leader promise and share the result
+  const generationPromise = (async (): Promise<{ buffer: Buffer; contentType: string } | null> => {
+    let geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
       try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-        const textPart: any = { text: cleanText };
-        // speech_metadata is exclusively supported on Gemini 3.8 models (Gemini 2.5 throws 400 Invalid Argument)
-        if (model.includes('3.8')) {
-          textPart.speech_metadata = {
-            style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
-          };
+        const envPath = path.join(process.cwd(), '.env');
+        if (fs.existsSync(envPath)) {
+          const envContent = fs.readFileSync(envPath, 'utf8');
+          const match = envContent.match(/GEMINI_API_KEY=["']?([^"'\r\n]+)["']?/);
+          if (match) geminiApiKey = match[1].trim();
         }
-        const payload = {
-          contents: [{
-            role: 'user',
-            parts: [textPart],
-          }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                voice: persona.geminiVoice || persona.name,
+      } catch {}
+    }
+
+    // Accept both classic AIzaSy keys and Google AI Studio AQ. keys
+    const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.trim().length > 15);
+
+    if (isValidGeminiKey && voiceKey !== 'system') {
+      const candidateModels = [
+        'gemini-3.8-flash-lite-tts',
+        'gemini-2.5-flash-preview-tts',
+        'gemini-3.8-flash-tts',
+      ];
+
+      for (const model of candidateModels) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+          const textPart: any = { text: cleanText };
+          // speech_metadata is exclusively supported on Gemini 3.8 models (Gemini 2.5 throws 400 Invalid Argument)
+          if (model.includes('3.8')) {
+            textPart.speech_metadata = {
+              style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
+            };
+          }
+          const payload = {
+            contents: [{
+              role: 'user',
+              parts: [textPart],
+            }],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig: {
+                voiceConfig: {
+                  voice: persona.geminiVoice || persona.name,
+                },
               },
             },
-          },
-        };
+          };
 
-        const geminiRes = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'x-goog-api-key': geminiApiKey!,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
-        });
+          const geminiRes = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'x-goog-api-key': geminiApiKey!,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
+          });
 
-        if (geminiRes.ok) {
-          usageBudgetTracker.recordTtsUpstream();
-          const geminiData: any = await geminiRes.json();
-          const inline = geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-          const audioBase64 =
-            inline?.data ||
-            geminiData?.output_audio?.data ||
-            geminiData?.outputAudio?.data;
+          if (geminiRes.ok) {
+            usageBudgetTracker.recordTtsUpstream();
+            const geminiData: any = await geminiRes.json();
+            const inline = geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+            const audioBase64 =
+              inline?.data ||
+              geminiData?.output_audio?.data ||
+              geminiData?.outputAudio?.data;
 
-          if (audioBase64) {
-            let buffer: any = Buffer.from(audioBase64, 'base64');
-            const mime = inline?.mimeType || '';
+            if (audioBase64) {
+              let buffer: any = Buffer.from(audioBase64, 'base64');
+              const mime = inline?.mimeType || '';
 
-            // If audio is raw PCM (e.g. Gemini 2.5 returns audio/L16;codec=pcm;rate=24000 without RIFF header), wrap in WAV container
-            if (mime.includes('pcm') || mime.includes('L16') || !buffer.subarray(0, 4).toString('ascii').startsWith('RIFF')) {
-              buffer = pcmToWav(buffer, 24000, 1, 16);
+              // If audio is raw PCM (e.g. Gemini 2.5 returns audio/L16;codec=pcm;rate=24000 without RIFF header), wrap in WAV container
+              if (mime.includes('pcm') || mime.includes('L16') || !buffer.subarray(0, 4).toString('ascii').startsWith('RIFF')) {
+                buffer = pcmToWav(buffer, 24000, 1, 16);
+              }
+              const contentType = 'audio/wav';
+
+              console.log(`[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) - 1 API call`);
+
+              if (ttsAudioCache.size > 1000) {
+                const firstKey = ttsAudioCache.keys().next().value;
+                if (firstKey) ttsAudioCache.delete(firstKey);
+              }
+              ttsAudioCache.set(cacheKey, { buffer, contentType });
+
+              // Asynchronously write to persistent disk cache & cloud storage
+              fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
+              saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType).catch(() => {});
+
+              return { buffer, contentType };
             }
-            const contentType = 'audio/wav';
-
-            console.log(`[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) - 1 API call`);
-
-            if (ttsAudioCache.size > 1000) {
-              const firstKey = ttsAudioCache.keys().next().value;
-              if (firstKey) ttsAudioCache.delete(firstKey);
-            }
-            ttsAudioCache.set(cacheKey, { buffer, contentType });
-
-            // Asynchronously write to persistent disk cache
-            fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
-            saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType).catch(() => {});
-
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-            res.setHeader('ETag', `"${hashKey}"`);
-            res.send(buffer);
-            return;
+          } else {
+            const errText = await geminiRes.text().catch(() => '');
+            console.warn(`[Gemini TTS (${model}) Error] Status ${geminiRes.status}: ${errText.slice(0, 150)}... Trying next model.`);
           }
-        } else {
-          const errText = await geminiRes.text().catch(() => '');
-          console.warn(`[Gemini TTS (${model}) Error] Status ${geminiRes.status}: ${errText.slice(0, 150)}... Trying next model.`);
+        } catch (err: any) {
+          console.warn(`[Gemini TTS (${model})] Upstream call failed:`, err?.message || err);
         }
-      } catch (err: any) {
-        console.warn(`[Gemini TTS (${model})] Upstream call failed:`, err?.message || err);
       }
     }
+
+    // If neural persona requested and Gemini unavailable, return null to prompt calibrated on-device speech fallback
+    if (voiceKey !== 'system') {
+      return null;
+    }
+
+    // Default system fallback for non-persona translation speech
+    try {
+      const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://translate.google.com/',
+        },
+        signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
+      });
+
+      usageBudgetTracker.recordTtsUpstream();
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const contentType = response.headers.get('content-type') || 'audio/mpeg';
+
+      if (ttsAudioCache.size > 1000) {
+        const firstKey = ttsAudioCache.keys().next().value;
+        if (firstKey) ttsAudioCache.delete(firstKey);
+      }
+      ttsAudioCache.set(cacheKey, { buffer, contentType });
+      fs.promises.writeFile(diskPathMp3, buffer).catch(() => {});
+
+      return { buffer, contentType };
+    } catch (err: any) {
+      if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+        console.warn('[TTS Proxy Timeout]:', err);
+      } else {
+        console.error('[TTS Proxy Error]:', err);
+      }
+      return null;
+    }
+  })();
+
+  inFlightTtsGenerations.set(cacheKey, generationPromise);
+
+  let result: { buffer: Buffer; contentType: string } | null = null;
+  try {
+    result = await generationPromise;
+  } finally {
+    inFlightTtsGenerations.delete(cacheKey);
   }
 
-  // If a neural persona was requested and Gemini was unavailable (invalid/missing key or network error),
-  // do NOT fall back to Google Translate's single static voice.
-  // Instead, return 503 so client-side speech synthesis uses its acoustic persona profile!
+  if (result) {
+    if (req.headers['if-none-match'] === `"${hashKey}"`) {
+      res.status(304).end();
+      return;
+    }
+    res.setHeader('Content-Type', result.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+    res.setHeader('ETag', `"${hashKey}"`);
+    res.send(result.buffer);
+    return;
+  }
+
   if (voiceKey !== 'system') {
     res.status(503).json({
       error: 'NeuralVoiceUnavailable',
@@ -700,46 +829,6 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // Default system fallback for non-persona translation speech
-  try {
-    const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
-    const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://translate.google.com/',
-      },
-      signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
-    });
-
-    usageBudgetTracker.recordTtsUpstream();
-
-    if (!response.ok) {
-      res.status(response.status).send('TTS upstream error');
-      return;
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const contentType = response.headers.get('content-type') || 'audio/mpeg';
-
-    if (ttsAudioCache.size > 1000) {
-      const firstKey = ttsAudioCache.keys().next().value;
-      if (firstKey) ttsAudioCache.delete(firstKey);
-    }
-    ttsAudioCache.set(cacheKey, { buffer, contentType });
-    fs.promises.writeFile(diskPathMp3, buffer).catch(() => {});
-
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-    res.setHeader('ETag', `"${hashKey}"`);
-    res.send(buffer);
-  } catch (err: any) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      res.status(504).send('TTS service timeout. Please try again.');
-      return;
-    }
-    console.error('[TTS Proxy Error]:', err);
-    res.status(500).send('TTS internal error');
-  }
+  res.status(500).send('TTS internal error');
 }
 

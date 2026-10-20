@@ -13,9 +13,11 @@ const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> =
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 const audioMemoryCache = new Map<string, string>();
 const TTS_CACHE_NAME = 'beeyou-tts-v3';
+const inFlightAudioFetches = new Map<string, Promise<string | null>>();
 
 /**
- * Multi-tier Audio Cache Loader (L1 In-Memory -> L2 Browser CacheStorage -> L3 Server Disk Stream)
+ * Multi-tier Audio Cache Loader (L1 In-Memory -> Client Single-Flight -> L2 Browser CacheStorage -> L3 Server Disk Stream)
+ * Deduplicates in-flight requests so simultaneous clicks or prefetch jobs share a single HTTP fetch.
  */
 async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Promise<string | null> {
   // 1. Level 1: In-Memory Cache (0ms latency, zero network)
@@ -23,55 +25,70 @@ async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Prom
     return audioMemoryCache.get(cacheKey)!;
   }
 
-  // 2. Level 2: Browser CacheStorage API (Persistent across app reloads & offline)
-  const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
-  if (typeof window !== 'undefined' && 'caches' in window) {
+  // 1b. Client Single-Flight In-Flight Deduplication:
+  // If an audio fetch for this cacheKey is already in flight, share the existing promise
+  if (inFlightAudioFetches.has(cacheKey)) {
+    return inFlightAudioFetches.get(cacheKey)!;
+  }
+
+  const fetchPromise = (async (): Promise<string | null> => {
+    // 2. Level 2: Browser CacheStorage API (Persistent across app reloads & offline)
+    const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      try {
+        const cache = await caches.open(TTS_CACHE_NAME);
+        const match = (await cache.match(fullUrl)) || (await cache.match(streamUrl));
+        if (match) {
+          const blob = await match.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          audioMemoryCache.set(cacheKey, blobUrl);
+          return blobUrl;
+        }
+      } catch (e) {
+        console.warn('[CacheStorage] Read exception:', e);
+      }
+    }
+
+    // 3. Level 3: Edge Server Stream (backed by Server-Side Disk Cache in .data/tts_cache)
     try {
-      const cache = await caches.open(TTS_CACHE_NAME);
-      const match = (await cache.match(fullUrl)) || (await cache.match(streamUrl));
-      if (match) {
-        const blob = await match.blob();
+      const response = await fetch(streamUrl);
+      if (response.ok) {
+        // Synchronously clone the response BEFORE consuming response.blob() to avoid "body used" error
+        const responseClone = response.clone();
+        if (typeof window !== 'undefined' && 'caches' in window) {
+          caches.open(TTS_CACHE_NAME)
+            .then((cache) => cache.put(fullUrl, responseClone))
+            .catch((err) => console.warn('[CacheStorage] Write warning:', err));
+        }
+        const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
+
+        // LRU Eviction guard for Level 1 memory cache (max 250 entries)
+        if (audioMemoryCache.size > 250) {
+          const oldestKey = audioMemoryCache.keys().next().value;
+          if (oldestKey) {
+            const oldUrl = audioMemoryCache.get(oldestKey);
+            if (oldUrl) URL.revokeObjectURL(oldUrl);
+            audioMemoryCache.delete(oldestKey);
+          }
+        }
+
         audioMemoryCache.set(cacheKey, blobUrl);
         return blobUrl;
       }
-    } catch (e) {
-      console.warn('[CacheStorage] Read exception:', e);
+    } catch (err) {
+      console.warn('[Audio Stream] Fetch error:', err);
     }
-  }
 
-  // 3. Level 3: Edge Server Stream (backed by Server-Side Disk Cache in .data/tts_cache)
+    return null;
+  })();
+
+  inFlightAudioFetches.set(cacheKey, fetchPromise);
   try {
-    const response = await fetch(streamUrl);
-    if (response.ok) {
-      // Synchronously clone the response BEFORE consuming response.blob() to avoid "body used" error
-      const responseClone = response.clone();
-      if (typeof window !== 'undefined' && 'caches' in window) {
-        caches.open(TTS_CACHE_NAME)
-          .then((cache) => cache.put(fullUrl, responseClone))
-          .catch((err) => console.warn('[CacheStorage] Write warning:', err));
-      }
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      // LRU Eviction guard for Level 1 memory cache (max 250 entries)
-      if (audioMemoryCache.size > 250) {
-        const oldestKey = audioMemoryCache.keys().next().value;
-        if (oldestKey) {
-          const oldUrl = audioMemoryCache.get(oldestKey);
-          if (oldUrl) URL.revokeObjectURL(oldUrl);
-          audioMemoryCache.delete(oldestKey);
-        }
-      }
-
-      audioMemoryCache.set(cacheKey, blobUrl);
-      return blobUrl;
-    }
-  } catch (err) {
-    console.warn('[Audio Stream] Fetch error:', err);
+    return await fetchPromise;
+  } finally {
+    inFlightAudioFetches.delete(cacheKey);
   }
-
-  return null;
 }
 
 let serverTTSCooldownUntil = 0;
