@@ -24,7 +24,7 @@ import {
   Clock,
   Palette,
   Shield,
-  Zap,
+  RotateCcw,
   HelpCircle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
@@ -882,7 +882,6 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
                 {/* Quick Speak Feedback Strip */}
                 <div className={themeStyles.feedbackStrip}>
                   <div className="flex items-center gap-2 min-w-0">
-                    <Zap className="w-4 h-4 shrink-0 opacity-80" />
                     {lastSpokenPhrase ? (
                       <span className="font-extrabold flex items-center gap-1.5 truncate">
                         <span className="opacity-70 font-semibold">{t('Spoke')}:</span> &ldquo;{lastSpokenPhrase}&rdquo;
@@ -901,7 +900,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
                       className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all cursor-pointer shrink-0 ml-2 ${themeStyles.headerButton}`}
                       title={t('Repeat phrase')}
                     >
-                      🔁 {t('Repeat')}
+                      <RotateCcw className="w-3 h-3 stroke-[2.5]" /> <span>{t('Repeat')}</span>
                     </button>
                   )}
                 </div>
