@@ -35,7 +35,6 @@ import {
   Droplet,
   Moon,
   Smile,
-  Sparkles,
   AlertTriangle,
   WifiOff
 } from 'lucide-react';

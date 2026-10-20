@@ -4,7 +4,6 @@ import {
   Crown, 
   Check, 
   ShieldCheck, 
-  Sparkles, 
   ArrowRight, 
   Lock, 
   RotateCcw,
@@ -163,7 +162,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   <span className="font-black text-amber-950 dark:text-amber-100 text-sm">
                     {t('BeeYou Plus')}
                   </span>
