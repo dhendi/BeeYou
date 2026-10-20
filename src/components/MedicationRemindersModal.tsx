@@ -31,6 +31,7 @@ export const MedicationRemindersModal: React.FC = () => {
     takeMedicationDose,
     undoMedicationDose,
     restockMedication,
+    addMedication,
     setIsParentMode,
     speak,
     childProfile,
@@ -42,6 +43,15 @@ export const MedicationRemindersModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'schedule' | 'inventory' | 'history'>('schedule');
   const [restockMedId, setRestockMedId] = useState<string | null>(null);
   const [restockAmount, setRestockAmount] = useState<number>(30);
+
+  // New medication form state
+  const [isAddingMed, setIsAddingMed] = useState(false);
+  const [newMedName, setNewMedName] = useState('');
+  const [newMedDosage, setNewMedDosage] = useState('1');
+  const [newMedUnit, setNewMedUnit] = useState('tablet');
+  const [newMedTime, setNewMedTime] = useState('08:00');
+  const [newMedQuantity, setNewMedQuantity] = useState('30');
+  const [newMedInstructions, setNewMedInstructions] = useState('');
 
   if (!showMedicationModal) return null;
 
@@ -159,6 +169,34 @@ export const MedicationRemindersModal: React.FC = () => {
     }
   };
 
+  const handleCreateMedication = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMedName.trim()) return;
+    if (!isPremium && medications.length >= 1) {
+      triggerUpgrade('Free plan includes 1 medication reminder. Upgrade to BeeYou Plus for unlimited medications, pill inventory tracking, and refill alerts!');
+      return;
+    }
+    addMedication({
+      name: newMedName.trim(),
+      dosage: Number(newMedDosage) || 1,
+      unit: newMedUnit,
+      frequency: 'daily',
+      times: [newMedTime || '08:00'],
+      instructions: newMedInstructions.trim(),
+      totalQuantity: Number(newMedQuantity) || 30,
+      refillThreshold: 5,
+      active: true,
+    });
+    setNewMedName('');
+    setNewMedDosage('1');
+    setNewMedUnit('tablet');
+    setNewMedTime('08:00');
+    setNewMedQuantity('30');
+    setNewMedInstructions('');
+    setIsAddingMed(false);
+    playChime('complete');
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col border-2 border-amber-300 overflow-hidden">
@@ -214,65 +252,212 @@ export const MedicationRemindersModal: React.FC = () => {
           </div>
         )}
 
-        {/* Tab Switcher */}
-        <div className="flex border-b border-amber-200/80 bg-amber-50/40 p-2 gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('schedule');
-              playChime('tap');
-            }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'schedule'
-                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
-                : 'text-stone-600 hover:bg-white/60'
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Today's Doses</span>
-            <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-950 border border-amber-200/80">
-              {takenDosesCount}/{totalDosesCount}
-            </span>
-          </button>
+        {/* Tab Switcher & Add Medication Action */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-amber-200/80 bg-amber-50/40 p-2 gap-2 shrink-0">
+          <div className="flex items-center gap-1 flex-1">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('schedule');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'schedule'
+                  ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                  : 'text-stone-600 hover:bg-white/60'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Today's Doses</span>
+              <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-950 border border-amber-200/80">
+                {takenDosesCount}/{totalDosesCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('inventory');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'inventory'
+                  ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                  : 'text-stone-600 hover:bg-white/60'
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              <span>Supply Inventory</span>
+              {lowSupplyMeds.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('history');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
+                  : 'text-stone-600 hover:bg-white/60'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              <span>Dose Log</span>
+            </button>
+          </div>
 
           <button
             type="button"
             onClick={() => {
-              setActiveTab('inventory');
+              if (!isPremium && medications.length >= 1) {
+                triggerUpgrade('Free plan includes 1 medication reminder. Upgrade to BeeYou Plus for unlimited medications, pill inventory tracking, and refill alerts!');
+                return;
+              }
+              setIsAddingMed(!isAddingMed);
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'inventory'
-                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
-                : 'text-stone-600 hover:bg-white/60'
-            }`}
+            className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all shrink-0"
+            title="Add a new medication reminder"
           >
-            <Package className="w-4 h-4" />
-            <span>Supply Inventory</span>
-            {lowSupplyMeds.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Medication</span>
+            {!isPremium && medications.length >= 1 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase tracking-wider shadow-2xs ml-0.5">
+                Plus
+              </span>
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('history');
-              playChime('tap');
-            }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'history'
-                ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
-                : 'text-stone-600 hover:bg-white/60'
-            }`}
-          >
-            <History className="w-4 h-4" />
-            <span>Dose Log</span>
           </button>
         </div>
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          {/* New Medication Form Drawer */}
+          {isAddingMed && (
+            <form onSubmit={handleCreateMedication} className="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-4 space-y-3 animate-in fade-in">
+              <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                <div className="flex items-center gap-2">
+                  <Pill className="w-4 h-4 text-amber-700" />
+                  <h4 className="font-black text-sm text-amber-950">Add New Medication</h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddingMed(false)}
+                  className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                    Medication Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newMedName}
+                    onChange={(e) => setNewMedName(e.target.value)}
+                    placeholder="e.g. Morning Multivitamin, Melatonin"
+                    className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-semibold text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                      Dosage
+                    </label>
+                    <input
+                      type="number"
+                      min="0.5"
+                      step="0.5"
+                      value={newMedDosage}
+                      onChange={(e) => setNewMedDosage(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-bold text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                      Unit
+                    </label>
+                    <select
+                      value={newMedUnit}
+                      onChange={(e) => setNewMedUnit(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-bold text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    >
+                      <option value="tablet">tablet</option>
+                      <option value="pill">pill</option>
+                      <option value="gummy">gummy</option>
+                      <option value="puff">puff</option>
+                      <option value="ml">ml</option>
+                      <option value="drop">drop</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                      Reminder Time
+                    </label>
+                    <input
+                      type="time"
+                      value={newMedTime}
+                      onChange={(e) => setNewMedTime(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-bold text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                      Total Supply
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newMedQuantity}
+                      onChange={(e) => setNewMedQuantity(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-bold text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-black text-stone-700 uppercase tracking-wider mb-1">
+                    Instructions (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newMedInstructions}
+                    onChange={(e) => setNewMedInstructions(e.target.value)}
+                    placeholder="e.g. Take with breakfast and water"
+                    className="w-full px-3 py-2 rounded-xl border border-amber-300 text-sm bg-white font-medium text-stone-900 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingMed(false)}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
+                >
+                  Save Medication
+                </button>
+              </div>
+            </form>
+          )}
+
           {/* TAB 1: TODAY'S SCHEDULE */}
           {activeTab === 'schedule' && (
             <div className="space-y-3">
@@ -284,7 +469,7 @@ export const MedicationRemindersModal: React.FC = () => {
                   </h4>
                   <p className="text-sm sm:text-base font-black text-amber-950">
                     {takenDosesCount === totalDosesCount && totalDosesCount > 0
-                      ? 'All doses taken today! Outstanding job! 🌟'
+                      ? 'All doses taken today! Outstanding job!'
                       : `${takenDosesCount} of ${totalDosesCount} doses taken`}
                   </p>
                 </div>
@@ -398,7 +583,7 @@ export const MedicationRemindersModal: React.FC = () => {
                             className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-md shadow-amber-200 flex items-center gap-1.5 cursor-pointer transition-all"
                           >
                             <Pill className="w-4 h-4" />
-                            <span>Take Dose (+1 ⭐)</span>
+                            <span>Take Dose</span>
                           </button>
                         )}
                       </div>
@@ -440,6 +625,11 @@ export const MedicationRemindersModal: React.FC = () => {
                           <h4 className="font-black text-sm sm:text-base text-slate-800">
                             {med.name}
                           </h4>
+                          {isLocked && (
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 shadow-2xs">
+                              Plus
+                            </span>
+                          )}
                           {isLow && (
                             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500 text-white">
                               Refill Soon
@@ -469,32 +659,45 @@ export const MedicationRemindersModal: React.FC = () => {
 
                     {/* Restock Buttons */}
                     <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => restockMedication(med.id, 10)}
-                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-all active:scale-95"
-                        title="Add 10"
-                      >
-                        +10
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => restockMedication(med.id, 30)}
-                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-black text-xs cursor-pointer transition-all active:scale-95 border border-amber-200"
-                        title="Add 30 (1 month pack)"
-                      >
-                        +30 (1 Mo)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRestockMedId(med.id);
-                          setRestockAmount(30);
-                        }}
-                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs cursor-pointer transition-all active:scale-95 shadow-xs"
-                      >
-                        Custom Refill
-                      </button>
+                      {isLocked ? (
+                        <button
+                          type="button"
+                          onClick={() => triggerUpgrade('Free plan includes 1 medication reminder. Upgrade to BeeYou Plus for unlimited medications, supply inventory, and refill alerts!')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                        >
+                          <Lock className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Unlock Plus</span>
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => restockMedication(med.id, 10)}
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-all active:scale-95"
+                            title="Add 10"
+                          >
+                            +10
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => restockMedication(med.id, 30)}
+                            className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-black text-xs cursor-pointer transition-all active:scale-95 border border-amber-200"
+                            title="Add 30 (1 month pack)"
+                          >
+                            +30 (1 Mo)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRestockMedId(med.id);
+                              setRestockAmount(30);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs cursor-pointer transition-all active:scale-95 shadow-xs"
+                          >
+                            Custom Refill
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

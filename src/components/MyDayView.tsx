@@ -398,10 +398,15 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                   }
                   onOpenCustomizer?.({ category: group.id as any });
                 }}
-                className="text-stone-400 hover:text-stone-800 text-2xl font-light leading-none p-1 -m-1 transition-colors cursor-pointer"
+                className="text-stone-400 hover:text-stone-800 text-2xl font-light leading-none p-1 -m-1 transition-colors cursor-pointer flex items-center gap-1.5"
                 title={t('Add routine')}
               >
-                +
+                <span>+</span>
+                {!isPremium && routines.length >= 2 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase tracking-wider shadow-2xs">
+                    Plus
+                  </span>
+                )}
               </button>
             </div>
 
@@ -434,7 +439,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                         className="flex items-center justify-between gap-3 cursor-pointer select-none"
                         onClick={() => {
                           if (isLocked) {
-                            triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                            triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
                             return;
                           }
                           toggleRoutineExpanded(routine.id);
@@ -488,7 +493,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                              triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
                             }}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all shrink-0"
                             title={t('Unlock with BeeYou Plus')}

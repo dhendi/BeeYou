@@ -23,7 +23,11 @@ import {
   Plus,
   Mail,
   Zap,
-  Lock
+  Lock,
+  Tablet,
+  Bell,
+  Crown,
+  CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -55,6 +59,108 @@ interface ConnectCaregiverModalProps {
   onClose: () => void;
   initialTab?: 'pair_code' | 'enter_code' | 'support_contact';
 }
+
+const CaregiverPortalPreview: React.FC<{
+  childName?: string;
+  onUpgrade: () => void;
+}> = ({ childName = 'Child', onUpgrade }) => {
+  return (
+    <div className="bg-white p-4 sm:p-6 rounded-3xl border-2 border-amber-300/80 shadow-sm space-y-4 animate-in fade-in">
+      {/* Header Banner */}
+      <div className="text-center space-y-1">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider mb-1">
+          <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+          <span>BeeYou Plus Feature</span>
+        </div>
+        <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+          Caregiver Remote Live Sync &amp; Portal
+        </h3>
+        <p className="text-xs text-slate-600 max-w-md mx-auto font-medium leading-relaxed">
+          Monitor your child's communication device from your own smartphone or tablet in real time.
+        </p>
+      </div>
+
+      {/* Dual Device Live Preview Mock */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+        {/* Left Device: Child Tablet */}
+        <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-black text-slate-600 pb-1.5 border-b border-slate-100">
+            <span className="flex items-center gap-1">
+              <Tablet className="w-3.5 h-3.5 text-amber-600" />
+              <span>{childName}'s Tablet</span>
+            </span>
+            <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">Live</span>
+          </div>
+          <div className="space-y-1.5 text-left">
+            <div className="p-2 rounded-lg bg-amber-50/60 border border-amber-100">
+              <span className="text-[10px] font-bold text-amber-900 block">Current Routine</span>
+              <span className="text-xs font-black text-slate-800">Morning Prep • Step 2 of 4</span>
+            </div>
+            <div className="p-2 rounded-lg bg-emerald-50/60 border border-emerald-100">
+              <span className="text-[10px] font-bold text-emerald-900 block">Spoon Energy Budget</span>
+              <span className="text-xs font-black text-slate-800">8 / 10 Spoons • Calm</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Device: Parent Phone */}
+        <div className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-black text-slate-600 pb-1.5 border-b border-slate-100">
+            <span className="flex items-center gap-1">
+              <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Parent's Phone</span>
+            </span>
+            <span className="text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-bold">Synced</span>
+          </div>
+          <div className="space-y-1.5 text-left">
+            <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-black text-slate-800 block">Brush Teeth Completed</span>
+                <span className="text-[9px] text-slate-500">1 min ago via Live Sync</span>
+              </div>
+            </div>
+            <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2">
+              <Bell className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-black text-slate-800 block">Silent Help Alerts</span>
+                <span className="text-[9px] text-slate-500">Instant notification when overwhelmed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature Bullet List */}
+      <ul className="space-y-1.5 text-xs text-slate-700 text-left max-w-md mx-auto">
+        <li className="flex items-center gap-2 font-medium">
+          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span><strong>Cross-Room Visibility</strong> — See routine steps from another room or at work.</span>
+        </li>
+        <li className="flex items-center gap-2 font-medium">
+          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span><strong>Instant Silent Alerts</strong> — Get notified when sensory overwhelm or a meltdown begins.</span>
+        </li>
+        <li className="flex items-center gap-2 font-medium">
+          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span><strong>Instant 6-Digit Code or QR</strong> — No passwords, email signups, or accounts needed.</span>
+        </li>
+      </ul>
+
+      {/* Action Upgrade Button */}
+      <div className="pt-2 text-center">
+        <button
+          type="button"
+          onClick={onUpgrade}
+          className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+        >
+          <Crown className="w-4 h-4 fill-slate-950 text-slate-950" />
+          <span>Start 15-Day Free Trial to Link Devices</span>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({ 
   isOpen, 
@@ -555,26 +661,10 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
 
           {/* TAB 1: FLOW A (CHILD IPAD FIRST -> GENERATE TEMPORARY PAIRING CODE & QR) */}
           {activeTab === 'pair_code' && !isPremium && (
-            <div className="bg-white p-6 rounded-3xl border-2 border-amber-300 shadow-xs text-center space-y-4 animate-in fade-in">
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center mx-auto shadow-xs">
-                <Lock className="w-7 h-7 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900">
-                  Caregiver Remote Live Sync &amp; Portal
-                </h3>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
-                  Sync routines, real-time battery status, sensory tools, and receive remote notifications across devices with BeeYou Plus.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer mx-auto"
-              >
-                Start 15-Day Free Trial
-              </button>
-            </div>
+            <CaregiverPortalPreview 
+              childName={childProfile?.name || 'Child'} 
+              onUpgrade={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')} 
+            />
           )}
 
           {activeTab === 'pair_code' && isPremium && (
@@ -736,26 +826,10 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
 
           {/* TAB 2: FLOW B (CAREGIVER GAVE A PAIRING CODE -> ENTER CODE) */}
           {activeTab === 'enter_code' && !isPremium && (
-            <div className="bg-white p-6 rounded-3xl border-2 border-amber-300 shadow-xs text-center space-y-4 animate-in fade-in">
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center mx-auto shadow-xs">
-                <Lock className="w-7 h-7 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900">
-                  Caregiver Remote Live Sync &amp; Portal
-                </h3>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
-                  Enter pairing codes from another tablet or phone to mirror visual routines and view live alerts with BeeYou Plus.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer mx-auto"
-              >
-                Start 15-Day Free Trial
-              </button>
-            </div>
+            <CaregiverPortalPreview 
+              childName={childProfile?.name || 'Child'} 
+              onUpgrade={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')} 
+            />
           )}
 
           {activeTab === 'enter_code' && isPremium && (

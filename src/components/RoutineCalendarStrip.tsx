@@ -188,6 +188,11 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t('New')}</span>
+            {!isPremium && routines.length >= 2 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase tracking-wider shadow-2xs ml-0.5">
+                Plus
+              </span>
+            )}
           </button>
 
           {/* Parent Edit / Manage Days Mode Toggle */}
@@ -393,7 +398,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
               type="button"
               onClick={() => {
                 if (!isPremium) {
-                  triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                  triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
                   return;
                 }
                 routines.forEach((r) => {

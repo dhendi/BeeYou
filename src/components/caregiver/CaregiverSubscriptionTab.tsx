@@ -258,7 +258,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
               {isPremium
                 ? 'Your family has full, unrestricted access to all 30+ sensory soundscapes & frequencies, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, and cloud caregiver sync.'
-                : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$89.99/year (~$7.50/mo)' : '$9.99/month'} ($0 today with a 15-day free trial) to unlock the full clinical suite.`
+                : `Basic gives you Day 1 essential AAC communication, 2 active visual routines, 1 medication tracker, and 5 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$89.99/year (~$7.50/mo)' : '$9.99/month'} ($0 today with a 15-day free trial) to unlock the full clinical suite.`
               }
             </p>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../services/translator';
 import { playChime } from '../../utils/audio';
@@ -21,6 +22,8 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
     childProfile,
     getTodaySpoonEntry,
     setShowSpoonModal,
+    setShowMedicationModal,
+    isPremium,
   } = useApp();
 
   const todaySpoon = getTodaySpoonEntry ? getTodaySpoonEntry() : null;
@@ -168,19 +171,50 @@ export const CaregiverHealthSummaryTab: React.FC<CaregiverHealthSummaryTabProps>
 
       {/* SECTION 1: MEDICATION SUPPLY & DOSE SCHEDULE */}
       <section className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-stone-200/80 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h3 className="font-black text-base sm:text-lg text-slate-900">{t('Medication Adherence & Refill Status')}</h3>
             <p className="text-xs text-slate-500 font-medium">{t('Real-time remaining pill inventory and scheduled doses')}</p>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (setShowMedicationModal) {
+                setShowMedicationModal(true);
+                playChime('tap');
+              }
+            }}
+            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>{t('Manage Medications')}</span>
+            {!isPremium && medications.length >= 1 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase tracking-wider shadow-2xs ml-0.5">
+                Plus
+              </span>
+            )}
+          </button>
         </div>
 
         {activeMeds.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50">
+          <div className="p-8 text-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50 space-y-3">
             <p className="text-sm font-bold text-slate-700">{t('No active medications tracked.')}</p>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              {t('Medications and dose reminders can be configured on the child tablet under the Health Reminders section.')}
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              {t('Set up daily prescription reminders, dosage schedules, and automatic pill refill tracking.')}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (setShowMedicationModal) {
+                  setShowMedicationModal(true);
+                  playChime('tap');
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-xs cursor-pointer active:scale-95 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{t('Add First Medication')}</span>
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
