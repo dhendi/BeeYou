@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Compass, 
   MapPin, 
@@ -17,16 +17,18 @@ import {
   Landmark, 
   Users, 
   LifeBuoy, 
-  ChevronRight, 
   X,
-  Filter
+  Filter,
+  Globe,
+  Loader2
 } from 'lucide-react';
 import { 
   CAREGIVER_RESOURCES, 
   SUPPORTED_REGIONS, 
   ResourceCategory, 
-  ResourceItem, 
   detectInitialRegion, 
+  detectRegionFromCoordinates,
+  detectRegionFromTimezone,
   filterResources 
 } from '../../data/caregiverResourcesData';
 import { playChime } from '../../utils/audio';
@@ -40,13 +42,21 @@ interface CaregiverResourcesTabProps {
 
 export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
   onShowNotification,
-  onStartTour,
 }) => {
-  // Region selection
-  const [selectedRegionCode, setSelectedRegionCode] = useState<string>(() => detectInitialRegion());
-  const [showRegionModal, setShowRegionModal] = useState<boolean>(false);
-  const [regionModalSearch, setRegionModalSearch] = useState<string>('');
-  const [regionGroupFilter, setRegionGroupFilter] = useState<'All' | 'US States' | 'Canadian Provinces' | 'International'>('All');
+  // Location and Region State
+  const [isLocationEnabled, setIsLocationEnabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('beeyou_location_enabled') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [selectedRegionCode, setSelectedRegionCode] = useState<string>(() => {
+    return detectInitialRegion();
+  });
+
+  const [isLocating, setIsLocating] = useState<boolean>(false);
 
   // Filters & Search
   const [selectedCategory, setSelectedCategory] = useState<ResourceCategory | 'all' | 'saved'>('all');
@@ -64,17 +74,86 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
   // Copied item indicator
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Sync region to local storage
-  const handleSelectRegion = (code: string) => {
-    setSelectedRegionCode(code);
-    setShowRegionModal(false);
-    try {
-      localStorage.setItem('beeyou_caregiver_region', code);
-    } catch {}
-    playChime('star');
+  // Request & Enable Geolocation
+  const handleEnableLocation = () => {
+    if (isLocating) return;
+    setIsLocating(true);
+    playChime('tap');
     triggerHaptic('selection');
-    const regionObj = SUPPORTED_REGIONS.find((r) => r.code === code);
-    onShowNotification(`Region updated to ${regionObj?.name || code}`);
+
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      const fallback = detectRegionFromTimezone();
+      setSelectedRegionCode(fallback);
+      setIsLocationEnabled(true);
+      try {
+        localStorage.setItem('beeyou_location_enabled', 'true');
+        localStorage.setItem('beeyou_caregiver_region', fallback);
+      } catch {}
+      const regionObj = SUPPORTED_REGIONS.find((r) => r.code === fallback);
+      onShowNotification(`Location enabled: ${regionObj?.name || fallback}`);
+      setIsLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const detected = await detectRegionFromCoordinates(pos.coords.latitude, pos.coords.longitude);
+          setSelectedRegionCode(detected);
+          setIsLocationEnabled(true);
+          try {
+            localStorage.setItem('beeyou_location_enabled', 'true');
+            localStorage.setItem('beeyou_caregiver_region', detected);
+          } catch {}
+          const regionObj = SUPPORTED_REGIONS.find((r) => r.code === detected);
+          onShowNotification(`Location enabled: ${regionObj?.name || detected}`);
+          playChime('star');
+          triggerHaptic('success');
+        } catch {
+          const fallback = detectRegionFromTimezone();
+          setSelectedRegionCode(fallback);
+          setIsLocationEnabled(true);
+          try {
+            localStorage.setItem('beeyou_location_enabled', 'true');
+            localStorage.setItem('beeyou_caregiver_region', fallback);
+          } catch {}
+          const regionObj = SUPPORTED_REGIONS.find((r) => r.code === fallback);
+          onShowNotification(`Location enabled: ${regionObj?.name || fallback}`);
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (err) => {
+        setIsLocating(false);
+        if (err.code === 1) { // PERMISSION_DENIED
+          onShowNotification('Location permission denied. Showing global resources.');
+        } else {
+          // Timeout or position unavailable -> fallback to device timezone heuristic
+          const fallback = detectRegionFromTimezone();
+          setSelectedRegionCode(fallback);
+          setIsLocationEnabled(true);
+          try {
+            localStorage.setItem('beeyou_location_enabled', 'true');
+            localStorage.setItem('beeyou_caregiver_region', fallback);
+          } catch {}
+          const regionObj = SUPPORTED_REGIONS.find((r) => r.code === fallback);
+          onShowNotification(`Estimated location: ${regionObj?.name || fallback}`);
+        }
+      },
+      { timeout: 8000, enableHighAccuracy: false }
+    );
+  };
+
+  // Turn off location & revert to Global mode
+  const handleDisableLocation = () => {
+    setIsLocationEnabled(false);
+    setSelectedRegionCode('GLOBAL');
+    try {
+      localStorage.setItem('beeyou_location_enabled', 'false');
+    } catch {}
+    playChime('tap');
+    triggerHaptic('selection');
+    onShowNotification('Location disabled. Showing global resources only.');
   };
 
   // Toggle bookmark
@@ -111,7 +190,14 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
   };
 
   const currentRegion = useMemo(() => {
-    return SUPPORTED_REGIONS.find((r) => r.code === selectedRegionCode) || SUPPORTED_REGIONS[0];
+    return SUPPORTED_REGIONS.find((r) => r.code === selectedRegionCode) || {
+      code: 'GLOBAL',
+      name: 'Global Resources',
+      flag: '',
+      country: 'GLOBAL' as const,
+      group: 'International' as const,
+      description: 'Global online communities, Facebook groups, affirming blogs & international guides',
+    };
   }, [selectedRegionCode]);
 
   // Filtered list
@@ -125,7 +211,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
     );
   }, [selectedRegionCode, selectedCategory, searchQuery, bookmarkedIds]);
 
-  // Counts by category within this region
+  // Counts by category within this view
   const categoryCounts = useMemo(() => {
     const regionFiltered = filterResources(
       CAREGIVER_RESOURCES,
@@ -182,7 +268,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
       case 'organizations':
         return 'Advocacy & Navigators';
       case 'community':
-        return 'Communities & Reddit';
+        return 'Communities (FB & Reddit)';
       case 'blogs':
         return 'Blogs & Guides';
       case 'helplines':
@@ -192,58 +278,106 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* HEADER & REGION SELECTION BANNER */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-linear-to-r from-amber-500/10 via-amber-200/40 to-orange-100/30 border-2 border-amber-300 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      {/* HEADER & LOCATION BANNER */}
+      <div className={`p-5 sm:p-6 rounded-3xl border-2 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${
+        isLocationEnabled
+          ? 'bg-linear-to-r from-emerald-500/10 via-emerald-100/40 to-teal-100/30 border-emerald-300'
+          : 'bg-linear-to-r from-amber-500/10 via-amber-200/40 to-orange-100/30 border-amber-300'
+      }`}>
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-xl bg-amber-400 text-amber-950 flex items-center justify-center font-black shadow-xs shrink-0">
+            <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black shadow-xs shrink-0 ${
+              isLocationEnabled ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950'
+            }`}>
               <Compass className="w-4 h-4" />
             </span>
             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-              {t('Caregiver & Regional Resources')}
+              {t('Caregiver & Community Resources')}
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-200 text-amber-950 border border-amber-300 hidden sm:inline-block">
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border hidden sm:inline-block ${
+              isLocationEnabled ? 'bg-emerald-100 text-emerald-950 border-emerald-300' : 'bg-amber-200 text-amber-950 border-amber-300'
+            }`}>
               {t('Verified 2025/2026')}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
-            {t('Curated government programs, funding grants, peer subreddits, and affirming blogs strictly filtered for your location.')}
+            {isLocationEnabled
+              ? t('Curated government programs, funding grants, peer communities, and affirming blogs strictly filtered for your location.')
+              : t('Global peer support circles, Facebook groups, Reddit communities, and affirming blogs. Enable location to discover verified state or provincial funding programs and Medicaid waivers.')}
           </p>
         </div>
 
-        {/* REGION SELECTOR PILL */}
-        <button
-          type="button"
-          onClick={() => {
-            setShowRegionModal(true);
-            playChime('tap');
-          }}
-          className="w-full md:w-auto px-4 py-2.5 rounded-2xl bg-white hover:bg-amber-50 text-slate-900 font-black text-xs sm:text-sm border-2 border-amber-400 shadow-2xs flex items-center justify-between md:justify-center gap-3 cursor-pointer active:scale-95 transition-all shrink-0"
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-lg">{currentRegion.flag}</span>
-            <div className="text-left min-w-0">
-              <span className="text-[10px] uppercase tracking-wider text-amber-800 font-black block leading-none">
-                {t('Current Location')}
-              </span>
-              <span className="truncate block font-black text-slate-900">
-                {currentRegion.name}
-              </span>
+        {/* LOCATION ACTION: ENABLE OR ACTIVE STATUS */}
+        {isLocationEnabled ? (
+          <div className="w-full md:w-auto px-4 py-2.5 rounded-2xl bg-white border-2 border-emerald-400 shadow-2xs flex items-center justify-between md:justify-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="text-left min-w-0">
+                <span className="text-[10px] uppercase tracking-wider text-emerald-800 font-black block leading-none">
+                  {t('Location Active')}
+                </span>
+                <span className="truncate block font-black text-slate-900 text-xs sm:text-sm">
+                  {currentRegion.name}
+                </span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={handleDisableLocation}
+              className="px-2.5 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-[11px] font-extrabold border border-stone-300 cursor-pointer transition active:scale-95"
+              title={t('Turn off location')}
+            >
+              {t('Turn Off')}
+            </button>
           </div>
-          <span className="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 text-[11px] font-extrabold border border-amber-300">
-            {t('Change')} ▾
-          </span>
-        </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleEnableLocation}
+            disabled={isLocating}
+            className="w-full md:w-auto px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs sm:text-sm border-2 border-amber-500 shadow-2xs flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all shrink-0"
+          >
+            {isLocating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-amber-900" />
+                <span>{t('Detecting Location...')}</span>
+              </>
+            ) : (
+              <>
+                <MapPin className="w-4 h-4 text-amber-900" />
+                <span>{t('Enable Location')}</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
-      {/* STRICT REGIONAL FILTER NOTICE */}
-      <div className="px-4 py-2.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center gap-2 text-xs font-bold text-amber-950">
-        <MapPin className="w-4 h-4 text-amber-600 shrink-0" />
-        <span>
-          {t('Location Active:')} <strong className="font-black">{currentRegion.name}</strong> ({currentRegion.country === 'US' ? 'United States' : currentRegion.country === 'CA' ? 'Canada' : 'International'}). {t('Out-of-region programs (such as Ontario AccessOAP or other states) are strictly excluded.')}
-        </span>
-      </div>
+      {/* LOCATION STATUS NOTICE */}
+      {isLocationEnabled ? (
+        <div className="px-4 py-2.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between gap-2 text-xs font-bold text-emerald-950">
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="truncate">
+              {t('Location Active:')} <strong className="font-black">{currentRegion.name}</strong> ({currentRegion.country === 'US' ? 'United States' : currentRegion.country === 'CA' ? 'Canada' : 'International'}). {t('Out-of-region programs are strictly excluded.')}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleEnableLocation}
+            disabled={isLocating}
+            className="text-[11px] text-emerald-800 hover:text-emerald-950 underline font-black shrink-0 cursor-pointer"
+          >
+            {isLocating ? t('Locating...') : t('Refresh')}
+          </button>
+        </div>
+      ) : (
+        <div className="px-4 py-2.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center gap-2 text-xs font-bold text-amber-950">
+          <Globe className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>
+            {t('Global Resources Active (Location Disabled). Showing universal Facebook groups, Reddit communities, affirming blogs, and helplines. Enable location above to unlock local funding & state waivers.')}
+          </span>
+        </div>
+      )}
 
       {/* SEARCH AND CATEGORY FILTER BAR */}
       <div className="space-y-3">
@@ -254,7 +388,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('Search programs, blogs, subreddits, keywords (e.g. OAP, IHSS, respite, sensory)...')}
+            placeholder={t('Search programs, blogs, subreddits, Facebook groups, keywords (e.g. OAP, IHSS, respite, sensory)...')}
             className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white border-2 border-stone-200 focus:border-amber-400 focus:outline-none text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-stone-400 shadow-2xs transition-all"
           />
           {searchQuery && (
@@ -275,7 +409,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
             { id: 'all' as const, label: 'All Resources', count: categoryCounts.all, icon: Filter },
             { id: 'funding' as const, label: 'Funding & Government', count: categoryCounts.funding, icon: Landmark },
             { id: 'organizations' as const, label: 'Navigators & Non-Profits', count: categoryCounts.organizations, icon: Users },
-            { id: 'community' as const, label: 'Communities & Reddit', count: categoryCounts.community, icon: MessageSquare },
+            { id: 'community' as const, label: 'Communities (FB & Reddit)', count: categoryCounts.community, icon: MessageSquare },
             { id: 'blogs' as const, label: 'Blogs & Guides', count: categoryCounts.blogs, icon: BookOpen },
             { id: 'helplines' as const, label: 'Helplines', count: categoryCounts.helplines, icon: LifeBuoy },
             { id: 'saved' as const, label: 'Saved', count: categoryCounts.saved, icon: Bookmark },
@@ -346,9 +480,9 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
             const isCopied = copiedId === item.id;
             const scopeLabel = 
               item.scope === 'regional'
-                ? `${currentRegion.flag} ${item.regionCode?.replace('CA-', '').replace('US-', '')} Regional`
+                ? `${item.regionCode?.replace('CA-', '').replace('US-', '')} Regional`
                 : item.scope === 'national'
-                ? `${item.countryCode === 'CA' ? '🇨🇦 Canada' : '🇺🇸 United States'} National`
+                ? `${item.countryCode === 'CA' ? 'Canada' : 'United States'} National`
                 : 'Global Community';
 
             return (
@@ -514,142 +648,6 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
           support@beeyou.app
         </button>
       </div>
-
-      {/* REGION SELECTION MODAL */}
-      {showRegionModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white w-full max-w-lg rounded-3xl p-6 shadow-xl border-2 border-amber-300 space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black">
-                  <MapPin className="w-4 h-4" />
-                </span>
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    {t('Select Your Region')}
-                  </h3>
-                  <p className="text-xs text-stone-500 font-medium">
-                    {t('Tailor programs, funding, and legal guides to your exact location.')}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowRegionModal(false)}
-                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-500 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Search Input for States / Provinces */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={regionModalSearch}
-                onChange={(e) => setRegionModalSearch(e.target.value)}
-                placeholder={t('Search your state or province (e.g. Virginia, Ontario, Florida)...')}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-100 border border-stone-200 focus:border-amber-400 focus:outline-none text-xs font-semibold text-slate-800 placeholder:text-stone-400"
-                autoFocus
-              />
-              {regionModalSearch && (
-                <button
-                  type="button"
-                  onClick={() => setRegionModalSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-600 rounded-md"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Region Group Filter Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
-              {[
-                { id: 'All' as const, label: 'All (67)' },
-                { id: 'US States' as const, label: '🇺🇸 US States (51)' },
-                { id: 'Canadian Provinces' as const, label: '🇨🇦 Canada (13)' },
-                { id: 'International' as const, label: 'International (3)' },
-              ].map((grp) => (
-                <button
-                  key={grp.id}
-                  type="button"
-                  onClick={() => setRegionGroupFilter(grp.id)}
-                  className={`px-2.5 py-1 rounded-lg font-bold whitespace-nowrap cursor-pointer transition-all ${
-                    regionGroupFilter === grp.id
-                      ? 'bg-amber-400 text-amber-950 font-black shadow-2xs'
-                      : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-                  }`}
-                >
-                  {grp.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Region List */}
-            <div className="space-y-1.5 overflow-y-auto flex-1 pr-1">
-              {SUPPORTED_REGIONS
-                .filter((r) => {
-                  if (regionGroupFilter !== 'All' && r.group !== regionGroupFilter) {
-                    return false;
-                  }
-                  if (regionModalSearch.trim()) {
-                    const q = regionModalSearch.toLowerCase();
-                    return (
-                      r.name.toLowerCase().includes(q) ||
-                      r.code.toLowerCase().includes(q) ||
-                      r.description.toLowerCase().includes(q)
-                    );
-                  }
-                  return true;
-                })
-                .map((region) => {
-                  const isSelected = region.code === selectedRegionCode;
-                  return (
-                    <button
-                      key={region.code}
-                      type="button"
-                      onClick={() => handleSelectRegion(region.code)}
-                      className={`w-full p-3 rounded-2xl text-left border-2 flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                        isSelected
-                          ? 'bg-amber-100 border-amber-400 text-amber-950 font-black shadow-xs'
-                          : 'bg-white hover:bg-amber-50/50 border-stone-200 text-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-xl shrink-0">{region.flag}</span>
-                        <div className="min-w-0">
-                          <span className="text-xs sm:text-sm font-black block text-slate-900 leading-tight">
-                            {region.name}
-                          </span>
-                          <span className="text-[11px] text-stone-500 font-medium block truncate mt-0.5">
-                            {region.description}
-                          </span>
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <span className="w-5 h-5 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-            </div>
-
-            <div className="pt-2 border-t border-stone-100 text-center">
-              <button
-                type="button"
-                onClick={() => setShowRegionModal(false)}
-                className="w-full py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-slate-800 font-bold text-xs cursor-pointer active:scale-95 transition"
-              >
-                {t('Close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

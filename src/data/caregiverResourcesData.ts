@@ -51,85 +51,85 @@ export interface RegionOption {
 // ALL 50 US STATES + DC
 // -----------------------------------------------------------------------------
 export const US_STATES: RegionOption[] = [
-  { code: 'US-VA', name: 'Virginia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DBHDS DD Waivers, CCC Plus Waiver & PEATC Special Ed Advocacy' },
-  { code: 'US-CA', name: 'California', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Regional Centers (DDS), IHSS Protective Supervision & DRC' },
-  { code: 'US-NY', name: 'New York', flag: '🇺🇸', country: 'US', group: 'US States', description: 'OPWDD Front Door, Care Design NY & INCLUDEnyc' },
-  { code: 'US-TX', name: 'Texas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Texas HHS CLASS & HCS Waivers & TxP2P' },
-  { code: 'US-FL', name: 'Florida', flag: '🇺🇸', country: 'US', group: 'US States', description: 'APD iBudget Florida Medicaid Waiver & CARD Autism Centers' },
-  { code: 'US-NC', name: 'North Carolina', flag: '🇺🇸', country: 'US', group: 'US States', description: 'NC Innovations Waiver, TEACCH Autism Program & ECAC' },
-  { code: 'US-GA', name: 'Georgia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'NOW & COMP Medicaid Waivers & Parent to Parent of Georgia' },
-  { code: 'US-PA', name: 'Pennsylvania', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ODP Community Living Waiver, ASERT & HUNE Special Ed' },
-  { code: 'US-OH', name: 'Ohio', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DODD Individual Options Waiver, OCALI & OPI' },
-  { code: 'US-IL', name: 'Illinois', flag: '🇺🇸', country: 'US', group: 'US States', description: 'PUNS Database, Illinois Children\'s DD Waiver & Family Resource Center' },
-  { code: 'US-WA', name: 'Washington', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA Basic Plus & Core Waivers & PAVE Washington' },
-  { code: 'US-MD', name: 'Maryland', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA Community Pathways Waiver & Parents\' Place of Maryland' },
-  { code: 'US-MA', name: 'Massachusetts', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDS Children\'s Autism Waiver & Federation for Children with Special Needs' },
-  { code: 'US-MI', name: 'Michigan', flag: '🇺🇸', country: 'US', group: 'US States', description: 'MDHHS Autism Benefit & Michigan Alliance for Families' },
-  { code: 'US-NJ', name: 'New Jersey', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s System of Care (CSOC) & SPAN Parent Advocacy' },
-  { code: 'US-CO', name: 'Colorado', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s Extensive Support (CES) Waiver & PEAK Parent Center' },
-  { code: 'US-AZ', name: 'Arizona', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DES/DDD & ALTCS Medicaid Waiver & Raising Special Kids' },
-  { code: 'US-TN', name: 'Tennessee', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Katie Beckett Waiver & Tennessee Disability Pathfinder' },
-  { code: 'US-IN', name: 'Indiana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Family Supports Waiver (FSW) & IN*SOURCE' },
-  { code: 'US-MO', name: 'Missouri', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DMH DD Comprehensive Waiver & Missouri P&A' },
-  { code: 'US-MN', name: 'Minnesota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Developmental Disabilities (DD) Waiver & PACER Center' },
-  { code: 'US-WI', name: 'Wisconsin', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s Long-Term Support (CLTS) Waiver & WI FACETS' },
-  { code: 'US-SC', name: 'South Carolina', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDSN ID/RD Waiver & Family Connection SC' },
-  { code: 'US-AL', name: 'Alabama', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ADMH DD Waiver & Alabama PTI' },
-  { code: 'US-LA', name: 'Louisiana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'New Opportunities Waiver (NOW) & Families Helping Families' },
-  { code: 'US-KY', name: 'Kentucky', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Michelle P. Waiver & KY-SPIN' },
-  { code: 'US-OR', name: 'Oregon', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ODDS K-Plan In-Home Supports & FACT Oregon' },
-  { code: 'US-OK', name: 'Oklahoma', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DHS DDSD Community Waiver & Oklahoma PTI' },
-  { code: 'US-CT', name: 'Connecticut', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDS Autism Spectrum Waiver & CPAC' },
-  { code: 'US-UT', name: 'Utah', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DSPD Community Supports Waiver & Utah Parent Center' },
-  { code: 'US-NV', name: 'Nevada', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ATAP (Autism Treatment Assistance Program) & Nevada PEP' },
-  { code: 'US-AR', name: 'Arkansas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'CES Waiver (Community & Employment Supports) & Arkansas PTI' },
-  { code: 'US-MS', name: 'Mississippi', flag: '🇺🇸', country: 'US', group: 'US States', description: 'ID/DD Waiver & Mississippi Coalition for Citizens with Disabilities' },
-  { code: 'US-KS', name: 'Kansas', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Autism Waiver & Families Together Inc.' },
-  { code: 'US-NM', name: 'New Mexico', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DD Waiver & Parents Reaching Out' },
-  { code: 'US-NE', name: 'Nebraska', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DHHS DD Waiver & PTI Nebraska' },
-  { code: 'US-ID', name: 'Idaho', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Children\'s DD Waiver & Idaho Parents Unlimited' },
-  { code: 'US-WV', name: 'West Virginia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'I/DD Waiver & West Virginia PTI' },
-  { code: 'US-HI', name: 'Hawaii', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DOH Developmental Disabilities Division & Hawaii PTI' },
-  { code: 'US-NH', name: 'New Hampshire', flag: '🇺🇸', country: 'US', group: 'US States', description: 'BDS Developmental Services Waiver & Parent Information Center' },
-  { code: 'US-ME', name: 'Maine', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Section 28 Children with Cognitive Impairments & Maine Parent Federation' },
-  { code: 'US-MT', name: 'Montana', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DPHHS DD Waiver & Parents, Let\'s Unite for Kids (PLUK)' },
-  { code: 'US-RI', name: 'Rhode Island', flag: '🇺🇸', country: 'US', group: 'US States', description: 'BHDDH DD Services & RIPIN' },
-  { code: 'US-DE', name: 'Delaware', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDDS Lifespan Waiver & Parent Information Center of Delaware' },
-  { code: 'US-SD', name: 'South Dakota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'CHOICES Waiver & South Dakota Parent Connection' },
-  { code: 'US-ND', name: 'North Dakota', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Autism Spectrum Disorder Waiver & Pathfinder Services ND' },
-  { code: 'US-AK', name: 'Alaska', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Senior & Disabilities Services IDD Waiver & Stone Soup Group' },
-  { code: 'US-VT', name: 'Vermont', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DAIL Developmental Disabilities Services & Vermont Family Network' },
-  { code: 'US-WY', name: 'Wyoming', flag: '🇺🇸', country: 'US', group: 'US States', description: 'Comprehensive & Supports Waiver & Wyoming PTI' },
-  { code: 'US-IA', name: 'Iowa', flag: '🇺🇸', country: 'US', group: 'US States', description: 'HCBS Children\'s Mental Health & ID Waiver & ASK Resource Center' },
-  { code: 'US-DC', name: 'District of Columbia', flag: '🇺🇸', country: 'US', group: 'US States', description: 'DDA IFS Waiver & Advocates for Justice and Education' },
+  { code: 'US-VA', name: 'Virginia', flag: '', country: 'US', group: 'US States', description: 'DBHDS DD Waivers, CCC Plus Waiver & PEATC Special Ed Advocacy' },
+  { code: 'US-CA', name: 'California', flag: '', country: 'US', group: 'US States', description: 'Regional Centers (DDS), IHSS Protective Supervision & DRC' },
+  { code: 'US-NY', name: 'New York', flag: '', country: 'US', group: 'US States', description: 'OPWDD Front Door, Care Design NY & INCLUDEnyc' },
+  { code: 'US-TX', name: 'Texas', flag: '', country: 'US', group: 'US States', description: 'Texas HHS CLASS & HCS Waivers & TxP2P' },
+  { code: 'US-FL', name: 'Florida', flag: '', country: 'US', group: 'US States', description: 'APD iBudget Florida Medicaid Waiver & CARD Autism Centers' },
+  { code: 'US-NC', name: 'North Carolina', flag: '', country: 'US', group: 'US States', description: 'NC Innovations Waiver, TEACCH Autism Program & ECAC' },
+  { code: 'US-GA', name: 'Georgia', flag: '', country: 'US', group: 'US States', description: 'NOW & COMP Medicaid Waivers & Parent to Parent of Georgia' },
+  { code: 'US-PA', name: 'Pennsylvania', flag: '', country: 'US', group: 'US States', description: 'ODP Community Living Waiver, ASERT & HUNE Special Ed' },
+  { code: 'US-OH', name: 'Ohio', flag: '', country: 'US', group: 'US States', description: 'DODD Individual Options Waiver, OCALI & OPI' },
+  { code: 'US-IL', name: 'Illinois', flag: '', country: 'US', group: 'US States', description: 'PUNS Database, Illinois Children\'s DD Waiver & Family Resource Center' },
+  { code: 'US-WA', name: 'Washington', flag: '', country: 'US', group: 'US States', description: 'DDA Basic Plus & Core Waivers & PAVE Washington' },
+  { code: 'US-MD', name: 'Maryland', flag: '', country: 'US', group: 'US States', description: 'DDA Community Pathways Waiver & Parents\' Place of Maryland' },
+  { code: 'US-MA', name: 'Massachusetts', flag: '', country: 'US', group: 'US States', description: 'DDS Children\'s Autism Waiver & Federation for Children with Special Needs' },
+  { code: 'US-MI', name: 'Michigan', flag: '', country: 'US', group: 'US States', description: 'MDHHS Autism Benefit & Michigan Alliance for Families' },
+  { code: 'US-NJ', name: 'New Jersey', flag: '', country: 'US', group: 'US States', description: 'Children\'s System of Care (CSOC) & SPAN Parent Advocacy' },
+  { code: 'US-CO', name: 'Colorado', flag: '', country: 'US', group: 'US States', description: 'Children\'s Extensive Support (CES) Waiver & PEAK Parent Center' },
+  { code: 'US-AZ', name: 'Arizona', flag: '', country: 'US', group: 'US States', description: 'DES/DDD & ALTCS Medicaid Waiver & Raising Special Kids' },
+  { code: 'US-TN', name: 'Tennessee', flag: '', country: 'US', group: 'US States', description: 'Katie Beckett Waiver & Tennessee Disability Pathfinder' },
+  { code: 'US-IN', name: 'Indiana', flag: '', country: 'US', group: 'US States', description: 'Family Supports Waiver (FSW) & IN*SOURCE' },
+  { code: 'US-MO', name: 'Missouri', flag: '', country: 'US', group: 'US States', description: 'DMH DD Comprehensive Waiver & Missouri P&A' },
+  { code: 'US-MN', name: 'Minnesota', flag: '', country: 'US', group: 'US States', description: 'Developmental Disabilities (DD) Waiver & PACER Center' },
+  { code: 'US-WI', name: 'Wisconsin', flag: '', country: 'US', group: 'US States', description: 'Children\'s Long-Term Support (CLTS) Waiver & WI FACETS' },
+  { code: 'US-SC', name: 'South Carolina', flag: '', country: 'US', group: 'US States', description: 'DDSN ID/RD Waiver & Family Connection SC' },
+  { code: 'US-AL', name: 'Alabama', flag: '', country: 'US', group: 'US States', description: 'ADMH DD Waiver & Alabama PTI' },
+  { code: 'US-LA', name: 'Louisiana', flag: '', country: 'US', group: 'US States', description: 'New Opportunities Waiver (NOW) & Families Helping Families' },
+  { code: 'US-KY', name: 'Kentucky', flag: '', country: 'US', group: 'US States', description: 'Michelle P. Waiver & KY-SPIN' },
+  { code: 'US-OR', name: 'Oregon', flag: '', country: 'US', group: 'US States', description: 'ODDS K-Plan In-Home Supports & FACT Oregon' },
+  { code: 'US-OK', name: 'Oklahoma', flag: '', country: 'US', group: 'US States', description: 'DHS DDSD Community Waiver & Oklahoma PTI' },
+  { code: 'US-CT', name: 'Connecticut', flag: '', country: 'US', group: 'US States', description: 'DDS Autism Spectrum Waiver & CPAC' },
+  { code: 'US-UT', name: 'Utah', flag: '', country: 'US', group: 'US States', description: 'DSPD Community Supports Waiver & Utah Parent Center' },
+  { code: 'US-NV', name: 'Nevada', flag: '', country: 'US', group: 'US States', description: 'ATAP (Autism Treatment Assistance Program) & Nevada PEP' },
+  { code: 'US-AR', name: 'Arkansas', flag: '', country: 'US', group: 'US States', description: 'CES Waiver (Community & Employment Supports) & Arkansas PTI' },
+  { code: 'US-MS', name: 'Mississippi', flag: '', country: 'US', group: 'US States', description: 'ID/DD Waiver & Mississippi Coalition for Citizens with Disabilities' },
+  { code: 'US-KS', name: 'Kansas', flag: '', country: 'US', group: 'US States', description: 'Autism Waiver & Families Together Inc.' },
+  { code: 'US-NM', name: 'New Mexico', flag: '', country: 'US', group: 'US States', description: 'DD Waiver & Parents Reaching Out' },
+  { code: 'US-NE', name: 'Nebraska', flag: '', country: 'US', group: 'US States', description: 'DHHS DD Waiver & PTI Nebraska' },
+  { code: 'US-ID', name: 'Idaho', flag: '', country: 'US', group: 'US States', description: 'Children\'s DD Waiver & Idaho Parents Unlimited' },
+  { code: 'US-WV', name: 'West Virginia', flag: '', country: 'US', group: 'US States', description: 'I/DD Waiver & West Virginia PTI' },
+  { code: 'US-HI', name: 'Hawaii', flag: '', country: 'US', group: 'US States', description: 'DOH Developmental Disabilities Division & Hawaii PTI' },
+  { code: 'US-NH', name: 'New Hampshire', flag: '', country: 'US', group: 'US States', description: 'BDS Developmental Services Waiver & Parent Information Center' },
+  { code: 'US-ME', name: 'Maine', flag: '', country: 'US', group: 'US States', description: 'Section 28 Children with Cognitive Impairments & Maine Parent Federation' },
+  { code: 'US-MT', name: 'Montana', flag: '', country: 'US', group: 'US States', description: 'DPHHS DD Waiver & Parents, Let\'s Unite for Kids (PLUK)' },
+  { code: 'US-RI', name: 'Rhode Island', flag: '', country: 'US', group: 'US States', description: 'BHDDH DD Services & RIPIN' },
+  { code: 'US-DE', name: 'Delaware', flag: '', country: 'US', group: 'US States', description: 'DDDS Lifespan Waiver & Parent Information Center of Delaware' },
+  { code: 'US-SD', name: 'South Dakota', flag: '', country: 'US', group: 'US States', description: 'CHOICES Waiver & South Dakota Parent Connection' },
+  { code: 'US-ND', name: 'North Dakota', flag: '', country: 'US', group: 'US States', description: 'Autism Spectrum Disorder Waiver & Pathfinder Services ND' },
+  { code: 'US-AK', name: 'Alaska', flag: '', country: 'US', group: 'US States', description: 'Senior & Disabilities Services IDD Waiver & Stone Soup Group' },
+  { code: 'US-VT', name: 'Vermont', flag: '', country: 'US', group: 'US States', description: 'DAIL Developmental Disabilities Services & Vermont Family Network' },
+  { code: 'US-WY', name: 'Wyoming', flag: '', country: 'US', group: 'US States', description: 'Comprehensive & Supports Waiver & Wyoming PTI' },
+  { code: 'US-IA', name: 'Iowa', flag: '', country: 'US', group: 'US States', description: 'HCBS Children\'s Mental Health & ID Waiver & ASK Resource Center' },
+  { code: 'US-DC', name: 'District of Columbia', flag: '', country: 'US', group: 'US States', description: 'DDA IFS Waiver & Advocates for Justice and Education' },
 ];
 
 // -----------------------------------------------------------------------------
 // ALL 10 CANADIAN PROVINCES + 3 TERRITORIES
 // -----------------------------------------------------------------------------
 export const CA_PROVINCES: RegionOption[] = [
-  { code: 'CA-ON', name: 'Ontario', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'AccessOAP, Autism Ontario, SSAH, ADP & Canada DTC' },
-  { code: 'CA-BC', name: 'British Columbia', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Funding Unit (AFU) & ACT Autism Community Training' },
-  { code: 'CA-AB', name: 'Alberta', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Family Support for Children with Disabilities (FSCD) & Autism Alberta' },
-  { code: 'CA-QC', name: 'Quebec', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Fédération québécoise de l\'autisme & CISSS/CIUSSS CRD Services' },
-  { code: 'CA-MB', name: 'Manitoba', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Children\'s disABILITY Services (CdS) & Autism Manitoba' },
-  { code: 'CA-SK', name: 'Saskatchewan', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Individualized Funding (AIF) & Autism Services of Saskatoon' },
-  { code: 'CA-NS', name: 'Nova Scotia', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Direct Family Support for Children (DFSC) & Autism Nova Scotia' },
-  { code: 'CA-NB', name: 'New Brunswick', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Learning Partnership & Early Intensive Intervention (EII)' },
-  { code: 'CA-NL', name: 'Newfoundland and Labrador', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Society of Newfoundland and Labrador (ASNL) & CSSD' },
-  { code: 'CA-PE', name: 'Prince Edward Island', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Autism Services Program & Stars for Life Foundation' },
-  { code: 'CA-NT', name: 'Northwest Territories', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'NWT Disability Services & Yellowknife Association for Community Living' },
-  { code: 'CA-YT', name: 'Yukon', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Yukon Children\'s Disability Services & Autism Yukon' },
-  { code: 'CA-NU', name: 'Nunavut', flag: '🇨🇦', country: 'CA', group: 'Canadian Provinces', description: 'Nunavut Department of Family Services & Disability Support Services' },
+  { code: 'CA-ON', name: 'Ontario', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'AccessOAP, Autism Ontario, SSAH, ADP & Canada DTC' },
+  { code: 'CA-BC', name: 'British Columbia', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Autism Funding Unit (AFU) & ACT Autism Community Training' },
+  { code: 'CA-AB', name: 'Alberta', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Family Support for Children with Disabilities (FSCD) & Autism Alberta' },
+  { code: 'CA-QC', name: 'Quebec', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Fédération québécoise de l\'autisme & CISSS/CIUSSS CRD Services' },
+  { code: 'CA-MB', name: 'Manitoba', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Children\'s disABILITY Services (CdS) & Autism Manitoba' },
+  { code: 'CA-SK', name: 'Saskatchewan', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Autism Individualized Funding (AIF) & Autism Services of Saskatoon' },
+  { code: 'CA-NS', name: 'Nova Scotia', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Direct Family Support for Children (DFSC) & Autism Nova Scotia' },
+  { code: 'CA-NB', name: 'New Brunswick', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Autism Learning Partnership & Early Intensive Intervention (EII)' },
+  { code: 'CA-NL', name: 'Newfoundland and Labrador', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Autism Society of Newfoundland and Labrador (ASNL) & CSSD' },
+  { code: 'CA-PE', name: 'Prince Edward Island', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Autism Services Program & Stars for Life Foundation' },
+  { code: 'CA-NT', name: 'Northwest Territories', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'NWT Disability Services & Yellowknife Association for Community Living' },
+  { code: 'CA-YT', name: 'Yukon', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Yukon Children\'s Disability Services & Autism Yukon' },
+  { code: 'CA-NU', name: 'Nunavut', flag: '', country: 'CA', group: 'Canadian Provinces', description: 'Nunavut Department of Family Services & Disability Support Services' },
 ];
 
 // -----------------------------------------------------------------------------
 // INTERNATIONAL & GLOBAL
 // -----------------------------------------------------------------------------
 export const INTL_REGIONS: RegionOption[] = [
-  { code: 'GB-ALL', name: 'United Kingdom', flag: '🇬🇧', country: 'GB', group: 'International', description: 'National Autistic Society, NHS Assessment & DLA Child' },
-  { code: 'AU-ALL', name: 'Australia', flag: '🇦🇺', country: 'AU', group: 'International', description: 'NDIS Early Childhood, Amaze & Aspect Australia' },
-  { code: 'GLOBAL', name: 'All / Global Resources', flag: '🌐', country: 'GLOBAL', group: 'International', description: 'Global online communities, affirming blogs & international guides' },
+  { code: 'GB-ALL', name: 'United Kingdom', flag: '', country: 'GB', group: 'International', description: 'National Autistic Society, NHS Assessment & DLA Child' },
+  { code: 'AU-ALL', name: 'Australia', flag: '', country: 'AU', group: 'International', description: 'NDIS Early Childhood, Amaze & Aspect Australia' },
+  { code: 'GLOBAL', name: 'All / Global Resources', flag: '', country: 'GLOBAL', group: 'International', description: 'Global online communities, affirming blogs & international guides' },
 ];
 
 export const SUPPORTED_REGIONS: RegionOption[] = [
@@ -656,6 +656,52 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
   },
 
   // =========================================================================
+  // GLOBAL FACEBOOK CAREGIVER & AAC SUPPORT COMMUNITIES
+  // =========================================================================
+  {
+    id: 'fb_autism_inclusivity',
+    title: 'Autism Inclusivity (Facebook Community)',
+    organization: 'Global Autistic-Led Caregiver Community (160,000+ Members)',
+    summary: 'The largest autistic-led caregiver learning community online, dedicated to neurodiversity-affirming parenting and communication.',
+    detailedNotes: 'Autistic-led Facebook group where parents learn respectful, non-behavioral approaches directly from neurodivergent adults. Ideal for learning about sensory regulation, motor planning, gestalt language processing, and validating non-speaking communication.',
+    category: 'community',
+    scope: 'global',
+    countryCode: 'GLOBAL',
+    url: 'https://www.facebook.com/groups/autisminclusivity',
+    badges: ['Facebook Community', '160k+ Members', 'Autistic-Led', 'Affirming Parenting'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'fb_aac_motivate_model_move',
+    title: 'AAC Through Motivate, Model, Move (Facebook Community)',
+    organization: 'Speech-Language Pathologists & AAC Families (50,000+ Members)',
+    summary: 'Active peer and clinician community dedicated to modeling augmentative and alternative communication (AAC) without pressure.',
+    detailedNotes: 'Specialized community for caregivers, educators, and speech therapists navigating speech-generating apps and picture communication systems. Features daily practical tips for core word modeling during natural routines, motor planning advice, and troubleshooting AAC adoption.',
+    category: 'community',
+    scope: 'global',
+    countryCode: 'GLOBAL',
+    url: 'https://www.facebook.com/groups/aacmotivatemodelmove/',
+    badges: ['Facebook Community', '50k+ Members', 'AAC Modeling', 'SLP & Caregiver Supported'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+  {
+    id: 'fb_neurodiversity_affirming_parenting',
+    title: 'Neurodiversity-Affirming Parenting & Low Demand Living (Facebook Community)',
+    organization: 'Affirming Family Collective (35,000+ Members)',
+    summary: 'Safe peer group focused on nervous system safety, low demand parenting, sensory accommodations, and caregiver solidarity.',
+    detailedNotes: 'Practical discussions on burnout prevention, school accommodations, sensory friendly home setups, and supporting autistic children with unconditional acceptance. Highly moderated to ensure zero predatory therapies or harmful compliance advice.',
+    category: 'community',
+    scope: 'global',
+    countryCode: 'GLOBAL',
+    url: 'https://www.facebook.com/groups/neurodiversityaffirmingparenting/',
+    badges: ['Facebook Community', '35k+ Members', 'Low Demand Parenting', 'Nervous System Safety'],
+    isVerified: true,
+    lastVerifiedYear: '2025/2026',
+  },
+
+  // =========================================================================
   // AFFIRMING BLOGS, GUIDES & ADVOCACY (Universal across all regions)
   // =========================================================================
   {
@@ -718,19 +764,9 @@ export const CAREGIVER_RESOURCES: ResourceItem[] = [
 ];
 
 /**
- * Coarse, non-invasive initial region detection.
- * Inspects device timezone / locale without triggering permission dialogs.
+ * Offline timezone-based coarse regional estimate.
  */
-export function detectInitialRegion(): string {
-  if (typeof window !== 'undefined') {
-    try {
-      const saved = localStorage.getItem('beeyou_caregiver_region');
-      if (saved && SUPPORTED_REGIONS.some((r) => r.code === saved)) {
-        return saved;
-      }
-    } catch {}
-  }
-
+export function detectRegionFromTimezone(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     
@@ -783,9 +819,65 @@ export function detectInitialRegion(): string {
 }
 
 /**
+ * Reverse geocodes device coordinates to ISO subdivision code (e.g. US-VA, US-CA, CA-ON).
+ * Uses free, client-side BigDataCloud reverse geocode client API with automatic timeout.
+ */
+export async function detectRegionFromCoordinates(latitude: number, longitude: number): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      const subCode = (data.principalSubdivisionCode || '').trim();
+      const match = SUPPORTED_REGIONS.find((r) => r.code === subCode);
+      if (match) return match.code;
+
+      const countryCode = (data.countryCode || '').trim();
+      if (countryCode === 'GB') return 'GB-ALL';
+      if (countryCode === 'AU') return 'AU-ALL';
+      if (countryCode === 'CA') return 'CA-ON';
+      if (countryCode === 'US') return 'US-VA';
+    }
+  } catch (err) {
+    console.warn('[CaregiverResources] Reverse geocoding fetch error, using fallback:', err);
+  }
+
+  return detectRegionFromTimezone();
+}
+
+/**
+ * Initial region determination.
+ * Default is STRICTLY 'GLOBAL' unless the user has explicitly enabled location!
+ */
+export function detectInitialRegion(): string {
+  if (typeof window !== 'undefined') {
+    try {
+      const isLocationEnabled = localStorage.getItem('beeyou_location_enabled') === 'true';
+      if (!isLocationEnabled) {
+        return 'GLOBAL';
+      }
+      const saved = localStorage.getItem('beeyou_caregiver_region');
+      if (saved && SUPPORTED_REGIONS.some((r) => r.code === saved)) {
+        return saved;
+      }
+      return detectRegionFromTimezone();
+    } catch {}
+  }
+  return 'GLOBAL';
+}
+
+/**
  * Filter resources strictly based on active location.
  *
  * Rules:
+ * - If selectedRegion is 'GLOBAL':
+ *   - Only items with scope === 'global' (peer communities, FB groups, subreddits, affirming blogs, crisis line) are returned.
+ *   - All state, provincial, and national funding programs are EXCLUDED until location is enabled.
  * - If selectedRegion is ANY US state (e.g. 'US-VA', 'US-CA', 'US-FL'):
  *   - Only items with regionCode === selectedRegion, countryCode === 'US' (national), or scope === 'global' are included.
  *   - Ontario items (CA-ON) and Canadian national items (CA) are 100% EXCLUDED!
@@ -793,8 +885,6 @@ export function detectInitialRegion(): string {
  * - If selectedRegion is ANY Canadian province (e.g. 'CA-ON', 'CA-BC', 'CA-AB'):
  *   - Only items with regionCode === selectedRegion, countryCode === 'CA' (national), or scope === 'global' are included.
  *   - Virginia and all other US state items are 100% EXCLUDED!
- * - If selectedRegion is 'GLOBAL':
- *   - All global items are shown, plus all regions are available.
  */
 export function filterResources(
   resources: ResourceItem[],
@@ -809,7 +899,12 @@ export function filterResources(
 
   return resources.filter((item) => {
     // 1. Regional Exclusion Rule
-    if (selectedRegionCode !== 'GLOBAL') {
+    if (selectedRegionCode === 'GLOBAL') {
+      // Location NOT enabled: strictly show universal global resources only
+      if (item.scope !== 'global') {
+        return false;
+      }
+    } else {
       if (item.scope === 'regional') {
         if (item.regionCode !== selectedRegionCode) {
           return false; // Mismatched state/province -> Strictly exclude!
@@ -819,7 +914,7 @@ export function filterResources(
           return false; // Mismatched country -> Strictly exclude!
         }
       }
-      // scope === 'global' items pass through to all regions
+      // scope === 'global' items pass through to all active regions
     }
 
     // 2. Category / Saved Filter

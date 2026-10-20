@@ -206,6 +206,56 @@ const vaSearchReddit = filterResources(
 );
 assert(vaSearchReddit.length >= 3, `Searching "reddit" in Virginia finds r/Autism_Parenting, r/AutisticAdults, and r/spicyautism`);
 
+// -----------------------------------------------------------------------------
+// TEST 6: GLOBAL DEFAULT ISOLATION (When Location is Disabled)
+// -----------------------------------------------------------------------------
+console.log('\nTest 6: GLOBAL Default Isolation (When Location is Disabled)');
+
+const globalResults = filterResources(
+  CAREGIVER_RESOURCES,
+  'GLOBAL',
+  'all',
+  '',
+  new Set()
+);
+
+assert(globalResults.length > 0, `Global default returns non-empty list of universal resources (found: ${globalResults.length})`);
+
+// Ensure strictly NO regional or national items are present in GLOBAL view
+const allAreGlobal = globalResults.every((r) => r.scope === 'global');
+assert(allAreGlobal, 'All resources in GLOBAL mode strictly have scope === "global"');
+
+const globalHasOntario = globalResults.some((r) => r.id === 'ontario_access_oap');
+assert(!globalHasOntario, 'AccessOAP (Ontario) is STRICTLY EXCLUDED from GLOBAL mode');
+
+const globalHasVirginia = globalResults.some((r) => r.id === 'virginia_dbhds_dd_waivers');
+assert(!globalHasVirginia, 'Virginia DBHDS is STRICTLY EXCLUDED from GLOBAL mode');
+
+const globalHasUSNational = globalResults.some((r) => r.id === 'us_idea_iep_rights');
+assert(!globalHasUSNational, 'US National IDEA is STRICTLY EXCLUDED from GLOBAL mode');
+
+const globalHasCANational = globalResults.some((r) => r.id === 'canada_disability_tax_credit_cdb');
+assert(!globalHasCANational, 'Canada National DTC is STRICTLY EXCLUDED from GLOBAL mode');
+
+// Check presence of top peer communities, Facebook groups, blogs, and helplines
+const globalHasFBInclusivity = globalResults.some((r) => r.id === 'fb_autism_inclusivity');
+assert(globalHasFBInclusivity, 'Facebook group Autism Inclusivity is included in GLOBAL mode');
+
+const globalHasFBAAC = globalResults.some((r) => r.id === 'fb_aac_motivate_model_move');
+assert(globalHasFBAAC, 'Facebook group AAC Motivate Model Move is included in GLOBAL mode');
+
+const globalHasFBNeuroAffirming = globalResults.some((r) => r.id === 'fb_neurodiversity_affirming_parenting');
+assert(globalHasFBNeuroAffirming, 'Facebook group Neurodiversity Affirming Parenting is included in GLOBAL mode');
+
+const globalHasReddit = globalResults.some((r) => r.id === 'reddit_autism_parenting');
+assert(globalHasReddit, 'r/Autism_Parenting Reddit community is included in GLOBAL mode');
+
+const globalHasTPGA = globalResults.some((r) => r.id === 'blog_thinking_persons_guide');
+assert(globalHasTPGA, 'Thinking Person’s Guide to Autism blog is included in GLOBAL mode');
+
+const globalHas988 = globalResults.some((r) => r.id === 'helpline_988_crisis_lifeline');
+assert(globalHas988, '988 Suicide & Crisis Lifeline is included in GLOBAL mode');
+
 console.log('\n------------------------------------------------------------------------');
 console.log(`Results: ${passCount} / ${passCount + failCount} assertions passed (${Math.round((passCount / (passCount + failCount)) * 100)}%)`);
 
