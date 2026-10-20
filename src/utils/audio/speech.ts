@@ -420,6 +420,46 @@ export function getAvailableVoices(): SpeechSynthesisVoice[] {
 }
 
 /**
+ * System voice preference mappings per persona to guarantee audibly distinct,
+ * authentic voice characteristics on iOS, Android, and Desktop on-device speech.
+ */
+export const PERSONA_SYSTEM_VOICE_PREFERENCES: Record<string, { preferred: string[]; avoid?: string[] }> = {
+  // Male personas: prioritize male voices (Daniel on iOS, David/Guy on Windows, Alex on Mac)
+  fenrir: { preferred: ['daniel', 'david', 'guy', 'ryan', 'oliver', 'george', 'mark', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
+  zephyr: { preferred: ['daniel', 'oliver', 'ryan', 'david', 'guy', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
+  achird: { preferred: ['daniel', 'george', 'david', 'mark', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
+  iapetus: { preferred: ['daniel', 'david', 'bruce', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
+  algenib: { preferred: ['daniel', 'guy', 'david', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
+  rasalas: { preferred: ['daniel', 'ryan', 'david', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
+  achernar: { preferred: ['daniel', 'oliver', 'ryan', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
+
+  // Leda: Australian / bright female (Karen on iOS, Jenny/Ava on Windows/Web)
+  leda: { preferred: ['karen', 'ava', 'zoe', 'jenny', 'allison'], avoid: ['daniel', 'david', 'male'] },
+
+  // Puck: Youthful/Child tone (Samantha, Ava, Zoe)
+  puck: { preferred: ['samantha', 'ava', 'zoe', 'junior'], avoid: ['daniel', 'david', 'male'] },
+
+  // Expressive female: Moira (Irish on iOS), Victoria, Serena
+  aoede: { preferred: ['moira', 'victoria', 'serena', 'fiona'], avoid: ['daniel', 'david', 'samantha', 'male'] },
+  callirrhoe: { preferred: ['moira', 'serena', 'victoria'], avoid: ['daniel', 'david', 'samantha', 'male'] },
+
+  // Clear female: Tessa (South African on iOS), Fiona, Hazel
+  autonoe: { preferred: ['tessa', 'fiona', 'hazel'], avoid: ['daniel', 'david', 'samantha', 'male'] },
+  sulafat: { preferred: ['tessa', 'karen', 'fiona'], avoid: ['daniel', 'david', 'samantha', 'male'] },
+
+  // Calm maternal female: Samantha, Allison, Susan
+  kore: { preferred: ['samantha', 'allison', 'susan', 'aria'], avoid: ['daniel', 'david', 'male'] },
+  vindemiatrix: { preferred: ['samantha', 'susan', 'allison'], avoid: ['daniel', 'david', 'male'] },
+  polaris: { preferred: ['samantha', 'allison', 'aria'], avoid: ['daniel', 'david', 'male'] },
+
+  // Articulate professional female: Karen, Zira, Jenny
+  erinome: { preferred: ['karen', 'zira', 'jenny', 'aria'], avoid: ['daniel', 'david', 'male'] },
+  despina: { preferred: ['karen', 'zira', 'jenny', 'aria'], avoid: ['daniel', 'david', 'male'] },
+  sadachbia: { preferred: ['karen', 'ava', 'zoe'], avoid: ['daniel', 'david', 'male'] },
+  alchiba: { preferred: ['karen', 'ava', 'zoe'], avoid: ['daniel', 'david', 'male'] },
+};
+
+/**
  * Finds and returns the single highest-quality, most fluid system voice
  * available on the user's device for a given language.
  */
@@ -442,13 +482,16 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
   if (candidates.length === 0) return null;
 
   const personaObj = getVoicePersonaById(persona);
+  const personaId = (personaObj.id || '').toLowerCase();
+  const pref = PERSONA_SYSTEM_VOICE_PREFERENCES[personaId];
+
   const isPreferFemale = personaObj.gender === 'female';
   const isPreferMale = personaObj.gender === 'male';
   const isChild = personaObj.gender === 'child';
 
   const femaleKeywords = ['female', 'zira', 'jenny', 'aria', 'samantha', 'ava', 'zoe', 'allison', 'karen', 'serena', 'victoria', 'moira', 'fiona', 'tessa', 'ana', 'hazel', 'susan', 'cathy', 'agnes'];
   const maleKeywords = ['male', 'david', 'puck', 'guy', 'ryan', 'daniel', 'oliver', 'evan', 'tom', 'alex', 'george', 'mark', 'christopher', 'fred', 'bruce', 'ralph'];
-  const childKeywords = ['child', 'junior', 'kid', 'youth', 'puck', 'samantha', 'ava', 'zoe', 'daniel'];
+  const childKeywords = ['child', 'junior', 'kid', 'youth', 'puck', 'ava', 'zoe'];
 
   const scoreVoice = (v: SpeechSynthesisVoice): number => {
     let score = rateVoiceNaturalness(v);
@@ -456,6 +499,12 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
 
     if (isCanadianFrench) {
       if (v.lang.toLowerCase().includes('ca') || n.includes('canada')) score += 100;
+    }
+
+    // Persona-specific preference boost
+    if (pref) {
+      if (pref.preferred.some((k) => n.includes(k))) score += 800;
+      if (pref.avoid && pref.avoid.some((k) => n.includes(k))) score -= 600;
     }
 
     if (isPreferMale) {
@@ -720,15 +769,12 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
-    } else {
-      // Uncached neural audio: fetch from edge server with a 2500ms safety window.
-      // This ensures chosen neural personas (Puck, Fenrir, Leda, etc.) genuinely play
-      // rather than prematurely dropping to the default system voice.
+    } else if (options?.previewAudio) {
+      // Explicit Audition Preview: wait up to 2500ms for neural audio sample from server
       try {
-        const timeoutMs = options?.previewAudio ? 3500 : 2500;
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem) {
@@ -736,8 +782,13 @@ export async function speakText(
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch (err) {
-        console.warn(`[Audio] Neural stream (${selectedPersonaId}) failed:`, err);
+        console.warn(`[Audio] Neural preview stream (${selectedPersonaId}) failed:`, err);
       }
+    } else {
+      // AAC communication button tap:
+      // Trigger background fetch to warm the cache for future taps, but never block instant vocalization!
+      // Immediately fall through to speakWithBrowserSpeechSynthesis (< 20ms response).
+      getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
     }
   }
 
@@ -1082,9 +1133,21 @@ function speakWithBrowserSpeechSynthesis(
       utterance.lang = targetLang;
 
       // Select system voice if available
-      const voices = getAvailableVoices();
-      if (options?.voiceURI) {
-        const explicit = voices.find((v) => v.voiceURI === options.voiceURI);
+      let voices = getAvailableVoices();
+      if ((!voices || voices.length === 0) && 'speechSynthesis' in window) {
+        voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) cachedVoices = voices;
+      }
+
+      if (options?.voiceURI && voices && voices.length > 0) {
+        const query = options.voiceURI.trim().toLowerCase();
+        const explicit = voices.find(
+          (v) =>
+            v.voiceURI.toLowerCase() === query ||
+            v.name.toLowerCase() === query ||
+            v.voiceURI.toLowerCase().includes(query) ||
+            v.name.toLowerCase().includes(query)
+        );
         if (explicit) {
           const vLang = explicit.lang.toLowerCase();
           const tPrefix = (options?.lang || 'en').toLowerCase();
@@ -1094,17 +1157,19 @@ function speakWithBrowserSpeechSynthesis(
             (tPrefix === 'fr_ca' && vLang.startsWith('fr'))
           ) {
             utterance.voice = explicit;
+            utterance.lang = explicit.lang; // Synchronize utterance.lang with voice to fix iOS WebKit voice override
           }
         }
       }
 
-      if (!utterance.voice && voices.length > 0) {
+      if (!utterance.voice && voices && voices.length > 0) {
         const targetPrefix = 
           options?.lang === 'fr_ca' ? 'fr_ca' :
           targetLang.substring(0, 2);
         const bestVoice = getBestSystemVoice(targetPrefix, options?.voicePersona || 'Kore');
         if (bestVoice) {
           utterance.voice = bestVoice;
+          utterance.lang = bestVoice.lang; // Synchronize utterance.lang with voice to fix iOS WebKit voice override
         }
       }
 

@@ -76,6 +76,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     linkedDeviceCode,
     setLinkedDeviceCode,
     settings,
+    updateSettings,
     startFreeTrial,
     setSubscriptionTier,
     setShowEmailVerificationModal,
@@ -260,8 +261,11 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   const finalizeOnboarding = (withTrial = false) => {
     if (withTrial) {
       startFreeTrial(selectedCycle);
+      const suggestedVoice = selectedPersona === 'child' ? 'puck' : selectedPersona === 'teen' ? 'zephyr' : 'kore';
+      updateSettings({ voicePersona: suggestedVoice });
     } else {
       setSubscriptionTier('basic');
+      updateSettings({ voicePersona: 'system' });
     }
 
     // 1. Commit persona & profile to state

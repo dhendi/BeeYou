@@ -1110,7 +1110,6 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (isValidGeminiKey && voiceKey !== 'system') {
       const candidateModels = [
-        'gemini-3.8-flash-lite-tts',
         'gemini-2.5-flash-preview-tts',
         'gemini-3.8-flash-tts',
       ];
