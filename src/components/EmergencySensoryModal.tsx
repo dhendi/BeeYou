@@ -14,6 +14,8 @@ const EMERGENCY_AAC_CARDS = [
 ];
 
 const SOUNDSCAPE_OPTIONS: { id: SoundscapeId; label: string }[] = [
+  { id: 'heartbeat_womb', label: 'Heartbeat & Womb' },
+  { id: 'bilateral_stimulation', label: 'Bilateral 8D Stimulation' },
   { id: 'brown_noise', label: 'Brown Noise' },
   { id: 'rain', label: 'Rain' },
   { id: 'ocean', label: 'Ocean' },

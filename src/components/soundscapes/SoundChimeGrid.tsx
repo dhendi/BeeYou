@@ -31,7 +31,12 @@ import {
   Activity,
   Infinity,
   MessageSquareHeart,
-  Fan
+  Fan,
+  Heart,
+  WashingMachine,
+  Droplets,
+  Sprout,
+  Umbrella
 } from 'lucide-react';
 import { 
   playSoundscape, 
@@ -468,6 +473,107 @@ export const SOUND_HONEYCOMB_CATALOG: HoneycombSoundDef[] = [
         <path d="M9 6a3.5 3.5 0 0 1 6 0" />
         <path d="M7 3.5a6.5 6.5 0 0 1 10 0" />
       </svg>
+    ),
+  },
+
+  // ── NEW SENSORY GROUNDING & OT CLINICAL TRACKS ──
+  {
+    id: 'bilateral_stimulation',
+    name: 'Bilateral 8D',
+    category: 'focus',
+    type: 'frequency',
+    freqHz: '8D',
+    icon: (active) => (
+      <div className="relative flex items-center justify-center">
+        <Headphones
+          className="w-7 h-7 sm:w-8 sm:h-8"
+          strokeWidth={2}
+          fill={active ? 'currentColor' : 'none'}
+          fillOpacity={0.2}
+        />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="absolute -top-1 -right-1 w-3.5 h-3.5 opacity-80 pointer-events-none">
+          <path d="M15 8a4 4 0 0 1 0 8" />
+        </svg>
+      </div>
+    ),
+  },
+  {
+    id: 'heartbeat_womb',
+    name: 'Heartbeat & Womb',
+    category: 'focus',
+    type: 'wood',
+    icon: (active) => (
+      <Heart
+        className="w-7 h-7 sm:w-8 sm:h-8 text-rose-500"
+        strokeWidth={2}
+        fill={active ? 'currentColor' : 'none'}
+        fillOpacity={0.3}
+      />
+    ),
+  },
+  {
+    id: 'appliance_hum',
+    name: 'Appliance Hum',
+    category: 'city',
+    type: 'wood',
+    icon: (active) => (
+      <WashingMachine
+        className="w-7 h-7 sm:w-8 sm:h-8"
+        strokeWidth={2}
+        fill={active ? 'currentColor' : 'none'}
+        fillOpacity={0.2}
+      />
+    ),
+  },
+  {
+    id: 'attic_tin_roof',
+    name: 'Attic Tin Roof',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <div className="relative flex items-center justify-center">
+        <Umbrella
+          className="w-7 h-7 sm:w-8 sm:h-8"
+          strokeWidth={2}
+          fill={active ? 'currentColor' : 'none'}
+          fillOpacity={0.2}
+        />
+        <Droplets className="absolute -top-1 -right-1 w-3.5 h-3.5 text-sky-500 opacity-90" />
+      </div>
+    ),
+  },
+  {
+    id: 'night_train_sleeper',
+    name: 'Night Sleeper',
+    category: 'city',
+    type: 'wood',
+    icon: (active) => (
+      <div className="relative flex items-center justify-center">
+        <Train
+          className="w-7 h-7 sm:w-8 sm:h-8"
+          strokeWidth={2}
+          fill={active ? 'currentColor' : 'none'}
+          fillOpacity={0.2}
+        />
+        <Moon className="absolute -top-1 -right-1 w-3.5 h-3.5 text-amber-500 opacity-90 fill-amber-400" />
+      </div>
+    ),
+  },
+  {
+    id: 'greenhouse_misting',
+    name: 'Greenhouse Mist',
+    category: 'ambiance',
+    type: 'wood',
+    icon: (active) => (
+      <div className="relative flex items-center justify-center">
+        <Sprout
+          className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600"
+          strokeWidth={2}
+          fill={active ? 'currentColor' : 'none'}
+          fillOpacity={0.2}
+        />
+        <Droplets className="absolute -top-1 -right-1 w-3.5 h-3.5 text-teal-500 opacity-90" />
+      </div>
     ),
   },
 ];

@@ -964,7 +964,13 @@ export type SoundscapeId =
   | 'counting_sheep'
   | 'bubble_wrap'
   | 'puppy'
-  | 'kitten';
+  | 'kitten'
+  | 'bilateral_stimulation'
+  | 'heartbeat_womb'
+  | 'appliance_hum'
+  | 'attic_tin_roof'
+  | 'night_train_sleeper'
+  | 'greenhouse_misting';
 
 export interface SoundscapeItem {
   id: SoundscapeId;

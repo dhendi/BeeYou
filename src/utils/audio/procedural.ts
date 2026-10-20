@@ -1286,6 +1286,406 @@ export function startProceduralTrack(id: SoundscapeId, volume: number, track: Ac
         playPop(pCtx, pCtx.currentTime);
       }, 320);
       track.timers.push(popTimer);
+
+    } else if (id === 'bilateral_stimulation') {
+      // Bilateral Auditory Stimulation (8D Panning): Occupational therapy calming tool
+      // Gentle harmonic acoustic chime layer and soft ocean wash slowly panning left-to-right
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+
+      // Warm F major pentatonic intervals (174.6Hz and 261.6Hz)
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(174.6, now);
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(261.6, now);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(950, now);
+
+      oscGain.gain.setValueAtTime(volume * 0.45, now);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(oscGain);
+
+      // Soft pink noise bed for ocean/forest breeze feel
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        data[i] = (b0 + b1 + b2) * 0.3;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.setValueAtTime(600, now);
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(volume * 0.25, now);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+
+      // Route everything through the StereoPannerNode
+      if (panner) {
+        oscGain.connect(panner);
+        noiseGain.connect(panner);
+        panner.connect(masterGain);
+        track.nodes.push(panner);
+
+        // Slow 0.22 Hz LFO oscillator for smooth left-to-right-to-left panning
+        const panLFO = ctx.createOscillator();
+        const panDepth = ctx.createGain();
+        panLFO.type = 'sine';
+        panLFO.frequency.setValueAtTime(0.22, now); // ~4.5 seconds per bilateral cycle
+        panDepth.gain.setValueAtTime(0.85, now); // Swing from -0.85 (left) to +0.85 (right)
+        panLFO.connect(panDepth);
+        panDepth.connect(panner.pan);
+        panLFO.start(now);
+        track.nodes.push(panLFO, panDepth);
+      } else {
+        oscGain.connect(masterGain);
+        noiseGain.connect(masterGain);
+      }
+
+      osc1.start(now);
+      osc2.start(now);
+      noise.start(now);
+      track.nodes.push(osc1, osc2, oscGain, filter, noise, noiseFilter, noiseGain);
+
+    } else if (id === 'heartbeat_womb') {
+      // Deep Resting Heartbeat & Brown Noise (Womb / Somatic Grounding)
+      // Steady 60 BPM maternal resting heartbeat rhythm layered under low-frequency brown noise
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.02 * white) / 1.02;
+        last = data[i];
+        data[i] *= 2.8;
+      }
+      const brown = ctx.createBufferSource();
+      brown.buffer = buffer;
+      brown.loop = true;
+      const brownFilter = ctx.createBiquadFilter();
+      brownFilter.type = 'lowpass';
+      brownFilter.frequency.setValueAtTime(190, now);
+      const brownGain = ctx.createGain();
+      brownGain.gain.setValueAtTime(volume * 0.45, now);
+      brown.connect(brownFilter);
+      brownFilter.connect(brownGain);
+      brownGain.connect(masterGain);
+      brown.start(now);
+      track.nodes.push(brown, brownFilter, brownGain);
+
+      // 60 BPM physiological "lub-dub" double pulse (every 1000ms)
+      const playHeartbeatPulse = (hbCtx: AudioContext, hbNow: number) => {
+        // First pulse: Lub (ventricular contraction, 56Hz)
+        const oscLub = hbCtx.createOscillator();
+        const gainLub = hbCtx.createGain();
+        oscLub.type = 'sine';
+        oscLub.frequency.setValueAtTime(56, hbNow);
+        oscLub.frequency.exponentialRampToValueAtTime(38, hbNow + 0.12);
+        gainLub.gain.setValueAtTime(volume * 0.85, hbNow);
+        gainLub.gain.exponentialRampToValueAtTime(0.0001, hbNow + 0.13);
+        oscLub.connect(gainLub);
+        gainLub.connect(masterGain);
+        oscLub.start(hbNow);
+        oscLub.stop(hbNow + 0.14);
+
+        // Second pulse: Dub (semilunar closure, 46Hz, 150ms later)
+        const dubTime = hbNow + 0.15;
+        const oscDub = hbCtx.createOscillator();
+        const gainDub = hbCtx.createGain();
+        oscDub.type = 'sine';
+        oscDub.frequency.setValueAtTime(48, dubTime);
+        oscDub.frequency.exponentialRampToValueAtTime(32, dubTime + 0.14);
+        gainDub.gain.setValueAtTime(volume * 0.65, dubTime);
+        gainDub.gain.exponentialRampToValueAtTime(0.0001, dubTime + 0.15);
+        oscDub.connect(gainDub);
+        gainDub.connect(masterGain);
+        oscDub.start(dubTime);
+        oscDub.stop(dubTime + 0.16);
+      };
+
+      // Play immediate first beat
+      playHeartbeatPulse(ctx, now + 0.05);
+
+      const hbTimer = setInterval(() => {
+        if (!track.active) return;
+        const hbCtx = getAudioContext();
+        if (!hbCtx || !track.gainNode) return;
+        playHeartbeatPulse(hbCtx, hbCtx.currentTime);
+      }, 1000); // 60 BPM
+      track.timers.push(hbTimer);
+
+    } else if (id === 'appliance_hum') {
+      // Household Appliance Hum (Dishwasher / Clothes Dryer)
+      // Rhythmic mechanical room tone and muffled tumbling whir
+      const motorHum = ctx.createOscillator();
+      const motorGain = ctx.createGain();
+      motorHum.type = 'triangle';
+      motorHum.frequency.setValueAtTime(58, now); // 60Hz mains motor drone
+      motorGain.gain.setValueAtTime(volume * 0.35, now);
+      motorHum.connect(motorGain);
+      motorGain.connect(masterGain);
+      motorHum.start(now);
+      track.nodes.push(motorHum, motorGain);
+
+      // Low mechanical noise layer with cyclical drum tumbling whir
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.05 * white) / 1.05;
+        last = data[i];
+      }
+      const drumNoise = ctx.createBufferSource();
+      drumNoise.buffer = buffer;
+      drumNoise.loop = true;
+
+      const drumFilter = ctx.createBiquadFilter();
+      drumFilter.type = 'lowpass';
+      drumFilter.frequency.setValueAtTime(380, now);
+
+      const drumGain = ctx.createGain();
+      drumGain.gain.setValueAtTime(volume * 0.4, now);
+
+      // 0.55 Hz gentle tumbling swell (1.8s per rotation)
+      const tumbleLFO = ctx.createOscillator();
+      const tumbleDepth = ctx.createGain();
+      tumbleLFO.type = 'sine';
+      tumbleLFO.frequency.setValueAtTime(0.55, now);
+      tumbleDepth.gain.setValueAtTime(volume * 0.15, now);
+      tumbleLFO.connect(tumbleDepth);
+      tumbleDepth.connect(drumGain.gain);
+      tumbleLFO.start(now);
+
+      drumNoise.connect(drumFilter);
+      drumFilter.connect(drumGain);
+      drumGain.connect(masterGain);
+      drumNoise.start(now);
+      track.nodes.push(drumNoise, drumFilter, drumGain, tumbleLFO, tumbleDepth);
+
+    } else if (id === 'attic_tin_roof') {
+      // Attic Rain with Tin Roof Patter: Distinct, hollow raindrops on metal/tin eaves
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.035 * white) / 1.035;
+        last = data[i];
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(1400, now);
+      bp.Q.setValueAtTime(1.1, now);
+
+      const rainBedGain = ctx.createGain();
+      rainBedGain.gain.setValueAtTime(volume * 0.55, now);
+
+      noise.connect(bp);
+      bp.connect(rainBedGain);
+      rainBedGain.connect(masterGain);
+      noise.start(now);
+      track.nodes.push(noise, bp, rainBedGain);
+
+      // Hollow, metallic tin roof droplet impacts
+      const tinTimer = setInterval(() => {
+        if (!track.active) return;
+        const tCtx = getAudioContext();
+        if (!tCtx || !track.gainNode) return;
+        const tNow = tCtx.currentTime;
+
+        // Distinct metallic ping (1800Hz - 2600Hz)
+        const ping = tCtx.createOscillator();
+        const pingGain = tCtx.createGain();
+        ping.type = 'triangle';
+        const pFreq = 1800 + Math.random() * 800;
+        ping.frequency.setValueAtTime(pFreq, tNow);
+        ping.frequency.exponentialRampToValueAtTime(320, tNow + 0.035);
+        pingGain.gain.setValueAtTime(volume * 0.45, tNow);
+        pingGain.gain.exponentialRampToValueAtTime(0.0001, tNow + 0.04);
+        ping.connect(pingGain);
+        pingGain.connect(masterGain);
+        ping.start(tNow);
+        ping.stop(tNow + 0.045);
+
+        // Hollow metal body resonance (240Hz)
+        const thud = tCtx.createOscillator();
+        const thudGain = tCtx.createGain();
+        thud.type = 'sine';
+        thud.frequency.setValueAtTime(240, tNow);
+        thud.frequency.exponentialRampToValueAtTime(90, tNow + 0.05);
+        thudGain.gain.setValueAtTime(volume * 0.3, tNow);
+        thudGain.gain.exponentialRampToValueAtTime(0.0001, tNow + 0.055);
+        thud.connect(thudGain);
+        thudGain.connect(masterGain);
+        thud.start(tNow);
+        thud.stop(tNow + 0.06);
+      }, 95);
+      track.timers.push(tinTimer);
+
+    } else if (id === 'night_train_sleeper') {
+      // Night Train Sleeper Berth with Rain on Glass
+      // Rhythmic rail click-clack + gentle water drops trickling on train window
+      const engine = ctx.createOscillator();
+      const engineGain = ctx.createGain();
+      engine.type = 'sawtooth';
+      engine.frequency.setValueAtTime(42, now); // Low cabin engine drone
+      const engineFilter = ctx.createBiquadFilter();
+      engineFilter.type = 'lowpass';
+      engineFilter.frequency.setValueAtTime(120, now);
+      engineGain.gain.setValueAtTime(volume * 0.25, now);
+      engine.connect(engineFilter);
+      engineFilter.connect(engineGain);
+      engineGain.connect(masterGain);
+      engine.start(now);
+      track.nodes.push(engine, engineFilter, engineGain);
+
+      // Rain trickling on glass window bed
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.04 * white) / 1.04;
+        last = data[i];
+      }
+      const rainNoise = ctx.createBufferSource();
+      rainNoise.buffer = buffer;
+      rainNoise.loop = true;
+      const rainFilter = ctx.createBiquadFilter();
+      rainFilter.type = 'bandpass';
+      rainFilter.frequency.setValueAtTime(3200, now);
+      const rainGain = ctx.createGain();
+      rainGain.gain.setValueAtTime(volume * 0.35, now);
+      rainNoise.connect(rainFilter);
+      rainFilter.connect(rainGain);
+      rainGain.connect(masterGain);
+      rainNoise.start(now);
+      track.nodes.push(rainNoise, rainFilter, rainGain);
+
+      // Hypnotic rail sleeper "click-clack" rhythm (every 1100ms)
+      const playRailJoint = (rCtx: AudioContext, rNow: number) => {
+        // Joint 1: "Click"
+        const click1 = rCtx.createOscillator();
+        const cGain1 = rCtx.createGain();
+        click1.type = 'triangle';
+        click1.frequency.setValueAtTime(140, rNow);
+        click1.frequency.exponentialRampToValueAtTime(50, rNow + 0.06);
+        cGain1.gain.setValueAtTime(volume * 0.6, rNow);
+        cGain1.gain.exponentialRampToValueAtTime(0.0001, rNow + 0.07);
+        click1.connect(cGain1);
+        cGain1.connect(masterGain);
+        click1.start(rNow);
+        click1.stop(rNow + 0.08);
+
+        // Joint 2: "Clack" (120ms later)
+        const clackTime = rNow + 0.12;
+        const click2 = rCtx.createOscillator();
+        const cGain2 = rCtx.createGain();
+        click2.type = 'triangle';
+        click2.frequency.setValueAtTime(120, clackTime);
+        click2.frequency.exponentialRampToValueAtTime(45, clackTime + 0.06);
+        cGain2.gain.setValueAtTime(volume * 0.5, clackTime);
+        cGain2.gain.exponentialRampToValueAtTime(0.0001, clackTime + 0.07);
+        click2.connect(cGain2);
+        cGain2.connect(masterGain);
+        click2.start(clackTime);
+        click2.stop(clackTime + 0.08);
+      };
+
+      playRailJoint(ctx, now + 0.1);
+
+      const railTimer = setInterval(() => {
+        if (!track.active) return;
+        const rCtx = getAudioContext();
+        if (!rCtx || !track.gainNode) return;
+        playRailJoint(rCtx, rCtx.currentTime);
+      }, 1100);
+      track.timers.push(railTimer);
+
+    } else if (id === 'greenhouse_misting') {
+      // Greenhouse Canopy & Fern Misting: High-humidity room resonance & slow water drops
+      const bufferSize = ctx.sampleRate * 2;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + 0.05 * white) / 1.05;
+        last = data[i];
+      }
+      const mistNoise = ctx.createBufferSource();
+      mistNoise.buffer = buffer;
+      mistNoise.loop = true;
+
+      // Ultra-fine high-frequency micro-mist spray
+      const mistFilter = ctx.createBiquadFilter();
+      mistFilter.type = 'highpass';
+      mistFilter.frequency.setValueAtTime(5400, now);
+
+      const mistGain = ctx.createGain();
+      mistGain.gain.setValueAtTime(volume * 0.35, now);
+
+      // Gentle cyclical misting pulse (swell every 5s)
+      const mistLFO = ctx.createOscillator();
+      const mistDepth = ctx.createGain();
+      mistLFO.type = 'sine';
+      mistLFO.frequency.setValueAtTime(0.2, now);
+      mistDepth.gain.setValueAtTime(volume * 0.12, now);
+      mistLFO.connect(mistDepth);
+      mistDepth.connect(mistGain.gain);
+      mistLFO.start(now);
+
+      mistNoise.connect(mistFilter);
+      mistFilter.connect(mistGain);
+      mistGain.connect(masterGain);
+      mistNoise.start(now);
+      track.nodes.push(mistNoise, mistFilter, mistGain, mistLFO, mistDepth);
+
+      // Slow water droplet impacts on broad tropical leaves
+      const leafTimer = setInterval(() => {
+        if (!track.active) return;
+        const lCtx = getAudioContext();
+        if (!lCtx || !track.gainNode) return;
+        const lNow = lCtx.currentTime;
+
+        // Soft organic drop
+        const plop = lCtx.createOscillator();
+        const plopGain = lCtx.createGain();
+        plop.type = 'sine';
+        const pFreq = 340 + Math.random() * 120;
+        plop.frequency.setValueAtTime(pFreq, lNow);
+        plop.frequency.exponentialRampToValueAtTime(110, lNow + 0.06);
+        plopGain.gain.setValueAtTime(volume * 0.4, lNow);
+        plopGain.gain.exponentialRampToValueAtTime(0.0001, lNow + 0.07);
+        plop.connect(plopGain);
+        plopGain.connect(masterGain);
+        plop.start(lNow);
+        plop.stop(lNow + 0.08);
+      }, 750);
+      track.timers.push(leafTimer);
     }
   } catch (e) {
     console.error('Error starting procedural track:', e);
