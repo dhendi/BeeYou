@@ -11,7 +11,6 @@ import {
   Share2, 
   Check, 
   ShieldCheck, 
-  Sparkles, 
   MessageSquare, 
   BookOpen, 
   Landmark, 
@@ -628,12 +627,9 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
 
       {/* SUGGEST A RESOURCE FOOTER BANNER */}
       <div className="p-4 rounded-2xl bg-stone-100/80 border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-600 font-semibold">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>
-            {t('Know an active regional autism program or support circle in your area? Let us know so we can add it.')}
-          </span>
-        </div>
+        <span>
+          {t('Know an active regional autism program or support circle in your area? Let us know so we can add it.')}
+        </span>
         <button
           type="button"
           onClick={() => {
