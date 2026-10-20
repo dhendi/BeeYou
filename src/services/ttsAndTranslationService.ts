@@ -1231,12 +1231,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       }
     }
 
-    // If neural persona requested and Gemini unavailable, return null to prompt calibrated on-device speech fallback
-    if (voiceKey !== 'system') {
-      return null;
-    }
-
-    // Default system fallback for non-persona translation speech
+    // Multilingual speech fallback: if Gemini neural generation is unavailable,
+    // seamlessly provide crystal-clear multilingual speech using Google TTS for any language
     try {
       const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normalizedLang)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
       const response = await fetch(targetUrl, {

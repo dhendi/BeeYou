@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { isAllAssetsPreloaded, isAppOpenedInSession, markAppOpenedInSession } from './utils/appAssetPreloader';
+import { subscribeToLanguage } from './services/translator';
 
 import { CaregiverApp } from './components/CaregiverApp';
 import { ChildApp } from './components/ChildApp';
@@ -68,6 +69,14 @@ export default function App() {
       window.removeEventListener('popstate', handleRoleUpdate);
       window.removeEventListener('beeyou_role_change' as any, handleRoleUpdate);
     };
+  }, []);
+
+  // Synchronize entire React tree whenever language dictionary updates
+  const [langVersion, setLangVersion] = useState<number>(0);
+  useEffect(() => {
+    return subscribeToLanguage(() => {
+      setLangVersion((v) => v + 1);
+    });
   }, []);
 
   // Eagerly prefetch secondary heavy modals after initial mount

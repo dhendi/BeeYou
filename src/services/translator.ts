@@ -1,11 +1,12 @@
 /**
  * Lightweight Zero-Bloat On-Demand Translator
- * Uses static public/locales/*.json + localStorage cache
+ * Uses static public/locales/*.json + localStorage cache + dynamic background translation
  */
 
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
 let lowerDictionary: Record<string, string> = {};
+const pendingDynamicTranslations = new Set<string>();
 
 function rebuildLowerDictionary() {
   lowerDictionary = {};
@@ -51,10 +52,21 @@ export async function setLanguage(lang: string): Promise<void> {
     dictionary = {};
     lowerDictionary = {};
   } else {
+    // 1. Instant synchronous load from localStorage cache if available
+    try {
+      const cached = localStorage.getItem(`beeyou_dict_${lang}`);
+      if (cached) {
+        dictionary = JSON.parse(cached);
+        rebuildLowerDictionary();
+      }
+    } catch {}
+
+    // 2. Fetch fresh static dictionary from server
     try {
       const res = await fetch(`/locales/${lang}.json`);
       if (res.ok) {
-        dictionary = await res.json();
+        const freshData = await res.json();
+        dictionary = { ...dictionary, ...freshData };
         rebuildLowerDictionary();
         localStorage.setItem(`beeyou_dict_${lang}`, JSON.stringify(dictionary));
       }
@@ -64,6 +76,17 @@ export async function setLanguage(lang: string): Promise<void> {
   }
 
   window.dispatchEvent(new CustomEvent('beeyou_lang_changed', { detail: { lang } }));
+}
+
+export function subscribeToLanguage(listener: (lang: string) => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  const handler = (e: any) => {
+    listener(e?.detail?.lang || currentLang);
+  };
+  window.addEventListener('beeyou_lang_changed', handler);
+  return () => {
+    window.removeEventListener('beeyou_lang_changed', handler);
+  };
 }
 
 export function t(text: string): string {

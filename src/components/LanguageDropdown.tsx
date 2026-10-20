@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { ChevronDown, Check, Globe } from 'lucide-react';
 import { playChime } from '../utils/audio';
-import { t } from '../services/translator';
+import { t, setLanguage } from '../services/translator';
 
 import { AppLanguage } from '../types';
 
@@ -69,10 +69,11 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
     };
   }, [isOpen]);
 
-  const handleSelectLanguage = (code: LanguageOption['code']) => {
-    updateSettings({ language: code });
+  const handleSelectLanguage = async (code: LanguageOption['code']) => {
     playChime('tap');
     setIsOpen(false);
+    await setLanguage(code);
+    updateSettings({ language: code });
   };
 
   return (
@@ -80,6 +81,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
       {/* Dropdown Trigger Button */}
       <button
         type="button"
+        data-testid="language-dropdown-trigger"
         onClick={() => {
           setIsOpen(!isOpen);
           playChime('tap');
@@ -127,6 +129,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
                 <button
                   key={lang.code}
                   type="button"
+                  data-testid={`lang-option-${lang.code}`}
                   role="menuitem"
                   onClick={() => handleSelectLanguage(lang.code)}
                   className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-left transition-all cursor-pointer ${

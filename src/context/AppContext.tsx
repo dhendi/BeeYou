@@ -60,6 +60,7 @@ import {
   ConnectionStatusInfo,
 } from '../services/caregiverSync';
 import { wipeDeviceStorage, getSyncSecureCaregiverPin, getSecureCaregiverPin, saveSecureCaregiverPin } from '../services/authService';
+import { setLanguage, getLanguage, subscribeToLanguage } from '../services/translator';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -236,6 +237,7 @@ export interface AppContextType {
   updateChildProfile: (profile: Partial<ChildProfile>) => void;
   settings: AppSettings;
   updateSettings: (settings: Partial<AppSettings>) => void;
+  currentLanguage: AppLanguage;
 
   // Digital Routine Stickers & Rewards
   earnedStickers: EarnedRoutineSticker[];
@@ -561,6 +563,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const secPin = getSyncSecureCaregiverPin();
+    const storedLang = typeof window !== 'undefined' ? (localStorage.getItem('beeyou_lang') as AppLanguage) : null;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -569,15 +572,33 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
           const loaded = { ...INITIAL_APP_SETTINGS, ...parsed.settings };
           if (secPin) loaded.pin = secPin;
           if (!loaded.voiceRate || loaded.voiceRate <= 0.85) loaded.voiceRate = 1.0;
+          if (storedLang && storedLang !== loaded.language) {
+            loaded.language = storedLang;
+          }
           return loaded;
         }
       }
     } catch (e) {}
     return {
       ...INITIAL_APP_SETTINGS,
+      language: storedLang || INITIAL_APP_SETTINGS.language,
       pin: secPin || INITIAL_APP_SETTINGS.pin,
     };
   });
+
+  // Active synchronized language state
+  const [currentLanguage, setCurrentLanguage] = useState<AppLanguage>(() => {
+    const stored = typeof window !== 'undefined' ? (localStorage.getItem('beeyou_lang') as AppLanguage) : null;
+    return stored || settings.language || 'en';
+  });
+
+  useEffect(() => {
+    return subscribeToLanguage((lang) => {
+      const validLang = (lang as AppLanguage) || 'en';
+      setCurrentLanguage(validLang);
+      setSettings((prev) => (prev.language === validLang ? prev : { ...prev, language: validLang }));
+    });
+  }, []);
 
   // Re-sync secure PIN from device storage asynchronously
   useEffect(() => {
@@ -595,6 +616,9 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     if (newSettings.pin) {
       saveSecureCaregiverPin(newSettings.pin).catch(() => {});
+    }
+    if (newSettings.language) {
+      setLanguage(newSettings.language).catch(() => {});
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
@@ -1169,6 +1193,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     updateChildProfile,
     settings,
     updateSettings,
+    currentLanguage,
 
     // Digital Routine Stickers & Rewards
     earnedStickers: gamification.earnedStickers,
