@@ -681,48 +681,48 @@ export function stopSpeaking() {
  * 3. Never blocks user-gesture activation behind failing network calls.
  */
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
-  system: { pitch: 1.0, rate: 1.0 },
+  system: { pitch: 1.0, rate: 1.05 },
 
-  // Kids (Youthful, even-toned, monotonous AAC)
-  puck: { pitch: 1.02, rate: 1.0 },
-  leda: { pitch: 1.02, rate: 1.0 },
-  sadachbia: { pitch: 1.02, rate: 1.0 },
-  achernar: { pitch: 1.00, rate: 1.0 },
-  alchiba: { pitch: 1.02, rate: 1.0 },
+  // Kids (Warm, natural, clear AAC)
+  puck: { pitch: 1.00, rate: 1.05 },
+  leda: { pitch: 1.00, rate: 1.05 },
+  sadachbia: { pitch: 1.00, rate: 1.05 },
+  achernar: { pitch: 1.00, rate: 1.05 },
+  alchiba: { pitch: 1.00, rate: 1.05 },
 
-  // Teens (Steady, even-toned, matter-of-fact)
-  zephyr: { pitch: 0.98, rate: 1.0 },
-  fenrir: { pitch: 0.98, rate: 1.0 },
-  aoede: { pitch: 1.00, rate: 1.0 },
-  callirrhoe: { pitch: 0.98, rate: 1.0 },
-  autonoe: { pitch: 1.00, rate: 1.0 },
-  sulafat: { pitch: 1.00, rate: 1.0 },
+  // Teens (Natural, casual, fluent)
+  zephyr: { pitch: 1.00, rate: 1.05 },
+  fenrir: { pitch: 1.00, rate: 1.05 },
+  aoede: { pitch: 1.00, rate: 1.05 },
+  callirrhoe: { pitch: 1.00, rate: 1.05 },
+  autonoe: { pitch: 1.00, rate: 1.05 },
+  sulafat: { pitch: 1.00, rate: 1.05 },
 
-  // Caring Women (Calm, flat, steady)
-  kore: { pitch: 1.00, rate: 1.0 },
-  vindemiatrix: { pitch: 1.00, rate: 1.0 },
-  polaris: { pitch: 1.00, rate: 1.0 },
+  // Caring Women (Warm, natural, fluent)
+  kore: { pitch: 1.00, rate: 1.05 },
+  vindemiatrix: { pitch: 1.00, rate: 1.05 },
+  polaris: { pitch: 1.00, rate: 1.05 },
 
   // Professional Women (Crisp, articulate, structured)
-  erinome: { pitch: 1.00, rate: 1.0 },
-  despina: { pitch: 1.00, rate: 1.0 },
-  algieba: { pitch: 1.00, rate: 1.0 },
-  charon: { pitch: 1.00, rate: 1.0 },
-  kalyke: { pitch: 1.00, rate: 1.0 },
-  vega: { pitch: 1.00, rate: 1.0 },
-  schedar: { pitch: 1.00, rate: 1.0 },
+  erinome: { pitch: 1.00, rate: 1.05 },
+  despina: { pitch: 1.00, rate: 1.05 },
+  algieba: { pitch: 1.00, rate: 1.05 },
+  charon: { pitch: 1.00, rate: 1.05 },
+  kalyke: { pitch: 1.00, rate: 1.05 },
+  vega: { pitch: 1.00, rate: 1.05 },
+  schedar: { pitch: 1.00, rate: 1.05 },
 
-  // Caring Men (Steady, grounded, calm)
-  achird: { pitch: 0.96, rate: 1.0 },
-  umbriel: { pitch: 0.96, rate: 1.0 },
-  zubenelgenubi: { pitch: 0.96, rate: 1.0 },
-  rasalas: { pitch: 0.96, rate: 1.0 },
-  capella: { pitch: 0.96, rate: 1.0 },
+  // Caring Men (Steady, natural, warm)
+  achird: { pitch: 1.00, rate: 1.05 },
+  umbriel: { pitch: 1.00, rate: 1.05 },
+  zubenelgenubi: { pitch: 1.00, rate: 1.05 },
+  rasalas: { pitch: 1.00, rate: 1.05 },
+  capella: { pitch: 1.00, rate: 1.05 },
 
   // Professional Men (Articulate, steady, direct)
-  iapetus: { pitch: 0.96, rate: 1.0 },
-  sadaltager: { pitch: 0.96, rate: 1.0 },
-  tarazed: { pitch: 0.96, rate: 1.0 },
+  iapetus: { pitch: 1.00, rate: 1.05 },
+  sadaltager: { pitch: 1.00, rate: 1.05 },
+  tarazed: { pitch: 1.00, rate: 1.05 },
 };
 
 let latestSpeechRequestId = 0;
@@ -1008,15 +1008,18 @@ export function cleanRiffWav(buffer: ArrayBuffer): ArrayBuffer {
 }
 
 /**
- * Extracts raw PCM byte payload from a standard RIFF WAV buffer.
+ * Extracts raw PCM byte payload from a standard RIFF WAV buffer,
+ * automatically trimming leading and trailing dead silence down to 15ms
+ * so stitched sentences flow with natural human prosody.
  */
-export function extractWavPcm(buffer: ArrayBuffer): Uint8Array | null {
+export function extractWavPcm(buffer: ArrayBuffer, trimSilence = true): Uint8Array | null {
   if (buffer.byteLength < 44) return null;
   const view = new DataView(buffer);
   if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) {
     return null;
   }
   let offset = 12;
+  let sampleRate = 24000;
   while (offset + 8 <= buffer.byteLength) {
     const chunkId =
       String.fromCharCode(view.getUint8(offset)) +
@@ -1024,8 +1027,35 @@ export function extractWavPcm(buffer: ArrayBuffer): Uint8Array | null {
       String.fromCharCode(view.getUint8(offset + 2)) +
       String.fromCharCode(view.getUint8(offset + 3));
     const chunkSize = view.getUint32(offset + 4, true);
-    if (chunkId === 'data') {
-      return new Uint8Array(buffer, offset + 8, chunkSize);
+    if (chunkId === 'fmt ') {
+      sampleRate = view.getUint32(offset + 12, true);
+    } else if (chunkId === 'data') {
+      const raw = new Uint8Array(buffer, offset + 8, chunkSize);
+      if (!trimSilence || raw.byteLength < 600) return raw;
+
+      const numSamples = Math.floor(raw.byteLength / 2);
+      const threshold = 400; // -38 dB threshold
+
+      let startSample = 0;
+      for (let i = 0; i < numSamples; i++) {
+        const val = Math.abs(view.getInt16(offset + 8 + i * 2, true));
+        if (val > threshold) {
+          startSample = Math.max(0, i - Math.round(sampleRate * 0.015)); // 15ms lead padding
+          break;
+        }
+      }
+
+      let endSample = numSamples;
+      for (let i = numSamples - 1; i >= 0; i--) {
+        const val = Math.abs(view.getInt16(offset + 8 + i * 2, true));
+        if (val > threshold) {
+          endSample = Math.min(numSamples, i + Math.round(sampleRate * 0.025)); // 25ms trail padding
+          break;
+        }
+      }
+
+      if (startSample >= endSample) return raw;
+      return new Uint8Array(buffer, offset + 8 + startSample * 2, (endSample - startSample) * 2);
     }
     offset += 8 + chunkSize;
     if (chunkSize % 2 !== 0) offset++;
@@ -1101,8 +1131,8 @@ export async function synthesizeOfflineSentence(
   // Must have matched at least one core word in the selected voice
   if (pcmBuffers.length === 0) return null;
 
-  // 35ms natural silence gap between words (at 24000Hz 16-bit mono = 1680 bytes)
-  const gapBytes = Math.round(sampleRate * 0.035) * 2;
+  // 25ms natural conversational silence gap between words (at 24000Hz 16-bit mono = 1200 bytes)
+  const gapBytes = Math.round(sampleRate * 0.025) * 2;
   const gap = new Uint8Array(gapBytes);
 
   let totalPcmLen = 0;
@@ -1237,7 +1267,7 @@ export async function playAudioUrl(
   enableSilentModePlayback();
   stopSpeaking();
 
-  const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 1.0));
+  const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 1.05));
   let arrayBuffer: ArrayBuffer | null = null;
   const sourceUrl = typeof srcOrBuffer === 'string' ? srcOrBuffer : (fallbackBlobUrl || '');
 
@@ -1479,7 +1509,7 @@ function speakWithBrowserSpeechSynthesis(
 
       // Natural Human Cadence Calibration (Calibrated for persona acoustic differentiation)
       utterance.pitch = Math.max(0.5, Math.min(1.85, options?.pitch ?? 1.0));
-      utterance.rate = Math.max(0.55, Math.min(1.4, options?.rate ?? 1.0));
+      utterance.rate = Math.max(0.55, Math.min(1.4, options?.rate ?? 1.05));
 
       const langMap: Record<string, string> = {
         en: 'en-US',

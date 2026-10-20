@@ -818,7 +818,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                       Speech Rate ({settings.voiceRate.toFixed(2)}x)
                     </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                      Adjust speech speed to be slower and clearer or faster (0.85x recommended).
+                      Adjust speech speed to be slower and clearer or faster (1.0x standard).
                     </p>
                   </div>
                   <button

@@ -24,7 +24,7 @@ export interface VoicePersona {
  * - Client in-memory audio cache & HTTP stream URLs (&v=...)
  * - Server L1 RAM cache, L3 disk cache (.data/tts_cache), and cloud storage cache
  */
-export const TTS_GENERATION_VERSION = 'v5';
+export const TTS_GENERATION_VERSION = 'v6';
 
 export const VOICE_PERSONAS: VoicePersona[] = [
   // --- Group 0: Default Free System Voice (100% Free • On-Device • Zero Credits) ---

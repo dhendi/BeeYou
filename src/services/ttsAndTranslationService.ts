@@ -1164,7 +1164,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
                 text: cleanText,
                 annotations: [{
                   type: 'speech_metadata',
-                  style: `monotonous, flat pitch, completely even-toned, clinical AAC assistive communication, matter-of-fact, calm, brisk and steady pace, direct pronunciation without pitch swings, without melodic variation, without emotional inflection, without excitement or drama, ${persona.style}`,
+                  style: `natural, fluent conversational cadence, warm and steady pace, clear and articulate assistive communication, gentle prosody with smooth sentence rhythm, authentic and friendly without exaggerated theatrical drama, ${persona.style}`,
                 }],
               }],
             }],

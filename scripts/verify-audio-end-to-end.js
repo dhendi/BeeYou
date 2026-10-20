@@ -237,6 +237,7 @@ async function runVerification() {
       const view = new DataView(buffer);
       if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) return null;
       let offset = 12;
+      let sampleRate = 24000;
       while (offset + 8 <= buffer.byteLength) {
         const chunkId =
           String.fromCharCode(view.getUint8(offset)) +
@@ -244,8 +245,28 @@ async function runVerification() {
           String.fromCharCode(view.getUint8(offset + 2)) +
           String.fromCharCode(view.getUint8(offset + 3));
         const chunkSize = view.getUint32(offset + 4, true);
-        if (chunkId === 'data') {
-          return new Uint8Array(buffer, offset + 8, chunkSize);
+        if (chunkId === 'fmt ') {
+          sampleRate = view.getUint32(offset + 12, true);
+        } else if (chunkId === 'data') {
+          const raw = new Uint8Array(buffer, offset + 8, chunkSize);
+          const numSamples = Math.floor(raw.byteLength / 2);
+          const threshold = 400;
+          let startSample = 0;
+          for (let i = 0; i < numSamples; i++) {
+            if (Math.abs(view.getInt16(offset + 8 + i * 2, true)) > threshold) {
+              startSample = Math.max(0, i - Math.round(sampleRate * 0.015));
+              break;
+            }
+          }
+          let endSample = numSamples;
+          for (let i = numSamples - 1; i >= 0; i--) {
+            if (Math.abs(view.getInt16(offset + 8 + i * 2, true)) > threshold) {
+              endSample = Math.min(numSamples, i + Math.round(sampleRate * 0.025));
+              break;
+            }
+          }
+          if (startSample >= endSample) return raw;
+          return new Uint8Array(buffer, offset + 8 + startSample * 2, (endSample - startSample) * 2);
         }
         offset += 8 + chunkSize;
         if (chunkSize % 2 !== 0) offset++;
@@ -293,7 +314,7 @@ async function runVerification() {
 
       if (pcmBuffers.length === 0) return null;
 
-      const gapBytes = Math.round(sampleRate * 0.06) * 2;
+      const gapBytes = Math.round(sampleRate * 0.025) * 2;
       const gap = new Uint8Array(gapBytes);
 
       let totalPcmLen = 0;
