@@ -1,23 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  Volume2, 
-  VolumeX, 
-  Sliders, 
-  Check, 
-  Play, 
-  Eye, 
-  Heart, 
-  Star,
-  SlidersHorizontal,
-  Zap,
-  RotateCcw,
-  Mic,
-  Smartphone,
-  Baby,
-  Headphones,
-  Briefcase
-} from 'lucide-react';
+// Clean minimalist accessible voice studio without redundant decorative icons
 import { playChime, prewarmCoreAudioVocabulary } from '../../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../../services/haptics';
 import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../../data/voicePersonasData';
@@ -81,13 +64,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const isAacActive = enabledFeatures?.aacCommunication !== false && enabledFeatures?.aac !== false;
 
-  const renderPersonaIcon = (persona: VoicePersona, size = 'w-4 h-4') => {
-    if (persona.category === 'system') return <Smartphone className={`${size} text-emerald-700`} />;
-    if (persona.category === 'kids') return <Baby className={`${size} text-amber-700`} />;
-    if (persona.category === 'teens') return <Headphones className={`${size} text-indigo-700`} />;
-    if (persona.category.startsWith('caring')) return <Heart className={`${size} text-rose-700`} />;
-    return <Briefcase className={`${size} text-sky-700`} />;
-  };
+
 
   const handleToggleAac = () => {
     const next = !isAacActive;
@@ -115,9 +92,6 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="w-8 h-8 rounded-xl bg-amber-200/80 border border-amber-300 text-amber-900 flex items-center justify-center shrink-0">
-                <Mic className="w-4 h-4 text-amber-800" />
-              </span>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 {t('Voice Studio & Sensory Preferences')}
               </h2>
@@ -137,9 +111,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 setShowAccessibilityModal(true);
                 playChime('tap');
               }}
-              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-amber-950 font-black text-xs sm:text-sm border-2 border-amber-300 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 text-amber-950 font-black text-xs sm:text-sm border-2 border-amber-300 shadow-xs active:scale-95 transition-all cursor-pointer"
             >
-              <SlidersHorizontal className="w-4 h-4 text-amber-600" />
               <span>{t('Open Full Preferences Modal')}</span>
             </button>
           </div>
@@ -152,33 +125,22 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           ? 'bg-emerald-50/70 border-emerald-300 dark:bg-emerald-950/20'
           : 'bg-stone-50 border-stone-300 dark:bg-stone-900/40'
       }`}>
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs border ${
-            isAacActive ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : 'bg-stone-200 border-stone-300 text-stone-600'
-          }`}>
-            {isAacActive ? (
-              <Volume2 className="w-6 h-6 text-emerald-800" />
-            ) : (
-              <VolumeX className="w-6 h-6 text-stone-600" />
-            )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm sm:text-base font-black text-slate-900">
+              {t('AAC Speech & Communication Board')}
+            </h4>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+              isAacActive ? 'bg-emerald-200 text-emerald-950' : 'bg-stone-200 text-stone-700'
+            }`}>
+              {isAacActive ? t('Active') : t('Disabled / Hidden')}
+            </span>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm sm:text-base font-black text-slate-900">
-                {t('AAC Speech & Communication Board')}
-              </h4>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                isAacActive ? 'bg-emerald-200 text-emerald-950' : 'bg-stone-200 text-stone-700'
-              }`}>
-                {isAacActive ? t('Active') : t('Disabled / Hidden')}
-              </span>
-            </div>
-            <p className="text-xs text-stone-600 font-medium mt-0.5">
-              {isAacActive
-                ? t('Speech communication tiles are visible on the child device. Turn off if not needed to lighten device load.')
-                : t('Turned off. Speech tiles and voice pre-loading are removed from child device for lighter, faster operation.')}
-            </p>
-          </div>
+          <p className="text-xs text-stone-600 font-medium mt-0.5">
+            {isAacActive
+              ? t('Speech communication tiles are visible on the child device. Turn off if not needed to lighten device load.')
+              : t('Turned off. Speech tiles and voice pre-loading are removed from child device for lighter, faster operation.')}
+          </p>
         </div>
 
         <button
@@ -196,26 +158,21 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
       {/* Active Voice Spotlight Banner */}
       <div className="rounded-3xl bg-white border-2 border-amber-300/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-300 flex items-center justify-center shrink-0 shadow-2xs">
-            {renderPersonaIcon(activePersona, 'w-7 h-7')}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+              {t('Current Active Speech Voice')}
+            </span>
+            <span className="text-xs font-bold text-stone-500 capitalize">
+              • {activePersona.style}
+            </span>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                {t('Current Active Speech Voice')}
-              </span>
-              <span className="text-xs font-bold text-stone-500 capitalize">
-                • {activePersona.style}
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 truncate">
-              {activePersona.name}
-            </h3>
-            <p className="text-xs text-stone-600 font-medium truncate max-w-md">
-              {activePersona.description}
-            </p>
-          </div>
+          <h3 className="text-base sm:text-lg font-black text-slate-900 truncate">
+            {activePersona.name}
+          </h3>
+          <p className="text-xs text-stone-600 font-medium truncate max-w-md">
+            {activePersona.description}
+          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -223,19 +180,9 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             type="button"
             disabled={playingVoiceId === activePersona.id}
             onClick={() => handleAudition(activePersona)}
-            className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-xs transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-xs transition-all cursor-pointer disabled:opacity-50"
           >
-            {playingVoiceId === activePersona.id ? (
-              <>
-                <Volume2 className="w-4 h-4 animate-bounce" />
-                <span>{t('Speaking...')}</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 fill-white" />
-                <span>{t('Audition Sample')}</span>
-              </>
-            )}
+            <span>{playingVoiceId === activePersona.id ? t('Speaking...') : t('Audition Sample')}</span>
           </button>
         </div>
       </div>
@@ -246,29 +193,23 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           ? 'bg-emerald-50/90 border-emerald-400 shadow-xs'
           : 'bg-white border-emerald-300 hover:border-emerald-400'
       }`}>
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-13 h-13 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <Smartphone className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
-                100% Free • Zero API Credits • Offline
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
+              100% Free • Zero API Credits • Offline
+            </span>
+            {(settings.voicePersona || 'system') === 'system' && (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
+                Active Default Voice
               </span>
-              {(settings.voicePersona || 'system') === 'system' && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center gap-1">
-                  <Check className="w-3 h-3 stroke-[3]" />
-                  <span>Active Default Voice</span>
-                </span>
-              )}
-            </div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
-              {t('Default Free Voice (System Native Speech)')}
-            </h3>
-            <p className="text-xs text-stone-600 font-medium">
-              {t('Uses your phone, tablet, or computer\'s built-in speech engine with 0ms delay, full offline reliability, and zero credit usage.')}
-            </p>
+            )}
           </div>
+          <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+            {t('Default Free Voice (System Native Speech)')}
+          </h3>
+          <p className="text-xs text-stone-600 font-medium">
+            {t('Uses your phone, tablet, or computer\'s built-in speech engine with 0ms delay, full offline reliability, and zero credit usage.')}
+          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -276,9 +217,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             type="button"
             disabled={playingVoiceId === 'system'}
             onClick={() => handleAudition(systemVoiceObj)}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 text-xs font-bold transition-all cursor-pointer shadow-2xs disabled:opacity-50"
           >
-            <Volume2 className={`w-3.5 h-3.5 text-emerald-600 ${playingVoiceId === 'system' ? 'animate-bounce' : ''}`} />
             <span>{playingVoiceId === 'system' ? t('Speaking...') : t('Audition Free Voice')}</span>
           </button>
 
@@ -300,9 +240,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
       <div className="rounded-3xl bg-white border-2 border-stone-200/90 p-5 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-              <Mic className="w-5 h-5 text-amber-600" />
-              <span>{t('All Voices & Neural Personas')}</span>
+            <h3 className="text-base sm:text-lg font-black text-slate-900">
+              {t('All Voices & Neural Personas')}
             </h3>
             <p className="text-xs text-stone-500 font-medium">
               {t('Choose between the free standard on-device voice or 20 curated Gemini neural voices.')}
@@ -358,36 +297,30 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="w-9 h-9 shrink-0 rounded-xl bg-white border border-stone-200/80 shadow-2xs flex items-center justify-center">
-                        {renderPersonaIcon(persona)}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-black text-sm text-slate-900 truncate">
-                            {persona.name}
-                          </h4>
-                          {persona.category === 'system' && (
-                            <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-[10px] font-black text-emerald-950 shrink-0">
-                              Free Voice
-                            </span>
-                          )}
-                          {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
-                            <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0 flex items-center gap-0.5">
-                              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                              <span>Fav</span>
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] font-bold text-stone-500 block truncate">
-                          {persona.style}
-                        </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-black text-sm text-slate-900 truncate">
+                          {persona.name}
+                        </h4>
+                        {persona.category === 'system' && (
+                          <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-[10px] font-black text-emerald-950 shrink-0">
+                            Free Voice
+                          </span>
+                        )}
+                        {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0">
+                            Fav
+                          </span>
+                        )}
                       </div>
+                      <span className="text-[11px] font-bold text-stone-500 block truncate mt-0.5">
+                        {persona.style}
+                      </span>
                     </div>
 
                     {isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <Check className="w-3 h-3 stroke-[3]" />
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0 shadow-2xs">
+                        Active
                       </span>
                     )}
                   </div>
@@ -402,9 +335,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     type="button"
                     disabled={isPlaying}
                     onClick={() => handleAudition(persona)}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 text-xs font-bold transition-all flex items-center justify-center cursor-pointer shadow-2xs disabled:opacity-50"
                   >
-                    <Volume2 className={`w-3.5 h-3.5 text-amber-600 ${isPlaying ? 'animate-bounce' : ''}`} />
                     <span>{isPlaying ? t('Playing...') : t('Audition')}</span>
                   </button>
 
@@ -429,9 +361,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
       {/* Speech Pacing & Fine-Tuning */}
       <div className="rounded-3xl bg-white border-2 border-stone-200/90 p-5 sm:p-6 shadow-xs space-y-4">
         <div>
-          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-            <Sliders className="w-5 h-5 text-amber-500" />
-            <span>{t('Speech Rate & Sensory Comfort')}</span>
+          <h3 className="text-base sm:text-lg font-black text-slate-900">
+            {t('Speech Rate & Sensory Comfort')}
           </h3>
           <p className="text-xs text-stone-500 font-medium">
             {t('Fine-tune voice pacing and pitch for clear sensory comprehension and comfort.')}
@@ -496,9 +427,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
       {/* Sensory & Tactile Accessibility Quick Toggles */}
       <div className="rounded-3xl bg-white border-2 border-stone-200/90 p-5 sm:p-6 shadow-xs space-y-4">
         <div>
-          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-            <Eye className="w-5 h-5 text-amber-500" />
-            <span>{t('Sensory & Accessibility Controls')}</span>
+          <h3 className="text-base sm:text-lg font-black text-slate-900">
+            {t('Sensory & Accessibility Controls')}
           </h3>
           <p className="text-xs text-stone-500 font-medium">
             {t('Adjust tactile feedback, visual clarity, and audio chimes for neurodivergent sensory balance.')}

@@ -17,7 +17,6 @@ import {
   Palette,
   Square,
   Type,
-  Mic,
   Calendar,
   MessageSquare,
   Award,
@@ -28,10 +27,6 @@ import {
   Users,
   CheckSquare,
   Clock,
-  Baby,
-  Headphones,
-  Briefcase,
-  Smartphone,
 } from 'lucide-react';
 import { playChime, prewarmCoreAudioVocabulary } from '../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
@@ -624,12 +619,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <Mic className="w-5 h-5 text-amber-700" />
-                      <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                        Voice Studio ({VOICE_PERSONAS.length} Personas)
-                      </h4>
-                    </div>
+                    <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
+                      Voice Studio ({VOICE_PERSONAS.length} Personas)
+                    </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
                       Choose from 20 natural AI voices across kids, teens, caring caregivers, and professionals.
                     </p>
@@ -685,14 +677,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     return true;
                   }).map((persona) => {
                     const isSelected = (settings.voicePersona || 'system').toLowerCase() === persona.id.toLowerCase();
-                    const renderVoiceIcon = () => {
-                      if (persona.category === 'system') return <Smartphone className="w-4 h-4 text-emerald-700" />;
-                      if (persona.category === 'kids') return <Baby className="w-4 h-4 text-amber-700" />;
-                      if (persona.category === 'teens') return <Headphones className="w-4 h-4 text-indigo-700" />;
-                      if (persona.category.startsWith('caring')) return <Heart className="w-4 h-4 text-rose-700" />;
-                      return <Briefcase className="w-4 h-4 text-sky-700" />;
-                    };
-
                     return (
                       <div
                         key={persona.id}
@@ -706,11 +690,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             : 'bg-white hover:bg-[#FAF7F2] border-[#E0D8CB]'
                         }`}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-10 h-10 rounded-xl bg-white border border-[#E0D8CB] flex items-center justify-center shrink-0 shadow-2xs">
-                            {renderVoiceIcon()}
-                          </span>
-                          <div className="min-w-0">
+                        <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
                                 {persona.label}
@@ -733,7 +713,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             <p className="text-[11px] text-[#7A6C60] font-semibold truncate mt-0.5">
                               {persona.tagline}
                             </p>
-                          </div>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
@@ -743,11 +722,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               e.stopPropagation();
                               speak(persona.previewText, { voicePersona: persona.id, force: true });
                             }}
-                            className="px-2.5 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 flex items-center gap-1 shadow-2xs"
+                            className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
                             title={`Audition ${persona.name}`}
                           >
                             <span>Audition</span>
-                            <Volume2 className="w-3.5 h-3.5" />
                           </button>
                           <div
                             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
@@ -777,10 +755,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => speak('Hello! This is your BeeYou communication voice.')}
-                    className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5"
+                    className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <span>Test Voice</span>
-                    <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <input
