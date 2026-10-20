@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Volume2, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
 import { prewarmCoreAudioVocabulary } from '../../utils/audio/speech';
 import { playChime } from '../../utils/audio/chimes';
 import { getVoicePersonaById } from '../../data/voicePersonasData';
@@ -106,7 +106,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
         <div className="w-full mt-6 space-y-2">
           <div className="flex items-center justify-between text-xs font-black text-amber-950">
             <span className="flex items-center gap-1.5 truncate">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 text-amber-600 animate-spin shrink-0" />
               <span className="truncate">{currentStepText}</span>
             </span>
             <span className="tabular-nums font-extrabold shrink-0 text-amber-700">{progress}%</span>
