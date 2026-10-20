@@ -333,16 +333,16 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[8000] bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-[8000] bg-[#FAF7EE] dark:bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-label="Adaptive Setup Onboarding"
     >
       <div 
-        className={`w-full max-w-2xl bg-white dark:bg-slate-900 ${currentTokens.cardRadius} shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden my-auto max-h-[92vh] transition-all`}
+        className="w-full h-full flex flex-col overflow-hidden max-w-3xl mx-auto"
       >
         {/* Top Header & Step Indicator */}
-        <div className="px-5 sm:px-8 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+        <div className="pt-[calc(env(safe-area-inset-top,0px)+1rem)] px-5 sm:px-8 pb-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
@@ -994,7 +994,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
         </div>
 
         {/* Footer Navigation Buttons */}
-        <div className="px-5 sm:px-8 py-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
+        <div className="px-5 sm:px-8 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border-t border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between shrink-0">
           {step > 1 ? (
             <button
               type="button"

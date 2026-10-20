@@ -21,7 +21,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
+    // Service worker claims clients in background without interrupting active user session
+    // Intentionally no window.location.reload() to eliminate jarring white flash & 2nd reload
   });
 }
 

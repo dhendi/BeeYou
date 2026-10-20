@@ -419,11 +419,11 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-[#FAF8F5] dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-300 dark:border-slate-800 max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2.5rem)] flex flex-col text-slate-800 dark:text-slate-100">
+    <div className="fixed inset-0 z-[140] bg-[#FAF8F5] dark:bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-200">
+      <div className="w-full h-full flex flex-col overflow-hidden text-slate-800 dark:text-slate-100">
         
         {/* TOP HEADER */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-sm">
+        <div className="pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] px-4 sm:px-6 pb-4 bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-700 text-white flex items-center justify-between shrink-0 shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-white shadow-inner">
               <BeeMascot size="xs" pose="celebrating" />
@@ -454,64 +454,67 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         </div>
 
         {/* TAB SELECTOR */}
-        <div className="p-2 bg-amber-100/60 dark:bg-slate-800 border-b border-amber-200/80 dark:border-slate-700 flex gap-1 shrink-0 text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('demo');
-              playChime('tap');
-            }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
-              activeTab === 'demo'
-                ? 'bg-amber-500 text-white shadow-xs font-black'
-                : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
-            }`}
-          >
-            <span>1-Click Demo Account</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('login');
-              playChime('tap');
-            }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
-              activeTab === 'login'
-                ? 'bg-indigo-600 text-white shadow-xs font-black'
-                : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
-            }`}
-          >
-            <span>Sign In with Email</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('register');
-              playChime('tap');
-            }}
-            className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
-              activeTab === 'register'
-                ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-xs font-black'
-                : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
-            }`}
-          >
-            <span>Create New Family</span>
-          </button>
-
-          {activeTab === 'forgot_password' && (
+        <div className="p-2 sm:px-6 bg-amber-100/60 dark:bg-slate-800 border-b border-amber-200/80 dark:border-slate-700 flex shrink-0 text-xs font-bold">
+          <div className="w-full max-w-2xl mx-auto flex gap-1.5">
             <button
               type="button"
-              className="flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center bg-indigo-700 text-white shadow-xs font-black"
+              onClick={() => {
+                setActiveTab('demo');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
+                activeTab === 'demo'
+                  ? 'bg-amber-500 text-white shadow-xs font-black'
+                  : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
+              }`}
             >
-              <span>Recover Account</span>
+              <span>1-Click Demo Account</span>
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('login');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
+                activeTab === 'login'
+                  ? 'bg-indigo-600 text-white shadow-xs font-black'
+                  : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
+              }`}
+            >
+              <span>Sign In with Email</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('register');
+                playChime('tap');
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center ${
+                activeTab === 'register'
+                  ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-xs font-black'
+                  : 'bg-white/70 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-white'
+              }`}
+            >
+              <span>Create New Family</span>
+            </button>
+
+            {activeTab === 'forgot_password' && (
+              <button
+                type="button"
+                className="flex-1 py-2.5 px-3 rounded-2xl transition cursor-pointer flex items-center justify-center bg-indigo-700 text-white shadow-xs font-black"
+              >
+                <span>Recover Account</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* MODAL BODY CONTENT */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)]">
+          <div className="max-w-2xl mx-auto space-y-5">
           {successMessage && (
             <div className="p-4 rounded-2xl bg-emerald-500 text-white font-bold text-sm shadow-lg animate-in zoom-in-95">
               <p className="font-black text-white">{successMessage}</p>
@@ -1445,6 +1448,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
             </div>
           )}
 
+          </div>
         </div>
 
       </div>

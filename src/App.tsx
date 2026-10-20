@@ -7,8 +7,8 @@ import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { isAllAssetsPreloaded, isAppOpenedInSession, markAppOpenedInSession } from './utils/appAssetPreloader';
 
-const CaregiverApp = lazy(() => import('./components/CaregiverApp').then((m) => ({ default: m.CaregiverApp })));
-const ChildApp = lazy(() => import('./components/ChildApp').then((m) => ({ default: m.ChildApp })));
+import { CaregiverApp } from './components/CaregiverApp';
+import { ChildApp } from './components/ChildApp';
 
 function getActiveRole(): 'caregiver' | 'child' {
   if (typeof window === 'undefined') return 'child';
@@ -70,12 +70,10 @@ export default function App() {
     };
   }, []);
 
-  // Eagerly prefetch child & caregiver view chunks after initial mount so view switching is instant (0ms)
+  // Eagerly prefetch secondary heavy modals after initial mount
   useEffect(() => {
     if (isReady && typeof window !== 'undefined') {
       const timer = setTimeout(() => {
-        import('./components/CaregiverApp').catch(() => {});
-        import('./components/ChildApp').catch(() => {});
         import('./components/ParentDashboard').catch(() => {});
       }, 300);
       return () => clearTimeout(timer);
@@ -88,7 +86,7 @@ export default function App() {
         <AppLoadingScreen onLoaded={handleLoaded} />
       )}
       <div className={!isReady ? 'invisible' : 'visible animate-fade-in'}>
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="fixed inset-0 bg-[#FAF7EE] dark:bg-slate-900" />}>
           {role === 'caregiver' ? (
             <CaregiverApp key="caregiver-root-app" />
           ) : (
