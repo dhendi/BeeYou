@@ -134,7 +134,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('Core AAC board (36 essential words)')}</span>
+                    <span>{t('Full AAC board (custom words, photos & symbols)')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span>{t('Default device speech engine')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
@@ -147,10 +151,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{t('2 Basic soundscapes (Rain & River)')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('Default device speech voice')}</span>
                   </li>
                 </ul>
               </div>
@@ -179,11 +179,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{t('Unlimited Custom AAC Tiles')}</strong> {t('& recordings')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{t('Full Mulberry AAC Symbol Studio')}</strong></span>
+                    <span><strong>{t('Caregiver Remote Live Sync & Portal')}</strong></span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />

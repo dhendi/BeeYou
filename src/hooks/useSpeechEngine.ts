@@ -54,8 +54,9 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
   }, [settings.language]);
 
   useEffect(() => {
-    prewarmCoreAudioVocabulary(settings.voicePersona || 'system', settings.language || 'en');
-  }, [settings.voicePersona, settings.language]);
+    const persona = isPremium === false ? 'system' : (settings.voicePersona || 'system');
+    prewarmCoreAudioVocabulary(persona, settings.language || 'en');
+  }, [settings.voicePersona, settings.language, isPremium]);
 
   const speak = async (text: string, options?: { force?: boolean; voicePersona?: string }) => {
     if (settings.soundEffects) playChime('speak');

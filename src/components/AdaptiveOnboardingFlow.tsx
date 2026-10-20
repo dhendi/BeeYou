@@ -884,7 +884,11 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-600 dark:text-slate-300">
                       <li className="flex items-start gap-1 sm:gap-2">
                         <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
-                        <span>{t('Standard core AAC board (36 words)')}</span>
+                        <span>{t('Full AAC board (all words, photos & symbols)')}</span>
+                      </li>
+                      <li className="flex items-start gap-1 sm:gap-2">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{t('Default free device speech engine')}</span>
                       </li>
                       <li className="flex items-start gap-1 sm:gap-2">
                         <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0 mt-0.5" />
@@ -896,7 +900,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       </li>
                       <li className="flex items-start gap-1 sm:gap-2">
                         <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
-                        <span className="text-slate-400 dark:text-slate-500 line-through">{t('Custom photos & voice recordings')}</span>
+                        <span className="text-slate-400 dark:text-slate-500 line-through">{t('Expressive Neural AI Voices')}</span>
                       </li>
                       <li className="flex items-start gap-1 sm:gap-2">
                         <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
@@ -928,7 +932,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     <ul className="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs text-slate-800 dark:text-slate-200">
                       <li className="flex items-start gap-1 sm:gap-2">
                         <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />
-                        <span><strong>{t('Unlimited AAC')}</strong>: {t('Photos, voice clips, grammar')}</span>
+                        <span><strong>{t('All 20+ Expressive Neural AI Voices')}</strong></span>
                       </li>
                       <li className="flex items-start gap-1 sm:gap-2">
                         <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-3" />

@@ -256,7 +256,7 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    prewarmCoreAudioVocabulary(settings?.voicePersona || 'system', settings?.language || 'en');
+    prewarmCoreAudioVocabulary(!isPremium ? 'system' : (settings?.voicePersona || 'system'), settings?.language || 'en');
   }, [settings?.voicePersona, settings?.language]);
 
   // Favorite Sentences Form state
@@ -1543,10 +1543,6 @@ export const AACView: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                if (!isPremium) {
-                  triggerUpgrade('Custom AAC tiles, voice recordings, and photos are a BeeYou Plus feature! Start your 15-day free trial.');
-                  return;
-                }
                 setEditingItem(null);
                 setShowWordEditor(true);
               }}
@@ -1581,10 +1577,6 @@ export const AACView: React.FC = () => {
                 data-tour="aac-symbols"
                 type="button"
                 onClick={() => {
-                  if (!isPremium) {
-                    triggerUpgrade('The Mulberry AAC Symbol library with 3,000+ clinical symbols is a BeeYou Plus feature! Start your 15-day free trial.');
-                    return;
-                  }
                   setShowSymbolPicker(true);
                   playChime('tap');
                 }}
@@ -2397,8 +2389,6 @@ export const AACView: React.FC = () => {
         editingItem={editingItem}
         defaultCategory={activeCategory}
         existingItems={aacItems}
-        isPremium={isPremium}
-        triggerUpgrade={triggerUpgrade}
         onSave={(wordData) => {
           if (editingItem) {
             updateAacItem({
