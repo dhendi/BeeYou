@@ -62,6 +62,7 @@ async function runAutomatedTestingAndDependenciesSuite() {
     'scripts/test-performance-app-size.ts',
     'scripts/test-third-party-assets-rights.ts',
     'scripts/test-error-handling-customer-support.ts',
+    'scripts/test-tts-abuse-protection.ts',
   ];
 
   for (const suite of requiredSuites) {
