@@ -150,11 +150,14 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
           </div>
         )}
 
-        {/* Real-time Hold Progress Ring Overlay */}
+        {/* Real-time Hold Progress Overlay */}
         {isHolding && (
-          <div className="absolute inset-0 rounded-2xl bg-amber-500/20 backdrop-blur-2xs flex flex-col items-center justify-center pointer-events-none border-2 border-amber-500 z-20 animate-in fade-in">
-            <div className="w-8 h-8 rounded-full border-2 border-amber-600 border-t-transparent animate-spin mb-1" />
-            <span className="text-[10px] font-black text-amber-950 bg-white/90 px-1.5 py-0.5 rounded shadow-xs">
+          <div className="absolute inset-0 rounded-xl bg-amber-500/20 backdrop-blur-2xs flex items-center justify-center pointer-events-none border-2 border-amber-500 z-20 animate-in fade-in overflow-hidden">
+            <div
+              className="absolute left-0 top-0 bottom-0 bg-amber-400/30 transition-all duration-75"
+              style={{ width: `${holdProgress}%` }}
+            />
+            <span className="relative z-10 text-[10px] font-black text-amber-950 bg-white/95 px-2 py-0.5 rounded shadow-xs">
               Hold {Math.max(0, Math.ceil((HOLD_DURATION_MS - (holdProgress / 100) * HOLD_DURATION_MS) / 1000))}s
             </span>
           </div>
