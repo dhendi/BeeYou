@@ -38,7 +38,7 @@ export const ThemeCustomizerModal: React.FC = () => {
                 BeeYou Themes & Customizer
               </h2>
               <p className={`text-xs ${headerStyles.topBarSubtext} font-medium`}>
-                Pick ready-made themes or customize & edit any theme's colors
+                Pick ready-made themes or customize & edit in Theme Studio
               </p>
             </div>
           </div>

@@ -117,9 +117,17 @@ export function useThemeState({
   const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
   const [editingThemeId, setEditingThemeId] = useState<string | null>(null);
 
+  const setEditingThemeIdSafe = (id: string | null) => {
+    if (id && !isPremium) {
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
+    setEditingThemeId(id);
+  };
+
   const createCustomTheme = (themeData: Omit<AppTheme, 'id' | 'isCustom' | 'isUnlocked'>): AppTheme => {
     if (!isPremium) {
-      triggerUpgrade('Custom Theme Studio is a BeeYou Premium feature! Start your 15-day free trial.');
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
       throw new Error('Premium required for custom themes');
     }
     const newTheme: AppTheme = {
@@ -139,6 +147,10 @@ export function useThemeState({
   };
 
   const updateTheme = (id: string, updates: Partial<AppTheme>) => {
+    if (!isPremium) {
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     setThemes((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
     );
@@ -149,6 +161,10 @@ export function useThemeState({
   };
 
   const resetThemeToPreset = (id: string) => {
+    if (!isPremium) {
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     const original = PRESET_THEMES.find((p) => p.id === id);
     if (original) {
       setThemes((prev) => prev.map((t) => (t.id === id ? { ...original } : t)));
@@ -178,6 +194,6 @@ export function useThemeState({
     showThemeModal,
     setShowThemeModal,
     editingThemeId,
-    setEditingThemeId,
+    setEditingThemeId: setEditingThemeIdSafe,
   };
 }

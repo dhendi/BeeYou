@@ -19,7 +19,8 @@ import {
   X,
   UploadCloud,
   Image as ImageIcon,
-  Sparkles,
+  Layers,
+  HelpCircle,
   Smile,
   Headphones,
   Briefcase
@@ -274,8 +275,15 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
     settings,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'shop' | 'studio'>(defaultMode);
+  const [activeTab, setActiveTab] = useState<'shop' | 'studio'>(() => (!isPremium && defaultMode === 'studio' ? 'shop' : defaultMode));
   const [ageFilter, setAgeFilter] = useState<'all' | 'kid' | 'teen' | 'adult' | 'custom'>('all');
+
+  // Ensure basic plan users cannot access or stay on studio tab
+  useEffect(() => {
+    if (!isPremium && activeTab === 'studio') {
+      setActiveTab('shop');
+    }
+  }, [isPremium, activeTab]);
 
   // Currently editing theme ID (null means creating a new theme)
   const [targetEditingThemeId, setTargetEditingThemeId] = useState<string | null>(contextEditingThemeId || null);
@@ -335,12 +343,21 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   // Handle external editingThemeId from context if passed
   useEffect(() => {
     if (contextEditingThemeId) {
+      if (!isPremium) {
+        triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+        setContextEditingThemeId(null);
+        return;
+      }
       handleOpenThemeEditor(contextEditingThemeId);
     }
-  }, [contextEditingThemeId]);
+  }, [contextEditingThemeId, isPremium]);
 
   // Load a theme into the editor
   const handleOpenThemeEditor = (themeId: string) => {
+    if (!isPremium) {
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     const target = themes.find((t) => t.id === themeId);
     if (!target) return;
 
@@ -400,6 +417,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   };
 
   const handleWallpaperUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isPremium) {
+      triggerUpgrade('Custom wallpaper photo upload is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -455,6 +476,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   };
 
   const handleSaveTheme = () => {
+    if (!isPremium) {
+      triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
+
     if (!themeName.trim()) {
       speakText('Please give your theme a name!');
       return;
@@ -561,7 +587,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                 onClick={onStartTour}
                 className="px-3.5 py-2 rounded-2xl bg-white/90 hover:bg-white text-slate-900 font-black text-xs flex items-center gap-1.5 border border-white shadow-xs transition-all active:scale-95 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
                 <span>Tour</span>
               </button>
             )}
@@ -650,6 +676,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               <>
                 <Edit3 className="w-4 h-4 text-amber-700" />
                 <span>Editing: {themeName}</span>
+                {!isPremium && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase shadow-2xs">
+                    Plus
+                  </span>
+                )}
               </>
             ) : (
               <>
@@ -701,12 +732,23 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <button
                 type="button"
-                onClick={() => handleOpenThemeEditor(activeTheme.id)}
+                onClick={() => {
+                  if (!isPremium) {
+                    triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+                    return;
+                  }
+                  handleOpenThemeEditor(activeTheme.id);
+                }}
                 className="px-3.5 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs sm:text-sm flex items-center gap-1.5 border border-amber-300 shadow-2xs transition-all cursor-pointer active:scale-95"
                 title="Edit this theme's colors, mascot, or greetings"
               >
                 <Edit3 className="w-3.5 h-3.5 text-amber-700" />
                 <span>Edit Theme</span>
+                {!isPremium && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase shadow-2xs ml-0.5">
+                    Plus
+                  </span>
+                )}
               </button>
 
               {activeThemeId !== 'theme-classic' ? (
@@ -735,7 +777,7 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-black text-slate-500 mr-1">Filter Themes:</span>
               {[
-                { id: 'all', label: 'All Themes', icon: Sparkles },
+                { id: 'all', label: 'All Themes', icon: Layers },
                 { id: 'kid', label: 'Kids (3–11)', icon: Smile },
                 { id: 'teen', label: 'Teens (12–17)', icon: Headphones },
                 { id: 'adult', label: 'Adults (18+)', icon: Briefcase },
@@ -887,12 +929,23 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                     <button
                       type="button"
-                      onClick={() => handleOpenThemeEditor(theme.id)}
+                      onClick={() => {
+                        if (!isPremium) {
+                          triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.');
+                          return;
+                        }
+                        handleOpenThemeEditor(theme.id);
+                      }}
                       className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
                       title="Edit this theme"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit</span>
+                      {!isPremium && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase shadow-2xs ml-0.5">
+                          Plus
+                        </span>
+                      )}
                     </button>
 
                     {isEquipped ? (
@@ -919,7 +972,37 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
       )}
 
       {/* 3. TAB: THEME STUDIO & EDITOR */}
-      {activeTab === 'studio' && (
+      {activeTab === 'studio' && !isPremium && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-300 shadow-sm text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto text-amber-700 shadow-xs">
+            <Palette className="w-7 h-7" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-xl font-black text-slate-800">Theme Studio is a BeeYou Plus Feature</h3>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto">
+              Start your 15-day free trial to customize theme colors, create custom companion mascots, and upload personal wallpapers.
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('shop')}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+            >
+              Browse Ready-Made Themes
+            </button>
+            <button
+              type="button"
+              onClick={() => triggerUpgrade('Theme Studio and custom theme editing is a BeeYou Plus feature! Start your 15-day free trial.')}
+              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
+            >
+              Start 15-Day Free Trial
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'studio' && isPremium && (
         <div className="bg-white rounded-3xl p-4 sm:p-6 border-2 border-amber-200 shadow-sm space-y-6">
           <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
