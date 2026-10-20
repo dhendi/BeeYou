@@ -569,7 +569,7 @@ interface SoundChimeGridProps {
   onTriggerUpgrade?: (reason?: string) => void;
 }
 
-export const FREE_SOUNDSCAPE_IDS: SoundscapeId[] = ['rain', 'stream'];
+export const FREE_SOUNDSCAPE_IDS: SoundscapeId[] = ['rain', 'ocean', 'stream', 'white_noise', 'kitten'];
 
 export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
   activeSoundIds,
@@ -594,7 +594,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
     } else {
       if (!isPremium && !FREE_SOUNDSCAPE_IDS.includes(id)) {
         if (onTriggerUpgrade) {
-          onTriggerUpgrade('Unlock all 17 sensory room soundscapes, soothing frequencies, and ambient noise with BeeYou Plus!');
+          onTriggerUpgrade('Unlock all 35+ sensory room soundscapes, soothing frequencies, and ambient noise with BeeYou Plus!');
         }
         return;
       }

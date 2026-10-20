@@ -192,9 +192,9 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted, isPremiu
   };
 
   const addRoutine = (routine: Omit<Routine, 'id'> & { id?: string }): Routine => {
-    if (isPremium === false && routines.length >= 1) {
+    if (isPremium === false && routines.length >= 2) {
       if (triggerUpgrade) {
-        triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+        triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
       }
       return routines[0];
     }

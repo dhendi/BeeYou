@@ -176,8 +176,8 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (!isPremium && routines.length >= 1) {
-                triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+              if (!isPremium && routines.length >= 2) {
+                triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
                 return;
               }
               onOpenCustomizer();
@@ -360,8 +360,8 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      if (!isPremium && routine.id !== routines[0]?.id) {
-                        triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                      if (!isPremium && !routines.slice(0, 2).some(r => r.id === routine.id)) {
+                        triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
                         return;
                       }
                       let nextDays: number[];

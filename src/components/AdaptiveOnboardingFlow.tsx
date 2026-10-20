@@ -276,9 +276,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       localStorage.setItem('beeyou_aac_enabled', String(featuresState.aacCommunication !== false && featuresState.aac !== false));
     } catch {}
 
-    // 3. Set active theme
+    // 3. Set active theme (Basic only gets default theme)
     const tokens = getPersonaTokens(selectedPersona);
-    setTheme(selectedThemeId || tokens.suggestedThemeId);
+    setTheme(withTrial ? (selectedThemeId || tokens.suggestedThemeId) : 'theme-classic');
 
     // 4. Set pairing code
     if (currentPairingCode) {
@@ -823,11 +823,11 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       </li>
                       <li className="flex items-start gap-1.5">
                         <Check className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
-                        <span>{t('1 active routine & 1 medication limit')}</span>
+                        <span>{t('2 active routines & 1 medication limit')}</span>
                       </li>
                       <li className="flex items-start gap-1.5">
                         <Check className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
-                        <span>{t('2 basic soundscapes (Rain & Ocean)')}</span>
+                        <span>{t('Default honey theme & 5 free sounds')}</span>
                       </li>
                     </ul>
                   </div>
@@ -859,7 +859,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       </li>
                       <li className="flex items-start gap-1.5">
                         <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                        <span><strong>{t('All 17 Soundscapes')}</strong> {t('& Theme Studio')}</span>
+                        <span><strong>{t('All 35+ Soundscapes')}</strong> {t('& All Themed Worlds')}</span>
                       </li>
                     </ul>
                   </div>

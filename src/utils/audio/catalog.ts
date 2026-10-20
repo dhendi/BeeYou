@@ -61,9 +61,9 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     id: 'stream',
     name: 'Babbling Forest Stream',
     description: 'Tranquil moving brook flowing over smooth river stones.',
-    isPremium: true,
+    isPremium: false,
     category: 'nature',
-    tags: ['Fresh', 'Peaceful', 'Premium'],
+    tags: ['Fresh', 'Peaceful', 'Free'],
   },
   {
     id: 'crickets',
@@ -181,9 +181,9 @@ export const SOUNDSCAPES_CATALOG: SoundscapeItem[] = [
     id: 'white_noise',
     name: 'Classic White Noise',
     description: 'Even full-spectrum static hiss. Blocks sudden household sounds, barking, and chatter.',
-    isPremium: true,
+    isPremium: false,
     category: 'noise',
-    tags: ['Full Masking', 'Tinnitus', 'Premium'],
+    tags: ['Full Masking', 'Tinnitus', 'Free'],
   },
   {
     id: 'beach',

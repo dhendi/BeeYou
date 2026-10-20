@@ -851,16 +851,19 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                             <h4 className="font-black text-slate-800 text-base sm:text-lg">
                               {theme.name}
                             </h4>
-                            {theme.id === 'theme-classic' && (
+                            {theme.id === 'theme-classic' ? (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
-                                Default
+                                Default (Free)
                               </span>
-                            )}
-                            {theme.isCustom && (
+                            ) : !isPremium ? (
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 font-black flex items-center gap-1 shadow-2xs">
+                                Plus
+                              </span>
+                            ) : theme.isCustom ? (
                               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
                                 Custom
                               </span>
-                            )}
+                            ) : null}
                           </div>
                           <span className="text-xs font-bold text-slate-500">
                             Mascot: {theme.mascotName}
@@ -956,11 +959,33 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
                     ) : (
                       <button
                         type="button"
-                        onClick={() => setTheme(theme.id)}
-                        className="py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+                        onClick={() => {
+                          if (theme.id !== 'theme-classic' && !isPremium) {
+                            triggerUpgrade('Themed worlds (Wise Turtle, Dino Kingdom, Ribbit Pond, etc.) are a BeeYou Plus feature! Start your 15-day free trial.');
+                            return;
+                          }
+                          setTheme(theme.id);
+                        }}
+                        className={`py-2 px-4 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 ${
+                          theme.id !== 'theme-classic' && !isPremium
+                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300'
+                            : 'bg-amber-500 hover:bg-amber-600 text-white'
+                        }`}
                       >
-                        <Star className="w-3.5 h-3.5" />
-                        <span>Equip Theme</span>
+                        {theme.id !== 'theme-classic' && !isPremium ? (
+                          <>
+                            <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                            <span>Unlock Theme</span>
+                            <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase shadow-2xs">
+                              Plus
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Star className="w-3.5 h-3.5" />
+                            <span>Equip Theme</span>
+                          </>
+                        )}
                       </button>
                     )}
                   </div>

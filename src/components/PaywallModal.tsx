@@ -141,11 +141,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   </li>
                   <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('1 Active visual routine & 1 medication reminder')}</span>
+                    <span>{t('2 Active visual routines & 1 medication reminder')}</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('2 Basic soundscapes (Rain & Ocean)')}</span>
+                    <span>{t('Default honey theme & 5 free sounds')}</span>
                   </li>
                 </ul>
               </div>
@@ -177,7 +177,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   </li>
                   <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{t('All 17 Soundscapes')}</strong> {t('& Theme Studio')}</span>
+                    <span><strong>{t('All 35+ Soundscapes')}</strong> {t('& All Themed Worlds')}</span>
                   </li>
                 </ul>
               </div>

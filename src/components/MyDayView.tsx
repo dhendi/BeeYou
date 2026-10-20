@@ -392,8 +392,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (!isPremium && routines.length >= 1) {
-                    triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                  if (!isPremium && routines.length >= 2) {
+                    triggerUpgrade('Free plan includes 2 active visual routines. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
                     return;
                   }
                   onOpenCustomizer?.({ category: group.id as any });
@@ -410,7 +410,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <div className="space-y-3.5">
                 {group.routines.map((routine) => {
                   const isExpanded = expandedRoutineIds.has(routine.id);
-                  const isLocked = !isPremium && routine.id !== validRoutines[0]?.id;
+                  const isLocked = !isPremium && !validRoutines.slice(0, 2).some(r => r.id === routine.id);
                   const isCurrentRoutine = isToday && routine.id === currentActiveRoutine?.id;
                   const totalMinutes = getTotalMinutes(routine.steps);
                   const recurrenceText = getRecurrenceText(routine.assignedDays);

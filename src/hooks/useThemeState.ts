@@ -61,15 +61,22 @@ export function useThemeState({
     } catch (e) {}
   }, [activeThemeId]);
 
-  // All preset themes (Honey, Turtle, Dino, Frog, Train, Space, etc.) are fully unlocked!
-  // Custom user-created studio themes require premium.
+  // Free basic users only get the default theme (theme-classic).
+  // All other themed worlds (Turtle, Dino, Frog, Cosmic, etc.) and custom themes require BeeYou Plus.
   const resolvedThemes = themes.map((t) => ({
     ...t,
-    isUnlocked: t.isCustom ? isPremium : true,
+    isUnlocked: t.id === 'theme-classic' || isPremium,
     costStars: 0,
   }));
 
   const activeTheme = resolvedThemes.find((t) => t.id === activeThemeId) || resolvedThemes[0] || PRESET_THEMES[0];
+
+  // Auto-reset basic users to default theme if they are on another theme
+  useEffect(() => {
+    if (!isPremium && activeThemeId !== 'theme-classic') {
+      setActiveThemeId('theme-classic');
+    }
+  }, [isPremium, activeThemeId]);
 
   useEffect(() => {
     try {
@@ -88,11 +95,11 @@ export function useThemeState({
   }, [activeTheme]);
 
   const setTheme = (id: string) => {
-    const target = resolvedThemes.find((t) => t.id === id);
-    if (target?.isCustom && !isPremium) {
-      triggerUpgrade('Custom themes are a BeeYou Premium feature! Start your 15-day free trial to unlock custom theme studio.');
+    if (id !== 'theme-classic' && !isPremium) {
+      triggerUpgrade('Themed worlds (Wise Turtle, Dino Kingdom, Ribbit Pond, etc.) are a BeeYou Plus feature! Start your 15-day free trial to unlock all themes.');
       return;
     }
+    const target = resolvedThemes.find((t) => t.id === id);
     if (target) {
       setActiveThemeId(id);
       preloadThemeStickers(id);
@@ -101,11 +108,11 @@ export function useThemeState({
   };
 
   const buyTheme = (themeId: string): boolean => {
-    const target = resolvedThemes.find((t) => t.id === themeId);
-    if (target?.isCustom && !isPremium) {
-      triggerUpgrade('Custom themes are a BeeYou Premium feature! Start your 15-day free trial to unlock custom theme studio.');
+    if (themeId !== 'theme-classic' && !isPremium) {
+      triggerUpgrade('Themed worlds are a BeeYou Plus feature! Start your 15-day free trial to unlock all themes.');
       return false;
     }
+    const target = resolvedThemes.find((t) => t.id === themeId);
     setActiveThemeId(themeId);
     if (soundEffects) playChime('complete');
     if (spokenAnnouncements && target) {
