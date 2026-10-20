@@ -3265,6 +3265,11 @@ app.get(['/delete-account', '/delete-account.html'], (_req, res) => {
 });
 
 async function startServer() {
+  // Explicitly serve bundled offline audio assets with strict 404 guard (prevents SPA HTML fallback from being decoded as audio)
+  app.use('/assets/audio', express.static(path.resolve(__dirname, 'public/assets/audio')));
+  app.get('/assets/audio/*', (_req, res) => {
+    res.status(404).type('text/plain').send('Audio asset not found');
+  });
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -3280,17 +3285,17 @@ async function startServer() {
   }
 
   const cacheVerif = verifyLevel3DiskCache();
-  console.log(`💾 Level 3 Disk Cache: ${cacheVerif.status} (${cacheVerif.cachedFilesCount} files, ${(cacheVerif.totalSizeBytes / 1024 / 1024).toFixed(2)} MB / ${(cacheVerif.maxDiskSizeBytes / 1024 / 1024).toFixed(0)} MB max, ${cacheVerif.diskUtilizationPercent}% utilized, ${cacheVerif.diskTtlDays}d TTL) @ ${cacheVerif.path}`);
-  console.log(`🧠 L1 Audio Memory Cache: bounded to ${(cacheVerif.memoryCache.maxSizeBytes / 1024 / 1024).toFixed(0)} MB max (${cacheVerif.memoryCache.maxItemCount} items max)`);
+  console.log(`[Level 3 Disk Cache] Status: ${cacheVerif.status} (${cacheVerif.cachedFilesCount} files, ${(cacheVerif.totalSizeBytes / 1024 / 1024).toFixed(2)} MB / ${(cacheVerif.maxDiskSizeBytes / 1024 / 1024).toFixed(0)} MB max, ${cacheVerif.diskUtilizationPercent}% utilized, ${cacheVerif.diskTtlDays}d TTL) @ ${cacheVerif.path}`);
+  console.log(`[L1 Audio Memory Cache] Bounded to ${(cacheVerif.memoryCache.maxSizeBytes / 1024 / 1024).toFixed(0)} MB max (${cacheVerif.memoryCache.maxItemCount} items max)`);
 
   const host = '0.0.0.0';
   app.listen(childPort, host, () => {
-    console.log(`🧒 Child Tablet App listening on http://0.0.0.0:${childPort} (Local: http://localhost:${childPort})`);
+    console.log(`[Child Tablet App] Listening on http://0.0.0.0:${childPort} (Local: http://localhost:${childPort})`);
   });
 
   if (childPort !== caregiverPort) {
     app.listen(caregiverPort, host, () => {
-      console.log(`👑 Caregiver Controller Hub listening on http://0.0.0.0:${caregiverPort} (Local: http://localhost:${caregiverPort})`);
+      console.log(`[Caregiver Hub] Controller listening on http://0.0.0.0:${caregiverPort} (Local: http://localhost:${caregiverPort})`);
     }).on('error', (err: any) => {
       console.warn(`Could not bind caregiver port ${caregiverPort}:`, err.message);
     });

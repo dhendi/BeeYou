@@ -782,9 +782,10 @@ export async function speakText(
       const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
       try {
         const bundledRes = await fetch(bundledPreviewUrl);
-        if (bundledRes.ok) {
+        const ct = bundledRes.headers.get('content-type') || '';
+        if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
           const buf = await bundledRes.arrayBuffer();
-          if (buf.byteLength > 44) {
+          if (isAudioPayload(buf)) {
             const blob = new Blob([buf], { type: 'audio/wav' });
             const blobUrl = URL.createObjectURL(blob);
             audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
@@ -803,7 +804,7 @@ export async function speakText(
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
-        if (audioItem) {
+        if (audioItem && isAudioPayload(audioItem.buffer)) {
           const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
@@ -819,9 +820,10 @@ export async function speakText(
         const bundledCoreUrl = `/assets/audio/core/${selectedPersonaId}_${wordSlug}.wav`;
         try {
           const bundledRes = await fetch(bundledCoreUrl);
-          if (bundledRes.ok) {
+          const ct = bundledRes.headers.get('content-type') || '';
+          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
             const buf = await bundledRes.arrayBuffer();
-            if (buf.byteLength > 44) {
+            if (isAudioPayload(buf)) {
               const blob = new Blob([buf], { type: 'audio/wav' });
               const blobUrl = URL.createObjectURL(blob);
               audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
@@ -841,7 +843,7 @@ export async function speakText(
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
-        if (audioItem) {
+        if (audioItem && isAudioPayload(audioItem.buffer)) {
           const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
@@ -874,24 +876,73 @@ export async function speakText(
 }
 
 /**
- * Inspects raw audio ArrayBuffer before decoding.
- * If raw PCM bytes were received without a RIFF header, constructs a standard 44-byte RIFF WAV
- * container so Web Audio API (decodeAudioData) on iOS Safari and Android WebView decodes it without failure.
+ * Verifies that a binary ArrayBuffer is an authentic audio stream (WAV, MP3, or OGG),
+ * and strictly rejects non-audio text data (such as HTML error pages or JSON strings).
  */
-export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000): ArrayBuffer {
-  if (!buffer || buffer.byteLength < 44) return buffer;
+export function isAudioPayload(buffer: ArrayBuffer | null | undefined): boolean {
+  if (!buffer || buffer.byteLength < 44) return false;
+  const view = new DataView(buffer);
+  const b0 = view.getUint8(0);
+  const b1 = view.getUint8(1);
+
+  // Reject text strings like HTML ('<'), JSON ('{'), brackets ('['), or whitespace
+  if (b0 === 0x3C || b0 === 0x7B || b0 === 0x5B || (b0 === 0x20 && b1 === 0x20)) {
+    return false;
+  }
+
+  // Check for 'RIFF' (0x52494646) and 'WAVE' (0x57415645)
+  const isRiff = view.getUint32(0, false) === 0x52494646;
+  const isWave = view.getUint32(8, false) === 0x57415645;
+  if (isRiff && isWave) return true;
+
+  // Check for MP3 (ID3 tag or sync word 0xFFE0)
+  const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
+  const isMp3Sync = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
+  if (isId3 || isMp3Sync) return true;
+
+  // Check for Ogg container
+  const isOgg = view.getUint32(0, false) === 0x4F676753;
+  if (isOgg) return true;
+
+  return false;
+}
+
+/**
+ * Inspects audio ArrayBuffer before decoding.
+ * Validates audio container headers and protects against non-audio text payloads.
+ */
+export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000): ArrayBuffer | null {
+  if (!buffer || buffer.byteLength < 44) return null;
   const view = new DataView(buffer);
 
   // Check for 'RIFF' (0x52494646) and 'WAVE' (0x57415645)
   const isRiff = view.getUint32(0, false) === 0x52494646;
   const isWave = view.getUint32(8, false) === 0x57415645;
+  if (isRiff && isWave) return buffer;
 
   // Also check for MP3 (ID3 tag or sync word 0xFFE0)
   const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
   const isMp3Sync = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
+  if (isId3 || isMp3Sync) return buffer;
 
-  if ((isRiff && isWave) || isId3 || isMp3Sync) {
-    return buffer; // Already a valid container format
+  // Strict text detection: prevent HTML/JSON text from ever being treated as PCM samples (eliminates static noise)
+  const b0 = view.getUint8(0);
+  if (b0 === 0x3C || b0 === 0x7B || b0 === 0x5B) {
+    console.warn('[Audio] Non-audio text payload rejected (HTML/JSON/text detected).');
+    return null;
+  }
+
+  let asciiCount = 0;
+  const checkLen = Math.min(64, buffer.byteLength);
+  for (let i = 0; i < checkLen; i++) {
+    const byte = view.getUint8(i);
+    if ((byte >= 32 && byte <= 126) || byte === 10 || byte === 13) {
+      asciiCount++;
+    }
+  }
+  if (asciiCount > checkLen * 0.8) {
+    console.warn('[Audio] Text payload rejected from audio pipeline.');
+    return null;
   }
 
   // Raw PCM: prepend standard 44-byte RIFF WAV header
@@ -971,10 +1022,14 @@ export async function playAudioUrl(
 
       if (arrayBuffer) {
         // Audio format safeguard: ensure valid container header for iOS Safari & Android WebView
-        arrayBuffer = ensureWavHeader(arrayBuffer, 24000);
+        const verifiedBuffer = ensureWavHeader(arrayBuffer, 24000);
+        if (!verifiedBuffer) {
+          console.warn('[Audio] Non-audio payload rejected from Web Audio decode.');
+          return false;
+        }
 
         const audioBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
-          ctx.decodeAudioData(arrayBuffer!.slice(0), resolve, reject);
+          ctx.decodeAudioData(verifiedBuffer.slice(0), resolve, reject);
         });
 
         if (speechId !== undefined && speechId !== latestSpeechRequestId) {
@@ -1031,6 +1086,11 @@ export async function playAudioUrl(
       let blobUrlToRevoke: string | null = null;
       if (arrayBuffer) {
         const verifiedBuffer = ensureWavHeader(arrayBuffer, 24000);
+        if (!verifiedBuffer) {
+          notifySpeechState(false, null);
+          resolve(false);
+          return;
+        }
         const blob = new Blob([verifiedBuffer], { type: 'audio/wav' });
         blobUrlToRevoke = URL.createObjectURL(blob);
         audio.src = blobUrlToRevoke;
