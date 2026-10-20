@@ -44,7 +44,6 @@ import {
   QuickPhrasesSticker,
   SpoonSticker,
   ShieldSosSticker,
-  TabletIpadSticker,
   FidgetBubblesSticker,
   ConnectHeartSticker,
 } from './icons/JournalStickers';
@@ -90,7 +89,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
       const saved = sessionStorage.getItem(ONBOARDING_STEP_KEY);
       if (saved) {
         const num = parseInt(saved, 10);
-        if (num >= 1 && num <= 5) return num;
+        if (num >= 1 && num <= 4) return num;
       }
     } catch {}
     return 1;
@@ -106,7 +105,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     });
   };
 
-  const totalSteps = 5;
+  const totalSteps = 4;
 
   const [selectedPersona, setSelectedPersonaState] = useState<UserPersona>(() => {
     try {
@@ -123,20 +122,13 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     } catch {}
   };
 
-  const [pairingMode, setPairingModeState] = useState<PairingMode>(() => {
+  const [pairingMode] = useState<PairingMode>(() => {
     try {
       const saved = sessionStorage.getItem(ONBOARDING_PAIRING_KEY) as PairingMode;
       if (saved === 'caregiver_hub' || saved === 'standalone') return saved;
     } catch {}
-    return 'caregiver_hub';
+    return 'standalone';
   });
-
-  const setPairingMode = (mode: PairingMode) => {
-    setPairingModeState(mode);
-    try {
-      sessionStorage.setItem(ONBOARDING_PAIRING_KEY, mode);
-    } catch {}
-  };
 
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('yearly');
   
@@ -351,10 +343,9 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {t('Step')} {step} {t('of')} {totalSteps} • {step === 1 && t('Welcome to BeeYou')}
-                {step === 2 && t('Role & Persona')}
-                {step === 3 && t('Identity & Dynamic Profile')}
-                {step === 4 && t('Modular Toolkit Customization')}
-                {step === 5 && t('BeeYou Plus & Free Trial')}
+                {step === 2 && t('Role & Profile')}
+                {step === 3 && t('Modular Toolkit Customization')}
+                {step === 4 && t('BeeYou Plus & Free Trial')}
               </span>
             </div>
 
@@ -576,68 +567,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 </button>
               </div>
 
-              {/* Pairing Mode Selection */}
-              <div className="pt-2">
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  {t('Device Pairing Mode')}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPairingMode('caregiver_hub')}
-                    className={`p-3.5 rounded-xl border-2 text-left flex items-start gap-3 transition cursor-pointer ${
-                      pairingMode === 'caregiver_hub'
-                        ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 text-slate-900 dark:text-white'
-                        : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                    }`}
-                  >
-                    <CaregiverPhoneSticker className="w-7 h-7 shrink-0 -mt-0.5" />
-                    <div>
-                      <div className="font-bold text-sm">{t('Pair with Caregiver Hub')}</div>
-                      <div className="text-xs opacity-75 mt-0.5">
-                        {t('Sync routines, live location, and receive silent SOS alerts remotely.')}
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPairingMode('standalone')}
-                    className={`p-3.5 rounded-xl border-2 text-left flex items-start gap-3 transition cursor-pointer ${
-                      pairingMode === 'standalone'
-                        ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 text-slate-900 dark:text-white'
-                        : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                    }`}
-                  >
-                    <TabletIpadSticker className="w-7 h-7 shrink-0 -mt-0.5" />
-                    <div>
-                      <div className="font-bold text-sm">{t('Standalone Mode')}</div>
-                      <div className="text-xs opacity-75 mt-0.5">
-                        {t('Self-directed autonomous use directly on this tablet device.')}
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════ STEP 3: IDENTITY & DYNAMIC FIELDS ════════════════ */}
-          {step === 3 && (
-            <div className="space-y-6 animate-in fade-in">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  {selectedPersona === 'child' ? t('Tell us about your child') : t('What is your identity?')}
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium">
-                  {selectedPersona === 'child' 
-                    ? t('We will customize voice, greeting tags, and communication tiles.')
-                    : t('Personalize your greetings, voice tags, and communication passport.')}
-                </p>
-              </div>
-
               {/* Persona-Aware Dynamic Name Field */}
-              <div className="space-y-2">
+              <div className="pt-1 space-y-2">
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   {t(nameLabel)}
                 </label>
@@ -648,15 +579,15 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t(namePlaceholder)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-base focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-base focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition shadow-xs"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* ════════════════ STEP 4: MODULAR TOOLKIT CUSTOMIZATION ════════════════ */}
-          {step === 4 && (
+          {/* ════════════════ STEP 3: MODULAR TOOLKIT CUSTOMIZATION ════════════════ */}
+          {step === 3 && (
             <div className="space-y-5 animate-in fade-in">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -791,8 +722,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* ════════════════ STEP 5: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
-          {step === 5 && (
+          {/* ════════════════ STEP 4: SUBSCRIPTION & 15-DAY FREE TRIAL ════════════════ */}
+          {step === 4 && (
             <div className="space-y-4 sm:space-y-5 animate-in fade-in">
               <div className="text-center space-y-1.5 sm:space-y-2">
                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center mx-auto shadow-sm border border-amber-300 dark:border-amber-700">
