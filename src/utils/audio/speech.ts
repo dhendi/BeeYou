@@ -1,6 +1,6 @@
 import { playChime } from './chimes';
 import { getAudioContext, enableSilentModePlayback } from './context';
-import { getVoicePersonaById } from '../../data/voicePersonasData';
+import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -14,8 +14,45 @@ let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 const audioMemoryCache = new Map<string, string>();
-const TTS_CACHE_NAME = 'beeyou-tts-v3';
+export const TTS_CACHE_NAME = `beeyou-tts-${TTS_GENERATION_VERSION}`;
 const inFlightAudioFetches = new Map<string, Promise<string | null>>();
+
+/**
+ * Builds version-scoped TTS stream URL with cache-busting query parameter.
+ */
+export function getTtsStreamUrl(voiceId: string, lang: string, text: string): string {
+  return `/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voiceId)}&v=${encodeURIComponent(TTS_GENERATION_VERSION)}`;
+}
+
+/**
+ * Builds version-scoped TTS memory cache key.
+ */
+export function getTtsCacheKey(voiceId: string, lang: string, text: string): string {
+  return `${voiceId}_${lang}_${text.toLowerCase()}_${TTS_GENERATION_VERSION}`;
+}
+
+/**
+ * Automatically purges stale, obsolete TTS cache partitions from previous engine versions.
+ */
+export async function cleanupObsoleteAudioCaches(): Promise<void> {
+  if (typeof window === 'undefined' || !('caches' in window)) return;
+  try {
+    const keys = await caches.keys();
+    for (const key of keys) {
+      if (key.startsWith('beeyou-tts-') && key !== TTS_CACHE_NAME) {
+        console.log(`[Cache Cleanup] Purging obsolete TTS cache version: ${key}`);
+        await caches.delete(key);
+      }
+    }
+  } catch (err) {
+    console.warn('[Cache Cleanup] Failed to purge obsolete audio caches:', err);
+  }
+}
+
+// Run cleanup once on client initialization
+if (typeof window !== 'undefined') {
+  cleanupObsoleteAudioCaches().catch(() => {});
+}
 
 /**
  * Multi-tier Audio Cache Loader (L1 In-Memory -> Client Single-Flight -> L2 Browser CacheStorage -> L3 Server Disk Stream)
@@ -595,8 +632,8 @@ export async function speakText(
   // High-Fidelity Neural Audio Stream (Multi-Tier Caching: RAM -> Browser CacheStorage -> Edge Server):
   // When using any of the 20 neural voices and not restricted to offline-only:
   if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly) {
-    const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formattedText.toLowerCase()}`;
-    const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formattedText)}&voice=${encodeURIComponent(selectedPersonaId)}`;
+    const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formattedText);
+    const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formattedText);
 
     try {
       const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
@@ -1117,9 +1154,9 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
     for (const phrase of CORE_AAC_VOCABULARY) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
-      const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formatted.toLowerCase()}`;
+      const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
       if (audioMemoryCache.has(cacheKey)) continue;
-      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}&voice=${encodeURIComponent(selectedPersonaId)}`;
+      const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
       await getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
     }
   });
@@ -1145,8 +1182,8 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
     for (const phrase of phrases.slice(0, 24)) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
-      const cacheKey = `${selectedPersonaId}_${normalizedLang}_${formatted.toLowerCase()}`;
-      const streamUrl = `/api/tts?lang=${encodeURIComponent(normalizedLang)}&text=${encodeURIComponent(formatted)}&voice=${encodeURIComponent(selectedPersonaId)}`;
+      const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
+      const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
       getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
     }
   });

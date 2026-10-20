@@ -41,13 +41,14 @@ function getStorageClient() {
 }
 
 /**
- * Generates a deterministic object key for cloud storage:
- * Example: tts_cache/puck/en/8d4db15d68531ff29aecb923ba505b9e.wav
+ * Generates a deterministic, version-scoped object key for cloud storage:
+ * Example: tts_cache/v4/puck/en/8d4db15d68531ff29aecb923ba505b9e.wav
  */
-export function getDeterministicCloudKey(voiceKey: string, lang: string, hashKey: string): string {
+export function getDeterministicCloudKey(voiceKey: string, lang: string, hashKey: string, version: string = 'v4'): string {
   const cleanVoice = voiceKey.toLowerCase().replace(/[^a-z0-9_-]/g, '');
   const cleanLang = lang.toLowerCase().replace(/[^a-z0-9_-]/g, '');
-  return `tts_cache/${cleanVoice}/${cleanLang}/${hashKey}.wav`;
+  const cleanVersion = version.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  return `tts_cache/${cleanVersion}/${cleanVoice}/${cleanLang}/${hashKey}.wav`;
 }
 
 /**
@@ -57,9 +58,10 @@ export function getDeterministicCloudKey(voiceKey: string, lang: string, hashKey
 export async function getAudioFromCloudStorage(
   voiceKey: string,
   lang: string,
-  hashKey: string
+  hashKey: string,
+  version: string = 'v4'
 ): Promise<Buffer | null> {
-  const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey);
+  const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey, version);
 
   // 1. Check direct HTTPS REST endpoint (Firebase Storage public CDN / GCS)
   try {
@@ -103,9 +105,10 @@ export async function saveAudioToCloudStorage(
   lang: string,
   hashKey: string,
   audioBuffer: Buffer,
-  contentType = 'audio/wav'
+  contentType = 'audio/wav',
+  version: string = 'v4'
 ): Promise<void> {
-  const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey);
+  const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey, version);
 
   try {
     const storage = getStorageClient();

@@ -13,6 +13,19 @@ export interface VoicePersona {
   previewText: string;
 }
 
+/**
+ * Explicit TTS Generation Version for Cache Invalidation & Audio Consistency.
+ * Bump this version whenever:
+ * 1. Voice persona style prompts or metadata instructions change.
+ * 2. Audio-generation model (e.g. Gemini 3.8 Flash-Lite TTS), sample rate, or WAV container formatting changes.
+ * 
+ * Bumping this automatically invalidates:
+ * - Browser CacheStorage (automatically cleans up previous beeyou-tts-v* caches)
+ * - Client in-memory audio cache & HTTP stream URLs (&v=...)
+ * - Server L1 RAM cache, L3 disk cache (.data/tts_cache), and cloud storage cache
+ */
+export const TTS_GENERATION_VERSION = 'v4';
+
 export const VOICE_PERSONAS: VoicePersona[] = [
   // --- Group 0: Default Free System Voice (100% Free • On-Device • Zero Credits) ---
   {

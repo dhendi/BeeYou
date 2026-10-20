@@ -4,7 +4,7 @@ import os from 'os';
 import crypto from 'crypto';
 import type { Request, Response } from 'express';
 import { defaultRateLimitStore, getClientIp } from './sharedRateLimitStore';
-import { getVoicePersonaById } from '../data/voicePersonasData';
+import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
 import {
   getAudioFromCloudStorage,
   saveAudioToCloudStorage,
@@ -534,11 +534,15 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const persona = getVoicePersonaById(rawVoice);
   const voiceKey = persona.id.toLowerCase();
 
+  // Explicit TTS Generation Version from query param or default engine version
+  const ttsVersion = (req.query.v || TTS_GENERATION_VERSION).toString().trim().toLowerCase();
+
   const clientIp = getClientIp(req);
-  const hashKey = crypto.createHash('md5').update(`${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`).digest('hex');
-  const cacheKey = `${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`;
-  const diskPathWav = path.join(TTS_CACHE_DIR, `${voiceKey}_${normalizedLang}_${hashKey}.wav`);
-  const diskPathMp3 = path.join(TTS_CACHE_DIR, `${voiceKey}_${normalizedLang}_${hashKey}.mp3`);
+  // Include explicit TTS generation version in hashKey and cacheKey so bumping version guarantees fresh generation
+  const hashKey = crypto.createHash('md5').update(`${ttsVersion}_${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`).digest('hex');
+  const cacheKey = `${ttsVersion}_${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`;
+  const diskPathWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${hashKey}.wav`);
+  const diskPathMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${hashKey}.mp3`);
   const legacyDiskPathMp3 = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
 
   // 3. L1 In-Memory Cache Check (0ms latency, zero upstream calls)
@@ -628,7 +632,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   // 4b. Persistent Cloud Object Storage Check (Firebase Storage / GCS / Vercel Durable Cache)
   // Ensures audio persists across Vercel serverless container recycles and cold starts
   try {
-    const cloudRaw = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey);
+    const cloudRaw = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey, ttsVersion);
     if (cloudRaw) {
       const contentType = 'audio/wav';
       const { buffer: cloudBuffer } = ensureValidWavContainer(cloudRaw);
@@ -809,7 +813,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
               // Asynchronously write to persistent disk cache & cloud storage
               fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
-              saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType).catch(() => {});
+              saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType, ttsVersion).catch(() => {});
 
               return { buffer, contentType };
             }
