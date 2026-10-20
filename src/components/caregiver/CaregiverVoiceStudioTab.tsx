@@ -31,8 +31,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     offlineVoices,
   } = useApp();
 
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'featured' | 'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('featured');
+  const [showAllCatalog, setShowAllCatalog] = useState(false);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+
+  const FEATURED_VOICE_IDS = ['system', 'puck', 'fenrir', 'kore'];
 
   const activePersona = getVoicePersonaById(settings.voicePersona);
   const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
@@ -64,7 +67,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   };
 
   const filteredPersonas = VOICE_PERSONAS.filter((p) => {
-    if (voiceCategoryFilter === 'all') return true;
+    if (voiceCategoryFilter === 'featured') return FEATURED_VOICE_IDS.includes(p.id);
+    if (voiceCategoryFilter === 'all') {
+      if (!showAllCatalog) return FEATURED_VOICE_IDS.includes(p.id);
+      return true;
+    }
     if (voiceCategoryFilter === 'free') return p.category === 'system';
     if (voiceCategoryFilter === 'kids') return p.category === 'kids';
     if (voiceCategoryFilter === 'teens') return p.category === 'teens';
@@ -372,6 +379,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
+              { key: 'featured', label: 'Curated (3 Voices + Free)' },
               { key: 'all', label: `All (${VOICE_PERSONAS.length})` },
               { key: 'free', label: 'Free (On-Device)' },
               { key: 'kids', label: 'Kids' },
@@ -484,6 +492,22 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               </div>
             );
           })}
+
+          {!showAllCatalog && (voiceCategoryFilter === 'featured' || voiceCategoryFilter === 'all') && (
+            <div className="col-span-full pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAllCatalog(true);
+                  setVoiceCategoryFilter('all');
+                  playChime('tap');
+                }}
+                className="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/70 hover:bg-amber-100/70 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
+              >
+                <span>Show All 20 Voices (Kids, Teens, Caregivers & Professionals)</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

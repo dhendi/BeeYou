@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    cleartext: false,
+    cleartext: true,
     hostname: 'localhost',
   },
   android: {
@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
     captureInput: true,
   },
   ios: {
-    limitsNavigationsToAppBoundDomains: true,
+    limitsNavigationsToAppBoundDomains: false,
     preferredContentMode: 'mobile',
     allowsLinkPreview: false,
   },

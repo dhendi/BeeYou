@@ -74,5 +74,12 @@
 	<string>BeeYou accesses your photo library so you can select personal pictures for communication cards, visual routines, and the About Me passport.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>BeeYou uses the camera to allow taking real-time photos of familiar objects, foods, and places for personalized communication tiles.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

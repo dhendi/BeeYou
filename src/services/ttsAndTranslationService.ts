@@ -755,7 +755,7 @@ const TRANSLATE_DAILY_LIMIT_PER_USER = 200; // Max 200 dynamic translations per 
 
 // Request Timeouts
 const TRANSLATE_TIMEOUT_MS = 5000; // 5-second strict upstream timeout
-const TTS_TIMEOUT_MS = 7500; // 7.5-second strict upstream timeout
+const TTS_TIMEOUT_MS = 10000; // 10-second upstream timeout for high-fidelity speech
 
 /**
  * Handle Translation Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.
@@ -1110,40 +1110,31 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (isValidGeminiKey && voiceKey !== 'system') {
       const candidateModels = [
-        'gemini-2.5-flash-preview-tts',
+        'gemini-3.8-flash-lite-tts',
         'gemini-3.8-flash-tts',
       ];
 
       for (const model of candidateModels) {
         try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-          const textPart: any = { text: cleanText };
-          // speech_metadata is exclusively supported on Gemini 3.8 models (Gemini 2.5 throws 400 Invalid Argument)
-          if (model.includes('3.8')) {
-            textPart.speech_metadata = {
-              style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
-            };
-          }
+          const endpoint = 'https://generativelanguage.googleapis.com/v1beta/interactions';
           const payload = {
-            contents: [{
-              role: 'user',
-              parts: [textPart],
+            model,
+            input: [{
+              type: 'user_input',
+              content: [{
+                type: 'text',
+                text: cleanText,
+                annotations: [{
+                  type: 'speech_metadata',
+                  style: `${persona.style}, calm, steady, neutral intonation, matter-of-fact assistive communication, even-toned and clear without dramatic inflection or exaggerated emotion`,
+                }],
+              }],
             }],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              ...(model.includes('3.8') ? {
-                responseFormat: {
-                  audio: {
-                    mimeType: 'AUDIO_WAV',
-                    sampleRate: 24000,
-                  },
-                },
-              } : {}),
-              speechConfig: {
-                voiceConfig: {
-                  voice: persona.geminiVoice || persona.name,
-                },
-              },
+            response_format: { type: 'audio' },
+            generation_config: {
+              speech_config: [
+                { voice: persona.geminiVoice || persona.name },
+              ],
             },
           };
 
@@ -1160,16 +1151,19 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
           if (geminiRes.ok) {
             usageBudgetTracker.recordTtsUpstream();
             const geminiData: any = await geminiRes.json();
+            const audioStep = geminiData?.steps?.find((s: any) => s.type === 'model_output' && s.content?.some((c: any) => c.type === 'audio'));
+            const audioContent = audioStep?.content?.find((c: any) => c.type === 'audio');
             const inline = geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
             const audioBase64 =
+              audioContent?.data ||
               inline?.data ||
               geminiData?.output_audio?.data ||
               geminiData?.outputAudio?.data;
 
             if (audioBase64) {
               const rawBuffer: Buffer = Buffer.from(audioBase64, 'base64');
-              const rawMime = inline?.mimeType || geminiData?.output_audio?.mime_type || geminiData?.outputAudio?.mimeType || '';
-              const metaRate = geminiData?.output_audio?.sample_rate || geminiData?.outputAudio?.sampleRate;
+              const rawMime = audioContent?.mime_type || inline?.mimeType || 'audio/wav';
+              const metaRate = geminiData?.output_audio?.sample_rate || geminiData?.outputAudio?.sampleRate || 24000;
 
               // Inspect response format and sample rate, adding a valid WAV header if raw PCM
               const { buffer, sampleRate, isNativeWav } = ensureValidWavContainer(rawBuffer, rawMime, metaRate);

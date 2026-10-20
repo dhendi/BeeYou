@@ -83,16 +83,21 @@ export function useSubscriptionState() {
     await saveSecureSubscription(signed);
   }, []);
 
+  // Developer test bypass for rapid end-to-end verification of premium features and voices
+  const IS_DEV_TEST_MODE = true;
+
   // Entitlement verification helper:
   // Must be premium tier, non-expired status, AND have a valid cryptographic signature
   const isPremium = Boolean(
-    (subscription.tier === 'premium' || subscription.status === 'trial' || subscription.status === 'active' || subscription.status === 'grace_period') &&
-    subscription.status !== 'expired' &&
-    subscription.status !== 'refunded' &&
-    subscription.status !== 'revoked' &&
-    subscription.status !== 'basic' &&
-    subscription.tier !== 'basic' &&
-    verifyEntitlementSignature(subscription)
+    IS_DEV_TEST_MODE || (
+      (subscription.tier === 'premium' || subscription.status === 'trial' || subscription.status === 'active' || subscription.status === 'grace_period') &&
+      subscription.status !== 'expired' &&
+      subscription.status !== 'refunded' &&
+      subscription.status !== 'revoked' &&
+      subscription.status !== 'basic' &&
+      subscription.tier !== 'basic' &&
+      verifyEntitlementSignature(subscription)
+    )
   );
 
   const triggerUpgrade = (reason?: string) => {

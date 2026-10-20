@@ -778,7 +778,25 @@ export async function speakText(
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
     } else if (options?.previewAudio) {
-      // Explicit Audition Preview: wait up to 8000ms for neural audio sample from server
+      // 2a. Pre-bundled instant offline audition preview asset
+      const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
+      try {
+        const bundledRes = await fetch(bundledPreviewUrl);
+        if (bundledRes.ok) {
+          const buf = await bundledRes.arrayBuffer();
+          if (buf.byteLength > 44) {
+            const blob = new Blob([buf], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
+            const played = await playAudioUrl(buf, formattedText, options?.rate, speechId, blobUrl);
+            if (played || speechId !== latestSpeechRequestId) return;
+          }
+        }
+      } catch {
+        // Bundled preview failed or not present, fallback to network
+      }
+
+      // 2b. Dynamic network preview fetch
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
@@ -795,10 +813,41 @@ export async function speakText(
       // Never fall through to default Samantha speech during an explicit audition of a neural voice!
       return;
     } else {
-      // AAC communication button tap:
-      // Trigger background fetch to warm the cache for future taps, but never block instant vocalization!
-      // Immediately fall through to speakWithBrowserSpeechSynthesis (< 20ms response).
-      getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
+      // 3a. Check pre-bundled core AAC vocabulary asset for 0ms instant offline speech
+      const wordSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (wordSlug) {
+        const bundledCoreUrl = `/assets/audio/core/${selectedPersonaId}_${wordSlug}.wav`;
+        try {
+          const bundledRes = await fetch(bundledCoreUrl);
+          if (bundledRes.ok) {
+            const buf = await bundledRes.arrayBuffer();
+            if (buf.byteLength > 44) {
+              const blob = new Blob([buf], { type: 'audio/wav' });
+              const blobUrl = URL.createObjectURL(blob);
+              audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
+              const played = await playAudioUrl(buf, formattedText, options?.rate, speechId, blobUrl);
+              if (played || speechId !== latestSpeechRequestId) return;
+            }
+          }
+        } catch {
+          // Bundled core word not present
+        }
+      }
+
+      // 3b. For non-bundled words, attempt dynamic server fetch with a fast 1500ms timeout
+      try {
+        const audioItem = await Promise.race([
+          getOrFetchAudioItem(streamUrl, cacheKey),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+        ]);
+        if (speechId !== latestSpeechRequestId) return;
+        if (audioItem) {
+          const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch {
+        // Dynamic fetch failed or timed out, gracefully fallback to calibrated on-device speech
+      }
     }
   }
 

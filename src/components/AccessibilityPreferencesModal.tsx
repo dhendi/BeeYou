@@ -49,7 +49,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('all');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'featured' | 'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('featured');
 
   if (!showAccessibilityModal) return null;
 
@@ -640,6 +640,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 {/* Category Filter Pills (Silicone Tray Style) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {[
+                    { key: 'featured', label: 'Curated (3 Voices + Free)' },
                     { key: 'all', label: 'All Voices (21)' },
                     { key: 'free', label: 'Free (On-Device)' },
                     { key: 'kids', label: 'Kids & Children' },
@@ -671,6 +672,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 {/* Voice Persona Cards List */}
                 <div className="max-h-72 overflow-y-auto pr-1 space-y-2.5 rounded-2xl">
                   {VOICE_PERSONAS.filter((p) => {
+                    if (voiceCategoryFilter === 'featured') return ['system', 'puck', 'fenrir', 'kore'].includes(p.id);
                     if (voiceCategoryFilter === 'all') return true;
                     if (voiceCategoryFilter === 'free') return p.category === 'system';
                     if (voiceCategoryFilter === 'kids') return p.category === 'kids';

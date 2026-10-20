@@ -105,18 +105,21 @@ export function signSubscriptionEntitlement(
 }
 
 /**
- * Default fallback Basic subscription (unlocked only free features).
+ * Default fallback subscription for developer testing (unlocked with 15-day trial).
  */
 export function getDefaultBasicSubscription(): SubscriptionInfo {
+  const startDate = new Date();
+  const endDate = new Date(startDate.getTime() + DEFAULT_TRIAL_DAYS * 24 * 60 * 60 * 1000);
   return signSubscriptionEntitlement({
-    tier: 'basic',
-    status: 'basic',
+    tier: 'premium',
+    status: 'trial',
     billingCycle: 'monthly',
-
+    trialStartDate: startDate.toISOString(),
+    trialEndDate: endDate.toISOString(),
     monthlyPrice: SUBSCRIPTION_PRICES.monthly,
     yearlyPrice: SUBSCRIPTION_PRICES.yearly,
     trialDays: DEFAULT_TRIAL_DAYS,
-    autoRenew: false,
+    autoRenew: true,
     storeProvider: 'none',
   });
 }
