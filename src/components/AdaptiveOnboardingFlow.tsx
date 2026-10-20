@@ -806,33 +806,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                 </p>
               </div>
 
-              {/* Plan Choice Cards (Weekly / Monthly / Yearly) - 3 columns on both mobile & tablet */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {/* Weekly */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    playChime('tap');
-                    setSelectedCycle('weekly');
-                  }}
-                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
-                    selectedCycle === 'weekly'
-                      ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
-                  }`}
-                >
-                  <div>
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
-                      {t('Weekly')}
-                    </span>
-                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$2.99</div>
-                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">/{t('week')}</span>
-                  </div>
-                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 leading-tight">
-                    {t('15 days free trial')}
-                  </div>
-                </button>
-
+              {/* Plan Choice Cards (Monthly / Yearly) - 2 columns on mobile & tablet */}
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                 {/* Monthly */}
                 <button
                   type="button"
@@ -840,20 +815,20 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     playChime('tap');
                     setSelectedCycle('monthly');
                   }}
-                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                  className={`p-3 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
                     selectedCycle === 'monthly'
                       ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 ring-2 ring-amber-400/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                   }`}
                 >
                   <div className="absolute -top-2.5 right-1.5 sm:right-3 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider shadow-xs">
-                    {t('Popular')}
+                    {t('Monthly')}
                   </div>
                   <div>
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
-                      {t('Monthly')}
+                      {t('Monthly Plan')}
                     </span>
-                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$9.99</div>
+                    <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">$9.99</div>
                     <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">/{t('month')}</span>
                   </div>
                   <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-400 leading-tight">
@@ -868,21 +843,21 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                     playChime('tap');
                     setSelectedCycle('yearly');
                   }}
-                  className={`p-2.5 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
+                  className={`p-3 sm:p-4 rounded-2xl border-2 text-left flex flex-col justify-between transition cursor-pointer relative ${
                     selectedCycle === 'yearly'
                       ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 ring-2 ring-emerald-400/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/40'
                   }`}
                 >
                   <div className="absolute -top-2.5 right-1.5 sm:right-3 px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider shadow-xs">
-                    {t('Save 17%')}
+                    {t('Save 25%')}
                   </div>
                   <div>
                     <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5 sm:mb-1">
-                      {t('Yearly')}
+                      {t('Yearly Plan')}
                     </span>
-                    <div className="text-base sm:text-xl font-black text-slate-900 dark:text-white">$89.99</div>
-                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">$7.49/{t('month')}</span>
+                    <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">$89.99</div>
+                    <span className="text-[10px] sm:text-[11px] text-emerald-700 dark:text-emerald-400 font-bold">~$7.50/{t('month')}</span>
                   </div>
                   <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] font-bold text-emerald-700 dark:text-emerald-400 leading-tight">
                     {t('15 days free trial')}

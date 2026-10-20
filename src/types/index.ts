@@ -899,7 +899,7 @@ export type SubscriptionStatus =
   | 'expired'
   | 'refunded'
   | 'revoked';
-export type BillingCycle = 'weekly' | 'monthly' | 'yearly';
+export type BillingCycle = 'monthly' | 'yearly';
 export type StoreProvider = 'apple_app_store' | 'google_play' | 'web_stripe' | 'promo' | 'none';
 
 export interface SubscriptionInfo {
@@ -912,7 +912,7 @@ export interface SubscriptionInfo {
   expiresAt?: string;
   trialStartDate?: string;
   trialEndDate?: string;
-  weeklyPrice: number;  // 2.99
+  weeklyPrice?: number;
   monthlyPrice: number; // 9.99
   yearlyPrice: number;  // 89.99
   trialDays: number;    // 15

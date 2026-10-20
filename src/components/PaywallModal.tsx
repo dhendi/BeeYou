@@ -203,7 +203,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
             <label className="block text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
               {t('Select Your Membership Plan')}
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 gap-3">
               {/* Monthly */}
               <button
                 type="button"
@@ -255,29 +255,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                 </div>
               </button>
 
-              {/* Weekly */}
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCycle('weekly');
-                  playChime('tap');
-                }}
-                className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
-                  selectedCycle === 'weekly'
-                    ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/40 shadow-xs'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
-                }`}
-              >
-                <div className="text-[11px] font-black text-slate-700 dark:text-slate-200">
-                  {t('Weekly')}
-                </div>
-                <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
-                  ${SUBSCRIPTION_PRICES.weekly}
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  {t('/ week')}
-                </div>
-              </button>
+
             </div>
           </div>
 

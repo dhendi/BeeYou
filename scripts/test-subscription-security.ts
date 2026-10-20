@@ -23,7 +23,6 @@ import {
   SUBSCRIPTION_PRICES,
   BEE_PRODUCT_MONTHLY,
   BEE_PRODUCT_ANNUAL,
-  BEE_PRODUCT_WEEKLY,
 } from '../src/services/subscriptionService';
 import { SubscriptionInfo } from '../src/types';
 
@@ -65,11 +64,6 @@ async function runSubscriptionSecurityAuditTests() {
     const annualResult = await executePurchase('yearly', 'success');
     assert(annualResult.subscription.productId === BEE_PRODUCT_ANNUAL, 'Annual product ID matches StoreKit ID');
     assert(annualResult.subscription.yearlyPrice === 89.99, 'Annual price is configured at $89.99');
-
-    // Test Weekly ($2.99)
-    const weeklyResult = await executePurchase('weekly', 'success');
-    assert(weeklyResult.subscription.productId === BEE_PRODUCT_WEEKLY, 'Weekly product ID matches StoreKit ID');
-    assert(weeklyResult.subscription.weeklyPrice === 2.99, 'Weekly price is configured at $2.99');
   }
 
   // -------------------------------------------------------------
@@ -237,7 +231,6 @@ async function runSubscriptionSecurityAuditTests() {
       storeProvider: 'google_play',
       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       monthlyPrice: 9.99,
-      weeklyPrice: 2.99,
       yearlyPrice: 89.99,
       trialDays: 15,
       autoRenew: true,
@@ -249,7 +242,7 @@ async function runSubscriptionSecurityAuditTests() {
     assert(verifyEntitlementSignature(signed), 'Entitlement verification confirms cryptographic validity');
 
     // Changing any field invalidates the signature
-    const altered = { ...signed, billingCycle: 'weekly' as const };
+    const altered: SubscriptionInfo = { ...signed, billingCycle: 'monthly' };
     assert(!verifyEntitlementSignature(altered), 'Changing billing cycle without re-signing fails verification');
   }
 
@@ -264,7 +257,6 @@ async function runSubscriptionSecurityAuditTests() {
     // 3. User account settings management deep links
     assert(SUBSCRIPTION_PRICES.monthly === 9.99, 'Monthly renewal term is $9.99');
     assert(SUBSCRIPTION_PRICES.yearly === 89.99, 'Yearly renewal term is $89.99 (Save 25%)');
-    assert(SUBSCRIPTION_PRICES.weekly === 2.99, 'Weekly renewal term is $2.99');
 
     const appleDeepLink = 'https://apps.apple.com/account/subscriptions';
     const googleDeepLink = 'https://play.google.com/store/account/subscriptions';

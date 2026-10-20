@@ -13,7 +13,6 @@ import {
   verifyEntitlementSignature,
   BEE_PRODUCT_MONTHLY,
   BEE_PRODUCT_ANNUAL,
-  BEE_PRODUCT_WEEKLY,
 } from '../services/subscriptionService';
 
 export function useSubscriptionState() {
@@ -111,7 +110,6 @@ export function useSubscriptionState() {
       billingCycle: chosenCycle,
       trialStartDate: startDate.toISOString(),
       trialEndDate: endDate.toISOString(),
-      weeklyPrice: SUBSCRIPTION_PRICES.weekly,
       monthlyPrice: SUBSCRIPTION_PRICES.monthly,
       yearlyPrice: SUBSCRIPTION_PRICES.yearly,
       trialDays: DEFAULT_TRIAL_DAYS,
@@ -125,9 +123,9 @@ export function useSubscriptionState() {
   const activateSubscription = (cycle?: BillingCycle) => {
     const chosenCycle = cycle || subscription.billingCycle || 'monthly';
     const startDate = new Date();
-    const daysToAdd = chosenCycle === 'yearly' ? 365 : chosenCycle === 'weekly' ? 7 : 30;
+    const daysToAdd = chosenCycle === 'yearly' ? 365 : 30;
     const expiresAt = new Date(startDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000).toISOString();
-    const productId = chosenCycle === 'yearly' ? BEE_PRODUCT_ANNUAL : chosenCycle === 'weekly' ? BEE_PRODUCT_WEEKLY : BEE_PRODUCT_MONTHLY;
+    const productId = chosenCycle === 'yearly' ? BEE_PRODUCT_ANNUAL : BEE_PRODUCT_MONTHLY;
 
     const newSub: SubscriptionInfo = {
       ...subscription,
@@ -137,7 +135,6 @@ export function useSubscriptionState() {
       productId,
       purchasedAt: startDate.toISOString(),
       expiresAt,
-      weeklyPrice: SUBSCRIPTION_PRICES.weekly,
       monthlyPrice: SUBSCRIPTION_PRICES.monthly,
       yearlyPrice: SUBSCRIPTION_PRICES.yearly,
       trialDays: DEFAULT_TRIAL_DAYS,

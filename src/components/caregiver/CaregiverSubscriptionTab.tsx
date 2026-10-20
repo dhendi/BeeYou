@@ -77,7 +77,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
               {t("BeeYou Membership & Plans")}
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-xs">
-              {subscription.billingCycle === 'yearly' ? '$89.99 / yr' : subscription.billingCycle === 'monthly' ? '$9.99 / mo' : '$2.99 / wk'}
+              {subscription.billingCycle === 'yearly' ? '$89.99 / yr' : '$9.99 / mo'}
             </span>
             {subscription.billingCycle === 'yearly' && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
@@ -185,22 +185,8 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
         </div>
       )}
 
-      {/* Billing Switcher (Weekly vs Monthly vs Yearly) */}
+      {/* Billing Switcher (Monthly vs Yearly) */}
       <div data-tour="subscription-billing-toggle" className="flex items-center justify-center p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl max-w-lg mx-auto border border-slate-200 dark:border-slate-700 shadow-inner gap-1">
-        <button
-          type="button"
-          onClick={() => {
-            setBillingCycle('weekly');
-            playChime('tap');
-          }}
-          className={`flex-1 py-2 px-2.5 rounded-xl font-black text-xs transition-all cursor-pointer text-center ${
-            subscription.billingCycle === 'weekly'
-              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-          }`}
-        >
-          <span>{t("Weekly • $2.99/wk")}</span>
-        </button>
         <button
           type="button"
           onClick={() => {
@@ -272,7 +258,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
               {isPremium
                 ? 'Your family has full, unrestricted access to all 30+ sensory soundscapes & frequencies, unlimited visual routines & First-Then boards, medication refill tracking, therapist IEP summaries, and cloud caregiver sync.'
-                : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$89.99/year (~$7.50/mo)' : subscription.billingCycle === 'monthly' ? '$9.99/month' : '$2.99/week'} ($0 today with a 15-day free trial) to unlock the full clinical suite.`
+                : `Basic gives you Day 1 essential AAC communication, 1 active visual routine, 1 medication tracker, and 2 calming sounds. Upgrade to BeeYou Premium for ${subscription.billingCycle === 'yearly' ? '$89.99/year (~$7.50/mo)' : '$9.99/month'} ($0 today with a 15-day free trial) to unlock the full clinical suite.`
               }
             </p>
 
@@ -348,7 +334,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
           </span>
         </div>
         <p className="leading-relaxed">
-          • <strong>Billing & Auto-Renewal:</strong> Payment will be charged to your Apple ID Account or Google Play Account upon purchase confirmation. Subscription automatically renews at <strong>${subscription.billingCycle === 'yearly' ? `${SUBSCRIPTION_PRICES.yearly}/year` : subscription.billingCycle === 'weekly' ? `${SUBSCRIPTION_PRICES.weekly}/week` : `${SUBSCRIPTION_PRICES.monthly}/month`}</strong> unless auto-renew is turned off at least 24 hours prior to the end of the current billing cycle.
+          • <strong>Billing & Auto-Renewal:</strong> Payment will be charged to your Apple ID Account or Google Play Account upon purchase confirmation. Subscription automatically renews at <strong>${subscription.billingCycle === 'yearly' ? `${SUBSCRIPTION_PRICES.yearly}/year` : `${SUBSCRIPTION_PRICES.monthly}/month`}</strong> unless auto-renew is turned off at least 24 hours prior to the end of the current billing cycle.
         </p>
         <p className="leading-relaxed">
           • <strong>Renewal Charge:</strong> Your account will be charged for renewal within 24 hours prior to the end of the current period, identifying the recurring fee.

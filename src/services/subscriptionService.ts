@@ -22,13 +22,11 @@ import {
 } from '../types';
 import { getStoredFamilyAccount } from './authService';
 
-export const BEE_PRODUCT_WEEKLY = 'app.beeyou.subscription.weekly';
 export const BEE_PRODUCT_MONTHLY = 'app.beeyou.subscription.monthly';
 export const BEE_PRODUCT_ANNUAL = 'app.beeyou.subscription.annual';
 
 export const SUBSCRIPTION_PRICES = {
-  weekly: 2.99,
-  monthly: 9.99, // $9.99/month as specified in audit report header
+  monthly: 9.99, // $9.99/month
   yearly: 89.99, // ~$7.50/mo (Save 25%)
 };
 
@@ -114,7 +112,7 @@ export function getDefaultBasicSubscription(): SubscriptionInfo {
     tier: 'basic',
     status: 'basic',
     billingCycle: 'monthly',
-    weeklyPrice: SUBSCRIPTION_PRICES.weekly,
+
     monthlyPrice: SUBSCRIPTION_PRICES.monthly,
     yearlyPrice: SUBSCRIPTION_PRICES.yearly,
     trialDays: DEFAULT_TRIAL_DAYS,
@@ -316,9 +314,7 @@ export async function executePurchase(
 
   const productId = cycle === 'yearly' 
     ? BEE_PRODUCT_ANNUAL 
-    : cycle === 'weekly' 
-      ? BEE_PRODUCT_WEEKLY 
-      : BEE_PRODUCT_MONTHLY;
+    : BEE_PRODUCT_MONTHLY;
 
   // Handle Simulated Edge Cases for Testing (Finding 7 checklist requirements)
   if (simulateScenario === 'payment_declined') {
@@ -359,7 +355,7 @@ export async function executePurchase(
 
   // Calculate billing period dates
   const startDate = new Date();
-  const daysToAdd = cycle === 'yearly' ? 365 : cycle === 'weekly' ? 7 : 30;
+  const daysToAdd = cycle === 'yearly' ? 365 : 30;
   const expiryDate = new Date(startDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
   const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -372,7 +368,7 @@ export async function executePurchase(
     storeProvider: store,
     purchasedAt: startDate.toISOString(),
     expiresAt: expiryDate.toISOString(),
-    weeklyPrice: SUBSCRIPTION_PRICES.weekly,
+
     monthlyPrice: SUBSCRIPTION_PRICES.monthly,
     yearlyPrice: SUBSCRIPTION_PRICES.yearly,
     trialDays: DEFAULT_TRIAL_DAYS,
