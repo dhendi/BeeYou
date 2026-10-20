@@ -13,9 +13,14 @@ let cachedVoices: SpeechSynthesisVoice[] = [];
 let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
-const audioMemoryCache = new Map<string, string>();
+export interface CachedAudioItem {
+  blobUrl: string;
+  buffer: ArrayBuffer;
+}
+
+const audioMemoryCache = new Map<string, CachedAudioItem>();
 export const TTS_CACHE_NAME = `beeyou-tts-${TTS_GENERATION_VERSION}`;
-const inFlightAudioFetches = new Map<string, Promise<string | null>>();
+const inFlightAudioFetches = new Map<string, Promise<CachedAudioItem | null>>();
 
 /**
  * Builds version-scoped TTS stream URL with cache-busting query parameter.
@@ -58,7 +63,7 @@ if (typeof window !== 'undefined') {
  * Multi-tier Audio Cache Loader (L1 In-Memory -> Client Single-Flight -> L2 Browser CacheStorage -> L3 Server Disk Stream)
  * Deduplicates in-flight requests so simultaneous clicks or prefetch jobs share a single HTTP fetch.
  */
-async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Promise<string | null> {
+export async function getOrFetchAudioItem(streamUrl: string, cacheKey: string): Promise<CachedAudioItem | null> {
   // 1. Level 1: In-Memory Cache (0ms latency, zero network)
   if (audioMemoryCache.has(cacheKey)) {
     return audioMemoryCache.get(cacheKey)!;
@@ -70,7 +75,7 @@ async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Prom
     return inFlightAudioFetches.get(cacheKey)!;
   }
 
-  const fetchPromise = (async (): Promise<string | null> => {
+  const fetchPromise = (async (): Promise<CachedAudioItem | null> => {
     // 2. Level 2: Browser CacheStorage API (Persistent across app reloads & offline)
     const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
     if (typeof window !== 'undefined' && 'caches' in window) {
@@ -78,10 +83,14 @@ async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Prom
         const cache = await caches.open(TTS_CACHE_NAME);
         const match = (await cache.match(fullUrl)) || (await cache.match(streamUrl));
         if (match) {
-          const blob = await match.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          audioMemoryCache.set(cacheKey, blobUrl);
-          return blobUrl;
+          const buffer = await match.arrayBuffer();
+          if (buffer && buffer.byteLength > 44) {
+            const blob = new Blob([buffer], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            const entry: CachedAudioItem = { blobUrl, buffer };
+            audioMemoryCache.set(cacheKey, entry);
+            return entry;
+          }
         }
       } catch (e) {
         console.warn('[CacheStorage] Read exception:', e);
@@ -92,28 +101,43 @@ async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Prom
     try {
       const response = await fetch(streamUrl);
       if (response.ok) {
-        // Synchronously clone the response BEFORE consuming response.blob() to avoid "body used" error
-        const responseClone = response.clone();
-        if (typeof window !== 'undefined' && 'caches' in window) {
-          caches.open(TTS_CACHE_NAME)
-            .then((cache) => cache.put(fullUrl, responseClone))
-            .catch((err) => console.warn('[CacheStorage] Write warning:', err));
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('audio') && !contentType.includes('octet-stream')) {
+          console.warn('[Audio Stream] Invalid content type:', contentType);
+          return null;
         }
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
 
-        // LRU Eviction guard for Level 1 memory cache (max 250 entries)
-        if (audioMemoryCache.size > 250) {
-          const oldestKey = audioMemoryCache.keys().next().value;
-          if (oldestKey) {
-            const oldUrl = audioMemoryCache.get(oldestKey);
-            if (oldUrl) URL.revokeObjectURL(oldUrl);
-            audioMemoryCache.delete(oldestKey);
+        const buffer = await response.arrayBuffer();
+        if (buffer && buffer.byteLength > 44) {
+          if (typeof window !== 'undefined' && 'caches' in window) {
+            const responseToCache = new Response(buffer.slice(0), {
+              headers: {
+                'content-type': contentType || 'audio/wav',
+                'cache-control': 'public, max-age=31536000, immutable',
+              },
+            });
+            caches.open(TTS_CACHE_NAME)
+              .then((cache) => cache.put(fullUrl, responseToCache))
+              .catch((err) => console.warn('[CacheStorage] Write warning:', err));
           }
-        }
 
-        audioMemoryCache.set(cacheKey, blobUrl);
-        return blobUrl;
+          const blob = new Blob([buffer], { type: contentType || 'audio/wav' });
+          const blobUrl = URL.createObjectURL(blob);
+
+          // LRU Eviction guard for Level 1 memory cache (max 250 entries)
+          if (audioMemoryCache.size > 250) {
+            const oldestKey = audioMemoryCache.keys().next().value;
+            if (oldestKey) {
+              const oldEntry = audioMemoryCache.get(oldestKey);
+              if (oldEntry?.blobUrl) URL.revokeObjectURL(oldEntry.blobUrl);
+              audioMemoryCache.delete(oldestKey);
+            }
+          }
+
+          const entry: CachedAudioItem = { blobUrl, buffer };
+          audioMemoryCache.set(cacheKey, entry);
+          return entry;
+        }
       }
     } catch (err) {
       console.warn('[Audio Stream] Fetch error:', err);
@@ -128,6 +152,11 @@ async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Prom
   } finally {
     inFlightAudioFetches.delete(cacheKey);
   }
+}
+
+export async function getOrFetchAudioBlobUrl(streamUrl: string, cacheKey: string): Promise<string | null> {
+  const item = await getOrFetchAudioItem(streamUrl, cacheKey);
+  return item ? item.blobUrl : null;
 }
 
 let serverTTSCooldownUntil = 0;
@@ -636,13 +665,13 @@ export async function speakText(
     const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formattedText);
 
     try {
-      const blobUrl = await getOrFetchAudioBlobUrl(streamUrl, cacheKey);
+      const audioItem = await getOrFetchAudioItem(streamUrl, cacheKey);
       // If a newer tap arrived while fetching audio, cancel cleanly without falling back
       if (speechId !== latestSpeechRequestId) {
         return;
       }
-      if (blobUrl) {
-        const played = await playAudioUrl(blobUrl, formattedText, options?.rate, speechId);
+      if (audioItem) {
+        const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
         // Either it played successfully or was intentionally superseded by a newer tap
         if (played || speechId !== latestSpeechRequestId) return;
       }
@@ -730,12 +759,23 @@ export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000):
  *         and plays without muting even when hardware Silent Mode is active.
  * Tier 2: HTML5 Audio Element — Fallback if Web Audio context decoding fails.
  */
-export async function playAudioUrl(src: string, originalText: string = '', rate?: number, speechId?: number): Promise<boolean> {
+export async function playAudioUrl(
+  srcOrBuffer: string | ArrayBuffer,
+  originalText: string = '',
+  rate?: number,
+  speechId?: number,
+  fallbackBlobUrl?: string
+): Promise<boolean> {
   enableSilentModePlayback();
   stopSpeaking();
 
   const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 0.85));
   let arrayBuffer: ArrayBuffer | null = null;
+  const sourceUrl = typeof srcOrBuffer === 'string' ? srcOrBuffer : (fallbackBlobUrl || '');
+
+  if (srcOrBuffer instanceof ArrayBuffer) {
+    arrayBuffer = srcOrBuffer;
+  }
 
   // 1. Tier 1: Web Audio API Engine
   const ctx = getAudioContext();
@@ -745,60 +785,64 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
         await ctx.resume().catch(() => {});
       }
 
-      const response = await fetch(src);
-      if (!response.ok) {
-        throw new Error(`Audio fetch HTTP ${response.status}`);
+      if (!arrayBuffer && typeof srcOrBuffer === 'string') {
+        const response = await fetch(srcOrBuffer);
+        if (!response.ok) {
+          throw new Error(`Audio fetch HTTP ${response.status}`);
+        }
+        arrayBuffer = await response.arrayBuffer();
       }
-      arrayBuffer = await response.arrayBuffer();
 
       // Check if a newer speech request arrived while fetching audio data
       if (speechId !== undefined && speechId !== latestSpeechRequestId) {
         return true;
       }
 
-      // Audio format safeguard: ensure valid container header for iOS Safari & Android WebView
-      arrayBuffer = ensureWavHeader(arrayBuffer, 24000);
+      if (arrayBuffer) {
+        // Audio format safeguard: ensure valid container header for iOS Safari & Android WebView
+        arrayBuffer = ensureWavHeader(arrayBuffer, 24000);
 
-      const audioBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
-        ctx.decodeAudioData(arrayBuffer!.slice(0), resolve, reject);
-      });
+        const audioBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
+          ctx.decodeAudioData(arrayBuffer!.slice(0), resolve, reject);
+        });
 
-      if (speechId !== undefined && speechId !== latestSpeechRequestId) {
-        return true;
-      }
-
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.playbackRate.value = targetRate;
-
-      const gainNode = ctx.createGain();
-      gainNode.gain.value = 1.0;
-      source.connect(gainNode);
-      gainNode.connect(ctx.destination);
-
-      activeSourceNode = source;
-      notifySpeechState(true, originalText);
-
-      return await new Promise<boolean>((resolve) => {
-        source.onended = () => {
-          if (activeSourceNode === source) {
-            activeSourceNode = null;
-          }
-          notifySpeechState(false, null);
-          resolve(true);
-        };
-
-        try {
-          source.start(0);
-        } catch (startErr) {
-          console.warn('[WebAudio] source.start error:', startErr);
-          if (activeSourceNode === source) {
-            activeSourceNode = null;
-          }
-          notifySpeechState(false, null);
-          resolve(false);
+        if (speechId !== undefined && speechId !== latestSpeechRequestId) {
+          return true;
         }
-      });
+
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = targetRate;
+
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 1.0;
+        source.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        activeSourceNode = source;
+        notifySpeechState(true, originalText);
+
+        return await new Promise<boolean>((resolve) => {
+          source.onended = () => {
+            if (activeSourceNode === source) {
+              activeSourceNode = null;
+            }
+            notifySpeechState(false, null);
+            resolve(true);
+          };
+
+          try {
+            source.start(0);
+          } catch (startErr) {
+            console.warn('[WebAudio] source.start error:', startErr);
+            if (activeSourceNode === source) {
+              activeSourceNode = null;
+            }
+            notifySpeechState(false, null);
+            resolve(false);
+          }
+        });
+      }
     } catch (webAudioErr) {
       console.warn('[WebAudio] Web Audio decode failed, falling back to HTML5 audio element:', webAudioErr);
     }
@@ -819,8 +863,12 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
         const blob = new Blob([verifiedBuffer], { type: 'audio/wav' });
         blobUrlToRevoke = URL.createObjectURL(blob);
         audio.src = blobUrlToRevoke;
+      } else if (sourceUrl) {
+        audio.src = sourceUrl;
       } else {
-        audio.src = src;
+        notifySpeechState(false, null);
+        resolve(false);
+        return;
       }
 
       activeAudioElement = audio;
