@@ -60,14 +60,47 @@ if (typeof window !== 'undefined') {
 }
 
 /**
+ * Fast synchronous/near-instant local cache lookup (L1 RAM + L2 CacheStorage).
+ * Returns immediately (< 10ms) without initiating any network fetch or cloud roundtrip.
+ */
+export async function getLocalCacheOnly(streamUrl: string, cacheKey: string): Promise<CachedAudioItem | null> {
+  // 1. Level 1: In-Memory RAM Cache (Instantaneous 0ms access)
+  if (audioMemoryCache.has(cacheKey)) {
+    return audioMemoryCache.get(cacheKey)!;
+  }
+
+  // 2. Level 2: Browser CacheStorage API (Fast local client storage, ~5ms)
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    try {
+      const fullUrl = new URL(streamUrl, window.location.origin).href;
+      const cache = await caches.open(TTS_CACHE_NAME);
+      const match = (await cache.match(fullUrl)) || (await cache.match(streamUrl));
+      if (match) {
+        const buffer = await match.arrayBuffer();
+        if (buffer && buffer.byteLength > 44) {
+          const blob = new Blob([buffer], { type: 'audio/wav' });
+          const blobUrl = URL.createObjectURL(blob);
+          const entry: CachedAudioItem = { blobUrl, buffer };
+          audioMemoryCache.set(cacheKey, entry);
+          return entry;
+        }
+      }
+    } catch (e) {
+      // Local storage read error; ignore and return null
+    }
+  }
+
+  return null;
+}
+
+/**
  * Multi-tier Audio Cache Loader (L1 In-Memory -> Client Single-Flight -> L2 Browser CacheStorage -> L3 Server Disk Stream)
  * Deduplicates in-flight requests so simultaneous clicks or prefetch jobs share a single HTTP fetch.
  */
 export async function getOrFetchAudioItem(streamUrl: string, cacheKey: string): Promise<CachedAudioItem | null> {
-  // 1. Level 1: In-Memory Cache (0ms latency, zero network)
-  if (audioMemoryCache.has(cacheKey)) {
-    return audioMemoryCache.get(cacheKey)!;
-  }
+  // 1. Level 1 & 2: Local Cache (RAM & CacheStorage)
+  const local = await getLocalCacheOnly(streamUrl, cacheKey);
+  if (local) return local;
 
   // 1b. Client Single-Flight In-Flight Deduplication:
   // If an audio fetch for this cacheKey is already in flight, share the existing promise
@@ -76,29 +109,9 @@ export async function getOrFetchAudioItem(streamUrl: string, cacheKey: string): 
   }
 
   const fetchPromise = (async (): Promise<CachedAudioItem | null> => {
-    // 2. Level 2: Browser CacheStorage API (Persistent across app reloads & offline)
-    const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
-    if (typeof window !== 'undefined' && 'caches' in window) {
-      try {
-        const cache = await caches.open(TTS_CACHE_NAME);
-        const match = (await cache.match(fullUrl)) || (await cache.match(streamUrl));
-        if (match) {
-          const buffer = await match.arrayBuffer();
-          if (buffer && buffer.byteLength > 44) {
-            const blob = new Blob([buffer], { type: 'audio/wav' });
-            const blobUrl = URL.createObjectURL(blob);
-            const entry: CachedAudioItem = { blobUrl, buffer };
-            audioMemoryCache.set(cacheKey, entry);
-            return entry;
-          }
-        }
-      } catch (e) {
-        console.warn('[CacheStorage] Read exception:', e);
-      }
-    }
-
     // 3. Level 3: Edge Server Stream (backed by Server-Side Disk Cache in .data/tts_cache)
     try {
+      const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
       const response = await fetch(streamUrl);
       if (response.ok) {
         const contentType = response.headers.get('content-type') || '';
@@ -638,6 +651,7 @@ export async function speakText(
     lang?: string;
     preferOfflineOnly?: boolean;
     force?: boolean;
+    previewAudio?: boolean;
   }
 ): Promise<void> {
   const formattedText = formatForNaturalSpeech(text);
@@ -659,24 +673,45 @@ export async function speakText(
     lang.substring(0, 2);
 
   // High-Fidelity Neural Audio Stream (Multi-Tier Caching: RAM -> Browser CacheStorage -> Edge Server):
-  // When using any of the 20 neural voices and not restricted to offline-only:
+  // When using any neural voice and not restricted to offline-only:
   if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly) {
     const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formattedText);
     const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formattedText);
 
-    try {
-      const audioItem = await getOrFetchAudioItem(streamUrl, cacheKey);
-      // If a newer tap arrived while fetching audio, cancel cleanly without falling back
-      if (speechId !== latestSpeechRequestId) {
-        return;
-      }
-      if (audioItem) {
-        const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
-        // Either it played successfully or was intentionally superseded by a newer tap
+    // 1. Instant check in local cache (RAM & CacheStorage) (< 10ms lookup)
+    const localAudioItem = await getLocalCacheOnly(streamUrl, cacheKey);
+    if (speechId !== latestSpeechRequestId) {
+      return;
+    }
+
+    if (localAudioItem) {
+      // Audio is already cached on-device! Play immediately with 0ms latency
+      try {
+        const played = await playAudioUrl(localAudioItem.buffer, formattedText, options?.rate, speechId, localAudioItem.blobUrl);
         if (played || speechId !== latestSpeechRequestId) return;
+      } catch (err) {
+        console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
-    } catch (err) {
-      console.warn(`[Audio] Neural stream (${selectedPersonaId}) failed, falling back to local speech synthesis:`, err);
+    } else if (options?.previewAudio) {
+      // Explicit preview audition in voice settings (user intentionally requested audition of this specific cloud voice)
+      try {
+        const audioItem = await Promise.race([
+          getOrFetchAudioItem(streamUrl, cacheKey),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+        ]);
+        if (speechId !== latestSpeechRequestId) return;
+        if (audioItem) {
+          const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (err) {
+        console.warn(`[Audio] Preview neural stream failed:`, err);
+      }
+    } else {
+      // AAC Tile or Sentence speech: DO NOT block user on uncached cloud roundtrip (which takes 3-5s and breaks iOS Safari user gesture)
+      // Fire background fetch to pre-warm CacheStorage for next time
+      getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
+      // Drop immediately to on-device SpeechSynthesis below!
     }
   }
 
@@ -685,7 +720,7 @@ export async function speakText(
     return;
   }
 
-  // Fallback to on-device Web Speech API with rich persona acoustic calibration
+  // Fallback to on-device Web Speech API with rich persona acoustic calibration (< 20ms response, zero user-gesture expiration)
   const userBasePitch = options?.pitch ?? 1.0;
   const userBaseRate = options?.rate ?? 1.0;
   const profile = PERSONA_ACOUSTIC_PROFILES[selectedPersonaId] || { pitch: 1.0, rate: 1.0 };
@@ -1197,22 +1232,27 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   }
   prewarmThrottleMap.set(throttleKey, now);
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+
   const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
   idleFn(async () => {
     for (const phrase of CORE_AAC_VOCABULARY) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
       const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
-      if (audioMemoryCache.has(cacheKey)) continue;
       const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
-      await getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
+      const existing = await getLocalCacheOnly(streamUrl, cacheKey);
+      if (existing) continue;
+      await getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   });
 }
 
 /**
  * Predictive Screen Pre-loader:
- * Pre-warms words visible on the active view (e.g., Food board, Feelings, Tools) in the background
+ * Gently pre-warms words visible on the active view in the background sequentially.
+ * Throttled to avoid saturating mobile network connections.
  */
 export function prewarmPhrases(phrases: string[], persona: string = 'system', lang: string = 'en'): void {
   if (typeof window === 'undefined' || !phrases || phrases.length === 0) return;
@@ -1225,14 +1265,28 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 600));
   idleFn(async () => {
-    for (const phrase of phrases.slice(0, 24)) {
+    // Top 8 phrases sequentially, checked against local cache first
+    const topPhrases = phrases.slice(0, 8);
+    for (const phrase of topPhrases) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
+
       const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
       const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
-      getOrFetchAudioBlobUrl(streamUrl, cacheKey).catch(() => {});
+
+      const existing = await getLocalCacheOnly(streamUrl, cacheKey);
+      if (existing) continue;
+
+      try {
+        await getOrFetchAudioItem(streamUrl, cacheKey);
+      } catch {}
+
+      // 500ms breather between requests to preserve mobile connection pool
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   });
 }

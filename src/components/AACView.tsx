@@ -4,9 +4,9 @@ import { AACCategory, AACItem, FavoriteSentence } from '../types';
 import { getThemedAacEmoji } from '../data/themesData';
 import { getFavoriteSentenceSticker } from '../data/defaultData';
 import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
-import { AACSymbolPickerModal } from './AACSymbolPickerModal';
-import { AACWordEditorModal } from './AACWordEditorModal';
-import { AACGuideModal } from './AACGuideModal';
+const AACSymbolPickerModal = React.lazy(() => import('./AACSymbolPickerModal').then((m) => ({ default: m.AACSymbolPickerModal })));
+const AACWordEditorModal = React.lazy(() => import('./AACWordEditorModal').then((m) => ({ default: m.AACWordEditorModal })));
+const AACGuideModal = React.lazy(() => import('./AACGuideModal').then((m) => ({ default: m.AACGuideModal })));
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
 import { autocorrectAacGrammar } from '../utils/aacGrammar';
@@ -2380,57 +2380,65 @@ export const AACView: React.FC = () => {
       )}
 
       {/* Word & Favorite Phrase Editor Modal */}
-      <AACWordEditorModal
-        isOpen={showWordEditor}
-        onClose={() => {
-          setShowWordEditor(false);
-          setEditingItem(null);
-        }}
-        editingItem={editingItem}
-        defaultCategory={activeCategory}
-        existingItems={aacItems}
-        onSave={(wordData) => {
-          if (editingItem) {
-            updateAacItem({
-              ...editingItem,
-              ...wordData,
-              id: editingItem.id,
-              motorIndex: editingItem.motorIndex,
-            });
-          } else {
-            addAacItem(wordData);
-          }
-        }}
-        onDelete={(id) => {
-          deleteAacItem(id);
-        }}
-      />
+      {showWordEditor && (
+        <React.Suspense fallback={null}>
+          <AACWordEditorModal
+            isOpen={showWordEditor}
+            onClose={() => {
+              setShowWordEditor(false);
+              setEditingItem(null);
+            }}
+            editingItem={editingItem}
+            defaultCategory={activeCategory}
+            existingItems={aacItems}
+            onSave={(wordData) => {
+              if (editingItem) {
+                updateAacItem({
+                  ...editingItem,
+                  ...wordData,
+                  id: editingItem.id,
+                  motorIndex: editingItem.motorIndex,
+                });
+              } else {
+                addAacItem(wordData);
+              }
+            }}
+            onDelete={(id) => {
+              deleteAacItem(id);
+            }}
+          />
+        </React.Suspense>
+      )}
 
       {/* Online AAC Symbol & Button Studio Modal */}
-      <AACSymbolPickerModal
-        isOpen={showSymbolPicker}
-        onClose={() => setShowSymbolPicker(false)}
-        activeCategory={activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory}
-        existingItems={aacItems}
-        onSelectSymbol={(sym) => {
-          addAacItem({
-            label: sym.label,
-            speechText: sym.speechText || sym.label,
-            photoUrl: sym.photoUrl,
-            symbolId: sym.symbolId,
-            symbolSource: sym.symbolSource || 'mulberry',
-            arasaacId: sym.arasaacId,
-            emoji: sym.emoji || '💬',
-            category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
-            colorType: sym.colorType || 'noun',
-            isFavorite: true,
-          });
-        }}
-        onImportPack={(pack) => {
-          importAacPack(pack.items);
-        }}
-        onUpgradeAll={upgradeAllAacToClinicalSymbols}
-      />
+      {showSymbolPicker && (
+        <React.Suspense fallback={null}>
+          <AACSymbolPickerModal
+            isOpen={showSymbolPicker}
+            onClose={() => setShowSymbolPicker(false)}
+            activeCategory={activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory}
+            existingItems={aacItems}
+            onSelectSymbol={(sym) => {
+              addAacItem({
+                label: sym.label,
+                speechText: sym.speechText || sym.label,
+                photoUrl: sym.photoUrl,
+                symbolId: sym.symbolId,
+                symbolSource: sym.symbolSource || 'mulberry',
+                arasaacId: sym.arasaacId,
+                emoji: sym.emoji || '',
+                category: sym.category || (activeCategory === 'all' || activeCategory === 'favorites' ? 'core' : activeCategory),
+                colorType: sym.colorType || 'noun',
+                isFavorite: true,
+              });
+            }}
+            onImportPack={(pack) => {
+              importAacPack(pack.items);
+            }}
+            onUpgradeAll={upgradeAllAacToClinicalSymbols}
+          />
+        </React.Suspense>
+      )}
 
       {/* Mulberry Symbols Licensing & Attribution Modal */}
       {showAttributionModal && (
@@ -2531,10 +2539,14 @@ export const AACView: React.FC = () => {
       />
 
       {/* AAC Guide / How-To Modal */}
-      <AACGuideModal
-        isOpen={showAacGuideModal}
-        onClose={() => setShowAacGuideModal(false)}
-      />
+      {showAacGuideModal && (
+        <React.Suspense fallback={null}>
+          <AACGuideModal
+            isOpen={showAacGuideModal}
+            onClose={() => setShowAacGuideModal(false)}
+          />
+        </React.Suspense>
+      )}
 
       {/* Parental Gate for External Link Protection */}
       {parentalGateTarget && (

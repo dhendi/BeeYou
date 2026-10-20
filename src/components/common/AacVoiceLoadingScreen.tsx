@@ -38,7 +38,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           return 100;
         }
 
-        const next = prev + Math.floor(Math.random() * 14) + 8;
+        const next = prev + Math.floor(Math.random() * 18) + 16;
         if (next >= 100) {
           clearInterval(stepInterval);
           return 100;
@@ -53,7 +53,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
         }
         return next;
       });
-    }, 280);
+    }, 50);
 
     return () => clearInterval(stepInterval);
   }, [isOpen, persona, language]);
@@ -67,7 +67,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
       } catch {}
       const timer = setTimeout(() => {
         onComplete();
-      }, 550);
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [progress, isOpen, onComplete]);

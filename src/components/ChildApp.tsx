@@ -119,6 +119,15 @@ const ChildAppContent: React.FC = () => {
     isSafeModeActive,
   } = useApp();
 
+  // Prefetch high-priority views during idle browser time
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./AACView');
+      import('./CommunicateView');
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [globalFeedbackState, setGlobalFeedbackState] = useState<ConnectionFeedbackState | null>(null);
   const [pieTimerMounted, setPieTimerMounted] = useState(false);
   useEffect(() => {

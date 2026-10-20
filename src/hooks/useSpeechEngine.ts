@@ -74,6 +74,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       voicePersona: personaToUse,
       lang: settings.language,
       force: options?.force,
+      previewAudio: options?.previewAudio,
     });
   };
 
