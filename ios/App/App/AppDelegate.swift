@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,8 +8,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // AAC Assistive Voice: Ensure speech audio is always audible, even if iPhone hardware Ring/Silent switch is enabled
+        configureAudioSessionForPlayback()
         return true
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Re-apply playback category when resuming from background
+        configureAudioSessionForPlayback()
+    }
+
+    private func configureAudioSessionForPlayback() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
+            try session.setActive(true)
+        } catch {
+            print("[BeeYou AAC] Failed to set AVAudioSession category to playback:", error)
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

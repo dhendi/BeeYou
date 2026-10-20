@@ -1,4 +1,5 @@
 import { playChime } from './chimes';
+import { getAudioContext, enableSilentModePlayback } from './context';
 import { getVoicePersonaById } from '../../data/voicePersonasData';
 
 // -------------------------------------------------------------
@@ -7,6 +8,7 @@ import { getVoicePersonaById } from '../../data/voicePersonasData';
 
 let activeUtterance: SpeechSynthesisUtterance | null = null;
 let activeAudioElement: HTMLAudioElement | null = null;
+let activeSourceNode: AudioBufferSourceNode | null = null;
 let cachedVoices: SpeechSynthesisVoice[] = [];
 let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
@@ -473,6 +475,13 @@ export function stopSpeaking() {
     clearTimeout(pendingSpeakTimeout);
     pendingSpeakTimeout = null;
   }
+  if (activeSourceNode) {
+    try {
+      activeSourceNode.stop();
+      activeSourceNode.disconnect();
+    } catch (e) {}
+    activeSourceNode = null;
+  }
   if (activeAudioElement) {
     try {
       activeAudioElement.pause();
@@ -628,19 +637,94 @@ export async function speakText(
 }
 
 /**
- * Audio playback helper for base64 / audio URL
+ * Audio playback engine with dual-tier support:
+ * Tier 1: Web Audio API (AudioContext) — Primary for iOS/Android mobile browsers & Capacitor.
+ *         Completely immune to mobile autoplay expiration after async network fetches,
+ *         and plays without muting even when hardware Silent Mode is active.
+ * Tier 2: HTML5 Audio Element — Fallback if Web Audio context decoding fails.
  */
-export function playAudioUrl(src: string, originalText: string = '', rate?: number, speechId?: number): Promise<boolean> {
+export async function playAudioUrl(src: string, originalText: string = '', rate?: number, speechId?: number): Promise<boolean> {
+  enableSilentModePlayback();
+  stopSpeaking();
+
+  const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 0.85));
+
+  // 1. Tier 1: Web Audio API Engine
+  const ctx = getAudioContext();
+  if (ctx) {
+    try {
+      if (ctx.state === 'suspended') {
+        await ctx.resume().catch(() => {});
+      }
+
+      const response = await fetch(src);
+      if (!response.ok) {
+        throw new Error(`Audio fetch HTTP ${response.status}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+
+      // Check if a newer speech request arrived while fetching audio data
+      if (speechId !== undefined && speechId !== latestSpeechRequestId) {
+        return true;
+      }
+
+      const audioBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
+        ctx.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+      });
+
+      if (speechId !== undefined && speechId !== latestSpeechRequestId) {
+        return true;
+      }
+
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.playbackRate.value = targetRate;
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = 1.0;
+      source.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      activeSourceNode = source;
+      notifySpeechState(true, originalText);
+
+      return await new Promise<boolean>((resolve) => {
+        source.onended = () => {
+          if (activeSourceNode === source) {
+            activeSourceNode = null;
+          }
+          notifySpeechState(false, null);
+          resolve(true);
+        };
+
+        try {
+          source.start(0);
+        } catch (startErr) {
+          console.warn('[WebAudio] source.start error:', startErr);
+          if (activeSourceNode === source) {
+            activeSourceNode = null;
+          }
+          notifySpeechState(false, null);
+          resolve(false);
+        }
+      });
+    } catch (webAudioErr) {
+      console.warn('[WebAudio] Web Audio decode failed, falling back to HTML5 audio element:', webAudioErr);
+    }
+  }
+
+  // 2. Tier 2: HTML5 Audio Element Fallback
   return new Promise((resolve) => {
     try {
       stopSpeaking();
       const audio = new Audio();
       audio.preload = 'auto';
+      (audio as any).playsInline = true;
+      (audio as any).webkitPlaysInline = true;
       audio.src = src;
       activeAudioElement = audio;
       notifySpeechState(true, originalText);
 
-      const targetRate = Math.max(0.65, Math.min(1.2, rate ?? 0.85));
       try {
         audio.playbackRate = targetRate;
         audio.defaultPlaybackRate = targetRate;
@@ -726,6 +810,7 @@ function speakWithBrowserSpeechSynthesis(
     force?: boolean;
   }
 ): Promise<void> {
+  enableSilentModePlayback();
   return new Promise((resolve) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       playChime('speak');

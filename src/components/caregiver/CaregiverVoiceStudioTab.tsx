@@ -49,6 +49,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     try {
       await speak(persona.previewText, {
         voicePersona: persona.id,
+        force: true,
       });
     } catch {
       onShowNotification('Audio preview unavailable.');
