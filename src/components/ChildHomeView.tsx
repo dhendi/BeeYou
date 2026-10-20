@@ -286,7 +286,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
               type="button"
               aria-label="Customize and reorder dashboard widgets"
               className={`px-4 py-2.5 min-h-[44px] rounded-xl ${currentTheme?.palette?.badgeBg || 'bg-amber-400'} hover:opacity-90 ${currentTheme?.palette?.textAccent || 'text-amber-950'} border ${currentTheme?.palette?.primaryBorder || 'border-amber-500/80'} font-black text-xs sm:text-sm flex items-center gap-2 shadow-xs active:scale-95 cursor-pointer transition-all shrink-0 focus-visible:ring-4 focus-visible:outline-none`}
-              title="Customize and reorder dashboard widgets (Protected)"
+              title={userPersona === 'adult' ? t('Customize and reorder dashboard widgets') : t('Customize and reorder dashboard widgets (Protected)')}
             >
               <SlidersHorizontal className="w-4 h-4 opacity-80" aria-hidden="true" />
               <span>{t('Customize Dashboard')}</span>

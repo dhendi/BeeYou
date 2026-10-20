@@ -30,7 +30,7 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
   className = '',
   showLockBadge = true,
 }) => {
-  const { settings, userPersona } = useApp();
+  const { settings, userPersona, userAgeGroup, userRole } = useApp();
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [isHolding, setIsHolding] = useState(false);
@@ -42,6 +42,10 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
   const holdStartTimeRef = useRef<number>(0);
 
   const HOLD_DURATION_MS = 3000;
+
+  // The lock and PIN for customizing is only for kids and teens.
+  // If the user is an adult, there is no need to lock it.
+  const isAdult = userPersona === 'adult' || userAgeGroup === 'adult' || userRole === 'independent_adult' || userRole === 'caregiver';
 
   const triggerSuccess = () => {
     playChime('complete');
@@ -89,6 +93,23 @@ export const CaregiverLockShield: React.FC<CaregiverLockShieldProps> = ({
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
   }, []);
+
+  // Adults: Completely unlocked (no PIN, no long-press, no lock badge)
+  if (isAdult) {
+    return (
+      <div
+        className={`relative inline-flex items-center justify-center ${className}`}
+        onClick={() => {
+          if (onUnlocked) {
+            onUnlocked();
+          }
+        }}
+        title={title}
+      >
+        {children}
+      </div>
+    );
+  }
 
   const handleClickCapture = (e: React.MouseEvent) => {
     // Intercept normal clicks and prompt for PIN modal if user simply clicks
