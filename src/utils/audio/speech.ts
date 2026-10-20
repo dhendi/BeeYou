@@ -39,9 +39,18 @@ export function getApiBaseUrl(): string {
     if (envUrl) return envUrl.replace(/\/+$/, '');
   } catch {}
 
+  // Detect Capacitor native mobile environment (iOS or Android)
+  const isCapacitorNative =
+    (window as any).Capacitor?.isNativePlatform?.() ||
+    Boolean((window as any).Capacitor) ||
+    Boolean((window as any).androidBridge) ||
+    (typeof navigator !== 'undefined' && navigator.userAgent.includes('Capacitor'));
+
   if (
     typeof window.location !== 'undefined' &&
-    (window.location.origin.startsWith('capacitor://') || window.location.protocol === 'file:')
+    (window.location.origin.startsWith('capacitor://') ||
+      window.location.protocol === 'file:' ||
+      (window.location.hostname === 'localhost' && isCapacitorNative))
   ) {
     return 'http://10.0.0.170:3000';
   }
@@ -786,10 +795,11 @@ export async function speakText(
         if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
           const buf = await bundledRes.arrayBuffer();
           if (isAudioPayload(buf)) {
-            const blob = new Blob([buf], { type: 'audio/wav' });
+            const cleanedBuf = cleanRiffWav(buf);
+            const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
             const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
-            const played = await playAudioUrl(buf, formattedText, options?.rate, speechId, blobUrl);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+            const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, blobUrl);
             if (played || speechId !== latestSpeechRequestId) return;
           }
         }
@@ -805,7 +815,8 @@ export async function speakText(
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
-          const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          const cleanedBuf = cleanRiffWav(audioItem.buffer);
+          const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch (err) {
@@ -824,10 +835,11 @@ export async function speakText(
           if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
             const buf = await bundledRes.arrayBuffer();
             if (isAudioPayload(buf)) {
-              const blob = new Blob([buf], { type: 'audio/wav' });
+              const cleanedBuf = cleanRiffWav(buf);
+              const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
               const blobUrl = URL.createObjectURL(blob);
-              audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
-              const played = await playAudioUrl(buf, formattedText, options?.rate, speechId, blobUrl);
+              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+              const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, blobUrl);
               if (played || speechId !== latestSpeechRequestId) return;
             }
           }
@@ -836,15 +848,16 @@ export async function speakText(
         }
       }
 
-      // 3b. For non-bundled words, attempt dynamic server fetch with a fast 1500ms timeout
+      // 3b. For non-bundled words, attempt dynamic server fetch with a fast 2000ms timeout
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
-          const played = await playAudioUrl(audioItem.buffer, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          const cleanedBuf = cleanRiffWav(audioItem.buffer);
+          const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch {
@@ -908,8 +921,72 @@ export function isAudioPayload(buffer: ArrayBuffer | null | undefined): boolean 
 }
 
 /**
+ * Strips non-standard trailing subchunks (such as Google Gemini's 6066-byte C2PA chunk)
+ * and reconstructs a pristine canonical RIFF WAV ArrayBuffer containing strictly the
+ * 'fmt ' and 'data' chunks. Guarantees 100% decodeAudioData compatibility on iOS WebKit/CoreAudio
+ * and Android WebView without decoder rejection.
+ */
+export function cleanRiffWav(buffer: ArrayBuffer): ArrayBuffer {
+  if (!buffer || buffer.byteLength < 44) return buffer;
+  const view = new DataView(buffer);
+  if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) {
+    return buffer;
+  }
+  let offset = 12;
+  let fmtOffset = -1;
+  let fmtLen = 0;
+  let dataOffset = -1;
+  let dataLen = 0;
+
+  while (offset + 8 <= buffer.byteLength) {
+    const chunkId =
+      String.fromCharCode(view.getUint8(offset)) +
+      String.fromCharCode(view.getUint8(offset + 1)) +
+      String.fromCharCode(view.getUint8(offset + 2)) +
+      String.fromCharCode(view.getUint8(offset + 3));
+    const chunkSize = view.getUint32(offset + 4, true);
+
+    if (chunkId === 'fmt ') {
+      fmtOffset = offset;
+      fmtLen = 8 + chunkSize;
+    } else if (chunkId === 'data') {
+      dataOffset = offset;
+      dataLen = 8 + chunkSize;
+    }
+
+    offset += 8 + chunkSize;
+    if (chunkSize % 2 !== 0) offset++;
+  }
+
+  if (fmtOffset === -1 || dataOffset === -1) {
+    return buffer;
+  }
+
+  // If already strictly canonical (fmt followed immediately by data with no trailing bytes), return as-is
+  if (fmtOffset === 12 && dataOffset === 12 + fmtLen && (12 + fmtLen + dataLen === buffer.byteLength)) {
+    return buffer;
+  }
+
+  const totalRiffSize = 4 + fmtLen + dataLen;
+  const out = new ArrayBuffer(8 + totalRiffSize);
+  const outView = new DataView(out);
+  const outBytes = new Uint8Array(out);
+  const inBytes = new Uint8Array(buffer);
+
+  outView.setUint32(0, 0x52494646, false);
+  outView.setUint32(4, totalRiffSize, true);
+  outView.setUint32(8, 0x57415645, false);
+
+  outBytes.set(inBytes.subarray(fmtOffset, fmtOffset + fmtLen), 12);
+  outBytes.set(inBytes.subarray(dataOffset, dataOffset + dataLen), 12 + fmtLen);
+
+  return out;
+}
+
+/**
  * Inspects audio ArrayBuffer before decoding.
  * Validates audio container headers and protects against non-audio text payloads.
+ * Automatically cleans any trailing metadata chunks (such as C2PA) to guarantee iOS CoreAudio compatibility.
  */
 export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000): ArrayBuffer | null {
   if (!buffer || buffer.byteLength < 44) return null;
@@ -918,7 +995,9 @@ export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000):
   // Check for 'RIFF' (0x52494646) and 'WAVE' (0x57415645)
   const isRiff = view.getUint32(0, false) === 0x52494646;
   const isWave = view.getUint32(8, false) === 0x57415645;
-  if (isRiff && isWave) return buffer;
+  if (isRiff && isWave) {
+    return cleanRiffWav(buffer);
+  }
 
   // Also check for MP3 (ID3 tag or sync word 0xFFE0)
   const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
@@ -1389,13 +1468,23 @@ function speakWithBrowserSpeechSynthesis(
         }
       };
 
-      // In Chromium / Android Chrome, executing cancel() and immediately calling speak()
-      // in the same microtask can cause cancel() to kill the newly dispatched utterance.
-      // A small micro-delay (25ms) ensures cancel() finishes flushing before speak().
-      pendingSpeakTimeout = setTimeout(() => {
-        pendingSpeakTimeout = null;
+      // On iOS Safari / WebKit, any setTimeout breaks the synchronous user-gesture token,
+      // which causes window.speechSynthesis.speak() to be completely silenced or dropped.
+      // On iOS, dispatch synchronously. On Chromium/Android Chrome, use a tiny 25ms delay
+      // to let cancel() flush without race condition.
+      const isIOS = typeof navigator !== 'undefined' && (
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1)
+      );
+
+      if (isIOS) {
         dispatchSpeech();
-      }, 25);
+      } else {
+        pendingSpeakTimeout = setTimeout(() => {
+          pendingSpeakTimeout = null;
+          dispatchSpeech();
+        }, 25);
+      }
     } catch (e) {
       console.error('SpeechSynthesis error:', e);
       playChime('speak');
@@ -1406,13 +1495,42 @@ function speakWithBrowserSpeechSynthesis(
 }
 
 /**
- * Top high-frequency AAC survival vocabulary to pre-warm for 0ms instantaneous speech
+ * Top high-frequency AAC vocabulary pre-bundled offline for 0ms instantaneous speech
  */
 export const CORE_AAC_VOCABULARY = [
   'Yes',
   'No',
   'Help',
   'Water',
+  'More',
+  'Stop',
+  'Please',
+  'Thank You',
+  'All Done',
+  'I',
+  'You',
+  'We',
+  'My',
+  'Want',
+  'Need',
+  'Like',
+  'Go',
+  'See',
+  'Feel',
+  'Eat',
+  'Drink',
+  'Play',
+  'Wait',
+  'Happy',
+  'Calm',
+  'Sad',
+  'Angry',
+  'Tired',
+  'Apple',
+  'Pizza',
+  'Bathroom',
+  'Break',
+  'Home',
 ];
 
 const prewarmThrottleMap = new Map<string, number>();
@@ -1442,9 +1560,7 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   }
   prewarmThrottleMap.set(throttleKey, now);
 
-  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
-
-  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
     for (const phrase of CORE_AAC_VOCABULARY) {
       const formatted = formatForNaturalSpeech(phrase);
@@ -1453,8 +1569,31 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
       const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
       const existing = await getLocalCacheOnly(streamUrl, cacheKey);
       if (existing) continue;
-      await getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
-      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // 1. Preload from local pre-bundled assets first (0ms latency, zero network)
+      const wordSlug = formatted.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (wordSlug) {
+        const bundledUrl = `/assets/audio/core/${selectedPersonaId}_${wordSlug}.wav`;
+        try {
+          const res = await fetch(bundledUrl);
+          if (res.ok) {
+            const buf = await res.arrayBuffer();
+            if (isAudioPayload(buf)) {
+              const cleaned = cleanRiffWav(buf);
+              const blob = new Blob([cleaned], { type: 'audio/wav' });
+              const blobUrl = URL.createObjectURL(blob);
+              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleaned });
+              continue;
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Dynamic prefetch if online
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        await getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
     }
   });
 }

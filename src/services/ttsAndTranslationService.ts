@@ -700,6 +700,42 @@ export function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1,
 }
 
 /**
+ * Strips non-standard trailing subchunks (such as Google Gemini's 6066-byte C2PA chunk)
+ * and reconstructs a pristine, strictly compliant RIFF WAV container containing only
+ * the 'fmt ' and 'data' chunks. This ensures 100% audio compatibility with Apple CoreAudio
+ * on iOS and WebKit/Chromium on Android without decoder rejection or static.
+ */
+export function cleanRiffWavBuffer(buffer: Buffer): Buffer {
+  if (!buffer || buffer.length < 44) return buffer;
+  if (buffer.subarray(0, 4).toString('ascii') !== 'RIFF' || buffer.subarray(8, 12).toString('ascii') !== 'WAVE') {
+    return buffer;
+  }
+  let offset = 12;
+  let fmtSubchunk: Buffer | null = null;
+  let dataSubchunk: Buffer | null = null;
+  while (offset + 8 <= buffer.length) {
+    const chunkId = buffer.subarray(offset, offset + 4).toString('ascii');
+    const chunkSize = buffer.readUInt32LE(offset + 4);
+    if (chunkId === 'fmt ') {
+      fmtSubchunk = buffer.subarray(offset, offset + 8 + chunkSize);
+    } else if (chunkId === 'data') {
+      dataSubchunk = buffer.subarray(offset, offset + 8 + chunkSize);
+    }
+    offset += 8 + chunkSize;
+    if (chunkSize % 2 !== 0) offset++;
+  }
+  if (!fmtSubchunk || !dataSubchunk) return buffer;
+  const riffSize = 4 + fmtSubchunk.length + dataSubchunk.length;
+  const out = Buffer.alloc(8 + riffSize);
+  out.write('RIFF', 0);
+  out.writeUInt32LE(riffSize, 4);
+  out.write('WAVE', 8);
+  fmtSubchunk.copy(out, 12);
+  dataSubchunk.copy(out, 12 + fmtSubchunk.length);
+  return out;
+}
+
+/**
  * Checks whether an audio buffer already contains a valid RIFF WAVE container.
  */
 export function isValidRiffWav(buffer: Buffer): boolean {
@@ -713,16 +749,18 @@ export function isValidRiffWav(buffer: Buffer): boolean {
 /**
  * Inspects audio buffer and MIME metadata. If the buffer is raw PCM (missing RIFF WAVE header),
  * parses sample rate from MIME or metadata and wraps it into a complete, standard 44-byte RIFF WAV container.
+ * Also cleans any trailing metadata subchunks (such as C2PA) to guarantee Apple CoreAudio compliance.
  */
 export function ensureValidWavContainer(
   buffer: Buffer,
   rawMime?: string,
   metadataSampleRate?: number
 ): { buffer: Buffer; sampleRate: number; isNativeWav: boolean } {
-  // If already a valid RIFF WAV, read and return its native sample rate
+  // If already a valid RIFF WAV, clean any trailing non-standard chunks (C2PA) and return native sample rate
   if (isValidRiffWav(buffer)) {
-    const sampleRate = buffer.readUInt32LE(24) || 24000;
-    return { buffer, sampleRate, isNativeWav: true };
+    const cleaned = cleanRiffWavBuffer(buffer);
+    const sampleRate = cleaned.readUInt32LE(24) || 24000;
+    return { buffer: cleaned, sampleRate, isNativeWav: true };
   }
 
   // Parse sample rate from MIME string (e.g. "audio/L16;rate=24000" or "audio/pcm;rate=16000")
