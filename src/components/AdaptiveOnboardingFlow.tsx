@@ -337,7 +337,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
         className="w-full h-full flex flex-col overflow-hidden max-w-3xl mx-auto"
       >
         {/* Top Header & Step Indicator */}
-        <div className="pt-[calc(env(safe-area-inset-top,0px)+1rem)] px-5 sm:px-8 pb-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shrink-0">
+        <div className="pt-[calc(env(safe-area-inset-top,0px)+1rem)] px-5 sm:px-8 pb-4 border-b border-[#E8E2D2] dark:border-slate-800/80 bg-[#FAF7EE]/95 dark:bg-slate-950/95 backdrop-blur-md shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
@@ -364,7 +364,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+          <div className="w-full bg-[#E8E2D2] dark:bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
             <div 
               className="bg-amber-500 h-full transition-all duration-300 rounded-full"
               style={{ width: `${(step / totalSteps) * 100}%` }}
@@ -377,7 +377,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
           {/* ════════════════ STEP 1: WELCOME TO BEEYOU ════════════════ */}
           {step === 1 && (
             <div className="space-y-6 text-center py-2 sm:py-4 animate-in fade-in">
-              <div className="mx-auto w-fit rounded-3xl bg-white px-6 py-4">
+              <div className="mx-auto w-fit px-6 py-2">
                 <img src="/logo.png" alt="BeeYou" className="h-20 sm:h-28 w-auto object-contain" draggable={false} />
               </div>
 
@@ -889,7 +889,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
         </div>
 
         {/* Footer Navigation Buttons */}
-        <div className="px-5 sm:px-8 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border-t border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between shrink-0">
+        <div className="px-5 sm:px-8 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] border-t border-[#E8E2D2] dark:border-slate-800/80 bg-[#FAF7EE]/95 dark:bg-slate-950/95 backdrop-blur-md flex items-center justify-between shrink-0">
           {step > 1 ? (
             <button
               type="button"
