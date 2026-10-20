@@ -637,6 +637,56 @@ export async function speakText(
 }
 
 /**
+ * Inspects raw audio ArrayBuffer before decoding.
+ * If raw PCM bytes were received without a RIFF header, constructs a standard 44-byte RIFF WAV
+ * container so Web Audio API (decodeAudioData) on iOS Safari and Android WebView decodes it without failure.
+ */
+export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000): ArrayBuffer {
+  if (!buffer || buffer.byteLength < 44) return buffer;
+  const view = new DataView(buffer);
+
+  // Check for 'RIFF' (0x52494646) and 'WAVE' (0x57415645)
+  const isRiff = view.getUint32(0, false) === 0x52494646;
+  const isWave = view.getUint32(8, false) === 0x57415645;
+
+  // Also check for MP3 (ID3 tag or sync word 0xFFE0)
+  const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
+  const isMp3Sync = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
+
+  if ((isRiff && isWave) || isId3 || isMp3Sync) {
+    return buffer; // Already a valid container format
+  }
+
+  // Raw PCM: prepend standard 44-byte RIFF WAV header
+  const numChannels = 1;
+  const bitDepth = 16;
+  const dataSize = buffer.byteLength;
+  const wavBuffer = new ArrayBuffer(44 + dataSize);
+  const outView = new DataView(wavBuffer);
+
+  // 'RIFF'
+  outView.setUint32(0, 0x52494646, false);
+  outView.setUint32(4, 36 + dataSize, true);
+  // 'WAVE'
+  outView.setUint32(8, 0x57415645, false);
+  // 'fmt '
+  outView.setUint32(12, 0x666D7420, false);
+  outView.setUint32(16, 16, true);
+  outView.setUint16(20, 1, true); // PCM
+  outView.setUint16(22, numChannels, true);
+  outView.setUint32(24, defaultSampleRate, true);
+  outView.setUint32(28, defaultSampleRate * numChannels * (bitDepth / 8), true);
+  outView.setUint16(32, numChannels * (bitDepth / 8), true);
+  outView.setUint16(34, bitDepth, true);
+  // 'data'
+  outView.setUint32(36, 0x64617461, false);
+  outView.setUint32(40, dataSize, true);
+
+  new Uint8Array(wavBuffer, 44).set(new Uint8Array(buffer));
+  return wavBuffer;
+}
+
+/**
  * Audio playback engine with dual-tier support:
  * Tier 1: Web Audio API (AudioContext) — Primary for iOS/Android mobile browsers & Capacitor.
  *         Completely immune to mobile autoplay expiration after async network fetches,
@@ -648,6 +698,7 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
   stopSpeaking();
 
   const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 0.85));
+  let arrayBuffer: ArrayBuffer | null = null;
 
   // 1. Tier 1: Web Audio API Engine
   const ctx = getAudioContext();
@@ -661,15 +712,18 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
       if (!response.ok) {
         throw new Error(`Audio fetch HTTP ${response.status}`);
       }
-      const arrayBuffer = await response.arrayBuffer();
+      arrayBuffer = await response.arrayBuffer();
 
       // Check if a newer speech request arrived while fetching audio data
       if (speechId !== undefined && speechId !== latestSpeechRequestId) {
         return true;
       }
 
+      // Audio format safeguard: ensure valid container header for iOS Safari & Android WebView
+      arrayBuffer = ensureWavHeader(arrayBuffer, 24000);
+
       const audioBuffer = await new Promise<AudioBuffer>((resolve, reject) => {
-        ctx.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+        ctx.decodeAudioData(arrayBuffer!.slice(0), resolve, reject);
       });
 
       if (speechId !== undefined && speechId !== latestSpeechRequestId) {
@@ -721,7 +775,17 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
       audio.preload = 'auto';
       (audio as any).playsInline = true;
       (audio as any).webkitPlaysInline = true;
-      audio.src = src;
+
+      let blobUrlToRevoke: string | null = null;
+      if (arrayBuffer) {
+        const verifiedBuffer = ensureWavHeader(arrayBuffer, 24000);
+        const blob = new Blob([verifiedBuffer], { type: 'audio/wav' });
+        blobUrlToRevoke = URL.createObjectURL(blob);
+        audio.src = blobUrlToRevoke;
+      } else {
+        audio.src = src;
+      }
+
       activeAudioElement = audio;
       notifySpeechState(true, originalText);
 
@@ -738,6 +802,10 @@ export async function playAudioUrl(src: string, originalText: string = '', rate?
           audio.src = '';
           audio.load();
         } catch (e) {}
+        if (blobUrlToRevoke) {
+          try { URL.revokeObjectURL(blobUrlToRevoke); } catch (e) {}
+          blobUrlToRevoke = null;
+        }
         if (activeAudioElement === audio) {
           activeAudioElement = null;
         }

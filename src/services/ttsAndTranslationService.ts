@@ -323,7 +323,54 @@ export function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1,
   header.writeUInt16LE(bitDepth, 34); // BitsPerSample
   header.write('data', 36);
   header.writeUInt32LE(dataSize, 40);
-  return Buffer.from(Buffer.concat([header, pcmBuffer]));
+  return Buffer.concat([header, pcmBuffer]);
+}
+
+/**
+ * Checks whether an audio buffer already contains a valid RIFF WAVE container.
+ */
+export function isValidRiffWav(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 44) return false;
+  const isRiff = buffer.subarray(0, 4).toString('ascii') === 'RIFF';
+  const isWave = buffer.subarray(8, 12).toString('ascii') === 'WAVE';
+  const isFmt = buffer.subarray(12, 16).toString('ascii') === 'fmt ';
+  return isRiff && isWave && isFmt;
+}
+
+/**
+ * Inspects audio buffer and MIME metadata. If the buffer is raw PCM (missing RIFF WAVE header),
+ * parses sample rate from MIME or metadata and wraps it into a complete, standard 44-byte RIFF WAV container.
+ */
+export function ensureValidWavContainer(
+  buffer: Buffer,
+  rawMime?: string,
+  metadataSampleRate?: number
+): { buffer: Buffer; sampleRate: number; isNativeWav: boolean } {
+  // If already a valid RIFF WAV, read and return its native sample rate
+  if (isValidRiffWav(buffer)) {
+    const sampleRate = buffer.readUInt32LE(24) || 24000;
+    return { buffer, sampleRate, isNativeWav: true };
+  }
+
+  // Parse sample rate from MIME string (e.g. "audio/L16;rate=24000" or "audio/pcm;rate=16000")
+  let sampleRate = metadataSampleRate || 24000;
+  if (rawMime) {
+    const rateMatch = rawMime.match(/rate[=:]\s*(\d+)/i);
+    if (rateMatch) {
+      sampleRate = parseInt(rateMatch[1], 10);
+    }
+  }
+
+  let numChannels = 1;
+  if (rawMime) {
+    const channelMatch = rawMime.match(/channels[=:]\s*(\d+)/i);
+    if (channelMatch) {
+      numChannels = parseInt(channelMatch[1], 10);
+    }
+  }
+
+  const wavBuffer = pcmToWav(buffer, sampleRate, numChannels, 16);
+  return { buffer: wavBuffer, sampleRate, isNativeWav: false };
 }
 
 // Per-User Quota Constants
@@ -551,8 +598,18 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
   if (diskFile) {
     try {
-      const fileBuffer = await fs.promises.readFile(diskFile);
-      const contentType = diskFile.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg';
+      let fileBuffer: Buffer = await fs.promises.readFile(diskFile);
+      let contentType = diskFile.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg';
+
+      // Ensure disk cached WAV has a valid RIFF header
+      if (contentType === 'audio/wav') {
+        const { buffer: validatedBuffer, isNativeWav } = ensureValidWavContainer(fileBuffer);
+        if (!isNativeWav) {
+          fileBuffer = validatedBuffer;
+          fs.promises.writeFile(diskFile, fileBuffer).catch(() => {});
+        }
+      }
+
       ttsAudioCache.set(cacheKey, { buffer: fileBuffer, contentType });
       usageBudgetTracker.recordTtsCacheHit();
       console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
@@ -571,9 +628,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   // 4b. Persistent Cloud Object Storage Check (Firebase Storage / GCS / Vercel Durable Cache)
   // Ensures audio persists across Vercel serverless container recycles and cold starts
   try {
-    const cloudBuffer = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey);
-    if (cloudBuffer) {
+    const cloudRaw = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey);
+    if (cloudRaw) {
       const contentType = 'audio/wav';
+      const { buffer: cloudBuffer } = ensureValidWavContainer(cloudRaw);
       ttsAudioCache.set(cacheKey, { buffer: cloudBuffer, contentType });
       // Cache to local container disk/tmp for 0ms subsequent hits on this instance
       fs.promises.writeFile(diskPathWav, cloudBuffer).catch(() => {});
@@ -695,6 +753,14 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
             }],
             generationConfig: {
               responseModalities: ['AUDIO'],
+              ...(model.includes('3.8') ? {
+                responseFormat: {
+                  audio: {
+                    mimeType: 'AUDIO_WAV',
+                    sampleRate: 24000,
+                  },
+                },
+              } : {}),
               speechConfig: {
                 voiceConfig: {
                   voice: persona.geminiVoice || persona.name,
@@ -723,16 +789,17 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
               geminiData?.outputAudio?.data;
 
             if (audioBase64) {
-              let buffer: any = Buffer.from(audioBase64, 'base64');
-              const mime = inline?.mimeType || '';
+              const rawBuffer: Buffer = Buffer.from(audioBase64, 'base64');
+              const rawMime = inline?.mimeType || geminiData?.output_audio?.mime_type || geminiData?.outputAudio?.mimeType || '';
+              const metaRate = geminiData?.output_audio?.sample_rate || geminiData?.outputAudio?.sampleRate;
 
-              // If audio is raw PCM (e.g. Gemini 2.5 returns audio/L16;codec=pcm;rate=24000 without RIFF header), wrap in WAV container
-              if (mime.includes('pcm') || mime.includes('L16') || !buffer.subarray(0, 4).toString('ascii').startsWith('RIFF')) {
-                buffer = pcmToWav(buffer, 24000, 1, 16);
-              }
+              // Inspect response format and sample rate, adding a valid WAV header if raw PCM
+              const { buffer, sampleRate, isNativeWav } = ensureValidWavContainer(rawBuffer, rawMime, metaRate);
               const contentType = 'audio/wav';
 
-              console.log(`[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) - 1 API call`);
+              console.log(
+                `[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) [format: ${isNativeWav ? 'Native RIFF WAV' : 'Raw PCM -> Wrapped 44-byte RIFF WAV'}, sampleRate: ${sampleRate}Hz, size: ${buffer.length} bytes] - 1 API call`
+              );
 
               if (ttsAudioCache.size > 1000) {
                 const firstKey = ttsAudioCache.keys().next().value;
