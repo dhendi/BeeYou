@@ -739,6 +739,14 @@ export async function speakText(
   // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
   stopSpeaking();
 
+  // CRITICAL FOR IOS SAFARI & CAPACITOR:
+  // Synchronously initialize and resume Web Audio context during the active user gesture.
+  // This unlocks the audio hardware pipeline before any async operations occur.
+  const ctx = getAudioContext();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
+  }
+
   const rawPersona = options?.voicePersona || 'system';
   const personaObj = getVoicePersonaById(rawPersona);
   const selectedPersonaId = personaObj.id;
@@ -770,11 +778,11 @@ export async function speakText(
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
     } else if (options?.previewAudio) {
-      // Explicit Audition Preview: wait up to 2500ms for neural audio sample from server
+      // Explicit Audition Preview: wait up to 8000ms for neural audio sample from server
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem) {
@@ -784,6 +792,8 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Neural preview stream (${selectedPersonaId}) failed:`, err);
       }
+      // Never fall through to default Samantha speech during an explicit audition of a neural voice!
+      return;
     } else {
       // AAC communication button tap:
       // Trigger background fetch to warm the cache for future taps, but never block instant vocalization!
