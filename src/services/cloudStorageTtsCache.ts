@@ -145,6 +145,6 @@ export function getCloudStorageStatus(): {
     provider: 'Firebase Storage / Google Cloud Storage',
     bucket: STORAGE_BUCKET,
     configured: Boolean(STORAGE_BUCKET),
-    deterministicKeyPattern: 'tts_cache/{voiceKey}/{normalizedLang}/{hashKey}.wav',
+    deterministicKeyPattern: 'tts_cache/{version}/{voiceKey}/{normalizedLang}/{hashKey}.wav',
   };
 }
