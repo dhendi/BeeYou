@@ -349,7 +349,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
                 ? `${currentRegion.flag} ${item.regionCode?.replace('CA-', '').replace('US-', '')} Regional`
                 : item.scope === 'national'
                 ? `${item.countryCode === 'CA' ? '🇨🇦 Canada' : '🇺🇸 United States'} National`
-                : '🌐 Global Community';
+                : 'Global Community';
 
             return (
               <div
@@ -570,7 +570,7 @@ export const CaregiverResourcesTab: React.FC<CaregiverResourcesTabProps> = ({
                 { id: 'All' as const, label: 'All (67)' },
                 { id: 'US States' as const, label: '🇺🇸 US States (51)' },
                 { id: 'Canadian Provinces' as const, label: '🇨🇦 Canada (13)' },
-                { id: 'International' as const, label: '🌐 International (3)' },
+                { id: 'International' as const, label: 'International (3)' },
               ].map((grp) => (
                 <button
                   key={grp.id}

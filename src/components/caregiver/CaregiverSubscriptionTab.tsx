@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { t } from '../../services/translator';
 import { useApp } from '../../context/AppContext';
 import { playChime } from '../../utils/audio';
@@ -143,7 +144,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
       {/* Lifecycle Status Notifications */}
       {subscription.status === 'grace_period' && (
         <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 flex items-start gap-3">
-          <div className="text-xl">⚠️</div>
+          <div className="text-amber-600"><AlertCircle className="w-5 h-5" /></div>
           <div>
             <h4 className="text-xs font-black text-amber-950 dark:text-amber-200 uppercase tracking-wide">
               Payment Retry in Progress (Grace Period)
@@ -171,7 +172,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
 
       {(subscription.status === 'refunded' || subscription.status === 'revoked') && (
         <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-700 flex items-start gap-3">
-          <div className="text-xl">🛑</div>
+          <div className="text-rose-600"><AlertCircle className="w-5 h-5" /></div>
           <div>
             <h4 className="text-xs font-black text-rose-950 dark:text-rose-200 uppercase tracking-wide">
               Subscription {subscription.status === 'refunded' ? 'Refunded' : 'Revoked'}
@@ -390,7 +391,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
         >
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-              🛠️ Pre-Launch Payment QA & Interruption Simulator
+              Pre-Launch Payment QA & Interruption Simulator
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300">
               Audit Item 7 Tested
@@ -431,14 +432,14 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
                 onClick={() => handleSimulatedTest('network_interrupted')}
                 className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-left cursor-pointer"
               >
-                ⚡ Test Network Interruption
+                Test Network Interruption
               </button>
               <button
                 type="button"
                 onClick={() => handleSimulatedTest('parental_approval_pending')}
                 className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-left cursor-pointer"
               >
-                👨‍👩‍👧 Test Ask-to-Buy Approval
+                Test Ask-to-Buy Approval
               </button>
             </div>
             {diagnosticStatus && (

@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Lock, 
-  Star, 
-  AlertCircle,
-  Crown,
-  Wifi,
-  WifiOff
-} from 'lucide-react';
+import { Lock, Star, AlertCircle, Crown, Wifi, WifiOff, HelpCircle, SlidersHorizontal } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { PWAInstallButton } from './PWAInstallButton';
 import { setActiveDeviceView } from '../services/authService';
@@ -106,7 +99,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
             title="Caregiver Help Hub (Quick Guides & Ergonomics)"
             aria-label="Caregiver Help Hub"
           >
-            <span className="text-sm">🐝</span>
+            <HelpCircle className="w-3.5 h-3.5 shrink-0" />
             <span className={`hidden sm:inline font-bold ${effectiveTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Help')}</span>
           </button>
 
@@ -121,7 +114,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
             title={t('Sensory & Accessibility Preferences')}
             aria-label="Sensory & Accessibility Preferences"
           >
-            <span className="text-sm">♿</span>
+            <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
             <span className={`hidden sm:inline font-bold ${effectiveTheme?.palette?.textAccent || 'text-amber-800'}`}>{t('Sensory')}</span>
           </button>
         </div>
