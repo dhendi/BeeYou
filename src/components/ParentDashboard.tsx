@@ -473,7 +473,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'subscription',
           label: 'Membership & Plan',
-          badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : '15d Free',
+          badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : t('Free Plan'),
         },
       ],
     },

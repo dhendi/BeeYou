@@ -42,6 +42,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     updateSettings,
     enabledFeatures,
     updateEnabledFeatures,
+    isPremium,
+    triggerUpgrade,
     speak,
   } = useApp();
 
@@ -681,6 +683,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                       <div
                         key={persona.id}
                         onClick={() => {
+                          if (!isPremium && persona.id !== 'system') {
+                            triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
+                            return;
+                          }
                           updateSettings({ voicePersona: persona.id });
                           playChime('tap');
                         }}
@@ -707,6 +713,11 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                 <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black flex items-center gap-1">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                   <span>Active</span>
+                                </span>
+                              )}
+                              {!isSelected && !isPremium && persona.id !== 'system' && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-amber-200 text-amber-950 text-[9px] font-black">
+                                  Plus
                                 </span>
                               )}
                             </div>

@@ -29,6 +29,8 @@ import { TurtleArchedBridgeSticker, DinoRexSticker } from './icons/JournalSticke
 export const MyRoutineView: React.FC = () => {
   const {
     routines,
+    isPremium,
+    triggerUpgrade,
     addRoutine,
     updateRoutine,
     plansChanged,
@@ -92,6 +94,10 @@ export const MyRoutineView: React.FC = () => {
 
   // Quick 1-Tap Import from Pre-Built Templates Library
   const handleQuickImportTemplate = (template: RoutineTemplate) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+      return;
+    }
     const newRoutine = addRoutine({
       title: template.title,
       category: template.category,
@@ -126,6 +132,10 @@ export const MyRoutineView: React.FC = () => {
 
   // Customize a template before saving
   const handleCustomizeTemplate = (template: RoutineTemplate) => {
+    if (!isPremium && routines.length >= 1) {
+      triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+      return;
+    }
     setCustomizingRoutine({
       title: template.title,
       category: template.category,
@@ -162,11 +172,15 @@ export const MyRoutineView: React.FC = () => {
         id: existingId,
       });
       setSelectedRoutineId(existingId);
-      showToast(`✅ ${t('Updated')} "${routineData.title}"!`);
+      showToast(`${t('Updated')} "${routineData.title}"!`);
     } else {
+      if (!isPremium && routines.length >= 1) {
+        triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+        return;
+      }
       const created = addRoutine(routineData);
       setSelectedRoutineId(created.id);
-      showToast(`🎉 ${t('Created')} "${routineData.title}"!`);
+      showToast(`${t('Created')} "${routineData.title}"!`);
     }
     setCustomizerOpen(false);
     playChime('complete');
@@ -345,6 +359,10 @@ export const MyRoutineView: React.FC = () => {
               routines={routines}
               onOpenTemplatesLibrary={() => setActiveSubTab('templates')}
               onOpenCustomizer={(initial) => {
+                if (!initial && !isPremium && routines.length >= 1) {
+                  triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+                  return;
+                }
                 setCustomizingRoutine(initial || null);
                 setCustomizerOpen(true);
               }}
@@ -361,6 +379,10 @@ export const MyRoutineView: React.FC = () => {
               onSelectRoutineId={setSelectedRoutineId}
               onOpenTemplatesLibrary={() => setActiveSubTab('templates')}
               onOpenCustomizer={(initial) => {
+                if (!initial && !isPremium && routines.length >= 1) {
+                  triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+                  return;
+                }
                 setCustomizingRoutine(initial || null);
                 setCustomizerOpen(true);
               }}

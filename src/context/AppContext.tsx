@@ -756,13 +756,14 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     setShowOnboardingModal(true);
   };
 
-  // 1. Speech Engine Hook
+  // 1. Subscription Hook
+  const subscriptionState = useSubscriptionState();
+
+  // 2. Speech Engine Hook
   const speechEngine = useSpeechEngine({
     settings,
+    isPremium: subscriptionState.isPremium,
   });
-
-  // 2. Subscription Hook
-  const subscriptionState = useSubscriptionState();
 
   // 3. Gamification Hook
   const gamification = useGamificationState({
@@ -776,6 +777,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 4. Routines & Schedule Hook
   const routinesSchedule = useRoutinesSchedule({
     soundEffects: settings.soundEffects,
+    isPremium: subscriptionState.isPremium,
+    triggerUpgrade: subscriptionState.triggerUpgrade,
     onRoutineCompleted: (routine) => {
       gamification.awardRoutineSticker(routine);
     },

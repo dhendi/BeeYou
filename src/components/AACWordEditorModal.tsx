@@ -47,6 +47,8 @@ interface AACWordEditorModalProps {
   onDelete?: (id: string) => void;
   defaultCategory?: AACCategory | 'all';
   existingItems?: AACItem[];
+  isPremium?: boolean;
+  triggerUpgrade?: (reason?: string) => void;
 }
 
 const CATEGORY_OPTIONS: { id: AACCategory; label: string; iconSrc: string }[] = [
@@ -148,6 +150,8 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
   onDelete,
   defaultCategory,
   existingItems = [],
+  isPremium,
+  triggerUpgrade,
 }) => {
   const [label, setLabel] = useState('');
   const [speechText, setSpeechText] = useState('');
@@ -359,6 +363,10 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
 
   // ─── Caregiver Voice Recording ──────────────────────────────────────────────
   const handleStartRecording = async () => {
+    if (isPremium === false && triggerUpgrade) {
+      triggerUpgrade('Recording custom caregiver voice clips for AAC tiles is a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     setMicError(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -514,6 +522,10 @@ export const AACWordEditorModal: React.FC<AACWordEditorModalProps> = ({
 
   // ─── Image Upload & Link ───────────────────────────────────────────────────
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isPremium === false && triggerUpgrade) {
+      triggerUpgrade('Custom photos for AAC tiles are a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
 

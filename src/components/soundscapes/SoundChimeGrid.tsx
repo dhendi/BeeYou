@@ -566,13 +566,17 @@ interface SoundChimeGridProps {
   soundVolumes: Record<string, number>;
   onVolumeChange: (id: SoundscapeId, volume: number) => void;
   isPremium?: boolean;
+  onTriggerUpgrade?: (reason?: string) => void;
 }
+
+export const FREE_SOUNDSCAPE_IDS: SoundscapeId[] = ['rain', 'stream'];
 
 export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
   activeSoundIds,
   soundVolumes,
   onVolumeChange,
   isPremium = true,
+  onTriggerUpgrade,
 }) => {
   // Theme state: defaults to false (cozy warm cream as selected by user), with night toggle option
   const [isNightMode, setIsNightMode] = useState(false);
@@ -588,6 +592,12 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
     if (activeSoundIds.includes(id)) {
       stopSoundscape(id);
     } else {
+      if (!isPremium && !FREE_SOUNDSCAPE_IDS.includes(id)) {
+        if (onTriggerUpgrade) {
+          onTriggerUpgrade('Unlock all 17 sensory room soundscapes, soothing frequencies, and ambient noise with BeeYou Plus!');
+        }
+        return;
+      }
       const vol = soundVolumes[id] ?? getSavedSoundscapeVolume(id);
       playSoundscape(id, vol, isPremium);
     }
@@ -843,6 +853,11 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
                     : 'drop-shadow-[0_2px_4px_rgba(120,94,58,0.08)] text-[#6B512F] hover:text-[#451A03] hover:scale-103'
                 }`}
               >
+                {!isPremium && !FREE_SOUNDSCAPE_IDS.includes(item.id) && (
+                  <span className="absolute top-1 right-1 z-20 px-1 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[8px] font-black uppercase tracking-wider shadow-2xs">
+                    Plus
+                  </span>
+                )}
                 {/* Honeycomb Pod Background Shape */}
                 <HoneycombPodShape
                   id={item.id}

@@ -26,6 +26,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
     getTrialDaysRemaining,
     startFreeTrial,
     cancelSubscription,
+    setSubscriptionTier,
     restorePurchases,
     purchaseSubscription,
     setShowEmailVerificationModal,
@@ -158,7 +159,7 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
 
       {subscription.status === 'cancelled' && subscription.expiresAt && (
         <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border-2 border-sky-300 dark:border-sky-700 flex items-start gap-3">
-          <div className="text-xl">ℹ️</div>
+          <div className="text-sky-600"><AlertCircle className="w-5 h-5" /></div>
           <div>
             <h4 className="text-xs font-black text-sky-950 dark:text-sky-200 uppercase tracking-wide">
               Subscription Cancelled
@@ -406,6 +407,30 @@ export const CaregiverSubscriptionTab: React.FC<CaregiverSubscriptionTabProps> =
               Test how BeeYou handles failed charges, user cancellations, and network dropouts gracefully without double-charging or corrupting state:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSubscriptionTier('basic');
+                  showNotification('Switched to Free Basic Plan for testing.');
+                  setDiagnosticStatus('Current plan switched to BeeYou Basic (Free Tier).');
+                  playChime('clear');
+                }}
+                className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-left cursor-pointer"
+              >
+                Switch to Free Plan (Test Basic)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  startFreeTrial();
+                  showNotification('Switched to BeeYou Plus Trial for testing.');
+                  setDiagnosticStatus('Current plan switched to BeeYou Plus (15-Day Trial).');
+                  playChime('star');
+                }}
+                className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-left cursor-pointer"
+              >
+                Switch to BeeYou Plus (Test Trial)
+              </button>
               <button
                 type="button"
                 onClick={() => handleSimulatedTest('success')}

@@ -76,6 +76,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
     setLinkedDeviceCode,
     settings,
     startFreeTrial,
+    setSubscriptionTier,
     setShowEmailVerificationModal,
   } = useApp();
 
@@ -265,6 +266,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   const finalizeOnboarding = (withTrial = false) => {
     if (withTrial) {
       startFreeTrial(selectedCycle);
+    } else {
+      setSubscriptionTier('basic');
     }
 
     // 1. Commit persona & profile to state

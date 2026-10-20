@@ -21,6 +21,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     speak,
     setShowAccessibilityModal,
     activeTheme,
+    isPremium,
+    triggerUpgrade,
     enabledFeatures,
     updateEnabledFeatures,
   } = useApp();
@@ -46,6 +48,10 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   };
 
   const handleSelectVoice = (persona: VoicePersona) => {
+    if (!isPremium && persona.id !== 'system') {
+      triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
+      return;
+    }
     updateSettings({ voicePersona: persona.id });
     if (settings.soundEffects) playChime('star');
     triggerHaptic('light', true);
@@ -323,6 +329,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                         Active
                       </span>
                     )}
+                    {!isSelected && !isPremium && persona.id !== 'system' && (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black shrink-0 shadow-2xs">
+                        Plus
+                      </span>
+                    )}
                   </div>
 
                   <p className="text-xs text-stone-600 font-medium leading-relaxed mb-3">
@@ -346,10 +357,12 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     className={`py-1.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                       isSelected
                         ? 'bg-amber-500 text-white border border-amber-600'
+                        : !isPremium && persona.id !== 'system'
+                        ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300'
                         : 'bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-950 border border-stone-200'
                     }`}
                   >
-                    {isSelected ? t('Selected') : t('Use Voice')}
+                    {isSelected ? t('Selected') : !isPremium && persona.id !== 'system' ? t('Unlock with Plus') : t('Use Voice')}
                   </button>
                 </div>
               </div>

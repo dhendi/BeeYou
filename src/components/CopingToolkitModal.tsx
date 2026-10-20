@@ -646,6 +646,7 @@ export const CopingToolkitModal: React.FC = () => {
                   setSoundVolumes((prev) => ({ ...prev, [id]: val }));
                 }}
                 isPremium={isPremium}
+                onTriggerUpgrade={triggerUpgrade}
               />
             </div>
           )}

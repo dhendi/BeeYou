@@ -69,6 +69,7 @@ const Rewards = lazy(() => import('./Rewards').then(m => ({ default: m.Rewards }
 const StickerScrapbookView = lazy(() => import('./StickerScrapbookView').then(m => ({ default: m.StickerScrapbookView })));
 const PrintScheduleModal = lazy(() => import('./PrintScheduleModal').then(m => ({ default: m.PrintScheduleModal })));
 const ThemeCustomizerModal = lazy(() => import('./ThemeCustomizerModal').then(m => ({ default: m.ThemeCustomizerModal })));
+const PaywallModal = lazy(() => import('./PaywallModal').then(m => ({ default: m.PaywallModal })));
 
 const ChildAppContent: React.FC = () => {
   const { 
@@ -110,6 +111,9 @@ const ChildAppContent: React.FC = () => {
     showDashboardCustomizer,
     showEditAlertsModal,
     showEditCalmModal,
+    showPaywallModal,
+    setShowPaywallModal,
+    paywallTriggerReason,
     settings,
     isParentMode,
     isSafeModeActive,
@@ -159,6 +163,7 @@ const ChildAppContent: React.FC = () => {
   useModalBackHandler(showAacExperiencePrompt, () => setShowAacExperiencePrompt(false));
   useModalBackHandler(showCaregiverModal, () => setShowCaregiverModal(false));
   useModalBackHandler(showCaregiverAlertModal, () => setShowCaregiverAlertModal(false));
+  useModalBackHandler(showPaywallModal, () => setShowPaywallModal(false));
   useModalBackHandler(showOnboardingModal, () => setShowOnboardingModal(false));
   useModalBackHandler(showAboutMeModal, () => setShowAboutMeModal(false));
   useModalBackHandler(showRecollectionModal, () => setShowRecollectionModal(false));
@@ -454,6 +459,15 @@ const ChildAppContent: React.FC = () => {
             state={globalFeedbackState}
             onClose={() => setGlobalFeedbackState(null)}
             onOpenCamera={() => setShowCaregiverModal(true)}
+          />
+        )}
+
+        {/* BeeYou Plus Paywall & Subscription Modal */}
+        {showPaywallModal && (
+          <PaywallModal
+            isOpen={showPaywallModal}
+            onClose={() => setShowPaywallModal(false)}
+            reason={paywallTriggerReason}
           />
         )}
 

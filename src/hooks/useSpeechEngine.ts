@@ -13,10 +13,11 @@ import { t, setLanguage } from '../services/translator';
 
 interface UseSpeechEngineProps {
   settings: AppSettings;
+  isPremium?: boolean;
   onLanguageChanged?: () => void;
 }
 
-export function useSpeechEngine({ settings, onLanguageChanged }: UseSpeechEngineProps) {
+export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseSpeechEngineProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakingText, setSpeakingText] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(
@@ -59,7 +60,11 @@ export function useSpeechEngine({ settings, onLanguageChanged }: UseSpeechEngine
   const speak = async (text: string, options?: { force?: boolean; voicePersona?: string }) => {
     if (settings.soundEffects) playChime('speak');
     const spoken = t(text);
-    const personaToUse = options?.voicePersona || settings.voicePersona || 'system';
+    let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
+    // If user is on Free tier, restrict speech to on-device system voice (unless an explicit audition preview is forced)
+    if (isPremium === false && personaToUse !== 'system' && !options?.force) {
+      personaToUse = 'system';
+    }
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,

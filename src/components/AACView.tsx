@@ -183,6 +183,8 @@ export const AACView: React.FC = () => {
     deleteAacItem,
     importAacPack,
     upgradeAllAacToClinicalSymbols,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AACCategory | 'all' | 'favorite_sentences'>('core');
@@ -1541,6 +1543,10 @@ export const AACView: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                if (!isPremium) {
+                  triggerUpgrade('Custom AAC tiles, voice recordings, and photos are a BeeYou Plus feature! Start your 15-day free trial.');
+                  return;
+                }
                 setEditingItem(null);
                 setShowWordEditor(true);
               }}
@@ -1575,6 +1581,10 @@ export const AACView: React.FC = () => {
                 data-tour="aac-symbols"
                 type="button"
                 onClick={() => {
+                  if (!isPremium) {
+                    triggerUpgrade('The Mulberry AAC Symbol library with 3,000+ clinical symbols is a BeeYou Plus feature! Start your 15-day free trial.');
+                    return;
+                  }
                   setShowSymbolPicker(true);
                   playChime('tap');
                 }}
@@ -2387,6 +2397,8 @@ export const AACView: React.FC = () => {
         editingItem={editingItem}
         defaultCategory={activeCategory}
         existingItems={aacItems}
+        isPremium={isPremium}
+        triggerUpgrade={triggerUpgrade}
         onSave={(wordData) => {
           if (editingItem) {
             updateAacItem({

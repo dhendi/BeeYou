@@ -91,6 +91,8 @@ export function useSubscriptionState() {
     subscription.status !== 'expired' &&
     subscription.status !== 'refunded' &&
     subscription.status !== 'revoked' &&
+    subscription.status !== 'basic' &&
+    subscription.tier !== 'basic' &&
     verifyEntitlementSignature(subscription)
   );
 
@@ -201,7 +203,8 @@ export function useSubscriptionState() {
     if (tier === 'premium') {
       startFreeTrial();
     } else {
-      cancelSubscription();
+      const basicSub = getDefaultBasicSubscription();
+      updateAndSaveSubscription(basicSub);
     }
   };
 

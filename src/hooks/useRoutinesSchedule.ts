@@ -8,9 +8,11 @@ import { pushFamilyStateUpdate } from '../services/familySync';
 interface UseRoutinesScheduleProps {
   soundEffects: boolean;
   onRoutineCompleted?: (routine: Routine) => void;
+  isPremium?: boolean;
+  triggerUpgrade?: (reason?: string) => void;
 }
 
-export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRoutinesScheduleProps) {
+export function useRoutinesSchedule({ soundEffects, onRoutineCompleted, isPremium, triggerUpgrade }: UseRoutinesScheduleProps) {
   const [showMyDayGuideModal, setShowMyDayGuideModal] = useState<boolean>(false);
   const [showPlansChangedModal, setShowPlansChangedModal] = useState<boolean>(false);
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
@@ -190,6 +192,12 @@ export function useRoutinesSchedule({ soundEffects, onRoutineCompleted }: UseRou
   };
 
   const addRoutine = (routine: Omit<Routine, 'id'> & { id?: string }): Routine => {
+    if (isPremium === false && routines.length >= 1) {
+      if (triggerUpgrade) {
+        triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+      }
+      return routines[0];
+    }
     const newR: Routine = {
       id: routine.id || `routine-${Date.now()}`,
       assignedDays:
