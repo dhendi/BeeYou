@@ -20,6 +20,7 @@ import {
   validateTextInput,
   normalizeLanguageCode,
   verifyLevel3DiskCache,
+  enforceDiskCacheLifecycle,
 } from './src/services/ttsAndTranslationService';
 
 dotenv.config();
@@ -285,7 +286,10 @@ app.get('/api/admin/usage', (_req, res) => {
 });
 
 // Explicit Level 3 Server-Side Disk Cache Deployment Verification Endpoint
-app.get('/api/admin/cache-status', (_req, res) => {
+app.get('/api/admin/cache-status', async (req, res) => {
+  if (req.query.prune === 'true' || req.query.force === 'true') {
+    await enforceDiskCacheLifecycle(true);
+  }
   res.json({
     success: true,
     cache: verifyLevel3DiskCache(),
@@ -300,6 +304,7 @@ export {
   validateTextInput,
   normalizeLanguageCode,
   verifyLevel3DiskCache,
+  enforceDiskCacheLifecycle,
 };
 
 // -------------------------------------------------------------
@@ -3275,7 +3280,8 @@ async function startServer() {
   }
 
   const cacheVerif = verifyLevel3DiskCache();
-  console.log(`💾 Level 3 Disk Cache: ${cacheVerif.status} (${cacheVerif.cachedFilesCount} files, ${(cacheVerif.totalSizeBytes / 1024 / 1024).toFixed(2)} MB) @ ${cacheVerif.path}`);
+  console.log(`💾 Level 3 Disk Cache: ${cacheVerif.status} (${cacheVerif.cachedFilesCount} files, ${(cacheVerif.totalSizeBytes / 1024 / 1024).toFixed(2)} MB / ${(cacheVerif.maxDiskSizeBytes / 1024 / 1024).toFixed(0)} MB max, ${cacheVerif.diskUtilizationPercent}% utilized, ${cacheVerif.diskTtlDays}d TTL) @ ${cacheVerif.path}`);
+  console.log(`🧠 L1 Audio Memory Cache: bounded to ${(cacheVerif.memoryCache.maxSizeBytes / 1024 / 1024).toFixed(0)} MB max (${cacheVerif.memoryCache.maxItemCount} items max)`);
 
   const host = '0.0.0.0';
   app.listen(childPort, host, () => {

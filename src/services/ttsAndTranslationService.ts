@@ -251,22 +251,386 @@ export function resolveCacheDirectory(subdir: string): string {
 export const TTS_CACHE_DIR = resolveCacheDirectory('tts_cache');
 export const TRANSLATE_CACHE_DIR = resolveCacheDirectory('translate_cache');
 
-const ttsAudioCache = new Map<string, { buffer: Buffer; contentType: string }>();
+// Cache capacity bounds & storage lifecycle rules
+export const MAX_MEMORY_CACHE_BYTES = 64 * 1024 * 1024; // 64 MB bounded RAM limit
+export const MAX_MEMORY_CACHE_ITEMS = 500; // 500 items max in memory
+export const MAX_DISK_CACHE_BYTES = 500 * 1024 * 1024; // 500 MB bounded persistent disk limit
+export const MAX_DISK_CACHE_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30-day TTL lifecycle expiration
+export const DISK_CLEANUP_TARGET_RATIO = 0.8; // Prune down to 80% (400 MB) when threshold breached
+const DISK_LIFECYCLE_MIN_INTERVAL_MS = 5 * 60 * 1000; // Throttle background runs to at most once every 5 min
+
+export interface MemoryCacheEntry<T> {
+  value: T;
+  sizeBytes: number;
+  addedAt: number;
+}
+
+export interface MemoryCacheMetrics {
+  itemCount: number;
+  maxItemCount: number;
+  totalSizeBytes: number;
+  maxSizeBytes: number;
+  utilizationPercent: number;
+  evictionsCount: number;
+  evictionsBytes: number;
+  hits: number;
+  misses: number;
+  hitRatePercent: number;
+}
+
+/**
+ * Byte-bounded LRU Memory Cache
+ * Enforces strict byte-based memory limits as well as item count bounds to prevent
+ * unbounded RAM growth from audio buffers.
+ */
+export class ByteBoundedMemoryCache<T extends { buffer: Buffer; contentType: string }> {
+  private map = new Map<string, MemoryCacheEntry<T>>();
+  private currentSizeBytes = 0;
+  public readonly maxSizeBytes: number;
+  public readonly maxItemCount: number;
+
+  private hits = 0;
+  private misses = 0;
+  private evictionsCount = 0;
+  private evictionsBytes = 0;
+
+  constructor(
+    maxSizeBytes: number = MAX_MEMORY_CACHE_BYTES,
+    maxItemCount: number = MAX_MEMORY_CACHE_ITEMS
+  ) {
+    this.maxSizeBytes = maxSizeBytes;
+    this.maxItemCount = maxItemCount;
+  }
+
+  private calculateEntrySize(key: string, value: T): number {
+    const keyBytes = key.length * 2;
+    const mimeBytes = value.contentType ? value.contentType.length * 2 : 32;
+    const bufferBytes = value.buffer ? value.buffer.length : 0;
+    // Estimated Map node and object wrapper overhead (~64 bytes)
+    return keyBytes + mimeBytes + bufferBytes + 64;
+  }
+
+  public get(key: string): T | undefined {
+    const entry = this.map.get(key);
+    if (!entry) {
+      this.misses++;
+      return undefined;
+    }
+    this.hits++;
+    // LRU refresh: re-insert so it becomes the most recently used
+    this.map.delete(key);
+    this.map.set(key, entry);
+    return entry.value;
+  }
+
+  public has(key: string): boolean {
+    return this.map.has(key);
+  }
+
+  public set(key: string, value: T): void {
+    const entrySize = this.calculateEntrySize(key, value);
+
+    // If an individual entry is abnormally larger than the entire cache max size, skip in-memory caching
+    if (entrySize > this.maxSizeBytes) {
+      console.warn(
+        `[ByteBoundedMemoryCache] Entry for key "${key}" (${(entrySize / 1024 / 1024).toFixed(2)} MB) exceeds total cache limit (${(this.maxSizeBytes / 1024 / 1024).toFixed(2)} MB). Bypassing L1 RAM cache.`
+      );
+      return;
+    }
+
+    // If key already exists, deduct old size before updating
+    if (this.map.has(key)) {
+      const existing = this.map.get(key)!;
+      this.currentSizeBytes -= existing.sizeBytes;
+      this.map.delete(key);
+    }
+
+    // Evict least-recently-used items until within byte and item count bounds
+    while (
+      (this.currentSizeBytes + entrySize > this.maxSizeBytes || this.map.size >= this.maxItemCount) &&
+      this.map.size > 0
+    ) {
+      const oldestKey = this.map.keys().next().value;
+      if (oldestKey === undefined) break;
+      const oldestEntry = this.map.get(oldestKey);
+      if (oldestEntry) {
+        this.currentSizeBytes -= oldestEntry.sizeBytes;
+        this.evictionsBytes += oldestEntry.sizeBytes;
+        this.evictionsCount++;
+      }
+      this.map.delete(oldestKey);
+    }
+
+    this.map.set(key, {
+      value,
+      sizeBytes: entrySize,
+      addedAt: Date.now(),
+    });
+    this.currentSizeBytes += entrySize;
+  }
+
+  public delete(key: string): boolean {
+    const existing = this.map.get(key);
+    if (existing) {
+      this.currentSizeBytes -= existing.sizeBytes;
+      return this.map.delete(key);
+    }
+    return false;
+  }
+
+  public clear(): void {
+    this.map.clear();
+    this.currentSizeBytes = 0;
+  }
+
+  public get size(): number {
+    return this.map.size;
+  }
+
+  public get bytes(): number {
+    return this.currentSizeBytes;
+  }
+
+  public keys(): IterableIterator<string> {
+    return this.map.keys();
+  }
+
+  public getMetrics(): MemoryCacheMetrics {
+    const totalRequests = this.hits + this.misses;
+    const hitRatePercent = totalRequests > 0 ? Number(((this.hits / totalRequests) * 100).toFixed(1)) : 0;
+    const utilizationPercent = this.maxSizeBytes > 0
+      ? Number(((this.currentSizeBytes / this.maxSizeBytes) * 100).toFixed(1))
+      : 0;
+
+    return {
+      itemCount: this.map.size,
+      maxItemCount: this.maxItemCount,
+      totalSizeBytes: this.currentSizeBytes,
+      maxSizeBytes: this.maxSizeBytes,
+      utilizationPercent,
+      evictionsCount: this.evictionsCount,
+      evictionsBytes: this.evictionsBytes,
+      hits: this.hits,
+      misses: this.misses,
+      hitRatePercent,
+    };
+  }
+}
+
+export const ttsAudioCache = new ByteBoundedMemoryCache<{ buffer: Buffer; contentType: string }>();
 const inFlightTtsGenerations = new Map<string, Promise<{ buffer: Buffer; contentType: string } | null>>();
 const translateTextCache = new Map<string, string>();
 
+export interface DiskLifecycleTelemetry {
+  lastRunTimestamp: string | null;
+  lastRunDurationMs: number;
+  ttlEvictedCount: number;
+  ttlEvictedBytes: number;
+  capacityEvictedCount: number;
+  capacityEvictedBytes: number;
+  lastScannedFilesCount: number;
+  lastScannedSizeBytes: number;
+}
+
+let diskLifecycleTelemetry: DiskLifecycleTelemetry = {
+  lastRunTimestamp: null,
+  lastRunDurationMs: 0,
+  ttlEvictedCount: 0,
+  ttlEvictedBytes: 0,
+  capacityEvictedCount: 0,
+  capacityEvictedBytes: 0,
+  lastScannedFilesCount: 0,
+  lastScannedSizeBytes: 0,
+};
+
+let isDiskLifecycleRunning = false;
+let lastDiskLifecycleRunTime = 0;
+
 /**
- * Diagnostic helper to verify Level 3 server-side disk cache deployment readiness
+ * Storage Lifecycle Manager
+ * Enforces TTL (30-day expiration) and maximum byte-capacity (500 MB) on the persistent disk cache.
+ * When disk usage exceeds MAX_DISK_CACHE_BYTES, prunes the oldest files down to 80% capacity (400 MB).
  */
-export function verifyLevel3DiskCache(): {
+export async function enforceDiskCacheLifecycle(force = false): Promise<{
+  scannedFiles: number;
+  totalSizeBytes: number;
+  ttlEvictedCount: number;
+  ttlEvictedBytes: number;
+  capacityEvictedCount: number;
+  capacityEvictedBytes: number;
+  durationMs: number;
+}> {
+  const now = Date.now();
+  if (!force && now - lastDiskLifecycleRunTime < DISK_LIFECYCLE_MIN_INTERVAL_MS) {
+    return {
+      scannedFiles: diskLifecycleTelemetry.lastScannedFilesCount,
+      totalSizeBytes: diskLifecycleTelemetry.lastScannedSizeBytes,
+      ttlEvictedCount: 0,
+      ttlEvictedBytes: 0,
+      capacityEvictedCount: 0,
+      capacityEvictedBytes: 0,
+      durationMs: 0,
+    };
+  }
+
+  if (isDiskLifecycleRunning) {
+    return {
+      scannedFiles: diskLifecycleTelemetry.lastScannedFilesCount,
+      totalSizeBytes: diskLifecycleTelemetry.lastScannedSizeBytes,
+      ttlEvictedCount: 0,
+      ttlEvictedBytes: 0,
+      capacityEvictedCount: 0,
+      capacityEvictedBytes: 0,
+      durationMs: 0,
+    };
+  }
+
+  isDiskLifecycleRunning = true;
+  const startTime = Date.now();
+
+  let ttlEvictedCount = 0;
+  let ttlEvictedBytes = 0;
+  let capacityEvictedCount = 0;
+  let capacityEvictedBytes = 0;
+  const remainingFiles: { path: string; size: number; mtime: number }[] = [];
+  let remainingBytes = 0;
+
+  try {
+    if (!fs.existsSync(TTS_CACHE_DIR)) {
+      return {
+        scannedFiles: 0,
+        totalSizeBytes: 0,
+        ttlEvictedCount: 0,
+        ttlEvictedBytes: 0,
+        capacityEvictedCount: 0,
+        capacityEvictedBytes: 0,
+        durationMs: 0,
+      };
+    }
+
+    const entries = await fs.promises.readdir(TTS_CACHE_DIR);
+    for (const file of entries) {
+      if (!file.endsWith('.wav') && !file.endsWith('.mp3')) continue;
+
+      const filePath = path.join(TTS_CACHE_DIR, file);
+      try {
+        const stat = await fs.promises.stat(filePath);
+        const ageMs = now - stat.mtimeMs;
+
+        // Rule 1: Expiration check (TTL > 30 days)
+        if (ageMs > MAX_DISK_CACHE_AGE_MS) {
+          await fs.promises.unlink(filePath);
+          ttlEvictedCount++;
+          ttlEvictedBytes += stat.size;
+        } else {
+          remainingFiles.push({
+            path: filePath,
+            size: stat.size,
+            mtime: stat.mtimeMs,
+          });
+          remainingBytes += stat.size;
+        }
+      } catch {
+        // File may have been unlinked concurrently
+      }
+    }
+
+    // Rule 2: Byte-bounded capacity eviction (Prune to 80% if > MAX_DISK_CACHE_BYTES)
+    if (remainingBytes > MAX_DISK_CACHE_BYTES) {
+      const targetBytes = Math.floor(MAX_DISK_CACHE_BYTES * DISK_CLEANUP_TARGET_RATIO);
+      // Sort oldest first by mtime
+      remainingFiles.sort((a, b) => a.mtime - b.mtime);
+
+      for (const item of remainingFiles) {
+        if (remainingBytes <= targetBytes) break;
+        try {
+          await fs.promises.unlink(item.path);
+          remainingBytes -= item.size;
+          capacityEvictedCount++;
+          capacityEvictedBytes += item.size;
+        } catch {
+          // File may have already been removed
+        }
+      }
+    }
+
+    const durationMs = Date.now() - startTime;
+    lastDiskLifecycleRunTime = Date.now();
+
+    diskLifecycleTelemetry = {
+      lastRunTimestamp: new Date().toISOString(),
+      lastRunDurationMs: durationMs,
+      ttlEvictedCount: diskLifecycleTelemetry.ttlEvictedCount + ttlEvictedCount,
+      ttlEvictedBytes: diskLifecycleTelemetry.ttlEvictedBytes + ttlEvictedBytes,
+      capacityEvictedCount: diskLifecycleTelemetry.capacityEvictedCount + capacityEvictedCount,
+      capacityEvictedBytes: diskLifecycleTelemetry.capacityEvictedBytes + capacityEvictedBytes,
+      lastScannedFilesCount: remainingFiles.length - capacityEvictedCount,
+      lastScannedSizeBytes: remainingBytes,
+    };
+
+    if (ttlEvictedCount > 0 || capacityEvictedCount > 0) {
+      console.log(
+        `[Disk Cache Lifecycle] Cleaned ${ttlEvictedCount} expired files (${(ttlEvictedBytes / 1024 / 1024).toFixed(2)} MB) and ${capacityEvictedCount} overflow files (${(capacityEvictedBytes / 1024 / 1024).toFixed(2)} MB). Remaining: ${remainingFiles.length - capacityEvictedCount} files (${(remainingBytes / 1024 / 1024).toFixed(2)} MB) in ${durationMs}ms.`
+      );
+    }
+
+    return {
+      scannedFiles: remainingFiles.length - capacityEvictedCount,
+      totalSizeBytes: remainingBytes,
+      ttlEvictedCount,
+      ttlEvictedBytes,
+      capacityEvictedCount,
+      capacityEvictedBytes,
+      durationMs,
+    };
+  } catch (err) {
+    console.warn('[Disk Cache Lifecycle Error]:', err);
+    return {
+      scannedFiles: remainingFiles.length,
+      totalSizeBytes: remainingBytes,
+      ttlEvictedCount,
+      ttlEvictedBytes,
+      capacityEvictedCount,
+      capacityEvictedBytes,
+      durationMs: Date.now() - startTime,
+    };
+  } finally {
+    isDiskLifecycleRunning = false;
+  }
+}
+
+/**
+ * Schedules a non-blocking background check for disk cache lifecycle rules.
+ * Uses setImmediate to prevent blocking the current request or event loop.
+ */
+export function scheduleDiskCacheLifecycleCheck(): void {
+  setImmediate(() => {
+    enforceDiskCacheLifecycle().catch((err) => {
+      console.warn('[Scheduled Disk Cache Lifecycle Error]:', err);
+    });
+  });
+}
+
+export interface DiskCacheVerification {
   status: 'VERIFIED_READY' | 'DEGRADED';
   path: string;
   cachedFilesCount: number;
   totalSizeBytes: number;
+  maxDiskSizeBytes: number;
+  diskUtilizationPercent: number;
+  diskTtlDays: number;
   writable: boolean;
   cloudStorage: ReturnType<typeof getCloudStorageStatus>;
   singleFlightActiveRequests: number;
-} {
+  memoryCache: MemoryCacheMetrics;
+  lifecycleTelemetry: DiskLifecycleTelemetry;
+}
+
+/**
+ * Diagnostic helper to verify Level 3 server-side disk cache deployment readiness
+ * and report real-time memory and disk utilization metrics.
+ */
+export function verifyLevel3DiskCache(): DiskCacheVerification {
   let writable = false;
   let cachedFilesCount = 0;
   let totalSizeBytes = 0;
@@ -291,15 +655,24 @@ export function verifyLevel3DiskCache(): {
     }
   } catch {}
 
+  const diskUtilizationPercent = MAX_DISK_CACHE_BYTES > 0
+    ? Number(((totalSizeBytes / MAX_DISK_CACHE_BYTES) * 100).toFixed(1))
+    : 0;
+
   const status = writable ? 'VERIFIED_READY' : 'DEGRADED';
   return {
     status,
     path: TTS_CACHE_DIR,
     cachedFilesCount,
     totalSizeBytes,
+    maxDiskSizeBytes: MAX_DISK_CACHE_BYTES,
+    diskUtilizationPercent,
+    diskTtlDays: Math.round(MAX_DISK_CACHE_AGE_MS / (24 * 60 * 60 * 1000)),
     writable,
     cloudStorage: getCloudStorageStatus(),
     singleFlightActiveRequests: inFlightTtsGenerations.size,
+    memoryCache: ttsAudioCache.getMetrics(),
+    lifecycleTelemetry: { ...diskLifecycleTelemetry },
   };
 }
 
@@ -546,9 +919,9 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const legacyDiskPathMp3 = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
 
   // 3. L1 In-Memory Cache Check (0ms latency, zero upstream calls)
-  if (ttsAudioCache.has(cacheKey)) {
+  const cached = ttsAudioCache.get(cacheKey);
+  if (cached) {
     usageBudgetTracker.recordTtsCacheHit();
-    const cached = ttsAudioCache.get(cacheKey)!;
     console.log(`[TTS Cache HIT L1] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
     if (req.headers['if-none-match'] === `"${hashKey}"`) {
       res.status(304).end();
@@ -638,7 +1011,9 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       const { buffer: cloudBuffer } = ensureValidWavContainer(cloudRaw);
       ttsAudioCache.set(cacheKey, { buffer: cloudBuffer, contentType });
       // Cache to local container disk/tmp for 0ms subsequent hits on this instance
-      fs.promises.writeFile(diskPathWav, cloudBuffer).catch(() => {});
+      fs.promises.writeFile(diskPathWav, cloudBuffer).then(() => {
+        scheduleDiskCacheLifecycleCheck();
+      }).catch(() => {});
       usageBudgetTracker.recordTtsCacheHit();
 
       if (req.headers['if-none-match'] === `"${hashKey}"`) {
@@ -805,14 +1180,12 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
                 `[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) [format: ${isNativeWav ? 'Native RIFF WAV' : 'Raw PCM -> Wrapped 44-byte RIFF WAV'}, sampleRate: ${sampleRate}Hz, size: ${buffer.length} bytes] - 1 API call`
               );
 
-              if (ttsAudioCache.size > 1000) {
-                const firstKey = ttsAudioCache.keys().next().value;
-                if (firstKey) ttsAudioCache.delete(firstKey);
-              }
               ttsAudioCache.set(cacheKey, { buffer, contentType });
 
               // Asynchronously write to persistent disk cache & cloud storage
-              fs.promises.writeFile(diskPathWav, buffer).catch(() => {});
+              fs.promises.writeFile(diskPathWav, buffer).then(() => {
+                scheduleDiskCacheLifecycleCheck();
+              }).catch(() => {});
               saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType, ttsVersion).catch(() => {});
 
               return { buffer, contentType };
@@ -853,12 +1226,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       const buffer = Buffer.from(arrayBuffer);
       const contentType = response.headers.get('content-type') || 'audio/mpeg';
 
-      if (ttsAudioCache.size > 1000) {
-        const firstKey = ttsAudioCache.keys().next().value;
-        if (firstKey) ttsAudioCache.delete(firstKey);
-      }
       ttsAudioCache.set(cacheKey, { buffer, contentType });
-      fs.promises.writeFile(diskPathMp3, buffer).catch(() => {});
+      fs.promises.writeFile(diskPathMp3, buffer).then(() => {
+        scheduleDiskCacheLifecycleCheck();
+      }).catch(() => {});
 
       return { buffer, contentType };
     } catch (err: any) {
@@ -902,4 +1273,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
   res.status(500).send('TTS internal error');
 }
+
+// Initialize non-blocking background disk cache lifecycle check
+scheduleDiskCacheLifecycleCheck();
 
