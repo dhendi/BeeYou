@@ -81,6 +81,14 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const isAacActive = enabledFeatures?.aacCommunication !== false && enabledFeatures?.aac !== false;
 
+  const renderPersonaIcon = (persona: VoicePersona, size = 'w-4 h-4') => {
+    if (persona.category === 'system') return <Smartphone className={`${size} text-emerald-700`} />;
+    if (persona.category === 'kids') return <Baby className={`${size} text-amber-700`} />;
+    if (persona.category === 'teens') return <Headphones className={`${size} text-indigo-700`} />;
+    if (persona.category.startsWith('caring')) return <Heart className={`${size} text-rose-700`} />;
+    return <Briefcase className={`${size} text-sky-700`} />;
+  };
+
   const handleToggleAac = () => {
     const next = !isAacActive;
     updateEnabledFeatures({
@@ -189,8 +197,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
       {/* Active Voice Spotlight Banner */}
       <div className="rounded-3xl bg-white border-2 border-amber-300/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-300 flex items-center justify-center text-3xl shrink-0 shadow-2xs">
-            {activePersona.emoji}
+          <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-300 flex items-center justify-center shrink-0 shadow-2xs">
+            {renderPersonaIcon(activePersona, 'w-7 h-7')}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -339,14 +347,6 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             const isSelected = (settings.voicePersona || 'system') === persona.id;
             const isPlaying = playingVoiceId === persona.id;
 
-            const renderPersonaIcon = () => {
-              if (persona.category === 'system') return <Smartphone className="w-4 h-4 text-emerald-700" />;
-              if (persona.category === 'kids') return <Baby className="w-4 h-4 text-amber-700" />;
-              if (persona.category === 'teens') return <Headphones className="w-4 h-4 text-indigo-700" />;
-              if (persona.category.startsWith('caring')) return <Heart className="w-4 h-4 text-rose-700" />;
-              return <Briefcase className="w-4 h-4 text-sky-700" />;
-            };
-
             return (
               <div
                 key={persona.id}
@@ -360,7 +360,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="w-9 h-9 shrink-0 rounded-xl bg-white border border-stone-200/80 shadow-2xs flex items-center justify-center">
-                        {renderPersonaIcon()}
+                        {renderPersonaIcon(persona)}
                       </span>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
