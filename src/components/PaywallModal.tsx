@@ -115,77 +115,69 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 space-y-3 overflow-y-auto flex-1">
           
           {/* Plan Comparison: Free Basic vs BeeYou Plus */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* Free Plan Card */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+            <div className="p-3 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-black text-slate-700 dark:text-slate-200 text-sm">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-black text-slate-700 dark:text-slate-200 text-xs sm:text-sm">
                     {t('BeeYou Basic')}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                     {t('Free Forever')}
                   </span>
                 </div>
-                <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  <li className="flex items-start gap-2">
+                <ul className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{t('Full AAC board (custom words, photos & symbols)')}</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{t('Default device speech engine')}</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('1 Active visual routine & schedule')}</span>
+                    <span>{t('1 Active visual routine & 1 medication reminder')}</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('1 Medication reminder')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{t('2 Basic soundscapes (Rain & River)')}</span>
+                    <span>{t('2 Basic soundscapes (Rain & Ocean)')}</span>
                   </li>
                 </ul>
               </div>
             </div>
 
             {/* Premium Plus Card */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/60 dark:from-amber-950/30 dark:to-slate-800 border-2 border-amber-400 dark:border-amber-600/80 shadow-xs relative flex flex-col justify-between">
-              <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[9px] font-black uppercase tracking-wider shadow-2xs">
+            <div className="p-3 rounded-2xl bg-linear-to-br from-amber-50 to-amber-100/60 dark:from-amber-950/30 dark:to-slate-800 border-2 border-amber-400 dark:border-amber-600/80 shadow-xs relative flex flex-col justify-between">
+              <div className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-linear-to-r from-amber-500 to-amber-600 text-white text-[8px] font-black uppercase tracking-wider shadow-2xs">
                 {t('All Features Included')}
               </div>
               <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="font-black text-amber-950 dark:text-amber-100 text-sm">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="font-black text-amber-950 dark:text-amber-100 text-xs sm:text-sm">
                     {t('BeeYou Plus')}
                   </span>
                 </div>
-                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-100">
-                  <li className="flex items-start gap-2">
+                <ul className="space-y-1 text-[11px] text-slate-800 dark:text-slate-100">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
                     <span><strong>{t('All 20+ Expressive Neural Voices')}</strong></span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
                     <span><strong>{t('Unlimited Visual Routines')}</strong> {t('& First-Then')}</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{t('Caregiver Remote Live Sync & Portal')}</strong></span>
+                    <span><strong>{t('Caregiver Live Sync & Silent SOS')}</strong></span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-1.5">
                     <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
                     <span><strong>{t('All 17 Soundscapes')}</strong> {t('& Theme Studio')}</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{t('Therapist IEP PDF Reports')}</strong></span>
                   </li>
                 </ul>
               </div>
@@ -194,10 +186,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
 
           {/* Pricing Options Selector */}
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-              {t('Select Your Membership Plan')}
-            </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {/* Monthly */}
               <button
                 type="button"
@@ -205,21 +194,24 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   setSelectedCycle('monthly');
                   playChime('tap');
                 }}
-                className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all ${
+                className={`p-2.5 rounded-xl border-2 text-left cursor-pointer transition-all flex items-center justify-between ${
                   selectedCycle === 'monthly'
-                    ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/40 shadow-xs'
+                    ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/40 shadow-xs ring-1 ring-amber-400'
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
                 }`}
               >
-                <div className="text-[11px] font-black text-slate-700 dark:text-slate-200">
-                  {t('Monthly')}
+                <div>
+                  <div className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                    {t('Monthly')}
+                  </div>
+                  <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                    ${SUBSCRIPTION_PRICES.monthly}
+                    <span className="text-[10px] text-slate-500 font-normal"> /mo</span>
+                  </div>
                 </div>
-                <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
-                  ${SUBSCRIPTION_PRICES.monthly}
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  {t('/ month')}
-                </div>
+                <span className="text-[9px] font-bold text-amber-800 bg-amber-100 dark:bg-amber-900/60 px-1.5 py-0.5 rounded">
+                  {t('15d trial')}
+                </span>
               </button>
 
               {/* Yearly */}
@@ -229,42 +221,47 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   setSelectedCycle('yearly');
                   playChime('tap');
                 }}
-                className={`p-3 rounded-2xl border-2 text-left cursor-pointer transition-all relative ${
+                className={`p-2.5 rounded-xl border-2 text-left cursor-pointer transition-all relative flex items-center justify-between ${
                   selectedCycle === 'yearly'
-                    ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/40 shadow-xs'
+                    ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 shadow-xs ring-1 ring-emerald-400'
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
                 }`}
               >
-                <span className="absolute -top-2 right-2 px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[8px] font-black uppercase tracking-wider">
-                  Save 25%
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                      {t('Yearly')}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[8px] font-black uppercase tracking-wider">
+                      Save 25%
+                    </span>
+                  </div>
+                  <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                    ${SUBSCRIPTION_PRICES.yearly}
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold"> (~$7.50/mo)</span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-900/60 px-1.5 py-0.5 rounded">
+                  {t('15d trial')}
                 </span>
-                <div className="text-[11px] font-black text-slate-700 dark:text-slate-200">
-                  {t('Yearly')}
-                </div>
-                <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
-                  ${SUBSCRIPTION_PRICES.yearly}
-                </div>
-                <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
-                  ~$7.50 / mo
-                </div>
               </button>
-
-
             </div>
           </div>
 
           {/* Guarantees Banner */}
-          <div className="p-3 rounded-2xl bg-slate-100/80 dark:bg-slate-800/50 flex flex-wrap items-center justify-around gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{t('15 Days 100% Free Trial')}</span>
+          <div className="py-2 px-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 flex items-center justify-around gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60">
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>{t('15 Days Free Trial')}</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span className="flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>{t('Cancel anytime in settings')}</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>{t('Private & offline-ready')}</span>
             </span>
           </div>
