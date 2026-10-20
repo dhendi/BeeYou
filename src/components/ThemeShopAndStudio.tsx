@@ -377,6 +377,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
   };
 
   const handleStartCreateNewTheme = () => {
+    if (!isPremium) {
+      triggerUpgrade('Custom Theme Studio is a BeeYou Plus feature! Start your 15-day free trial to craft your own themes.');
+      return;
+    }
     setTargetEditingThemeId(null);
     setContextEditingThemeId(null);
     setThemeName('My Custom Theme');
@@ -625,6 +629,10 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
           <button
             type="button"
             onClick={() => {
+              if (!isPremium) {
+                triggerUpgrade('Custom Theme Studio is a BeeYou Plus feature! Start your 15-day free trial to craft your own themes.');
+                return;
+              }
               if (targetEditingThemeId) {
                 setActiveTab('studio');
               } else {
@@ -647,6 +655,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
               <>
                 <Palette className="w-4 h-4 text-amber-700" />
                 <span>Create & Edit Theme</span>
+                {!isPremium && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase shadow-2xs">
+                    Plus
+                  </span>
+                )}
               </>
             )}
           </button>
@@ -757,6 +770,11 @@ export const ThemeShopAndStudio: React.FC<ThemeShopAndStudioProps> = ({
             >
               <Palette className="w-3.5 h-3.5" />
               <span>+ Create New Theme</span>
+              {!isPremium && (
+                <span className="px-1.5 py-0.2 rounded-full bg-amber-300 text-amber-950 text-[9px] font-black uppercase shadow-2xs">
+                  Plus
+                </span>
+              )}
             </button>
           </div>
 

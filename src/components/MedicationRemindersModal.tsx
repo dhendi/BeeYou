@@ -16,7 +16,8 @@ import {
   RotateCcw,
   Check,
   ShieldAlert,
-  Info
+  Info,
+  Lock
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { RoutineStickerIcon } from './icons/JournalStickers';
@@ -34,6 +35,8 @@ export const MedicationRemindersModal: React.FC = () => {
     speak,
     childProfile,
     userAgeGroup,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'schedule' | 'inventory' | 'history'>('schedule');
@@ -297,6 +300,8 @@ export const MedicationRemindersModal: React.FC = () => {
                 </div>
               ) : (
                 todayDoses.map((dose, index) => {
+                  const medIndex = medications.findIndex((m) => m.id === dose.medId);
+                  const isLocked = !isPremium && medIndex > 0;
                   const isLow = dose.totalQuantity <= dose.refillThreshold;
                   return (
                     <div
@@ -377,6 +382,15 @@ export const MedicationRemindersModal: React.FC = () => {
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
                           </div>
+                        ) : isLocked ? (
+                          <button
+                            type="button"
+                            onClick={() => triggerUpgrade('Free plan includes 1 medication reminder. Upgrade to BeeYou Plus for unlimited medications and caregiver dose alerts!')}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                          >
+                            <Lock className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Plus</span>
+                          </button>
                         ) : (
                           <button
                             type="button"
@@ -407,7 +421,8 @@ export const MedicationRemindersModal: React.FC = () => {
                 </div>
               </div>
 
-              {medications.map((med) => {
+              {medications.map((med, index) => {
+                const isLocked = !isPremium && index > 0;
                 const isLow = med.totalQuantity <= med.refillThreshold;
                 return (
                   <div

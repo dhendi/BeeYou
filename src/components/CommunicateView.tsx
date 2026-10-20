@@ -28,6 +28,8 @@ export const CommunicateView: React.FC = () => {
     speak,
     quickPhrases,
     activeTheme,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const themeStyles = getThemeWidgetStyles(activeTheme);
@@ -61,11 +63,15 @@ export const CommunicateView: React.FC = () => {
       desc: isCaregiverConnected 
         ? `Connected live with ${connectionStatus.peerName || 'Caregiver'}. Tap to manage link.`
         : 'Link to a parent, teacher, or helper device with a QR scan or 6-digit code.',
-      badge: isCaregiverConnected ? 'Connected Live' : 'Link Device',
+      badge: isCaregiverConnected ? 'Connected Live' : !isPremium ? 'Plus' : 'Link Device',
       color: 'border-2 border-pink-300/80 bg-pink-50/40 hover:bg-pink-50/80 text-pink-950',
       badgeClass: 'bg-pink-100 text-pink-800 border-pink-200',
       Sticker: ConnectHeartSticker,
       action: () => {
+        if (!isPremium) {
+          triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+          return;
+        }
         setShowCaregiverModal(true);
         playChime('tap');
       },

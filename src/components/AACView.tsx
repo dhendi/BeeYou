@@ -532,7 +532,7 @@ export const AACView: React.FC = () => {
     if (filteredItems && filteredItems.length > 0) {
       prewarmPhrases(
         filteredItems.slice(0, 20).map((i) => i.label),
-        settings?.voicePersona || 'system',
+        !isPremium ? 'system' : (settings?.voicePersona || 'system'),
         settings?.language || 'en'
       );
     }

@@ -161,7 +161,7 @@ export interface AppContextType {
   setShowAacGuideModal: (val: boolean) => void;
   showMyDayGuideModal: boolean;
   setShowMyDayGuideModal: (val: boolean) => void;
-  speak: (text: string, options?: { force?: boolean; voicePersona?: string }) => Promise<void>;
+  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean }) => Promise<void>;
   announce: (text: string, options?: { force?: boolean }) => Promise<void>;
   addToSentence: (item: AACItem) => void;
   speakSentence: () => Promise<void>;
@@ -758,6 +758,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
   // 1. Subscription Hook
   const subscriptionState = useSubscriptionState();
+
+  // Strict Basic Tier Voice Fallback: Revert any neural voice persona to free system voice
+  useEffect(() => {
+    if (subscriptionState.isPremium === false && settings.voicePersona && settings.voicePersona !== 'system') {
+      updateSettings({ voicePersona: 'system' });
+    }
+  }, [subscriptionState.isPremium, settings.voicePersona]);
 
   // 2. Speech Engine Hook
   const speechEngine = useSpeechEngine({

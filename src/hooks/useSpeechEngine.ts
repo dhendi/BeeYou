@@ -58,12 +58,13 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     prewarmCoreAudioVocabulary(persona, settings.language || 'en');
   }, [settings.voicePersona, settings.language, isPremium]);
 
-  const speak = async (text: string, options?: { force?: boolean; voicePersona?: string }) => {
+  const speak = async (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean }) => {
     if (settings.soundEffects) playChime('speak');
     const spoken = t(text);
     let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
-    // If user is on Free tier, restrict speech to on-device system voice (unless an explicit audition preview is forced)
-    if (isPremium === false && personaToUse !== 'system' && !options?.force) {
+    // If user is on Free tier, restrict speech strictly to on-device system voice
+    // (Only explicit audition previews with previewAudio === true may play a 2-second snippet)
+    if (isPremium === false && personaToUse !== 'system' && !options?.previewAudio) {
       personaToUse = 'system';
     }
     await speakText(spoken, {

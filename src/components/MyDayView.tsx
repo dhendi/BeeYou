@@ -13,7 +13,8 @@ import {
   X,
   BookOpen,
   Pause,
-  Printer
+  Printer,
+  Lock
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
 import { t } from '../services/translator';
@@ -50,6 +51,8 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
     updateRoutine,
     openPrintSchedule,
     activeTheme,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   // Re-render when language changes
@@ -388,7 +391,13 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
 
               <button
                 type="button"
-                onClick={() => onOpenCustomizer?.({ category: group.id as any })}
+                onClick={() => {
+                  if (!isPremium && routines.length >= 1) {
+                    triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                    return;
+                  }
+                  onOpenCustomizer?.({ category: group.id as any });
+                }}
                 className="text-stone-400 hover:text-stone-800 text-2xl font-light leading-none p-1 -m-1 transition-colors cursor-pointer"
                 title={t('Add routine')}
               >
@@ -401,6 +410,7 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
               <div className="space-y-3.5">
                 {group.routines.map((routine) => {
                   const isExpanded = expandedRoutineIds.has(routine.id);
+                  const isLocked = !isPremium && routine.id !== validRoutines[0]?.id;
                   const isCurrentRoutine = isToday && routine.id === currentActiveRoutine?.id;
                   const totalMinutes = getTotalMinutes(routine.steps);
                   const recurrenceText = getRecurrenceText(routine.assignedDays);
@@ -422,7 +432,13 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                       {/* Collapsed Routine Header: Chevron, Title, Subtitle, Play Button */}
                       <div
                         className="flex items-center justify-between gap-3 cursor-pointer select-none"
-                        onClick={() => toggleRoutineExpanded(routine.id)}
+                        onClick={() => {
+                          if (isLocked) {
+                            triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                            return;
+                          }
+                          toggleRoutineExpanded(routine.id);
+                        }}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           {isExpanded ? (
@@ -466,18 +482,33 @@ export const MyDayView: React.FC<MyDayViewProps> = ({
                           </div>
                         </div>
 
-                        {/* Circular Dark Play Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartTimer(routine);
-                          }}
-                          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1E232A] hover:bg-[#2D3748] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer shrink-0"
-                          title={t('Start Routine Timer')}
-                        >
-                          <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                        </button>
+                        {/* Circular Dark Play Button or Lock Plus Button */}
+                        {isLocked ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all shrink-0"
+                            title={t('Unlock with BeeYou Plus')}
+                          >
+                            <Lock className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Plus</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartTimer(routine);
+                            }}
+                            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1E232A] hover:bg-[#2D3748] active:scale-95 text-white flex items-center justify-center shadow-md transition-all cursor-pointer shrink-0"
+                            title={t('Start Routine Timer')}
+                          >
+                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          </button>
+                        )}
                       </div>
 
                       {/* Expanded Dropdown Steps List */}

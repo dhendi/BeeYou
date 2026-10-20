@@ -22,7 +22,8 @@ import {
   RefreshCw,
   Plus,
   Mail,
-  Zap
+  Zap,
+  Lock
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -75,6 +76,8 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
     setLinkedDeviceCode,
     connectionStatus,
     isCaregiverConnected,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const isAdult = userAgeGroup === 'adult' || userRole === 'independent_adult';
@@ -456,7 +459,13 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
 
           <button
             type="button"
-            onClick={() => setShowFamilyModal(true)}
+            onClick={() => {
+              if (!isPremium) {
+                triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+                return;
+              }
+              setShowFamilyModal(true);
+            }}
             className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs shadow-xs transition cursor-pointer flex items-center gap-1 shrink-0"
           >
             <Zap className="w-3.5 h-3.5 text-amber-300" />
@@ -470,7 +479,13 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
             <>
               <button
                 type="button"
-                onClick={() => setActiveTab('pair_code')}
+                onClick={() => {
+                  if (!isPremium) {
+                    triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+                    return;
+                  }
+                  setActiveTab('pair_code');
+                }}
                 className={`flex-1 py-2 px-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
                   activeTab === 'pair_code'
                     ? 'bg-white text-slate-900 shadow-xs'
@@ -479,10 +494,21 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
               >
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>Temporary Code / QR</span>
+                {!isPremium && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase">
+                    Plus
+                  </span>
+                )}
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('enter_code')}
+                onClick={() => {
+                  if (!isPremium) {
+                    triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+                    return;
+                  }
+                  setActiveTab('enter_code');
+                }}
                 className={`flex-1 py-2 px-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
                   activeTab === 'enter_code'
                     ? 'bg-white text-slate-900 shadow-xs'
@@ -491,6 +517,11 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
               >
                 <UserCheck className="w-3.5 h-3.5" />
                 <span>Enter 6-Letter Code</span>
+                {!isPremium && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase">
+                    Plus
+                  </span>
+                )}
               </button>
             </>
           )}
@@ -523,7 +554,30 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
         <div className="mt-3.5 space-y-4 overflow-y-auto flex-1 pr-1 text-slate-800">
 
           {/* TAB 1: FLOW A (CHILD IPAD FIRST -> GENERATE TEMPORARY PAIRING CODE & QR) */}
-          {activeTab === 'pair_code' && (
+          {activeTab === 'pair_code' && !isPremium && (
+            <div className="bg-white p-6 rounded-3xl border-2 border-amber-300 shadow-xs text-center space-y-4 animate-in fade-in">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center mx-auto shadow-xs">
+                <Lock className="w-7 h-7 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900">
+                  Caregiver Remote Live Sync &amp; Portal
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
+                  Sync routines, real-time battery status, sensory tools, and receive remote notifications across devices with BeeYou Plus.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer mx-auto"
+              >
+                Start 15-Day Free Trial
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'pair_code' && isPremium && (
             <div className="space-y-4 animate-in fade-in">
               <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs text-center space-y-3">
                 <div className="flex items-center justify-center gap-2">
@@ -681,7 +735,30 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
           )}
 
           {/* TAB 2: FLOW B (CAREGIVER GAVE A PAIRING CODE -> ENTER CODE) */}
-          {activeTab === 'enter_code' && (
+          {activeTab === 'enter_code' && !isPremium && (
+            <div className="bg-white p-6 rounded-3xl border-2 border-amber-300 shadow-xs text-center space-y-4 animate-in fade-in">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center mx-auto shadow-xs">
+                <Lock className="w-7 h-7 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900">
+                  Caregiver Remote Live Sync &amp; Portal
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
+                  Enter pairing codes from another tablet or phone to mirror visual routines and view live alerts with BeeYou Plus.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.')}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer mx-auto"
+              >
+                Start 15-Day Free Trial
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'enter_code' && isPremium && (
             <div className="space-y-4 animate-in fade-in">
               <form onSubmit={handleClaimCode} className="space-y-4">
                 <div className="bg-white p-5 rounded-3xl border-2 border-stone-200/90 shadow-xs space-y-3.5">

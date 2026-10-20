@@ -359,7 +359,7 @@ export const MyRoutineView: React.FC = () => {
               routines={routines}
               onOpenTemplatesLibrary={() => setActiveSubTab('templates')}
               onOpenCustomizer={(initial) => {
-                if (!initial && !isPremium && routines.length >= 1) {
+                if (!isPremium && (!initial ? routines.length >= 1 : initial.id !== routines[0]?.id)) {
                   triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
                   return;
                 }
@@ -379,7 +379,7 @@ export const MyRoutineView: React.FC = () => {
               onSelectRoutineId={setSelectedRoutineId}
               onOpenTemplatesLibrary={() => setActiveSubTab('templates')}
               onOpenCustomizer={(initial) => {
-                if (!initial && !isPremium && routines.length >= 1) {
+                if (!isPremium && (!initial ? routines.length >= 1 : initial.id !== routines[0]?.id)) {
                   triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
                   return;
                 }

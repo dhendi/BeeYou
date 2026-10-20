@@ -575,7 +575,7 @@ export const SoundChimeGrid: React.FC<SoundChimeGridProps> = ({
   activeSoundIds,
   soundVolumes,
   onVolumeChange,
-  isPremium = true,
+  isPremium = false,
   onTriggerUpgrade,
 }) => {
   // Theme state: defaults to false (cozy warm cream as selected by user), with night toggle option

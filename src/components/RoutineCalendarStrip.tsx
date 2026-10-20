@@ -41,7 +41,7 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
   setIsParentMode,
   isAdult,
 }) => {
-  const { activeTheme } = useApp();
+  const { activeTheme, isPremium, triggerUpgrade } = useApp();
   // Current week offset (0 = current week, -1 = last week, +1 = next week)
   const [weekOffset, setWeekOffset] = useState(0);
   const [showDayManager, setShowDayManager] = useState(false);
@@ -176,6 +176,10 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
           <button
             type="button"
             onClick={() => {
+              if (!isPremium && routines.length >= 1) {
+                triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines, schedules, and First-Then boards!');
+                return;
+              }
               onOpenCustomizer();
               playChime('tap');
             }}
@@ -356,6 +360,10 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
                   <button
                     type="button"
                     onClick={() => {
+                      if (!isPremium && routine.id !== routines[0]?.id) {
+                        triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                        return;
+                      }
                       let nextDays: number[];
                       if (isActiveToday) {
                         nextDays = currentDays.filter((d) => d !== selectedDayIndex);
@@ -384,6 +392,10 @@ export const RoutineCalendarStrip: React.FC<RoutineCalendarStripProps> = ({
             <button
               type="button"
               onClick={() => {
+                if (!isPremium) {
+                  triggerUpgrade('Free plan includes 1 active visual routine. Upgrade to BeeYou Plus for unlimited routines and First-Then schedules!');
+                  return;
+                }
                 routines.forEach((r) => {
                   const currentDays = r.assignedDays || [0, 1, 2, 3, 4, 5, 6];
                   onUpdateRoutineDays(r.id, Array.from(new Set([...currentDays, selectedDayIndex])));

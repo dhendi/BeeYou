@@ -112,6 +112,8 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     setShowDashboardCustomizer,
     updateRoutine,
     updateTheme,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const currentTheme = previewTheme || activeTheme;
@@ -326,6 +328,10 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
             type="button"
             aria-label="Caregiver Pairing and Connect"
             onClick={() => {
+              if (!isPremium) {
+                triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+                return;
+              }
               setShowCaregiverModal(true);
               playChime('tap');
             }}

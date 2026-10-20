@@ -678,7 +678,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     if (voiceCategoryFilter === 'pro') return p.category === 'pro_women' || p.category === 'pro_men';
                     return true;
                   }).map((persona) => {
-                    const isSelected = (settings.voicePersona || 'system').toLowerCase() === persona.id.toLowerCase();
+                    const effectiveVoicePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
+                    const isSelected = effectiveVoicePersona.toLowerCase() === persona.id.toLowerCase();
                     return (
                       <div
                         key={persona.id}
@@ -731,7 +732,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              speak(persona.previewText, { voicePersona: persona.id, force: true });
+                              speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
                             }}
                             className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
                             title={`Audition ${persona.name}`}

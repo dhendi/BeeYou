@@ -38,6 +38,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     try {
       await speak(persona.previewText, {
         voicePersona: persona.id,
+        previewAudio: true,
         force: true,
       });
     } catch {
@@ -204,7 +205,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
               100% Free • Zero API Credits • Offline
             </span>
-            {(settings.voicePersona || 'system') === 'system' && (
+            {(isPremium ? (settings.voicePersona || 'system') : 'system') === 'system' && (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
                 Active Default Voice
               </span>
@@ -237,7 +238,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300'
             }`}
           >
-            {(settings.voicePersona || 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
+            {(isPremium ? (settings.voicePersona || 'system') : 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
           </button>
         </div>
       </div>
@@ -289,7 +290,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         {/* Personas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
           {filteredPersonas.map((persona) => {
-            const isSelected = (settings.voicePersona || 'system') === persona.id;
+            const effectiveVoicePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
+            const isSelected = effectiveVoicePersona === persona.id;
             const isPlaying = playingVoiceId === persona.id;
 
             return (

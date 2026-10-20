@@ -31,6 +31,8 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
     activeTheme,
     enabledFeatures,
     userAgeGroup,
+    isPremium,
+    triggerUpgrade,
   } = useApp();
 
   const effectiveTheme = previewTheme || activeTheme;
@@ -64,6 +66,10 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
           <button
             type="button"
             onClick={() => {
+              if (!isPremium) {
+                triggerUpgrade('Caregiver Remote Live Sync & Portal is a BeeYou Plus feature! Start your 15-day free trial.');
+                return;
+              }
               setShowCaregiverModal(true);
               playChime('tap');
             }}
