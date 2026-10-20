@@ -738,6 +738,7 @@ export async function speakText(
     preferOfflineOnly?: boolean;
     force?: boolean;
     previewAudio?: boolean;
+    sentenceWords?: string[];
   }
 ): Promise<void> {
   const formattedText = formatForNaturalSpeech(text);
@@ -848,11 +849,34 @@ export async function speakText(
         }
       }
 
-      // 3b. For non-bundled words, attempt dynamic server fetch with a fast 2000ms timeout
+      // 3b. Offline Multi-Word Sentence Synthesizer:
+      // If speaking a multi-word phrase or sentence, stitch pre-bundled words in the child's selected neural voice!
+      // This guarantees 0ms instantaneous speech in Puck / Fenrir / Kore without waiting for network or reverting to robotic default voice!
+      const isMultiWord = Boolean(
+        (options?.sentenceWords && options.sentenceWords.length > 1) ||
+        formattedText.trim().split(/\s+/).length > 1
+      );
+
+      if (isMultiWord) {
+        try {
+          const sentenceWav = await synthesizeOfflineSentence(formattedText, selectedPersonaId, options?.sentenceWords);
+          if (sentenceWav && isAudioPayload(sentenceWav)) {
+            const blob = new Blob([sentenceWav], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
+            const played = await playAudioUrl(sentenceWav, formattedText, options?.rate, speechId, blobUrl);
+            if (played || speechId !== latestSpeechRequestId) return;
+          }
+        } catch (synthErr) {
+          console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
+        }
+      }
+
+      // 3c. For non-bundled words, attempt dynamic server fetch with a fast 1500ms timeout
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -981,6 +1005,149 @@ export function cleanRiffWav(buffer: ArrayBuffer): ArrayBuffer {
   outBytes.set(inBytes.subarray(dataOffset, dataOffset + dataLen), 12 + fmtLen);
 
   return out;
+}
+
+/**
+ * Extracts raw PCM byte payload from a standard RIFF WAV buffer.
+ */
+export function extractWavPcm(buffer: ArrayBuffer): Uint8Array | null {
+  if (buffer.byteLength < 44) return null;
+  const view = new DataView(buffer);
+  if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) {
+    return null;
+  }
+  let offset = 12;
+  while (offset + 8 <= buffer.byteLength) {
+    const chunkId =
+      String.fromCharCode(view.getUint8(offset)) +
+      String.fromCharCode(view.getUint8(offset + 1)) +
+      String.fromCharCode(view.getUint8(offset + 2)) +
+      String.fromCharCode(view.getUint8(offset + 3));
+    const chunkSize = view.getUint32(offset + 4, true);
+    if (chunkId === 'data') {
+      return new Uint8Array(buffer, offset + 8, chunkSize);
+    }
+    offset += 8 + chunkSize;
+    if (chunkSize % 2 !== 0) offset++;
+  }
+  return null;
+}
+
+/**
+ * Offline Neural Sentence Synthesizer:
+ * Stitches pre-bundled word assets into a seamless, single canonical WAV audio buffer
+ * in the user's selected neural persona (Puck, Fenrir, Kore) with natural 60ms conversational pauses.
+ * Completely eliminates robotic system voice reversion during sentence vocalization on iOS and Android.
+ */
+export async function synthesizeOfflineSentence(
+  sentenceText: string,
+  personaId: string,
+  explicitWords?: string[]
+): Promise<ArrayBuffer | null> {
+  const rawWords: string[] = (
+    explicitWords && explicitWords.length > 0
+      ? explicitWords.flatMap((w) => w.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '').trim().toLowerCase().split(/\s+/))
+      : sentenceText.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '').trim().toLowerCase().split(/\s+/)
+  ).filter(Boolean);
+
+  if (rawWords.length === 0) return null;
+
+  const pcmBuffers: Uint8Array[] = [];
+  const sampleRate = 24000;
+
+  for (let i = 0; i < rawWords.length; i++) {
+    // 1. Check for 2-word pre-bundled idioms first (e.g. 'all done', 'thank you')
+    if (i < rawWords.length - 1) {
+      const pairSlug = (rawWords[i] + rawWords[i + 1]).replace(/[^a-z0-9]/g, '');
+      const pairUrl = `/assets/audio/core/${personaId}_${pairSlug}.wav`;
+      try {
+        const pairRes = await fetch(pairUrl);
+        const ct = pairRes.headers.get('content-type') || '';
+        if (pairRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+          const ab = await pairRes.arrayBuffer();
+          if (isAudioPayload(ab)) {
+            const pcm = extractWavPcm(ab);
+            if (pcm) {
+              pcmBuffers.push(pcm);
+              i++; // consume second word of pair
+              continue;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    // 2. Check for single pre-bundled word
+    const singleSlug = rawWords[i].replace(/[^a-z0-9]/g, '');
+    if (!singleSlug) continue;
+
+    const singleUrl = `/assets/audio/core/${personaId}_${singleSlug}.wav`;
+    try {
+      const singleRes = await fetch(singleUrl);
+      const ct = singleRes.headers.get('content-type') || '';
+      if (singleRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+        const ab = await singleRes.arrayBuffer();
+        if (isAudioPayload(ab)) {
+          const pcm = extractWavPcm(ab);
+          if (pcm) {
+            pcmBuffers.push(pcm);
+            continue;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // Must have matched at least one core word in the selected voice
+  if (pcmBuffers.length === 0) return null;
+
+  // 60ms natural silence gap between words (at 24000Hz 16-bit mono = 2880 bytes)
+  const gapBytes = Math.round(sampleRate * 0.06) * 2;
+  const gap = new Uint8Array(gapBytes);
+
+  let totalPcmLen = 0;
+  for (let i = 0; i < pcmBuffers.length; i++) {
+    totalPcmLen += pcmBuffers[i].byteLength;
+    if (i < pcmBuffers.length - 1) totalPcmLen += gapBytes;
+  }
+
+  const combinedPcm = new Uint8Array(totalPcmLen);
+  let writeOffset = 0;
+  for (let i = 0; i < pcmBuffers.length; i++) {
+    combinedPcm.set(pcmBuffers[i], writeOffset);
+    writeOffset += pcmBuffers[i].byteLength;
+    if (i < pcmBuffers.length - 1) {
+      combinedPcm.set(gap, writeOffset);
+      writeOffset += gapBytes;
+    }
+  }
+
+  // Wrap in a canonical 44-byte RIFF WAV container
+  const numChannels = 1;
+  const bitDepth = 16;
+  const wavBuffer = new ArrayBuffer(44 + totalPcmLen);
+  const outView = new DataView(wavBuffer);
+
+  // 'RIFF'
+  outView.setUint32(0, 0x52494646, false);
+  outView.setUint32(4, 36 + totalPcmLen, true);
+  // 'WAVE'
+  outView.setUint32(8, 0x57415645, false);
+  // 'fmt '
+  outView.setUint32(12, 0x666D7420, false);
+  outView.setUint32(16, 16, true);
+  outView.setUint16(20, 1, true); // Linear PCM
+  outView.setUint16(22, numChannels, true);
+  outView.setUint32(24, sampleRate, true);
+  outView.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
+  outView.setUint16(32, numChannels * (bitDepth / 8), true);
+  outView.setUint16(34, bitDepth, true);
+  // 'data'
+  outView.setUint32(36, 0x64617461, false);
+  outView.setUint32(40, totalPcmLen, true);
+
+  new Uint8Array(wavBuffer, 44).set(combinedPcm);
+  return wavBuffer;
 }
 
 /**

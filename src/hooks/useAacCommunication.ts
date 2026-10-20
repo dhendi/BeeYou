@@ -17,7 +17,7 @@ interface UseAacCommunicationProps {
   autoSpeakSentence: boolean;
   childName: string;
   currentMood: string | null;
-  speak: (text: string) => Promise<void>;
+  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string; sentenceWords?: string[] }) => Promise<void>;
 }
 
 export function useAacCommunication({
@@ -205,7 +205,8 @@ export function useAacCommunication({
       lastAacSentence: fullText,
       currentMood: currentMood as any,
     });
-    await speak(fullText);
+    const sentenceWords = sentence.map((item) => (item.speechText || item.label));
+    await speak(fullText, { sentenceWords });
   };
 
   const clearSentence = () => {

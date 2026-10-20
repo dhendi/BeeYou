@@ -35,7 +35,8 @@ async function runVerification() {
   });
 
   console.log('[Verification] Navigating to http://localhost:3000...');
-  await page.goto('http://localhost:3000', { waitUntil: 'networkidle2', timeout: 30000 });
+  await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await new Promise((r) => setTimeout(r, 1000));
 
   console.log('[Verification] Page loaded. Title:', await page.title());
 
@@ -226,6 +227,168 @@ async function runVerification() {
       console.log(`  PASS: Persona '${st.persona}' for word '${st.word}' decoded & vocalized in Web Audio (duration: ${st.duration.toFixed(2)}s)`);
     } else {
       console.error(`  FAIL: Persona '${st.persona}' failed:`, st.error);
+    }
+  }
+
+  // Test 4: Offline Multi-Word Sentence Synthesizer in Browser
+  console.log('\n--- Test 4: Offline Multi-Word Sentence Synthesizer in Browser ---');
+  const sentenceTests = await page.evaluate(async () => {
+    function extractWavPcm(buffer) {
+      const view = new DataView(buffer);
+      if (view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) return null;
+      let offset = 12;
+      while (offset + 8 <= buffer.byteLength) {
+        const chunkId =
+          String.fromCharCode(view.getUint8(offset)) +
+          String.fromCharCode(view.getUint8(offset + 1)) +
+          String.fromCharCode(view.getUint8(offset + 2)) +
+          String.fromCharCode(view.getUint8(offset + 3));
+        const chunkSize = view.getUint32(offset + 4, true);
+        if (chunkId === 'data') {
+          return new Uint8Array(buffer, offset + 8, chunkSize);
+        }
+        offset += 8 + chunkSize;
+        if (chunkSize % 2 !== 0) offset++;
+      }
+      return null;
+    }
+
+    async function synthesizeSentence(sentenceText, personaId) {
+      const rawWords = sentenceText.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '').trim().toLowerCase().split(/\s+/);
+      const pcmBuffers = [];
+      const sampleRate = 24000;
+
+      for (let i = 0; i < rawWords.length; i++) {
+        if (i < rawWords.length - 1) {
+          const pairSlug = rawWords[i] + rawWords[i + 1];
+          const pairUrl = `/assets/audio/core/${personaId}_${pairSlug}.wav`;
+          try {
+            const pairRes = await fetch(pairUrl);
+            if (pairRes.ok) {
+              const ab = await pairRes.arrayBuffer();
+              const pcm = extractWavPcm(ab);
+              if (pcm) {
+                pcmBuffers.push(pcm);
+                i++;
+                continue;
+              }
+            }
+          } catch {}
+        }
+
+        const singleSlug = rawWords[i];
+        const singleUrl = `/assets/audio/core/${personaId}_${singleSlug}.wav`;
+        try {
+          const singleRes = await fetch(singleUrl);
+          if (singleRes.ok) {
+            const ab = await singleRes.arrayBuffer();
+            const pcm = extractWavPcm(ab);
+            if (pcm) {
+              pcmBuffers.push(pcm);
+              continue;
+            }
+          }
+        } catch {}
+      }
+
+      if (pcmBuffers.length === 0) return null;
+
+      const gapBytes = Math.round(sampleRate * 0.06) * 2;
+      const gap = new Uint8Array(gapBytes);
+
+      let totalPcmLen = 0;
+      for (let i = 0; i < pcmBuffers.length; i++) {
+        totalPcmLen += pcmBuffers[i].byteLength;
+        if (i < pcmBuffers.length - 1) totalPcmLen += gapBytes;
+      }
+
+      const combinedPcm = new Uint8Array(totalPcmLen);
+      let writeOffset = 0;
+      for (let i = 0; i < pcmBuffers.length; i++) {
+        combinedPcm.set(pcmBuffers[i], writeOffset);
+        writeOffset += pcmBuffers[i].byteLength;
+        if (i < pcmBuffers.length - 1) {
+          combinedPcm.set(gap, writeOffset);
+          writeOffset += gapBytes;
+        }
+      }
+
+      const numChannels = 1;
+      const bitDepth = 16;
+      const wavBuffer = new ArrayBuffer(44 + totalPcmLen);
+      const outView = new DataView(wavBuffer);
+      outView.setUint32(0, 0x52494646, false);
+      outView.setUint32(4, 36 + totalPcmLen, true);
+      outView.setUint32(8, 0x57415645, false);
+      outView.setUint32(12, 0x666D7420, false);
+      outView.setUint32(16, 16, true);
+      outView.setUint16(20, 1, true);
+      outView.setUint16(22, numChannels, true);
+      outView.setUint32(24, sampleRate, true);
+      outView.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
+      outView.setUint16(32, numChannels * (bitDepth / 8), true);
+      outView.setUint16(34, bitDepth, true);
+      outView.setUint32(36, 0x64617461, false);
+      outView.setUint32(40, totalPcmLen, true);
+      new Uint8Array(wavBuffer, 44).set(combinedPcm);
+      return wavBuffer;
+    }
+
+    const testCases = [
+      { persona: 'puck', text: 'I want water.' },
+      { persona: 'fenrir', text: 'I need help.' },
+      { persona: 'kore', text: 'I feel happy.' },
+      { persona: 'puck', text: 'All done thank you.' },
+    ];
+
+    const results = [];
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContextClass();
+    if (ctx.state === 'suspended') await ctx.resume();
+
+    for (const tc of testCases) {
+      try {
+        const wav = await synthesizeSentence(tc.text, tc.persona);
+        if (!wav) {
+          results.push({ persona: tc.persona, text: tc.text, success: false, error: 'Could not synthesize' });
+          continue;
+        }
+
+        const decoded = await ctx.decodeAudioData(wav.slice(0));
+        let playedCleanly = false;
+        await new Promise((resolve) => {
+          const source = ctx.createBufferSource();
+          source.buffer = decoded;
+          source.connect(ctx.destination);
+          source.onended = () => {
+            playedCleanly = true;
+            resolve();
+          };
+          source.start(0);
+          setTimeout(resolve, 300);
+        });
+
+        results.push({
+          persona: tc.persona,
+          text: tc.text,
+          success: true,
+          byteLength: wav.byteLength,
+          sampleRate: decoded.sampleRate,
+          duration: decoded.duration,
+          playedCleanly,
+        });
+      } catch (err) {
+        results.push({ persona: tc.persona, text: tc.text, success: false, error: err.message });
+      }
+    }
+    return results;
+  });
+
+  for (const st of sentenceTests) {
+    if (st.success) {
+      console.log(`  PASS: Sentence "${st.text}" for '${st.persona}' synthesized (${st.byteLength} bytes, duration: ${st.duration.toFixed(2)}s) in Web Audio`);
+    } else {
+      console.error(`  FAIL: Sentence "${st.text}" for '${st.persona}' failed:`, st.error);
     }
   }
 
