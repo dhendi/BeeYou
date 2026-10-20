@@ -23,10 +23,38 @@ export const TTS_CACHE_NAME = `beeyou-tts-${TTS_GENERATION_VERSION}`;
 const inFlightAudioFetches = new Map<string, Promise<CachedAudioItem | null>>();
 
 /**
+ * Resolves the base API URL for TTS requests.
+ * Handles native mobile wrappers (Capacitor) where relative URLs fail to resolve to the server.
+ */
+export function getApiBaseUrl(): string {
+  if (typeof window === 'undefined') return '';
+
+  try {
+    const custom = localStorage.getItem('beeyou_api_server');
+    if (custom) return custom.replace(/\/+$/, '');
+  } catch {}
+
+  try {
+    const envUrl = (import.meta as any).env?.VITE_API_BASE_URL;
+    if (envUrl) return envUrl.replace(/\/+$/, '');
+  } catch {}
+
+  if (
+    typeof window.location !== 'undefined' &&
+    (window.location.origin.startsWith('capacitor://') || window.location.protocol === 'file:')
+  ) {
+    return 'http://10.0.0.170:3000';
+  }
+
+  return '';
+}
+
+/**
  * Builds version-scoped TTS stream URL with cache-busting query parameter.
  */
 export function getTtsStreamUrl(voiceId: string, lang: string, text: string): string {
-  return `/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voiceId)}&v=${encodeURIComponent(TTS_GENERATION_VERSION)}`;
+  const base = getApiBaseUrl();
+  return `${base}/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voiceId)}&v=${encodeURIComponent(TTS_GENERATION_VERSION)}`;
 }
 
 /**
@@ -692,12 +720,15 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
-    } else if (options?.previewAudio) {
-      // Explicit preview audition in voice settings (user intentionally requested audition of this specific cloud voice)
+    } else {
+      // Uncached neural audio: fetch from edge server with a 2500ms safety window.
+      // This ensures chosen neural personas (Puck, Fenrir, Leda, etc.) genuinely play
+      // rather than prematurely dropping to the default system voice.
       try {
+        const timeoutMs = options?.previewAudio ? 3500 : 2500;
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem) {
@@ -705,13 +736,8 @@ export async function speakText(
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch (err) {
-        console.warn(`[Audio] Preview neural stream failed:`, err);
+        console.warn(`[Audio] Neural stream (${selectedPersonaId}) failed:`, err);
       }
-    } else {
-      // AAC Tile or Sentence speech: DO NOT block user on uncached cloud roundtrip (which takes 3-5s and breaks iOS Safari user gesture)
-      // Fire background fetch to pre-warm CacheStorage for next time
-      getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
-      // Drop immediately to on-device SpeechSynthesis below!
     }
   }
 

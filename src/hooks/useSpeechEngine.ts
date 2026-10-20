@@ -58,7 +58,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     prewarmCoreAudioVocabulary(persona, settings.language || 'en');
   }, [settings.voicePersona, settings.language, isPremium]);
 
-  const speak = async (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean }) => {
+  const speak = async (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string }) => {
     if (settings.soundEffects) playChime('speak');
     const spoken = t(text);
     let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
@@ -70,7 +70,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
-      voiceURI: personaToUse === 'system' ? settings.selectedVoiceURI : undefined,
+      voiceURI: options?.voiceURI || (personaToUse === 'system' ? settings.selectedVoiceURI : undefined),
       voicePersona: personaToUse,
       lang: settings.language,
       force: options?.force,

@@ -45,6 +45,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
     isPremium,
     triggerUpgrade,
     speak,
+    offlineVoices,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
@@ -691,13 +692,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                           updateSettings({ voicePersona: persona.id });
                           playChime('tap');
                         }}
-                        className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-2.5 ${
                           isSelected
                             ? 'bg-[#FDF4E7] border-[#E2A44E] shadow-xs'
                             : 'bg-white hover:bg-[#FAF7F2] border-[#E0D8CB]'
                         }`}
                       >
-                        <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-3 w-full">
+                          <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
                                 {persona.label}
@@ -725,28 +727,81 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             <p className="text-[11px] text-[#7A6C60] font-semibold truncate mt-0.5">
                               {persona.tagline}
                             </p>
-                        </div>
+                          </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
-                            title={`Audition ${persona.name}`}
-                          >
-                            <span>Audition</span>
-                          </button>
-                          <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              isSelected ? 'border-[#E2A44E] bg-[#E2A44E] text-white' : 'border-[#C8BFB3]'
-                            }`}
-                          >
-                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
+                              title={`Audition ${persona.name}`}
+                            >
+                              <span>Audition</span>
+                            </button>
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                                isSelected ? 'border-[#E2A44E] bg-[#E2A44E] text-white' : 'border-[#C8BFB3]'
+                              }`}
+                            >
+                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
                           </div>
                         </div>
+
+                        {/* On-Device System Voice Sub-Selector */}
+                        {persona.id === 'system' && isSelected && offlineVoices && offlineVoices.length > 0 && (
+                          <div className="pt-2.5 border-t border-[#E0D8CB]/80 space-y-1.5 w-full">
+                            <div className="text-[11px] font-black text-[#7A6C60]">
+                              Installed Device Voices ({offlineVoices.length}):
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                              {offlineVoices.map((v) => {
+                                const isVoiceActive = settings.selectedVoiceURI === v.voiceURI || (!settings.selectedVoiceURI && v === offlineVoices[0]);
+                                return (
+                                  <div
+                                    key={v.voiceURI}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateSettings({ voicePersona: 'system', selectedVoiceURI: v.voiceURI });
+                                      playChime('tap');
+                                    }}
+                                    className={`p-2 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                                      isVoiceActive
+                                        ? 'bg-emerald-50 border-emerald-400 font-bold text-emerald-950'
+                                        : 'bg-white border-[#E0D8CB] text-[#2D241E] hover:bg-[#FAF7F2]'
+                                    }`}
+                                  >
+                                    <div className="min-w-0">
+                                      <span className="truncate block font-bold">{v.name}</span>
+                                      <span className="text-[10px] text-[#7A6C60] block">{v.lang}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          speak('Hello! This is an on-device voice.', {
+                                            voiceURI: v.voiceURI,
+                                            voicePersona: 'system',
+                                            previewAudio: true,
+                                            force: true,
+                                          });
+                                        }}
+                                        className="px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#4A2F0F] text-[10px] font-bold"
+                                      >
+                                        Test
+                                      </button>
+                                      {isVoiceActive && <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
