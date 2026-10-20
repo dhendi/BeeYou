@@ -568,7 +568,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         if (parsed.settings) {
           const loaded = { ...INITIAL_APP_SETTINGS, ...parsed.settings };
           if (secPin) loaded.pin = secPin;
-          if (loaded.voiceRate >= 0.95) loaded.voiceRate = 0.85;
+          if (!loaded.voiceRate || loaded.voiceRate <= 0.85) loaded.voiceRate = 1.0;
           return loaded;
         }
       }

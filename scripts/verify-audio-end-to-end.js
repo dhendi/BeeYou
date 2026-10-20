@@ -392,10 +392,121 @@ async function runVerification() {
     }
   }
 
-  // Take screenshot
+  // Test 5: Homepage AAC Sensory Board Tiles Verification
+  console.log('\n--- Test 5: Homepage AAC Sensory Board Interactive Tiles Verification ---');
+  
+  // Navigate to child home page
+  await page.evaluate(() => {
+    try {
+      // Ensure local settings has voiceRate 1.0 and puck persona
+      const raw = localStorage.getItem('beeyou_parent_settings');
+      let data = raw ? JSON.parse(raw) : {};
+      data.settings = data.settings || {};
+      data.settings.voicePersona = 'puck';
+      data.settings.voiceRate = 1.0;
+      data.childProfile = data.childProfile || { name: 'Alex', age: 6 };
+      localStorage.setItem('beeyou_parent_settings', JSON.stringify(data));
+      localStorage.setItem('beeyou_onboarding_completed', 'true');
+      localStorage.setItem('beeyou_free_trial_activated', 'true');
+      sessionStorage.setItem('beeyou_session_opened', 'true');
+      sessionStorage.setItem('beeyou_preloaded_session', 'true');
+    } catch (e) {}
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !document.body.textContent.includes('Preloaded'), { timeout: 10000 }).catch(() => {});
+  await new Promise((r) => setTimeout(r, 2000));
+
+  const sensoryResults = await page.evaluate(async () => {
+    const results = [];
+    // Verify pre-bundled assets for all 9 sensory board tiles exist and decode at rate 1.0
+    const sensoryTiles = [
+      { label: 'I want food', slug: 'iwantfood' },
+      { label: 'I want a drink', slug: 'iwantadrink' },
+      { label: 'I want to play', slug: 'iwanttoplay' },
+      { label: 'Go somewhere', slug: 'gosomewhere' },
+      { label: 'How I feel', slug: 'howifeel' },
+      { label: 'I need a break', slug: 'ineedabreak' },
+      { label: 'I want this', slug: 'iwantthis' },
+      { label: 'I need help', slug: 'ineedhelp' },
+      { label: 'Please stop', slug: 'pleasestop' },
+    ];
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContextClass();
+    if (ctx.state === 'suspended') await ctx.resume();
+
+    for (const tile of sensoryTiles) {
+      const url = `/assets/audio/core/puck_${tile.slug}.wav`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          results.push({ label: tile.label, slug: tile.slug, success: false, error: `HTTP ${res.status}` });
+          continue;
+        }
+        const buf = await res.arrayBuffer();
+        const decoded = await ctx.decodeAudioData(buf.slice(0));
+
+        let playedCleanly = false;
+        await new Promise((resolve) => {
+          const source = ctx.createBufferSource();
+          source.buffer = decoded;
+          source.playbackRate.value = 1.0; // Steady, brisk 1.0 pace
+          source.connect(ctx.destination);
+          source.onended = () => {
+            playedCleanly = true;
+            resolve();
+          };
+          source.start(0);
+          setTimeout(resolve, 150);
+        });
+
+        results.push({
+          label: tile.label,
+          slug: tile.slug,
+          success: true,
+          byteLength: buf.byteLength,
+          duration: decoded.duration,
+          sampleRate: decoded.sampleRate,
+          playedCleanly,
+        });
+      } catch (err) {
+        results.push({ label: tile.label, slug: tile.slug, success: false, error: err.message });
+      }
+    }
+    return results;
+  });
+
+  for (const sr of sensoryResults) {
+    if (sr.success) {
+      console.log(`  PASS: Tile "${sr.label}" (puck_${sr.slug}.wav) loaded (${sr.byteLength} bytes, ${sr.duration.toFixed(2)}s duration at 1.0x rate)`);
+    } else {
+      console.error(`  FAIL: Tile "${sr.label}" failed:`, sr.error);
+    }
+  }
+
+  // Click on "I want food" and "I need a break" tiles in the DOM if available
+  const clickedTiles = await page.evaluate(async () => {
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const foodBtn = buttons.find((b) => b.textContent && b.textContent.includes('I want food'));
+    if (foodBtn) {
+      foodBtn.click();
+      await new Promise((r) => setTimeout(r, 400));
+      return { found: true, text: 'I want food' };
+    }
+    return { found: false };
+  });
+  console.log(`\n  DOM Tile Click Result:`, clickedTiles);
+
+  // Take screenshot of homepage sensory board
+  const sensoryScreenshotPath = path.join(ARTIFACT_DIR, 'sensory_board_verified.png');
+  await page.screenshot({ path: sensoryScreenshotPath });
+  console.log(`[Verification] Saved sensory board screenshot to: ${sensoryScreenshotPath}`);
+
+  // Take general screenshot
   const screenshotPath = path.join(ARTIFACT_DIR, 'audio_verification_app_screen.png');
   await page.screenshot({ path: screenshotPath });
-  console.log(`\n[Verification] Saved app screenshot to: ${screenshotPath}`);
+  console.log(`[Verification] Saved app screenshot to: ${screenshotPath}`);
 
   await browser.close();
   console.log('\n[Verification] All checks complete!');

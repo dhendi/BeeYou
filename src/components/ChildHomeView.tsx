@@ -135,7 +135,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-food',
       label: 'I want food',
-      speechText: 'I want food to eat',
+      speechText: 'I want food',
       emoji: '🍕',
       symbolId: 'food',
       bgTone: 'bg-[#FCF9F2]',
@@ -145,7 +145,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-drinks',
       label: 'I want a drink',
-      speechText: 'I want something to drink',
+      speechText: 'I want a drink',
       emoji: '🧃',
       symbolId: 'drink',
       bgTone: 'bg-[#FCF9F2]',
@@ -155,7 +155,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-play',
       label: 'I want to play',
-      speechText: 'I want to play and have fun',
+      speechText: 'I want to play',
       emoji: '🎮',
       symbolId: 'play_,_to',
       bgTone: 'bg-[#FCF9F2]',
@@ -165,7 +165,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-places',
       label: 'Go somewhere',
-      speechText: 'I want to go somewhere',
+      speechText: 'Go somewhere',
       emoji: '🏠',
       symbolId: 'house',
       bgTone: 'bg-[#FCF9F2]',
@@ -175,7 +175,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-feelings',
       label: 'How I feel',
-      speechText: 'I want to share my feelings',
+      speechText: 'How I feel',
       emoji: '💛',
       symbolId: 'happy_man',
       bgTone: 'bg-[#FCF9F2]',
@@ -185,7 +185,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-break',
       label: 'I need a break',
-      speechText: 'I need a break please',
+      speechText: 'I need a break',
       emoji: '🛋️',
       symbolId: 'break_,_to',
       bgTone: 'bg-[#FCF9F2]',
@@ -195,7 +195,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-want',
       label: 'I want this',
-      speechText: 'I want this please',
+      speechText: 'I want this',
       emoji: '🤲',
       symbolId: 'want_,_to',
       bgTone: 'bg-[#FCF9F2]',
@@ -205,7 +205,7 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
     {
       id: 'tactile-help',
       label: 'I need help',
-      speechText: 'Please help me',
+      speechText: 'I need help',
       emoji: '🛟',
       symbolId: 'help_,_to',
       bgTone: 'bg-[#FCF9F2]',
