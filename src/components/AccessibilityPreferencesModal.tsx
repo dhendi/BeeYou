@@ -641,9 +641,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 {/* Category Filter Pills (Silicone Tray Style) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   {[
-                    { key: 'featured', label: 'Curated (3 Voices + Free)' },
-                    { key: 'all', label: 'All Voices (21)' },
-                    { key: 'free', label: 'Free (On-Device)' },
+                    { key: 'featured', label: 'Curated (4 Voices + Free)' },
+                    { key: 'all', label: `All Voices (${VOICE_PERSONAS.length})` },
+                    { key: 'free', label: 'Free (Native)' },
                     { key: 'kids', label: 'Kids & Children' },
                     { key: 'teens', label: 'Teens & Youth' },
                     { key: 'caring', label: 'Caring & Warm' },
