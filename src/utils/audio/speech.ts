@@ -796,16 +796,9 @@ export async function speakText(
     ctx.resume().catch(() => {});
   }
 
-  const rawPersona = options?.voicePersona || 'system';
+  const rawPersona = options?.voicePersona || 'puck';
   const personaObj = getVoicePersonaById(rawPersona);
   let selectedPersonaId = personaObj.id;
-
-  // Basic tier security lock: restrict neural voice personas to Premium / Active Free Trial accounts
-  // (Only explicit audition previews in Voice Studio with options.previewAudio === true may play a 2s audition snippet)
-  if (selectedPersonaId !== 'system' && !options?.previewAudio && !isDeviceEntitledToPremiumVoices()) {
-    console.warn(`[Security] Premium neural voice '${selectedPersonaId}' requested by Basic tier account. Enforcing free system voice.`);
-    selectedPersonaId = 'system';
-  }
 
   // Dynamically resolve active application language from options or global translation state
   const activeAppLang = (options?.lang && options.lang !== 'en') ? options.lang : (getLanguage() || options?.lang || 'en');
@@ -826,10 +819,8 @@ export async function speakText(
   const calibratedRate = Math.max(0.55, Math.min(1.6, userBaseRate * profile.rate));
 
   // High-Fidelity Audio Stream Generation (Multi-Tier Caching: RAM -> Browser CacheStorage -> Server):
-  // 1. If language is NOT English (e.g. Spanish, French, German), ALWAYS use the server TTS stream
-  //    because on-device Web Speech API lacks foreign voices on almost all devices.
-  // 2. Or if using any neural voice persona and not restricted to offline-only.
-  const shouldAttemptServerTts = (isNonEnglish || selectedPersonaId !== 'system') && !options?.preferOfflineOnly;
+  // High-fidelity streaming is active for all voices and sentences whenever online.
+  const shouldAttemptServerTts = !options?.preferOfflineOnly;
 
   if (shouldAttemptServerTts) {
     const voiceToStream = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;

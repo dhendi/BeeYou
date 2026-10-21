@@ -778,13 +778,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 1. Subscription Hook
   const subscriptionState = useSubscriptionState();
 
-  // Basic Tier Guard: Ensure Basic accounts cannot retain or select premium neural voice personas
-  useEffect(() => {
-    if (!subscriptionState.isPremium && settings.voicePersona && settings.voicePersona !== 'system') {
-      console.warn('[Security] Basic tier account detected with premium voice persona:', settings.voicePersona);
-      setSettings((prev) => ({ ...prev, voicePersona: 'system' }));
-    }
-  }, [subscriptionState.isPremium, settings.voicePersona]);
+
 
   const [voiceLoadingState, setVoiceLoadingState] = useState<{
     isOpen: boolean;
@@ -816,11 +810,6 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
     if (newSettings.language) {
       setLanguage(newSettings.language).catch(() => {});
-    }
-    if (newSettings.voicePersona && newSettings.voicePersona !== 'system' && !subscriptionState.isPremium) {
-      console.warn('[Security] Basic tier account cannot select premium voice persona:', newSettings.voicePersona);
-      newSettings.voicePersona = 'system';
-      subscriptionState.triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
     }
     if (newSettings.voicePersona || newSettings.language) {
       const p = newSettings.voicePersona || settings.voicePersona || 'puck';

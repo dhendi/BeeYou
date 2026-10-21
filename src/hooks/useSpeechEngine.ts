@@ -77,12 +77,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       } catch {}
     }
 
-    let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
-    // If user is on Free / Basic tier, restrict speech strictly to on-device system voice
-    // (Only explicit audition previews with previewAudio === true may play a 2-second snippet)
-    if (!isPremium && personaToUse !== 'system' && !options?.previewAudio) {
-      personaToUse = 'system';
-    }
+    const personaToUse = options?.voicePersona || settings.voicePersona || 'puck';
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
