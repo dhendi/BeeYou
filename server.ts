@@ -51,6 +51,9 @@ const ALLOWED_ORIGIN_PATTERNS = [
   /^https?:\/\/127\.0\.0\.1(:[0-9]+)?$/,
   /^https?:\/\/192\.168\.[0-9]+\.[0-9]+(:[0-9]+)?$/,
   /^https?:\/\/10\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/,
+  /^https?:\/\/[a-zA-Z0-9-]+\.vercel\.app$/,
+  /^https?:\/\/[a-zA-Z0-9-]+\.firebaseapp\.com$/,
+  /^https?:\/\/[a-zA-Z0-9-]+\.web\.app$/,
 ];
 
 function isOriginAllowed(origin?: string): boolean {

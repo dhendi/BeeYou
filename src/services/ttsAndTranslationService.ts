@@ -1157,62 +1157,88 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   // 7. Single-Flight Registry: Register Leader Generation Promise
   // Any concurrent requests arriving during this generation will join the leader promise and share the result
   const generationPromise = (async (): Promise<{ buffer: Buffer; contentType: string } | null> => {
-    // 7a. Instant Google TTS generation via native HTTP client (~180ms response time, zero rate limits, all languages)
+    // 7a. Instant Google TTS generation via native fetch (~180ms response time, zero rate limits, all languages)
     try {
       const normLang = (normalizedLang === 'fr_ca') ? 'fr' : (normalizedLang === 'zh' || normalizedLang.startsWith('zh')) ? 'zh-CN' : normalizedLang.substring(0, 2);
-      const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normLang)}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
       
-      const googleResult = await new Promise<{ buffer: Buffer; contentType: string } | null>((resolve) => {
-        const hreq = https.get(
-          targetUrl,
-          {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Referer': 'https://translate.google.com/',
-            },
-            timeout: 4000,
-          },
-          (hres) => {
-            if (hres.statusCode !== 200) {
-              console.warn('[Google TTS Debug] Status code was not 200:', hres.statusCode);
-              resolve(null);
-              return;
+      // Split text into chunks if it exceeds Google Translate TTS length limit (180 chars)
+      const textChunks: string[] = [];
+      if (cleanText.length <= 180) {
+        textChunks.push(cleanText);
+      } else {
+        const sentences = cleanText.split(/(?<=[.!?])\s+/);
+        let curr = '';
+        for (const s of sentences) {
+          if ((curr + ' ' + s).trim().length <= 180) {
+            curr = (curr + ' ' + s).trim();
+          } else {
+            if (curr) textChunks.push(curr);
+            if (s.length <= 180) {
+              curr = s;
+            } else {
+              const words = s.split(/\s+/);
+              curr = '';
+              for (const w of words) {
+                if ((curr + ' ' + w).trim().length <= 180) {
+                  curr = (curr + ' ' + w).trim();
+                } else {
+                  if (curr) textChunks.push(curr);
+                  curr = w;
+                }
+              }
             }
-            const chunks: Buffer[] = [];
-            hres.on('data', (c) => chunks.push(c));
-            hres.on('end', () => {
-              const buf = Buffer.concat(chunks);
-              const ct = (hres.headers['content-type'] as string) || 'audio/mpeg';
-              resolve({ buffer: buf, contentType: ct });
-            });
           }
-        );
-        hreq.on('error', (err) => {
-          console.warn('[Google TTS Debug Request Error]:', err.message);
-          resolve(null);
-        });
-        hreq.on('timeout', () => {
-          console.warn('[Google TTS Debug Request Timeout]');
-          hreq.destroy();
-          resolve(null);
-        });
-      });
+        }
+        if (curr) textChunks.push(curr);
+      }
 
-      if (googleResult && googleResult.buffer.length > 100) {
+      const chunkBuffers: Buffer[] = [];
+      let allChunksOk = true;
+
+      for (const chunk of textChunks) {
+        const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normLang)}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+        const fetchRes = await fetch(targetUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://translate.google.com/',
+          },
+          signal: AbortSignal.timeout(3500),
+        });
+
+        if (fetchRes.ok) {
+          const ab = await fetchRes.arrayBuffer();
+          const buf = Buffer.from(ab);
+          if (buf.length > 50) {
+            chunkBuffers.push(buf);
+          } else {
+            allChunksOk = false;
+            break;
+          }
+        } else {
+          allChunksOk = false;
+          console.warn('[Google TTS Debug] Status code was not 200:', fetchRes.status);
+          break;
+        }
+      }
+
+      if (allChunksOk && chunkBuffers.length > 0) {
+        const combinedBuf = chunkBuffers.length === 1 ? chunkBuffers[0] : Buffer.concat(chunkBuffers);
+        const ct = 'audio/mpeg';
+        const googleResult = { buffer: combinedBuf, contentType: ct };
         usageBudgetTracker.recordTtsUpstream();
-        console.log(`[TTS Instant Stream] Generated: "${cleanText}" (${persona.name}, ${normalizedLang}) [size: ${googleResult.buffer.length} bytes] - auto-saved to disk cache`);
+        console.log(`[TTS Instant Stream] Generated: "${cleanText}" (${persona.name}, ${normalizedLang}) [size: ${combinedBuf.length} bytes] - auto-saved to disk cache`);
 
         // Cache in memory for instant reuse
         ttsAudioCache.set(cacheKey, googleResult);
 
         // Auto-save to persistent disk cache (.data/tts_cache) with both normalized and literal hash keys
-        fs.promises.writeFile(diskPathMp3, googleResult.buffer).catch(() => {});
-        fs.promises.writeFile(literalDiskPathMp3, googleResult.buffer).catch(() => {});
+        fs.promises.writeFile(diskPathMp3, combinedBuf).catch(() => {});
+        fs.promises.writeFile(literalDiskPathMp3, combinedBuf).catch(() => {});
 
         return googleResult;
       }
-    } catch (googleErr) {
-      console.warn('[TTS Instant Google Stream Notice]:', googleErr);
+    } catch (googleErr: any) {
+      console.warn('[TTS Instant Google Stream Notice]:', googleErr?.message || googleErr);
     }
 
     // 7b. Secondary Fallback to Gemini Neural Generation if Google TTS is unreachable

@@ -910,6 +910,14 @@ export async function speakText(
           iwantthis: 'iwantthis',
           ineedhelp: 'ineedhelp',
           pleasestop: 'pleasestop',
+          headphones: 'ineedmyheadphones',
+          ineedmyheadphones: 'ineedmyheadphones',
+          weightedblanket: 'iwantmyweightedblanket',
+          iwantmyweightedblanket: 'iwantmyweightedblanket',
+          quietroom: 'ineedaquietplace',
+          ineedaquietplace: 'ineedaquietplace',
+          squishyfidget: 'iwantmyfidgettoy',
+          iwantmyfidgettoy: 'iwantmyfidgettoy',
         };
         // For constructed multi-word sentences, only match if an exact pre-baked full sentence audio exists
         const wordSlug = (isMultiWord && options?.sentenceWords && options.sentenceWords.length > 1)
@@ -919,7 +927,11 @@ export async function speakText(
         if (wordSlug) {
           const candidateUrls = [
             `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
-            ...(voiceToStream !== 'puck' ? [`/assets/audio/core/puck_${wordSlug}.wav`] : []),
+            `/assets/audio/core/${voiceToStream}_${wordSlug}.mp3`,
+            ...(voiceToStream !== 'puck' ? [
+              `/assets/audio/core/puck_${wordSlug}.wav`,
+              `/assets/audio/core/puck_${wordSlug}.mp3`,
+            ] : []),
           ];
 
           for (const bundledCoreUrl of candidateUrls) {
@@ -930,7 +942,9 @@ export async function speakText(
                 const buf = await bundledRes.arrayBuffer();
                 if (isAudioPayload(buf)) {
                   const cleanedBuf = cleanRiffWav(buf);
-                  const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+                  const isMp3 = isAudioMp3(cleanedBuf);
+                  const mimeType = isMp3 ? 'audio/mpeg' : 'audio/wav';
+                  const blob = new Blob([cleanedBuf], { type: mimeType });
                   const blobUrl = URL.createObjectURL(blob);
                   audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
                   const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
@@ -953,7 +967,7 @@ export async function speakText(
         try {
           const audioItem = await Promise.race([
             getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
           ]);
           if (speechId !== latestSpeechRequestId) return;
           if (audioItem && isAudioPayload(audioItem.buffer)) {
