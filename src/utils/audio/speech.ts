@@ -888,36 +888,58 @@ export async function speakText(
       );
 
       // 3a. Check pre-bundled offline core asset for instant 0ms speech
-      // IMPORTANT: Strictly for single core words (or explicit two-word idioms).
-      // Multi-word constructed sentences ("I want a drink.") must NEVER match single word slugs!
-      if (!isNonEnglish && !isMultiWord) {
+      // Immediately plays pre-recorded authentic full phrases (e.g., AAC Sensory Board tiles)
+      // or single core words without network delay.
+      if (!isNonEnglish) {
         const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
         const slugAliases: Record<string, string> = {
           helpme: 'help',
           pleasehelpme: 'help',
           waitplease: 'wait',
           alldone: 'alldone',
-          ineedabreak: 'break',
+          tooloud: 'tooloud',
+          itistooloud: 'itistooloud',
+          toobright: 'toobright',
+          itistoobright: 'itistoobright',
+          iwantfood: 'iwantfood',
+          iwantadrink: 'iwantadrink',
+          iwanttoplay: 'iwanttoplay',
+          gosomewhere: 'gosomewhere',
+          howifeel: 'howifeel',
+          ineedabreak: 'ineedabreak',
+          iwantthis: 'iwantthis',
+          ineedhelp: 'ineedhelp',
+          pleasestop: 'pleasestop',
         };
-        const wordSlug = slugAliases[rawSlug] || rawSlug;
+        // For constructed multi-word sentences, only match if an exact pre-baked full sentence audio exists
+        const wordSlug = (isMultiWord && options?.sentenceWords && options.sentenceWords.length > 1)
+          ? rawSlug
+          : (slugAliases[rawSlug] || rawSlug);
+
         if (wordSlug) {
-          const bundledCoreUrl = `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`;
-          try {
-            const bundledRes = await fetch(bundledCoreUrl);
-            const ct = bundledRes.headers.get('content-type') || '';
-            if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-              const buf = await bundledRes.arrayBuffer();
-              if (isAudioPayload(buf)) {
-                const cleanedBuf = cleanRiffWav(buf);
-                const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
-                const blobUrl = URL.createObjectURL(blob);
-                audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-                const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-                if (played || speechId !== latestSpeechRequestId) return;
+          const candidateUrls = [
+            `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
+            ...(voiceToStream !== 'puck' ? [`/assets/audio/core/puck_${wordSlug}.wav`] : []),
+          ];
+
+          for (const bundledCoreUrl of candidateUrls) {
+            try {
+              const bundledRes = await fetch(bundledCoreUrl);
+              const ct = bundledRes.headers.get('content-type') || '';
+              if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+                const buf = await bundledRes.arrayBuffer();
+                if (isAudioPayload(buf)) {
+                  const cleanedBuf = cleanRiffWav(buf);
+                  const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+                  const blobUrl = URL.createObjectURL(blob);
+                  audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+                  const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
+                  if (played || speechId !== latestSpeechRequestId) return;
+                }
               }
+            } catch {
+              // Bundled core word not present
             }
-          } catch {
-            // Bundled core word not present
           }
         }
       }
@@ -925,6 +947,7 @@ export async function speakText(
       // 3b. Unified Whole-Sentence Neural Synthesis via streaming backend:
       // Google TTS synthesizes the entire clause as a single utterance with conversational prosody
       // Generates in ~200-300ms on first press and immediately caches locally for 0ms subsequent replays.
+      let streamSucceeded = false;
       const isOnline = typeof navigator === 'undefined' || navigator.onLine;
       if (isOnline && !options?.preferOfflineOnly) {
         try {
@@ -937,17 +960,17 @@ export async function speakText(
             const cleanedBuf = cleanRiffWav(audioItem.buffer);
             const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
             if (played || speechId !== latestSpeechRequestId) return;
+            streamSucceeded = true;
           }
         } catch (streamErr) {
           console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
         }
       }
 
-      // 3c. STRICT EMERGENCY OFFLINE FALLBACK ONLY:
-      // Stitched word concatenation is strictly downgraded to zero-connection offline mode (!isOnline or preferOfflineOnly).
-      // When connected to the internet, we NEVER stitch words together; we use the conversational neural sentence.
-      // Furthermore, emergency stitched audio is NEVER cached in audioMemoryCache to avoid poisoning subsequent online replays.
-      if (!isOnline && !isNonEnglish && isMultiWord) {
+      // 3c. EMERGENCY FALLBACK FOR ARBITRARY MULTI-WORD PHRASES:
+      // Activated when offline OR if the streaming server is unavailable / quota-exhausted (HTTP 429/503).
+      // Uses on-device Web Audio buffer playback so playback never expires or mutes on iOS/Android gesture limits.
+      if ((!isOnline || !streamSucceeded) && !isNonEnglish && isMultiWord) {
         try {
           const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
           if (sentenceWav && isAudioPayload(sentenceWav)) {
@@ -957,7 +980,7 @@ export async function speakText(
             if (played || speechId !== latestSpeechRequestId) return;
           }
         } catch (synthErr) {
-          console.warn('[Audio] Offline emergency sentence synthesis notice:', synthErr);
+          console.warn('[Audio] Emergency sentence synthesis notice:', synthErr);
         }
       }
     }
@@ -1836,6 +1859,25 @@ export const CORE_AAC_VOCABULARY = [
   'Bathroom',
   'Break',
   'Home',
+  'Food',
+  'This',
+  'A',
+  'To',
+  // 9 Tactile AAC Sensory Board Communicative Phrases
+  'I want food',
+  'I want a drink',
+  'I want to play',
+  'Go somewhere',
+  'How I feel',
+  'I need a break',
+  'I want this',
+  'I need help',
+  'Please stop',
+  // Sensory Needs
+  'Too loud',
+  'It is too loud',
+  'Too bright',
+  'It is too bright',
 ];
 
 const prewarmThrottleMap = new Map<string, number>();

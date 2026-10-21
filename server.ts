@@ -60,6 +60,12 @@ function isOriginAllowed(origin?: string): boolean {
 
 // Security & CORS middleware
 app.use((req, res, next) => {
+  const matchedPath = req.headers['x-matched-path'] as string | undefined;
+  if (matchedPath && matchedPath.startsWith('/api') && !req.url.startsWith('/api')) {
+    req.url = matchedPath;
+  } else if (req.url.startsWith('/api/index.ts')) {
+    req.url = req.url.replace('/api/index.ts', '/api');
+  }
   const origin = req.headers.origin as string | undefined;
 
   if (isOriginAllowed(origin)) {
@@ -239,8 +245,8 @@ export const alertLimiter = createCompositeRateLimiter([
   },
 ]);
 
-app.use('/api/translate', translateLimiter);
-app.use('/api/tts', ttsLimiter);
+app.use(['/api/translate', '/translate'], translateLimiter);
+app.use(['/api/tts', '/tts'], ttsLimiter);
 
 // High-priority per-account and per-target limiters mounted before catch-alls
 app.use('/api/family/auth', authLimiter);
@@ -270,15 +276,15 @@ app.param('code', (req, res, next, rawCode) => {
 });
 
 // Health check
-app.get('/api/health', (_req, res) => {
+app.get(['/api/health', '/health'], (_req, res) => {
   res.json({ status: 'ok', childPort, caregiverPort, timestamp: new Date().toISOString() });
 });
 
 // Lightweight On-Demand Translation Endpoint with Input Validation, Timeouts & Multi-Tier Caching
-app.get('/api/translate', handleTranslateRequest);
+app.get(['/api/translate', '/translate'], handleTranslateRequest);
 
 // Authentic High-Fidelity Audio Streaming Endpoint with Abuse Protection, Quotas & Caching
-app.get('/api/tts', handleTtsRequest);
+app.get(['/api/tts', '/tts'], handleTtsRequest);
 
 // Usage Metrics & Budget Status Endpoint (Admin & Diagnostic Health)
 app.get('/api/admin/usage', (_req, res) => {

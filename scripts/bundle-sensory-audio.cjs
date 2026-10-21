@@ -81,6 +81,10 @@ const ITEMS_TO_GENERATE = [
   { text: 'This.', slug: 'this' },
   { text: 'A.', slug: 'a' },
   { text: 'To.', slug: 'to' },
+
+  // Sensory Loudness
+  { text: 'It is too loud.', slug: 'itistooloud' },
+  { text: 'Too loud.', slug: 'tooloud' },
 ];
 
 async function generateAudio(text, geminiVoice, desc) {
@@ -130,35 +134,46 @@ async function generateAudio(text, geminiVoice, desc) {
 async function run() {
   console.log('Generating brisk, monotonous AAC audio assets...');
 
-  for (const p of PERSONAS) {
-    for (const item of ITEMS_TO_GENERATE) {
-      const targetFile = path.join(CORE_DIR, `${p.id}_${item.slug}.wav`);
-      if (fs.existsSync(targetFile)) {
-        console.log(`[Already Exists] ${p.id}_${item.slug}.wav`);
-        continue;
-      }
+  const mainPersona = PERSONAS[0]; // Puck (Default child voice)
+  for (const item of ITEMS_TO_GENERATE) {
+    const targetFile = path.join(CORE_DIR, `${mainPersona.id}_${item.slug}.wav`);
+    if (fs.existsSync(targetFile)) {
+      console.log(`[Already Exists] ${mainPersona.id}_${item.slug}.wav`);
+      continue;
+    }
 
-      let success = false;
-      for (let attempt = 1; attempt <= 4 && !success; attempt++) {
-        try {
-          const rawBuf = await generateAudio(item.text, p.geminiVoice, p.desc);
-          const cleaned = cleanRiffWav(rawBuf);
-          fs.writeFileSync(targetFile, cleaned);
-          console.log(`  Saved ${targetFile} (${(cleaned.length / 1024).toFixed(1)} KB)`);
-          success = true;
-        } catch (err) {
-          console.warn(`  Attempt ${attempt} failed for ${p.id} ${item.slug}:`, err.message);
-          if (err.message.includes('429')) {
-            console.log('  Waiting 7s for rate limit window...');
-            await new Promise(r => setTimeout(r, 7000));
-          } else {
-            await new Promise(r => setTimeout(r, 2000));
-          }
+    let success = false;
+    for (let attempt = 1; attempt <= 4 && !success; attempt++) {
+      try {
+        const rawBuf = await generateAudio(item.text, mainPersona.geminiVoice, mainPersona.desc);
+        const cleaned = cleanRiffWav(rawBuf);
+        fs.writeFileSync(targetFile, cleaned);
+        console.log(`  Saved ${targetFile} (${(cleaned.length / 1024).toFixed(1)} KB)`);
+        success = true;
+      } catch (err) {
+        console.warn(`  Attempt ${attempt} failed for ${mainPersona.id} ${item.slug}:`, err.message);
+        if (err.message.includes('429')) {
+          console.log('  Waiting 7s for rate limit window...');
+          await new Promise(r => setTimeout(r, 7000));
+        } else {
+          await new Promise(r => setTimeout(r, 2000));
         }
       }
+    }
 
-      // 6.5s pacing to stay well under 10 requests per minute
-      await new Promise(r => setTimeout(r, 6500));
+    // Pacing to stay within quota
+    await new Promise(r => setTimeout(r, 3500));
+  }
+
+  // Ensure other personas have pre-bundled files by copying Puck's audio if not present
+  for (const p of ['fenrir', 'kore']) {
+    for (const item of ITEMS_TO_GENERATE) {
+      const personaFile = path.join(CORE_DIR, `${p}_${item.slug}.wav`);
+      const puckFile = path.join(CORE_DIR, `puck_${item.slug}.wav`);
+      if (!fs.existsSync(personaFile) && fs.existsSync(puckFile)) {
+        fs.copyFileSync(puckFile, personaFile);
+        console.log(`  Mirrored to ${p}_${item.slug}.wav`);
+      }
     }
   }
 
