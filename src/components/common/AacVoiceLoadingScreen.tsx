@@ -34,11 +34,21 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
   }, [onComplete]);
 
   const activeOpRef = useRef<string | null>(null);
+  const highestPercentRef = useRef(0);
+  const highestLoadedRef = useRef(0);
 
   useEffect(() => {
     if (!isOpen) {
       activeOpRef.current = null;
       setIsFinished(false);
+      highestPercentRef.current = 0;
+      highestLoadedRef.current = 0;
+      setProgress({
+        loaded: 0,
+        total: 82,
+        percent: 0,
+        currentPhrase: 'Preparing speech cache...',
+      });
       return;
     }
 
@@ -49,8 +59,30 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
     }
     activeOpRef.current = opKey;
     setIsFinished(false);
+    highestPercentRef.current = 0;
+    highestLoadedRef.current = 0;
+    setProgress({
+      loaded: 0,
+      total: 82,
+      percent: 0,
+      currentPhrase: 'Preparing speech cache...',
+    });
 
     let isSubscribed = true;
+
+    // Hard fail-safe: The loading modal must NEVER hold the user hostage for minutes.
+    // If anything stalls, dismiss gracefully after 4.5 seconds.
+    const maxSafetyTimer = setTimeout(() => {
+      if (!isSubscribed) return;
+      console.warn('[Voice Loading Screen] Max safety threshold reached (4.5s), dismissing modal.');
+      setIsFinished(true);
+      try { playChime('complete'); } catch {}
+      setTimeout(() => {
+        if (isSubscribed) {
+          onCompleteRef.current?.();
+        }
+      }, 300);
+    }, 4500);
 
     // Trigger genuine background pre-caching of every single AAC tile
     preloadVoicePack(
@@ -58,34 +90,32 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
       language,
       (p) => {
         if (!isSubscribed) return;
-        setProgress((prev) => {
-          // Strictly monotonic progress: loaded count and percent NEVER decrease
-          const nextLoaded = Math.max(prev.loaded, p.loaded);
-          const nextPercent = Math.max(prev.percent, p.percent);
-          return {
-            loaded: nextLoaded,
-            total: p.total,
-            percent: nextPercent,
-            currentPhrase: p.currentPhrase,
-          };
+        highestLoadedRef.current = Math.max(highestLoadedRef.current, p.loaded);
+        highestPercentRef.current = Math.max(highestPercentRef.current, p.percent);
+        setProgress({
+          loaded: highestLoadedRef.current,
+          total: p.total || 82,
+          percent: highestPercentRef.current,
+          currentPhrase: p.currentPhrase,
         });
       }
     )
       .then(() => {
         if (!isSubscribed) return;
+        clearTimeout(maxSafetyTimer);
         setIsFinished(true);
         try {
           playChime('complete');
         } catch {}
-        const timer = setTimeout(() => {
+        setTimeout(() => {
           if (isSubscribed) {
             onCompleteRef.current?.();
           }
         }, 350);
-        return () => clearTimeout(timer);
       })
       .catch((err) => {
         if (!isSubscribed) return;
+        clearTimeout(maxSafetyTimer);
         console.warn('[Voice Preload Notice]:', err);
         setIsFinished(true);
         onCompleteRef.current?.();
@@ -93,6 +123,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
     return () => {
       isSubscribed = false;
+      clearTimeout(maxSafetyTimer);
     };
   }, [isOpen, persona, language]);
 

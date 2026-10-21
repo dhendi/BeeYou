@@ -32,6 +32,7 @@ function getStorageKey(personaId: string, lang: string): string {
  * Checks whether speech tiles for this voice persona and language are pre-cached and ready for instant playback.
  */
 export function isVoicePackLoaded(personaId: string = 'puck', lang: string = 'en'): boolean {
+  if (personaId === 'system') return true;
   if (typeof window === 'undefined') return true;
   try {
     const key = getStorageKey(personaId, lang);
@@ -63,6 +64,12 @@ export async function preloadVoicePack(
   signal?: AbortSignal
 ): Promise<void> {
   if (typeof window === 'undefined') return;
+
+  if (personaId === 'system') {
+    markVoicePackLoaded('system', lang);
+    onProgress?.({ loaded: 82, total: 82, percent: 100, currentPhrase: 'Ready' });
+    return;
+  }
 
   const personaObj = getVoicePersonaById(personaId);
   const voiceToUse = personaObj.id === 'system' ? 'puck' : personaObj.id;
@@ -121,12 +128,16 @@ export async function preloadVoicePack(
       if (!formatted) return;
 
       const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
-      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
+      const streamUrl = `${getTtsStreamUrl(voiceToUse, normalizedLang, formatted)}&cachedOnly=1`;
 
       try {
         const local = await getLocalCacheOnly(streamUrl, cacheKey);
         if (!local && !effectiveSignal.aborted) {
-          await getOrFetchAudioItem(streamUrl, cacheKey);
+          // Strict 1.5s timeout per tile to ensure preloading NEVER blocks or hangs
+          await Promise.race([
+            getOrFetchAudioItem(streamUrl, cacheKey),
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+          ]);
         }
       } catch {
         // Ignore single item fetch error

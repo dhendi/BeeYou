@@ -794,7 +794,7 @@ const TRANSLATE_DAILY_LIMIT_PER_USER = 200; // Max 200 dynamic translations per 
 
 // Request Timeouts
 const TRANSLATE_TIMEOUT_MS = 5000; // 5-second strict upstream timeout
-const TTS_TIMEOUT_MS = 15000; // 15-second upstream timeout for high-fidelity speech
+const TTS_TIMEOUT_MS = 4500; // 4.5-second strict timeout for fast, non-blocking speech responses
 
 /**
  * Handle Translation Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.
@@ -1013,7 +1013,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   }
 
   // 4. L3 Persistent Disk Cache Check
-  const diskFile = fs.existsSync(diskPathWav)
+  let diskFile = fs.existsSync(diskPathWav)
     ? diskPathWav
     : (fs.existsSync(literalDiskPathWav)
       ? literalDiskPathWav
@@ -1022,6 +1022,24 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         : (fs.existsSync(literalDiskPathMp3)
           ? literalDiskPathMp3
           : (fs.existsSync(legacyDiskPathMp3) ? legacyDiskPathMp3 : null))));
+
+  // High-performance baseline fallback: If requested voice file is missing on disk,
+  // instantly serve the pre-baked audio for this exact phrase and language from disk
+  if (!diskFile && voiceKey !== 'puck') {
+    const puckHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${cacheKeyText}`).digest('hex');
+    const puckLitHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${literalKeyText}`).digest('hex');
+    const puckWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.wav`);
+    const puckLitWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.wav`);
+    const puckMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.mp3`);
+    const puckLitMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.mp3`);
+    diskFile = fs.existsSync(puckWav) ? puckWav : (fs.existsSync(puckLitWav) ? puckLitWav : (fs.existsSync(puckMp3) ? puckMp3 : (fs.existsSync(puckLitMp3) ? puckLitMp3 : null)));
+  }
+
+  // Fast preloading safeguard: If client passes cachedOnly=1 and file is not on disk, return 404 in 1ms rather than blocking on Gemini
+  if (!diskFile && (req.query.cachedOnly === '1' || req.query.cachedOnly === 'true')) {
+    res.status(404).json({ error: 'NotPreCached', message: 'Audio tile not cached on server disk' });
+    return;
+  }
 
   if (diskFile) {
     try {

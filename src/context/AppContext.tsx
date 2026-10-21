@@ -799,9 +799,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   const triggerVoicePreload = useCallback(async (persona?: string, lang?: string) => {
     const p = persona || settings.voicePersona || 'puck';
     const l = lang || settings.language || 'en';
+    if (p === 'system') {
+      // System native voice runs 100% on-device via Web Speech API, zero download required
+      return;
+    }
     setVoiceLoadingState({
       isOpen: true,
-      persona: p === 'system' ? 'puck' : p,
+      persona: p,
       language: l,
     });
   }, [settings.voicePersona, settings.language]);
@@ -821,7 +825,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (newSettings.voicePersona || newSettings.language) {
       const p = newSettings.voicePersona || settings.voicePersona || 'puck';
       const l = newSettings.language || settings.language || 'en';
-      if (!isVoicePackLoaded(p, l)) {
+      if (p !== 'system' && !isVoicePackLoaded(p, l)) {
         triggerVoicePreload(p, l);
       }
     }
