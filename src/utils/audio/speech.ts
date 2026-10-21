@@ -857,7 +857,7 @@ export async function speakText(
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -915,7 +915,7 @@ export async function speakText(
         try {
           const audioItem = await Promise.race([
             getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
           ]);
           if (speechId !== latestSpeechRequestId) return;
           if (audioItem && isAudioPayload(audioItem.buffer)) {

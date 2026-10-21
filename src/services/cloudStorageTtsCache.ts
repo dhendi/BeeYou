@@ -61,6 +61,12 @@ export async function getAudioFromCloudStorage(
   hashKey: string,
   version: string = 'v4'
 ): Promise<Buffer | null> {
+  // On local servers, .data/tts_cache is the authoritative persistent disk storage.
+  // Avoid 20-second Firebase Storage SDK retry hangs on cache misses.
+  if (!process.env.VERCEL) {
+    return null;
+  }
+
   const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey, version);
 
   // 1. Check direct HTTPS REST endpoint (Firebase Storage public CDN / GCS)
@@ -108,6 +114,9 @@ export async function saveAudioToCloudStorage(
   contentType = 'audio/wav',
   version: string = 'v4'
 ): Promise<void> {
+  if (!process.env.VERCEL) {
+    return;
+  }
   const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey, version);
 
   try {
