@@ -536,7 +536,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             <input
               type="range"
               min="0.7"
-              max="1.3"
+              max="1.6"
               step="0.05"
               value={settings.voiceRate || 1.0}
               onChange={(e) => updateSettings({ voiceRate: parseFloat(e.target.value) })}
@@ -545,7 +545,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
             <div className="flex justify-between text-[11px] font-bold text-stone-400">
               <span>0.7x ({t('Calm & Slow')})</span>
               <span>1.0x ({t('Standard')})</span>
-              <span>1.3x ({t('Fast')})</span>
+              <span>1.3x ({t('Youthful')})</span>
+              <span>1.6x ({t('Fast')})</span>
             </div>
           </div>
 

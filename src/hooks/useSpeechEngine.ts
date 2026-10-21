@@ -84,7 +84,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       lang: settings.language,
       force: options?.force,
       previewAudio: options?.previewAudio,
-      sentenceWords: options?.sentenceWords,
+      sentenceWords: (settings.language && settings.language !== 'en') ? undefined : options?.sentenceWords,
     });
   };
 

@@ -1,6 +1,7 @@
 import { playChime } from './chimes';
 import { getAudioContext, enableSilentModePlayback } from './context';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
+import { t } from '../../services/translator';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -41,17 +42,17 @@ export function getApiBaseUrl(): string {
 
   // Detect Capacitor native mobile environment (iOS or Android)
   const isCapacitorNative =
-    (window as any).Capacitor?.isNativePlatform?.() ||
-    Boolean((window as any).Capacitor) ||
-    Boolean((window as any).androidBridge) ||
-    (typeof navigator !== 'undefined' && navigator.userAgent.includes('Capacitor'));
+    typeof (window as any).Capacitor !== 'undefined' &&
+    typeof (window as any).Capacitor?.isNativePlatform === 'function' &&
+    Boolean((window as any).Capacitor.isNativePlatform());
 
-  if (
+  const isNativeProtocol =
     typeof window.location !== 'undefined' &&
     (window.location.origin.startsWith('capacitor://') ||
       window.location.protocol === 'file:' ||
-      (window.location.hostname === 'localhost' && isCapacitorNative))
-  ) {
+      Boolean((window as any).androidBridge));
+
+  if (isCapacitorNative || isNativeProtocol) {
     return 'http://10.0.0.170:3000';
   }
 
@@ -684,7 +685,7 @@ export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: nu
   system: { pitch: 1.0, rate: 1.05 },
 
   // Kids (Warm, natural, clear AAC)
-  puck: { pitch: 1.00, rate: 1.05 },
+  puck: { pitch: 1.00, rate: 1.30 },
   leda: { pitch: 1.00, rate: 1.05 },
   sadachbia: { pitch: 1.00, rate: 1.05 },
   achernar: { pitch: 1.00, rate: 1.05 },
@@ -767,11 +768,26 @@ export async function speakText(
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  // High-Fidelity Neural Audio Stream (Multi-Tier Caching: RAM -> Browser CacheStorage -> Edge Server):
-  // When using any neural voice and not restricted to offline-only:
-  if (selectedPersonaId !== 'system' && !options?.preferOfflineOnly) {
-    const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formattedText);
-    const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formattedText);
+  const isNonEnglish = normalizedLang !== 'en';
+
+  // Acoustic Calibration & Rate Calculation:
+  const userBasePitch = options?.pitch ?? 1.0;
+  const userBaseRate = options?.rate ?? 1.0;
+  const profile = PERSONA_ACOUSTIC_PROFILES[selectedPersonaId] || { pitch: 1.0, rate: 1.0 };
+
+  const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
+  const calibratedRate = Math.max(0.55, Math.min(1.6, userBaseRate * profile.rate));
+
+  // High-Fidelity Audio Stream Generation (Multi-Tier Caching: RAM -> Browser CacheStorage -> Server):
+  // 1. If language is NOT English (e.g. Spanish, French, German), ALWAYS use the server TTS stream
+  //    because on-device Web Speech API lacks foreign voices on almost all devices.
+  // 2. Or if using any neural voice persona and not restricted to offline-only.
+  const shouldAttemptServerTts = (isNonEnglish || selectedPersonaId !== 'system') && !options?.preferOfflineOnly;
+
+  if (shouldAttemptServerTts) {
+    const voiceToStream = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
+    const cacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
+    const streamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
 
     // 1. Instant check in local cache (RAM & CacheStorage) (< 10ms lookup)
     const localAudioItem = await getLocalCacheOnly(streamUrl, cacheKey);
@@ -782,13 +798,13 @@ export async function speakText(
     if (localAudioItem) {
       // Audio is already cached on-device! Play immediately with 0ms latency
       try {
-        const played = await playAudioUrl(localAudioItem.buffer, formattedText, options?.rate, speechId, localAudioItem.blobUrl);
+        const played = await playAudioUrl(localAudioItem.buffer, formattedText, calibratedRate, speechId, localAudioItem.blobUrl);
         if (played || speechId !== latestSpeechRequestId) return;
       } catch (err) {
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
-    } else if (options?.previewAudio) {
-      // 2a. Pre-bundled instant offline audition preview asset
+    } else if (options?.previewAudio && !isNonEnglish) {
+      // 2a. Pre-bundled instant offline audition preview asset (English only)
       const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
       try {
         const bundledRes = await fetch(bundledPreviewUrl);
@@ -800,7 +816,7 @@ export async function speakText(
             const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
             const blobUrl = URL.createObjectURL(blob);
             audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-            const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, blobUrl);
+            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
             if (played || speechId !== latestSpeechRequestId) return;
           }
         }
@@ -817,7 +833,7 @@ export async function speakText(
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
           const cleanedBuf = cleanRiffWav(audioItem.buffer);
-          const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch (err) {
@@ -826,66 +842,68 @@ export async function speakText(
       // Never fall through to default Samantha speech during an explicit audition of a neural voice!
       return;
     } else {
-      // 3a. Check pre-bundled core AAC vocabulary asset for 0ms instant offline speech
-      const wordSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (wordSlug) {
-        const bundledCoreUrl = `/assets/audio/core/${selectedPersonaId}_${wordSlug}.wav`;
-        try {
-          const bundledRes = await fetch(bundledCoreUrl);
-          const ct = bundledRes.headers.get('content-type') || '';
-          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-            const buf = await bundledRes.arrayBuffer();
-            if (isAudioPayload(buf)) {
-              const cleanedBuf = cleanRiffWav(buf);
-              const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+      // For English, check pre-bundled offline recordings
+      if (!isNonEnglish) {
+        // 3a. Check pre-bundled core AAC vocabulary asset for 0ms instant offline speech
+        const wordSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (wordSlug) {
+          const bundledCoreUrl = `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`;
+          try {
+            const bundledRes = await fetch(bundledCoreUrl);
+            const ct = bundledRes.headers.get('content-type') || '';
+            if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+              const buf = await bundledRes.arrayBuffer();
+              if (isAudioPayload(buf)) {
+                const cleanedBuf = cleanRiffWav(buf);
+                const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+                const blobUrl = URL.createObjectURL(blob);
+                audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+                const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
+                if (played || speechId !== latestSpeechRequestId) return;
+              }
+            }
+          } catch {
+            // Bundled core word not present
+          }
+        }
+
+        // 3b. Offline Multi-Word Sentence Synthesizer:
+        // If speaking an English multi-word phrase or sentence, stitch pre-bundled words in the child's selected neural voice!
+        const isMultiWord = Boolean(
+          (options?.sentenceWords && options.sentenceWords.length > 1) ||
+          formattedText.trim().split(/\s+/).length > 1
+        );
+
+        if (isMultiWord) {
+          try {
+            const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
+            if (sentenceWav && isAudioPayload(sentenceWav)) {
+              const blob = new Blob([sentenceWav], { type: 'audio/wav' });
               const blobUrl = URL.createObjectURL(blob);
-              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-              const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, blobUrl);
+              audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
+              const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId, blobUrl);
               if (played || speechId !== latestSpeechRequestId) return;
             }
+          } catch (synthErr) {
+            console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
           }
-        } catch {
-          // Bundled core word not present
         }
       }
 
-      // 3b. Offline Multi-Word Sentence Synthesizer:
-      // If speaking a multi-word phrase or sentence, stitch pre-bundled words in the child's selected neural voice!
-      // This guarantees 0ms instantaneous speech in Puck / Fenrir / Kore without waiting for network or reverting to robotic default voice!
-      const isMultiWord = Boolean(
-        (options?.sentenceWords && options.sentenceWords.length > 1) ||
-        formattedText.trim().split(/\s+/).length > 1
-      );
-
-      if (isMultiWord) {
-        try {
-          const sentenceWav = await synthesizeOfflineSentence(formattedText, selectedPersonaId, options?.sentenceWords);
-          if (sentenceWav && isAudioPayload(sentenceWav)) {
-            const blob = new Blob([sentenceWav], { type: 'audio/wav' });
-            const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
-            const played = await playAudioUrl(sentenceWav, formattedText, options?.rate, speechId, blobUrl);
-            if (played || speechId !== latestSpeechRequestId) return;
-          }
-        } catch (synthErr) {
-          console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
-        }
-      }
-
-      // 3c. For non-bundled words, attempt dynamic server fetch with a fast 1500ms timeout
+      // 3c. Dynamic server fetch with a healthy 6000ms timeout
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
           const cleanedBuf = cleanRiffWav(audioItem.buffer);
-          const played = await playAudioUrl(cleanedBuf, formattedText, options?.rate, speechId, audioItem.blobUrl);
+          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
           if (played || speechId !== latestSpeechRequestId) return;
         }
-      } catch {
-        // Dynamic fetch failed or timed out, gracefully fallback to calibrated on-device speech
+      } catch (streamErr) {
+        console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
       }
     }
   }
@@ -896,13 +914,6 @@ export async function speakText(
   }
 
   // Fallback to on-device Web Speech API with rich persona acoustic calibration (< 20ms response, zero user-gesture expiration)
-  const userBasePitch = options?.pitch ?? 1.0;
-  const userBaseRate = options?.rate ?? 1.0;
-  const profile = PERSONA_ACOUSTIC_PROFILES[selectedPersonaId] || { pitch: 1.0, rate: 1.0 };
-
-  const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
-  const calibratedRate = Math.max(0.55, Math.min(1.4, userBaseRate * profile.rate));
-
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
@@ -910,6 +921,28 @@ export async function speakText(
     rate: calibratedRate,
     force: options?.force,
   });
+}
+
+/**
+ * Inspects binary data to detect MP3 container format (ID3 header or sync frames).
+ */
+export function isAudioMp3(buffer: ArrayBuffer | null | undefined): boolean {
+  if (!buffer || buffer.byteLength < 4) return false;
+  const view = new DataView(buffer);
+  // ID3 tag check (0x494433 = 'ID3')
+  const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
+  if (isId3) return true;
+  // MP3 frame sync check (0xFFE0 mask)
+  const isSyncAt0 = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
+  if (isSyncAt0) return true;
+  // Scan first 512 bytes for sync word
+  const maxSearch = Math.min(buffer.byteLength - 2, 512);
+  for (let i = 1; i < maxSearch; i++) {
+    if ((view.getUint16(i, false) & 0xFFE0) === 0xFFE0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -932,10 +965,8 @@ export function isAudioPayload(buffer: ArrayBuffer | null | undefined): boolean 
   const isWave = view.getUint32(8, false) === 0x57415645;
   if (isRiff && isWave) return true;
 
-  // Check for MP3 (ID3 tag or sync word 0xFFE0)
-  const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
-  const isMp3Sync = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
-  if (isId3 || isMp3Sync) return true;
+  // Check for MP3 (ID3 tag or sync word)
+  if (isAudioMp3(buffer)) return true;
 
   // Check for Ogg container
   const isOgg = view.getUint32(0, false) === 0x4F676753;
@@ -1196,10 +1227,8 @@ export function ensureWavHeader(buffer: ArrayBuffer, defaultSampleRate = 24000):
     return cleanRiffWav(buffer);
   }
 
-  // Also check for MP3 (ID3 tag or sync word 0xFFE0)
-  const isId3 = (view.getUint32(0, false) & 0xFFFFFF00) === 0x49443300;
-  const isMp3Sync = (view.getUint16(0, false) & 0xFFE0) === 0xFFE0;
-  if (isId3 || isMp3Sync) return buffer;
+  // Also check for MP3 (ID3 tag or sync word)
+  if (isAudioMp3(buffer)) return buffer;
 
   // Strict text detection: prevent HTML/JSON text from ever being treated as PCM samples (eliminates static noise)
   const b0 = view.getUint8(0);
@@ -1267,7 +1296,7 @@ export async function playAudioUrl(
   enableSilentModePlayback();
   stopSpeaking();
 
-  const targetRate = Math.max(0.65, Math.min(1.4, rate ?? 1.05));
+  const targetRate = Math.max(0.65, Math.min(1.6, rate ?? 1.05));
   let arrayBuffer: ArrayBuffer | null = null;
   const sourceUrl = typeof srcOrBuffer === 'string' ? srcOrBuffer : (fallbackBlobUrl || '');
 
@@ -1367,7 +1396,9 @@ export async function playAudioUrl(
           resolve(false);
           return;
         }
-        const blob = new Blob([verifiedBuffer], { type: 'audio/wav' });
+        const isMp3 = isAudioMp3(verifiedBuffer);
+        const mimeType = isMp3 ? 'audio/mpeg' : 'audio/wav';
+        const blob = new Blob([verifiedBuffer], { type: mimeType });
         blobUrlToRevoke = URL.createObjectURL(blob);
         audio.src = blobUrlToRevoke;
       } else if (sourceUrl) {
@@ -1742,15 +1773,17 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   const personaObj = getVoicePersonaById(persona);
   const selectedPersonaId = personaObj.id;
 
-  // System native voice runs directly on-device hardware with 0ms latency; no need to pre-warm network
-  if (selectedPersonaId === 'system') return;
-
   const normalizedLang =
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  const throttleKey = `${selectedPersonaId}_${normalizedLang}`;
+  // System native voice runs directly on-device hardware with 0ms latency for English;
+  // For non-English languages, cloud multilingual TTS is used, so we pre-warm it!
+  if (selectedPersonaId === 'system' && normalizedLang === 'en') return;
+
+  const voiceToUse = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
+  const throttleKey = `${voiceToUse}_${normalizedLang}`;
   const now = Date.now();
   if (prewarmThrottleMap.has(throttleKey) && now - prewarmThrottleMap.get(throttleKey)! < 60000) {
     return;
@@ -1760,30 +1793,33 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
     for (const phrase of CORE_AAC_VOCABULARY) {
-      const formatted = formatForNaturalSpeech(phrase);
+      const translated = t(phrase);
+      const formatted = formatForNaturalSpeech(translated);
       if (!formatted) continue;
-      const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
-      const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
+      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
       const existing = await getLocalCacheOnly(streamUrl, cacheKey);
       if (existing) continue;
 
-      // 1. Preload from local pre-bundled assets first (0ms latency, zero network)
-      const wordSlug = formatted.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (wordSlug) {
-        const bundledUrl = `/assets/audio/core/${selectedPersonaId}_${wordSlug}.wav`;
-        try {
-          const res = await fetch(bundledUrl);
-          if (res.ok) {
-            const buf = await res.arrayBuffer();
-            if (isAudioPayload(buf)) {
-              const cleaned = cleanRiffWav(buf);
-              const blob = new Blob([cleaned], { type: 'audio/wav' });
-              const blobUrl = URL.createObjectURL(blob);
-              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleaned });
-              continue;
+      // 1. Preload from local pre-bundled assets first (English only)
+      if (normalizedLang === 'en') {
+        const wordSlug = formatted.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (wordSlug) {
+          const bundledUrl = `/assets/audio/core/${voiceToUse}_${wordSlug}.wav`;
+          try {
+            const res = await fetch(bundledUrl);
+            if (res.ok) {
+              const buf = await res.arrayBuffer();
+              if (isAudioPayload(buf)) {
+                const cleaned = cleanRiffWav(buf);
+                const blob = new Blob([cleaned], { type: 'audio/wav' });
+                const blobUrl = URL.createObjectURL(blob);
+                audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleaned });
+                continue;
+              }
             }
-          }
-        } catch {}
+          } catch {}
+        }
       }
 
       // 2. Dynamic prefetch if online

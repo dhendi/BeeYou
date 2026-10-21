@@ -835,7 +835,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <input
                   type="range"
                   min="0.6"
-                  max="1.4"
+                  max="1.6"
                   step="0.05"
                   value={settings.voiceRate}
                   onChange={(e) => updateSettings({ voiceRate: parseFloat(e.target.value) })}
