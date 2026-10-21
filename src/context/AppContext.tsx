@@ -786,12 +786,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     language: string;
   }>({
     isOpen: false,
-    persona: 'puck',
+    persona: 'amy',
     language: 'en',
   });
 
   const triggerVoicePreload = useCallback(async (persona?: string, lang?: string) => {
-    const p = persona || settings.voicePersona || 'puck';
+    const p = persona || settings.voicePersona || 'amy';
     const l = lang || settings.language || 'en';
     if (p === 'system') {
       // System native voice runs 100% on-device via Web Speech API, zero download required
@@ -812,7 +812,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       setLanguage(newSettings.language).catch(() => {});
     }
     if (newSettings.voicePersona || newSettings.language) {
-      const p = newSettings.voicePersona || settings.voicePersona || 'puck';
+      const p = newSettings.voicePersona || settings.voicePersona || 'amy';
       const l = newSettings.language || settings.language || 'en';
       if (p !== 'system' && !isVoicePackLoaded(p, l)) {
         triggerVoicePreload(p, l);

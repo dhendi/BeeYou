@@ -1488,7 +1488,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
               setPendingAccountContext(null);
             }
           }}
-          persona={settings?.voicePersona || 'puck'}
+          persona={settings?.voicePersona || 'amy'}
           language={regLanguage || settings?.language || 'en'}
         />
       )}

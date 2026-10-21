@@ -1,5 +1,6 @@
 import { getPrimarySpokenPhrasesForLanguage, getSpokenPhrasesForLanguage } from '../data/aacVocabularyCatalog';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
+import { preloadPiperVoice, isPiperVoiceReady } from './piperTtsService';
 import {
   getTtsStreamUrl,
   getTtsCacheKey,
@@ -24,14 +25,14 @@ const progressListenersMap = new Map<string, Set<PreloadProgressCallback>>();
 
 function getStorageKey(personaId: string, lang: string): string {
   const normLang = (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' : (lang === 'zh' || lang.startsWith('zh')) ? 'zh' : lang.substring(0, 2);
-  const normVoice = (personaId === 'system' ? 'puck' : personaId).toLowerCase();
+  const normVoice = (personaId === 'system' ? 'amy' : personaId).toLowerCase();
   return `beeyou_vp_${normVoice}_${normLang}_${TTS_GENERATION_VERSION}`;
 }
 
 /**
  * Checks whether speech tiles for this voice persona and language are pre-cached and ready for instant playback.
  */
-export function isVoicePackLoaded(personaId: string = 'puck', lang: string = 'en'): boolean {
+export function isVoicePackLoaded(personaId: string = 'amy', lang: string = 'en'): boolean {
   if (personaId === 'system') return true;
   if (typeof window === 'undefined') return true;
   try {
@@ -45,7 +46,7 @@ export function isVoicePackLoaded(personaId: string = 'puck', lang: string = 'en
 /**
  * Marks voice pack as ready in local storage.
  */
-export function markVoicePackLoaded(personaId: string = 'puck', lang: string = 'en'): void {
+export function markVoicePackLoaded(personaId: string = 'amy', lang: string = 'en'): void {
   if (typeof window === 'undefined') return;
   try {
     const key = getStorageKey(personaId, lang);
@@ -58,7 +59,7 @@ export function markVoicePackLoaded(personaId: string = 'puck', lang: string = '
  * Emits real-time progress callbacks for the loading screen.
  */
 export async function preloadVoicePack(
-  personaId: string = 'puck',
+  personaId: string = 'amy',
   lang: string = 'en',
   onProgress?: PreloadProgressCallback,
   signal?: AbortSignal
@@ -72,7 +73,7 @@ export async function preloadVoicePack(
   }
 
   const personaObj = getVoicePersonaById(personaId);
-  const voiceToUse = personaObj.id === 'system' ? 'puck' : personaObj.id;
+  const voiceToUse = personaObj.id === 'system' ? 'amy' : personaObj.id;
   const normalizedLang =
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
@@ -117,6 +118,20 @@ export async function preloadVoicePack(
       dispatchProgress({ loaded: 0, total: 0, percent: 100, currentPhrase: 'Ready' });
       markVoicePackLoaded(personaId, normalizedLang);
       return;
+    }
+
+    // Preload Piper on-device neural voice model first
+    try {
+      await preloadPiperVoice(voiceToUse, normalizedLang, (pInfo) => {
+        dispatchProgress({
+          loaded: Math.round((pInfo.percent / 100) * total),
+          total,
+          percent: pInfo.percent,
+          currentPhrase: pInfo.currentPhrase,
+        });
+      });
+    } catch (piperErr) {
+      console.warn('[AAC Preload] Piper voice model download notice:', piperErr);
     }
 
     // Concurrency worker pool (up to 6 parallel fetches for fast downloads)
@@ -201,8 +216,8 @@ export async function preloadVoicePack(
 /**
  * Cancels any active preload operation for this voice and language.
  */
-export function abortVoicePackPreload(personaId: string = 'puck', lang: string = 'en'): void {
-  const normVoice = (personaId === 'system' ? 'puck' : personaId).toLowerCase();
+export function abortVoicePackPreload(personaId: string = 'amy', lang: string = 'en'): void {
+  const normVoice = (personaId === 'system' ? 'amy' : personaId).toLowerCase();
   const normLang = (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' : (lang === 'zh' || lang.startsWith('zh')) ? 'zh' : lang.substring(0, 2);
   const key = `${normVoice}_${normLang}`;
   if (activePreloadAbortControllers.has(key)) {

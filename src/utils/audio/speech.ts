@@ -3,6 +3,7 @@ import { getAudioContext, enableSilentModePlayback } from './context';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 import { t, getLanguage } from '../../services/translator';
 import { isPremiumSubscription } from '../../services/subscriptionService';
+import { synthesizeWithPiper, resolvePiperVoiceId, isPiperVoiceReady } from '../../services/piperTtsService';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -708,27 +709,33 @@ export function stopSpeaking() {
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
   system: { pitch: 1.0, rate: 1.0 },
 
-  // Kids (Warm, natural, fluid, expressive AAC)
+  // Piper On-Device Neural Personas
+  amy: { pitch: 1.00, rate: 1.00 },
+  danny: { pitch: 1.02, rate: 1.02 },
+  bryce: { pitch: 1.00, rate: 0.98 },
+  ryan: { pitch: 1.00, rate: 1.00 },
+  kristin: { pitch: 1.02, rate: 1.00 },
+  lessac: { pitch: 1.00, rate: 0.98 },
+  joe: { pitch: 0.98, rate: 0.98 },
+  claude: { pitch: 1.00, rate: 1.00 },
+  davefx: { pitch: 1.00, rate: 1.00 },
+  upmc: { pitch: 1.00, rate: 1.00 },
+
+  // Legacy Persona mappings for backward compatibility
   puck: { pitch: 1.00, rate: 1.04 },
   leda: { pitch: 1.00, rate: 1.00 },
   sadachbia: { pitch: 1.00, rate: 1.00 },
   achernar: { pitch: 1.00, rate: 1.00 },
   alchiba: { pitch: 1.00, rate: 1.00 },
-
-  // Teens (Natural, casual, fluid)
   zephyr: { pitch: 1.00, rate: 1.00 },
   fenrir: { pitch: 1.00, rate: 1.00 },
   aoede: { pitch: 1.00, rate: 1.00 },
   callirrhoe: { pitch: 1.00, rate: 1.00 },
   autonoe: { pitch: 1.00, rate: 1.00 },
   sulafat: { pitch: 1.00, rate: 1.00 },
-
-  // Caring Women (Warm, natural, fluid)
   kore: { pitch: 1.00, rate: 1.00 },
   vindemiatrix: { pitch: 1.00, rate: 1.00 },
   polaris: { pitch: 1.00, rate: 1.00 },
-
-  // Professional Women (Crisp, articulate, fluid)
   erinome: { pitch: 1.00, rate: 1.00 },
   despina: { pitch: 1.00, rate: 1.00 },
   algieba: { pitch: 1.00, rate: 1.00 },
@@ -736,15 +743,11 @@ export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: nu
   kalyke: { pitch: 1.00, rate: 1.00 },
   vega: { pitch: 1.00, rate: 1.00 },
   schedar: { pitch: 1.00, rate: 1.00 },
-
-  // Caring Men (Warm, friendly, natural)
   achird: { pitch: 1.00, rate: 1.00 },
   umbriel: { pitch: 1.00, rate: 1.00 },
   zubenelgenubi: { pitch: 1.00, rate: 1.00 },
   rasalas: { pitch: 1.00, rate: 1.00 },
   capella: { pitch: 1.00, rate: 1.00 },
-
-  // Professional Men (Articulate, clear, natural)
   iapetus: { pitch: 1.00, rate: 1.00 },
   sadaltager: { pitch: 1.00, rate: 1.00 },
   tarazed: { pitch: 1.00, rate: 1.00 },
@@ -844,17 +847,22 @@ export async function speakText(
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
     } else if (options?.previewAudio) {
-      if (!isNonEnglish) {
-        // 2a. Pre-bundled instant offline audition preview asset (English only)
-        const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
+      // 2a. Pre-bundled instant offline audition preview asset (.mp3 or .wav)
+      const previewCandidates = [
+        `/assets/audio/previews/${selectedPersonaId}.mp3`,
+        `/assets/audio/previews/${selectedPersonaId}.wav`,
+      ];
+      for (const candidateUrl of previewCandidates) {
         try {
-          const bundledRes = await fetch(bundledPreviewUrl);
+          const bundledRes = await fetch(candidateUrl);
           const ct = bundledRes.headers.get('content-type') || '';
           if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
             const buf = await bundledRes.arrayBuffer();
             if (isAudioPayload(buf)) {
               const cleanedBuf = cleanRiffWav(buf);
-              const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+              const isMp3 = isAudioMp3(cleanedBuf);
+              const mime = isMp3 ? 'audio/mpeg' : 'audio/wav';
+              const blob = new Blob([cleanedBuf], { type: mime });
               const blobUrl = URL.createObjectURL(blob);
               audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
               const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
@@ -862,11 +870,27 @@ export async function speakText(
             }
           }
         } catch {
-          // Bundled preview failed or not present, fallback to network
+          // Bundled preview failed or not present, try next
         }
       }
 
-      // 2b. Dynamic network preview fetch (for non-English or missing bundled preview)
+      // 2b. Piper on-device dynamic preview synthesis
+      try {
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang);
+        if (speechId !== latestSpeechRequestId) return;
+        if (piperBuf && isAudioPayload(piperBuf)) {
+          const cleanedBuf = cleanRiffWav(piperBuf);
+          const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+          const blobUrl = URL.createObjectURL(blob);
+          audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (piperErr) {
+        console.warn(`[Audio] Piper preview synthesis (${selectedPersonaId}) failed:`, piperErr);
+      }
+
+      // 2c. Dynamic network preview fetch fallback
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
@@ -881,9 +905,27 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Neural preview stream (${selectedPersonaId}) failed:`, err);
       }
-      // Never fall through to default Samantha speech during an explicit audition of a neural voice!
       return;
     } else {
+      // 3a. Piper On-Device Neural Synthesis for Whole Sentences
+      // Synthesizes arbitrary, multi-clause constructed sentences on-device in WebAssembly
+      // as a single contiguous audio waveform with natural human cadence and prosody.
+      if (selectedPersonaId !== 'system') {
+        try {
+          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang);
+          if (speechId !== latestSpeechRequestId) return;
+          if (piperBuf && isAudioPayload(piperBuf)) {
+            const cleanedBuf = cleanRiffWav(piperBuf);
+            const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
+            if (played || speechId !== latestSpeechRequestId) return;
+          }
+        } catch (piperErr) {
+          console.warn('[Audio] Piper on-device speech synthesis notice:', piperErr);
+        }
+      }
       const isConstructedSentence = Boolean(
         options?.sentenceWords && options.sentenceWords.length > 1
       );

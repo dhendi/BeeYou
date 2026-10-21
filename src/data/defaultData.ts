@@ -73,7 +73,7 @@ export const INITIAL_APP_SETTINGS: AppSettings = {
   voiceRate: 1.0,
   voicePitch: 1.0,
   selectedVoiceURI: '',
-  voicePersona: 'puck',
+  voicePersona: 'amy',
   language: 'en',
   gridColumns: 4,
   largeButtonMode: false,

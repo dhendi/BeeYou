@@ -260,7 +260,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   const finalizeOnboarding = (withTrial = false) => {
     if (withTrial) {
       startFreeTrial(selectedCycle);
-      const suggestedVoice = selectedPersona === 'child' ? 'puck' : selectedPersona === 'teen' ? 'zephyr' : 'kore';
+      const suggestedVoice = selectedPersona === 'child' ? 'amy' : selectedPersona === 'teen' ? 'ryan' : 'lessac';
       updateSettings({ voicePersona: suggestedVoice });
     } else {
       setSubscriptionTier('basic');
@@ -958,7 +958,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             setShowAacLoadingScreen(false);
             finalizeOnboarding(pendingTrialChoice);
           }}
-          persona={pendingTrialChoice ? (settings?.voicePersona || 'puck') : 'system'}
+          persona={pendingTrialChoice ? (settings?.voicePersona || 'amy') : 'system'}
           language={settings?.language || 'en'}
         />
       )}

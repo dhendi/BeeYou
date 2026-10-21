@@ -2,9 +2,10 @@ export interface VoicePersona {
   id: string;
   name: string;
   label: string;
-  geminiVoice: string;
+  piperVoice?: string;
+  geminiVoice?: string;
   style: string;
-  category: 'kids' | 'teens' | 'caring_women' | 'pro_women' | 'caring_men' | 'pro_men' | 'system';
+  category: 'kids' | 'teens' | 'caring_women' | 'pro_women' | 'caring_men' | 'pro_men' | 'multilingual' | 'system';
   categoryLabel: string;
   gender: 'child' | 'female' | 'male' | 'system';
   emoji: string;
@@ -15,337 +16,230 @@ export interface VoicePersona {
 
 /**
  * Explicit TTS Generation Version for Cache Invalidation & Audio Consistency.
- * Bump this version whenever:
- * 1. Voice persona style prompts or metadata instructions change.
- * 2. Audio-generation model (e.g. Gemini 3.8 Flash-Lite TTS), sample rate, or WAV container formatting changes.
- * 
- * Bumping this automatically invalidates:
- * - Browser CacheStorage (automatically cleans up previous beeyou-tts-v* caches)
- * - Client in-memory audio cache & HTTP stream URLs (&v=...)
- * - Server L1 RAM cache, L3 disk cache (.data/tts_cache), and cloud storage cache
  */
-export const TTS_GENERATION_VERSION = 'v9';
+export const TTS_GENERATION_VERSION = 'v10';
 
 export const VOICE_PERSONAS: VoicePersona[] = [
-  // --- Group 0: Default Free System Voice (100% Free • On-Device • Zero Credits) ---
+  // --- Group 0: Default Free System Voice (On-Device Built-In) ---
   {
     id: 'system',
     name: 'Default Free Voice (System Native)',
     label: 'Default Free Voice (System Native)',
+    piperVoice: '',
     geminiVoice: '',
     style: 'standard',
     category: 'system',
     categoryLabel: 'Default Free Voice',
     gender: 'system',
     emoji: '',
-    tagline: 'Default • 100% Free • On-Device',
-    description: 'Uses your phone or computer’s built-in speech engine. Completely free with zero API credits used.',
+    tagline: 'Default • On-Device',
+    description: 'Uses your phone or computer built-in speech engine. Fast on-device fallback.',
     previewText: 'This is the default free voice built into your device.',
   },
 
-  // --- Group 1: Kids & Little Ones (Calm, Warm, Youthful AAC) ---
+  // --- Group 1: Kids & Youth (Warm, Friendly AAC) ---
   {
-    id: 'puck',
-    name: 'Puck',
-    label: 'Puck (Soft Child)',
-    geminiVoice: 'Puck',
-    style: 'natural young child voice, smooth and fluid human speech, warm, friendly and cheerful, natural conversational intonation, clear everyday assistive speech',
+    id: 'amy',
+    name: 'Amy',
+    label: 'Amy (Cozy & Warm Child)',
+    piperVoice: 'en_US-amy-medium',
+    geminiVoice: 'Amy',
+    style: 'warm friendly conversational female child voice, natural cadence, clear everyday AAC speech',
     category: 'kids',
     categoryLabel: 'Kids',
     gender: 'child',
     emoji: '',
-    tagline: 'Recommended • Fluid & Childlike',
-    description: 'Natural child voice with fluid, friendly speech, warm conversational tone, and clear AAC pronunciation.',
+    tagline: 'Recommended • Warm & Fluid',
+    description: 'Warm, friendly on-device voice with natural cadence across multi-word sentences.',
     previewText: 'Hello. I am ready to communicate with BeeYou.',
   },
   {
-    id: 'leda',
-    name: 'Leda',
-    label: 'Leda (Cozy Little Kid)',
-    geminiVoice: 'Leda',
-    style: 'sweet young child voice, smooth and fluid human speech, gentle, warm, cozy, natural melody, clear assistive speech',
+    id: 'danny',
+    name: 'Danny',
+    label: 'Danny (Playful Youth)',
+    piperVoice: 'en_US-danny-low',
+    geminiVoice: 'Danny',
+    style: 'energetic youthful boy tone, articulate, clear everyday speech',
     category: 'kids',
     categoryLabel: 'Kids',
     gender: 'child',
     emoji: '',
-    tagline: 'Preschooler • Cozy & Steady',
-    description: 'Sweet, cozy young child voice with natural cadence and warm, friendly tone.',
+    tagline: 'Youthful • Energetic & Crisp',
+    description: 'Energetic, youthful boy tone designed for quick, articulate AAC response.',
     previewText: 'Hi. I want to look at our pictures.',
   },
   {
-    id: 'sadachbia',
-    name: 'Sadachbia',
-    label: 'Sadachbia (Little Explorer)',
-    geminiVoice: 'Sadachbia',
-    style: 'enthusiastic child voice, natural and fluid human speech, bright, articulate, clear and expressive everyday cadence',
+    id: 'bryce',
+    name: 'Bryce',
+    label: 'Bryce (Gentle Boy)',
+    piperVoice: 'en_US-bryce-medium',
+    geminiVoice: 'Bryce',
+    style: 'gentle young male voice, calm, peaceful, reassuring cadence',
     category: 'kids',
     categoryLabel: 'Kids',
     gender: 'child',
     emoji: '',
-    tagline: 'Child • Articulate & Clear',
-    description: 'Bright, articulate young voice with natural, engaging human cadence.',
-    previewText: 'I finished my morning routine.',
-  },
-  {
-    id: 'achernar',
-    name: 'Achernar',
-    label: 'Achernar (Gentle Whisper Child)',
-    geminiVoice: 'Achernar',
-    style: 'soft and gentle child voice, natural human speech, soothing, peaceful, smooth and comforting cadence',
-    category: 'kids',
-    categoryLabel: 'Kids',
-    gender: 'child',
-    emoji: '',
-    tagline: 'Bedtime • Quiet & Low-Sensory',
-    description: 'Ultra-gentle, soothing child tone designed for comforting, low-sensory communication.',
+    tagline: 'Gentle • Calm & Soothing',
+    description: 'Calm, gentle young male tone for peaceful, low-sensory communication.',
     previewText: 'Time for a quiet break and a deep breath.',
   },
 
-  // --- Group 2: Teens & Youth (Relatable, Casual, Direct AAC) ---
+  // --- Group 2: Teens & Young Adults (Relatable, Natural) ---
   {
-    id: 'fenrir',
-    name: 'Fenrir',
-    label: 'Fenrir (Teen Boy)',
-    geminiVoice: 'Fenrir',
-    style: 'natural modern teen male voice, smooth and fluid conversational speech, authentic, relaxed, clear and direct',
+    id: 'ryan',
+    name: 'Ryan',
+    label: 'Ryan (Natural Teen)',
+    piperVoice: 'en_US-ryan-medium',
+    geminiVoice: 'Ryan',
+    style: 'clean modern teen male voice, natural human speech, friendly and direct',
     category: 'teens',
     categoryLabel: 'Teens',
     gender: 'male',
     emoji: '',
-    tagline: 'Casual Teen • Natural & Direct',
+    tagline: 'Natural Teen • Clear & Direct',
     description: 'Everyday modern teen voice with smooth, natural articulation and authentic tone.',
     previewText: 'Ready to check off our schedule for today.',
   },
   {
-    id: 'aoede',
-    name: 'Aoede',
-    label: 'Aoede (Teen Girl)',
-    geminiVoice: 'Aoede',
-    style: 'natural teen female voice, smooth and fluid human speech, warm, expressive, friendly and articulate',
+    id: 'kristin',
+    name: 'Kristin',
+    label: 'Kristin (Bright Teen)',
+    piperVoice: 'en_US-kristin-medium',
+    geminiVoice: 'Kristin',
+    style: 'bright youth female voice, encouraging, clear and articulate',
     category: 'teens',
     categoryLabel: 'Teens',
     gender: 'female',
     emoji: '',
-    tagline: 'Teen Girl • Clear & Steady',
-    description: 'Authentic teen female voice with smooth, expressive cadence and natural clarity.',
-    previewText: 'This visual board makes everything clear.',
-  },
-  {
-    id: 'callirrhoe',
-    name: 'Callirrhoe',
-    label: 'Callirrhoe (Chill Teen)',
-    geminiVoice: 'Callirrhoe',
-    style: 'casual teen female voice, natural human speech, mellow, smooth, friendly and relaxed conversational tone',
-    category: 'teens',
-    categoryLabel: 'Teens',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Mellow • Relaxed & Even',
-    description: 'Relaxed, smooth teenage cadence with a friendly, natural everyday tone.',
-    previewText: 'No rush. We can take our time on each step.',
-  },
-  {
-    id: 'autonoe',
-    name: 'Autonoe',
-    label: 'Autonoe (Upbeat Youth)',
-    geminiVoice: 'Autonoe',
-    style: 'bright youth female voice, natural and fluid human speech, encouraging, clear and articulate',
-    category: 'teens',
-    categoryLabel: 'Teens',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Youth • Crisp & Clear',
-    description: 'Encouraging, bright youth voice with fluid pacing and clear articulation.',
+    tagline: 'Youth • Expressive & Clear',
+    description: 'Encouraging, bright youth female voice with natural pacing and clarity.',
     previewText: 'Good job. You are doing well.',
   },
 
-  // --- Group 3: Caring & Nurturing Women (Calm, Gentle, Warm) ---
+  // --- Group 3: Clear Instructors & Narrators ---
   {
-    id: 'kore',
-    name: 'Kore',
-    label: 'Kore (Nurturing Caregiver)',
-    geminiVoice: 'Kore',
-    style: 'warm maternal female voice, natural and fluid human speech, soothing, loving, patient and expressive',
-    category: 'caring_women',
-    categoryLabel: 'Caring Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Maternal • Calm & Steady',
-    description: 'Soothing caregiver tone with natural, warm maternal warmth and clear expression.',
-    previewText: 'You are safe, and we have a good schedule planned.',
-  },
-  {
-    id: 'zephyr',
-    name: 'Zephyr',
-    label: 'Zephyr (Quiet Sensory Guide)',
-    geminiVoice: 'Zephyr',
-    style: 'peaceful, gentle female voice, natural human speech, smooth, serene, calming conversational delivery',
-    category: 'caring_women',
-    categoryLabel: 'Caring Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Sensory Calm • Soft & Peaceful',
-    description: 'Quiet, serene, peaceful voice for calming, sensory-friendly AAC communication.',
-    previewText: 'Let us take a quiet pause, breathe, and relax.',
-  },
-  {
-    id: 'sulafat',
-    name: 'Sulafat',
-    label: 'Sulafat (Warm Compassion)',
-    geminiVoice: 'Sulafat',
-    style: 'compassionate adult female voice, natural and fluid human speech, supportive, warm, empathetic and reassuring',
-    category: 'caring_women',
-    categoryLabel: 'Caring Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Compassionate • Gentle & Direct',
-    description: 'Supportive, empathetic female voice with natural, comforting human flow.',
-    previewText: 'I am right here whenever you need help.',
-  },
-  {
-    id: 'vindemiatrix',
-    name: 'Vindemiatrix',
-    label: 'Vindemiatrix (Peaceful Harmony)',
-    geminiVoice: 'Vindemiatrix',
-    style: 'gentle mindful female voice, natural human speech, smooth, patient, soothing and harmonious',
-    category: 'caring_women',
-    categoryLabel: 'Caring Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Mindful • Patient & Balanced',
-    description: 'Patient, soothing pacing with smooth, fluid flow for calming routines.',
-    previewText: 'Breathe in slowly, breathe out slowly.',
-  },
-
-  // --- Group 4: Professional & Clear Women (Teachers, Therapists & Coaches) ---
-  {
-    id: 'erinome',
-    name: 'Erinome',
-    label: 'Erinome (Clear Educator)',
-    geminiVoice: 'Erinome',
-    style: 'warm professional female educator, natural and fluid human speech, articulate, encouraging, clear instructional delivery',
+    id: 'lessac',
+    name: 'Lessac',
+    label: 'Lessac (Storybook Narrator)',
+    piperVoice: 'en_US-lessac-medium',
+    geminiVoice: 'Lessac',
+    style: 'expressive articulate narrator, crystal-clear pronunciation, rich cadence',
     category: 'pro_women',
-    categoryLabel: 'Professional Women',
+    categoryLabel: 'Narrators & Coaches',
     gender: 'female',
     emoji: '',
-    tagline: 'Instructor • Articulate & Direct',
-    description: 'Warm, articulate, encouraging instructional speech for learning and communication.',
-    previewText: 'First we finish reading, then it is snack time.',
-  },
-  {
-    id: 'despina',
-    name: 'Despina',
-    label: 'Despina (Speech Specialist)',
-    geminiVoice: 'Despina',
-    style: 'skilled female speech therapist, natural and fluid human speech, crystal-clear, articulate, friendly and engaging',
-    category: 'pro_women',
-    categoryLabel: 'Professional Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Therapist • Precise & Clear',
-    description: 'Engaging, friendly speech with crystal-clear phonetic pronunciation for AAC.',
+    tagline: 'Narrator • Articulate & Precise',
+    description: 'Expressive picture-book narrator voice with crystal-clear phonetic pronunciation.',
     previewText: 'Water. Please give me a cup of water.',
   },
   {
-    id: 'algieba',
-    name: 'Algieba',
-    label: 'Algieba (Mindful Anchor)',
-    geminiVoice: 'Algieba',
-    style: 'grounded adult female voice, natural and fluid human speech, calm, reassuring, warm and balanced',
-    category: 'pro_women',
-    categoryLabel: 'Professional Women',
-    gender: 'female',
-    emoji: '',
-    tagline: 'Guide • Grounded & Steady',
-    description: 'Balanced, reassuring vocal presence for structured daily communication.',
-    previewText: 'Next step: wash hands with warm water and soap.',
-  },
-
-  // --- Group 5: Caring & Warm Men (Paternal, Friendly & Reassuring) ---
-  {
-    id: 'achird',
-    name: 'Achird',
-    label: 'Achird (Friendly Big Brother / Dad)',
-    geminiVoice: 'Achird',
-    style: 'warm, friendly adult male voice, natural and fluid human speech, supportive, reassuring, brotherly and engaging',
+    id: 'joe',
+    name: 'Joe',
+    label: 'Joe (Warm Companion)',
+    piperVoice: 'en_US-joe-medium',
+    geminiVoice: 'Joe',
+    style: 'warm friendly adult male voice, supportive, brotherly and reassuring',
     category: 'caring_men',
     categoryLabel: 'Caring Men',
     gender: 'male',
     emoji: '',
-    tagline: 'Supportive • Steady & Direct',
-    description: 'Supportive, warm male voice with natural, friendly conversational articulation.',
+    tagline: 'Supportive • Steady & Reassuring',
+    description: 'Supportive, warm male voice with natural, friendly conversational cadence.',
     previewText: 'Let us get our shoes on and head outside.',
   },
-  {
-    id: 'umbriel',
-    name: 'Umbriel',
-    label: 'Umbriel (Gentle Fatherly)',
-    geminiVoice: 'Umbriel',
-    style: 'warm paternal male voice, natural and fluid human speech, gentle, patient, deep and reassuring',
-    category: 'caring_men',
-    categoryLabel: 'Caring Men',
-    gender: 'male',
-    emoji: '',
-    tagline: 'Fatherly • Reassuring & Patient',
-    description: 'Deep, warm, reassuring fatherly tone with gentle, natural pacing.',
-    previewText: 'Take your time. I am right here beside you.',
-  },
-  {
-    id: 'zubenelgenubi',
-    name: 'Zubenelgenubi',
-    label: 'Zubenelgenubi (Relaxed Companion)',
-    geminiVoice: 'Zubenelgenubi',
-    style: 'casual friendly male voice, natural and fluid human speech, relaxed, upbeat, companionable and direct',
-    category: 'caring_men',
-    categoryLabel: 'Caring Men',
-    gender: 'male',
-    emoji: '',
-    tagline: 'Buddy • Casual & Steady',
-    description: 'Casual, relaxed companion voice with smooth, natural cadence.',
-    previewText: 'Ready. Let us choose an activity together.',
-  },
 
-  // --- Group 6: Professional & Grounded Men (Mentors & Anchors) ---
+  // --- Group 4: Multilingual Native Voices ---
   {
-    id: 'iapetus',
-    name: 'Iapetus',
-    label: 'Iapetus (Clear Guide)',
-    geminiVoice: 'Iapetus',
-    style: 'grounded adult male mentor, natural and fluid human speech, articulate, encouraging, confident and clear',
-    category: 'pro_men',
-    categoryLabel: 'Professional Men',
+    id: 'claude',
+    name: 'Claude',
+    label: 'Claude (Español Neutro)',
+    piperVoice: 'es_MX-claude-high',
+    geminiVoice: 'Claude',
+    style: 'native Spanish speech, authentic cadence, Mexican / Latin American Spanish',
+    category: 'multilingual',
+    categoryLabel: 'Spanish',
     gender: 'male',
     emoji: '',
-    tagline: 'Speech Coach • Crisp & Grounded',
-    description: 'Confident, articulate male voice with smooth, natural clarity and warmth.',
-    previewText: 'First complete your checklist, then free play.',
+    tagline: 'Español • Voz Nativa',
+    description: 'Voz neural nativa en español neutro con dicción clara y cadencia natural.',
+    previewText: 'Hola. Estoy listo para comunicarme contigo.',
   },
   {
-    id: 'sadaltager',
-    name: 'Sadaltager',
-    label: 'Sadaltager (Wise Mentor)',
-    geminiVoice: 'Sadaltager',
-    style: 'wise, warm adult male mentor, natural and fluid human speech, deep, dignified, kind and engaging',
-    category: 'pro_men',
-    categoryLabel: 'Professional Men',
+    id: 'davefx',
+    name: 'Dave',
+    label: 'Dave (Español España)',
+    piperVoice: 'es_ES-davefx-medium',
+    geminiVoice: 'Davefx',
+    style: 'native European Spanish speech, clear pronunciation',
+    category: 'multilingual',
+    categoryLabel: 'Spanish',
     gender: 'male',
     emoji: '',
-    tagline: 'Mentor • Deep & Dignified',
-    description: 'Dignified, kind guidance with smooth, natural and engaging delivery.',
-    previewText: 'Every small step forward is progress.',
+    tagline: 'Castellano • Dicción Clara',
+    description: 'Voz nativa de España con pronunciación articulada.',
+    previewText: 'Buenos días. Vamos a revisar las tareas de hoy.',
+  },
+  {
+    id: 'upmc',
+    name: 'UPMC',
+    label: 'UPMC (Français)',
+    piperVoice: 'fr_FR-upmc-medium',
+    geminiVoice: 'UPMC',
+    style: 'native French speech, natural liaisons and intonation',
+    category: 'multilingual',
+    categoryLabel: 'French',
+    gender: 'female',
+    emoji: '',
+    tagline: 'Français • Voix Naturelle',
+    description: 'Voix naturelle en français avec liaisons authentiques.',
+    previewText: 'Bonjour. Je suis prêt à communiquer avec BeeYou.',
   },
 ];
 
-export const DEFAULT_VOICE_PERSONA_ID = 'system';
+export const DEFAULT_VOICE_PERSONA_ID = 'amy';
+
+/**
+ * Mapping of legacy Gemini persona IDs to modern Piper personas
+ * so existing saved settings seamlessly transition without breaking.
+ */
+const LEGACY_PERSONA_ALIASES: Record<string, string> = {
+  puck: 'amy',
+  leda: 'amy',
+  fenrir: 'ryan',
+  aoede: 'amy',
+  callirrhoe: 'kristin',
+  autonoe: 'amy',
+  kore: 'amy',
+  zephyr: 'amy',
+  sulafat: 'amy',
+  vindemiatrix: 'amy',
+  erinome: 'lessac',
+  despina: 'kristin',
+  algieba: 'lessac',
+  achird: 'ryan',
+  umbriel: 'joe',
+  zubenelgenubi: 'ryan',
+  iapetus: 'lessac',
+  sadaltager: 'lessac',
+  sadachbia: 'danny',
+  achernar: 'bryce',
+};
 
 export function getVoicePersonaById(id?: string | null): VoicePersona {
-  if (!id) return VOICE_PERSONAS[0];
+  if (!id) return VOICE_PERSONAS[1]; // Default to Amy
   const clean = id.trim().toLowerCase();
   if (clean === 'default' || clean === 'free' || clean === 'system') {
     return VOICE_PERSONAS[0];
   }
+
+  // Check alias map first
+  const mappedId = LEGACY_PERSONA_ALIASES[clean] || clean;
+
   const found = VOICE_PERSONAS.find(
-    (p) => p.id.toLowerCase() === clean || p.name.toLowerCase() === clean || p.geminiVoice.toLowerCase() === clean
+    (p) =>
+      p.id.toLowerCase() === mappedId ||
+      p.name.toLowerCase() === mappedId ||
+      (p.piperVoice && p.piperVoice.toLowerCase() === mappedId)
   );
-  return found || VOICE_PERSONAS[0];
+  return found || VOICE_PERSONAS[1];
 }

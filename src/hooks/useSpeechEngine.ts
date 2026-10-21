@@ -77,7 +77,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       } catch {}
     }
 
-    const personaToUse = options?.voicePersona || settings.voicePersona || 'puck';
+    const personaToUse = options?.voicePersona || settings.voicePersona || 'amy';
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,

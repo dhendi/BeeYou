@@ -35,7 +35,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   const [showAllCatalog, setShowAllCatalog] = useState(false);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
 
-  const FEATURED_VOICE_IDS = ['system', 'puck', 'fenrir', 'kore'];
+  const FEATURED_VOICE_IDS = ['system', 'amy', 'ryan', 'lessac', 'danny'];
 
   const activePersona = getVoicePersonaById(settings.voicePersona);
   const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
@@ -56,10 +56,6 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   };
 
   const handleSelectVoice = (persona: VoicePersona) => {
-    if (!isPremium && persona.id !== 'system') {
-      triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
-      return;
-    }
     updateSettings({ voicePersona: persona.id });
     if (settings.soundEffects) playChime('star');
     triggerHaptic('light', true);
@@ -174,51 +170,23 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         </button>
       </div>
 
-      {/* Voice Persona Trial & Emotional Identity Banner */}
-      {subscription?.status === 'trial' ? (
-        <div className="rounded-3xl bg-amber-50/90 border-2 border-amber-300 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="min-w-0">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
-              <Crown className="w-3 h-3 fill-amber-700 text-amber-700" />
-              <span>{t('15-Day Free Trial')} • {getTrialDaysRemaining()} {t('Days Remaining')}</span>
-            </span>
-            <h4 className="text-sm sm:text-base font-black text-slate-900 mt-1">
-              {t('Expressive Neural Voice Persona Active')}
-            </h4>
-            <p className="text-xs text-slate-700 font-medium max-w-xl leading-relaxed mt-0.5">
-              {t('Your child is speaking with an authentic, friendly voice. When your free trial ends, speech will automatically revert to the Default Free Voice unless you keep BeeYou Plus.')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => triggerUpgrade('Keep your child’s authentic voice persona active with BeeYou Plus!')}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs shrink-0 shadow-xs transition-all cursor-pointer"
-          >
-            {t('Keep Voice Active')}
-          </button>
+      {/* Free Local Neural Engine Banner */}
+      <div className="rounded-3xl bg-emerald-50/70 border-2 border-emerald-200/90 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-[10px] font-black uppercase tracking-wider">
+            {t('On-Device Neural Speech Engine')}
+          </span>
+          <h4 className="text-sm sm:text-base font-black text-slate-900 mt-1">
+            {t('Piper TTS On-Device Neural Voices')}
+          </h4>
+          <p className="text-xs text-slate-600 font-medium max-w-xl leading-relaxed mt-0.5">
+            {t('Runs 100% locally on your device with natural human cadence, seamless sentence prosody, 0ms latency, and zero cloud API fees.')}
+          </p>
         </div>
-      ) : !isPremium ? (
-        <div className="rounded-3xl bg-amber-50/70 border-2 border-amber-200/90 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="min-w-0">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider">
-              {t('Give Your Child An Authentic Voice')}
-            </span>
-            <h4 className="text-sm sm:text-base font-black text-slate-900 mt-1">
-              {t('Expressive Neural AI Voices')}
-            </h4>
-            <p className="text-xs text-slate-600 font-medium max-w-xl leading-relaxed mt-0.5">
-              {t('Children and teens connect deeper when their AAC sounds like a real peer. Try any of our 20+ lifelike voices free for 15 days.')}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => triggerUpgrade('Start your 15-day free trial to unlock all 20+ neural voices for your child!')}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs shrink-0 shadow-xs transition-all cursor-pointer"
-          >
-            {t('Start 15-Day Free Trial')}
-          </button>
-        </div>
-      ) : null}
+        <span className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-black text-xs shrink-0 shadow-xs">
+          {t('100% Free & Offline')}
+        </span>
+      </div>
 
       {/* Active Voice Spotlight Banner */}
       <div className="rounded-3xl bg-white border-2 border-amber-300/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -372,16 +340,16 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               {t('All Voices & Neural Personas')}
             </h3>
             <p className="text-xs text-stone-500 font-medium">
-              {t('Choose between the free standard on-device voice or 20 curated Gemini neural voices.')}
+              {t('Choose between the built-in system voice or Piper on-device neural voices for natural, fluid sentences.')}
             </p>
           </div>
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { key: 'featured', label: 'Curated (3 Voices + Free)' },
+              { key: 'featured', label: 'Curated (4 Voices + Free)' },
               { key: 'all', label: `All (${VOICE_PERSONAS.length})` },
-              { key: 'free', label: 'Free (On-Device)' },
+              { key: 'free', label: 'Free (Native)' },
               { key: 'kids', label: 'Kids' },
               { key: 'teens', label: 'Teens' },
               { key: 'caring', label: 'Caring' },
@@ -437,9 +405,14 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                             {t('Free Voice')}
                           </span>
                         )}
-                        {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
+                        {(persona.id === 'amy' || persona.tagline.includes('Recommended')) && (
                           <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0">
-                            {t('Fav')}
+                            {t('Recommended')}
+                          </span>
+                        )}
+                        {persona.piperVoice && (
+                          <span className="px-1.5 py-0.2 rounded-full bg-blue-50 border border-blue-200 text-[10px] font-bold text-blue-900 shrink-0">
+                            {t('On-Device')}
                           </span>
                         )}
                       </div>
@@ -451,11 +424,6 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     {isSelected && (
                       <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0 shadow-2xs">
                         {t('Active')}
-                      </span>
-                    )}
-                    {!isSelected && !isPremium && persona.id !== 'system' && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black shrink-0 shadow-2xs">
-                        {t('Plus')}
                       </span>
                     )}
                   </div>
@@ -481,12 +449,10 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     className={`py-1.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                       isSelected
                         ? 'bg-amber-500 text-white border border-amber-600'
-                        : !isPremium && persona.id !== 'system'
-                        ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300'
                         : 'bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-950 border border-stone-200'
                     }`}
                   >
-                    {isSelected ? t('Selected') : !isPremium && persona.id !== 'system' ? t('Unlock with Plus') : t('Use Voice')}
+                    {isSelected ? t('Selected') : t('Use Voice')}
                   </button>
                 </div>
               </div>
@@ -504,7 +470,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 }}
                 className="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/70 hover:bg-amber-100/70 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
               >
-                <span>{t('Show All 20 Voices (Kids, Teens, Caregivers & Professionals)')}</span>
+                <span>{t(`Show All ${VOICE_PERSONAS.length} Voices (Kids, Teens, Narrators & Multilingual)`)}</span>
               </button>
             </div>
           )}

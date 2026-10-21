@@ -673,7 +673,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 {/* Voice Persona Cards List */}
                 <div className="max-h-72 overflow-y-auto pr-1 space-y-2.5 rounded-2xl">
                   {VOICE_PERSONAS.filter((p) => {
-                    if (voiceCategoryFilter === 'featured') return ['system', 'puck', 'fenrir', 'kore'].includes(p.id);
+                    if (voiceCategoryFilter === 'featured') return ['system', 'amy', 'ryan', 'lessac', 'danny'].includes(p.id);
                     if (voiceCategoryFilter === 'all') return true;
                     if (voiceCategoryFilter === 'free') return p.category === 'system';
                     if (voiceCategoryFilter === 'kids') return p.category === 'kids';
@@ -682,16 +682,12 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     if (voiceCategoryFilter === 'pro') return p.category === 'pro_women' || p.category === 'pro_men';
                     return true;
                   }).map((persona) => {
-                    const effectiveVoicePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
+                    const effectiveVoicePersona = settings.voicePersona || 'amy';
                     const isSelected = effectiveVoicePersona.toLowerCase() === persona.id.toLowerCase();
                     return (
                       <div
                         key={persona.id}
                         onClick={() => {
-                          if (!isPremium && persona.id !== 'system') {
-                            triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
-                            return;
-                          }
                           updateSettings({ voicePersona: persona.id });
                           playChime('tap');
                         }}
@@ -709,7 +705,12 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               </h5>
                               {persona.category === 'system' && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-[9px] font-black">
-                                  {t("100% Free")}
+                                  {t("Native Free")}
+                                </span>
+                              )}
+                              {persona.piperVoice && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-blue-100 border border-blue-200 text-blue-950 text-[9px] font-black">
+                                  {t("On-Device")}
                                 </span>
                               )}
                               <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
@@ -719,11 +720,6 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                 <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black flex items-center gap-1">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                   <span>{t("Active")}</span>
-                                </span>
-                              )}
-                              {!isSelected && !isPremium && persona.id !== 'system' && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-amber-200 text-amber-950 text-[9px] font-black">
-                                  {t("Plus")}
                                 </span>
                               )}
                             </div>

@@ -462,7 +462,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'voice-studio',
           label: 'Voice Studio & Preferences',
-          badge: '21 Voices',
+          badge: `${VOICE_PERSONAS.length} Voices`,
         },
       ],
     },
