@@ -605,10 +605,11 @@ export function stripEmojis(text: string): string {
 }
 
 /**
- * Format phrases for natural human speech cadence and prosody without emojis.
+ * Format phrases for natural human speech cadence and conversational prosody without emojis.
+ * Removes internal periods, commas, or unnatural stops that create robotic word-by-word cadences.
  */
 export function formatForNaturalSpeech(text: string): string {
-  let cleaned = stripEmojis(text.trim());
+  let cleaned = stripEmojis(text.trim()).replace(/\s+/g, ' ');
   if (!cleaned) return '';
 
   // Clean dual slash labels like "My/Mine", "My / Mine", "I / Me", "Yes / Good", "No / Stop"
@@ -617,11 +618,30 @@ export function formatForNaturalSpeech(text: string): string {
     cleaned = cleaned.split('/')[0].trim();
   }
 
+  // Clean mid-phrase periods, semicolons, and unnatural internal stops that fragment speech into robotic word chunks.
+  // e.g., "I. want. a. drink." -> "I want a drink."
+  cleaned = cleaned.replace(/([a-zA-Z0-9\u00C0-\u024F])\s*[\.,;:]\s*(?=[a-zA-Z0-9\u00C0-\u024F])/g, (m, p1) => p1 + ' ');
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+  if (!cleaned) return '';
+
+  // Detect if original text intentionally ended with a question mark or exclamation mark
+  const isQuestion = /\?$/.test(text.trim());
+  const isExclamation = /!$/.test(text.trim());
+
+  // Remove any remaining trailing punctuation before adding the final sentence cadence mark
+  cleaned = cleaned.replace(/[\.,;:!\?\s]+$/, '');
+  if (!cleaned) return '';
+
   // Capitalize first letter
   cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 
-  // Add trailing punctuation if missing for natural downward intonation
-  if (!/[.!?]$/.test(cleaned)) {
+  // Add single final sentence punctuation for natural conversational pitch contour
+  if (isQuestion) {
+    cleaned += '?';
+  } else if (isExclamation) {
+    cleaned += '!';
+  } else {
     cleaned += '.';
   }
 
@@ -877,7 +897,9 @@ export async function speakText(
       );
 
       // 3a. Check pre-bundled offline core asset for instant 0ms speech
-      if (!isNonEnglish) {
+      // IMPORTANT: Strictly for single core words (or explicit two-word idioms).
+      // Multi-word constructed sentences ("I want a drink.") must NEVER match single word slugs!
+      if (!isNonEnglish && !isMultiWord) {
         const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
         const slugAliases: Record<string, string> = {
           helpme: 'help',
@@ -886,7 +908,7 @@ export async function speakText(
           alldone: 'alldone',
           ineedabreak: 'break',
         };
-        const wordSlug = slugAliases[rawSlug] || (!isMultiWord ? rawSlug : '');
+        const wordSlug = slugAliases[rawSlug] || rawSlug;
         if (wordSlug) {
           const bundledCoreUrl = `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`;
           try {
@@ -909,13 +931,15 @@ export async function speakText(
         }
       }
 
-      // 3b. For complete sentences and dynamic phrases, synthesize natural, smooth, fluid connected speech via server stream
+      // 3b. Unified Whole-Sentence Neural Synthesis via streaming backend:
+      // Google TTS synthesizes the entire clause as a single utterance with conversational prosody
+      // Generates in ~200-300ms on first press and immediately caches locally for 0ms subsequent replays.
       const isOnline = typeof navigator === 'undefined' || navigator.onLine;
       if (isOnline && !options?.preferOfflineOnly) {
         try {
           const audioItem = await Promise.race([
             getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
           ]);
           if (speechId !== latestSpeechRequestId) return;
           if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -928,19 +952,21 @@ export async function speakText(
         }
       }
 
-      // 3c. Offline Fallback for multi-word sentences (only when offline or network failed)
-      if (!isNonEnglish && isMultiWord) {
+      // 3c. STRICT EMERGENCY OFFLINE FALLBACK ONLY:
+      // Stitched word concatenation is strictly downgraded to zero-connection offline mode (!isOnline or preferOfflineOnly).
+      // When connected to the internet, we NEVER stitch words together; we use the conversational neural sentence.
+      // Furthermore, emergency stitched audio is NEVER cached in audioMemoryCache to avoid poisoning subsequent online replays.
+      if (!isOnline && !isNonEnglish && isMultiWord) {
         try {
           const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
           if (sentenceWav && isAudioPayload(sentenceWav)) {
             const blob = new Blob([sentenceWav], { type: 'audio/wav' });
             const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
             const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId, blobUrl);
             if (played || speechId !== latestSpeechRequestId) return;
           }
         } catch (synthErr) {
-          console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
+          console.warn('[Audio] Offline emergency sentence synthesis notice:', synthErr);
         }
       }
     }
