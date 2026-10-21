@@ -62,38 +62,25 @@ export async function getAudioFromCloudStorage(
   version: string = 'v4'
 ): Promise<Buffer | null> {
   // On local servers, .data/tts_cache is the authoritative persistent disk storage.
-  // Avoid 20-second Firebase Storage SDK retry hangs on cache misses.
   if (!process.env.VERCEL) {
     return null;
   }
 
   const objectPath = getDeterministicCloudKey(voiceKey, lang, hashKey, version);
 
-  // 1. Check direct HTTPS REST endpoint (Firebase Storage public CDN / GCS)
+  // Direct HTTPS REST endpoint (Firebase Storage public CDN / GCS)
+  // Strict 1000ms timeout so missing files never block dynamic neural synthesis
   try {
     const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${encodeURIComponent(objectPath)}?alt=media`;
     const res = await fetch(publicUrl, {
       method: 'GET',
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(1000),
     });
 
     if (res.ok) {
       const arrayBuf = await res.arrayBuffer();
       if (arrayBuf && arrayBuf.byteLength > 44) {
         console.log(`[TTS Cache HIT Cloud Storage] "${objectPath}" (${(arrayBuf.byteLength / 1024).toFixed(1)} KB) - 0 Gemini API calls ($0.00)`);
-        return Buffer.from(arrayBuf);
-      }
-    }
-  } catch {}
-
-  // 2. Firebase Storage SDK fallback
-  try {
-    const storage = getStorageClient();
-    if (storage) {
-      const fileRef = ref(storage, objectPath);
-      const arrayBuf = await getBytes(fileRef, 5 * 1024 * 1024); // max 5MB audio
-      if (arrayBuf && arrayBuf.byteLength > 44) {
-        console.log(`[TTS Cache HIT Cloud SDK] "${objectPath}" (${(arrayBuf.byteLength / 1024).toFixed(1)} KB) - 0 Gemini API calls ($0.00)`);
         return Buffer.from(arrayBuf);
       }
     }

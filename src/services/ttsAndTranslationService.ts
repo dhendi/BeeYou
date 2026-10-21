@@ -1197,26 +1197,37 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
       for (const chunk of textChunks) {
         const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normLang)}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
-        const fetchRes = await fetch(targetUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer': 'https://translate.google.com/',
-          },
-          signal: AbortSignal.timeout(3500),
-        });
+        try {
+          const buf = await new Promise<Buffer>((resolve, reject) => {
+            const req = https.get(targetUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://translate.google.com/',
+              },
+            }, (res) => {
+              if (res.statusCode !== 200) {
+                res.resume();
+                return reject(new Error(`Google TTS status ${res.statusCode}`));
+              }
+              const chunks: Buffer[] = [];
+              res.on('data', (c) => chunks.push(c));
+              res.on('end', () => resolve(Buffer.concat(chunks)));
+            });
+            req.on('error', reject);
+            req.setTimeout(4500, () => {
+              req.destroy(new Error('Google TTS request timeout'));
+            });
+          });
 
-        if (fetchRes.ok) {
-          const ab = await fetchRes.arrayBuffer();
-          const buf = Buffer.from(ab);
           if (buf.length > 50) {
             chunkBuffers.push(buf);
           } else {
             allChunksOk = false;
             break;
           }
-        } else {
+        } catch (fetchErr: any) {
           allChunksOk = false;
-          console.warn('[Google TTS Debug] Status code was not 200:', fetchRes.status);
+          console.warn('[Google TTS Debug] Upstream request error:', fetchErr?.message || fetchErr);
           break;
         }
       }

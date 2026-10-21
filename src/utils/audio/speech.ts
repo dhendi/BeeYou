@@ -152,7 +152,9 @@ export async function getOrFetchAudioItem(streamUrl: string, cacheKey: string): 
     // 3. Level 3: Edge Server Stream (backed by Server-Side Disk Cache in .data/tts_cache)
     try {
       const fullUrl = typeof window !== 'undefined' ? new URL(streamUrl, window.location.origin).href : streamUrl;
-      const response = await fetch(streamUrl);
+      const response = await fetch(streamUrl, {
+        signal: AbortSignal.timeout(2200),
+      });
       if (response.ok) {
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('audio') && !contentType.includes('octet-stream')) {
@@ -980,25 +982,13 @@ export async function speakText(
         } catch (streamErr) {
           console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
         }
-
-        // Direct Google TTS fallback if server route was unreachable or timed out while online
-        if (!streamSucceeded && isOnline) {
-          const normLang = (normalizedLang === 'fr_ca') ? 'fr' : (normalizedLang === 'zh' || normalizedLang.startsWith('zh')) ? 'zh-CN' : normalizedLang.substring(0, 2);
-          const directUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normLang)}&client=tw-ob&q=${encodeURIComponent(formattedText)}`;
-          try {
-            const directPlayed = await playAudioUrl(directUrl, formattedText, calibratedRate, speechId);
-            if (directPlayed || speechId !== latestSpeechRequestId) return;
-            streamSucceeded = directPlayed;
-          } catch (directErr) {
-            console.warn('[Audio] Direct Google TTS fallback notice:', directErr);
-          }
-        }
       }
 
-      // 3c. STRICT EMERGENCY OFFLINE FALLBACK ONLY:
-      // Restrict stitched word concatenation exclusively to zero-connection offline mode (!isOnline).
-      // When connected to the internet, we NEVER stitch words together; we always use the conversational neural sentence.
-      if (!isOnline && !isNonEnglish && isMultiWord) {
+      // 3c. EMERGENCY OFFLINE OR NETWORK TIMEOUT FALLBACK:
+      // When connected to the internet, unified whole-sentence neural synthesis is always preferred.
+      // If completely offline OR if the streaming server is temporarily unreachable on mobile data,
+      // fallback to stitched audio so the child can always vocalize without silence!
+      if ((!isOnline || !streamSucceeded) && !isNonEnglish && isMultiWord) {
         try {
           const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
           if (sentenceWav && isAudioPayload(sentenceWav)) {
