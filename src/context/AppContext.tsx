@@ -61,6 +61,8 @@ import {
 } from '../services/caregiverSync';
 import { wipeDeviceStorage, getSyncSecureCaregiverPin, getSecureCaregiverPin, saveSecureCaregiverPin } from '../services/authService';
 import { setLanguage, getLanguage, subscribeToLanguage } from '../services/translator';
+import { AacVoiceLoadingScreen } from '../components/common/AacVoiceLoadingScreen';
+import { isVoicePackLoaded } from '../services/aacPreloadService';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -237,6 +239,7 @@ export interface AppContextType {
   updateChildProfile: (profile: Partial<ChildProfile>) => void;
   settings: AppSettings;
   updateSettings: (settings: Partial<AppSettings>) => void;
+  triggerVoicePreload: (persona?: string, lang?: string) => Promise<void>;
   currentLanguage: AppLanguage;
 
   // Digital Routine Stickers & Rewards
@@ -783,6 +786,26 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
   }, [subscriptionState.isPremium, settings.voicePersona]);
 
+  const [voiceLoadingState, setVoiceLoadingState] = useState<{
+    isOpen: boolean;
+    persona: string;
+    language: string;
+  }>({
+    isOpen: false,
+    persona: 'puck',
+    language: 'en',
+  });
+
+  const triggerVoicePreload = useCallback(async (persona?: string, lang?: string) => {
+    const p = persona || settings.voicePersona || 'puck';
+    const l = lang || settings.language || 'en';
+    setVoiceLoadingState({
+      isOpen: true,
+      persona: p === 'system' ? 'puck' : p,
+      language: l,
+    });
+  }, [settings.voicePersona, settings.language]);
+
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     if (newSettings.pin) {
       saveSecureCaregiverPin(newSettings.pin).catch(() => {});
@@ -794,6 +817,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       console.warn('[Security] Basic tier account cannot select premium voice persona:', newSettings.voicePersona);
       newSettings.voicePersona = 'system';
       subscriptionState.triggerUpgrade('Expressive Neural AI Voices are a BeeYou Plus feature! Start your 15-day free trial to unlock all 20+ voices.');
+    }
+    if (newSettings.voicePersona || newSettings.language) {
+      const p = newSettings.voicePersona || settings.voicePersona || 'puck';
+      const l = newSettings.language || settings.language || 'en';
+      if (!isVoicePackLoaded(p, l)) {
+        triggerVoicePreload(p, l);
+      }
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
@@ -1208,6 +1238,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     updateChildProfile,
     settings,
     updateSettings,
+    triggerVoicePreload,
     currentLanguage,
 
     // Digital Routine Stickers & Rewards
@@ -1414,7 +1445,17 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     resetToDefaults,
   };
 
-  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={contextValue}>
+      {children}
+      <AacVoiceLoadingScreen
+        isOpen={voiceLoadingState.isOpen}
+        persona={voiceLoadingState.persona}
+        language={voiceLoadingState.language}
+        onComplete={() => setVoiceLoadingState((prev) => ({ ...prev, isOpen: false }))}
+      />
+    </AppContext.Provider>
+  );
 };
 
 export const useApp = () => {

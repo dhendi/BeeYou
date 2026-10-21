@@ -17,6 +17,7 @@ import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac'
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
 import { prewarmCoreAudioVocabulary, prewarmPhrases } from '../utils/audio/speech';
+import { isVoicePackLoaded } from '../services/aacPreloadService';
 export { getGrammaticalCategoryLabel };
 
 
@@ -185,6 +186,7 @@ export const AACView: React.FC = () => {
     upgradeAllAacToClinicalSymbols,
     isPremium,
     triggerUpgrade,
+    triggerVoicePreload,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AACCategory | 'all' | 'favorite_sentences'>('core');
@@ -256,7 +258,11 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    prewarmCoreAudioVocabulary(!isPremium ? 'system' : (settings?.voicePersona || 'system'), settings?.language || 'en');
+    const p = !isPremium ? 'system' : (settings?.voicePersona || 'system');
+    const l = settings?.language || 'en';
+    if (!isVoicePackLoaded(p, l)) {
+      triggerVoicePreload(p, l);
+    }
   }, [settings?.voicePersona, settings?.language, isPremium]);
 
   // Favorite Sentences Form state
@@ -531,7 +537,7 @@ export const AACView: React.FC = () => {
   useEffect(() => {
     if (filteredItems && filteredItems.length > 0) {
       prewarmPhrases(
-        filteredItems.slice(0, 20).map((i) => i.label),
+        filteredItems.map((i) => (i.speechText && t(i.speechText) !== i.speechText ? t(i.speechText) : t(i.label))),
         !isPremium ? 'system' : (settings?.voicePersona || 'system'),
         settings?.language || 'en'
       );

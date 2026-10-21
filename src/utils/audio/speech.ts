@@ -606,7 +606,7 @@ export function stripEmojis(text: string): string {
 /**
  * Format phrases for natural human speech cadence and prosody without emojis.
  */
-function formatForNaturalSpeech(text: string): string {
+export function formatForNaturalSpeech(text: string): string {
   let cleaned = stripEmojis(text.trim());
   if (!cleaned) return '';
 
@@ -875,9 +875,17 @@ export async function speakText(
         formattedText.trim().split(/\s+/).length > 1
       );
 
-      // 3a. For single core AAC words in English, check pre-bundled offline asset for instant 0ms speech
-      if (!isNonEnglish && !isMultiWord) {
-        const wordSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+      // 3a. Check pre-bundled offline core asset for instant 0ms speech
+      if (!isNonEnglish) {
+        const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const slugAliases: Record<string, string> = {
+          helpme: 'help',
+          pleasehelpme: 'help',
+          waitplease: 'wait',
+          alldone: 'alldone',
+          ineedabreak: 'break',
+        };
+        const wordSlug = slugAliases[rawSlug] || (!isMultiWord ? rawSlug : '');
         if (wordSlug) {
           const bundledCoreUrl = `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`;
           try {
@@ -1873,30 +1881,32 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
       return;
     }
 
-    // For non-English: only check existing local cache (RAM & CacheStorage) to warm L1 memory.
-    // Do NOT fire background network requests that exhaust upstream API rate limits.
-    // On-demand caching when user taps tiles or sentences handles speech with persistent L2/L3 disk caching.
+    // For non-English: fetch each core vocabulary item and cache to L1 RAM & L2 CacheStorage
     for (const phrase of CORE_AAC_VOCABULARY) {
       const translated = t(phrase);
       const formatted = formatForNaturalSpeech(translated);
       if (!formatted) continue;
       const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
       const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
-      await getLocalCacheOnly(streamUrl, cacheKey);
+      const local = await getLocalCacheOnly(streamUrl, cacheKey);
+      if (!local) {
+        try {
+          await getOrFetchAudioItem(streamUrl, cacheKey);
+        } catch {}
+      }
     }
   });
 }
 
 /**
  * Predictive Screen Pre-loader:
- * Gently pre-warms words visible on the active view in the background sequentially.
- * Throttled to avoid saturating mobile network connections.
+ * Pre-warms words visible on the active view in the background.
  */
 export function prewarmPhrases(phrases: string[], persona: string = 'system', lang: string = 'en'): void {
   if (typeof window === 'undefined' || !phrases || phrases.length === 0) return;
   const personaObj = getVoicePersonaById(persona);
   const selectedPersonaId = personaObj.id;
-  if (selectedPersonaId === 'system') return;
+  const voiceToUse = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
 
   const normalizedLang =
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
@@ -1905,16 +1915,14 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
 
   if (typeof navigator !== 'undefined' && !navigator.onLine) return;
 
-  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 600));
+  const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
-    // Top 8 phrases sequentially, checked against local cache first
-    const topPhrases = phrases.slice(0, 8);
-    for (const phrase of topPhrases) {
+    for (const phrase of phrases) {
       const formatted = formatForNaturalSpeech(phrase);
       if (!formatted) continue;
 
-      const cacheKey = getTtsCacheKey(selectedPersonaId, normalizedLang, formatted);
-      const streamUrl = getTtsStreamUrl(selectedPersonaId, normalizedLang, formatted);
+      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
 
       const existing = await getLocalCacheOnly(streamUrl, cacheKey);
       if (existing) continue;
@@ -1923,8 +1931,7 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
         await getOrFetchAudioItem(streamUrl, cacheKey);
       } catch {}
 
-      // 500ms breather between requests to preserve mobile connection pool
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 80));
     }
   });
 }

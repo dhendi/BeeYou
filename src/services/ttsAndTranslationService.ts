@@ -1149,9 +1149,9 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (isValidGeminiKey && voiceKey !== 'system') {
       const candidateModels = [
-        'gemini-3.1-flash-tts-preview',
-        'gemini-3.8-flash-lite-tts',
         'gemini-3.8-flash-tts',
+        'gemini-3.8-flash-lite-tts',
+        'gemini-3.1-flash-tts-preview',
         'gemini-2.5-flash-preview-tts',
       ];
 
@@ -1171,7 +1171,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
           if (is38Model) {
             contentObj.annotations = [{
               type: 'speech_metadata',
-              style: `natural, warm, fluid human speech, smooth connected pronunciation, expressive and friendly cadence, clear and articulate assistive communication, speaking naturally without pauses between words, ${persona.style}`,
+              style: `natural everyday conversational speech, smooth and fluid delivery, calm matter-of-fact conversational tone, neutral without exaggerated emotion, clear and connected pronunciation without pauses between words, normal speaking rhythm, ${persona.style}`,
             }];
           }
 

@@ -1,0 +1,177 @@
+import { getPrimarySpokenPhrasesForLanguage, getSpokenPhrasesForLanguage } from '../data/aacVocabularyCatalog';
+import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
+import {
+  getTtsStreamUrl,
+  getTtsCacheKey,
+  getLocalCacheOnly,
+  getOrFetchAudioItem,
+  formatForNaturalSpeech,
+} from '../utils/audio/speech';
+import { t } from './translator';
+
+export interface PreloadProgress {
+  loaded: number;
+  total: number;
+  percent: number;
+  currentPhrase: string;
+}
+
+export type PreloadProgressCallback = (progress: PreloadProgress) => void;
+
+const activePreloadAbortControllers = new Map<string, AbortController>();
+
+function getStorageKey(personaId: string, lang: string): string {
+  const normLang = (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' : (lang === 'zh' || lang.startsWith('zh')) ? 'zh' : lang.substring(0, 2);
+  const normVoice = (personaId === 'system' ? 'puck' : personaId).toLowerCase();
+  return `beeyou_vp_${normVoice}_${normLang}_${TTS_GENERATION_VERSION}`;
+}
+
+/**
+ * Checks whether speech tiles for this voice persona and language are pre-cached and ready for instant playback.
+ */
+export function isVoicePackLoaded(personaId: string = 'puck', lang: string = 'en'): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const key = getStorageKey(personaId, lang);
+    return localStorage.getItem(key) === 'ready';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Marks voice pack as ready in local storage.
+ */
+export function markVoicePackLoaded(personaId: string = 'puck', lang: string = 'en'): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const key = getStorageKey(personaId, lang);
+    localStorage.setItem(key, 'ready');
+  } catch {}
+}
+
+/**
+ * Preloads all primary AAC speech tiles into device RAM and persistent browser CacheStorage.
+ * Emits real-time progress callbacks for the loading screen.
+ */
+export async function preloadVoicePack(
+  personaId: string = 'puck',
+  lang: string = 'en',
+  onProgress?: PreloadProgressCallback,
+  signal?: AbortSignal
+): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  const personaObj = getVoicePersonaById(personaId);
+  const voiceToUse = personaObj.id === 'system' ? 'puck' : personaObj.id;
+  const normalizedLang =
+    (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
+    (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
+    lang.substring(0, 2);
+
+  const operationKey = `${voiceToUse}_${normalizedLang}`;
+
+  // Abort any previous in-flight preload for this exact voice/lang pair
+  if (activePreloadAbortControllers.has(operationKey)) {
+    activePreloadAbortControllers.get(operationKey)?.abort();
+  }
+  const controller = new AbortController();
+  activePreloadAbortControllers.set(operationKey, controller);
+
+  const effectiveSignal = signal || controller.signal;
+
+  // Primary board items (Core + Categories + Quick Phrases)
+  const primaryItems = getPrimarySpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
+  const total = primaryItems.length;
+  let loaded = 0;
+
+  if (total === 0) {
+    if (onProgress) {
+      onProgress({ loaded: 0, total: 0, percent: 100, currentPhrase: 'Ready' });
+    }
+    markVoicePackLoaded(personaId, normalizedLang);
+    return;
+  }
+
+  // Concurrency worker pool (up to 4 parallel fetches)
+  const CONCURRENCY = 4;
+  let index = 0;
+
+  const runItem = async (phraseText: string) => {
+    const formatted = formatForNaturalSpeech(phraseText);
+    if (!formatted) return;
+
+    const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+    const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
+
+    try {
+      const local = await getLocalCacheOnly(streamUrl, cacheKey);
+      if (!local && !effectiveSignal.aborted) {
+        await getOrFetchAudioItem(streamUrl, cacheKey);
+      }
+    } catch {
+      // Ignore single item fetch error
+    }
+  };
+
+  const primaryWorker = async () => {
+    while (index < primaryItems.length) {
+      if (effectiveSignal.aborted) return;
+      const currentIndex = index++;
+      const item = primaryItems[currentIndex];
+      if (!item) break;
+
+      await runItem(item.phrase);
+
+      loaded++;
+      if (onProgress && !effectiveSignal.aborted) {
+        const percent = Math.min(100, Math.round((loaded / total) * 100));
+        onProgress({
+          loaded,
+          total,
+          percent,
+          currentPhrase: item.phrase,
+        });
+      }
+    }
+  };
+
+  const primaryWorkers = Array.from({ length: Math.min(CONCURRENCY, primaryItems.length) }, () => primaryWorker());
+  await Promise.all(primaryWorkers);
+
+  if (!effectiveSignal.aborted) {
+    markVoicePackLoaded(personaId, normalizedLang);
+    if (onProgress) {
+      onProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
+    }
+
+    // Silently warm secondary scene tiles in background on idle priority
+    const allItems = getSpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
+    const secondaryItems = allItems.slice(primaryItems.length);
+    if (secondaryItems.length > 0) {
+      const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
+      idleFn(async () => {
+        for (const item of secondaryItems) {
+          if (effectiveSignal.aborted) break;
+          await runItem(item.phrase);
+          await new Promise((r) => setTimeout(r, 60));
+        }
+      });
+    }
+  }
+
+  activePreloadAbortControllers.delete(operationKey);
+}
+
+/**
+ * Cancels any active preload operation for this voice and language.
+ */
+export function abortVoicePackPreload(personaId: string = 'puck', lang: string = 'en'): void {
+  const normVoice = (personaId === 'system' ? 'puck' : personaId).toLowerCase();
+  const normLang = (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' : (lang === 'zh' || lang.startsWith('zh')) ? 'zh' : lang.substring(0, 2);
+  const key = `${normVoice}_${normLang}`;
+  if (activePreloadAbortControllers.has(key)) {
+    activePreloadAbortControllers.get(key)?.abort();
+    activePreloadAbortControllers.delete(key);
+  }
+}
