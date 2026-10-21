@@ -683,48 +683,48 @@ export function stopSpeaking() {
  * 3. Never blocks user-gesture activation behind failing network calls.
  */
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
-  system: { pitch: 1.0, rate: 0.96 },
+  system: { pitch: 1.0, rate: 1.0 },
 
-  // Kids (Warm, natural, clear AAC - unhurried and softly monotone)
-  puck: { pitch: 1.00, rate: 0.96 },
-  leda: { pitch: 1.00, rate: 0.96 },
-  sadachbia: { pitch: 1.00, rate: 0.96 },
-  achernar: { pitch: 1.00, rate: 0.96 },
-  alchiba: { pitch: 1.00, rate: 0.96 },
+  // Kids (Warm, natural, fluid, expressive AAC)
+  puck: { pitch: 1.00, rate: 1.04 },
+  leda: { pitch: 1.00, rate: 1.00 },
+  sadachbia: { pitch: 1.00, rate: 1.00 },
+  achernar: { pitch: 1.00, rate: 1.00 },
+  alchiba: { pitch: 1.00, rate: 1.00 },
 
-  // Teens (Natural, casual, fluent - unhurried and softly monotone)
-  zephyr: { pitch: 1.00, rate: 0.96 },
-  fenrir: { pitch: 1.00, rate: 0.96 },
-  aoede: { pitch: 1.00, rate: 0.96 },
-  callirrhoe: { pitch: 1.00, rate: 0.96 },
-  autonoe: { pitch: 1.00, rate: 0.96 },
-  sulafat: { pitch: 1.00, rate: 0.96 },
+  // Teens (Natural, casual, fluid)
+  zephyr: { pitch: 1.00, rate: 1.00 },
+  fenrir: { pitch: 1.00, rate: 1.00 },
+  aoede: { pitch: 1.00, rate: 1.00 },
+  callirrhoe: { pitch: 1.00, rate: 1.00 },
+  autonoe: { pitch: 1.00, rate: 1.00 },
+  sulafat: { pitch: 1.00, rate: 1.00 },
 
-  // Caring Women (Warm, natural, fluent - unhurried and softly monotone)
-  kore: { pitch: 1.00, rate: 0.96 },
-  vindemiatrix: { pitch: 1.00, rate: 0.96 },
-  polaris: { pitch: 1.00, rate: 0.96 },
+  // Caring Women (Warm, natural, fluid)
+  kore: { pitch: 1.00, rate: 1.00 },
+  vindemiatrix: { pitch: 1.00, rate: 1.00 },
+  polaris: { pitch: 1.00, rate: 1.00 },
 
-  // Professional Women (Crisp, articulate, structured - unhurried and softly monotone)
-  erinome: { pitch: 1.00, rate: 0.96 },
-  despina: { pitch: 1.00, rate: 0.96 },
-  algieba: { pitch: 1.00, rate: 0.96 },
-  charon: { pitch: 1.00, rate: 0.96 },
-  kalyke: { pitch: 1.00, rate: 0.96 },
-  vega: { pitch: 1.00, rate: 0.96 },
-  schedar: { pitch: 1.00, rate: 0.96 },
+  // Professional Women (Crisp, articulate, fluid)
+  erinome: { pitch: 1.00, rate: 1.00 },
+  despina: { pitch: 1.00, rate: 1.00 },
+  algieba: { pitch: 1.00, rate: 1.00 },
+  charon: { pitch: 1.00, rate: 1.00 },
+  kalyke: { pitch: 1.00, rate: 1.00 },
+  vega: { pitch: 1.00, rate: 1.00 },
+  schedar: { pitch: 1.00, rate: 1.00 },
 
-  // Caring Men (Steady, natural, warm - unhurried and softly monotone)
-  achird: { pitch: 1.00, rate: 0.96 },
-  umbriel: { pitch: 1.00, rate: 0.96 },
-  zubenelgenubi: { pitch: 1.00, rate: 0.96 },
-  rasalas: { pitch: 1.00, rate: 0.96 },
-  capella: { pitch: 1.00, rate: 0.96 },
+  // Caring Men (Warm, friendly, natural)
+  achird: { pitch: 1.00, rate: 1.00 },
+  umbriel: { pitch: 1.00, rate: 1.00 },
+  zubenelgenubi: { pitch: 1.00, rate: 1.00 },
+  rasalas: { pitch: 1.00, rate: 1.00 },
+  capella: { pitch: 1.00, rate: 1.00 },
 
-  // Professional Men (Articulate, steady, direct - unhurried and softly monotone)
-  iapetus: { pitch: 1.00, rate: 0.96 },
-  sadaltager: { pitch: 1.00, rate: 0.96 },
-  tarazed: { pitch: 1.00, rate: 0.96 },
+  // Professional Men (Articulate, clear, natural)
+  iapetus: { pitch: 1.00, rate: 1.00 },
+  sadaltager: { pitch: 1.00, rate: 1.00 },
+  tarazed: { pitch: 1.00, rate: 1.00 },
 };
 
 let latestSpeechRequestId = 0;
@@ -870,9 +870,13 @@ export async function speakText(
       // Never fall through to default Samantha speech during an explicit audition of a neural voice!
       return;
     } else {
-      // For English, check pre-bundled offline recordings
-      if (!isNonEnglish) {
-        // 3a. Check pre-bundled core AAC vocabulary asset for 0ms instant offline speech
+      const isMultiWord = Boolean(
+        (options?.sentenceWords && options.sentenceWords.length > 1) ||
+        formattedText.trim().split(/\s+/).length > 1
+      );
+
+      // 3a. For single core AAC words in English, check pre-bundled offline asset for instant 0ms speech
+      if (!isNonEnglish && !isMultiWord) {
         const wordSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
         if (wordSlug) {
           const bundledCoreUrl = `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`;
@@ -894,44 +898,41 @@ export async function speakText(
             // Bundled core word not present
           }
         }
+      }
 
-        // 3b. Offline Multi-Word Sentence Synthesizer:
-        // If speaking an English multi-word phrase or sentence, stitch pre-bundled words in the child's selected neural voice!
-        const isMultiWord = Boolean(
-          (options?.sentenceWords && options.sentenceWords.length > 1) ||
-          formattedText.trim().split(/\s+/).length > 1
-        );
-
-        if (isMultiWord) {
-          try {
-            const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
-            if (sentenceWav && isAudioPayload(sentenceWav)) {
-              const blob = new Blob([sentenceWav], { type: 'audio/wav' });
-              const blobUrl = URL.createObjectURL(blob);
-              audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
-              const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId, blobUrl);
-              if (played || speechId !== latestSpeechRequestId) return;
-            }
-          } catch (synthErr) {
-            console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
+      // 3b. For complete sentences and dynamic phrases, synthesize natural, smooth, fluid connected speech via server stream
+      const isOnline = typeof navigator === 'undefined' || navigator.onLine;
+      if (isOnline && !options?.preferOfflineOnly) {
+        try {
+          const audioItem = await Promise.race([
+            getOrFetchAudioItem(streamUrl, cacheKey),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
+          ]);
+          if (speechId !== latestSpeechRequestId) return;
+          if (audioItem && isAudioPayload(audioItem.buffer)) {
+            const cleanedBuf = cleanRiffWav(audioItem.buffer);
+            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
+            if (played || speechId !== latestSpeechRequestId) return;
           }
+        } catch (streamErr) {
+          console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
         }
       }
 
-      // 3c. Dynamic server fetch with a healthy 15000ms timeout
-      try {
-        const audioItem = await Promise.race([
-          getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
-        ]);
-        if (speechId !== latestSpeechRequestId) return;
-        if (audioItem && isAudioPayload(audioItem.buffer)) {
-          const cleanedBuf = cleanRiffWav(audioItem.buffer);
-          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
-          if (played || speechId !== latestSpeechRequestId) return;
+      // 3c. Offline Fallback for multi-word sentences (only when offline or network failed)
+      if (!isNonEnglish && isMultiWord) {
+        try {
+          const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
+          if (sentenceWav && isAudioPayload(sentenceWav)) {
+            const blob = new Blob([sentenceWav], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: sentenceWav });
+            const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId, blobUrl);
+            if (played || speechId !== latestSpeechRequestId) return;
+          }
+        } catch (synthErr) {
+          console.warn('[Audio] Offline sentence synthesis notice:', synthErr);
         }
-      } catch (streamErr) {
-        console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
       }
     }
   }

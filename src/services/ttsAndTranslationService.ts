@@ -1171,7 +1171,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
           if (is38Model) {
             contentObj.annotations = [{
               type: 'speech_metadata',
-              style: `natural human speech, calm and steady pace, speaking slightly slower and clearly, softly monotone with minimal pitch variance, clear and articulate assistive communication, ${persona.style}`,
+              style: `natural, warm, fluid human speech, smooth connected pronunciation, expressive and friendly cadence, clear and articulate assistive communication, speaking naturally without pauses between words, ${persona.style}`,
             }];
           }
 
