@@ -33,6 +33,7 @@ import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
 import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../data/voicePersonasData';
+import { t } from '../services/translator';
 
 export const AccessibilityPreferencesModal: React.FC = () => {
   const {
@@ -143,10 +144,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             </span>
             <div>
               <h2 id="accessibility-modal-title" className="font-black text-[#2D241E] text-base sm:text-lg leading-tight">
-                Accessibility & Sensory Preferences
+                {t("Accessibility & Sensory Preferences")}
               </h2>
               <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                Customize colors, sounds, voice narration, and visible tools
+                {t("Customize colors, sounds, voice narration, and visible tools")}
               </p>
             </div>
           </div>
@@ -155,7 +156,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             type="button"
             onClick={handleClose}
             className="p-2.5 rounded-2xl bg-[#EFE9DF] hover:bg-[#E5DFD4] text-[#4A2F0F] transition-all cursor-pointer border border-[#E0D8CB] active:scale-95"
-            aria-label="Close modal"
+            aria-label={t("Close modal")}
           >
             <X className="w-5 h-5 stroke-[2.5]" />
           </button>
@@ -177,7 +178,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               }`}
             >
               <Eye className="w-4 h-4 text-[#E28743]" />
-              <span>Colors & Visuals</span>
+              <span>{t("Colors & Visuals")}</span>
             </button>
 
             <button
@@ -193,7 +194,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               }`}
             >
               <Volume2 className="w-4 h-4 text-[#5B8E7D]" />
-              <span>Sound & Voice</span>
+              <span>{t("Sound & Voice")}</span>
             </button>
 
             <button
@@ -209,7 +210,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               }`}
             >
               <Sliders className="w-4 h-4 text-[#9B72AA]" />
-              <span>Feature Toggles</span>
+              <span>{t("Feature Toggles")}</span>
             </button>
           </div>
         </div>
@@ -222,10 +223,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-3">
                 <div>
                   <h3 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Color-Coded Cards & Tiles
+                    {t("Color-Coded Cards & Tiles")}
                   </h3>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Choose whether buttons and categories have distinctive soft color tints or a neutral oat milk monochrome look.
+                    {t("Choose whether buttons and categories have distinctive soft color tints or a neutral oat milk monochrome look.")}
                   </p>
                 </div>
 
@@ -249,9 +250,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                       <Palette className="w-5 h-5" />
                     </span>
                     <div>
-                      <span className="font-black text-xs sm:text-sm block">Color-Coded</span>
+                      <span className="font-black text-xs sm:text-sm block">{t("Color-Coded")}</span>
                       <span className="text-[11px] text-[#7A6C60] font-semibold block leading-tight mt-0.5">
-                        Fitzgerald key colors (yellow for subjects, green for verbs, blue for feelings).
+                        {t("Fitzgerald key colors (yellow for subjects, green for verbs, blue for feelings).")}
                       </span>
                     </div>
                   </button>
@@ -275,9 +276,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                       <Square className="w-5 h-5" />
                     </span>
                     <div>
-                      <span className="font-black text-xs sm:text-sm block">Neutral / Low-Stimulation</span>
+                      <span className="font-black text-xs sm:text-sm block">{t("Neutral / Low-Stimulation")}</span>
                       <span className="text-[11px] text-[#7A6C60] font-semibold block leading-tight mt-0.5">
-                        Clean, uniform silicone oat milk tiles without bright color fills.
+                        {t("Clean, uniform silicone oat milk tiles without bright color fills.")}
                       </span>
                     </div>
                   </button>
@@ -288,10 +289,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    High-Contrast Tactile Outlines
+                    {t("High-Contrast Tactile Outlines")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Darker, bolder outlines around buttons and cards for low-vision clarity.
+                    {t("Darker, bolder outlines around buttons and cards for low-vision clarity.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -309,10 +310,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Reduce Motion & Floating Animations
+                    {t("Reduce Motion & Floating Animations")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Disables scale pulses, particle effects, and moving transitions for a steady visual space.
+                    {t("Disables scale pulses, particle effects, and moving transitions for a steady visual space.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -330,10 +331,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Color-Coded Action Cards
+                    {t("Color-Coded Action Cards")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Show category pastel colors across Tools, Me, and Communicate action cards instead of the default theme yellow.
+                    {t("Show category pastel colors across Tools, Me, and Communicate action cards instead of the default theme yellow.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -352,10 +353,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-1.5">
                     <Type className="w-4 h-4 text-[#E28743]" />
-                    <span>Text Size & Dynamic Scaling</span>
+                    <span>{t("Text Size & Dynamic Scaling")}</span>
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Adjust text scaling for comfortable reading and visual clarity across all cards and schedules.
+                    {t("Adjust text scaling for comfortable reading and visual clarity across all cards and schedules.")}
                   </p>
                 </div>
 
@@ -383,7 +384,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             : 'border-[#E0D8CB] bg-[#FAF7F2] hover:bg-white text-[#6B5E52]'
                         }`}
                       >
-                        <span className="font-black text-xs sm:text-sm block">{sizeOpt.label}</span>
+                        <span className="font-black text-xs sm:text-sm block">{t(sizeOpt.label)}</span>
                         <span className="text-[10px] text-[#7A6C60] font-bold block mt-0.5">{sizeOpt.scale}</span>
                       </button>
                     );
@@ -395,10 +396,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Dyslexia-Friendly Letterforms
+                    {t("Dyslexia-Friendly Letterforms")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    High-legibility typeface with weighted bottoms and distinct character shapes to prevent letter flipping.
+                    {t("High-legibility typeface with weighted bottoms and distinct character shapes to prevent letter flipping.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -417,10 +418,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-1.5">
                     <SlidersHorizontal className="w-4 h-4 text-[#E28743]" />
-                    <span>AAC Button Size & Grid Density</span>
+                    <span>{t("AAC Button Size & Grid Density")}</span>
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Enlarge button targets for motor-friendly tapping or make them compact to fit more tiles.
+                    {t("Enlarge button targets for motor-friendly tapping or make them compact to fit more tiles.")}
                   </p>
                 </div>
 
@@ -468,9 +469,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                           )}
                         </div>
                         <div className="mt-2">
-                          <span className="font-black text-xs block">{preset.label}</span>
+                          <span className="font-black text-xs block">{t(preset.label)}</span>
                           <span className="text-[10px] text-[#7A6C60] font-semibold block leading-tight mt-0.5">
-                            {preset.desc}
+                            {t(preset.desc)}
                           </span>
                         </div>
                       </button>
@@ -483,10 +484,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Weather Temperature Unit
+                    {t("Weather Temperature Unit")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Display weather and sensory comfort tips in Fahrenheit (°F) or Celsius (°C).
+                    {t("Display weather and sensory comfort tips in Fahrenheit (°F) or Celsius (°C).")}
                   </p>
                 </div>
                 <div className="flex items-center bg-[#EFE8DC] rounded-xl p-1 gap-1 text-xs font-black shrink-0">
@@ -531,10 +532,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Sound Effects & Chimes
+                    {t("Sound Effects & Chimes")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Play gentle tactile chime feedback on tap, star awards, and routine step completion.
+                    {t("Play gentle tactile chime feedback on tap, star awards, and routine step completion.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -552,10 +553,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Gentle Tactile Haptics (Vibration)
+                    {t("Gentle Tactile Haptics (Vibration)")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Soft sensory vibration feedback when tapping AAC cards, completing routine steps, and sliding sound volumes.
+                    {t("Soft sensory vibration feedback when tapping AAC cards, completing routine steps, and sliding sound volumes.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -580,10 +581,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Spoken Announcements ("Say What's Happening")
+                    {t('Spoken Announcements ("Say What\'s Happening")')}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Speak aloud routine steps and timer updates. Turn off for a silent, quiet visual space.
+                    {t("Speak aloud routine steps and timer updates. Turn off for a silent, quiet visual space.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -601,10 +602,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                    Auto-Speak Tapped AAC Words
+                    {t("Auto-Speak Tapped AAC Words")}
                   </h4>
                   <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                    Instantly speak each vocabulary word aloud when tapped on the AAC sensory board.
+                    {t("Instantly speak each vocabulary word aloud when tapped on the AAC sensory board.")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -623,17 +624,17 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                      Voice Studio ({VOICE_PERSONAS.length} Personas)
+                      {t("Voice Studio")} ({VOICE_PERSONAS.length} {t("Personas")})
                     </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                      Choose from 20 natural AI voices across kids, teens, caring caregivers, and professionals.
+                      {t("Choose from 20 natural AI voices across kids, teens, caring caregivers, and professionals.")}
                     </p>
                   </div>
 
                   {/* Active Voice Pill */}
                   <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
-                    <span>Active:</span>
-                    <span className="truncate max-w-[130px]">{getVoicePersonaById(isPremium ? (settings.voicePersona || 'system') : 'system').name}</span>
+                    <span>{t("Active:")}</span>
+                    <span className="truncate max-w-[130px]">{t(getVoicePersonaById(isPremium ? (settings.voicePersona || 'system') : 'system').name)}</span>
                   </div>
                 </div>
 
@@ -663,7 +664,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             : 'bg-[#EFE9DF] border-[#E0D8CB] text-[#6B5E52] hover:bg-[#E5DFD4]'
                         }`}
                       >
-                        {filter.label}
+                        {t(filter.label)}
                       </button>
                     );
                   })}
@@ -704,30 +705,30 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
-                                {persona.label}
+                                {t(persona.label)}
                               </h5>
                               {persona.category === 'system' && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-[9px] font-black">
-                                  100% Free
+                                  {t("100% Free")}
                                 </span>
                               )}
                               <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
-                                {persona.categoryLabel}
+                                {t(persona.categoryLabel)}
                               </span>
                               {isSelected && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-[#5B8E7D] text-white text-[9px] font-black flex items-center gap-1">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                  <span>Active</span>
+                                  <span>{t("Active")}</span>
                                 </span>
                               )}
                               {!isSelected && !isPremium && persona.id !== 'system' && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-amber-200 text-amber-950 text-[9px] font-black">
-                                  Plus
+                                  {t("Plus")}
                                 </span>
                               )}
                             </div>
                             <p className="text-[11px] text-[#7A6C60] font-semibold truncate mt-0.5">
-                              {persona.tagline}
+                              {t(persona.tagline)}
                             </p>
                           </div>
 
@@ -739,9 +740,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                 speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
                               }}
                               className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
-                              title={`Audition ${persona.name}`}
+                              title={`${t("Audition")} ${t(persona.name)}`}
                             >
-                              <span>Audition</span>
+                              <span>{t("Audition")}</span>
                             </button>
                             <div
                               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
@@ -757,7 +758,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         {persona.id === 'system' && isSelected && offlineVoices && offlineVoices.length > 0 && (
                           <div className="pt-2.5 border-t border-[#E0D8CB]/80 space-y-1.5 w-full">
                             <div className="text-[11px] font-black text-[#7A6C60]">
-                              Installed Device Voices ({offlineVoices.length}):
+                              {t("Installed Device Voices")} ({offlineVoices.length}):
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
                               {offlineVoices.map((v) => {
@@ -794,7 +795,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                         }}
                                         className="px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#4A2F0F] text-[10px] font-bold"
                                       >
-                                        Test
+                                        {t("Test")}
                                       </button>
                                       {isVoiceActive && <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />}
                                     </div>
@@ -815,10 +816,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                      Speech Rate ({settings.voiceRate.toFixed(2)}x)
+                      {t("Speech Rate")} ({settings.voiceRate.toFixed(2)}x)
                     </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                      Adjust speech speed to be slower and clearer or faster (1.0x standard).
+                      {t("Adjust speech speed to be slower and clearer or faster (1.0x standard).")}
                     </p>
                   </div>
                   <button
@@ -829,7 +830,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     }}
                     className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
                   >
-                    <span>Test Voice</span>
+                    <span>{t("Test Voice")}</span>
                   </button>
                 </div>
                 <input
@@ -850,11 +851,10 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="pb-1">
                 <h3 className="font-black text-[#2D241E] text-base sm:text-lg">
-                  Choose what BeeYou helps you with
+                  {t("Choose what BeeYou helps you with")}
                 </h3>
                 <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                  Switch off any tools you don't need. They will disappear from your home dashboard, shortcuts, and menus.
-                  You can toggle them back on anytime.
+                  {t("Switch off any tools you don't need. They will disappear from your home dashboard, shortcuts, and menus. You can toggle them back on anytime.")}
                 </p>
               </div>
 
@@ -884,9 +884,9 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     <div>
                       <h4 id={`fg-${group.id}`} className="font-black text-[#2D241E] text-sm sm:text-base flex items-center gap-2">
                         <GroupIcon className="w-4 h-4 text-amber-700" />
-                        <span>{group.title}</span>
+                        <span>{t(group.title)}</span>
                       </h4>
-                      <p className="text-[11px] text-[#7A6C60] font-semibold">{group.blurb}</p>
+                      <p className="text-[11px] text-[#7A6C60] font-semibold">{t(group.blurb)}</p>
                     </div>
 
                     <div className="space-y-2">
@@ -904,16 +904,16 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               </span>
                               <div className="min-w-0">
                                 <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
-                                  {f.title}
+                                  {t(f.title)}
                                 </h5>
                                 <p className="text-[11px] text-[#7A6C60] font-semibold truncate">
-                                  {f.desc}
+                                  {t(f.desc)}
                                 </p>
                               </div>
                             </div>
 
                             <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                              <span className="sr-only">{f.title}</span>
+                              <span className="sr-only">{t(f.title)}</span>
                               <input
                                 type="checkbox"
                                 checked={isEnabled}
@@ -954,7 +954,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
             onClick={handleClose}
             className="px-6 py-2.5 rounded-2xl bg-[#2D241E] hover:bg-[#1E1814] text-white font-black text-xs sm:text-sm cursor-pointer active:scale-95 transition-all shadow-md"
           >
-            Done
+            {t("Done")}
           </button>
         </div>
       </div>
