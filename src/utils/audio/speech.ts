@@ -439,7 +439,19 @@ export function getAvailableVoices(): SpeechSynthesisVoice[] {
  * authentic voice characteristics on iOS, Android, and Desktop on-device speech.
  */
 export const PERSONA_SYSTEM_VOICE_PREFERENCES: Record<string, { preferred: string[]; avoid?: string[] }> = {
-  // Male personas: prioritize male voices (Daniel on iOS, David/Guy on Windows, Alex on Mac)
+  // Piper Neural Personas
+  amy: { preferred: ['samantha', 'ava', 'zoe', 'jenny', 'allison'], avoid: ['daniel', 'david', 'male'] },
+  danny: { preferred: ['junior', 'oliver', 'kid', 'child', 'daniel', 'evan'], avoid: ['female', 'samantha', 'karen'] },
+  bryce: { preferred: ['oliver', 'evan', 'ryan', 'daniel', 'guy'], avoid: ['female', 'samantha', 'karen'] },
+  ryan: { preferred: ['ryan', 'guy', 'daniel', 'david', 'alex'], avoid: ['female', 'samantha', 'karen'] },
+  kristin: { preferred: ['karen', 'ava', 'samantha', 'jenny', 'aria'], avoid: ['daniel', 'david', 'male'] },
+  lessac: { preferred: ['serena', 'victoria', 'moira', 'allison', 'aria'], avoid: ['daniel', 'david', 'male'] },
+  joe: { preferred: ['david', 'daniel', 'alex', 'mark', 'bruce'], avoid: ['female', 'samantha'] },
+  claude: { preferred: ['george', 'bruce', 'daniel', 'alex', 'david'], avoid: ['female', 'samantha'] },
+  davefx: { preferred: ['bruce', 'david', 'daniel', 'alex', 'guy'], avoid: ['female', 'samantha'] },
+  upmc: { preferred: ['moira', 'victoria', 'allison', 'karen', 'serena'], avoid: ['daniel', 'david', 'male'] },
+
+  // Legacy persona mappings for backward compatibility
   fenrir: { preferred: ['daniel', 'david', 'guy', 'ryan', 'oliver', 'george', 'mark', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
   zephyr: { preferred: ['daniel', 'oliver', 'ryan', 'david', 'guy', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
   achird: { preferred: ['daniel', 'george', 'david', 'mark', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },
@@ -447,27 +459,15 @@ export const PERSONA_SYSTEM_VOICE_PREFERENCES: Record<string, { preferred: strin
   algenib: { preferred: ['daniel', 'guy', 'david', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
   rasalas: { preferred: ['daniel', 'ryan', 'david', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
   achernar: { preferred: ['daniel', 'oliver', 'ryan', 'alex'], avoid: ['samantha', 'karen', 'moira', 'female'] },
-
-  // Leda: Australian / bright female (Karen on iOS, Jenny/Ava on Windows/Web)
   leda: { preferred: ['karen', 'ava', 'zoe', 'jenny', 'allison'], avoid: ['daniel', 'david', 'male'] },
-
-  // Puck: Youthful/Child tone (Samantha, Ava, Zoe)
-  puck: { preferred: ['samantha', 'ava', 'zoe'], avoid: ['daniel', 'david', 'male'] },
-
-  // Expressive female: Moira (Irish on iOS), Victoria, Serena
+  puck: { preferred: ['samantha', 'ava', 'zoe', 'jenny'], avoid: ['daniel', 'david', 'male'] },
   aoede: { preferred: ['moira', 'victoria', 'serena', 'fiona'], avoid: ['daniel', 'david', 'samantha', 'male'] },
   callirrhoe: { preferred: ['moira', 'serena', 'victoria'], avoid: ['daniel', 'david', 'samantha', 'male'] },
-
-  // Clear female: Tessa (South African on iOS), Fiona, Hazel
   autonoe: { preferred: ['tessa', 'fiona', 'hazel'], avoid: ['daniel', 'david', 'samantha', 'male'] },
   sulafat: { preferred: ['tessa', 'karen', 'fiona'], avoid: ['daniel', 'david', 'samantha', 'male'] },
-
-  // Calm maternal female: Samantha, Allison, Susan
   kore: { preferred: ['samantha', 'allison', 'susan', 'aria'], avoid: ['daniel', 'david', 'male'] },
   vindemiatrix: { preferred: ['samantha', 'susan', 'allison'], avoid: ['daniel', 'david', 'male'] },
   polaris: { preferred: ['samantha', 'allison', 'aria'], avoid: ['daniel', 'david', 'male'] },
-
-  // Articulate professional female: Karen, Zira, Jenny
   erinome: { preferred: ['karen', 'zira', 'jenny', 'aria'], avoid: ['daniel', 'david', 'male'] },
   despina: { preferred: ['karen', 'zira', 'jenny', 'aria'], avoid: ['daniel', 'david', 'male'] },
   sadachbia: { preferred: ['karen', 'ava', 'zoe'], avoid: ['daniel', 'david', 'male'] },
@@ -801,7 +801,7 @@ export async function speakText(
     ctx.resume().catch(() => {});
   }
 
-  const rawPersona = options?.voicePersona || 'puck';
+  const rawPersona = options?.voicePersona || 'amy';
   const personaObj = getVoicePersonaById(rawPersona);
   let selectedPersonaId = personaObj.id;
 
@@ -828,7 +828,7 @@ export async function speakText(
   const shouldAttemptServerTts = !options?.preferOfflineOnly;
 
   if (shouldAttemptServerTts) {
-    const voiceToStream = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
+    const voiceToStream = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
     const cacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
     const streamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
 
@@ -973,7 +973,9 @@ export async function speakText(
           const candidateUrls = [
             `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
             `/assets/audio/core/${voiceToStream}_${wordSlug}.mp3`,
-            ...(voiceToStream !== 'puck' ? [
+            ...(voiceToStream !== 'amy' ? [
+              `/assets/audio/core/amy_${wordSlug}.wav`,
+              `/assets/audio/core/amy_${wordSlug}.mp3`,
               `/assets/audio/core/puck_${wordSlug}.wav`,
               `/assets/audio/core/puck_${wordSlug}.mp3`,
             ] : []),
@@ -1745,14 +1747,14 @@ function speakWithBrowserSpeechSynthesis(
         const targetPrefix = 
           currentAppLang === 'fr_ca' ? 'fr_ca' :
           targetLang.substring(0, 2);
-        const bestVoice = getBestSystemVoice(targetPrefix, options?.voicePersona || 'Kore');
+        const bestVoice = getBestSystemVoice(targetPrefix, options?.voicePersona || 'amy');
         if (bestVoice) {
           utterance.voice = bestVoice;
           utterance.lang = bestVoice.lang; // Synchronize utterance.lang with voice to fix iOS WebKit voice override
         } else if (voices.length > 0) {
           // If the device does not have a foreign language pack installed,
           // fall back to the highest rated available voice so speech is never completely silenced
-          const fallbackVoice = getBestSystemVoice('en', options?.voicePersona || 'Kore') || voices[0];
+          const fallbackVoice = getBestSystemVoice('en', options?.voicePersona || 'amy') || voices[0];
           if (fallbackVoice) {
             utterance.voice = fallbackVoice;
           }
@@ -1961,7 +1963,7 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   // For non-English languages, cloud multilingual TTS is used, so we pre-warm it!
   if (selectedPersonaId === 'system' && normalizedLang === 'en') return;
 
-  const voiceToUse = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
+  const voiceToUse = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
   const throttleKey = `${voiceToUse}_${normalizedLang}`;
   const now = Date.now();
   if (prewarmThrottleMap.has(throttleKey) && now - prewarmThrottleMap.get(throttleKey)! < 60000) {
@@ -2026,7 +2028,7 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
   if (typeof window === 'undefined' || !phrases || phrases.length === 0) return;
   const personaObj = getVoicePersonaById(persona);
   const selectedPersonaId = personaObj.id;
-  const voiceToUse = selectedPersonaId === 'system' ? 'puck' : selectedPersonaId;
+  const voiceToUse = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
 
   const normalizedLang =
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :

@@ -90,7 +90,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
       localStorage.setItem('beeyou_aac_enabled', String(next));
     } catch {}
     if (next) {
-      prewarmCoreAudioVocabulary(settings.voicePersona || 'puck', settings.language || 'en');
+      prewarmCoreAudioVocabulary(settings.voicePersona || 'amy', settings.language || 'en');
       onShowNotification('AAC communication enabled! Speech voices pre-warmed for instant playback.');
     } else {
       onShowNotification('AAC communication turned off. Interface simplified for child device.');

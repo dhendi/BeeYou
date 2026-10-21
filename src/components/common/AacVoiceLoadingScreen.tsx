@@ -15,7 +15,7 @@ interface AacVoiceLoadingScreenProps {
 export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
   isOpen,
   onComplete,
-  persona = 'puck',
+  persona = 'amy',
   language = 'en',
 }) => {
   const [progress, setProgress] = useState<PreloadProgress>({

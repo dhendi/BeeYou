@@ -921,7 +921,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                       localStorage.setItem('beeyou_aac_enabled', String(isChecked));
                                     } catch {}
                                     if (isChecked) {
-                                      prewarmCoreAudioVocabulary(settings?.voicePersona || 'puck', settings?.language || 'en');
+                                      prewarmCoreAudioVocabulary(settings?.voicePersona || 'amy', settings?.language || 'en');
                                     }
                                   } else {
                                     updateEnabledFeatures({ [f.key]: isChecked });

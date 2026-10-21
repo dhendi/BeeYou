@@ -1,3 +1,4 @@
+import './utils/autoCacheBust';
 import './utils/migrateLegacyStorage';
 import { ensurePersistentStorage } from './utils/offlineStorage';
 import { preloadAllStickersOnIdle } from './utils/stickerPreloader';
@@ -20,9 +21,12 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     }
   });
 
+  let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // Service worker claims clients in background without interrupting active user session
-    // Intentionally no window.location.reload() to eliminate jarring white flash & 2nd reload
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
   });
 }
 
