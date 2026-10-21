@@ -43,13 +43,13 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   const handleAudition = async (persona: VoicePersona) => {
     setPlayingVoiceId(persona.id);
     try {
-      await speak(persona.previewText, {
+      await speak(t(persona.previewText), {
         voicePersona: persona.id,
         previewAudio: true,
         force: true,
       });
     } catch {
-      onShowNotification('Audio preview unavailable.');
+      onShowNotification(t('Audio preview unavailable.'));
     } finally {
       setPlayingVoiceId(null);
     }
@@ -180,7 +180,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           <div className="min-w-0">
             <span className="px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
               <Crown className="w-3 h-3 fill-amber-700 text-amber-700" />
-              <span>15-Day Free Trial • {getTrialDaysRemaining()} Days Remaining</span>
+              <span>{t('15-Day Free Trial')} • {getTrialDaysRemaining()} {t('Days Remaining')}</span>
             </span>
             <h4 className="text-sm sm:text-base font-black text-slate-900 mt-1">
               {t('Expressive Neural Voice Persona Active')}
@@ -228,14 +228,14 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               {t('Current Active Speech Voice')}
             </span>
             <span className="text-xs font-bold text-stone-500 capitalize">
-              • {activePersona.style}
+              • {t(activePersona.style)}
             </span>
           </div>
           <h3 className="text-base sm:text-lg font-black text-slate-900 truncate">
-            {activePersona.name}
+            {t(activePersona.name)}
           </h3>
           <p className="text-xs text-stone-600 font-medium truncate max-w-md">
-            {activePersona.description}
+            {t(activePersona.description)}
           </p>
         </div>
 
@@ -261,11 +261,11 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
-                100% Free • Zero API Credits • Offline
+                {t('100% Free • Zero API Credits • Offline')}
               </span>
               {(isPremium ? (settings.voicePersona || 'system') : 'system') === 'system' && (
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
-                  Active Default Voice
+                  {t('Active Default Voice')}
                 </span>
               )}
             </div>
@@ -430,38 +430,38 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <h4 className="font-black text-sm text-slate-900 truncate">
-                          {persona.name}
+                          {t(persona.name)}
                         </h4>
                         {persona.category === 'system' && (
                           <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 border border-emerald-300 text-[10px] font-black text-emerald-950 shrink-0">
-                            Free Voice
+                            {t('Free Voice')}
                           </span>
                         )}
                         {(persona.id === 'puck' || persona.tagline.includes('Recommended')) && (
                           <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 shrink-0">
-                            Fav
+                            {t('Fav')}
                           </span>
                         )}
                       </div>
                       <span className="text-[11px] font-bold text-stone-500 block truncate mt-0.5">
-                        {persona.style}
+                        {t(persona.style)}
                       </span>
                     </div>
 
                     {isSelected && (
                       <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shrink-0 shadow-2xs">
-                        Active
+                        {t('Active')}
                       </span>
                     )}
                     {!isSelected && !isPremium && persona.id !== 'system' && (
                       <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black shrink-0 shadow-2xs">
-                        Plus
+                        {t('Plus')}
                       </span>
                     )}
                   </div>
 
                   <p className="text-xs text-stone-600 font-medium leading-relaxed mb-3">
-                    {persona.description}
+                    {t(persona.description)}
                   </p>
                 </div>
 
@@ -504,7 +504,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 }}
                 className="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/70 hover:bg-amber-100/70 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
               >
-                <span>Show All 20 Voices (Kids, Teens, Caregivers & Professionals)</span>
+                <span>{t('Show All 20 Voices (Kids, Teens, Caregivers & Professionals)')}</span>
               </button>
             </div>
           )}

@@ -348,7 +348,7 @@ export const CaregiverLivePortal: React.FC<CaregiverLivePortalProps> = ({
                 className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95 shadow-2xs"
                 title="Enable push notifications and audible alert banners on this device"
               >
-                <span className="hidden sm:inline">Enable Device Alerts</span>
+                <span className="hidden sm:inline">{t('Enable Device Alerts')}</span>
                 <span className="sm:hidden">Alerts</span>
               </button>
             ) : (

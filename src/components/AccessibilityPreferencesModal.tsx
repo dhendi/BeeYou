@@ -737,7 +737,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
+                                speak(t(persona.previewText), { voicePersona: persona.id, previewAudio: true, force: true });
                               }}
                               className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
                               title={`${t("Audition")} ${t(persona.name)}`}
@@ -786,7 +786,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                         type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          speak('Hello! This is an on-device voice.', {
+                                          speak(t('Hello! This is an on-device voice.'), {
                                             voiceURI: v.voiceURI,
                                             voicePersona: 'system',
                                             previewAudio: true,
@@ -826,7 +826,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     type="button"
                     onClick={() => {
                       const activePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
-                      speak('Hello! This is your BeeYou communication voice.', { voicePersona: activePersona, previewAudio: true, force: true });
+                      speak(t('Hello! This is your BeeYou communication voice.'), { voicePersona: activePersona, previewAudio: true, force: true });
                     }}
                     className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
                   >
