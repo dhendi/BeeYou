@@ -55,7 +55,7 @@ export function getApiBaseUrl(): string {
       Boolean((window as any).androidBridge));
 
   if (isCapacitorNative || isNativeProtocol) {
-    return 'http://10.0.0.170:3000';
+    return '';
   }
 
   return '';
@@ -529,9 +529,13 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
       if (femaleKeywords.some((k) => n.includes(k))) score += 500;
       if (maleKeywords.some((k) => n.includes(k))) score -= 500;
     } else if (isChild) {
-      if (childKeywords.some((k) => n.includes(k))) score += 500;
-      else if (femaleKeywords.some((k) => n.includes(k))) score += 200;
-      if (maleKeywords.some((k) => n.includes(k))) score -= 300;
+      if (childKeywords.some((k) => n.includes(k))) score += 600;
+      if (pref && pref.avoid?.includes('female')) {
+        if (maleKeywords.some((k) => n.includes(k))) score += 300;
+        if (femaleKeywords.some((k) => n.includes(k))) score -= 500;
+      } else {
+        if (femaleKeywords.some((k) => n.includes(k))) score += 200;
+      }
     }
     return score;
   };
@@ -719,17 +723,17 @@ export function stopSpeaking() {
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
   system: { pitch: 1.0, rate: 1.0 },
 
-  // Piper On-Device Neural Personas
-  amy: { pitch: 1.00, rate: 1.00 },
-  danny: { pitch: 1.02, rate: 1.02 },
-  bryce: { pitch: 1.00, rate: 0.98 },
-  ryan: { pitch: 1.00, rate: 1.00 },
-  kristin: { pitch: 1.02, rate: 1.00 },
-  lessac: { pitch: 1.00, rate: 0.98 },
-  joe: { pitch: 0.98, rate: 0.98 },
-  claude: { pitch: 1.00, rate: 1.00 },
-  davefx: { pitch: 1.00, rate: 1.00 },
-  upmc: { pitch: 1.00, rate: 1.00 },
+  // Piper On-Device Neural Personas - Distinct Characteristic Acoustic Profiles
+  amy: { pitch: 1.06, rate: 0.98 },      // Warm & caring maternal narrator
+  danny: { pitch: 1.28, rate: 1.06 },    // Energetic & cheerful 8yo boy child
+  bryce: { pitch: 1.18, rate: 0.94 },    // Gentle, soft, patient boy child
+  ryan: { pitch: 1.02, rate: 1.02 },     // Clear & relatable teenage boy
+  kristin: { pitch: 1.22, rate: 1.02 },  // Bright, cheerful young girl
+  lessac: { pitch: 0.96, rate: 0.95 },   // Articulate, measured narrator
+  joe: { pitch: 0.82, rate: 0.92 },      // Deep, grounded, calm adult male
+  claude: { pitch: 0.92, rate: 0.98 },   // Warm, friendly conversational male
+  davefx: { pitch: 0.85, rate: 0.94 },   // Relaxed, deep baritone male
+  upmc: { pitch: 1.12, rate: 0.94 },     // Gentle, soothing caregiver
 
   // Legacy Persona mappings for backward compatibility
   puck: { pitch: 1.00, rate: 1.04 },
@@ -964,11 +968,10 @@ export async function speakText(
         formattedText.trim().split(/\s+/).length > 1
       );
 
-      // 3a. Check pre-bundled offline core asset for single-tile taps
-      // Immediately plays pre-recorded authentic full phrases (e.g., AAC Sensory Board tiles)
-      // or single core words without network delay.
-      // Constructed multi-word sentences bypass this so they always receive dynamic natural prosody.
-      if (!isNonEnglish && !isConstructedSentence) {
+      // 3a. Check pre-bundled offline core asset for single-tile taps and fluent whole sentences
+      // Immediately plays pre-recorded authentic full phrases (e.g. "I want water", "I want food", "I need help")
+      // or single core words without network delay and with 100% natural, fluid conversational prosody.
+      if (!isNonEnglish) {
         const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
         const slugAliases: Record<string, string> = {
           helpme: 'help',
@@ -979,15 +982,28 @@ export async function speakText(
           itistooloud: 'itistooloud',
           toobright: 'toobright',
           itistoobright: 'itistoobright',
-          iwantfood: 'iwantfood',
+          iwantwater: 'iwantwater',
           iwantadrink: 'iwantadrink',
+          iwantdrink: 'iwantdrink',
+          iwantfood: 'iwantfood',
+          iwantpizza: 'iwantpizza',
+          iwantapple: 'iwantapple',
+          iwantanapple: 'iwantapple',
           iwanttoplay: 'iwanttoplay',
           gosomewhere: 'gosomewhere',
           howifeel: 'howifeel',
           ineedabreak: 'ineedabreak',
           iwantthis: 'iwantthis',
           ineedhelp: 'ineedhelp',
+          ineedbathroom: 'ineedbathroom',
+          ineedthebathroom: 'ineedbathroom',
+          iwantmore: 'iwantmore',
+          ilikeit: 'ilikeit',
+          idontlikeit: 'idontlikeit',
+          yesplease: 'yesplease',
+          nothankyou: 'nothankyou',
           pleasestop: 'pleasestop',
+          thankyou: 'thankyou',
           headphones: 'ineedmyheadphones',
           ineedmyheadphones: 'ineedmyheadphones',
           weightedblanket: 'iwantmyweightedblanket',
@@ -1058,23 +1074,9 @@ export async function speakText(
         }
       }
 
-      // 3c. EMERGENCY OFFLINE OR NETWORK TIMEOUT FALLBACK:
-      // When connected to the internet, unified whole-sentence neural synthesis is always preferred.
-      // If completely offline OR if the streaming server is temporarily unreachable on mobile data,
-      // fallback to stitched audio so the child can always vocalize without silence!
-      if ((!isOnline || !streamSucceeded) && !isNonEnglish && isMultiWord) {
-        try {
-          const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
-          if (sentenceWav && isAudioPayload(sentenceWav)) {
-            const blob = new Blob([sentenceWav], { type: 'audio/wav' });
-            const blobUrl = URL.createObjectURL(blob);
-            const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId, blobUrl);
-            if (played || speechId !== latestSpeechRequestId) return;
-          }
-        } catch (synthErr) {
-          console.warn('[Audio] Emergency sentence synthesis notice:', synthErr);
-        }
-      }
+      // 3c. If streaming backend is unreachable or offline, flow directly to on-device
+      // speech synthesis below so the full sentence is vocalized as one contiguous, fluid utterance
+      // with natural cadence and persona pitch differentiation (never choppy stitched words).
     }
   }
 
