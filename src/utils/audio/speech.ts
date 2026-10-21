@@ -448,7 +448,7 @@ export const PERSONA_SYSTEM_VOICE_PREFERENCES: Record<string, { preferred: strin
   leda: { preferred: ['karen', 'ava', 'zoe', 'jenny', 'allison'], avoid: ['daniel', 'david', 'male'] },
 
   // Puck: Youthful/Child tone (Samantha, Ava, Zoe)
-  puck: { preferred: ['samantha', 'ava', 'zoe', 'junior'], avoid: ['daniel', 'david', 'male'] },
+  puck: { preferred: ['samantha', 'ava', 'zoe'], avoid: ['daniel', 'david', 'male'] },
 
   // Expressive female: Moira (Irish on iOS), Victoria, Serena
   aoede: { preferred: ['moira', 'victoria', 'serena', 'fiona'], avoid: ['daniel', 'david', 'samantha', 'male'] },
@@ -683,48 +683,48 @@ export function stopSpeaking() {
  * 3. Never blocks user-gesture activation behind failing network calls.
  */
 export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: number }> = {
-  system: { pitch: 1.0, rate: 1.05 },
+  system: { pitch: 1.0, rate: 0.96 },
 
-  // Kids (Warm, natural, clear AAC)
-  puck: { pitch: 1.00, rate: 1.05 },
-  leda: { pitch: 1.00, rate: 1.05 },
-  sadachbia: { pitch: 1.00, rate: 1.05 },
-  achernar: { pitch: 1.00, rate: 1.05 },
-  alchiba: { pitch: 1.00, rate: 1.05 },
+  // Kids (Warm, natural, clear AAC - unhurried and softly monotone)
+  puck: { pitch: 1.00, rate: 0.96 },
+  leda: { pitch: 1.00, rate: 0.96 },
+  sadachbia: { pitch: 1.00, rate: 0.96 },
+  achernar: { pitch: 1.00, rate: 0.96 },
+  alchiba: { pitch: 1.00, rate: 0.96 },
 
-  // Teens (Natural, casual, fluent)
-  zephyr: { pitch: 1.00, rate: 1.05 },
-  fenrir: { pitch: 1.00, rate: 1.05 },
-  aoede: { pitch: 1.00, rate: 1.05 },
-  callirrhoe: { pitch: 1.00, rate: 1.05 },
-  autonoe: { pitch: 1.00, rate: 1.05 },
-  sulafat: { pitch: 1.00, rate: 1.05 },
+  // Teens (Natural, casual, fluent - unhurried and softly monotone)
+  zephyr: { pitch: 1.00, rate: 0.96 },
+  fenrir: { pitch: 1.00, rate: 0.96 },
+  aoede: { pitch: 1.00, rate: 0.96 },
+  callirrhoe: { pitch: 1.00, rate: 0.96 },
+  autonoe: { pitch: 1.00, rate: 0.96 },
+  sulafat: { pitch: 1.00, rate: 0.96 },
 
-  // Caring Women (Warm, natural, fluent)
-  kore: { pitch: 1.00, rate: 1.05 },
-  vindemiatrix: { pitch: 1.00, rate: 1.05 },
-  polaris: { pitch: 1.00, rate: 1.05 },
+  // Caring Women (Warm, natural, fluent - unhurried and softly monotone)
+  kore: { pitch: 1.00, rate: 0.96 },
+  vindemiatrix: { pitch: 1.00, rate: 0.96 },
+  polaris: { pitch: 1.00, rate: 0.96 },
 
-  // Professional Women (Crisp, articulate, structured)
-  erinome: { pitch: 1.00, rate: 1.05 },
-  despina: { pitch: 1.00, rate: 1.05 },
-  algieba: { pitch: 1.00, rate: 1.05 },
-  charon: { pitch: 1.00, rate: 1.05 },
-  kalyke: { pitch: 1.00, rate: 1.05 },
-  vega: { pitch: 1.00, rate: 1.05 },
-  schedar: { pitch: 1.00, rate: 1.05 },
+  // Professional Women (Crisp, articulate, structured - unhurried and softly monotone)
+  erinome: { pitch: 1.00, rate: 0.96 },
+  despina: { pitch: 1.00, rate: 0.96 },
+  algieba: { pitch: 1.00, rate: 0.96 },
+  charon: { pitch: 1.00, rate: 0.96 },
+  kalyke: { pitch: 1.00, rate: 0.96 },
+  vega: { pitch: 1.00, rate: 0.96 },
+  schedar: { pitch: 1.00, rate: 0.96 },
 
-  // Caring Men (Steady, natural, warm)
-  achird: { pitch: 1.00, rate: 1.05 },
-  umbriel: { pitch: 1.00, rate: 1.05 },
-  zubenelgenubi: { pitch: 1.00, rate: 1.05 },
-  rasalas: { pitch: 1.00, rate: 1.05 },
-  capella: { pitch: 1.00, rate: 1.05 },
+  // Caring Men (Steady, natural, warm - unhurried and softly monotone)
+  achird: { pitch: 1.00, rate: 0.96 },
+  umbriel: { pitch: 1.00, rate: 0.96 },
+  zubenelgenubi: { pitch: 1.00, rate: 0.96 },
+  rasalas: { pitch: 1.00, rate: 0.96 },
+  capella: { pitch: 1.00, rate: 0.96 },
 
-  // Professional Men (Articulate, steady, direct)
-  iapetus: { pitch: 1.00, rate: 1.05 },
-  sadaltager: { pitch: 1.00, rate: 1.05 },
-  tarazed: { pitch: 1.00, rate: 1.05 },
+  // Professional Men (Articulate, steady, direct - unhurried and softly monotone)
+  iapetus: { pitch: 1.00, rate: 0.96 },
+  sadaltager: { pitch: 1.00, rate: 0.96 },
+  tarazed: { pitch: 1.00, rate: 0.96 },
 };
 
 let latestSpeechRequestId = 0;
@@ -1336,7 +1336,7 @@ export async function playAudioUrl(
   enableSilentModePlayback();
   stopSpeaking();
 
-  const targetRate = Math.max(0.65, Math.min(1.6, rate ?? 1.05));
+  const targetRate = Math.max(0.65, Math.min(1.6, rate ?? 1.0));
   let arrayBuffer: ArrayBuffer | null = null;
   const sourceUrl = typeof srcOrBuffer === 'string' ? srcOrBuffer : (fallbackBlobUrl || '');
 
@@ -1580,7 +1580,7 @@ function speakWithBrowserSpeechSynthesis(
 
       // Natural Human Cadence Calibration (Calibrated for persona acoustic differentiation)
       utterance.pitch = Math.max(0.5, Math.min(1.85, options?.pitch ?? 1.0));
-      utterance.rate = Math.max(0.55, Math.min(1.4, options?.rate ?? 1.05));
+      utterance.rate = Math.max(0.55, Math.min(1.4, options?.rate ?? 0.96));
 
       const langMap: Record<string, string> = {
         en: 'en-US',

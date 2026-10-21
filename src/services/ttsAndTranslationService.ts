@@ -1150,23 +1150,30 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       const candidateModels = [
         'gemini-3.8-flash-lite-tts',
         'gemini-3.8-flash-tts',
+        'gemini-3.1-flash-tts-preview',
+        'gemini-2.5-flash-preview-tts',
       ];
 
       for (const model of candidateModels) {
         try {
           const endpoint = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+          const is38Model = model.includes('3.8');
+          const contentObj: any = {
+            type: 'text',
+            text: cleanText,
+          };
+          if (is38Model) {
+            contentObj.annotations = [{
+              type: 'speech_metadata',
+              style: `natural human speech, calm and steady pace, speaking slightly slower and clearly, softly monotone with minimal pitch variance, clear and articulate assistive communication, ${persona.style}`,
+            }];
+          }
+
           const payload = {
             model,
             input: [{
               type: 'user_input',
-              content: [{
-                type: 'text',
-                text: cleanText,
-                annotations: [{
-                  type: 'speech_metadata',
-                  style: `natural, fluid conversational cadence with smooth melodic rhythm, warm and gentle pace, clear and articulate assistive communication, authentic and friendly with expressive intonation, ${persona.style}`,
-                }],
-              }],
+              content: [contentObj],
             }],
             response_format: { type: 'audio' },
             generation_config: {
