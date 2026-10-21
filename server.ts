@@ -63,12 +63,6 @@ function isOriginAllowed(origin?: string): boolean {
 
 // Security & CORS middleware
 app.use((req, res, next) => {
-  const matchedPath = req.headers['x-matched-path'] as string | undefined;
-  if (matchedPath && matchedPath.startsWith('/api') && !req.url.startsWith('/api')) {
-    req.url = matchedPath;
-  } else if (req.url.startsWith('/api/index.ts')) {
-    req.url = req.url.replace('/api/index.ts', '/api');
-  }
   const origin = req.headers.origin as string | undefined;
 
   if (isOriginAllowed(origin)) {

@@ -882,15 +882,19 @@ export async function speakText(
       // Never fall through to default Samantha speech during an explicit audition of a neural voice!
       return;
     } else {
+      const isConstructedSentence = Boolean(
+        options?.sentenceWords && options.sentenceWords.length > 1
+      );
       const isMultiWord = Boolean(
-        (options?.sentenceWords && options.sentenceWords.length > 1) ||
+        isConstructedSentence ||
         formattedText.trim().split(/\s+/).length > 1
       );
 
-      // 3a. Check pre-bundled offline core asset for instant 0ms speech
+      // 3a. Check pre-bundled offline core asset for single-tile taps
       // Immediately plays pre-recorded authentic full phrases (e.g., AAC Sensory Board tiles)
       // or single core words without network delay.
-      if (!isNonEnglish) {
+      // Constructed multi-word sentences bypass this so they always receive dynamic natural prosody.
+      if (!isNonEnglish && !isConstructedSentence) {
         const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
         const slugAliases: Record<string, string> = {
           helpme: 'help',
@@ -919,10 +923,7 @@ export async function speakText(
           squishyfidget: 'iwantmyfidgettoy',
           iwantmyfidgettoy: 'iwantmyfidgettoy',
         };
-        // For constructed multi-word sentences, only match if an exact pre-baked full sentence audio exists
-        const wordSlug = (isMultiWord && options?.sentenceWords && options.sentenceWords.length > 1)
-          ? rawSlug
-          : (slugAliases[rawSlug] || rawSlug);
+        const wordSlug = slugAliases[rawSlug] || rawSlug;
 
         if (wordSlug) {
           const candidateUrls = [
@@ -979,12 +980,25 @@ export async function speakText(
         } catch (streamErr) {
           console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
         }
+
+        // Direct Google TTS fallback if server route was unreachable or timed out while online
+        if (!streamSucceeded && isOnline) {
+          const normLang = (normalizedLang === 'fr_ca') ? 'fr' : (normalizedLang === 'zh' || normalizedLang.startsWith('zh')) ? 'zh-CN' : normalizedLang.substring(0, 2);
+          const directUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(normLang)}&client=tw-ob&q=${encodeURIComponent(formattedText)}`;
+          try {
+            const directPlayed = await playAudioUrl(directUrl, formattedText, calibratedRate, speechId);
+            if (directPlayed || speechId !== latestSpeechRequestId) return;
+            streamSucceeded = directPlayed;
+          } catch (directErr) {
+            console.warn('[Audio] Direct Google TTS fallback notice:', directErr);
+          }
+        }
       }
 
-      // 3c. EMERGENCY FALLBACK FOR ARBITRARY MULTI-WORD PHRASES:
-      // Activated when offline OR if the streaming server is unavailable / quota-exhausted (HTTP 429/503).
-      // Uses on-device Web Audio buffer playback so playback never expires or mutes on iOS/Android gesture limits.
-      if ((!isOnline || !streamSucceeded) && !isNonEnglish && isMultiWord) {
+      // 3c. STRICT EMERGENCY OFFLINE FALLBACK ONLY:
+      // Restrict stitched word concatenation exclusively to zero-connection offline mode (!isOnline).
+      // When connected to the internet, we NEVER stitch words together; we always use the conversational neural sentence.
+      if (!isOnline && !isNonEnglish && isMultiWord) {
         try {
           const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
           if (sentenceWav && isAudioPayload(sentenceWav)) {
