@@ -54,7 +54,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
   }, [settings.language]);
 
   useEffect(() => {
-    const persona = isPremium === false ? 'system' : (settings.voicePersona || 'system');
+    const persona = !isPremium ? 'system' : (settings.voicePersona || 'system');
     prewarmCoreAudioVocabulary(persona, settings.language || 'en');
   }, [settings.voicePersona, settings.language, isPremium]);
 
@@ -71,9 +71,9 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     if (settings.soundEffects) playChime('speak');
     const spoken = t(text);
     let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
-    // If user is on Free tier, restrict speech strictly to on-device system voice
+    // If user is on Free / Basic tier, restrict speech strictly to on-device system voice
     // (Only explicit audition previews with previewAudio === true may play a 2-second snippet)
-    if (isPremium === false && personaToUse !== 'system' && !options?.previewAudio) {
+    if (!isPremium && personaToUse !== 'system' && !options?.previewAudio) {
       personaToUse = 'system';
     }
     const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');

@@ -257,7 +257,7 @@ export const AACView: React.FC = () => {
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
     prewarmCoreAudioVocabulary(!isPremium ? 'system' : (settings?.voicePersona || 'system'), settings?.language || 'en');
-  }, [settings?.voicePersona, settings?.language]);
+  }, [settings?.voicePersona, settings?.language, isPremium]);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');

@@ -2,6 +2,7 @@ import { playChime } from './chimes';
 import { getAudioContext, enableSilentModePlayback } from './context';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 import { t, getLanguage } from '../../services/translator';
+import { isPremiumSubscription } from '../../services/subscriptionService';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -728,6 +729,22 @@ export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: nu
 
 let latestSpeechRequestId = 0;
 
+/**
+ * Checks whether the current device profile holds an active Premium subscription or valid trial.
+ * Used to safeguard premium Gemini AI voice personas against unauthorized Basic tier access.
+ */
+export function isDeviceEntitledToPremiumVoices(): boolean {
+  if (typeof localStorage === 'undefined') return false;
+  try {
+    const raw = localStorage.getItem('beeyou_subscription');
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return isPremiumSubscription(parsed);
+  } catch {
+    return false;
+  }
+}
+
 export async function speakText(
   text: string,
   options?: {
@@ -760,7 +777,14 @@ export async function speakText(
 
   const rawPersona = options?.voicePersona || 'system';
   const personaObj = getVoicePersonaById(rawPersona);
-  const selectedPersonaId = personaObj.id;
+  let selectedPersonaId = personaObj.id;
+
+  // Basic tier security lock: restrict neural voice personas to Premium / Active Free Trial accounts
+  // (Only explicit audition previews in Voice Studio with options.previewAudio === true may play a 2s audition snippet)
+  if (selectedPersonaId !== 'system' && !options?.previewAudio && !isDeviceEntitledToPremiumVoices()) {
+    console.warn(`[Security] Premium neural voice '${selectedPersonaId}' requested by Basic tier account. Enforcing free system voice.`);
+    selectedPersonaId = 'system';
+  }
 
   // Dynamically resolve active application language from options or global translation state
   const activeAppLang = (options?.lang && options.lang !== 'en') ? options.lang : (getLanguage() || options?.lang || 'en');

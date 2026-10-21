@@ -11,6 +11,7 @@ import {
   SUBSCRIPTION_PRICES,
   DEFAULT_TRIAL_DAYS,
   verifyEntitlementSignature,
+  isPremiumSubscription,
   BEE_PRODUCT_MONTHLY,
   BEE_PRODUCT_ANNUAL,
 } from '../services/subscriptionService';
@@ -83,22 +84,9 @@ export function useSubscriptionState() {
     await saveSecureSubscription(signed);
   }, []);
 
-  // Developer test bypass for rapid end-to-end verification of premium features and voices
-  const IS_DEV_TEST_MODE = true;
-
   // Entitlement verification helper:
-  // Must be premium tier, non-expired status, AND have a valid cryptographic signature
-  const isPremium = Boolean(
-    IS_DEV_TEST_MODE || (
-      (subscription.tier === 'premium' || subscription.status === 'trial' || subscription.status === 'active' || subscription.status === 'grace_period') &&
-      subscription.status !== 'expired' &&
-      subscription.status !== 'refunded' &&
-      subscription.status !== 'revoked' &&
-      subscription.status !== 'basic' &&
-      subscription.tier !== 'basic' &&
-      verifyEntitlementSignature(subscription)
-    )
-  );
+  // Must be premium tier or active trial, non-expired status, AND have a valid cryptographic signature
+  const isPremium = Boolean(isPremiumSubscription(subscription));
 
   const triggerUpgrade = (reason?: string) => {
     if (reason) setPaywallTriggerReason(reason);
@@ -205,6 +193,9 @@ export function useSubscriptionState() {
     if (tier === 'premium') {
       startFreeTrial();
     } else {
+      try {
+        localStorage.removeItem('beeyou_free_trial_activated');
+      } catch {}
       const basicSub = getDefaultBasicSubscription();
       updateAndSaveSubscription(basicSub);
     }

@@ -958,7 +958,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
             setShowAacLoadingScreen(false);
             finalizeOnboarding(pendingTrialChoice);
           }}
-          persona={settings?.voicePersona || 'puck'}
+          persona={pendingTrialChoice ? (settings?.voicePersona || 'puck') : 'system'}
           language={settings?.language || 'en'}
         />
       )}

@@ -29,9 +29,22 @@ async function testTranslatedVoicesAndPuck() {
   console.log('[Test] Loading app at http://localhost:3000...');
   await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded' });
 
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    const subMod = await import('/src/services/subscriptionService.ts');
+    const trialSub = subMod.signSubscriptionEntitlement({
+      tier: 'premium',
+      status: 'trial',
+      billingCycle: 'monthly',
+      trialStartDate: new Date().toISOString(),
+      trialEndDate: new Date(Date.now() + 15 * 86400000).toISOString(),
+      monthlyPrice: 9.99,
+      yearlyPrice: 89.99,
+      trialDays: 15,
+      autoRenew: true,
+      storeProvider: 'none',
+    });
     localStorage.setItem('beeyou_onboarding_completed', 'true');
-    localStorage.setItem('beeyou_free_trial_activated', 'true');
+    localStorage.setItem('beeyou_subscription', JSON.stringify(trialSub));
     sessionStorage.setItem('beeyou_app_session_opened', 'true');
     sessionStorage.setItem('beeyou_active_device_view', 'child');
   });

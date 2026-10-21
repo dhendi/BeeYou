@@ -633,7 +633,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   {/* Active Voice Pill */}
                   <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
                     <span>Active:</span>
-                    <span className="truncate max-w-[130px]">{getVoicePersonaById(settings.voicePersona).name}</span>
+                    <span className="truncate max-w-[130px]">{getVoicePersonaById(isPremium ? (settings.voicePersona || 'system') : 'system').name}</span>
                   </div>
                 </div>
 

@@ -105,23 +105,43 @@ export function signSubscriptionEntitlement(
 }
 
 /**
- * Default fallback subscription for developer testing (unlocked with 15-day trial).
+ * Default fallback subscription for free Basic accounts.
  */
 export function getDefaultBasicSubscription(): SubscriptionInfo {
-  const startDate = new Date();
-  const endDate = new Date(startDate.getTime() + DEFAULT_TRIAL_DAYS * 24 * 60 * 60 * 1000);
   return signSubscriptionEntitlement({
-    tier: 'premium',
-    status: 'trial',
+    tier: 'basic',
+    status: 'basic',
     billingCycle: 'monthly',
-    trialStartDate: startDate.toISOString(),
-    trialEndDate: endDate.toISOString(),
-    monthlyPrice: SUBSCRIPTION_PRICES.monthly,
-    yearlyPrice: SUBSCRIPTION_PRICES.yearly,
-    trialDays: DEFAULT_TRIAL_DAYS,
-    autoRenew: true,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    trialDays: 0,
+    autoRenew: false,
     storeProvider: 'none',
   });
+}
+
+/**
+ * Validates whether a subscription object grants active Premium tier privileges.
+ */
+export function isPremiumSubscription(subscription?: SubscriptionInfo | null): boolean {
+  if (!subscription) return false;
+  if (subscription.tier === 'basic' || subscription.status === 'basic') return false;
+  if (
+    subscription.status === 'expired' ||
+    subscription.status === 'refunded' ||
+    subscription.status === 'revoked'
+  ) {
+    return false;
+  }
+
+  const hasValidStatus = (
+    subscription.tier === 'premium' ||
+    subscription.status === 'trial' ||
+    subscription.status === 'active' ||
+    subscription.status === 'grace_period'
+  );
+
+  return Boolean(hasValidStatus && verifyEntitlementSignature(subscription));
 }
 
 /**

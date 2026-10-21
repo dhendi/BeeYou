@@ -56,6 +56,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
     updateSettings,
     subscription,
     setShowOnboardingModal,
+    setSubscriptionTier,
     updateEnabledFeatures,
   } = useApp();
 
@@ -127,6 +128,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
           localStorage.setItem('beeyou_active_device_view', 'caregiver');
         } catch {}
         if (setUserRole) setUserRole('caregiver');
+        if (setSubscriptionTier) {
+          if (account.subscriptionTier === 'free' || account.subscriptionTier === 'basic') {
+            setSubscriptionTier('basic');
+            updateSettings({ voicePersona: 'system' });
+          } else {
+            setSubscriptionTier('premium');
+          }
+        }
         updateChildProfile({
           name: account.childProfile.name,
           ageGroup: account.childProfile.ageGroup,
@@ -150,6 +159,14 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         } catch {}
         setIsParentMode(false);
         if (setUserRole) setUserRole('child_dependent');
+        if (setSubscriptionTier) {
+          if (account.subscriptionTier === 'free' || account.subscriptionTier === 'basic') {
+            setSubscriptionTier('basic');
+            updateSettings({ voicePersona: 'system' });
+          } else {
+            setSubscriptionTier('premium');
+          }
+        }
         if (setUserAgeGroup) setUserAgeGroup(account.childProfile.ageGroup);
         updateChildProfile({
           name: account.childProfile.name,
