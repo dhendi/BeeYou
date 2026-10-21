@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, 
@@ -28,7 +28,7 @@ import {
   CheckSquare,
   Clock,
 } from 'lucide-react';
-import { playChime, prewarmCoreAudioVocabulary } from '../utils/audio';
+import { playChime, prewarmCoreAudioVocabulary, stopSpeaking } from '../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
@@ -52,9 +52,16 @@ export const AccessibilityPreferencesModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
   const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'featured' | 'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('featured');
 
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, []);
+
   if (!showAccessibilityModal) return null;
 
   const handleClose = () => {
+    stopSpeaking();
     if (settings.soundEffects) playChime('tap');
     setShowAccessibilityModal(false);
   };
@@ -634,7 +641,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   {/* Active Voice Pill */}
                   <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
                     <span>{t("Active:")}</span>
-                    <span className="truncate max-w-[130px]">{t(getVoicePersonaById(isPremium ? (settings.voicePersona || 'system') : 'system').name)}</span>
+                    <span className="truncate max-w-[130px]">{t(getVoicePersonaById(settings.voicePersona || 'amy').name)}</span>
                   </div>
                 </div>
 
@@ -688,6 +695,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                       <div
                         key={persona.id}
                         onClick={() => {
+                          stopSpeaking();
                           updateSettings({ voicePersona: persona.id });
                           playChime('tap');
                         }}
@@ -821,7 +829,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      const activePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
+                      const activePersona = settings.voicePersona || 'amy';
                       speak(t('Hello! This is your BeeYou communication voice.'), { voicePersona: activePersona, previewAudio: true, force: true });
                     }}
                     className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"

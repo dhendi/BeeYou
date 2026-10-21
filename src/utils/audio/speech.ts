@@ -659,9 +659,11 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Stop any current vocalization immediately
+ * Stop active hardware audio outputs (Web Audio node, HTML5 Audio, Web Speech API)
+ * without incrementing the global speech request ID. Used internally so starting a new
+ * utterance terminates any prior sound without cancelling itself.
  */
-export function stopSpeaking() {
+function stopAudioHardware() {
   if (pendingSpeakTimeout) {
     clearTimeout(pendingSpeakTimeout);
     pendingSpeakTimeout = null;
@@ -698,6 +700,14 @@ export function stopSpeaking() {
     activeUtterancesSet.clear();
   }
   notifySpeechState(false, null);
+}
+
+/**
+ * Stop any current vocalization immediately and invalidate all pending speech requests
+ */
+export function stopSpeaking() {
+  latestSpeechRequestId++;
+  stopAudioHardware();
 }
 
 /**
@@ -788,10 +798,9 @@ export async function speakText(
   const formattedText = formatForNaturalSpeech(text);
   if (!formattedText) return;
 
-  const speechId = ++latestSpeechRequestId;
-
   // Immediately cancel any prior in-flight speech to prevent double/overlapping vocalization on rapid clicks
   stopSpeaking();
+  const speechId = latestSpeechRequestId;
 
   // CRITICAL FOR IOS SAFARI & CAPACITOR:
   // Synchronously initialize and resume Web Audio context during the active user gesture.
@@ -847,6 +856,17 @@ export async function speakText(
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
     } else if (options?.previewAudio) {
+      if (selectedPersonaId === 'system') {
+        await speakWithBrowserSpeechSynthesis(formattedText, {
+          ...options,
+          voicePersona: 'system',
+          pitch: calibratedPitch,
+          rate: calibratedRate,
+          force: options?.force,
+        });
+        return;
+      }
+
       // 2a. Pre-bundled instant offline audition preview asset (.mp3 or .wav)
       const previewCandidates = [
         `/assets/audio/previews/${selectedPersonaId}.mp3`,
@@ -876,7 +896,7 @@ export async function speakText(
 
       // 2b. Piper on-device dynamic preview synthesis
       try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang);
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 800);
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           const cleanedBuf = cleanRiffWav(piperBuf);
@@ -894,7 +914,7 @@ export async function speakText(
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -905,6 +925,16 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Neural preview stream (${selectedPersonaId}) failed:`, err);
       }
+
+      // Fallback: If no preview asset played, fall through to calibrated browser speech synthesis
+      if (speechId !== latestSpeechRequestId) return;
+      await speakWithBrowserSpeechSynthesis(formattedText, {
+        ...options,
+        voicePersona: selectedPersonaId,
+        pitch: calibratedPitch,
+        rate: calibratedRate,
+        force: options?.force,
+      });
       return;
     } else {
       // 3a. Piper On-Device Neural Synthesis for Whole Sentences
@@ -912,7 +942,7 @@ export async function speakText(
       // as a single contiguous audio waveform with natural human cadence and prosody.
       if (selectedPersonaId !== 'system') {
         try {
-          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang);
+          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 800);
           if (speechId !== latestSpeechRequestId) return;
           if (piperBuf && isAudioPayload(piperBuf)) {
             const cleanedBuf = cleanRiffWav(piperBuf);
@@ -1014,7 +1044,7 @@ export async function speakText(
         try {
           const audioItem = await Promise.race([
             getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200)),
           ]);
           if (speechId !== latestSpeechRequestId) return;
           if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -1448,7 +1478,7 @@ export async function playAudioUrl(
   fallbackBlobUrl?: string
 ): Promise<boolean> {
   enableSilentModePlayback();
-  stopSpeaking();
+  stopAudioHardware();
 
   const targetRate = Math.max(0.65, Math.min(1.6, rate ?? 1.0));
   let arrayBuffer: ArrayBuffer | null = null;
@@ -1536,7 +1566,7 @@ export async function playAudioUrl(
   // 2. Tier 2: HTML5 Audio Element Fallback
   return new Promise((resolve) => {
     try {
-      stopSpeaking();
+      stopAudioHardware();
       const audio = new Audio();
       audio.preload = 'auto';
       (audio as any).playsInline = true;

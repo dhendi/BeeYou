@@ -76,7 +76,7 @@ export const AacKeyboardModal: React.FC = () => {
 
   if (!showAacKeyboardModal) return null;
 
-  const activePersonaId = isPremium ? (settings?.voicePersona || 'system') : 'system';
+  const activePersonaId = settings?.voicePersona || 'amy';
   const activePersona = getVoicePersonaById(activePersonaId);
   const activeVoiceName = activePersonaId === 'system' ? 'System Voice' : activePersona.name;
 
@@ -102,7 +102,7 @@ export const AacKeyboardModal: React.FC = () => {
 
   const handleSpeak = () => {
     if (!text.trim()) return;
-    const personaToUse = isPremium ? (settings?.voicePersona || 'system') : 'system';
+    const personaToUse = settings?.voicePersona || 'amy';
     speak(text.trim(), {
       voicePersona: personaToUse,
       voiceURI: personaToUse === 'system' ? settings?.selectedVoiceURI : undefined,

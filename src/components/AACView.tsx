@@ -258,12 +258,12 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    const p = !isPremium ? 'system' : (settings?.voicePersona || 'system');
+    const p = settings?.voicePersona || 'amy';
     const l = settings?.language || 'en';
     if (!isVoicePackLoaded(p, l)) {
       triggerVoicePreload(p, l);
     }
-  }, [settings?.voicePersona, settings?.language, isPremium]);
+  }, [settings?.voicePersona, settings?.language]);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
@@ -538,7 +538,7 @@ export const AACView: React.FC = () => {
     if (filteredItems && filteredItems.length > 0) {
       prewarmPhrases(
         filteredItems.map((i) => (i.speechText && t(i.speechText) !== i.speechText ? t(i.speechText) : t(i.label))),
-        !isPremium ? 'system' : (settings?.voicePersona || 'system'),
+        settings?.voicePersona || 'amy',
         settings?.language || 'en'
       );
     }

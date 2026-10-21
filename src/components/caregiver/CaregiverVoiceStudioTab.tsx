@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Crown, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 // Clean minimalist accessible voice studio without redundant decorative icons
-import { playChime, prewarmCoreAudioVocabulary } from '../../utils/audio';
+import { playChime, prewarmCoreAudioVocabulary, stopSpeaking } from '../../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../../services/haptics';
 import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../../data/voicePersonasData';
 import { t } from '../../services/translator';
@@ -35,12 +35,24 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   const [showAllCatalog, setShowAllCatalog] = useState(false);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, []);
+
   const FEATURED_VOICE_IDS = ['system', 'amy', 'ryan', 'lessac', 'danny'];
 
   const activePersona = getVoicePersonaById(settings.voicePersona);
   const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
 
   const handleAudition = async (persona: VoicePersona) => {
+    if (playingVoiceId === persona.id) {
+      stopSpeaking();
+      setPlayingVoiceId(null);
+      return;
+    }
+    stopSpeaking();
     setPlayingVoiceId(persona.id);
     try {
       await speak(t(persona.previewText), {
@@ -56,6 +68,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   };
 
   const handleSelectVoice = (persona: VoicePersona) => {
+    stopSpeaking();
     updateSettings({ voicePersona: persona.id });
     if (settings.soundEffects) playChime('star');
     triggerHaptic('light', true);
@@ -231,7 +244,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
                 {t('100% Free • Zero API Credits • Offline')}
               </span>
-              {(isPremium ? (settings.voicePersona || 'system') : 'system') === 'system' && (
+              {(settings.voicePersona || 'system') === 'system' && (
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
                   {t('Active Default Voice')}
                 </span>
@@ -264,7 +277,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                   : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300'
               }`}
             >
-              {(isPremium ? (settings.voicePersona || 'system') : 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
+              {(settings.voicePersona || 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
             </button>
           </div>
         </div>
@@ -380,7 +393,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         {/* Personas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
           {filteredPersonas.map((persona) => {
-            const effectiveVoicePersona = isPremium ? (settings.voicePersona || 'system') : 'system';
+            const effectiveVoicePersona = settings.voicePersona || 'amy';
             const isSelected = effectiveVoicePersona === persona.id;
             const isPlaying = playingVoiceId === persona.id;
 

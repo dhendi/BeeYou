@@ -228,7 +228,8 @@ export async function preloadPiperVoice(
 export async function synthesizeWithPiper(
   text: string,
   personaId?: string,
-  lang: string = 'en'
+  lang: string = 'en',
+  timeoutMs: number = 800
 ): Promise<ArrayBuffer | null> {
   const cleanText = text.trim();
   if (!cleanText) return null;
@@ -246,17 +247,30 @@ export async function synthesizeWithPiper(
     return inFlightPiperPredictions.get(cacheKey)!;
   }
 
+  // 3. Fast-guard: If voice model is not yet in OPFS, do NOT stall user gesture with a 60MB on-the-fly download.
+  // Kick off silent background download and return null so instant speech fallback sounds immediately.
+  const isReady = await isPiperVoiceReady(personaId, lang);
+  if (!isReady) {
+    preloadPiperVoice(personaId, lang).catch(() => {});
+    return null;
+  }
+
   const predictionPromise = (async () => {
     const piper = await getPiperModule();
     if (!piper) return null;
 
     try {
-      // Use piper.predict to generate WAV blob in background worker
-      const wavBlob = await piper.predict({
+      // Race prediction against strict timeout so it never hangs or locks up speech
+      const predictionWork = piper.predict({
         text: cleanText,
         voiceId: voiceId as any,
       });
 
+      const timeoutWork = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), timeoutMs)
+      );
+
+      const wavBlob = await Promise.race([predictionWork, timeoutWork]);
       if (!wavBlob) return null;
 
       const arrayBuffer = await wavBlob.arrayBuffer();
