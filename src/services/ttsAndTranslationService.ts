@@ -793,7 +793,7 @@ const TRANSLATE_DAILY_LIMIT_PER_USER = 200; // Max 200 dynamic translations per 
 
 // Request Timeouts
 const TRANSLATE_TIMEOUT_MS = 5000; // 5-second strict upstream timeout
-const TTS_TIMEOUT_MS = 10000; // 10-second upstream timeout for high-fidelity speech
+const TTS_TIMEOUT_MS = 15000; // 15-second upstream timeout for high-fidelity speech
 
 /**
  * Handle Translation Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.

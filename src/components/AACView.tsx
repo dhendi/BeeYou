@@ -1243,6 +1243,19 @@ export const AACView: React.FC = () => {
                 )}
 
                 <button
+                  type="button"
+                  onClick={() => {
+                    setShowAacKeyboardModal(true);
+                    playChime('tap');
+                  }}
+                  className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+                  title="Type with Dyslexia-Friendly AAC Keyboard"
+                  aria-label="Open AAC Keyboard"
+                >
+                  <Keyboard className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
+                </button>
+
+                <button
                   onClick={() => setIsSentenceBarCollapsed(true)}
                   className="p-2 rounded-2xl bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#7A6C60] border border-[#E0D8CB] transition-all cursor-pointer hidden md:block"
                   title="Minimize sentence bar"

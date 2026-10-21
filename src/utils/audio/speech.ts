@@ -854,7 +854,7 @@ export async function speakText(
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -916,11 +916,11 @@ export async function speakText(
         }
       }
 
-      // 3c. Dynamic server fetch with a healthy 6000ms timeout
+      // 3c. Dynamic server fetch with a healthy 15000ms timeout
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 15000)),
         ]);
         if (speechId !== latestSpeechRequestId) return;
         if (audioItem && isAudioPayload(audioItem.buffer)) {
@@ -1141,8 +1141,11 @@ export async function synthesizeOfflineSentence(
 
   const pcmBuffers: Uint8Array[] = [];
   const sampleRate = 24000;
+  let matchedWordsCount = 0;
 
   for (let i = 0; i < rawWords.length; i++) {
+    let wordMatched = false;
+
     // 1. Check for 2-word pre-bundled idioms first (e.g. 'all done', 'thank you')
     if (i < rawWords.length - 1) {
       const pairSlug = (rawWords[i] + rawWords[i + 1]).replace(/[^a-z0-9]/g, '');
@@ -1156,6 +1159,8 @@ export async function synthesizeOfflineSentence(
             const pcm = extractWavPcm(ab);
             if (pcm) {
               pcmBuffers.push(pcm);
+              matchedWordsCount += 2;
+              wordMatched = true;
               i++; // consume second word of pair
               continue;
             }
@@ -1166,27 +1171,36 @@ export async function synthesizeOfflineSentence(
 
     // 2. Check for single pre-bundled word
     const singleSlug = rawWords[i].replace(/[^a-z0-9]/g, '');
-    if (!singleSlug) continue;
-
-    const singleUrl = `/assets/audio/core/${personaId}_${singleSlug}.wav`;
-    try {
-      const singleRes = await fetch(singleUrl);
-      const ct = singleRes.headers.get('content-type') || '';
-      if (singleRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-        const ab = await singleRes.arrayBuffer();
-        if (isAudioPayload(ab)) {
-          const pcm = extractWavPcm(ab);
-          if (pcm) {
-            pcmBuffers.push(pcm);
-            continue;
+    if (singleSlug) {
+      const singleUrl = `/assets/audio/core/${personaId}_${singleSlug}.wav`;
+      try {
+        const singleRes = await fetch(singleUrl);
+        const ct = singleRes.headers.get('content-type') || '';
+        if (singleRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+          const ab = await singleRes.arrayBuffer();
+          if (isAudioPayload(ab)) {
+            const pcm = extractWavPcm(ab);
+            if (pcm) {
+              pcmBuffers.push(pcm);
+              matchedWordsCount += 1;
+              wordMatched = true;
+              continue;
+            }
           }
         }
-      }
-    } catch {}
+      } catch {}
+    }
+
+    // If this word is not available in pre-bundled offline core recordings,
+    // abort offline stitching immediately to avoid stitching an incomplete sentence
+    // and to prevent wasted 404 network lookups for subsequent words.
+    if (!wordMatched) {
+      return null;
+    }
   }
 
-  // Must have matched at least one core word in the selected voice
-  if (pcmBuffers.length === 0) return null;
+  // Must have matched 100% of the words in the sentence
+  if (pcmBuffers.length === 0 || matchedWordsCount < rawWords.length) return null;
 
   // 25ms natural conversational silence gap between words (at 24000Hz 16-bit mono = 1200 bytes)
   const gapBytes = Math.round(sampleRate * 0.025) * 2;

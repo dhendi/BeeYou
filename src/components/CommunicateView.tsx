@@ -136,7 +136,7 @@ export const CommunicateView: React.FC = () => {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            {t('Communicate')} 💬
+            {t('Communicate')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
             {t('Ways to express yourself, connect with caregivers, and share your ID.')}
