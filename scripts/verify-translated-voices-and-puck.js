@@ -39,17 +39,17 @@ async function testTranslatedVoicesAndPuck() {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await new Promise((r) => setTimeout(r, 2000));
 
-  console.log('\n--- Step 1: Verify Puck acoustic profile default rate is 1.30 ---');
+  console.log('\n--- Step 1: Verify Puck acoustic profile default rate is 1.05 (Fluid & Natural) ---');
   const puckRateCheck = await page.evaluate(async () => {
     const speechMod = await import('/src/utils/audio/speech.ts');
     const profile = speechMod.PERSONA_ACOUSTIC_PROFILES?.puck;
     return profile;
   });
   console.log('Puck acoustic profile:', puckRateCheck);
-  const puckRateOk = puckRateCheck && puckRateCheck.rate === 1.30;
-  console.log('Puck Rate === 1.30:', puckRateOk ? 'PASS' : 'FAIL');
+  const puckRateOk = puckRateCheck && puckRateCheck.rate === 1.05;
+  console.log('Puck Rate === 1.05:', puckRateOk ? 'PASS' : 'FAIL');
 
-  console.log('\n--- Step 2: Test Translated Voice Audio in Spanish (Quiero comida) ---');
+  console.log('\n--- Step 2: Test Translated Voice Audio in Spanish (Explicit lang: "es") ---');
   const spanishSpeechResult = await page.evaluate(async () => {
     const speechMod = await import('/src/utils/audio/speech.ts');
     const start = Date.now();
@@ -64,7 +64,26 @@ async function testTranslatedVoicesAndPuck() {
       return { success: false, error: e.message };
     }
   });
-  console.log('Spanish speech result:', spanishSpeechResult);
+  console.log('Spanish speech result (explicit):', spanishSpeechResult);
+
+  console.log('\n--- Step 2b: Test Implicit Language Resolution via getLanguage() (Tile Click Simulation) ---');
+  const implicitSpanishResult = await page.evaluate(async () => {
+    const transMod = await import('/src/services/translator.ts');
+    const speechMod = await import('/src/utils/audio/speech.ts');
+    transMod.setLanguage('es');
+    const start = Date.now();
+    try {
+      // Simulate button click without passing options.lang
+      await speechMod.speakText('Quiero agua', {
+        voicePersona: 'puck',
+        force: true,
+      });
+      return { success: true, activeLang: transMod.getLanguage(), elapsed: Date.now() - start };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
+  console.log('Implicit Spanish speech result:', implicitSpanishResult);
 
   console.log('\n--- Step 3: Test Translated Voice Audio in French (Je veux de la nourriture) ---');
   const frenchSpeechResult = await page.evaluate(async () => {

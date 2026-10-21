@@ -1,7 +1,7 @@
 import { playChime } from './chimes';
 import { getAudioContext, enableSilentModePlayback } from './context';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
-import { t } from '../../services/translator';
+import { t, getLanguage } from '../../services/translator';
 
 // -------------------------------------------------------------
 // WEB SPEECH API GETVOICES() QUERYING & NATURAL RANKING ENGINE
@@ -685,7 +685,7 @@ export const PERSONA_ACOUSTIC_PROFILES: Record<string, { pitch: number; rate: nu
   system: { pitch: 1.0, rate: 1.05 },
 
   // Kids (Warm, natural, clear AAC)
-  puck: { pitch: 1.00, rate: 1.30 },
+  puck: { pitch: 1.00, rate: 1.05 },
   leda: { pitch: 1.00, rate: 1.05 },
   sadachbia: { pitch: 1.00, rate: 1.05 },
   achernar: { pitch: 1.00, rate: 1.05 },
@@ -762,7 +762,9 @@ export async function speakText(
   const personaObj = getVoicePersonaById(rawPersona);
   const selectedPersonaId = personaObj.id;
 
-  const lang = (options?.lang || 'en').toLowerCase();
+  // Dynamically resolve active application language from options or global translation state
+  const activeAppLang = (options?.lang && options.lang !== 'en') ? options.lang : (getLanguage() || options?.lang || 'en');
+  const lang = (activeAppLang || 'en').toLowerCase();
   const normalizedLang = 
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
@@ -1555,7 +1557,8 @@ function speakWithBrowserSpeechSynthesis(
         ja: 'ja-JP',
         ko: 'ko-KR',
       };
-      const targetLang = langMap[options?.lang ?? 'en'] || 'en-US';
+      const currentAppLang = (options?.lang && options.lang !== 'en') ? options.lang : (getLanguage() || options?.lang || 'en');
+      const targetLang = langMap[currentAppLang] || langMap[currentAppLang.substring(0, 2)] || 'en-US';
       utterance.lang = targetLang;
 
       // Select system voice if available
@@ -1590,12 +1593,19 @@ function speakWithBrowserSpeechSynthesis(
 
       if (!utterance.voice && voices && voices.length > 0) {
         const targetPrefix = 
-          options?.lang === 'fr_ca' ? 'fr_ca' :
+          currentAppLang === 'fr_ca' ? 'fr_ca' :
           targetLang.substring(0, 2);
         const bestVoice = getBestSystemVoice(targetPrefix, options?.voicePersona || 'Kore');
         if (bestVoice) {
           utterance.voice = bestVoice;
           utterance.lang = bestVoice.lang; // Synchronize utterance.lang with voice to fix iOS WebKit voice override
+        } else if (voices.length > 0) {
+          // If the device does not have a foreign language pack installed,
+          // fall back to the highest rated available voice so speech is never completely silenced
+          const fallbackVoice = getBestSystemVoice('en', options?.voicePersona || 'Kore') || voices[0];
+          if (fallbackVoice) {
+            utterance.voice = fallbackVoice;
+          }
         }
       }
 

@@ -24,7 +24,7 @@ export interface VoicePersona {
  * - Client in-memory audio cache & HTTP stream URLs (&v=...)
  * - Server L1 RAM cache, L3 disk cache (.data/tts_cache), and cloud storage cache
  */
-export const TTS_GENERATION_VERSION = 'v6';
+export const TTS_GENERATION_VERSION = 'v7';
 
 export const VOICE_PERSONAS: VoicePersona[] = [
   // --- Group 0: Default Free System Voice (100% Free • On-Device • Zero Credits) ---
@@ -49,13 +49,13 @@ export const VOICE_PERSONAS: VoicePersona[] = [
     name: 'Puck',
     label: 'Puck (Soft Child)',
     geminiVoice: 'Puck',
-    style: 'child voice, calm, steady, clear, neutral intonation, matter-of-fact assistive communication',
+    style: 'natural, fluid child voice, warm and friendly, smooth speech melody with gentle conversational rhythm, clear and expressive everyday assistive communication',
     category: 'kids',
     categoryLabel: 'Kids',
     gender: 'child',
     emoji: '',
-    tagline: 'Recommended • Soft & Childlike',
-    description: 'Calm, steady everyday child voice with clear, even-toned AAC pronunciation.',
+    tagline: 'Recommended • Fluid & Childlike',
+    description: 'Natural, fluid child voice with warm prosody, smooth phrasing, and clear AAC pronunciation.',
     previewText: 'Hello. I am ready to communicate with BeeYou.',
   },
   {

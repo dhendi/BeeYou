@@ -9,7 +9,7 @@ import {
   getOfflineCapableVoices,
   prewarmCoreAudioVocabulary,
 } from '../utils/audio';
-import { t, setLanguage } from '../services/translator';
+import { t, setLanguage, getLanguage } from '../services/translator';
 
 interface UseSpeechEngineProps {
   settings: AppSettings;
@@ -76,15 +76,16 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     if (isPremium === false && personaToUse !== 'system' && !options?.previewAudio) {
       personaToUse = 'system';
     }
+    const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
       voiceURI: options?.voiceURI || (personaToUse === 'system' ? settings.selectedVoiceURI : undefined),
       voicePersona: personaToUse,
-      lang: settings.language,
+      lang: currentActiveLang,
       force: options?.force,
       previewAudio: options?.previewAudio,
-      sentenceWords: (settings.language && settings.language !== 'en') ? undefined : options?.sentenceWords,
+      sentenceWords: (currentActiveLang && currentActiveLang !== 'en') ? undefined : options?.sentenceWords,
     });
   };
 
