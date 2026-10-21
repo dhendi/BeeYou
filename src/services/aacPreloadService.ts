@@ -19,6 +19,8 @@ export interface PreloadProgress {
 export type PreloadProgressCallback = (progress: PreloadProgress) => void;
 
 const activePreloadAbortControllers = new Map<string, AbortController>();
+const inFlightPreloadPromises = new Map<string, Promise<void>>();
+const progressListenersMap = new Map<string, Set<PreloadProgressCallback>>();
 
 function getStorageKey(personaId: string, lang: string): string {
   const normLang = (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' : (lang === 'zh' || lang.startsWith('zh')) ? 'zh' : lang.substring(0, 2);
@@ -71,96 +73,118 @@ export async function preloadVoicePack(
 
   const operationKey = `${voiceToUse}_${normalizedLang}`;
 
-  // Abort any previous in-flight preload for this exact voice/lang pair
-  if (activePreloadAbortControllers.has(operationKey)) {
-    activePreloadAbortControllers.get(operationKey)?.abort();
+  // Register listener for progress
+  if (!progressListenersMap.has(operationKey)) {
+    progressListenersMap.set(operationKey, new Set());
   }
+  if (onProgress) {
+    progressListenersMap.get(operationKey)!.add(onProgress);
+  }
+
+  // If a preload is already in flight for this exact voice and language, join it
+  if (inFlightPreloadPromises.has(operationKey)) {
+    return inFlightPreloadPromises.get(operationKey)!;
+  }
+
   const controller = new AbortController();
   activePreloadAbortControllers.set(operationKey, controller);
 
   const effectiveSignal = signal || controller.signal;
 
-  // Primary board items (Core + Categories + Quick Phrases)
-  const primaryItems = getPrimarySpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
-  const total = primaryItems.length;
-  let loaded = 0;
+  const promise = (async () => {
+    // Primary board items (Core + Categories + Quick Phrases)
+    const primaryItems = getPrimarySpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
+    const total = primaryItems.length;
+    let loaded = 0;
 
-  if (total === 0) {
-    if (onProgress) {
-      onProgress({ loaded: 0, total: 0, percent: 100, currentPhrase: 'Ready' });
-    }
-    markVoicePackLoaded(personaId, normalizedLang);
-    return;
-  }
-
-  // Concurrency worker pool (up to 4 parallel fetches)
-  const CONCURRENCY = 4;
-  let index = 0;
-
-  const runItem = async (phraseText: string) => {
-    const formatted = formatForNaturalSpeech(phraseText);
-    if (!formatted) return;
-
-    const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
-    const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
-
-    try {
-      const local = await getLocalCacheOnly(streamUrl, cacheKey);
-      if (!local && !effectiveSignal.aborted) {
-        await getOrFetchAudioItem(streamUrl, cacheKey);
+    const dispatchProgress = (p: PreloadProgress) => {
+      const listeners = progressListenersMap.get(operationKey);
+      if (listeners) {
+        listeners.forEach((fn) => {
+          try { fn(p); } catch {}
+        });
       }
-    } catch {
-      // Ignore single item fetch error
+    };
+
+    if (total === 0) {
+      dispatchProgress({ loaded: 0, total: 0, percent: 100, currentPhrase: 'Ready' });
+      markVoicePackLoaded(personaId, normalizedLang);
+      return;
     }
-  };
 
-  const primaryWorker = async () => {
-    while (index < primaryItems.length) {
-      if (effectiveSignal.aborted) return;
-      const currentIndex = index++;
-      const item = primaryItems[currentIndex];
-      if (!item) break;
+    // Concurrency worker pool (up to 6 parallel fetches for fast downloads)
+    const CONCURRENCY = 6;
+    let index = 0;
 
-      await runItem(item.phrase);
+    const runItem = async (phraseText: string) => {
+      const formatted = formatForNaturalSpeech(phraseText);
+      if (!formatted) return;
 
-      loaded++;
-      if (onProgress && !effectiveSignal.aborted) {
-        const percent = Math.min(100, Math.round((loaded / total) * 100));
-        onProgress({
-          loaded,
-          total,
-          percent,
-          currentPhrase: item.phrase,
+      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
+
+      try {
+        const local = await getLocalCacheOnly(streamUrl, cacheKey);
+        if (!local && !effectiveSignal.aborted) {
+          await getOrFetchAudioItem(streamUrl, cacheKey);
+        }
+      } catch {
+        // Ignore single item fetch error
+      }
+    };
+
+    const primaryWorker = async () => {
+      while (index < primaryItems.length) {
+        if (effectiveSignal.aborted) return;
+        const currentIndex = index++;
+        const item = primaryItems[currentIndex];
+        if (!item) break;
+
+        await runItem(item.phrase);
+
+        loaded++;
+        if (!effectiveSignal.aborted) {
+          const percent = Math.min(100, Math.round((loaded / total) * 100));
+          dispatchProgress({
+            loaded,
+            total,
+            percent,
+            currentPhrase: item.phrase,
+          });
+        }
+      }
+    };
+
+    const primaryWorkers = Array.from({ length: Math.min(CONCURRENCY, primaryItems.length) }, () => primaryWorker());
+    await Promise.all(primaryWorkers);
+
+    if (!effectiveSignal.aborted) {
+      markVoicePackLoaded(personaId, normalizedLang);
+      dispatchProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
+
+      // Silently warm secondary scene tiles in background on idle priority
+      const allItems = getSpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
+      const secondaryItems = allItems.slice(primaryItems.length);
+      if (secondaryItems.length > 0) {
+        const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
+        idleFn(async () => {
+          for (const item of secondaryItems) {
+            if (effectiveSignal.aborted) break;
+            await runItem(item.phrase);
+            await new Promise((r) => setTimeout(r, 40));
+          }
         });
       }
     }
-  };
+  })()
+    .finally(() => {
+      inFlightPreloadPromises.delete(operationKey);
+      activePreloadAbortControllers.delete(operationKey);
+      progressListenersMap.delete(operationKey);
+    });
 
-  const primaryWorkers = Array.from({ length: Math.min(CONCURRENCY, primaryItems.length) }, () => primaryWorker());
-  await Promise.all(primaryWorkers);
-
-  if (!effectiveSignal.aborted) {
-    markVoicePackLoaded(personaId, normalizedLang);
-    if (onProgress) {
-      onProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
-    }
-
-    // Silently warm secondary scene tiles in background on idle priority
-    const allItems = getSpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
-    const secondaryItems = allItems.slice(primaryItems.length);
-    if (secondaryItems.length > 0) {
-      const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
-      idleFn(async () => {
-        for (const item of secondaryItems) {
-          if (effectiveSignal.aborted) break;
-          await runItem(item.phrase);
-          await new Promise((r) => setTimeout(r, 60));
-        }
-      });
-    }
-  }
-
-  activePreloadAbortControllers.delete(operationKey);
+  inFlightPreloadPromises.set(operationKey, promise);
+  return promise;
 }
 
 /**
@@ -173,5 +197,7 @@ export function abortVoicePackPreload(personaId: string = 'puck', lang: string =
   if (activePreloadAbortControllers.has(key)) {
     activePreloadAbortControllers.get(key)?.abort();
     activePreloadAbortControllers.delete(key);
+    inFlightPreloadPromises.delete(key);
+    progressListenersMap.delete(key);
   }
 }

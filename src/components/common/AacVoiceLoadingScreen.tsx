@@ -20,67 +20,81 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 }) => {
   const [progress, setProgress] = useState<PreloadProgress>({
     loaded: 0,
-    total: 100,
+    total: 83,
     percent: 0,
     currentPhrase: 'Connecting to neural speech engine...',
   });
   const [isFinished, setIsFinished] = useState(false);
   const personaObj = getVoicePersonaById(persona);
-  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Keep a stable ref to onComplete to avoid triggering re-renders or restarting preloads
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  const activeOpRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
-      setProgress({
-        loaded: 0,
-        total: 100,
-        percent: 0,
-        currentPhrase: 'Connecting to neural speech engine...',
-      });
+      activeOpRef.current = null;
       setIsFinished(false);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
       return;
     }
 
-    const abortCtrl = new AbortController();
-    abortControllerRef.current = abortCtrl;
+    const opKey = `${persona}_${language}`;
+    if (activeOpRef.current === opKey) {
+      // Already running for this exact persona and language, do not restart
+      return;
+    }
+    activeOpRef.current = opKey;
     setIsFinished(false);
 
-    // Trigger REAL background pre-caching of every single AAC tile
+    let isSubscribed = true;
+
+    // Trigger genuine background pre-caching of every single AAC tile
     preloadVoicePack(
       persona,
       language,
       (p) => {
-        setProgress(p);
-      },
-      abortCtrl.signal
+        if (!isSubscribed) return;
+        setProgress((prev) => {
+          // Strictly monotonic progress: loaded count and percent NEVER decrease
+          const nextLoaded = Math.max(prev.loaded, p.loaded);
+          const nextPercent = Math.max(prev.percent, p.percent);
+          return {
+            loaded: nextLoaded,
+            total: p.total,
+            percent: nextPercent,
+            currentPhrase: p.currentPhrase,
+          };
+        });
+      }
     )
       .then(() => {
-        if (!abortCtrl.signal.aborted) {
-          setIsFinished(true);
-          try {
-            playChime('complete');
-          } catch {}
-          const timer = setTimeout(() => {
-            onComplete();
-          }, 350);
-          return () => clearTimeout(timer);
-        }
+        if (!isSubscribed) return;
+        setIsFinished(true);
+        try {
+          playChime('complete');
+        } catch {}
+        const timer = setTimeout(() => {
+          if (isSubscribed) {
+            onCompleteRef.current?.();
+          }
+        }, 350);
+        return () => clearTimeout(timer);
       })
       .catch((err) => {
-        if (!abortCtrl.signal.aborted) {
-          console.warn('[Voice Preload Notice]:', err);
-          setIsFinished(true);
-          onComplete();
-        }
+        if (!isSubscribed) return;
+        console.warn('[Voice Preload Notice]:', err);
+        setIsFinished(true);
+        onCompleteRef.current?.();
       });
 
     return () => {
-      abortCtrl.abort();
+      isSubscribed = false;
     };
-  }, [isOpen, persona, language, onComplete]);
+  }, [isOpen, persona, language]);
 
   if (!isOpen) return null;
 
@@ -161,7 +175,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           type="button"
           onClick={() => {
             try { playChime('tap'); } catch {}
-            onComplete();
+            onCompleteRef.current?.();
           }}
           className="mt-6 text-xs text-[#7A6C60] hover:text-[#2D241E] font-bold underline cursor-pointer flex items-center gap-1 transition"
         >

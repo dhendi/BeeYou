@@ -950,15 +950,20 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const ttsVersion = (req.query.v || TTS_GENERATION_VERSION).toString().trim().toLowerCase();
 
   const clientIp = getClientIp(req);
-  // Include explicit TTS generation version in hashKey and cacheKey so bumping version guarantees fresh generation
-  const hashKey = crypto.createHash('md5').update(`${ttsVersion}_${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`).digest('hex');
-  const cacheKey = `${ttsVersion}_${voiceKey}_${normalizedLang}_${cleanText.toLowerCase()}`;
+  // Normalize text for hashing: strip trailing sentence punctuation so "Want" and "Want." hit the exact same cache file
+  const cacheKeyText = cleanText.trim().replace(/[.!?]+$/, '').toLowerCase();
+  const literalKeyText = cleanText.trim().toLowerCase();
+  const hashKey = crypto.createHash('md5').update(`${ttsVersion}_${voiceKey}_${normalizedLang}_${cacheKeyText}`).digest('hex');
+  const literalHashKey = crypto.createHash('md5').update(`${ttsVersion}_${voiceKey}_${normalizedLang}_${literalKeyText}`).digest('hex');
+  const cacheKey = `${ttsVersion}_${voiceKey}_${normalizedLang}_${cacheKeyText}`;
   const diskPathWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${hashKey}.wav`);
+  const literalDiskPathWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${literalHashKey}.wav`);
   const diskPathMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${hashKey}.mp3`);
+  const literalDiskPathMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${literalHashKey}.mp3`);
   const legacyDiskPathMp3 = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
 
   // 3. L1 In-Memory Cache Check (0ms latency, zero upstream calls)
-  const cached = ttsAudioCache.get(cacheKey);
+  const cached = ttsAudioCache.get(cacheKey) || ttsAudioCache.get(`${ttsVersion}_${voiceKey}_${normalizedLang}_${literalKeyText}`);
   if (cached) {
     usageBudgetTracker.recordTtsCacheHit();
     console.log(`[TTS Cache HIT L1] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
@@ -1010,7 +1015,13 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   // 4. L3 Persistent Disk Cache Check
   const diskFile = fs.existsSync(diskPathWav)
     ? diskPathWav
-    : (fs.existsSync(diskPathMp3) ? diskPathMp3 : (fs.existsSync(legacyDiskPathMp3) ? legacyDiskPathMp3 : null));
+    : (fs.existsSync(literalDiskPathWav)
+      ? literalDiskPathWav
+      : (fs.existsSync(diskPathMp3)
+        ? diskPathMp3
+        : (fs.existsSync(literalDiskPathMp3)
+          ? literalDiskPathMp3
+          : (fs.existsSync(legacyDiskPathMp3) ? legacyDiskPathMp3 : null))));
 
   if (diskFile) {
     try {

@@ -67,7 +67,7 @@ async function verifyVoiceLoadingAndInstantAac() {
   });
 
   console.log('[Test] Reloading to apply storage...');
-  await page.reload({ waitUntil: 'networkidle0' });
+  await page.reload({ waitUntil: 'domcontentloaded' });
 
   // Navigate to AAC view
   console.log('[Test] Navigating to AAC view...');

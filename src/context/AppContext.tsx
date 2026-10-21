@@ -1445,6 +1445,10 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     resetToDefaults,
   };
 
+  const handleVoiceLoadingComplete = useCallback(() => {
+    setVoiceLoadingState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
   return (
     <AppContext.Provider value={contextValue}>
       {children}
@@ -1452,7 +1456,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         isOpen={voiceLoadingState.isOpen}
         persona={voiceLoadingState.persona}
         language={voiceLoadingState.language}
-        onComplete={() => setVoiceLoadingState((prev) => ({ ...prev, isOpen: false }))}
+        onComplete={handleVoiceLoadingComplete}
       />
     </AppContext.Provider>
   );

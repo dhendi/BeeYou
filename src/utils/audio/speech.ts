@@ -72,7 +72,8 @@ export function getTtsStreamUrl(voiceId: string, lang: string, text: string): st
  * Builds version-scoped TTS memory cache key.
  */
 export function getTtsCacheKey(voiceId: string, lang: string, text: string): string {
-  return `${voiceId}_${lang}_${text.toLowerCase()}_${TTS_GENERATION_VERSION}`;
+  const normalized = text.trim().replace(/[.!?]+$/, '').toLowerCase();
+  return `${voiceId.toLowerCase()}_${lang}_${normalized}_${TTS_GENERATION_VERSION}`;
 }
 
 /**
