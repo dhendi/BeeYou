@@ -829,28 +829,30 @@ export async function speakText(
       } catch (err) {
         console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
       }
-    } else if (options?.previewAudio && !isNonEnglish) {
-      // 2a. Pre-bundled instant offline audition preview asset (English only)
-      const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
-      try {
-        const bundledRes = await fetch(bundledPreviewUrl);
-        const ct = bundledRes.headers.get('content-type') || '';
-        if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-          const buf = await bundledRes.arrayBuffer();
-          if (isAudioPayload(buf)) {
-            const cleanedBuf = cleanRiffWav(buf);
-            const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
-            const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-            if (played || speechId !== latestSpeechRequestId) return;
+    } else if (options?.previewAudio) {
+      if (!isNonEnglish) {
+        // 2a. Pre-bundled instant offline audition preview asset (English only)
+        const bundledPreviewUrl = `/assets/audio/previews/${selectedPersonaId}.wav`;
+        try {
+          const bundledRes = await fetch(bundledPreviewUrl);
+          const ct = bundledRes.headers.get('content-type') || '';
+          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+            const buf = await bundledRes.arrayBuffer();
+            if (isAudioPayload(buf)) {
+              const cleanedBuf = cleanRiffWav(buf);
+              const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
+              const blobUrl = URL.createObjectURL(blob);
+              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
+              const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
+              if (played || speechId !== latestSpeechRequestId) return;
+            }
           }
+        } catch {
+          // Bundled preview failed or not present, fallback to network
         }
-      } catch {
-        // Bundled preview failed or not present, fallback to network
       }
 
-      // 2b. Dynamic network preview fetch
+      // 2b. Dynamic network preview fetch (for non-English or missing bundled preview)
       try {
         const audioItem = await Promise.race([
           getOrFetchAudioItem(streamUrl, cacheKey),
@@ -1840,17 +1842,16 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
 
   const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
-    for (const phrase of CORE_AAC_VOCABULARY) {
-      const translated = t(phrase);
-      const formatted = formatForNaturalSpeech(translated);
-      if (!formatted) continue;
-      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
-      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
-      const existing = await getLocalCacheOnly(streamUrl, cacheKey);
-      if (existing) continue;
+    // For English: check and populate RAM cache from pre-bundled zero-latency local assets
+    if (normalizedLang === 'en') {
+      for (const phrase of CORE_AAC_VOCABULARY) {
+        const formatted = formatForNaturalSpeech(phrase);
+        if (!formatted) continue;
+        const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+        const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
+        const existing = await getLocalCacheOnly(streamUrl, cacheKey);
+        if (existing) continue;
 
-      // 1. Preload from local pre-bundled assets first (English only)
-      if (normalizedLang === 'en') {
         const wordSlug = formatted.toLowerCase().replace(/[^a-z0-9]/g, '');
         if (wordSlug) {
           const bundledUrl = `/assets/audio/core/${voiceToUse}_${wordSlug}.wav`;
@@ -1863,18 +1864,24 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
                 const blob = new Blob([cleaned], { type: 'audio/wav' });
                 const blobUrl = URL.createObjectURL(blob);
                 audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleaned });
-                continue;
               }
             }
           } catch {}
         }
       }
+      return;
+    }
 
-      // 2. Dynamic prefetch if online
-      if (typeof navigator !== 'undefined' && navigator.onLine) {
-        await getOrFetchAudioItem(streamUrl, cacheKey).catch(() => {});
-        await new Promise((resolve) => setTimeout(resolve, 150));
-      }
+    // For non-English: only check existing local cache (RAM & CacheStorage) to warm L1 memory.
+    // Do NOT fire background network requests that exhaust upstream API rate limits.
+    // On-demand caching when user taps tiles or sentences handles speech with persistent L2/L3 disk caching.
+    for (const phrase of CORE_AAC_VOCABULARY) {
+      const translated = t(phrase);
+      const formatted = formatForNaturalSpeech(translated);
+      if (!formatted) continue;
+      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
+      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
+      await getLocalCacheOnly(streamUrl, cacheKey);
     }
   });
 }

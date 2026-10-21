@@ -419,6 +419,7 @@ export class ByteBoundedMemoryCache<T extends { buffer: Buffer; contentType: str
 
 export const ttsAudioCache = new ByteBoundedMemoryCache<{ buffer: Buffer; contentType: string }>();
 const inFlightTtsGenerations = new Map<string, Promise<{ buffer: Buffer; contentType: string } | null>>();
+const modelCooldownMap = new Map<string, number>();
 const translateTextCache = new Map<string, string>();
 
 export interface DiskLifecycleTelemetry {
@@ -1148,13 +1149,18 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (isValidGeminiKey && voiceKey !== 'system') {
       const candidateModels = [
+        'gemini-3.1-flash-tts-preview',
         'gemini-3.8-flash-lite-tts',
         'gemini-3.8-flash-tts',
-        'gemini-3.1-flash-tts-preview',
         'gemini-2.5-flash-preview-tts',
       ];
 
       for (const model of candidateModels) {
+        const cooldownUntil = modelCooldownMap.get(model) || 0;
+        if (Date.now() < cooldownUntil) {
+          continue;
+        }
+
         try {
           const endpoint = 'https://generativelanguage.googleapis.com/v1beta/interactions';
           const is38Model = model.includes('3.8');
@@ -1194,6 +1200,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
           });
 
           if (geminiRes.ok) {
+            modelCooldownMap.delete(model);
             usageBudgetTracker.recordTtsUpstream();
             const geminiData: any = await geminiRes.json();
             const audioStep = geminiData?.steps?.find((s: any) => s.type === 'model_output' && s.content?.some((c: any) => c.type === 'audio'));
@@ -1230,7 +1237,19 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
             }
           } else {
             const errText = await geminiRes.text().catch(() => '');
-            console.warn(`[Gemini TTS (${model}) Error] Status ${geminiRes.status}: ${errText.slice(0, 150)}... Trying next model.`);
+            if (geminiRes.status === 429) {
+              let cooldownMs = 60000;
+              const retryMatch = errText.match(/retry in\s+(\d+)m(\d+)s/i);
+              if (retryMatch) {
+                cooldownMs = (parseInt(retryMatch[1], 10) * 60 + parseInt(retryMatch[2], 10)) * 1000 + 5000;
+              } else if (errText.includes('per day')) {
+                cooldownMs = 15 * 60 * 1000;
+              }
+              modelCooldownMap.set(model, Date.now() + cooldownMs);
+              console.warn(`[Gemini TTS (${model}) Error] Status 429: ${errText.slice(0, 150)}... Cooling down for ${Math.round(cooldownMs / 1000)}s.`);
+            } else {
+              console.warn(`[Gemini TTS (${model}) Error] Status ${geminiRes.status}: ${errText.slice(0, 150)}... Trying next model.`);
+            }
           }
         } catch (err: any) {
           console.warn(`[Gemini TTS (${model})] Upstream call failed:`, err?.message || err);

@@ -9,7 +9,7 @@ import {
   getOfflineCapableVoices,
   prewarmCoreAudioVocabulary,
 } from '../utils/audio';
-import { t, setLanguage, getLanguage } from '../services/translator';
+import { t, setLanguage, getLanguage, translateDynamic } from '../services/translator';
 
 interface UseSpeechEngineProps {
   settings: AppSettings;
@@ -69,14 +69,20 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     }
   ) => {
     if (settings.soundEffects) playChime('speak');
-    const spoken = t(text);
+    const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');
+    let spoken = t(text);
+    if (currentActiveLang && currentActiveLang !== 'en' && spoken === text && text.trim().length > 0) {
+      try {
+        spoken = await translateDynamic(text);
+      } catch {}
+    }
+
     let personaToUse = options?.voicePersona || settings.voicePersona || 'system';
     // If user is on Free / Basic tier, restrict speech strictly to on-device system voice
     // (Only explicit audition previews with previewAudio === true may play a 2-second snippet)
     if (!isPremium && personaToUse !== 'system' && !options?.previewAudio) {
       personaToUse = 'system';
     }
-    const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
