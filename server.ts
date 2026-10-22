@@ -344,6 +344,7 @@ interface TemporaryPairingSessionData {
   expiresAt: number;
   status: 'pending' | 'awaiting_approval' | 'paired' | 'rejected' | 'expired' | 'revoked';
   initiatedBy: 'child_device' | 'caregiver';
+  targetFamilyCode?: string;
   childName?: string;
   childAge?: number;
   ageGroup?: string;
@@ -398,11 +399,42 @@ export interface ServerFamilyAccount {
   subscriptionTier: 'free' | 'premium';
   createdAt: string;
   lastSyncedAt: string;
+  ownerUid?: string;
+  members?: Record<string, { role: string; email?: string; approvedAt: number }>;
+  pendingMembers?: Record<string, { email: string; name: string; requestedAt: number }>;
+  revokedMembers?: Record<string, { revokedAt: number; reason?: string }>;
 }
 
 export const caregiverSessions = new Map<string, CaregiverSessionData>();
 export const pairingSessions = new Map<string, TemporaryPairingSessionData>();
 export const familyAccounts = new Map<string, ServerFamilyAccount>();
+
+/**
+ * Authoritatively retrieves a family account by UID, Email, or familyCode
+ */
+export function findFamilyAccount(criteria: { uid?: string; email?: string; familyCode?: string }): ServerFamilyAccount | null {
+  const cleanEmail = criteria.email ? criteria.email.trim().toLowerCase() : undefined;
+  const cleanCode = criteria.familyCode ? sanitizeFamilyCode(criteria.familyCode) : undefined;
+  const uid = criteria.uid?.trim();
+
+  // 1. Direct email lookup
+  if (cleanEmail && familyAccounts.has(cleanEmail)) {
+    const acc = familyAccounts.get(cleanEmail)!;
+    if (!cleanCode || acc.familyCode === cleanCode) return acc;
+  }
+
+  // 2. Scan accounts by UID or familyCode
+  for (const acc of familyAccounts.values()) {
+    if (uid && (acc.ownerUid === uid || (acc.members && acc.members[uid]))) {
+      if (!cleanCode || acc.familyCode === cleanCode) return acc;
+    }
+    if (cleanCode && acc.familyCode === cleanCode) {
+      return acc;
+    }
+  }
+
+  return null;
+}
 
 export function seedDemoFamilyAccount(): void {
   familyAccounts.set('demo@beeyou.app', {
@@ -1015,7 +1047,139 @@ function getDeterministicFamilyCode(email: string): string {
 // Authentication & Cryptographic Family Authorization Engine
 // Satisfies Launch-Blocking Priority 3 Security Requirement
 // -------------------------------------------------------------
-const SERVER_AUTH_SECRET = process.env.FAMILY_AUTH_SECRET || process.env.SESSION_SECRET || 'beeyou-secure-family-auth-secret-key-2026';
+function resolveServerAuthSecret(): string {
+  if (process.env.FAMILY_AUTH_SECRET && process.env.FAMILY_AUTH_SECRET.trim()) {
+    return process.env.FAMILY_AUTH_SECRET.trim();
+  }
+  if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim()) {
+    return process.env.SESSION_SECRET.trim();
+  }
+  const secretFile = path.join(DATA_DIR, '.server_auth_secret');
+  try {
+    if (fs.existsSync(secretFile)) {
+      const persisted = fs.readFileSync(secretFile, 'utf-8').trim();
+      if (persisted.length >= 32) return persisted;
+    }
+  } catch {}
+  const generated = crypto.randomBytes(32).toString('hex');
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(secretFile, generated, { encoding: 'utf-8', mode: 0o600 });
+  } catch {}
+  return generated;
+}
+
+const SERVER_AUTH_SECRET = resolveServerAuthSecret();
+
+// Cache for Google's public certificates used to verify Firebase Auth ID tokens
+interface GoogleCertsCache {
+  certs: Record<string, string>;
+  expiresAt: number;
+}
+let googleCertsCache: GoogleCertsCache | null = null;
+const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
+
+/**
+ * Fetch and cache Google's public certificates for Firebase ID Token RS256 signature verification.
+ */
+export async function fetchGooglePublicKeys(): Promise<Record<string, string>> {
+  const now = Date.now();
+  if (googleCertsCache && googleCertsCache.expiresAt > now) {
+    return googleCertsCache.certs;
+  }
+  try {
+    const res = await fetch('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com');
+    if (!res.ok) throw new Error(`Google certs endpoint returned HTTP ${res.status}`);
+    const certs: Record<string, string> = await res.json();
+    const cacheControl = res.headers.get('cache-control') || '';
+    const maxAgeMatch = cacheControl.match(/max-age=(\d+)/i);
+    const maxAgeSec = maxAgeMatch ? parseInt(maxAgeMatch[1], 10) : 3600 * 6;
+    googleCertsCache = {
+      certs,
+      expiresAt: now + (maxAgeSec * 1000),
+    };
+    return certs;
+  } catch (err) {
+    console.error('[Firebase Auth] Failed to fetch Google public certificates:', err);
+    if (googleCertsCache?.certs) return googleCertsCache.certs;
+    throw err;
+  }
+}
+
+/**
+ * Cryptographically verifies a Firebase Auth ID Token using Google's public keys.
+ * Rejects forged, expired, or tampered tokens with zero trust in unverified payloads.
+ */
+export async function verifyFirebaseIdToken(token: string): Promise<{ uid: string; email?: string; familyCode?: string; role?: string } | null> {
+  if (!token || typeof token !== 'string') return null;
+  const trimmed = token.trim();
+  const parts = trimmed.split('.');
+  if (parts.length !== 3) return null;
+
+  try {
+    const [headerB64, payloadB64, sigB64] = parts;
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+
+    // 1. Header Validation
+    if (header.alg !== 'RS256' || !header.kid) {
+      return null;
+    }
+
+    // 2. Fetch Google Public Certificates & Verify RS256 Signature
+    const certs = await fetchGooglePublicKeys();
+    let certPem = certs[header.kid];
+    if (!certPem) {
+      googleCertsCache = null;
+      const refreshedCerts = await fetchGooglePublicKeys();
+      certPem = refreshedCerts[header.kid];
+      if (!certPem) return null;
+    }
+
+    const activeCertPem = certPem;
+    const signatureData = Buffer.from(`${headerB64}.${payloadB64}`, 'utf8');
+    const signature = Buffer.from(sigB64, 'base64url');
+    const isSignatureValid = crypto.verify('RSA-SHA256', signatureData, activeCertPem, signature);
+    if (!isSignatureValid) {
+      console.warn('[Firebase Auth] Rejected token with invalid cryptographic signature');
+      return null;
+    }
+
+    // 3. Claims Verification
+    const nowSec = Math.floor(Date.now() / 1000);
+    const clockSkewSec = 300;
+
+    if (payload.iss !== `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`) {
+      return null;
+    }
+    if (payload.aud !== FIREBASE_PROJECT_ID) {
+      return null;
+    }
+    if (!payload.sub || typeof payload.sub !== 'string') {
+      return null;
+    }
+    if (payload.exp && (payload.exp + clockSkewSec < nowSec)) {
+      return null; // Expired
+    }
+    if (payload.iat && (payload.iat - clockSkewSec > nowSec)) {
+      return null; // Issued in future
+    }
+    if (payload.auth_time && (payload.auth_time - clockSkewSec > nowSec)) {
+      return null;
+    }
+
+    return {
+      uid: payload.sub,
+      email: payload.email ? String(payload.email).toLowerCase() : undefined,
+      familyCode: payload.familyCode,
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export interface AuthenticatedUser {
   familyCode: string;
@@ -1028,7 +1192,8 @@ export interface AuthenticatedUser {
 export function signFamilyToken(
   familyCode: string,
   role: 'caregiver' | 'child' | 'demo' | 'admin' = 'caregiver',
-  email?: string
+  email?: string,
+  uid?: string
 ): string {
   const cleanCode = sanitizeFamilyCode(familyCode);
   if (!cleanCode) throw new Error('Cannot sign token: invalid family code');
@@ -1036,6 +1201,7 @@ export function signFamilyToken(
     familyCode: cleanCode,
     role: cleanCode === 'BEE-DEMO' ? 'demo' : role,
     email: email || '',
+    uid: uid || '',
     iat: Date.now(),
   };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -1046,14 +1212,14 @@ export function signFamilyToken(
 export const revokedFamilyCodes = new Set<string>();
 export const revokedFamilyTokens = new Set<string>();
 
-export function verifyFamilyToken(token: string): AuthenticatedUser | null {
+export async function verifyFamilyToken(token: string): Promise<AuthenticatedUser | null> {
   if (!token || typeof token !== 'string') return null;
   const trimmed = token.trim();
   if (revokedFamilyTokens.has(trimmed)) return null;
 
   // 1. App Store & Google Play reviewer demo token
   if (trimmed === 'by_demo_reviewer_token_2026' || trimmed === 'DEMO-APPSTORE-REVIEWER-2026') {
-    return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', isDemo: true };
+    return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid: 'B5wSQd95KbYRuL79L6I3wNMgSxP2', isDemo: true };
   }
 
   // 2. Cryptographic signed by_tok format
@@ -1070,10 +1236,18 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
           if (parsed && parsed.familyCode) {
             const cleanCode = sanitizeFamilyCode(parsed.familyCode);
             if (!cleanCode || revokedFamilyCodes.has(cleanCode)) return null;
+
+            // Check if member UID was revoked
+            if (parsed.uid) {
+              const acc = findFamilyAccount({ familyCode: cleanCode });
+              if (acc?.revokedMembers && acc.revokedMembers[parsed.uid]) return null;
+            }
+
             return {
               familyCode: cleanCode,
               role: cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver'),
               email: parsed.email,
+              uid: parsed.uid,
               isDemo: cleanCode === 'BEE-DEMO',
             };
           }
@@ -1086,7 +1260,8 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
   if (trimmed.startsWith('tok-')) {
     for (const [code, session] of pairingSessions.entries()) {
       if (session.token === trimmed && (session.status === 'paired' || session.status === 'pending')) {
-        const cleanCode = sanitizeFamilyCode(code);
+        const effectiveFamilyCode = session.targetFamilyCode || code;
+        const cleanCode = sanitizeFamilyCode(effectiveFamilyCode);
         if (!cleanCode || revokedFamilyCodes.has(cleanCode)) continue;
         return {
           familyCode: cleanCode,
@@ -1098,46 +1273,37 @@ export function verifyFamilyToken(token: string): AuthenticatedUser | null {
     }
   }
 
-  // 4. Firebase Auth ID Token (JWT with 3 parts)
+  // 4. Firebase Auth ID Token (Strict Cryptographic RS256 Verification with Google)
   if (trimmed.split('.').length === 3 && !trimmed.startsWith('by_tok.')) {
-    try {
-      const payloadPart = trimmed.split('.')[1];
-      const decoded = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf-8'));
-      if (decoded && (decoded.user_id || decoded.sub)) {
-        const uid = decoded.user_id || decoded.sub;
-        const email = decoded.email ? String(decoded.email).toLowerCase() : undefined;
+    const verified = await verifyFirebaseIdToken(trimmed);
+    if (verified) {
+      const { uid, email } = verified;
 
-        if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
-          return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
+      // Demo reviewer bypass
+      if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
+        return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
+      }
+
+      // Check authoritative family accounts
+      const acc = findFamilyAccount({ uid, email });
+      if (acc) {
+        // Enforce revocation: if this user was revoked from the family, deny access
+        if (acc.revokedMembers && acc.revokedMembers[uid]) {
+          return null;
         }
 
-        if (decoded.familyCode) {
-          const cleanCode = sanitizeFamilyCode(decoded.familyCode);
-          if (cleanCode && !revokedFamilyCodes.has(cleanCode)) {
-            return {
-              familyCode: cleanCode,
-              role: decoded.role || 'caregiver',
-              email,
-              uid,
-              isDemo: cleanCode === 'BEE-DEMO',
-            };
-          }
-        }
-
-        if (email && familyAccounts.has(email)) {
-          const acc = familyAccounts.get(email)!;
-          if (!revokedFamilyCodes.has(acc.familyCode)) {
-            return {
-              familyCode: acc.familyCode,
-              role: 'caregiver',
-              email,
-              uid,
-              isDemo: acc.familyCode === 'BEE-DEMO',
-            };
-          }
+        if (!revokedFamilyCodes.has(acc.familyCode)) {
+          const role = acc.ownerUid === uid ? 'caregiver' : (acc.members?.[uid]?.role || 'caregiver');
+          return {
+            familyCode: acc.familyCode,
+            role: role as any,
+            email,
+            uid,
+            isDemo: acc.familyCode === 'BEE-DEMO',
+          };
         }
       }
-    } catch {}
+    }
   }
 
   return null;
@@ -1159,7 +1325,7 @@ export function extractAuthToken(req: express.Request): string | null {
 }
 
 export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const token = extractAuthToken(req);
     if (!token) {
       return res.status(401).json({
@@ -1168,7 +1334,7 @@ export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
       });
     }
 
-    const user = verifyFamilyToken(token);
+    const user = await verifyFamilyToken(token);
     if (!user) {
       return res.status(401).json({
         error: 'Unauthorized',
@@ -1180,7 +1346,7 @@ export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
     const targetRaw = req.params.code || req.body?.pairingCode || req.body?.code || req.query.code;
     const targetCode = sanitizeFamilyCode(targetRaw);
 
-    // If target family was requested, ensure user token has explicit access
+    // Cross-Family Denial: Ensure user token has explicit access to target family
     if (targetCode) {
       if (user.familyCode !== targetCode) {
         return res.status(403).json({
@@ -1338,20 +1504,20 @@ function broadcastEvent(code: string, event: CloudSyncEvent): void {
   }
 }
 
-// Helper to generate an unguessable high-entropy temporary pairing code (e.g., BEE-K7P492)
+// Helper to generate an unguessable high-entropy temporary pairing code (e.g., PAIR-K7P492)
 function generatePairingCode(): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let part = '';
   for (let i = 0; i < 6; i++) {
     part += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return `BEE-${part}`;
+  return `PAIR-${part}`;
 }
 
 // -------------------------------------------------------------
 // Family Authentication Token Exchange Endpoint
 // -------------------------------------------------------------
-app.post('/api/family/auth/token', (req, res) => {
+app.post('/api/family/auth/token', async (req, res) => {
   const { familyCode, pin, email } = req.body || {};
   const cleanCode = sanitizeFamilyCode(familyCode);
   if (!cleanCode) {
@@ -1374,9 +1540,9 @@ app.post('/api/family/auth/token', (req, res) => {
   // Check if caller already has a valid Bearer token (e.g. Firebase ID token or pairing token)
   const bearerToken = extractAuthToken(req);
   if (bearerToken) {
-    const verified = verifyFamilyToken(bearerToken);
+    const verified = await verifyFamilyToken(bearerToken);
     if (verified && (verified.familyCode === cleanCode || verified.role === 'admin')) {
-      const token = signFamilyToken(cleanCode, verified.role === 'admin' ? 'caregiver' : (verified.role as any), verified.email || email);
+      const token = signFamilyToken(cleanCode, verified.role === 'admin' ? 'caregiver' : (verified.role as any), verified.email || email, verified.uid);
       return res.json({ success: true, token, familyCode: cleanCode, role: verified.role });
     }
   }
@@ -1417,9 +1583,18 @@ app.post('/api/family/auth/token', (req, res) => {
 // -------------------------------------------------------------
 
 // Create a new temporary single-use expirable pairing session (15-min TTL)
-app.post('/api/caregiver/pairing/create', (req, res) => {
-  const { initiatedBy, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body || {};
+app.post('/api/caregiver/pairing/create', async (req, res) => {
+  const { initiatedBy, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions, targetFamilyCode } = req.body || {};
   
+  let resolvedFamilyCode: string | undefined = sanitizeFamilyCode(targetFamilyCode) || undefined;
+  const callerToken = extractAuthToken(req);
+  if (callerToken) {
+    const verified = await verifyFamilyToken(callerToken);
+    if (verified?.familyCode) {
+      resolvedFamilyCode = verified.familyCode;
+    }
+  }
+
   let pairingCode = generatePairingCode();
   // Ensure unique and never BEE-DEMO
   while (pairingSessions.has(pairingCode) || pairingCode === 'BEE-DEMO') {
@@ -1435,6 +1610,7 @@ app.post('/api/caregiver/pairing/create', (req, res) => {
     expiresAt: now + 15 * 60 * 1000, // 15 minutes TTL
     status: 'pending',
     initiatedBy: initiatedBy === 'caregiver' ? 'caregiver' : 'child_device',
+    targetFamilyCode: resolvedFamilyCode,
     childName: childName || (initiatedBy === 'caregiver' ? 'Child' : undefined),
     childAge: childAge ? Number(childAge) : undefined,
     ageGroup: ageGroup || 'kid',
@@ -1533,7 +1709,7 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 });
 
 // Explicit approval endpoint called by the intended account on the host device
-app.post('/api/caregiver/pairing/approve', (req, res) => {
+app.post('/api/caregiver/pairing/approve', async (req, res) => {
   const { pairingCode } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
@@ -1550,12 +1726,27 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
     return res.status(400).json({ error: 'Pairing code has expired. Please generate a new code.' });
   }
 
+  // Resolve target permanent family code
+  let effectiveFamilyCode = session.targetFamilyCode;
+  const callerToken = extractAuthToken(req);
+  if (callerToken) {
+    const verified = await verifyFamilyToken(callerToken);
+    if (verified?.familyCode) {
+      effectiveFamilyCode = verified.familyCode;
+    }
+  }
+
+  if (!effectiveFamilyCode) {
+    effectiveFamilyCode = 'BEE-' + code.replace(/^PAIR-/, '');
+  }
+
+  session.targetFamilyCode = effectiveFamilyCode;
   session.status = 'paired';
   savePairingSessions().catch(() => {});
 
   // Initialize the permanent live caregiver session for this linked pairing
   const permanentSession: CaregiverSessionData = {
-    pairingCode: code,
+    pairingCode: effectiveFamilyCode,
     childName: session.childName || 'Child',
     lastActiveTime: new Date().toISOString(),
     currentActivity: 'Connected to BeeYou Companion',
@@ -1569,8 +1760,8 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
       {
         id: 'msg-welcome-' + Date.now(),
         senderName: session.caregiverName || 'Caregiver',
-        text: `Connected! You can be yourself here. 🐝`,
-        emoji: '🐝',
+        text: 'Connected! You can be yourself here.',
+        emoji: '',
         timestamp: new Date().toISOString(),
         read: false,
       }
@@ -1581,7 +1772,7 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
     unlinked: false,
   };
 
-  setCaregiverSession(code, permanentSession);
+  setCaregiverSession(effectiveFamilyCode, permanentSession);
 
   // Broadcast DEVICE_PAIRED & PAIRING_APPROVED events across all connected devices
   broadcastEvent(code, {
@@ -1592,7 +1783,17 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
     sentAt: Date.now(),
   });
 
-  const authToken = signFamilyToken(code, (session.initiatedBy === 'caregiver' ? 'caregiver' : 'child'), session.caregiverEmail);
+  if (effectiveFamilyCode !== code) {
+    broadcastEvent(effectiveFamilyCode, {
+      eventId: `ev-pair-approved-${Date.now()}`,
+      type: 'DEVICE_PAIRED',
+      pairingCode: effectiveFamilyCode,
+      session: permanentSession,
+      sentAt: Date.now(),
+    });
+  }
+
+  const authToken = signFamilyToken(effectiveFamilyCode, (session.initiatedBy === 'caregiver' ? 'caregiver' : 'child'), session.caregiverEmail);
 
   return res.json({ 
     success: true, 
@@ -1600,6 +1801,7 @@ app.post('/api/caregiver/pairing/approve', (req, res) => {
     session,
     permanentSession,
     token: authToken,
+    familyCode: effectiveFamilyCode,
     message: 'Pairing approved and device connected successfully!' 
   });
 });
@@ -2232,12 +2434,37 @@ app.post('/api/family/message/:code', requireFamilyAuth(), (req, res) => {
 // -------------------------------------------------------------
 
 // Register a new shared family account on the server
-app.post('/api/caregiver/family/register', (req, res) => {
+app.post('/api/caregiver/family/register', async (req, res) => {
+  const token = extractAuthToken(req);
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Unauthorized', message: 'Authentication required. Missing Bearer ID token.' });
+  }
+
+  const verified = await verifyFamilyToken(token);
+  if (!verified) {
+    return res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid or expired authentication credentials.' });
+  }
+
   const { email, caregiverName, caregiverRole, childName, childAgeGroup, pin } = req.body || {};
-  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanEmail = (verified.email || email || '').trim().toLowerCase();
 
   if (!cleanEmail || !cleanEmail.includes('@')) {
     return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+  }
+
+  // Check if an account already exists for this email or uid
+  let existing = findFamilyAccount({ uid: verified.uid, email: cleanEmail });
+  if (existing) {
+    const signedToken = signFamilyToken(existing.familyCode, 'caregiver', existing.email, verified.uid);
+    const safeAccount = {
+      ...existing,
+      childProfile: {
+        ...existing.childProfile,
+        pin: undefined,
+      },
+      backupEmail: undefined,
+    };
+    return res.json({ success: true, account: safeAccount, token: signedToken, message: `Account already exists for ${cleanEmail}! Family code: ${existing.familyCode}` });
   }
 
   const familyCode = getDeterministicFamilyCode(cleanEmail);
@@ -2245,6 +2472,10 @@ app.post('/api/caregiver/family/register', (req, res) => {
     id: 'fam-' + Date.now(),
     email: cleanEmail,
     familyCode,
+    ownerUid: verified.uid,
+    members: verified.uid ? {
+      [verified.uid]: { role: 'caregiver', email: cleanEmail, approvedAt: Date.now() }
+    } : {},
     caregiverName: caregiverName?.trim() || 'Caregiver',
     caregiverRole: caregiverRole?.trim() || 'Parent',
     childProfile: {
@@ -2281,7 +2512,7 @@ app.post('/api/caregiver/family/register', (req, res) => {
     saveCaregiverSessions().catch(() => {});
   }
 
-  const token = signFamilyToken(familyCode, 'caregiver', cleanEmail);
+  const signedToken = signFamilyToken(familyCode, 'caregiver', cleanEmail, verified.uid);
 
   const safeAccount = {
     ...account,
@@ -2292,26 +2523,54 @@ app.post('/api/caregiver/family/register', (req, res) => {
     backupEmail: undefined,
   };
 
-  return res.json({ success: true, account: safeAccount, token, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
+  return res.json({ success: true, account: safeAccount, token: signedToken, message: `Account created for ${cleanEmail}! Family code: ${familyCode}` });
 });
 
 // Sign into shared family account on the server
-app.post('/api/caregiver/family/login', (req, res) => {
+app.post('/api/caregiver/family/login', async (req, res) => {
+  const token = extractAuthToken(req);
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Unauthorized', message: 'Authentication required. Missing Bearer ID token.' });
+  }
+
+  const verified = await verifyFamilyToken(token);
+  if (!verified) {
+    return res.status(401).json({ success: false, error: 'Unauthorized', message: 'Invalid or expired authentication credentials.' });
+  }
+
   const { email } = req.body || {};
-  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanEmail = (verified.email || email || '').trim().toLowerCase();
 
   if (!cleanEmail || !cleanEmail.includes('@')) {
     return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
   }
 
-  let account = familyAccounts.get(cleanEmail);
-  if (!account) {
+  let account = findFamilyAccount({ uid: verified.uid, email: cleanEmail });
+
+  if (account) {
+    // Check if user was revoked by owner
+    if (verified.uid && account.revokedMembers && account.revokedMembers[verified.uid]) {
+      return res.status(403).json({ error: 'Forbidden', message: 'Family access has been revoked by the account owner.' });
+    }
+
+    // Link ownerUid if not previously set
+    if (!account.ownerUid && verified.uid && account.email === cleanEmail) {
+      account.ownerUid = verified.uid;
+      if (!account.members) account.members = {};
+      account.members[verified.uid] = { role: 'caregiver', email: cleanEmail, approvedAt: Date.now() };
+      saveFamilyAccounts().catch(() => {});
+    }
+  } else {
     // Deterministically generate so sign in NEVER fails across devices
     const familyCode = getDeterministicFamilyCode(cleanEmail);
     account = {
       id: 'fam-' + Date.now(),
       email: cleanEmail,
       familyCode,
+      ownerUid: verified.uid,
+      members: verified.uid ? {
+        [verified.uid]: { role: 'caregiver', email: cleanEmail, approvedAt: Date.now() }
+      } : {},
       caregiverName: 'Caregiver',
       caregiverRole: 'Parent',
       childProfile: {
@@ -2348,7 +2607,7 @@ app.post('/api/caregiver/family/login', (req, res) => {
     saveCaregiverSessions().catch(() => {});
   }
 
-  const token = signFamilyToken(account.familyCode, 'caregiver', cleanEmail);
+  const signedToken = signFamilyToken(account.familyCode, 'caregiver', cleanEmail, verified.uid);
 
   const safeAccount = {
     ...account,
@@ -2359,7 +2618,169 @@ app.post('/api/caregiver/family/login', (req, res) => {
     backupEmail: undefined,
   };
 
-  return res.json({ success: true, account: safeAccount, token, message: `Logged in as ${cleanEmail}!` });
+  return res.json({ success: true, account: safeAccount, token: signedToken, message: `Logged in as ${cleanEmail}!` });
+});
+
+// List members of a family
+app.get('/api/family/members/:code', requireFamilyAuth(), (req, res) => {
+  const code = sanitizeFamilyCode(req.params.code);
+  const user = (req as any).user as AuthenticatedUser;
+  if (!code || user.familyCode !== code) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Access denied.' });
+  }
+
+  const account = findFamilyAccount({ familyCode: code });
+  if (!account) {
+    return res.status(404).json({ error: 'NotFound', message: 'Family account not found.' });
+  }
+
+  return res.json({
+    success: true,
+    familyCode: code,
+    ownerUid: account.ownerUid,
+    members: account.members || {},
+    pendingMembers: account.pendingMembers || {},
+    revokedMembers: account.revokedMembers || {},
+  });
+});
+
+// Request to join family
+app.post('/api/family/member/request', async (req, res) => {
+  const token = extractAuthToken(req);
+  if (!token) return res.status(401).json({ error: 'Unauthorized', message: 'Bearer token required.' });
+  const verified = await verifyFamilyToken(token);
+  if (!verified || !verified.uid) return res.status(401).json({ error: 'Unauthorized', message: 'Invalid token.' });
+
+  const { familyCode, name } = req.body || {};
+  const code = sanitizeFamilyCode(familyCode);
+  if (!code) return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code.' });
+
+  const account = findFamilyAccount({ familyCode: code });
+  if (!account) return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
+
+  if (account.revokedMembers && account.revokedMembers[verified.uid]) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Access to this family has been revoked.' });
+  }
+
+  if (account.ownerUid === verified.uid || (account.members && account.members[verified.uid])) {
+    return res.json({ success: true, status: 'already_member', message: 'Already a member of this family.' });
+  }
+
+  if (!account.pendingMembers) account.pendingMembers = {};
+  account.pendingMembers[verified.uid] = {
+    email: verified.email || '',
+    name: name?.trim() || 'Caregiver',
+    requestedAt: Date.now(),
+  };
+  saveFamilyAccounts().catch(() => {});
+
+  return res.json({ success: true, status: 'pending_approval', message: 'Membership request submitted. Awaiting owner approval.' });
+});
+
+// Explicit owner approval for a member
+app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => {
+  const user = (req as any).user as AuthenticatedUser;
+  const { targetUid, role } = req.body || {};
+  if (!targetUid || typeof targetUid !== 'string') {
+    return res.status(400).json({ error: 'BadRequest', message: 'targetUid is required.' });
+  }
+
+  const account = findFamilyAccount({ familyCode: user.familyCode });
+  if (!account) {
+    return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
+  }
+
+  // Only the owner (or demo/admin) can approve new members
+  if (account.ownerUid && account.ownerUid !== user.uid && user.role !== 'admin' && !user.isDemo) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Only the family owner can approve new members.' });
+  }
+
+  if (!account.members) account.members = {};
+  const pending = account.pendingMembers?.[targetUid];
+  account.members[targetUid] = {
+    role: role || 'caregiver',
+    email: pending?.email,
+    approvedAt: Date.now(),
+  };
+
+  if (account.pendingMembers) {
+    delete account.pendingMembers[targetUid];
+  }
+  if (account.revokedMembers) {
+    delete account.revokedMembers[targetUid];
+  }
+  saveFamilyAccounts().catch(() => {});
+
+  // Sync to Firebase RTDB if available
+  if (FIREBASE_DB_URL) {
+    try {
+      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/members/${encodeURIComponent(targetUid)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(true),
+      });
+    } catch {}
+  }
+
+  return res.json({ success: true, message: `Member ${targetUid} approved successfully.` });
+});
+
+// Explicit owner revocation of a member
+app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
+  const user = (req as any).user as AuthenticatedUser;
+  const { targetUid, reason } = req.body || {};
+  if (!targetUid || typeof targetUid !== 'string') {
+    return res.status(400).json({ error: 'BadRequest', message: 'targetUid is required.' });
+  }
+
+  const account = findFamilyAccount({ familyCode: user.familyCode });
+  if (!account) {
+    return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
+  }
+
+  // Only the owner (or admin) can revoke members
+  if (account.ownerUid && account.ownerUid !== user.uid && user.role !== 'admin' && !user.isDemo) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Only the family owner can revoke members.' });
+  }
+
+  // Cannot revoke the owner
+  if (targetUid === account.ownerUid) {
+    return res.status(400).json({ error: 'BadRequest', message: 'Cannot revoke the family owner.' });
+  }
+
+  if (!account.revokedMembers) account.revokedMembers = {};
+  account.revokedMembers[targetUid] = {
+    revokedAt: Date.now(),
+    reason: reason?.trim() || 'Revoked by family owner',
+  };
+
+  if (account.members) {
+    delete account.members[targetUid];
+  }
+  if (account.pendingMembers) {
+    delete account.pendingMembers[targetUid];
+  }
+  saveFamilyAccounts().catch(() => {});
+
+  // Remove member from Firebase Realtime Database
+  if (FIREBASE_DB_URL) {
+    try {
+      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/members/${encodeURIComponent(targetUid)}.json`, {
+        method: 'DELETE',
+      });
+    } catch {}
+  }
+
+  // Broadcast revocation event across devices
+  broadcastEvent(account.familyCode, {
+    eventId: `ev-revoke-${Date.now()}`,
+    type: 'MEMBER_REVOKED',
+    pairingCode: account.familyCode,
+    targetUid,
+    sentAt: Date.now(),
+  });
+
+  return res.json({ success: true, message: `Member ${targetUid} has been revoked.` });
 });
 
 // Fetch account details by email (sanitized - strips internal PIN)

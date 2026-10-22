@@ -1363,6 +1363,10 @@ export async function pollPairingSessionStatus(code: string): Promise<TemporaryP
       if (data?.session) {
         try {
           localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(data.session));
+          if (data.session.status === 'paired' && data.session.targetFamilyCode) {
+            setPairingCode(data.session.targetFamilyCode);
+            subscribeToCloudChannel(data.session.targetFamilyCode);
+          }
         } catch {}
         return data.session;
       }
@@ -1542,6 +1546,7 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
   const safeCode = (code || '').trim().toUpperCase();
   if (!safeCode) return { success: false, message: 'Invalid pairing code.' };
 
+  let effectiveCode = safeCode;
   try {
     const res = await fetch('/api/caregiver/pairing/approve', {
       method: 'POST',
@@ -1553,6 +1558,9 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
       if (data?.token) {
         saveClientAuthToken(data.token);
       }
+      if (data?.familyCode) {
+        effectiveCode = data.familyCode;
+      }
     }
   } catch {}
 
@@ -1563,21 +1571,29 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
       const s = JSON.parse(raw);
       if (s.pairingCode === safeCode) {
         s.status = 'paired';
+        s.targetFamilyCode = effectiveCode;
         localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(s));
       }
     }
   } catch {}
 
-  setPairingCode(safeCode);
-  subscribeToCloudChannel(safeCode);
+  setPairingCode(effectiveCode);
+  subscribeToCloudChannel(effectiveCode);
 
   lastPeerPingTimestamp = Date.now();
   notifyConnectionStatus();
 
-  await publishCloudEvent(safeCode, {
+  await publishCloudEvent(effectiveCode, {
     type: 'DEVICE_PAIRED',
-    pairingCode: safeCode,
+    pairingCode: effectiveCode,
   });
+
+  if (effectiveCode !== safeCode) {
+    await publishCloudEvent(safeCode, {
+      type: 'DEVICE_PAIRED',
+      pairingCode: safeCode,
+    });
+  }
 
   return { success: true, message: 'Device paired and connected successfully!' };
 }

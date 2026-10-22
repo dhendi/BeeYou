@@ -129,7 +129,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         } catch {}
         if (setUserRole) setUserRole('caregiver');
         if (setSubscriptionTier) {
-          if (account.subscriptionTier === 'free' || account.subscriptionTier === 'basic') {
+          if ((account.subscriptionTier as string) === 'free' || (account.subscriptionTier as string) === 'basic') {
             setSubscriptionTier('basic');
             updateSettings({ voicePersona: 'system' });
           } else {
@@ -160,7 +160,7 @@ export const FamilyAuthModal: React.FC<FamilyAuthModalProps> = ({
         setIsParentMode(false);
         if (setUserRole) setUserRole('child_dependent');
         if (setSubscriptionTier) {
-          if (account.subscriptionTier === 'free' || account.subscriptionTier === 'basic') {
+          if ((account.subscriptionTier as string) === 'free' || (account.subscriptionTier as string) === 'basic') {
             setSubscriptionTier('basic');
             updateSettings({ voicePersona: 'system' });
           } else {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { t } from '../services/translator';
 import { 
   RefreshCw, 
   ArrowLeft,

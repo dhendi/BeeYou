@@ -465,7 +465,20 @@ export function getDeterministicFamilyCode(email: string): string {
   if (existing && existing.email === clean && existing.familyCode && existing.familyCode !== 'BEE-DEMO') {
     return existing.familyCode;
   }
-  return generateSecureFamilyCode();
+  // Deterministic fallback derived from email so fresh second devices resolve identical family code
+  let hash = 0;
+  for (let i = 0; i < clean.length; i++) {
+    hash = (hash << 5) - hash + clean.charCodeAt(i);
+    hash |= 0;
+  }
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let code = '';
+  let h = Math.abs(hash);
+  for (let i = 0; i < 7; i++) {
+    code += chars[h % chars.length];
+    h = Math.floor(h / chars.length) || (h + 13);
+  }
+  return `BEE-${code}`;
 }
 
 /**
@@ -586,13 +599,14 @@ export async function loginWithSharedEmail(
   const deterministicCode = getDeterministicFamilyCode(cleanEmail);
   let firebaseUid: string;
   let isEmailVerified = false;
+  let idToken: string = '';
 
   // 2. Real Firebase Authentication
   try {
     const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
     firebaseUid = userCredential.user.uid;
     isEmailVerified = userCredential.user.emailVerified;
-    await syncUserFamilyMembership(firebaseUid, deterministicCode, false);
+    idToken = await userCredential.user.getIdToken();
   } catch (err: any) {
     console.warn('Firebase signIn notice:', err?.code, err?.message);
     return {
@@ -601,32 +615,64 @@ export async function loginWithSharedEmail(
     };
   }
 
+  // Retrieve existing authoritative family account and token from server
+  let serverAccount: any = null;
+  if (idToken) {
+    try {
+      const res = await fetch('/api/caregiver/family/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.account) serverAccount = data.account;
+        if (data?.token) saveClientAuthToken(data.token);
+      } else if (res.status === 403) {
+        return {
+          success: false,
+          message: 'Access denied. Family membership has been revoked by the account owner.',
+        };
+      }
+    } catch (netErr) {
+      console.warn('Server family login notice:', netErr);
+    }
+  }
+
   // Preserve existing local account profiles if this user previously signed in here
   const existing = getStoredFamilyAccount();
   const existingMatches = existing && existing.email === cleanEmail;
 
+  const resolvedFamilyCode = serverAccount?.familyCode || (existingMatches ? existing.familyCode : deterministicCode);
+  const resolvedChildProfile = serverAccount?.childProfile || (existingMatches ? existing.childProfile : {
+    name: 'Child',
+    ageGroup: 'kid',
+    interests: ['Visual Schedules'],
+    pronouns: 'they/them',
+    pin: '1234',
+  });
+  const resolvedCaregiverName = serverAccount?.caregiverName || (existingMatches ? existing.caregiverName : 'Caregiver');
+  const resolvedCaregiverRole = serverAccount?.caregiverRole || (existingMatches ? existing.caregiverRole : 'Parent / Caregiver');
+
   let account: FamilyAccount = {
     id: firebaseUid,
     email: cleanEmail,
-    caregiverName: existingMatches ? existing.caregiverName : 'Caregiver',
-    caregiverRole: existingMatches ? existing.caregiverRole : 'Parent / Caregiver',
-    familyCode: deterministicCode,
-    childProfile: existingMatches
-      ? existing.childProfile
-      : {
-          name: '',
-          ageGroup: 'kid',
-          interests: [],
-          pronouns: '',
-          pin: '1234',
-        },
+    caregiverName: resolvedCaregiverName,
+    caregiverRole: resolvedCaregiverRole,
+    familyCode: resolvedFamilyCode,
+    childProfile: resolvedChildProfile,
     subscriptionTier: isEmailVerified ? 'premium' : 'free',
     emailVerified: isEmailVerified,
-    createdAt: existingMatches ? existing.createdAt : new Date().toISOString(),
+    createdAt: serverAccount?.createdAt || (existingMatches ? existing.createdAt : new Date().toISOString()),
     lastSyncedAt: new Date().toISOString(),
   };
 
   saveStoredFamilyAccount(account);
+  setPairingCode(account.familyCode);
+  await syncUserFamilyMembership(firebaseUid, account.familyCode, serverAccount?.ownerUid === firebaseUid);
 
   // Send initial heartbeat
   try {
@@ -653,30 +699,60 @@ export async function loginWithGoogle(): Promise<{ success: boolean; account?: F
     const user = result.user;
     const email = user.email || `google-${user.uid.slice(0, 8)}@beeyou.app`;
     const deterministicCode = getDeterministicFamilyCode(email);
+    const idToken = await user.getIdToken();
 
-    const displayName = user.displayName || 'Caregiver';
+    let serverAccount: any = null;
+    if (idToken) {
+      try {
+        const res = await fetch('/api/caregiver/family/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ email }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.account) serverAccount = data.account;
+          if (data?.token) saveClientAuthToken(data.token);
+        } else if (res.status === 403) {
+          return {
+            success: false,
+            message: 'Access denied. Family membership has been revoked by the account owner.',
+          };
+        }
+      } catch (e) {
+        console.warn('Google login server sync notice:', e);
+      }
+    }
+
+    const displayName = serverAccount?.caregiverName || user.displayName || 'Caregiver';
+    const resolvedFamilyCode = serverAccount?.familyCode || deterministicCode;
+    const resolvedChildProfile = serverAccount?.childProfile || {
+      name: 'Child',
+      ageGroup: 'kid',
+      interests: ['Visual Schedules'],
+      pronouns: 'they/them',
+      pin: '1234',
+    };
 
     let account: FamilyAccount = {
       id: user.uid,
       email: email,
       caregiverName: displayName,
-      caregiverRole: 'Parent / Caregiver',
-      familyCode: deterministicCode,
-      childProfile: {
-        name: '',
-        ageGroup: 'kid',
-        interests: [],
-        pronouns: '',
-        pin: '1234',
-      },
+      caregiverRole: serverAccount?.caregiverRole || 'Parent / Caregiver',
+      familyCode: resolvedFamilyCode,
+      childProfile: resolvedChildProfile,
       subscriptionTier: 'premium',
       emailVerified: true,
-      createdAt: new Date().toISOString(),
+      createdAt: serverAccount?.createdAt || new Date().toISOString(),
       lastSyncedAt: new Date().toISOString(),
     };
 
     saveStoredFamilyAccount(account);
-    await syncUserFamilyMembership(user.uid, deterministicCode, false);
+    setPairingCode(account.familyCode);
+    await syncUserFamilyMembership(user.uid, account.familyCode, serverAccount?.ownerUid === user.uid);
 
     try {
       await sendHeartbeat({
@@ -733,11 +809,13 @@ export async function registerSharedFamilyAccount(params: {
     return { success: false, message: 'BEE-DEMO is reserved for App Store review.' };
   }
   let firebaseUid: string;
+  let idToken = '';
 
   // 1. Create User in Firebase Auth
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, params.password);
     firebaseUid = userCredential.user.uid;
+    idToken = await userCredential.user.getIdToken();
 
     // Send automated email verification link for free via Firebase
     try {
@@ -753,29 +831,62 @@ export async function registerSharedFamilyAccount(params: {
     };
   }
 
+  // Register authoritatively with server
+  let serverAccount: any = null;
+  if (idToken) {
+    try {
+      const regRes = await fetch('/api/caregiver/family/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+          caregiverName: params.caregiverName,
+          caregiverRole: params.caregiverRole,
+          childName: params.childName,
+          childAgeGroup: params.childAgeGroup,
+          pin: params.pin,
+        }),
+      });
+      if (regRes.ok) {
+        const regData = await regRes.json();
+        if (regData?.account) serverAccount = regData.account;
+        if (regData?.token) saveClientAuthToken(regData.token);
+      }
+    } catch (netErr) {
+      console.warn('Server registration sync notice:', netErr);
+    }
+  }
+
   const hashedPin = await hashPin(params.pin || '1234');
+  const resolvedFamilyCode = serverAccount?.familyCode || deterministicCode;
+  const resolvedChildProfile = serverAccount?.childProfile || {
+    name: params.childName.trim() || 'Child',
+    ageGroup: params.childAgeGroup || 'kid',
+    interests: [],
+    pronouns: '',
+    pin: hashedPin,
+  };
+
   let newAccount: FamilyAccount = {
     id: firebaseUid,
     email: cleanEmail,
     backupEmail: cleanBackupEmail || undefined,
     caregiverName: params.caregiverName.trim() || 'Caregiver',
     caregiverRole: params.caregiverRole.trim() || 'Parent',
-    familyCode: deterministicCode,
-    childProfile: {
-      name: params.childName.trim() || 'Child',
-      ageGroup: params.childAgeGroup || 'kid',
-      interests: [],
-      pronouns: '',
-      pin: hashedPin,
-    },
+    familyCode: resolvedFamilyCode,
+    childProfile: resolvedChildProfile,
     subscriptionTier: 'free',
     emailVerified: false,
-    createdAt: new Date().toISOString(),
+    createdAt: serverAccount?.createdAt || new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
   };
 
   saveStoredFamilyAccount(newAccount);
-  await syncUserFamilyMembership(firebaseUid, deterministicCode, true);
+  setPairingCode(newAccount.familyCode);
+  await syncUserFamilyMembership(firebaseUid, newAccount.familyCode, true);
 
   // Send initial heartbeat & sync status
   try {
@@ -791,6 +902,64 @@ export async function registerSharedFamilyAccount(params: {
     account: newAccount,
     message: `Account created for ${cleanEmail}! A free verification email has been sent to your inbox. You can use the Basic app now, or verify to unlock your 15-day free trial!`,
   };
+}
+
+/**
+ * Fetch authoritative list of family members from server
+ */
+export async function fetchFamilyMembers(familyCode: string): Promise<any> {
+  const token = await getClientAuthToken();
+  if (!token) throw new Error('Authentication required.');
+  const res = await fetch(`/api/family/members/${encodeURIComponent(familyCode)}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || 'Failed to fetch family members.');
+  }
+  return res.json();
+}
+
+/**
+ * Owner approves a pending family member
+ */
+export async function approveFamilyMember(targetUid: string, role = 'caregiver'): Promise<any> {
+  const token = await getClientAuthToken();
+  if (!token) throw new Error('Authentication required.');
+  const res = await fetch('/api/family/member/approve', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ targetUid, role }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || 'Failed to approve member.');
+  }
+  return res.json();
+}
+
+/**
+ * Owner revokes an existing member from the family
+ */
+export async function revokeFamilyMember(targetUid: string, reason?: string): Promise<any> {
+  const token = await getClientAuthToken();
+  if (!token) throw new Error('Authentication required.');
+  const res = await fetch('/api/family/member/revoke', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ targetUid, reason }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || 'Failed to revoke member.');
+  }
+  return res.json();
 }
 
 /**
