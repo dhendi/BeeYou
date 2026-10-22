@@ -16,6 +16,7 @@ import { ParentalGateModal } from './common/ParentalGateModal';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
+import { registerScrollCancel } from '../utils/touchScrollGuard';
 import { prewarmCoreAudioVocabulary, prewarmPhrases } from '../utils/audio/speech';
 import { isVoicePackLoaded } from '../services/aacPreloadService';
 import { preloadPiperVoice } from '../services/piperTtsService';
@@ -1014,6 +1015,12 @@ export const AACView: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    return registerScrollCancel(() => {
+      handleLongPressEnd();
+    });
+  }, []);
+
   const handleSelectInflection = (inf: WordInflection) => {
     if (!inflectionTarget) return;
     const gestureTime = performance.now();
@@ -1048,7 +1055,7 @@ export const AACView: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => speak(phrase)}
-                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-100 text-indigo-950 font-bold text-xs border border-indigo-200 shadow-2xs shrink-0 active:scale-95 cursor-pointer whitespace-nowrap"
+                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-100 text-indigo-950 font-bold text-xs border border-indigo-200 shadow-2xs shrink-0 active:scale-95 cursor-pointer whitespace-nowrap touch-manipulation"
                 >
                   {phrase}
                 </button>
@@ -1326,7 +1333,7 @@ export const AACView: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => speak(phrase)}
-                  className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-xl bg-[#FCF9F2] hover:bg-white text-[#4A2F0F] font-bold text-xs border border-[#E0D8CB] shadow-[0_2px_4px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] shrink-0 active:scale-95 cursor-pointer flex items-center gap-1.5 touch-manipulation"
                 >
                   <img
                     src="/assets/stickers/aac_sentences.webp"
@@ -1507,7 +1514,7 @@ export const AACView: React.FC = () => {
                       setSearchQuery('');
                       playChime('tap');
                     }}
-                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 ${activeStyle}`}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 touch-manipulation ${activeStyle}`}
                   >
                     <img
                       src={iconSrc}
@@ -1744,7 +1751,11 @@ export const AACView: React.FC = () => {
       </div>
 
       {/* 6. SCROLLABLE MOTOR-PLANNING VOCABULARY GRID */}
-      <div className="flex-1 overflow-y-auto min-h-0 pr-0.5 pb-20 scrollbar-thin mt-1">
+      <div
+        onScroll={handleLongPressEnd}
+        onTouchMove={handleLongPressEnd}
+        className="flex-1 overflow-y-auto min-h-0 pr-0.5 pb-20 scrollbar-thin mt-1"
+      >
         
         {/* Active Scene Banner */}
         {activeSceneData && (
@@ -2135,7 +2146,7 @@ export const AACView: React.FC = () => {
                     setActiveCategory(folder.category);
                     playChime('tap');
                   }}
-                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
+                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden touch-manipulation ${
                     isFrogTheme
                       ? 'bg-lime-50/80 hover:bg-lime-50 border-lime-300 text-lime-950 shadow-[0_4px_10px_rgba(101,163,13,0.08)]'
                       : isDinoTheme
@@ -2222,8 +2233,11 @@ export const AACView: React.FC = () => {
                 className={`relative group aspect-square ${isMasked ? 'opacity-40 grayscale ring-2 ring-[#99C2A2] rounded-2xl' : ''}`}
                 onMouseDown={() => handleLongPressStart(item)}
                 onMouseUp={handleLongPressEnd}
+                onMouseLeave={handleLongPressEnd}
                 onTouchStart={() => handleLongPressStart(item)}
+                onTouchMove={handleLongPressEnd}
                 onTouchEnd={handleLongPressEnd}
+                onTouchCancel={handleLongPressEnd}
               >
                 <AccessibleTile
                   variant="aac"

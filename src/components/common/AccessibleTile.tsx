@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTouchScrollGuard } from '../../utils/touchScrollGuard';
 
 export type AccessibleTileVariant = 'aac' | 'routine' | 'emergency' | 'action' | 'custom';
 
@@ -65,15 +66,29 @@ export const AccessibleTile = React.forwardRef<HTMLButtonElement, AccessibleTile
         ? 'min-w-[48px] min-h-[48px] sm:min-w-[56px] sm:min-h-[56px]'
         : 'min-w-[48px] min-h-[48px]';
 
+    const scrollGuard = useTouchScrollGuard(onClick);
+
     return (
       <button
         ref={ref}
         type="button"
         disabled={disabled}
-        onClick={onClick}
+        onClick={scrollGuard.onClick}
+        onTouchStart={(e) => {
+          scrollGuard.onTouchStart(e);
+          rest.onTouchStart?.(e);
+        }}
+        onTouchMove={(e) => {
+          scrollGuard.onTouchMove(e);
+          rest.onTouchMove?.(e);
+        }}
+        onTouchEnd={(e) => {
+          scrollGuard.onTouchEnd();
+          rest.onTouchEnd?.(e);
+        }}
         aria-label={computedAriaLabel}
         aria-pressed={variant === 'routine' ? completed : active}
-        className={`${touchTargetClass} relative flex items-center justify-center font-bold text-center select-none cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        className={`${touchTargetClass} touch-manipulation relative flex items-center justify-center font-bold text-center select-none cursor-pointer transition-all focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
         {...rest}
       >
         {children ? (
