@@ -879,67 +879,31 @@ export async function speakText(
     return;
   }
 
-  // 2. Pre-bundled Offline Core Audio (Whole-Sentence Fluid Neural Recordings & Single Words)
-  // Immediately checks local app bundle for 24kHz 16-bit Mono PCM WAV files.
-  // Plays instantly via Web Audio with iOS Silent Mode bypass (0ms delay, natural prosody).
+  // 2. Direct Whole-Sentence Native Vocalization for Multi-Word Sentences
+  // Constructed AAC sentences are vocalized directly as a single, fluid utterance
+  // with natural human prosody, proper cadence, and calibrated persona acoustic profiles.
+  // Strictly eliminates choppy word-stitching and isolated single-word concatenation.
+  if (isMultiWord) {
+    if (speechId !== latestSpeechRequestId) return;
+    await speakWithBrowserSpeechSynthesis(formattedText, {
+      ...options,
+      voicePersona: selectedPersonaId,
+      pitch: calibratedPitch,
+      rate: calibratedRate,
+      force: options?.force,
+    });
+    return;
+  }
+
+  // 3. Pre-bundled Offline Core Audio for Single Words
+  // When an individual tile is tapped on the board, plays the authentic persona word recording
+  // if available for the active persona. Does NOT cross-contaminate voices.
   if (!isNonEnglish) {
     const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const slugAliases: Record<string, string> = {
-      helpme: 'help',
-      pleasehelpme: 'help',
-      waitplease: 'wait',
-      alldone: 'alldone',
-      tooloud: 'tooloud',
-      itistooloud: 'itistooloud',
-      toobright: 'toobright',
-      itistoobright: 'itistoobright',
-      iwantwater: 'iwantwater',
-      iwantadrink: 'iwantadrink',
-      iwantdrink: 'iwantdrink',
-      iwantfood: 'iwantfood',
-      iwantpizza: 'iwantpizza',
-      iwantapple: 'iwantapple',
-      iwantanapple: 'iwantapple',
-      iwanttoplay: 'iwanttoplay',
-      iwantplay: 'iwanttoplay',
-      gosomewhere: 'gosomewhere',
-      howifeel: 'howifeel',
-      ineedabreak: 'ineedabreak',
-      ineedbreak: 'ineedabreak',
-      iwantthis: 'iwantthis',
-      ineedhelp: 'ineedhelp',
-      ineedbathroom: 'ineedbathroom',
-      ineedthebathroom: 'ineedbathroom',
-      iwantmore: 'iwantmore',
-      ilikeit: 'ilikeit',
-      ilike: 'ilikeit',
-      idontlikeit: 'idontlikeit',
-      idontlike: 'idontlikeit',
-      yesplease: 'yesplease',
-      nothankyou: 'nothankyou',
-      pleasestop: 'pleasestop',
-      thankyou: 'thankyou',
-      headphones: 'ineedmyheadphones',
-      ineedmyheadphones: 'ineedmyheadphones',
-      weightedblanket: 'iwantmyweightedblanket',
-      iwantmyweightedblanket: 'iwantmyweightedblanket',
-      quietroom: 'ineedaquietplace',
-      ineedaquietplace: 'ineedaquietplace',
-      squishyfidget: 'iwantmyfidgettoy',
-      iwantmyfidgettoy: 'iwantmyfidgettoy',
-    };
-    const wordSlug = slugAliases[rawSlug] || rawSlug;
-
-    if (wordSlug) {
+    if (rawSlug) {
       const candidateUrls = [
-        `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
-        `/assets/audio/core/${voiceToStream}_${wordSlug}.mp3`,
-        ...(voiceToStream !== 'amy' ? [
-          `/assets/audio/core/amy_${wordSlug}.wav`,
-          `/assets/audio/core/amy_${wordSlug}.mp3`,
-          `/assets/audio/core/puck_${wordSlug}.wav`,
-          `/assets/audio/core/puck_${wordSlug}.mp3`,
-        ] : []),
+        `/assets/audio/core/${voiceToStream}_${rawSlug}.wav`,
+        `/assets/audio/core/${voiceToStream}_${rawSlug}.mp3`,
       ];
 
       for (const bundledCoreUrl of candidateUrls) {
@@ -955,21 +919,6 @@ export async function speakText(
           }
         } catch {}
       }
-    }
-  }
-
-  // 3. Offline Multi-Word Concatenation Fallback:
-  // For novel constructed sentences that do not match an exact pre-recorded phrase,
-  // stitches available core word WAVs so audio is NEVER silent on iOS or offline.
-  if (!isNonEnglish && isMultiWord) {
-    try {
-      const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
-      if (sentenceWav && isAudioPayload(sentenceWav)) {
-        const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId);
-        if (played || speechId !== latestSpeechRequestId) return;
-      }
-    } catch (synthErr) {
-      console.warn('[Audio] Sentence synthesis notice:', synthErr);
     }
   }
 
