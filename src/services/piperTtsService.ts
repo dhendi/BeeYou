@@ -79,6 +79,20 @@ let piperInitAttempted = false;
 let piperAvailable = true;
 let activeLoadedVoiceId: string | null = null;
 
+// Tracks in-flight preload promises to coalesce concurrent model downloads/warm-ups
+const inFlightPiperPreloads = new Map<string, Promise<boolean>>();
+
+// Performance telemetry for Piper phonemization and ONNX inference
+let lastOnnxInferenceMs = 0;
+let lastPhonemizeMs = 0;
+
+/**
+ * Returns the most recent Piper ONNX inference and phonemization durations in milliseconds.
+ */
+export function getLastPiperTimings(): { onnxInferenceMs: number; phonemizeMs: number } {
+  return { onnxInferenceMs: lastOnnxInferenceMs, phonemizeMs: lastPhonemizeMs };
+}
+
 /**
  * Returns the currently active in-memory Piper voice ID.
  */
@@ -98,20 +112,59 @@ async function getPiperModule(): Promise<typeof import('@mintplex-labs/piper-tts
   try {
     // 1. Configure ONNX runtime WASM paths and single-threading BEFORE anything initializes
     try {
-      const ortModule = await import('onnxruntime-web');
-      const ort = (ortModule as any).default || ortModule;
-      if (ort?.env?.wasm) {
-        ort.env.wasm.wasmPaths = '/onnx/';
-        if (!window.crossOriginIsolated) {
-          try {
-            Object.defineProperty(ort.env.wasm, 'numThreads', {
-              configurable: true,
-              enumerable: true,
-              get: () => 1,
-              set: () => {}
-            });
-          } catch {
-            ort.env.wasm.numThreads = 1;
+      const [ortMain, ortWasm] = await Promise.all([
+        import('onnxruntime-web').catch(() => null),
+        import('onnxruntime-web/wasm').catch(() => null),
+      ]);
+      const ortInstances = [
+        (ortMain as any)?.default || ortMain,
+        (ortWasm as any)?.default || ortWasm,
+      ].filter(Boolean);
+
+      for (const ort of ortInstances) {
+        if (ort?.env?.wasm) {
+          ort.env.wasm.wasmPaths = '/onnx/';
+          if (!window.crossOriginIsolated) {
+            try {
+              Object.defineProperty(ort.env.wasm, 'numThreads', {
+                configurable: true,
+                enumerable: true,
+                get: () => 1,
+                set: () => {}
+              });
+            } catch {
+              ort.env.wasm.numThreads = 1;
+            }
+          }
+        }
+
+        // Intercept InferenceSession to accurately profile raw neural inference duration
+        if (ort?.InferenceSession && !(ort.InferenceSession as any).__timed) {
+          (ort.InferenceSession as any).__timed = true;
+          if (ort.InferenceSession.prototype?.run) {
+            const origProtoRun = ort.InferenceSession.prototype.run;
+            ort.InferenceSession.prototype.run = async function (this: any, ...args: any[]) {
+              const t0 = performance.now();
+              const res = await origProtoRun.apply(this, args);
+              lastOnnxInferenceMs = Math.round(performance.now() - t0);
+              return res;
+            };
+          }
+          if (typeof ort.InferenceSession.create === 'function') {
+            const origCreate = ort.InferenceSession.create.bind(ort.InferenceSession);
+            ort.InferenceSession.create = async function (...args: any[]) {
+              const session = await origCreate(...args);
+              if (session && typeof session.run === 'function') {
+                const origRun = session.run.bind(session);
+                session.run = async function (...runArgs: any[]) {
+                  const t0 = performance.now();
+                  const res = await origRun(...runArgs);
+                  lastOnnxInferenceMs = Math.round(performance.now() - t0);
+                  return res;
+                };
+              }
+              return session;
+            };
           }
         }
       }
@@ -239,6 +292,7 @@ async function waitForOpfsFileReady(filename: string, minBytes: number = 1000000
 
 /**
  * Downloads and preloads a Piper voice model for local offline use.
+ * Coalesces concurrent calls to prevent OPFS file lock contention.
  */
 export async function preloadPiperVoice(
   personaId?: string,
@@ -246,74 +300,87 @@ export async function preloadPiperVoice(
   onProgress?: (info: PiperProgressInfo) => void
 ): Promise<boolean> {
   const voiceId = resolvePiperVoiceId(personaId, lang);
-  const piper = await getPiperModule();
-  if (!piper) return false;
 
-  try {
-    // 1. Check if already stored in OPFS
-    const alreadyStored = await isPiperVoiceReady(personaId, lang);
-    if (!alreadyStored) {
-      onProgress?.({
-        percent: 10,
-        currentPhrase: `Downloading neural voice model (${voiceId})...`,
-        loadedBytes: 10,
-        totalBytes: 100,
-      });
+  // Single-flight deduplication: if preload is already active for this voice, join it
+  if (inFlightPiperPreloads.has(voiceId)) {
+    return inFlightPiperPreloads.get(voiceId)!;
+  }
 
-      await piper.download(voiceId as any, (p) => {
-        const percent = p.total > 0 ? Math.min(90, Math.round((p.loaded / p.total) * 100)) : 50;
+  const preloadPromise = (async () => {
+    const piper = await getPiperModule();
+    if (!piper) return false;
+
+    try {
+      // 1. Check if already stored in OPFS
+      const alreadyStored = await isPiperVoiceReady(personaId, lang);
+      if (!alreadyStored) {
         onProgress?.({
-          percent,
-          currentPhrase: `Downloading voice model: ${Math.round(percent)}%`,
-          loadedBytes: p.loaded,
-          totalBytes: p.total,
+          percent: 10,
+          currentPhrase: `Downloading neural voice model (${voiceId})...`,
+          loadedBytes: 10,
+          totalBytes: 100,
         });
-      });
 
-      // Ensure OPFS write stream is completely closed and flushed before session initialization
-      await waitForOpfsFileReady(`${voiceId}.onnx`, 1000000);
-      await waitForOpfsFileReady(`${voiceId}.onnx.json`, 100);
-    }
+        await piper.download(voiceId as any, (p) => {
+          const percent = p.total > 0 ? Math.min(90, Math.round((p.loaded / p.total) * 100)) : 50;
+          onProgress?.({
+            percent,
+            currentPhrase: `Downloading voice model: ${Math.round(percent)}%`,
+            loadedBytes: p.loaded,
+            totalBytes: p.total,
+          });
+        });
 
-    // 2. Warm up / prime the WebAssembly session in memory for this target voice
-    if (activeLoadedVoiceId !== voiceId) {
-      onProgress?.({
-        percent: 95,
-        currentPhrase: `Preparing neural speech engine...`,
-        loadedBytes: 95,
-        totalBytes: 100,
-      });
+        // Ensure OPFS write stream is completely closed and flushed before session initialization
+        await waitForOpfsFileReady(`${voiceId}.onnx`, 1000000);
+        await waitForOpfsFileReady(`${voiceId}.onnx.json`, 100);
+      }
 
-      // Clear singleton session lock if different voice was previously active
-      if ((piper as any).TtsSession?._instance) {
-        (piper as any).TtsSession._instance = null;
+      // 2. Warm up / prime the WebAssembly session in memory for this target voice
+      if (activeLoadedVoiceId !== voiceId) {
+        onProgress?.({
+          percent: 95,
+          currentPhrase: `Preparing neural speech engine...`,
+          loadedBytes: 95,
+          totalBytes: 100,
+        });
+
+        // Clear singleton session lock if different voice was previously active
+        if ((piper as any).TtsSession?._instance) {
+          (piper as any).TtsSession._instance = null;
+        }
+
+        try {
+          await piper.predict({ text: 'ready', voiceId: voiceId as any });
+          activeLoadedVoiceId = voiceId;
+          console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
+        } catch (warmErr) {
+          console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
+        }
       }
 
       try {
-        await piper.predict({ text: 'ready', voiceId: voiceId as any });
-        activeLoadedVoiceId = voiceId;
-        console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
-      } catch (warmErr) {
-        console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
-      }
+        localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
+      } catch {}
+
+      onProgress?.({
+        percent: 100,
+        currentPhrase: `Voice model ready (${voiceId})`,
+        loadedBytes: 100,
+        totalBytes: 100,
+      });
+
+      return true;
+    } catch (err) {
+      console.warn(`[Piper TTS] Preload failed for ${voiceId}:`, err);
+      return false;
     }
+  })().finally(() => {
+    inFlightPiperPreloads.delete(voiceId);
+  });
 
-    try {
-      localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
-    } catch {}
-
-    onProgress?.({
-      percent: 100,
-      currentPhrase: `Voice model ready (${voiceId})`,
-      loadedBytes: 100,
-      totalBytes: 100,
-    });
-
-    return true;
-  } catch (err) {
-    console.warn(`[Piper TTS] Preload failed for ${voiceId}:`, err);
-    return false;
-  }
+  inFlightPiperPreloads.set(voiceId, preloadPromise);
+  return preloadPromise;
 }
 
 /**
@@ -376,6 +443,7 @@ export async function synthesizeWithPiper(
 
     try {
       const tStart = performance.now();
+      lastOnnxInferenceMs = 0;
       const predictionWork = piper.predict({
         text: cleanText,
         voiceId: voiceId as any,
@@ -393,9 +461,11 @@ export async function synthesizeWithPiper(
 
       const arrayBuffer = await wavBlob.arrayBuffer();
       const durationMs = Math.round(performance.now() - tStart);
+      lastPhonemizeMs = Math.max(0, durationMs - lastOnnxInferenceMs);
+
       if (arrayBuffer && arrayBuffer.byteLength > 44) {
         activeLoadedVoiceId = voiceId;
-        console.log(`[AAC Speech] Piper sentence synthesized successfully (${voiceId}, ${cleanText.split(/\s+/).length} words, ${durationMs}ms, ${arrayBuffer.byteLength} bytes)`);
+        console.log(`[AAC Speech] Piper sentence synthesized successfully (${voiceId}, ${cleanText.split(/\s+/).length} words, total: ${durationMs}ms [phonemize: ${lastPhonemizeMs}ms, onnx: ${lastOnnxInferenceMs}ms], ${arrayBuffer.byteLength} bytes)`);
 
         // LRU guard: keep cache size bounded to prevent excessive mobile memory usage (max 150 entries)
         if (piperAudioMemoryCache.size >= 150) {

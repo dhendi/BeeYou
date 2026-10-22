@@ -66,6 +66,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       previewAudio?: boolean;
       voiceURI?: string;
       sentenceWords?: string[];
+      gestureTime?: number;
     }
   ) => {
     if (settings.soundEffects && options?.previewAudio) playChime('speak');
@@ -87,6 +88,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       force: options?.force,
       previewAudio: options?.previewAudio,
       sentenceWords: (currentActiveLang && currentActiveLang !== 'en') ? undefined : options?.sentenceWords,
+      gestureTime: options?.gestureTime,
     });
   };
 

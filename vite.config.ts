@@ -159,6 +159,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, '.'),
+        'onnxruntime-web/wasm': 'onnxruntime-web',
       },
     },
     build: {

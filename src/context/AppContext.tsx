@@ -166,10 +166,10 @@ export interface AppContextType {
   setShowAacGuideModal: (val: boolean) => void;
   showMyDayGuideModal: boolean;
   setShowMyDayGuideModal: (val: boolean) => void;
-  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string }) => Promise<void>;
+  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string; gestureTime?: number }) => Promise<void>;
   announce: (text: string, options?: { force?: boolean }) => Promise<void>;
-  addToSentence: (item: AACItem) => void;
-  speakSentence: () => Promise<void>;
+  addToSentence: (item: AACItem, options?: { gestureTime?: number }) => void;
+  speakSentence: (gestureTime?: number) => Promise<void>;
   clearSentence: () => void;
   removeLastFromSentence: () => void;
   saveSentenceAsQuickPhrase: () => void;

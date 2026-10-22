@@ -1,6 +1,7 @@
 let audioCtx: AudioContext | null = null;
 let silentAudioEl: HTMLAudioElement | null = null;
 let hardwareUnlocked = false;
+let silentAudioUnlocked = false;
 
 /**
  * Configure browser / WebKit audio session to 'playback' mode.
@@ -18,27 +19,34 @@ export function enableSilentModePlayback(): void {
   }
 
   // 2. HTML5 Audio silent element for WebKit silent-switch bypass
-  if (!silentAudioEl) {
-    try {
-      // 0.05s silent PCM WAV data URI
-      const silenceWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
-      const audio = new Audio(silenceWav);
-      audio.preload = 'auto';
-      (audio as any).playsInline = true;
-      (audio as any).webkitPlaysInline = true;
-      audio.volume = 0.001;
-      silentAudioEl = audio;
-    } catch (e) {}
-  }
+  // Only trigger once to avoid unnecessary overhead and media pipeline churn on every tap
+  if (!silentAudioUnlocked) {
+    if (!silentAudioEl) {
+      try {
+        // 0.05s silent PCM WAV data URI
+        const silenceWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/w==';
+        const audio = new Audio(silenceWav);
+        audio.preload = 'auto';
+        (audio as any).playsInline = true;
+        (audio as any).webkitPlaysInline = true;
+        audio.volume = 0.001;
+        silentAudioEl = audio;
+      } catch (e) {}
+    }
 
-  if (silentAudioEl) {
-    try {
-      silentAudioEl.currentTime = 0;
-      const playPromise = silentAudioEl.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    } catch (e) {}
+    if (silentAudioEl) {
+      try {
+        silentAudioEl.currentTime = 0;
+        const playPromise = silentAudioEl.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              silentAudioUnlocked = true;
+            })
+            .catch(() => {});
+        }
+      } catch (e) {}
+    }
   }
 }
 

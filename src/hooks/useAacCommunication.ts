@@ -21,7 +21,7 @@ interface UseAacCommunicationProps {
   autoSpeakSentence: boolean;
   childName: string;
   currentMood: string | null;
-  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string; sentenceWords?: string[] }) => Promise<void>;
+  speak: (text: string, options?: { force?: boolean; voicePersona?: string; previewAudio?: boolean; voiceURI?: string; sentenceWords?: string[]; gestureTime?: number }) => Promise<void>;
 }
 
 export function useAacCommunication({
@@ -85,7 +85,7 @@ export function useAacCommunication({
     } catch (e) {}
   }, [favoriteSentences]);
 
-  const addToSentence = (item: AACItem) => {
+  const addToSentence = (item: AACItem, options?: { gestureTime?: number }) => {
     if (soundEffects) playChime('tap');
     const safeItem: AACItem = {
       ...item,
@@ -114,7 +114,7 @@ export function useAacCommunication({
       if (item.audioDataUrl) {
         playAudioUrl(item.audioDataUrl, item.speechText || item.label);
       } else {
-        speak(item.speechText || item.label);
+        speak(item.speechText || item.label, { gestureTime: options?.gestureTime });
       }
     }
   };
@@ -203,7 +203,7 @@ export function useAacCommunication({
     if (soundEffects) playChime('tap');
   };
 
-  const speakSentence = async () => {
+  const speakSentence = async (gestureTime?: number) => {
     if (sentence.length === 0) return;
     // If single tile with recorded voice, prioritize playing the authentic caregiver recording
     if (sentence.length === 1 && sentence[0].audioDataUrl) {
@@ -230,7 +230,7 @@ export function useAacCommunication({
       currentMood: currentMood as any,
     }).catch(() => {});
     const sentenceWords = sentence.map((item) => (item.speechText || item.label));
-    await speak(fullText, { sentenceWords });
+    await speak(fullText, { sentenceWords, gestureTime });
   };
 
   const clearSentence = () => {

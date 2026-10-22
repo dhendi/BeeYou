@@ -19,7 +19,8 @@ async function testVoiceConsistency() {
     }
   });
 
-  await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+  await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded' });
+  await new Promise((r) => setTimeout(r, 1000));
 
   const testReport = await page.evaluate(`
     (async () => {

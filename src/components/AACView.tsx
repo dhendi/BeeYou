@@ -972,6 +972,7 @@ export const AACView: React.FC = () => {
   })();
 
   const handleTileClick = (item: AACItem) => {
+    const gestureTime = performance.now();
     if (isMaskingMode) {
       toggleMaskItem(item.id);
       return;
@@ -988,10 +989,10 @@ export const AACView: React.FC = () => {
       if (item.audioDataUrl) {
         playAudioUrl(item.audioDataUrl, speech);
       } else {
-        speak(speech);
+        speak(speech, { gestureTime });
       }
     } else {
-      addToSentence({ ...item, originalLabel: item.originalLabel || item.label, label: t(item.label), speechText: speech });
+      addToSentence({ ...item, originalLabel: item.originalLabel || item.label, label: t(item.label), speechText: speech }, { gestureTime });
     }
     playChime('tap');
   };
@@ -1015,15 +1016,16 @@ export const AACView: React.FC = () => {
 
   const handleSelectInflection = (inf: WordInflection) => {
     if (!inflectionTarget) return;
+    const gestureTime = performance.now();
     const modifiedItem: AACItem = {
       ...inflectionTarget.item,
       label: inf.label,
       speechText: inf.speechText,
     };
     if (instantSpeakMode) {
-      speak(inf.speechText || inf.label);
+      speak(inf.speechText || inf.label, { gestureTime });
     } else {
-      addToSentence(modifiedItem);
+      addToSentence(modifiedItem, { gestureTime });
     }
     playChime('tap');
     setInflectionTarget(null);
@@ -1084,7 +1086,7 @@ export const AACView: React.FC = () => {
               {/* Sentence Display Area (Debossed Silicone Slot) */}
               <button 
                 type="button"
-                onClick={sentence.length > 0 ? speakSentence : undefined}
+                onClick={sentence.length > 0 ? () => speakSentence(performance.now()) : undefined}
                 aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence, settings.language)}` : 'Sentence builder. Tap words below to build sentence'}
                 className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] ${
                   isFrogTheme
@@ -1239,7 +1241,7 @@ export const AACView: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={speakSentence}
+                    onClick={() => speakSentence(performance.now())}
                     disabled={sentence.length === 0}
                     className={`flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
                       sentence.length > 0
