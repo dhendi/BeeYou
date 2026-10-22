@@ -35,9 +35,9 @@ try {
 }
 
 # Step 4: Install to device if connected
-$devices = adb devices | Where-Object { $_ -match "\tdevice$" }
-if ($devices) {
-    $deviceId = ($devices[0] -split "\t")[0]
+[array]$devices = @(adb devices | Where-Object { $_ -match "\tdevice$" })
+if ($devices.Count -gt 0) {
+    $deviceId = ($devices[0].Trim() -split "\s+")[0]
     $apkPath = "android\app\build\outputs\apk\debug\app-debug.apk"
     Write-Host "Installing production APK on $deviceId..."
     adb -s $deviceId install -r $apkPath

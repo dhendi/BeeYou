@@ -63,6 +63,18 @@ export function logLatencyBreakdown(r: SpeechLatencyReport): void {
   console.log(`  Stage 8 (totalToAudible):      ${r.totalToAudibleMs}ms`);
 }
 export const TTS_CACHE_NAME = `beeyou-tts-${TTS_GENERATION_VERSION}`;
+
+// Immediately purge obsolete audio caches from previous generations (v1 - v10)
+if (typeof window !== 'undefined' && 'caches' in window) {
+  caches.keys().then((keys) => {
+    keys.forEach((key) => {
+      if (key.startsWith('beeyou-tts-') && key !== TTS_CACHE_NAME) {
+        console.log(`[AAC Speech] Purging obsolete audio cache: ${key}`);
+        caches.delete(key);
+      }
+    });
+  }).catch(() => {});
+}
 const inFlightAudioFetches = new Map<string, Promise<CachedAudioItem | null>>();
 
 /**
@@ -695,12 +707,14 @@ export function formatForNaturalSpeech(text: string): string {
   // Capitalize first letter
   cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 
-  // Add single final sentence punctuation for natural conversational pitch contour
+  // Add final cadence mark:
+  // - Multi-word phrases or sentences get terminal punctuation (., ?, !) for natural human sentence cadence
+  // - Single isolated AAC word tiles remain open without a trailing period to prevent unnatural falling pitch drops
   if (isQuestion) {
     cleaned += '?';
   } else if (isExclamation) {
     cleaned += '!';
-  } else {
+  } else if (cleaned.includes(' ')) {
     cleaned += '.';
   }
 
@@ -1126,37 +1140,10 @@ export async function speakText(
   }
 
   // 3. Single Word Vocalization
-  // When an individual tile is tapped on the board, plays the authentic persona word recording.
-  // Priority: 1. Bundled core recordings -> 2. Local Cache -> 3. Piper on-device -> 4. System speech
-  if (!isNonEnglish) {
-    const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (rawSlug && BUNDLED_CORE_SLUGS.has(rawSlug)) {
-      const candidateUrls = [
-        `/assets/audio/core/${voiceToStream}_${rawSlug}.wav`,
-        `/assets/audio/core/${voiceToStream}_${rawSlug}.mp3`,
-      ];
+  // When an individual tile is tapped on the board, vocalizes using the consistent selected Piper voice.
+  // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. System speech fallback
 
-      for (const bundledCoreUrl of candidateUrls) {
-        try {
-          const bundledRes = await fetch(bundledCoreUrl);
-          const ct = bundledRes.headers.get('content-type') || '';
-          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-            const buf = await bundledRes.arrayBuffer();
-            if (isAudioPayload(buf)) {
-              console.log(`[AAC Speech] Playing single word via pre-bundled core recording (${voiceToStream}_${rawSlug})`);
-              const coreKey = `core_${voiceToStream}_${rawSlug}`;
-              const played = await playAudioUrl(buf, formattedText, calibratedRate, speechId, undefined, coreKey, (t) => {
-                recordReport('core_audio', true, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-              });
-              if (played || speechId !== latestSpeechRequestId) return;
-            }
-          }
-        } catch {}
-      }
-    }
-  }
-
-  // 3b. Local Audio Cache (L1 RAM + L2 CacheStorage)
+  // 3a. Local Audio Cache (L1 RAM + L2 CacheStorage)
   const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
   if (speechId !== latestSpeechRequestId) return;
   if (localCachedSingle && isAudioPayload(localCachedSingle.buffer)) {
@@ -2181,8 +2168,8 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
 
   const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
-    // For English: check and populate RAM cache from pre-bundled zero-latency local assets
-    if (normalizedLang === 'en') {
+    // Populate RAM and local cache using the consistent selected Piper neural voice during idle time
+    if (selectedPersonaId !== 'system' && isPiperVoiceReadySync(voiceToUse, normalizedLang)) {
       for (const phrase of CORE_AAC_VOCABULARY) {
         const formatted = formatForNaturalSpeech(phrase);
         if (!formatted) continue;
@@ -2191,34 +2178,25 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
         const existing = await getLocalCacheOnly(streamUrl, cacheKey);
         if (existing) continue;
 
-        const wordSlug = formatted.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (wordSlug) {
-          const bundledUrl = `/assets/audio/core/${voiceToUse}_${wordSlug}.wav`;
-          try {
-            const res = await fetch(bundledUrl);
-            if (res.ok) {
-              const buf = await res.arrayBuffer();
-              if (isAudioPayload(buf)) {
-                const cleaned = cleanRiffWav(buf);
-                const blob = new Blob([cleaned], { type: 'audio/wav' });
-                const blobUrl = URL.createObjectURL(blob);
-                audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleaned });
-                const ctx = getAudioContext();
-                if (ctx) {
-                  try {
-                    const audioBuffer = await new Promise<AudioBuffer>((resDec, rejDec) => {
-                      ctx.decodeAudioData(cleaned.slice(0), resDec, rejDec);
-                    });
-                    if (audioBuffer) {
-                      decodedAudioBufferCache.set(cacheKey, audioBuffer);
-                      decodedAudioBufferCache.set(`core_${voiceToUse}_${wordSlug}`, audioBuffer);
-                    }
-                  } catch {}
-                }
-              }
+        try {
+          const buf = await synthesizeWithPiper(formatted, voiceToUse, normalizedLang, 2000);
+          if (buf && isAudioPayload(buf)) {
+            const blob = new Blob([buf], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: buf });
+            if (typeof window !== 'undefined' && 'caches' in window) {
+              const fullUrl = new URL(streamUrl, window.location.origin).href;
+              const resToCache = new Response(buf.slice(0), {
+                headers: {
+                  'content-type': 'audio/wav',
+                  'cache-control': 'public, max-age=31536000, immutable',
+                },
+              });
+              caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
             }
-          } catch {}
-        }
+          }
+        } catch {}
+        await new Promise((r) => setTimeout(r, 60));
       }
       return;
     }

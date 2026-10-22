@@ -17,7 +17,7 @@ export interface VoicePersona {
 /**
  * Explicit TTS Generation Version for Cache Invalidation & Audio Consistency.
  */
-export const TTS_GENERATION_VERSION = 'v10';
+export const TTS_GENERATION_VERSION = 'v11';
 
 export const VOICE_PERSONAS: VoicePersona[] = [
   // --- Group 0: Default Free System Voice (On-Device Built-In) ---

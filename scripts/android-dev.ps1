@@ -18,14 +18,14 @@ if (Test-Path $sdkPath) {
 Write-Host "=== BeeYou Android Live Reload Development Environment ==="
 
 # Check connected device
-$devices = adb devices | Where-Object { $_ -match "\tdevice$" }
-if (-not $devices) {
+[array]$devices = @(adb devices | Where-Object { $_ -match "\tdevice$" })
+if ($devices.Count -eq 0) {
     Write-Warning "No authorized Android device detected via ADB."
     Write-Host "Ensure USB debugging is enabled and the phone is unlocked."
     exit 1
 }
 
-$deviceId = ($devices[0] -split "\t")[0]
+$deviceId = ($devices[0].Trim() -split "\s+")[0]
 Write-Host "Target Device: $deviceId"
 
 # Reverse port 3000 and 3001 over USB
