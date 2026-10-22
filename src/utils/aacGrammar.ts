@@ -11,7 +11,7 @@
  * - Dynamic subject pronoun resolution (I, yo, je, ich, etc.)
  */
 
-import { AACItem } from '../types';
+import { AACItem, FavoriteSentence } from '../types';
 import { conjugateEnglishSingleVerb } from './aacInflections';
 
 // Base English core action verbs for raw string input fallback (AACItem tiles use metadata: colorType === 'verb')
@@ -490,4 +490,202 @@ export function autocorrectAacGrammar(tokens: (string | AACItem)[], language?: s
   }
 
   return sentence;
+}
+
+/**
+ * Normalizes an AAC sentence or phrase back to canonical English.
+ * Solves the issue where sentences saved while testing in French, Vietnamese, Japanese, etc.
+ * get stuck in translation when returning to English or switching languages.
+ */
+export function normalizeAacSentenceToEnglish(text: string): string {
+  if (!text) return '';
+  const trimmed = text.trim();
+  const lower = trimmed.toLowerCase();
+
+  // 1. Multi-lingual phrase normalizations
+  // French
+  if (lower.startsWith('je mon') || lower.startsWith('j\'ai besoin de mon') || lower.startsWith('j\'ai besoin de mes')) {
+    return 'I need my';
+  }
+  if (lower.startsWith('je veux mon') || lower.startsWith('je veux mes')) {
+    return 'I want my';
+  }
+  if (lower.startsWith('je veux jouer aux lego') || lower.startsWith('je veux jouer au lego')) {
+    return 'I want to play lego';
+  }
+  if (lower.startsWith('je veux jouer')) {
+    return 'I want to play';
+  }
+  if (lower.startsWith('je veux manger')) {
+    return 'I want to eat';
+  }
+  if (lower.startsWith('je veux boire')) {
+    return 'I want to drink';
+  }
+  if (lower.startsWith('j\'ai besoin d\'aide')) {
+    return 'I need help';
+  }
+  if (lower.startsWith('j\'ai besoin d\'une pause')) {
+    return 'I need a break';
+  }
+  if (lower.startsWith('j\'ai besoin')) {
+    return 'I need';
+  }
+  if (lower.startsWith('je veux')) {
+    return 'I want';
+  }
+
+  // Vietnamese
+  if (lower.startsWith('tôi cần của') || lower.startsWith('tôi cần của tôi') || lower.startsWith('tôi cần tai nghe của tôi')) {
+    return 'I need my';
+  }
+  if (lower.startsWith('tôi muốn của')) {
+    return 'I want my';
+  }
+  if (lower.startsWith('tôi muốn chơi lego')) {
+    return 'I want to play lego';
+  }
+  if (lower.startsWith('tôi muốn chơi')) {
+    return 'I want to play';
+  }
+  if (lower.startsWith('tôi muốn ăn')) {
+    return 'I want to eat';
+  }
+  if (lower.startsWith('tôi muốn uống')) {
+    return 'I want to drink';
+  }
+  if (lower.startsWith('tôi cần giúp đỡ') || lower.startsWith('tôi cần sự giúp đỡ')) {
+    return 'I need help';
+  }
+  if (lower.startsWith('tôi cần nghỉ ngơi')) {
+    return 'I need a break';
+  }
+  if (lower.startsWith('tôi cần')) {
+    return 'I need';
+  }
+  if (lower.startsWith('tôi muốn')) {
+    return 'I want';
+  }
+
+  // Japanese
+  if (trimmed.startsWith('私必要私の') || trimmed.startsWith('私のヘッドフォンが必要') || trimmed.startsWith('私必要')) {
+    return trimmed.includes('私の') ? 'I need my' : 'I need';
+  }
+  if (trimmed.startsWith('私欲しい私の') || trimmed.startsWith('私欲しい')) {
+    return trimmed.includes('私の') ? 'I want my' : 'I want';
+  }
+  if (trimmed.includes('レゴで遊びたい')) {
+    return 'I want to play lego';
+  }
+  if (trimmed.includes('遊びたい')) {
+    return 'I want to play';
+  }
+  if (trimmed.includes('食べたい')) {
+    return 'I want to eat';
+  }
+  if (trimmed.includes('飲みたい')) {
+    return 'I want to drink';
+  }
+
+  // Spanish
+  if (lower.startsWith('yo necesito mi') || lower.startsWith('necesito mi')) {
+    return 'I need my';
+  }
+  if (lower.startsWith('yo quiero mi') || lower.startsWith('quiero mi')) {
+    return 'I want my';
+  }
+  if (lower.startsWith('quiero jugar legos') || lower.startsWith('quiero jugar lego')) {
+    return 'I want to play lego';
+  }
+  if (lower.startsWith('quiero jugar')) {
+    return 'I want to play';
+  }
+  if (lower.startsWith('quiero comer')) {
+    return 'I want to eat';
+  }
+  if (lower.startsWith('quiero beber') || lower.startsWith('quiero tomar')) {
+    return 'I want to drink';
+  }
+  if (lower.startsWith('necesito ayuda')) {
+    return 'I need help';
+  }
+  if (lower.startsWith('necesito un descanso')) {
+    return 'I need a break';
+  }
+  if (lower.startsWith('necesito')) {
+    return 'I need';
+  }
+  if (lower.startsWith('quiero')) {
+    return 'I want';
+  }
+
+  // German
+  if (lower.startsWith('ich brauche meine') || lower.startsWith('ich brauche mein')) {
+    return 'I need my';
+  }
+  if (lower.startsWith('ich möchte mein') || lower.startsWith('ich möchte meine')) {
+    return 'I want my';
+  }
+  if (lower.startsWith('ich möchte lego spielen')) {
+    return 'I want to play lego';
+  }
+  if (lower.startsWith('ich möchte spielen')) {
+    return 'I want to play';
+  }
+  if (lower.startsWith('ich möchte essen')) {
+    return 'I want to eat';
+  }
+  if (lower.startsWith('ich brauche hilfe')) {
+    return 'I need help';
+  }
+  if (lower.startsWith('ich brauche eine pause')) {
+    return 'I need a break';
+  }
+  if (lower.startsWith('ich brauche')) {
+    return 'I need';
+  }
+  if (lower.startsWith('ich möchte')) {
+    return 'I want';
+  }
+
+  return trimmed;
+}
+
+/**
+ * Sanitizes and migrates stored favorite sentences.
+ * Normalizes any sentences that were saved in foreign languages back to canonical English,
+ * and deduplicates/merges counts into their English counterpart.
+ */
+export function sanitizeAndMigrateFavoriteSentences(sentences: FavoriteSentence[]): FavoriteSentence[] {
+  if (!Array.isArray(sentences)) return [];
+
+  const result: FavoriteSentence[] = [];
+  const seenIndexByKey = new Map<string, number>();
+
+  for (const item of sentences) {
+    if (!item || !item.text) continue;
+    const normalizedText = normalizeAacSentenceToEnglish(item.text);
+    const key = normalizedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (seenIndexByKey.has(key)) {
+      const idx = seenIndexByKey.get(key)!;
+      result[idx] = {
+        ...result[idx],
+        usageCount: (result[idx].usageCount || 1) + (item.usageCount || 1),
+        isParentPinned: result[idx].isParentPinned || item.isParentPinned,
+        audioDataUrl: result[idx].audioDataUrl || item.audioDataUrl,
+        audioRecordedBy: result[idx].audioRecordedBy || item.audioRecordedBy,
+      };
+    } else {
+      const sanitizedItem: FavoriteSentence = {
+        ...item,
+        text: normalizedText,
+        speechText: normalizedText,
+      };
+      seenIndexByKey.set(key, result.length);
+      result.push(sanitizedItem);
+    }
+  }
+
+  return result;
 }

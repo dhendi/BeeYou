@@ -80,7 +80,8 @@ import {
   ShieldAlert,
   Info,
   ExternalLink,
-  Mic
+  Mic,
+  Maximize2
 } from 'lucide-react';
 import { playChime, playAudioUrl } from '../utils/audio';
 
@@ -287,6 +288,28 @@ export const AACView: React.FC = () => {
   });
 
   const longPressTimerRef = useRef<any>(null);
+  const [inspectingSentence, setInspectingSentence] = useState<FavoriteSentence | null>(null);
+  const longPressSentenceTimerRef = useRef<any>(null);
+  const isSentenceLongPressRef = useRef<boolean>(false);
+
+  const handleSentencePressStart = (fav: FavoriteSentence) => {
+    isSentenceLongPressRef.current = false;
+    if (longPressSentenceTimerRef.current) {
+      clearTimeout(longPressSentenceTimerRef.current);
+    }
+    longPressSentenceTimerRef.current = setTimeout(() => {
+      isSentenceLongPressRef.current = true;
+      playChime('star');
+      setInspectingSentence(fav);
+    }, 400);
+  };
+
+  const handleSentencePressEnd = () => {
+    if (longPressSentenceTimerRef.current) {
+      clearTimeout(longPressSentenceTimerRef.current);
+      longPressSentenceTimerRef.current = null;
+    }
+  };
 
   const toggleMaskItem = (id: string) => {
     setMaskedItemIds((prev) => {
@@ -965,7 +988,7 @@ export const AACView: React.FC = () => {
         speak(speech);
       }
     } else {
-      addToSentence({ ...item, label: t(item.label), speechText: speech });
+      addToSentence({ ...item, originalLabel: item.originalLabel || item.label, label: t(item.label), speechText: speech });
       if (!settings.autoSpeakSentence) {
         if (item.audioDataUrl) {
           playAudioUrl(item.audioDataUrl, speech);
@@ -1909,18 +1932,29 @@ export const AACView: React.FC = () => {
                   >
                     <button
                       type="button"
+                      onMouseDown={() => handleSentencePressStart(fav)}
+                      onMouseUp={handleSentencePressEnd}
+                      onMouseLeave={handleSentencePressEnd}
+                      onTouchStart={() => handleSentencePressStart(fav)}
+                      onTouchEnd={handleSentencePressEnd}
+                      onTouchCancel={handleSentencePressEnd}
                       onClick={() => {
+                        if (isSentenceLongPressRef.current) {
+                          isSentenceLongPressRef.current = false;
+                          return;
+                        }
                         const spoken = t(fav.speechText || fav.text);
                         if (fav.audioDataUrl) {
                           playAudioUrl(fav.audioDataUrl, spoken);
                         } else {
                           speak(spoken);
                         }
-                        recordSentenceSpoken(spoken, fav.emoji);
+                        recordSentenceSpoken(fav.text, fav.emoji);
                         playChime('speak');
                         addToSentence({
                           id: `fav-${Date.now()}`,
                           label: t(fav.text),
+                          originalLabel: fav.text,
                           speechText: spoken,
                           emoji: fav.emoji || '💬',
                           photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
@@ -1932,7 +1966,7 @@ export const AACView: React.FC = () => {
                         });
                       }}
                       className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-xl"
-                      title="Tap to speak sentence aloud"
+                      title={t(fav.speechText || fav.text)}
                       aria-label={`Speak favorite phrase: ${t(fav.speechText || fav.text)}`}
                     >
                       <div className="w-13 h-13 sm:w-14 sm:h-14 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
@@ -1952,7 +1986,7 @@ export const AACView: React.FC = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                          <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words line-clamp-3 select-none">
                             {t(fav.text)}
                           </h4>
                           {fav.audioDataUrl && (
@@ -1988,11 +2022,12 @@ export const AACView: React.FC = () => {
                           } else {
                             speak(spoken);
                           }
-                          recordSentenceSpoken(spoken, fav.emoji);
+                          recordSentenceSpoken(fav.text, fav.emoji);
                           playChime('speak');
                           addToSentence({
                             id: `fav-${Date.now()}`,
                             label: t(fav.text),
+                            originalLabel: fav.text,
                             speechText: spoken,
                             emoji: fav.emoji || '💬',
                             photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
@@ -2003,7 +2038,7 @@ export const AACView: React.FC = () => {
                             audioRecordedBy: fav.audioRecordedBy,
                           });
                         }}
-                        className="px-3.5 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
+                        className="px-3 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
                         title="Speak Sentence Aloud"
                       >
                         <Volume2 className="w-4 h-4" />
@@ -2012,11 +2047,25 @@ export const AACView: React.FC = () => {
 
                       <button
                         type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInspectingSentence(fav);
+                          playChime('tap');
+                        }}
+                        className="p-2 rounded-xl text-slate-400 hover:text-amber-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all cursor-pointer"
+                        title="Show full sentence"
+                        aria-label="Show full sentence"
+                      >
+                        <Maximize2 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => togglePinFavoriteSentence(fav.id)}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${
                           fav.isParentPinned
-                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                         title={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
                       >
@@ -2026,7 +2075,7 @@ export const AACView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => deleteFavoriteSentence(fav.id)}
-                        className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
+                        className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
                         title="Delete sentence"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -2556,6 +2605,148 @@ export const AACView: React.FC = () => {
         onComplete={() => setIsCoachMarksActive(false)}
         onSkip={() => setIsCoachMarksActive(false)}
       />
+
+
+      {/* Full Sentence Inspector Modal (Triggered on Press-and-Hold or Click) */}
+      {inspectingSentence && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Sentence Details"
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
+          onClick={() => setInspectingSentence(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 max-w-lg w-full border-3 border-amber-300 shadow-2xl space-y-5 text-center relative animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setInspectingSentence(null)}
+              className="absolute top-4 right-4 p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer transition-all"
+              title="Close"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto p-2 bg-amber-50 dark:bg-amber-950/40 rounded-3xl border-2 border-amber-200 flex items-center justify-center shadow-xs">
+              {(() => {
+                const stickerPath = inspectingSentence.stickerSrc || getFavoriteSentenceSticker(inspectingSentence);
+                if (stickerPath) {
+                  return (
+                    <img
+                      src={stickerPath}
+                      alt=""
+                      className="w-full h-full object-contain drop-shadow-xs pointer-events-none select-none"
+                    />
+                  );
+                }
+                return <span className="text-4xl sm:text-5xl">{inspectingSentence.emoji || '💬'}</span>;
+              })()}
+            </div>
+
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 text-xs font-black">
+                🔥 Spoken {inspectingSentence.usageCount || 1} {inspectingSentence.usageCount === 1 ? 'time' : 'times'}
+              </span>
+              {inspectingSentence.isParentPinned && (
+                <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-900 dark:text-rose-200 text-xs font-black flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                  <span>Pinned Favorite</span>
+                </span>
+              )}
+            </div>
+
+            <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 dark:bg-slate-800/80 border-2 border-amber-200/80 shadow-inner">
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-relaxed select-text tracking-tight">
+                &ldquo;{t(inspectingSentence.text)}&rdquo;
+              </p>
+              {settings.language !== 'en' && inspectingSentence.text.toLowerCase() !== t(inspectingSentence.text).toLowerCase() && (
+                <p className="text-xs font-bold text-slate-500 mt-2">
+                  Original (EN): &ldquo;{inspectingSentence.text}&rdquo;
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  const spoken = t(inspectingSentence.speechText || inspectingSentence.text);
+                  if (inspectingSentence.audioDataUrl) {
+                    playAudioUrl(inspectingSentence.audioDataUrl, spoken);
+                  } else {
+                    speak(spoken);
+                  }
+                  recordSentenceSpoken(inspectingSentence.text, inspectingSentence.emoji);
+                  playChime('speak');
+                }}
+                className="w-full py-3.5 sm:py-4 rounded-2xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+              >
+                <Volume2 className="w-5 h-5" />
+                <span>Speak Sentence Aloud</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const spoken = t(inspectingSentence.speechText || inspectingSentence.text);
+                  addToSentence({
+                    id: `fav-${Date.now()}`,
+                    label: t(inspectingSentence.text),
+                    originalLabel: inspectingSentence.text,
+                    speechText: spoken,
+                    emoji: inspectingSentence.emoji || '💬',
+                    photoUrl: inspectingSentence.stickerSrc || getFavoriteSentenceSticker(inspectingSentence),
+                    category: 'favorites',
+                    colorType: 'social',
+                    motorIndex: 0,
+                    audioDataUrl: inspectingSentence.audioDataUrl,
+                    audioRecordedBy: inspectingSentence.audioRecordedBy,
+                  });
+                  playChime('star');
+                  setInspectingSentence(null);
+                }}
+                className="w-full py-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-900 dark:text-indigo-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 cursor-pointer transition-all"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Add to Sentence Bar</span>
+              </button>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    togglePinFavoriteSentence(inspectingSentence.id);
+                    setInspectingSentence((prev) => prev ? { ...prev, isParentPinned: !prev.isParentPinned } : null);
+                  }}
+                  className={`flex-1 py-2.5 rounded-2xl font-black text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                    inspectingSentence.isParentPinned
+                      ? 'bg-amber-100 border-amber-300 text-amber-900'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${inspectingSentence.isParentPinned ? 'fill-amber-500 text-amber-600' : ''}`} />
+                  <span>{inspectingSentence.isParentPinned ? 'Pinned' : 'Pin to Top'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    deleteFavoriteSentence(inspectingSentence.id);
+                    setInspectingSentence(null);
+                  }}
+                  className="px-4 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AAC Guide / How-To Modal */}
       {showAacGuideModal && (

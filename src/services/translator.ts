@@ -3,6 +3,8 @@
  * Uses static public/locales/*.json + localStorage cache + dynamic background translation
  */
 
+import { normalizeAacSentenceToEnglish } from '../utils/aacGrammar';
+
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
 let lowerDictionary: Record<string, string> = {};
@@ -90,10 +92,17 @@ export function subscribeToLanguage(listener: (lang: string) => void): () => voi
 }
 
 export function t(text: string): string {
-  if (!text || currentLang === 'en') return text;
-  if (dictionary[text]) return dictionary[text];
+  if (!text) return '';
+  if (currentLang === 'en') {
+    return normalizeAacSentenceToEnglish(text);
+  }
 
-  const trimmed = text.trim();
+  // If text was passed in a foreign language from legacy cache, first normalize to English canonical key
+  const englishKey = normalizeAacSentenceToEnglish(text);
+
+  if (dictionary[englishKey]) return dictionary[englishKey];
+
+  const trimmed = englishKey.trim();
   if (dictionary[trimmed]) return dictionary[trimmed];
 
   const lower = trimmed.toLowerCase();
@@ -103,14 +112,27 @@ export function t(text: string): string {
   // Return only the primary word so it never speaks "slash" or repeats both options
   if (trimmed.includes(' / ')) {
     const parts = trimmed.split(' / ').map(p => t(p.trim()));
-    return parts[0] || text;
+    return parts[0] || englishKey;
   }
   if (trimmed.includes('/') && !trimmed.startsWith('http')) {
     const parts = trimmed.split('/').map(p => t(p.trim()));
-    return parts[0] || text;
+    return parts[0] || englishKey;
   }
 
-  return text;
+  // Multi-word compound translation fallback for AAC phrases
+  if (trimmed.includes(' ')) {
+    const words = trimmed.split(/\s+/);
+    const translatedWords = words.map(w => {
+      const wLower = w.toLowerCase();
+      return lowerDictionary[wLower] || dictionary[w] || w;
+    });
+    const hasTranslation = translatedWords.some((tw, idx) => tw.toLowerCase() !== words[idx].toLowerCase());
+    if (hasTranslation) {
+      return translatedWords.join(' ');
+    }
+  }
+
+  return englishKey;
 }
 
 export function translateItem<T extends { label?: string; speechText?: string }>(item: T): T {

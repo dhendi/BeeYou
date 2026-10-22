@@ -7,7 +7,11 @@ import {
   getFavoriteSentenceSticker,
 } from '../data/defaultData';
 import { playChime, playAudioUrl } from '../utils/audio';
-import { autocorrectAacGrammar } from '../utils/aacGrammar';
+import {
+  autocorrectAacGrammar,
+  normalizeAacSentenceToEnglish,
+  sanitizeAndMigrateFavoriteSentences,
+} from '../utils/aacGrammar';
 import { resolveAacImageUrl } from '../services/symbolService';
 import { syncChildStatusToCaregiver } from '../services/caregiverSync';
 
@@ -53,10 +57,16 @@ export function useAacCommunication({
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((fav: FavoriteSentence) => ({
-            ...fav,
-            stickerSrc: fav.stickerSrc || getFavoriteSentenceSticker(fav),
-          }));
+          const sanitized = sanitizeAndMigrateFavoriteSentences(
+            parsed.map((fav: FavoriteSentence) => ({
+              ...fav,
+              stickerSrc: fav.stickerSrc || getFavoriteSentenceSticker(fav),
+            }))
+          );
+          try {
+            localStorage.setItem('beeyou_favorite_sentences', JSON.stringify(sanitized));
+          } catch {}
+          return sanitized;
         }
       }
     } catch (e) {}
@@ -77,8 +87,12 @@ export function useAacCommunication({
 
   const addToSentence = (item: AACItem) => {
     if (soundEffects) playChime('tap');
+    const safeItem: AACItem = {
+      ...item,
+      originalLabel: item.originalLabel || item.label,
+    };
     setSentence((prev) => {
-      const updated = [...prev, item];
+      const updated = [...prev, safeItem];
       if (updated.length >= 2 && updated[0].label.trim().toUpperCase() === 'ME') {
         const nextWord = (updated[1].speechText || updated[1].label).trim().toLowerCase();
         const actionVerbs = [
@@ -90,6 +104,7 @@ export function useAacCommunication({
             ...updated[0],
             label: 'I',
             speechText: 'I',
+            originalLabel: 'I',
           };
         }
       }
@@ -105,8 +120,11 @@ export function useAacCommunication({
   };
 
   const recordSentenceSpoken = (text: string, emoji?: string) => {
-    const cleanText = text.trim();
+    const rawClean = text.trim();
+    if (!rawClean) return;
+    const cleanText = normalizeAacSentenceToEnglish(rawClean);
     if (!cleanText) return;
+
     setFavoriteSentences((prev) => {
       const existingIdx = prev.findIndex((s) => s.text.toLowerCase() === cleanText.toLowerCase());
       if (existingIdx >= 0) {
@@ -123,6 +141,7 @@ export function useAacCommunication({
           text: cleanText,
           speechText: cleanText,
           emoji: emoji || '💬',
+          stickerSrc: getFavoriteSentenceSticker({ emoji: emoji || '💬', text: cleanText }),
           usageCount: 1,
           lastUsedAt: new Date().toISOString(),
           isCustom: true,
@@ -189,7 +208,8 @@ export function useAacCommunication({
     // If single tile with recorded voice, prioritize playing the authentic caregiver recording
     if (sentence.length === 1 && sentence[0].audioDataUrl) {
       const singleSpoken = sentence[0].speechText || sentence[0].label;
-      recordSentenceSpoken(singleSpoken, sentence[0].emoji);
+      const canonicalSingle = sentence[0].originalLabel || sentence[0].label;
+      recordSentenceSpoken(canonicalSingle, sentence[0].emoji);
       syncChildStatusToCaregiver({
         childName: childName || 'Child',
         lastAacSentence: singleSpoken,
@@ -199,7 +219,11 @@ export function useAacCommunication({
       return;
     }
     const fullText = autocorrectAacGrammar(sentence, language);
-    recordSentenceSpoken(fullText, sentence[0]?.emoji);
+    // Always compute the canonical English sentence for cross-lingual persistence and accurate recording:
+    const englishTokens = sentence.map((item) => item.originalLabel || item.label);
+    const englishSentence = autocorrectAacGrammar(englishTokens, 'en');
+
+    recordSentenceSpoken(englishSentence, sentence[0]?.emoji);
     syncChildStatusToCaregiver({
       childName: childName || 'Child',
       lastAacSentence: fullText,
@@ -221,10 +245,13 @@ export function useAacCommunication({
 
   const saveSentenceAsQuickPhrase = () => {
     if (sentence.length === 0) return;
-    const phraseText = autocorrectAacGrammar(sentence, language);
+    const localizedText = autocorrectAacGrammar(sentence, language);
+    const englishTokens = sentence.map((item) => item.originalLabel || item.label);
+    const englishText = autocorrectAacGrammar(englishTokens, 'en');
+
     addFavoriteSentence({
-      text: phraseText,
-      speechText: phraseText,
+      text: englishText, // Store canonical English key so it dynamically translates into any language
+      speechText: englishText,
       emoji: sentence[0]?.emoji || '💬',
       isParentPinned: true,
       audioDataUrl: sentence.length === 1 ? sentence[0].audioDataUrl : undefined,
@@ -232,7 +259,7 @@ export function useAacCommunication({
     });
     const newQP: QuickPhrase = {
       id: `qp-custom-${Date.now()}`,
-      text: phraseText,
+      text: localizedText,
       emoji: sentence[0]?.emoji || '💬',
       isCustom: true,
       audioDataUrl: sentence.length === 1 ? sentence[0].audioDataUrl : undefined,

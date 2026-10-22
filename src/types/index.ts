@@ -37,6 +37,7 @@ export type AACCategory =
 export interface AACItem {
   id: string;
   label: string;
+  originalLabel?: string; // Canonical English label for cross-lingual persistence
   speechText?: string;
   emoji: string;
   photoUrl?: string;
