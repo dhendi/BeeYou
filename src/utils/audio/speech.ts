@@ -838,10 +838,143 @@ export async function speakText(
   const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
   const calibratedRate = Math.max(0.55, Math.min(1.6, userBaseRate * profile.rate));
 
-  // Option 1: Direct Synchronous Native Vocalization
-  // Delivers instant, 0ms latency speech execution to on-device SpeechSynthesis with
-  // persona acoustic profile calibration. Completely avoids user-gesture expiration,
-  // network round-trips, and missing WebAssembly model blocks on iOS, Android, and Web.
+  const voiceToStream = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
+  const isConstructedSentence = Boolean(
+    options?.sentenceWords && options.sentenceWords.length > 1
+  );
+  const isMultiWord = Boolean(
+    isConstructedSentence || formattedText.trim().split(/\s+/).length > 1
+  );
+
+  // 1. Audition / Voice Studio Preview Vocalization
+  if (options?.previewAudio) {
+    if (selectedPersonaId !== 'system') {
+      const previewCandidateUrls = [
+        `/assets/audio/previews/${selectedPersonaId}.wav`,
+        `/assets/audio/previews/${selectedPersonaId}.mp3`,
+      ];
+      for (const previewUrl of previewCandidateUrls) {
+        try {
+          const res = await fetch(previewUrl);
+          const ct = res.headers.get('content-type') || '';
+          if (res.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+            const buf = await res.arrayBuffer();
+            if (isAudioPayload(buf)) {
+              const played = await playAudioUrl(buf, formattedText, calibratedRate, speechId);
+              if (played || speechId !== latestSpeechRequestId) return;
+            }
+          }
+        } catch {}
+      }
+    }
+    // Fallback if preview file not present
+    if (speechId !== latestSpeechRequestId) return;
+    await speakWithBrowserSpeechSynthesis(formattedText, {
+      ...options,
+      voicePersona: selectedPersonaId,
+      pitch: calibratedPitch,
+      rate: calibratedRate,
+      force: options?.force,
+    });
+    return;
+  }
+
+  // 2. Pre-bundled Offline Core Audio (Whole-Sentence Fluid Neural Recordings & Single Words)
+  // Immediately checks local app bundle for 24kHz 16-bit Mono PCM WAV files.
+  // Plays instantly via Web Audio with iOS Silent Mode bypass (0ms delay, natural prosody).
+  if (!isNonEnglish) {
+    const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const slugAliases: Record<string, string> = {
+      helpme: 'help',
+      pleasehelpme: 'help',
+      waitplease: 'wait',
+      alldone: 'alldone',
+      tooloud: 'tooloud',
+      itistooloud: 'itistooloud',
+      toobright: 'toobright',
+      itistoobright: 'itistoobright',
+      iwantwater: 'iwantwater',
+      iwantadrink: 'iwantadrink',
+      iwantdrink: 'iwantdrink',
+      iwantfood: 'iwantfood',
+      iwantpizza: 'iwantpizza',
+      iwantapple: 'iwantapple',
+      iwantanapple: 'iwantapple',
+      iwanttoplay: 'iwanttoplay',
+      iwantplay: 'iwanttoplay',
+      gosomewhere: 'gosomewhere',
+      howifeel: 'howifeel',
+      ineedabreak: 'ineedabreak',
+      ineedbreak: 'ineedabreak',
+      iwantthis: 'iwantthis',
+      ineedhelp: 'ineedhelp',
+      ineedbathroom: 'ineedbathroom',
+      ineedthebathroom: 'ineedbathroom',
+      iwantmore: 'iwantmore',
+      ilikeit: 'ilikeit',
+      ilike: 'ilikeit',
+      idontlikeit: 'idontlikeit',
+      idontlike: 'idontlikeit',
+      yesplease: 'yesplease',
+      nothankyou: 'nothankyou',
+      pleasestop: 'pleasestop',
+      thankyou: 'thankyou',
+      headphones: 'ineedmyheadphones',
+      ineedmyheadphones: 'ineedmyheadphones',
+      weightedblanket: 'iwantmyweightedblanket',
+      iwantmyweightedblanket: 'iwantmyweightedblanket',
+      quietroom: 'ineedaquietplace',
+      ineedaquietplace: 'ineedaquietplace',
+      squishyfidget: 'iwantmyfidgettoy',
+      iwantmyfidgettoy: 'iwantmyfidgettoy',
+    };
+    const wordSlug = slugAliases[rawSlug] || rawSlug;
+
+    if (wordSlug) {
+      const candidateUrls = [
+        `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
+        `/assets/audio/core/${voiceToStream}_${wordSlug}.mp3`,
+        ...(voiceToStream !== 'amy' ? [
+          `/assets/audio/core/amy_${wordSlug}.wav`,
+          `/assets/audio/core/amy_${wordSlug}.mp3`,
+          `/assets/audio/core/puck_${wordSlug}.wav`,
+          `/assets/audio/core/puck_${wordSlug}.mp3`,
+        ] : []),
+      ];
+
+      for (const bundledCoreUrl of candidateUrls) {
+        try {
+          const bundledRes = await fetch(bundledCoreUrl);
+          const ct = bundledRes.headers.get('content-type') || '';
+          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
+            const buf = await bundledRes.arrayBuffer();
+            if (isAudioPayload(buf)) {
+              const played = await playAudioUrl(buf, formattedText, calibratedRate, speechId);
+              if (played || speechId !== latestSpeechRequestId) return;
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // 3. Offline Multi-Word Concatenation Fallback:
+  // For novel constructed sentences that do not match an exact pre-recorded phrase,
+  // stitches available core word WAVs so audio is NEVER silent on iOS or offline.
+  if (!isNonEnglish && isMultiWord) {
+    try {
+      const sentenceWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
+      if (sentenceWav && isAudioPayload(sentenceWav)) {
+        const played = await playAudioUrl(sentenceWav, formattedText, calibratedRate, speechId);
+        if (played || speechId !== latestSpeechRequestId) return;
+      }
+    } catch (synthErr) {
+      console.warn('[Audio] Sentence synthesis notice:', synthErr);
+    }
+  }
+
+  // 4. Native Browser SpeechSynthesis Fallback:
+  if (speechId !== latestSpeechRequestId) return;
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
