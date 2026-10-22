@@ -756,6 +756,17 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   };
 
   const updateEnabledFeatures = (updates: Partial<EnabledFeatures>) => {
+    const wasAacActive =
+      enabledFeatures?.aacCommunication !== false &&
+      enabledFeatures?.aac !== false &&
+      settings.features?.aacCommunication !== false &&
+      settings.features?.aac !== false;
+
+    const nextFeatures = normalizeFeatures(updates, enabledFeatures);
+    const willAacBeActive =
+      nextFeatures?.aacCommunication !== false &&
+      nextFeatures?.aac !== false;
+
     setEnabledFeatures((prev) => {
       const next = normalizeFeatures(updates, prev);
       try {
@@ -767,6 +778,15 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       ...prev,
       features: normalizeFeatures(updates, prev.features),
     }));
+
+    // When activating AAC from a disabled state, display loading screen until voices are prepared
+    if (!wasAacActive && willAacBeActive) {
+      const p = settings.voicePersona || 'amy';
+      const l = settings.language || 'en';
+      if (p !== 'system' && !isVoicePackLoaded(p, l)) {
+        triggerVoicePreload(p, l, true);
+      }
+    }
   };
 
   const toggleFeature = (key: keyof EnabledFeatures) => {
@@ -792,19 +812,31 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     language: 'en',
   });
 
-  const triggerVoicePreload = useCallback(async (persona?: string, lang?: string) => {
+  const triggerVoicePreload = useCallback(async (persona?: string, lang?: string, force = false) => {
     const p = persona || settings.voicePersona || 'amy';
     const l = lang || settings.language || 'en';
     if (p === 'system') {
       // System native voice runs 100% on-device via Web Speech API, zero download required
       return;
     }
+
+    const aacActive =
+      enabledFeatures?.aacCommunication !== false &&
+      enabledFeatures?.aac !== false &&
+      settings.features?.aacCommunication !== false &&
+      settings.features?.aac !== false;
+
+    // If AAC is not enabled, skip voice preloading unless explicitly forced by activating AAC
+    if (!aacActive && !force) {
+      return;
+    }
+
     setVoiceLoadingState({
       isOpen: true,
       persona: p,
       language: l,
     });
-  }, [settings.voicePersona, settings.language]);
+  }, [settings.voicePersona, settings.language, settings.features, enabledFeatures]);
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     if (newSettings.pin) {
@@ -813,12 +845,25 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (newSettings.language) {
       setLanguage(newSettings.language).catch(() => {});
     }
-    if (newSettings.voicePersona || newSettings.language) {
+
+    const wasAacActive =
+      enabledFeatures?.aacCommunication !== false &&
+      enabledFeatures?.aac !== false &&
+      settings.features?.aacCommunication !== false &&
+      settings.features?.aac !== false;
+
+    const willAacBeActive = newSettings.features
+      ? (newSettings.features.aacCommunication !== false && newSettings.features.aac !== false)
+      : wasAacActive;
+
+    const isActivatingAac = !wasAacActive && willAacBeActive;
+
+    if (newSettings.voicePersona || newSettings.language || isActivatingAac) {
       const p = newSettings.voicePersona || settings.voicePersona || 'amy';
       const l = newSettings.language || settings.language || 'en';
-      if (p !== 'system') {
-        if (!isVoicePackLoaded(p, l)) {
-          triggerVoicePreload(p, l);
+      if (p !== 'system' && willAacBeActive) {
+        if (!isVoicePackLoaded(p, l) || isActivatingAac) {
+          triggerVoicePreload(p, l, true);
         } else {
           // Warm up target voice in memory eagerly upon selection
           preloadPiperVoice(p, l).catch(() => {});
