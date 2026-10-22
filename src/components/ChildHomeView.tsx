@@ -851,15 +851,15 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
                           speechText={t(tile.speechText || tile.label)}
                           category={getGrammaticalCategoryLabel(tile.colorType)}
                           onClick={() => handleTactileTileClick(tile)}
-                          className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2.5 sm:p-3 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group"
+                          className="w-full h-full rounded-[22px] bg-[#FCF9F2] hover:bg-white text-stone-900 flex flex-col items-center justify-between p-2 sm:p-2.5 transition-all cursor-pointer shadow-[0_5px_12px_rgba(0,0,0,0.06),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18)] active:scale-95 border border-[#EBE3D5] group overflow-hidden"
                           title={t(tile.speechText || tile.label)}
                         >
-                          <div className="flex-1 w-full flex items-center justify-center p-1 group-hover:scale-105 transition-transform relative pointer-events-none">
+                          <div className="flex-1 min-h-0 w-full flex items-center justify-center p-0.5 group-hover:scale-105 transition-transform relative pointer-events-none">
                             <img
                               src={resolveAacImageUrl(tile)}
                               alt=""
                               aria-hidden="true"
-                              className="w-full h-full object-contain max-h-16 sm:max-h-20 pointer-events-none drop-shadow-2xs"
+                              className="w-full h-full object-contain max-h-11 sm:max-h-16 pointer-events-none drop-shadow-2xs"
                               loading="lazy"
                               onError={(e) => {
                                 const target = e.currentTarget as HTMLElement;
@@ -869,15 +869,12 @@ export const ChildHomeView: React.FC<ChildHomeViewProps> = ({ previewTheme }) =>
                                 }
                               }}
                             />
-                            <span aria-hidden="true" className="hidden text-3xl sm:text-4xl items-center justify-center select-none pointer-events-none">
+                            <span aria-hidden="true" className="hidden text-2xl sm:text-3xl items-center justify-center select-none pointer-events-none">
                               {tile.emoji}
                             </span>
                           </div>
-                          <span className="font-extrabold text-xs sm:text-sm text-stone-800 tracking-tight text-center leading-tight">
+                          <span className="font-black text-[11px] sm:text-xs md:text-sm text-stone-900 tracking-tight text-center leading-tight line-clamp-2 px-0.5 shrink-0 mt-0.5">
                             {t(tile.label)}
-                          </span>
-                          <span aria-hidden="true" className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-black/5 text-stone-600 mt-0.5">
-                            {getGrammaticalCategoryLabel(tile.colorType)}
                           </span>
                         </AccessibleTile>
                       </div>

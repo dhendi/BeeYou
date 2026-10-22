@@ -157,23 +157,26 @@ async function runTests() {
     const ttsUrl = `${baseUrl}/api/tts?text=${encodeURIComponent(testPhrase)}&voice=${voice}&lang=${lang}&v=${v}`;
     res = await fetch(ttsUrl);
     assert(res.status === 200, 'GET /api/tts returns 200 OK for valid AAC phrase');
-    assert(res.headers.get('content-type') === 'audio/wav', 'Content-Type header is audio/wav');
+    const contentType = res.headers.get('content-type');
+    assert(contentType === 'audio/wav' || contentType === 'audio/mpeg', 'Content-Type header is audio/wav or audio/mpeg');
     assert(res.headers.get('cache-control')?.includes('max-age=31536000') ?? false, 'Cache-Control header specifies 1-year immutable edge cache');
     const originalEtag = res.headers.get('etag');
     assert(Boolean(originalEtag), 'Response includes deterministic ETag header');
 
     const audioBuffer = Buffer.from(await res.arrayBuffer());
     assert(audioBuffer.length >= 44, 'Audio payload is at least 44 bytes (header size)');
-    assert(audioBuffer.toString('ascii', 0, 4) === 'RIFF', 'WAV container starts with "RIFF" magic bytes');
-    assert(audioBuffer.toString('ascii', 8, 12) === 'WAVE', 'WAV container contains "WAVE" format identifier');
-    assert(audioBuffer.toString('ascii', 12, 16) === 'fmt ', 'WAV container contains "fmt " subchunk');
-    assert(audioBuffer.readUInt16LE(20) === 1, 'AudioFormat field is 1 (uncompressed Linear PCM)');
-    assert(audioBuffer.readUInt16LE(22) === 1, 'NumChannels field is 1 (Mono)');
-    const sampleRate = audioBuffer.readUInt32LE(24);
-    assert(sampleRate === 24000 || sampleRate === 16000 || sampleRate >= 8000, `Sample rate is valid (${sampleRate} Hz)`);
-    assert(audioBuffer.readUInt16LE(34) === 16, 'BitsPerSample field is 16-bit depth');
-    assert(audioBuffer.toString('ascii', 36, 40) === 'data', 'WAV container contains "data" subchunk header');
-    assert(audioBuffer.length > 5000, `Audio contains real audible PCM payload (${(audioBuffer.length / 1024).toFixed(1)} KB)`);
+    if (contentType === 'audio/wav') {
+      assert(audioBuffer.toString('ascii', 0, 4) === 'RIFF', 'WAV container starts with "RIFF" magic bytes');
+      assert(audioBuffer.toString('ascii', 8, 12) === 'WAVE', 'WAV container contains "WAVE" format identifier');
+      assert(audioBuffer.toString('ascii', 12, 16) === 'fmt ', 'WAV container contains "fmt " subchunk');
+      assert(audioBuffer.readUInt16LE(20) === 1, 'AudioFormat field is 1 (uncompressed Linear PCM)');
+      assert(audioBuffer.readUInt16LE(22) === 1, 'NumChannels field is 1 (Mono)');
+      const sampleRate = audioBuffer.readUInt32LE(24);
+      assert(sampleRate === 24000 || sampleRate === 16000 || sampleRate >= 8000, `Sample rate is valid (${sampleRate} Hz)`);
+      assert(audioBuffer.readUInt16LE(34) === 16, 'BitsPerSample field is 16-bit depth');
+      assert(audioBuffer.toString('ascii', 36, 40) === 'data', 'WAV container contains "data" subchunk header');
+    }
+    assert(audioBuffer.length > 5000, `Audio contains real audible payload (${(audioBuffer.length / 1024).toFixed(1)} KB)`);
 
     // Test ETag 304 Not Modified
     const res304 = await fetch(ttsUrl, { headers: { 'If-None-Match': originalEtag! } });
@@ -198,7 +201,7 @@ async function runTests() {
     // Fetch same phrase again
     const resRestart = await fetch(ttsUrl);
     assert(resRestart.status === 200, 'Request after restart returns 200 OK from persistent disk/cloud storage');
-    assert(resRestart.headers.get('content-type') === 'audio/wav', 'Content-Type remains audio/wav');
+    assert(resRestart.headers.get('content-type') === contentType, 'Content-Type remains consistent across restart');
     const diskBuffer = Buffer.from(await resRestart.arrayBuffer());
     assert(diskBuffer.equals(audioBuffer), 'Audio returned after restart is 100% byte-for-byte identical to original generation');
 

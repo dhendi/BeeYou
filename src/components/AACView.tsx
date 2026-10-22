@@ -1133,7 +1133,7 @@ export const AACView: React.FC = () => {
                         <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
                       </span>
                     ) : (
-                      <span>Tap words below to build a sentence... (tap window to speak)</span>
+                      <span className="truncate">Tap words below to build a sentence...</span>
                     )}
                   </div>
                 ) : (
@@ -1373,7 +1373,7 @@ export const AACView: React.FC = () => {
                     className="w-4 h-4 sm:w-5 sm:h-5 object-contain pointer-events-none drop-shadow-2xs select-none"
                   />
                 )}
-                <span>{categories.find(c => c.id === activeCategory)?.label} Folder</span>
+                <span className="truncate max-w-[140px] sm:max-w-none">{categories.find(c => c.id === activeCategory)?.label}</span>
               </span>
             </div>
 
@@ -1514,7 +1514,7 @@ export const AACView: React.FC = () => {
                       setSearchQuery('');
                       playChime('tap');
                     }}
-                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-sm sm:text-base min-h-[46px] sm:min-h-[52px] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer select-none active:scale-95 shrink-0 touch-manipulation ${activeStyle}`}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm min-h-[40px] sm:min-h-[48px] flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer select-none active:scale-95 shrink-0 touch-manipulation ${activeStyle}`}
                   >
                     <img
                       src={iconSrc}
@@ -1991,66 +1991,31 @@ export const AACView: React.FC = () => {
                         })()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-snug break-words line-clamp-3 select-none">
-                            {t(fav.text)}
-                          </h4>
+                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-snug select-none">
+                          {t(fav.text)}
+                        </h4>
+                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500 font-medium flex-wrap">
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-black text-[10px] shrink-0">
+                            {fav.usageCount || 1}x spoken
+                          </span>
                           {fav.audioDataUrl && (
-                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-[10px] flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-[10px] flex items-center gap-1 shrink-0">
                               <Mic className="w-3 h-3 text-purple-700" />
                               <span>{fav.audioRecordedBy || 'Voice'}</span>
                             </span>
                           )}
                           {fav.isParentPinned && (
-                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1 shrink-0">
                               <img src="/assets/stickers/aac_core.webp" alt="" className="w-3.5 h-3.5 object-contain" />
                               <span>Pinned</span>
                             </span>
                           )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 font-medium">
-                          <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300 font-bold">
-                            🔥 {fav.usageCount || 1}x spoken
-                          </span>
-                          <span>•</span>
-                          <span className="text-slate-400">{t('Tap to speak')}</span>
+                          <span className="text-slate-400 hidden sm:inline">• {t('Tap to speak')}</span>
                         </div>
                       </div>
                     </button>
 
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const spoken = t(fav.speechText || fav.text);
-                          if (fav.audioDataUrl) {
-                            playAudioUrl(fav.audioDataUrl, spoken);
-                          } else {
-                            speak(spoken);
-                          }
-                          recordSentenceSpoken(fav.text, fav.emoji);
-                          playChime('speak');
-                          addToSentence({
-                            id: `fav-${Date.now()}`,
-                            label: t(fav.text),
-                            originalLabel: fav.text,
-                            speechText: spoken,
-                            emoji: fav.emoji || '💬',
-                            photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
-                            category: 'favorites',
-                            colorType: 'social',
-                            motorIndex: 0,
-                            audioDataUrl: fav.audioDataUrl,
-                            audioRecordedBy: fav.audioRecordedBy,
-                          });
-                        }}
-                        className="px-3 py-2 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all"
-                        title="Speak Sentence Aloud"
-                      >
-                        <Volume2 className="w-4 h-4" />
-                        <span>Speak</span>
-                      </button>
-
+                    <div className="flex items-center gap-1 shrink-0 ml-1">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -2067,22 +2032,30 @@ export const AACView: React.FC = () => {
 
                       <button
                         type="button"
-                        onClick={() => togglePinFavoriteSentence(fav.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePinFavoriteSentence(fav.id);
+                        }}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${
                           fav.isParentPinned
                             ? 'text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40'
                             : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                         title={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
+                        aria-label={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
                       >
                         <Heart className={`w-4 h-4 ${fav.isParentPinned ? 'fill-amber-400 text-amber-600' : ''}`} />
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => deleteFavoriteSentence(fav.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteFavoriteSentence(fav.id);
+                        }}
                         className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
                         title="Delete sentence"
+                        aria-label="Delete sentence"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
