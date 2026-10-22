@@ -14,6 +14,8 @@
     "cap:sync": "npm run build && cap sync",
     "cap:ios": "cap open ios",
     "cap:android": "cap open android",
+    "android:dev": "powershell -ExecutionPolicy Bypass -File scripts/android-dev.ps1",
+    "android:prod": "powershell -ExecutionPolicy Bypass -File scripts/android-prod.ps1",
     "deploy:rules": "firebase deploy --only database,storage"
   },
   "dependencies": {
