@@ -48,17 +48,18 @@ async function testUnbakedSpeech() {
     };
   })()`);
 
-  console.log('[Test Results]:', JSON.stringify(testResults, null, 2));
+  const results = testResults as any;
+  console.log('[Test Results]:', JSON.stringify(results, null, 2));
 
-  if (testResults.firstCallLatency > 1500) {
-    throw new Error(`First call latency was too slow: ${testResults.firstCallLatency}ms`);
+  if (results.firstCallLatency > 1500) {
+    throw new Error(`First call latency was too slow: ${results.firstCallLatency}ms`);
   }
 
-  if (testResults.secondCallLatency > 100) {
-    throw new Error(`Second call latency was not instant: ${testResults.secondCallLatency}ms`);
+  if (results.secondCallLatency > 100) {
+    throw new Error(`Second call latency was not instant: ${results.secondCallLatency}ms`);
   }
 
-  console.log(`SUCCESS: First call started sound in ${testResults.firstCallLatency}ms, second call started in ${testResults.secondCallLatency}ms (instant 0ms cache)!`);
+  console.log(`SUCCESS: First call started sound in ${results.firstCallLatency}ms, second call started in ${results.secondCallLatency}ms (instant 0ms cache)!`);
   await browser.close();
 }
 

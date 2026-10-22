@@ -989,13 +989,6 @@ export const AACView: React.FC = () => {
       }
     } else {
       addToSentence({ ...item, originalLabel: item.originalLabel || item.label, label: t(item.label), speechText: speech });
-      if (!settings.autoSpeakSentence) {
-        if (item.audioDataUrl) {
-          playAudioUrl(item.audioDataUrl, speech);
-        } else {
-          speak(speech);
-        }
-      }
     }
     playChime('tap');
   };
@@ -1028,9 +1021,6 @@ export const AACView: React.FC = () => {
       speak(inf.speechText || inf.label);
     } else {
       addToSentence(modifiedItem);
-      if (!settings.autoSpeakSentence) {
-        speak(inf.speechText || inf.label);
-      }
     }
     playChime('tap');
     setInflectionTarget(null);

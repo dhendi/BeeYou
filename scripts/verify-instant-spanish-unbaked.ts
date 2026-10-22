@@ -48,17 +48,18 @@ async function testSpanishUnbaked() {
     };
   })()`);
 
-  console.log('[Spanish Test Results]:', JSON.stringify(testResults, null, 2));
+  const results = testResults as any;
+  console.log('[Spanish Test Results]:', JSON.stringify(results, null, 2));
 
-  if (testResults.firstCallLatency > 1500) {
-    throw new Error(`Spanish first call was too slow: ${testResults.firstCallLatency}ms`);
+  if (results.firstCallLatency > 1500) {
+    throw new Error(`Spanish first call was too slow: ${results.firstCallLatency}ms`);
   }
 
-  if (testResults.secondCallLatency > 100) {
-    throw new Error(`Spanish second call was not cached: ${testResults.secondCallLatency}ms`);
+  if (results.secondCallLatency > 100) {
+    throw new Error(`Spanish second call was not cached: ${results.secondCallLatency}ms`);
   }
 
-  console.log(`SUCCESS: Spanish un-baked phrase started in ${testResults.firstCallLatency}ms and second call was ${testResults.secondCallLatency}ms!`);
+  console.log(`SUCCESS: Spanish un-baked phrase started in ${results.firstCallLatency}ms and second call was ${results.secondCallLatency}ms!`);
   await browser.close();
 }
 

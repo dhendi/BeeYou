@@ -48,7 +48,8 @@ async function runE2eVerification() {
   await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded' });
 
   await page.evaluate(async () => {
-    const subMod = await import('/src/services/subscriptionService.ts');
+    const dynImport = new Function('p', 'return import(p)');
+    const subMod = await dynImport('/src/services/subscriptionService.ts');
     const trialSub = subMod.signSubscriptionEntitlement({
       tier: 'premium',
       status: 'trial',
@@ -184,7 +185,8 @@ async function runE2eVerification() {
   console.log('\n--- Scenario 2: Basic Tier Account Lock ---');
 
   await page.evaluate(async () => {
-    const subMod = await import('/src/services/subscriptionService.ts');
+    const dynImport = new Function('p', 'return import(p)');
+    const subMod = await dynImport('/src/services/subscriptionService.ts');
     const basicSub = subMod.getDefaultBasicSubscription();
     localStorage.setItem('beeyou_subscription', JSON.stringify(basicSub));
     const appState = {

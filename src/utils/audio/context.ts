@@ -1,5 +1,6 @@
 let audioCtx: AudioContext | null = null;
 let silentAudioEl: HTMLAudioElement | null = null;
+let hardwareUnlocked = false;
 
 /**
  * Configure browser / WebKit audio session to 'playback' mode.
@@ -16,7 +17,7 @@ export function enableSilentModePlayback(): void {
     } catch (e) {}
   }
 
-  // 2. Universal HTML5 Audio silent unlock for WebKit silent-switch bypass
+  // 2. HTML5 Audio silent element for WebKit silent-switch bypass
   if (!silentAudioEl) {
     try {
       // 0.05s silent PCM WAV data URI
@@ -31,8 +32,29 @@ export function enableSilentModePlayback(): void {
   }
 
   if (silentAudioEl) {
-    silentAudioEl.play().catch(() => {});
+    try {
+      silentAudioEl.currentTime = 0;
+      const playPromise = silentAudioEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    } catch (e) {}
   }
+}
+
+/**
+ * Unlocks Web Audio hardware output on iOS WebKit and mobile devices
+ * by scheduling a 1-sample silent buffer directly through the destination node.
+ */
+export function unlockAudioHardwareNode(ctx: AudioContext): void {
+  try {
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(0);
+    hardwareUnlocked = true;
+  } catch (e) {}
 }
 
 export function getAudioContext(): AudioContext | null {
@@ -45,31 +67,33 @@ export function getAudioContext(): AudioContext | null {
       audioCtx = new AudioContextClass();
     }
   }
+
   if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume().catch(() => {});
   }
+
   return audioCtx;
 }
 
-// Mobile / Android Global User-Gesture Audio & Speech Unlocker
-if (typeof window !== 'undefined') {
-  const events = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'] as const;
-  const unbindUnlockListeners = () => {
-    events.forEach((evt) => {
-      window.removeEventListener(evt, unlockMobileAudioAndSpeech, { capture: true });
-    });
-  };
+export function isAudioHardwareUnlocked(): boolean {
+  return hardwareUnlocked && Boolean(audioCtx && audioCtx.state === 'running');
+}
 
-  const unlockMobileAudioAndSpeech = () => {
+// Mobile / iOS User-Gesture Audio & Speech Unlocker
+// Crucial: Keeps listeners active so subsequent app-switch or lock-screen suspensions
+// are immediately resumed on the next user interaction.
+if (typeof window !== 'undefined') {
+  const handleUserGestureUnlock = () => {
     try {
       enableSilentModePlayback();
       const ctx = getAudioContext();
-      if (ctx && ctx.state === 'suspended') {
-        ctx.resume().then(() => {
-          unbindUnlockListeners();
-        }).catch(() => {});
-      } else if (ctx && ctx.state === 'running') {
-        unbindUnlockListeners();
+      if (ctx) {
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        if (!hardwareUnlocked) {
+          unlockAudioHardwareNode(ctx);
+        }
       }
       if ('speechSynthesis' in window) {
         if (window.speechSynthesis.paused) {
@@ -79,7 +103,28 @@ if (typeof window !== 'undefined') {
     } catch (e) {}
   };
 
-  events.forEach((evt) => {
-    window.addEventListener(evt, unlockMobileAudioAndSpeech, { passive: true, capture: true });
+  const gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click'] as const;
+  gestureEvents.forEach((evt) => {
+    window.addEventListener(evt, handleUserGestureUnlock, { passive: true, capture: true });
   });
+
+  // App lifecycle: resume audio pipeline when returning from background or lock screen
+  const handleAppResume = () => {
+    enableSilentModePlayback();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    if (typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      handleAppResume();
+    }
+  });
+
+  window.addEventListener('pageshow', handleAppResume);
+  window.addEventListener('focus', handleAppResume);
 }

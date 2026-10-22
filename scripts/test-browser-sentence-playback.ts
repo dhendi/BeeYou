@@ -18,8 +18,8 @@ async function testBrowserSentencePlayback() {
     console.log(`[Browser Console]: ${txt}`);
   });
 
-  page.on('pageerror', (err) => {
-    console.log(`[Browser PageError]: ${err.message}`);
+  page.on('pageerror', (err: any) => {
+    console.log(`[Browser PageError]: ${err?.message || err}`);
   });
 
   console.log('Navigating to http://localhost:3000...');
@@ -38,7 +38,8 @@ async function testBrowserSentencePlayback() {
   // Trigger speak of "I want a drink."
   console.log('Executing test sentence speak in browser context...');
   const result = await page.evaluate(async () => {
-    const { speakText } = await import('/src/utils/audio/speech.ts');
+    const dynImport = new Function('p', 'return import(p)');
+    const { speakText } = await dynImport('/src/utils/audio/speech.ts');
     let persona = 'system';
     try {
       const s = JSON.parse(localStorage.getItem('beeyou_settings') || '{}');

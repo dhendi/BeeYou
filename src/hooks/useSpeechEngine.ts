@@ -68,7 +68,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       sentenceWords?: string[];
     }
   ) => {
-    if (settings.soundEffects) playChime('speak');
+    if (settings.soundEffects && options?.previewAudio) playChime('speak');
     const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');
     let spoken = t(text);
     if (currentActiveLang && currentActiveLang !== 'en' && spoken === text && text.trim().length > 0) {

@@ -879,12 +879,71 @@ export async function speakText(
     return;
   }
 
+  const cacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
+  const streamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
+
   // 2. Direct Whole-Sentence Native Vocalization for Multi-Word Sentences
   // Constructed AAC sentences are vocalized directly as a single, fluid utterance
   // with natural human prosody, proper cadence, and calibrated persona acoustic profiles.
-  // Strictly eliminates choppy word-stitching and isolated single-word concatenation.
+  // Priority: 1. Local Cache -> 2. Piper On-Device Neural Synthesis -> 3. Server Stream -> 4. System Speech Fallback
   if (isMultiWord) {
+    // 2a. Fast Local Cache Lookup (L1 RAM + L2 CacheStorage)
+    const localCached = await getLocalCacheOnly(streamUrl, cacheKey);
     if (speechId !== latestSpeechRequestId) return;
+    if (localCached && isAudioPayload(localCached.buffer)) {
+      console.log(`[AAC Speech] Playing multi-word sentence via local cache (${selectedPersonaId})`);
+      const played = await playAudioUrl(localCached.buffer, formattedText, calibratedRate, speechId);
+      if (played || speechId !== latestSpeechRequestId) return;
+    }
+
+    // 2b. Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
+    if (selectedPersonaId !== 'system') {
+      try {
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 2500);
+        if (speechId !== latestSpeechRequestId) return;
+        if (piperBuf && isAudioPayload(piperBuf)) {
+          console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
+          // Cache in L1 memory and L2 CacheStorage for subsequent 0ms replay
+          const blob = new Blob([piperBuf], { type: 'audio/wav' });
+          const blobUrl = URL.createObjectURL(blob);
+          audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
+          if (typeof window !== 'undefined' && 'caches' in window) {
+            const fullUrl = new URL(streamUrl, window.location.origin).href;
+            const resToCache = new Response(piperBuf.slice(0), {
+              headers: {
+                'content-type': 'audio/wav',
+                'cache-control': 'public, max-age=31536000, immutable',
+              },
+            });
+            caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
+          }
+
+          const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId);
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (piperErr) {
+        console.warn('[AAC Speech] Piper sentence synthesis error:', piperErr);
+      }
+    }
+
+    // 2c. Server Stream Fallback
+    if (selectedPersonaId !== 'system') {
+      try {
+        const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
+        if (speechId !== latestSpeechRequestId) return;
+        if (serverItem && isAudioPayload(serverItem.buffer)) {
+          console.log(`[AAC Speech] Playing multi-word sentence via server stream (${selectedPersonaId})`);
+          const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId);
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (serverErr) {
+        console.warn('[AAC Speech] Server audio stream fallback error:', serverErr);
+      }
+    }
+
+    // 2d. Emergency Fallback: Browser Speech Synthesis for whole sentence
+    if (speechId !== latestSpeechRequestId) return;
+    console.log(`[AAC Speech] Multi-word sentence falling back to system speech synthesis (${selectedPersonaId})`);
     await speakWithBrowserSpeechSynthesis(formattedText, {
       ...options,
       voicePersona: selectedPersonaId,
@@ -895,9 +954,11 @@ export async function speakText(
     return;
   }
 
-  // 3. Pre-bundled Offline Core Audio for Single Words
-  // When an individual tile is tapped on the board, plays the authentic persona word recording
-  // if available for the active persona. Does NOT cross-contaminate voices.
+  // 3. Single Word Vocalization
+  // When an individual tile is tapped on the board, plays the authentic persona word recording.
+  // Priority: 1. Bundled core recordings -> 2. Local Cache -> 3. Piper on-device -> 4. Server stream -> 5. Browser speech
+
+  // 3a. Pre-bundled Offline Core Audio for Single Words
   if (!isNonEnglish) {
     const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (rawSlug) {
@@ -913,6 +974,7 @@ export async function speakText(
           if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
             const buf = await bundledRes.arrayBuffer();
             if (isAudioPayload(buf)) {
+              console.log(`[AAC Speech] Playing single word via pre-bundled core recording (${voiceToStream}_${rawSlug})`);
               const played = await playAudioUrl(buf, formattedText, calibratedRate, speechId);
               if (played || speechId !== latestSpeechRequestId) return;
             }
@@ -922,8 +984,49 @@ export async function speakText(
     }
   }
 
-  // 4. Native Browser SpeechSynthesis Fallback:
+  // 3b. Local Audio Cache (L1 RAM + L2 CacheStorage)
+  const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
   if (speechId !== latestSpeechRequestId) return;
+  if (localCachedSingle && isAudioPayload(localCachedSingle.buffer)) {
+    console.log(`[AAC Speech] Playing single word via local cache (${selectedPersonaId})`);
+    const played = await playAudioUrl(localCachedSingle.buffer, formattedText, calibratedRate, speechId);
+    if (played || speechId !== latestSpeechRequestId) return;
+  }
+
+  // 3c. Piper On-Device Neural Synthesis for Single Word
+  if (selectedPersonaId !== 'system') {
+    try {
+      const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 1500);
+      if (speechId !== latestSpeechRequestId) return;
+      if (piperBuf && isAudioPayload(piperBuf)) {
+        console.log(`[AAC Speech] Playing single word via Piper neural synthesis (${selectedPersonaId})`);
+        const blob = new Blob([piperBuf], { type: 'audio/wav' });
+        const blobUrl = URL.createObjectURL(blob);
+        audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
+        const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId);
+        if (played || speechId !== latestSpeechRequestId) return;
+      }
+    } catch (piperErr) {
+      console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
+    }
+  }
+
+  // 3d. Server Stream Fallback for Single Word
+  if (selectedPersonaId !== 'system') {
+    try {
+      const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
+      if (speechId !== latestSpeechRequestId) return;
+      if (serverItem && isAudioPayload(serverItem.buffer)) {
+        console.log(`[AAC Speech] Playing single word via server stream (${selectedPersonaId})`);
+        const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId);
+        if (played || speechId !== latestSpeechRequestId) return;
+      }
+    } catch {}
+  }
+
+  // 3e. Native Browser SpeechSynthesis Fallback:
+  if (speechId !== latestSpeechRequestId) return;
+  console.log(`[AAC Speech] Single word falling back to system speech synthesis (${selectedPersonaId})`);
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
@@ -1333,6 +1436,7 @@ export async function playAudioUrl(
   if (ctx) {
     try {
       if (ctx.state === 'suspended') {
+        console.log('[AAC Speech] AudioContext suspended, attempting resume');
         await ctx.resume().catch(() => {});
       }
 
@@ -1353,7 +1457,7 @@ export async function playAudioUrl(
         // Audio format safeguard: ensure valid container header for iOS Safari & Android WebView
         const verifiedBuffer = ensureWavHeader(arrayBuffer, 24000);
         if (!verifiedBuffer) {
-          console.warn('[Audio] Non-audio payload rejected from Web Audio decode.');
+          console.warn('[AAC Speech] Non-audio payload rejected from Web Audio decode.');
           return false;
         }
 
@@ -1378,28 +1482,38 @@ export async function playAudioUrl(
         notifySpeechState(true, originalText);
 
         return await new Promise<boolean>((resolve) => {
-          source.onended = () => {
+          let finished = false;
+          const finish = (result: boolean) => {
+            if (finished) return;
+            finished = true;
             if (activeSourceNode === source) {
               activeSourceNode = null;
             }
             notifySpeechState(false, null);
-            resolve(true);
+            resolve(result);
           };
+
+          source.onended = () => {
+            finish(true);
+          };
+
+          // iOS WebKit safety timeout: handles cases where iOS drops onended event
+          const durationMs = Math.ceil((audioBuffer.duration / Math.max(0.1, targetRate)) * 1000) + 350;
+          const safetyTimer = setTimeout(() => {
+            finish(true);
+          }, durationMs);
 
           try {
             source.start(0);
           } catch (startErr) {
-            console.warn('[WebAudio] source.start error:', startErr);
-            if (activeSourceNode === source) {
-              activeSourceNode = null;
-            }
-            notifySpeechState(false, null);
-            resolve(false);
+            console.warn('[AAC Speech] WebAudio source.start error:', startErr);
+            clearTimeout(safetyTimer);
+            finish(false);
           }
         });
       }
     } catch (webAudioErr) {
-      console.warn('[WebAudio] Web Audio decode failed, falling back to HTML5 audio element:', webAudioErr);
+      console.warn('[AAC Speech] Web Audio decode failed, falling back to HTML5 audio element:', webAudioErr);
     }
   }
 
@@ -1539,11 +1653,11 @@ function speakWithBrowserSpeechSynthesis(
       return;
     }
 
-    // Double-tap bounce protection: ignore rapid duplicate clicks on the exact same word within 200ms,
-    // but allow different words immediately and allow repeat words after 200ms (or when force is true).
+    // Double-tap bounce protection: ignore rapid duplicate clicks on the exact same word within 50ms (jitter guard),
+    // but allow deliberate repeat words (or when force is true).
     const normText = formattedText.trim().toLowerCase();
     const now = Date.now();
-    const debounceWindow = options?.force ? 0 : 200;
+    const debounceWindow = options?.force ? 0 : 50;
     if (normText === lastSpokenTextNormalized && (now - lastSpokenTimestamp) < debounceWindow) {
       resolve();
       return;

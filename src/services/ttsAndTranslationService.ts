@@ -916,7 +916,7 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
 
 /**
  * Handle Text-to-Speech Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.
- * Supports 20 Gemini 3.8 Flash-Lite Neural TTS Personas across Kids, Teens, Caring, and Professional categories.
+ * Supports neural persona streaming across Kids, Teens, Caring, and Professional categories.
  */
 export async function handleTtsRequest(req: Request, res: Response): Promise<void> {
   const rawText = req.query.text;
@@ -999,8 +999,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (voiceKey !== 'system') {
       res.status(503).json({
-        error: 'NeuralVoiceUnavailable',
-        message: 'Gemini neural voice requires a valid API key. Falling back to calibrated on-device speech.',
+        error: 'VoiceStreamUnavailable',
+        message: 'Voice stream unavailable. Falling back to on-device Piper or system speech.',
       });
       return;
     }
@@ -1115,8 +1115,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
     if (voiceKey !== 'system') {
       res.status(503).json({
-        error: 'NeuralVoiceUnavailable',
-        message: 'Gemini neural voice requires a valid API key. Falling back to calibrated on-device speech.',
+        error: 'VoiceStreamUnavailable',
+        message: 'Voice stream unavailable. Falling back to on-device Piper or system speech.',
       });
       return;
     }
@@ -1250,116 +1250,6 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       }
     } catch (googleErr: any) {
       console.warn('[TTS Instant Google Stream Notice]:', googleErr?.message || googleErr);
-    }
-
-    // 7b. Secondary Fallback to Gemini Neural Generation if Google TTS is unreachable
-    let geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-      try {
-        const envPath = path.join(process.cwd(), '.env');
-        if (fs.existsSync(envPath)) {
-          const envContent = fs.readFileSync(envPath, 'utf8');
-          const match = envContent.match(/GEMINI_API_KEY=["']?([^"'\r\n]+)["']?/);
-          if (match) geminiApiKey = match[1].trim();
-        }
-      } catch {}
-    }
-
-    // Accept both classic AIzaSy keys and Google AI Studio AQ. keys
-    const isValidGeminiKey = Boolean(geminiApiKey && geminiApiKey.trim().length > 15);
-
-    if (isValidGeminiKey && voiceKey !== 'system') {
-      const candidateModels = [
-        'gemini-3.8-flash-tts',
-        'gemini-3.8-flash-lite-tts',
-      ];
-
-      for (const model of candidateModels) {
-        const cooldownUntil = modelCooldownMap.get(model) || 0;
-        if (Date.now() < cooldownUntil) {
-          continue;
-        }
-
-        try {
-          const endpoint = 'https://generativelanguage.googleapis.com/v1beta/interactions';
-          const is38Model = model.includes('3.8');
-          const contentObj: any = {
-            type: 'text',
-            text: cleanText,
-          };
-          if (is38Model) {
-            contentObj.annotations = [{
-              type: 'speech_metadata',
-              style: `natural everyday conversational speech, smooth and fluid delivery, calm matter-of-fact conversational tone, neutral without exaggerated emotion, clear and connected pronunciation without pauses between words, normal speaking rhythm, ${persona.style}`,
-            }];
-          }
-
-          const payload = {
-            model,
-            input: [{
-              type: 'user_input',
-              content: [contentObj],
-            }],
-            response_format: { type: 'audio' },
-            generation_config: {
-              speech_config: [
-                { voice: persona.geminiVoice || persona.name },
-              ],
-            },
-          };
-
-          const geminiRes = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'x-goog-api-key': geminiApiKey!,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
-          });
-
-          if (geminiRes.ok) {
-            modelCooldownMap.delete(model);
-            usageBudgetTracker.recordTtsUpstream();
-            const geminiData: any = await geminiRes.json();
-            const audioStep = geminiData?.steps?.find((s: any) => s.type === 'model_output' && s.content?.some((c: any) => c.type === 'audio'));
-            const audioContent = audioStep?.content?.find((c: any) => c.type === 'audio');
-            const inline = geminiData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-            const audioBase64 =
-              audioContent?.data ||
-              inline?.data ||
-              geminiData?.output_audio?.data ||
-              geminiData?.outputAudio?.data;
-
-            if (audioBase64) {
-              const rawBuffer: Buffer = Buffer.from(audioBase64, 'base64');
-              const rawMime = audioContent?.mime_type || inline?.mimeType || 'audio/wav';
-              const metaRate = geminiData?.output_audio?.sample_rate || geminiData?.outputAudio?.sampleRate || 24000;
-
-              // Inspect response format and sample rate, adding a valid WAV header if raw PCM
-              const { buffer, sampleRate, isNativeWav } = ensureValidWavContainer(rawBuffer, rawMime, metaRate);
-              const contentType = 'audio/wav';
-
-              console.log(
-                `[TTS Upstream] Generated from Gemini (${model}): "${cleanText}" (${persona.label}) [format: ${isNativeWav ? 'Native RIFF WAV' : 'Raw PCM -> Wrapped 44-byte RIFF WAV'}, sampleRate: ${sampleRate}Hz, size: ${buffer.length} bytes] - 1 API call`
-              );
-
-              ttsAudioCache.set(cacheKey, { buffer, contentType });
-
-              // Asynchronously write to persistent disk cache & cloud storage
-              fs.promises.writeFile(diskPathWav, buffer).then(() => {
-                scheduleDiskCacheLifecycleCheck();
-              }).catch(() => {});
-              fs.promises.writeFile(literalDiskPathWav, buffer).catch(() => {});
-              saveAudioToCloudStorage(voiceKey, normalizedLang, hashKey, buffer, contentType, ttsVersion).catch(() => {});
-
-              return { buffer, contentType };
-            }
-          }
-        } catch (err: any) {
-          console.warn(`[Gemini TTS (${model})] Upstream call failed:`, err?.message || err);
-        }
-      }
     }
 
     return null;

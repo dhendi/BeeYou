@@ -222,6 +222,13 @@ export async function preloadPiperVoice(
 }
 
 /**
+ * Clears the Piper in-memory audio cache to release RAM.
+ */
+export function clearPiperAudioMemoryCache(): void {
+  piperAudioMemoryCache.clear();
+}
+
+/**
  * Synthesizes arbitrary text using Piper on-device.
  * Returns ArrayBuffer of canonical WAV audio, or null if synthesis failed.
  */
@@ -229,7 +236,7 @@ export async function synthesizeWithPiper(
   text: string,
   personaId?: string,
   lang: string = 'en',
-  timeoutMs: number = 800
+  timeoutMs: number = 2500
 ): Promise<ArrayBuffer | null> {
   const cleanText = text.trim();
   if (!cleanText) return null;
@@ -251,13 +258,17 @@ export async function synthesizeWithPiper(
   // Kick off silent background download and return null so instant speech fallback sounds immediately.
   const isReady = await isPiperVoiceReady(personaId, lang);
   if (!isReady) {
+    console.log(`[AAC Speech] Piper model not ready for voice ${voiceId}, triggering background preload`);
     preloadPiperVoice(personaId, lang).catch(() => {});
     return null;
   }
 
   const predictionPromise = (async () => {
     const piper = await getPiperModule();
-    if (!piper) return null;
+    if (!piper) {
+      console.warn(`[AAC Speech] Piper WebAssembly module unavailable for voice ${voiceId}`);
+      return null;
+    }
 
     try {
       // Race prediction against strict timeout so it never hangs or locks up speech
@@ -271,10 +282,19 @@ export async function synthesizeWithPiper(
       );
 
       const wavBlob = await Promise.race([predictionWork, timeoutWork]);
-      if (!wavBlob) return null;
+      if (!wavBlob) {
+        console.warn(`[AAC Speech] Piper synthesis timed out after ${timeoutMs}ms for voice ${voiceId}`);
+        return null;
+      }
 
       const arrayBuffer = await wavBlob.arrayBuffer();
       if (arrayBuffer && arrayBuffer.byteLength > 44) {
+        // LRU guard: keep cache size bounded to prevent excessive mobile memory usage (max 150 entries)
+        if (piperAudioMemoryCache.size >= 150) {
+          const firstKey = piperAudioMemoryCache.keys().next().value;
+          if (firstKey) piperAudioMemoryCache.delete(firstKey);
+        }
+
         piperAudioMemoryCache.set(cacheKey, arrayBuffer);
         try {
           localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
@@ -282,8 +302,8 @@ export async function synthesizeWithPiper(
         return arrayBuffer;
       }
       return null;
-    } catch (err) {
-      console.warn(`[Piper TTS] Synthesis failed for text "${cleanText}" with voice ${voiceId}:`, err);
+    } catch (err: any) {
+      console.warn(`[AAC Speech] Piper synthesis failed for voice ${voiceId} (words: ${cleanText.split(/\s+/).length}):`, err?.message || err);
       return null;
     } finally {
       inFlightPiperPredictions.delete(cacheKey);
