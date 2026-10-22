@@ -698,7 +698,9 @@ function stopAudioHardware() {
       (activeUtterance as any).__beeyouCancelled = true;
     }
     try {
-      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+      }
     } catch (e) {}
     activeUtterance = null;
     activeUtterancesSet.clear();
@@ -836,256 +838,10 @@ export async function speakText(
   const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
   const calibratedRate = Math.max(0.55, Math.min(1.6, userBaseRate * profile.rate));
 
-  // High-Fidelity Audio Stream Generation (Multi-Tier Caching: RAM -> Browser CacheStorage -> Server):
-  // High-fidelity streaming is active for all voices and sentences whenever online.
-  const shouldAttemptServerTts = !options?.preferOfflineOnly;
-
-  if (shouldAttemptServerTts) {
-    const voiceToStream = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
-    const cacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
-    const streamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
-
-    // 1. Instant check in local cache (RAM & CacheStorage) (< 10ms lookup)
-    const localAudioItem = await getLocalCacheOnly(streamUrl, cacheKey);
-    if (speechId !== latestSpeechRequestId) {
-      return;
-    }
-
-    if (localAudioItem) {
-      // Audio is already cached on-device! Play immediately with 0ms latency
-      try {
-        const played = await playAudioUrl(localAudioItem.buffer, formattedText, calibratedRate, speechId, localAudioItem.blobUrl);
-        if (played || speechId !== latestSpeechRequestId) return;
-      } catch (err) {
-        console.warn(`[Audio] Cached playback failed, dropping back to on-device speech:`, err);
-      }
-    } else if (options?.previewAudio) {
-      if (selectedPersonaId === 'system') {
-        await speakWithBrowserSpeechSynthesis(formattedText, {
-          ...options,
-          voicePersona: 'system',
-          pitch: calibratedPitch,
-          rate: calibratedRate,
-          force: options?.force,
-        });
-        return;
-      }
-
-      // 2a. Pre-bundled instant offline audition preview asset (.mp3 or .wav)
-      const previewCandidates = [
-        `/assets/audio/previews/${selectedPersonaId}.mp3`,
-        `/assets/audio/previews/${selectedPersonaId}.wav`,
-      ];
-      for (const candidateUrl of previewCandidates) {
-        try {
-          const bundledRes = await fetch(candidateUrl);
-          const ct = bundledRes.headers.get('content-type') || '';
-          if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-            const buf = await bundledRes.arrayBuffer();
-            if (isAudioPayload(buf)) {
-              const cleanedBuf = cleanRiffWav(buf);
-              const isMp3 = isAudioMp3(cleanedBuf);
-              const mime = isMp3 ? 'audio/mpeg' : 'audio/wav';
-              const blob = new Blob([cleanedBuf], { type: mime });
-              const blobUrl = URL.createObjectURL(blob);
-              audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-              const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-              if (played || speechId !== latestSpeechRequestId) return;
-            }
-          }
-        } catch {
-          // Bundled preview failed or not present, try next
-        }
-      }
-
-      // 2b. Piper on-device dynamic preview synthesis
-      try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 800);
-        if (speechId !== latestSpeechRequestId) return;
-        if (piperBuf && isAudioPayload(piperBuf)) {
-          const cleanedBuf = cleanRiffWav(piperBuf);
-          const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
-          const blobUrl = URL.createObjectURL(blob);
-          audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-          if (played || speechId !== latestSpeechRequestId) return;
-        }
-      } catch (piperErr) {
-        console.warn(`[Audio] Piper preview synthesis (${selectedPersonaId}) failed:`, piperErr);
-      }
-
-      // 2c. Dynamic network preview fetch fallback
-      try {
-        const audioItem = await Promise.race([
-          getOrFetchAudioItem(streamUrl, cacheKey),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200)),
-        ]);
-        if (speechId !== latestSpeechRequestId) return;
-        if (audioItem && isAudioPayload(audioItem.buffer)) {
-          const cleanedBuf = cleanRiffWav(audioItem.buffer);
-          const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
-          if (played || speechId !== latestSpeechRequestId) return;
-        }
-      } catch (err) {
-        console.warn(`[Audio] Neural preview stream (${selectedPersonaId}) failed:`, err);
-      }
-
-      // Fallback: If no preview asset played, fall through to calibrated browser speech synthesis
-      if (speechId !== latestSpeechRequestId) return;
-      await speakWithBrowserSpeechSynthesis(formattedText, {
-        ...options,
-        voicePersona: selectedPersonaId,
-        pitch: calibratedPitch,
-        rate: calibratedRate,
-        force: options?.force,
-      });
-      return;
-    } else {
-      // 3a. Piper On-Device Neural Synthesis for Whole Sentences
-      // Synthesizes arbitrary, multi-clause constructed sentences on-device in WebAssembly
-      // as a single contiguous audio waveform with natural human cadence and prosody.
-      if (selectedPersonaId !== 'system') {
-        try {
-          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 800);
-          if (speechId !== latestSpeechRequestId) return;
-          if (piperBuf && isAudioPayload(piperBuf)) {
-            const cleanedBuf = cleanRiffWav(piperBuf);
-            const blob = new Blob([cleanedBuf], { type: 'audio/wav' });
-            const blobUrl = URL.createObjectURL(blob);
-            audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-            if (played || speechId !== latestSpeechRequestId) return;
-          }
-        } catch (piperErr) {
-          console.warn('[Audio] Piper on-device speech synthesis notice:', piperErr);
-        }
-      }
-      const isConstructedSentence = Boolean(
-        options?.sentenceWords && options.sentenceWords.length > 1
-      );
-      const isMultiWord = Boolean(
-        isConstructedSentence ||
-        formattedText.trim().split(/\s+/).length > 1
-      );
-
-      // 3a. Check pre-bundled offline core asset for single-tile taps and fluent whole sentences
-      // Immediately plays pre-recorded authentic full phrases (e.g. "I want water", "I want food", "I need help")
-      // or single core words without network delay and with 100% natural, fluid conversational prosody.
-      if (!isNonEnglish) {
-        const rawSlug = formattedText.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const slugAliases: Record<string, string> = {
-          helpme: 'help',
-          pleasehelpme: 'help',
-          waitplease: 'wait',
-          alldone: 'alldone',
-          tooloud: 'tooloud',
-          itistooloud: 'itistooloud',
-          toobright: 'toobright',
-          itistoobright: 'itistoobright',
-          iwantwater: 'iwantwater',
-          iwantadrink: 'iwantadrink',
-          iwantdrink: 'iwantdrink',
-          iwantfood: 'iwantfood',
-          iwantpizza: 'iwantpizza',
-          iwantapple: 'iwantapple',
-          iwantanapple: 'iwantapple',
-          iwanttoplay: 'iwanttoplay',
-          gosomewhere: 'gosomewhere',
-          howifeel: 'howifeel',
-          ineedabreak: 'ineedabreak',
-          iwantthis: 'iwantthis',
-          ineedhelp: 'ineedhelp',
-          ineedbathroom: 'ineedbathroom',
-          ineedthebathroom: 'ineedbathroom',
-          iwantmore: 'iwantmore',
-          ilikeit: 'ilikeit',
-          idontlikeit: 'idontlikeit',
-          yesplease: 'yesplease',
-          nothankyou: 'nothankyou',
-          pleasestop: 'pleasestop',
-          thankyou: 'thankyou',
-          headphones: 'ineedmyheadphones',
-          ineedmyheadphones: 'ineedmyheadphones',
-          weightedblanket: 'iwantmyweightedblanket',
-          iwantmyweightedblanket: 'iwantmyweightedblanket',
-          quietroom: 'ineedaquietplace',
-          ineedaquietplace: 'ineedaquietplace',
-          squishyfidget: 'iwantmyfidgettoy',
-          iwantmyfidgettoy: 'iwantmyfidgettoy',
-        };
-        const wordSlug = slugAliases[rawSlug] || rawSlug;
-
-        if (wordSlug) {
-          const candidateUrls = [
-            `/assets/audio/core/${voiceToStream}_${wordSlug}.wav`,
-            `/assets/audio/core/${voiceToStream}_${wordSlug}.mp3`,
-            ...(voiceToStream !== 'amy' ? [
-              `/assets/audio/core/amy_${wordSlug}.wav`,
-              `/assets/audio/core/amy_${wordSlug}.mp3`,
-              `/assets/audio/core/puck_${wordSlug}.wav`,
-              `/assets/audio/core/puck_${wordSlug}.mp3`,
-            ] : []),
-          ];
-
-          for (const bundledCoreUrl of candidateUrls) {
-            try {
-              const bundledRes = await fetch(bundledCoreUrl);
-              const ct = bundledRes.headers.get('content-type') || '';
-              if (bundledRes.ok && !ct.includes('text/html') && !ct.includes('application/json')) {
-                const buf = await bundledRes.arrayBuffer();
-                if (isAudioPayload(buf)) {
-                  const cleanedBuf = cleanRiffWav(buf);
-                  const isMp3 = isAudioMp3(cleanedBuf);
-                  const mimeType = isMp3 ? 'audio/mpeg' : 'audio/wav';
-                  const blob = new Blob([cleanedBuf], { type: mimeType });
-                  const blobUrl = URL.createObjectURL(blob);
-                  audioMemoryCache.set(cacheKey, { blobUrl, buffer: cleanedBuf });
-                  const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, blobUrl);
-                  if (played || speechId !== latestSpeechRequestId) return;
-                }
-              }
-            } catch {
-              // Bundled core word not present
-            }
-          }
-        }
-      }
-
-      // 3b. Unified Whole-Sentence Neural Synthesis via streaming backend:
-      // Google TTS synthesizes the entire clause as a single utterance with conversational prosody
-      // Generates in ~200-300ms on first press and immediately caches locally for 0ms subsequent replays.
-      let streamSucceeded = false;
-      const isOnline = typeof navigator === 'undefined' || navigator.onLine;
-      if (isOnline && !options?.preferOfflineOnly) {
-        try {
-          const audioItem = await Promise.race([
-            getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200)),
-          ]);
-          if (speechId !== latestSpeechRequestId) return;
-          if (audioItem && isAudioPayload(audioItem.buffer)) {
-            const cleanedBuf = cleanRiffWav(audioItem.buffer);
-            const played = await playAudioUrl(cleanedBuf, formattedText, calibratedRate, speechId, audioItem.blobUrl);
-            if (played || speechId !== latestSpeechRequestId) return;
-            streamSucceeded = true;
-          }
-        } catch (streamErr) {
-          console.warn('[Audio] Dynamic server speech fetch notice:', streamErr);
-        }
-      }
-
-      // 3c. If streaming backend is unreachable or offline, flow directly to on-device
-      // speech synthesis below so the full sentence is vocalized as one contiguous, fluid utterance
-      // with natural cadence and persona pitch differentiation (never choppy stitched words).
-    }
-  }
-
-  // If superseded by a newer tap, do not play fallback system speech
-  if (speechId !== latestSpeechRequestId) {
-    return;
-  }
-
-  // Fallback to on-device Web Speech API with rich persona acoustic calibration (< 20ms response, zero user-gesture expiration)
+  // Option 1: Direct Synchronous Native Vocalization
+  // Delivers instant, 0ms latency speech execution to on-device SpeechSynthesis with
+  // persona acoustic profile calibration. Completely avoids user-gesture expiration,
+  // network round-trips, and missing WebAssembly model blocks on iOS, Android, and Web.
   await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
@@ -1890,22 +1646,22 @@ function speakWithBrowserSpeechSynthesis(
         }
       };
 
-      // On iOS Safari / WebKit, any setTimeout breaks the synchronous user-gesture token,
+      // On iOS Safari / WebKit and Capacitor mobile, any setTimeout breaks the synchronous user-gesture token,
       // which causes window.speechSynthesis.speak() to be completely silenced or dropped.
-      // On iOS, dispatch synchronously. On Chromium/Android Chrome, use a tiny 25ms delay
-      // to let cancel() flush without race condition.
-      const isIOS = typeof navigator !== 'undefined' && (
-        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1)
+      // On mobile / iOS / Capacitor, dispatch synchronously. On desktop Chromium, use a tiny 15ms delay.
+      const isSynchronousPlatform = typeof navigator !== 'undefined' && (
+        /iPad|iPhone|iPod|Android/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1) ||
+        Boolean((window as any).Capacitor?.isNativePlatform?.())
       );
 
-      if (isIOS) {
+      if (isSynchronousPlatform) {
         dispatchSpeech();
       } else {
         pendingSpeakTimeout = setTimeout(() => {
           pendingSpeakTimeout = null;
           dispatchSpeech();
-        }, 25);
+        }, 15);
       }
     } catch (e) {
       console.error('SpeechSynthesis error:', e);
@@ -2088,4 +1844,8 @@ export function prewarmPhrases(phrases: string[], persona: string = 'system', la
       await new Promise((resolve) => setTimeout(resolve, 80));
     }
   });
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).__beeyouSpeakText = speakText;
 }
