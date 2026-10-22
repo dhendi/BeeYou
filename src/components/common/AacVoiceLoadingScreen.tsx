@@ -70,11 +70,10 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
     let isSubscribed = true;
 
-    // Hard fail-safe: The loading modal must NEVER hold the user hostage for minutes.
-    // If anything stalls, dismiss gracefully after 4.5 seconds.
+    // Safety fail-safe threshold: Dismiss gracefully if network connection drops
     const maxSafetyTimer = setTimeout(() => {
       if (!isSubscribed) return;
-      console.warn('[Voice Loading Screen] Max safety threshold reached (4.5s), dismissing modal.');
+      console.warn('[Voice Loading Screen] Safety threshold reached, dismissing modal.');
       setIsFinished(true);
       try { playChime('complete'); } catch {}
       setTimeout(() => {
@@ -82,7 +81,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           onCompleteRef.current?.();
         }
       }, 300);
-    }, 4500);
+    }, 30000);
 
     // Trigger genuine background pre-caching of every single AAC tile
     preloadVoicePack(

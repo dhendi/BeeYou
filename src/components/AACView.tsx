@@ -18,6 +18,7 @@ import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac'
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
 import { prewarmCoreAudioVocabulary, prewarmPhrases } from '../utils/audio/speech';
 import { isVoicePackLoaded } from '../services/aacPreloadService';
+import { preloadPiperVoice } from '../services/piperTtsService';
 export { getGrammaticalCategoryLabel };
 
 
@@ -263,6 +264,8 @@ export const AACView: React.FC = () => {
     const l = settings?.language || 'en';
     if (!isVoicePackLoaded(p, l)) {
       triggerVoicePreload(p, l);
+    } else if (p !== 'system') {
+      preloadPiperVoice(p, l).catch(() => {});
     }
   }, [settings?.voicePersona, settings?.language]);
 

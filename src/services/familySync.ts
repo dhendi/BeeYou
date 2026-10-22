@@ -210,6 +210,9 @@ export function onFamilyConnectionStatus(fn: ConnectionListener): () => void {
  */
 export async function fetchFamilyState(familyCode?: string): Promise<SharedFamilyState | null> {
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  if (!code || code.length < 3) {
+    return lastKnownState;
+  }
 
   // 1. Primary: Fetch from Firebase Realtime Database
   try {
@@ -283,6 +286,11 @@ export async function pushFamilyStateUpdate(
         state: updatedState,
       });
     } catch {}
+  }
+
+  // If device is standalone / unpaired, local state is persisted and no network operations are required
+  if (!code || code.length < 3) {
+    return { success: true, state: updatedState };
   }
 
   // Coalesce rapid tapping / stimming: merge changes across 250ms window into a single atomic write
@@ -713,6 +721,9 @@ function updateLiveConnectionStatus(connected: boolean, mode: 'sse' | 'polling' 
 export function startFamilyLiveSync(familyCode?: string): () => void {
   if (typeof window === 'undefined') return () => {};
   const code = (familyCode || getActiveFamilyCode()).trim().toUpperCase();
+  if (!code || code.length < 3) {
+    return () => {};
+  }
 
   if (subscribedCode === code && activeEventSource && activeEventSource.readyState !== EventSource.CLOSED) {
     return () => {};

@@ -77,6 +77,14 @@ const inFlightPiperPredictions = new Map<string, Promise<ArrayBuffer | null>>();
 let cachedPiperModule: typeof import('@mintplex-labs/piper-tts-web') | null = null;
 let piperInitAttempted = false;
 let piperAvailable = true;
+let activeLoadedVoiceId: string | null = null;
+
+/**
+ * Returns the currently active in-memory Piper voice ID.
+ */
+export function getActivePiperVoiceId(): string | null {
+  return activeLoadedVoiceId;
+}
 
 /**
  * Dynamically loads the piper-tts-web WebAssembly module.
@@ -88,7 +96,37 @@ async function getPiperModule(): Promise<typeof import('@mintplex-labs/piper-tts
 
   piperInitAttempted = true;
   try {
+    // 1. Configure ONNX runtime WASM paths and single-threading BEFORE anything initializes
+    try {
+      const ortModule = await import('onnxruntime-web');
+      const ort = (ortModule as any).default || ortModule;
+      if (ort?.env?.wasm) {
+        ort.env.wasm.wasmPaths = '/onnx/';
+        if (!window.crossOriginIsolated) {
+          try {
+            Object.defineProperty(ort.env.wasm, 'numThreads', {
+              configurable: true,
+              enumerable: true,
+              get: () => 1,
+              set: () => {}
+            });
+          } catch {
+            ort.env.wasm.numThreads = 1;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Piper TTS] Failed to pre-configure onnxruntime-web:', e);
+    }
+
+    // 2. Load Piper TTS web module and redirect WASM and data paths to self-hosted assets
     const mod = await import('@mintplex-labs/piper-tts-web');
+    if (mod?.TtsSession?.WASM_LOCATIONS) {
+      mod.TtsSession.WASM_LOCATIONS.onnxWasm = '/onnx/';
+      mod.TtsSession.WASM_LOCATIONS.piperWasm = '/piper/piper_phonemize.wasm';
+      mod.TtsSession.WASM_LOCATIONS.piperData = '/piper/piper_phonemize.data';
+    }
+
     cachedPiperModule = mod;
     piperAvailable = true;
     return mod;
@@ -131,6 +169,19 @@ export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): st
 }
 
 /**
+ * Fast synchronous check whether a Piper voice model is already confirmed stored in local cache.
+ */
+export function isPiperVoiceReadySync(personaId?: string, lang: string = 'en'): boolean {
+  if (typeof window === 'undefined') return false;
+  const voiceId = resolvePiperVoiceId(personaId, lang);
+  try {
+    return localStorage.getItem(`beeyou_piper_ready_${voiceId}`) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks whether a Piper voice model is already stored in OPFS or local cache.
  */
 export async function isPiperVoiceReady(personaId?: string, lang: string = 'en'): Promise<boolean> {
@@ -147,6 +198,9 @@ export async function isPiperVoiceReady(personaId?: string, lang: string = 'en')
   if (!piper) return false;
 
   try {
+    if (typeof navigator !== 'undefined' && (!navigator.storage || typeof navigator.storage.getDirectory !== 'function')) {
+      return false;
+    }
     const storedVoices = await piper.stored();
     const isStored = storedVoices.includes(voiceId as any);
     if (isStored) {
@@ -162,6 +216,28 @@ export async function isPiperVoiceReady(personaId?: string, lang: string = 'en')
 }
 
 /**
+ * Helper to ensure OPFS file handle has finished writing and flushing to disk before reading.
+ * Works around upstream piper-tts-web omitting `await` before writeBlob().
+ */
+async function waitForOpfsFileReady(filename: string, minBytes: number = 1000000, maxWaitMs: number = 5000): Promise<boolean> {
+  if (typeof navigator === 'undefined' || !navigator.storage?.getDirectory) return true;
+  const start = performance.now();
+  while (performance.now() - start < maxWaitMs) {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const dir = await root.getDirectoryHandle('piper');
+      const fileHandle = await dir.getFileHandle(filename);
+      const file = await fileHandle.getFile();
+      if (file.size >= minBytes) {
+        return true;
+      }
+    } catch {}
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return false;
+}
+
+/**
  * Downloads and preloads a Piper voice model for local offline use.
  */
 export async function preloadPiperVoice(
@@ -174,34 +250,53 @@ export async function preloadPiperVoice(
   if (!piper) return false;
 
   try {
-    // Check if already stored
+    // 1. Check if already stored in OPFS
     const alreadyStored = await isPiperVoiceReady(personaId, lang);
-    if (alreadyStored) {
+    if (!alreadyStored) {
       onProgress?.({
-        percent: 100,
-        currentPhrase: `Voice model ready (${voiceId})`,
-        loadedBytes: 100,
+        percent: 10,
+        currentPhrase: `Downloading neural voice model (${voiceId})...`,
+        loadedBytes: 10,
         totalBytes: 100,
       });
-      return true;
+
+      await piper.download(voiceId as any, (p) => {
+        const percent = p.total > 0 ? Math.min(90, Math.round((p.loaded / p.total) * 100)) : 50;
+        onProgress?.({
+          percent,
+          currentPhrase: `Downloading voice model: ${Math.round(percent)}%`,
+          loadedBytes: p.loaded,
+          totalBytes: p.total,
+        });
+      });
+
+      // Ensure OPFS write stream is completely closed and flushed before session initialization
+      await waitForOpfsFileReady(`${voiceId}.onnx`, 1000000);
+      await waitForOpfsFileReady(`${voiceId}.onnx.json`, 100);
     }
 
-    onProgress?.({
-      percent: 10,
-      currentPhrase: `Downloading neural voice model (${voiceId})...`,
-      loadedBytes: 10,
-      totalBytes: 100,
-    });
-
-    await piper.download(voiceId as any, (p) => {
-      const percent = p.total > 0 ? Math.min(99, Math.round((p.loaded / p.total) * 100)) : 50;
+    // 2. Warm up / prime the WebAssembly session in memory for this target voice
+    if (activeLoadedVoiceId !== voiceId) {
       onProgress?.({
-        percent,
-        currentPhrase: `Downloading voice model: ${Math.round(percent)}%`,
-        loadedBytes: p.loaded,
-        totalBytes: p.total,
+        percent: 95,
+        currentPhrase: `Preparing neural speech engine...`,
+        loadedBytes: 95,
+        totalBytes: 100,
       });
-    });
+
+      // Clear singleton session lock if different voice was previously active
+      if ((piper as any).TtsSession?._instance) {
+        (piper as any).TtsSession._instance = null;
+      }
+
+      try {
+        await piper.predict({ text: 'ready', voiceId: voiceId as any });
+        activeLoadedVoiceId = voiceId;
+        console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
+      } catch (warmErr) {
+        console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
+      }
+    }
 
     try {
       localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
@@ -216,7 +311,7 @@ export async function preloadPiperVoice(
 
     return true;
   } catch (err) {
-    console.warn(`[Piper TTS] Download failed for ${voiceId}:`, err);
+    console.warn(`[Piper TTS] Preload failed for ${voiceId}:`, err);
     return false;
   }
 }
@@ -236,7 +331,7 @@ export async function synthesizeWithPiper(
   text: string,
   personaId?: string,
   lang: string = 'en',
-  timeoutMs: number = 2500
+  timeoutMs: number = 3500
 ): Promise<ArrayBuffer | null> {
   const cleanText = text.trim();
   if (!cleanText) return null;
@@ -270,25 +365,38 @@ export async function synthesizeWithPiper(
       return null;
     }
 
+    // If changing active voice, clear previous singleton instance so new ONNX model is loaded
+    if (activeLoadedVoiceId !== voiceId && (piper as any).TtsSession?._instance) {
+      (piper as any).TtsSession._instance = null;
+    }
+
+    const isCold = (activeLoadedVoiceId !== voiceId);
+    // Cold initialization (loading ONNX model into WebAssembly) takes ~4-6 seconds; warm inference takes ~400-800ms
+    const effectiveTimeout = Math.max(timeoutMs, isCold ? 8000 : 3500);
+
     try {
-      // Race prediction against strict timeout so it never hangs or locks up speech
+      const tStart = performance.now();
       const predictionWork = piper.predict({
         text: cleanText,
         voiceId: voiceId as any,
       });
 
       const timeoutWork = new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), timeoutMs)
+        setTimeout(() => resolve(null), effectiveTimeout)
       );
 
       const wavBlob = await Promise.race([predictionWork, timeoutWork]);
       if (!wavBlob) {
-        console.warn(`[AAC Speech] Piper synthesis timed out after ${timeoutMs}ms for voice ${voiceId}`);
+        console.warn(`[AAC Speech] Piper synthesis timed out after ${effectiveTimeout}ms for voice ${voiceId}`);
         return null;
       }
 
       const arrayBuffer = await wavBlob.arrayBuffer();
+      const durationMs = Math.round(performance.now() - tStart);
       if (arrayBuffer && arrayBuffer.byteLength > 44) {
+        activeLoadedVoiceId = voiceId;
+        console.log(`[AAC Speech] Piper sentence synthesized successfully (${voiceId}, ${cleanText.split(/\s+/).length} words, ${durationMs}ms, ${arrayBuffer.byteLength} bytes)`);
+
         // LRU guard: keep cache size bounded to prevent excessive mobile memory usage (max 150 entries)
         if (piperAudioMemoryCache.size >= 150) {
           const firstKey = piperAudioMemoryCache.keys().next().value;

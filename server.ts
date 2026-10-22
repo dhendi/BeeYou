@@ -3705,6 +3705,28 @@ async function startServer() {
   app.get('/assets/audio/*', (_req, res) => {
     res.status(404).type('text/plain').send('Audio asset not found');
   });
+
+  // Self-hosted ONNX Runtime WebAssembly assets for Piper neural speech
+  app.use('/onnx', express.static(path.resolve(__dirname, 'public/onnx'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+      }
+    }
+  }));
+
+  // Self-hosted Piper phonemize assets for Piper neural speech
+  app.use('/piper', express.static(path.resolve(__dirname, 'public/piper'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+      } else if (filePath.endsWith('.data')) {
+        res.setHeader('Content-Type', 'application/octet-stream');
+      }
+    }
+  }));
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({

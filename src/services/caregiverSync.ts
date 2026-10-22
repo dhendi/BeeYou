@@ -431,7 +431,26 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
   // Mark as seen locally in this tab to prevent self-processing
   seenEventIds.add(eventId);
 
-  // 1. Firebase Realtime Cloud Sync (Primary <50ms Cloud WebSocket Engine)
+  // 1. Local BroadcastChannel for zero-latency multi-tab on same machine
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage(envelope);
+    } catch (e) {}
+  }
+
+  // 2. Direct WebRTC DataChannel (0ms live peer delivery across devices)
+  if (activePeerConn && activePeerConn.open) {
+    try {
+      activePeerConn.send(envelope);
+    } catch (e) {}
+  }
+
+  // If device is standalone / unpaired, skip remote network calls
+  if (!safeCode || safeCode.length < 3) {
+    return;
+  }
+
+  // 3. Firebase Realtime Cloud Sync (Primary <50ms Cloud WebSocket Engine)
   try {
     if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
       sendFirebaseAlert(envelope.alert);
@@ -454,20 +473,6 @@ export async function publishCloudEvent(code: string, eventData: Record<string, 
       });
     }
   } catch (e) {}
-
-  // 2. Local BroadcastChannel for zero-latency multi-tab on same machine
-  if (broadcastChannel) {
-    try {
-      broadcastChannel.postMessage(envelope);
-    } catch (e) {}
-  }
-
-  // 3. Direct WebRTC DataChannel (0ms live peer delivery across devices)
-  if (activePeerConn && activePeerConn.open) {
-    try {
-      activePeerConn.send(envelope);
-    } catch (e) {}
-  }
 
   // 4. Direct Server Event Relay (/api/caregiver/event)
   try {
@@ -1750,6 +1755,11 @@ export async function syncChildStatusToCaregiver(status: Partial<CaregiverChildS
   try {
     localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(payload));
   } catch {}
+
+  // If device is standalone / unpaired, local session is stored and no network operations are required
+  if (!code || code.length < 3) {
+    return;
+  }
 
   // 1. Send to server sync endpoint
   try {

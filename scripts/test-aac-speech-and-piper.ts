@@ -5,11 +5,14 @@ import {
   getTtsStreamUrl, 
   isAudioPayload, 
   isAudioMp3,
-  ensureWavHeader
+  ensureWavHeader,
+  extractWavPcm,
+  formatForNaturalSpeech
 } from '../src/utils/audio/speech.ts';
 import { 
   resolvePiperVoiceId, 
-  PIPER_VOICE_MAP 
+  PIPER_VOICE_MAP,
+  isPiperVoiceReadySync
 } from '../src/services/piperTtsService.ts';
 import { 
   VOICE_PERSONAS, 
@@ -127,6 +130,57 @@ async function runAacSpeechAndPiperTests() {
     const raw = 'i want a drink';
     const formatted = raw.charAt(0).toUpperCase() + raw.slice(1) + '.';
     assert.strictEqual(formatted, 'I want a drink.');
+  });
+
+  // 7. formatForNaturalSpeech validation
+  runTest('formatForNaturalSpeech: Removes dual slash tokens and internal periods', () => {
+    assert.strictEqual(formatForNaturalSpeech('My / Mine'), 'My.');
+    assert.strictEqual(formatForNaturalSpeech('I. want. a. drink.'), 'I want a drink.');
+    assert.strictEqual(formatForNaturalSpeech('Can I have water?'), 'Can I have water?');
+  });
+
+  // 8. extractWavPcm PCM Extraction & Validation
+  runTest('extractWavPcm: Validates Linear PCM 16-bit mono and extracts samples', () => {
+    // Construct a valid canonical RIFF WAV buffer
+    const pcmData = new Int16Array(2400); // 100ms at 24000Hz
+    for (let i = 0; i < pcmData.length; i++) {
+      pcmData[i] = Math.round(Math.sin(i / 10) * 10000); // audible tone above -38dB threshold
+    }
+    const wavBuffer = new ArrayBuffer(44 + pcmData.byteLength);
+    const view = new DataView(wavBuffer);
+    // 'RIFF'
+    view.setUint32(0, 0x52494646, false);
+    view.setUint32(4, 36 + pcmData.byteLength, true);
+    // 'WAVE'
+    view.setUint32(8, 0x57415645, false);
+    // 'fmt '
+    view.setUint32(12, 0x666D7420, false);
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // Linear PCM
+    view.setUint16(22, 1, true); // Mono
+    view.setUint32(24, 24000, true); // 24kHz
+    view.setUint32(28, 48000, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true); // 16-bit
+    // 'data'
+    view.setUint32(36, 0x64617461, false);
+    view.setUint32(40, pcmData.byteLength, true);
+    new Uint8Array(wavBuffer, 44).set(new Uint8Array(pcmData.buffer));
+
+    const pcm = extractWavPcm(wavBuffer, false);
+    assert(pcm !== null);
+    assert.strictEqual(pcm.byteLength, pcmData.byteLength);
+
+    // Corrupted format (e.g. stereo instead of mono)
+    view.setUint16(22, 2, true);
+    const rejectedStereo = extractWavPcm(wavBuffer, false);
+    assert.strictEqual(rejectedStereo, null);
+  });
+
+  // 9. Piper Voice Readiness Sync Check
+  runTest('isPiperVoiceReadySync: Synchronously checks voice availability', () => {
+    const ready = isPiperVoiceReadySync('amy', 'en');
+    assert.strictEqual(typeof ready, 'boolean');
   });
 
   console.log(`\n====================================================`);

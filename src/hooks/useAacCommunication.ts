@@ -210,11 +210,11 @@ export function useAacCommunication({
       const singleSpoken = sentence[0].speechText || sentence[0].label;
       const canonicalSingle = sentence[0].originalLabel || sentence[0].label;
       recordSentenceSpoken(canonicalSingle, sentence[0].emoji);
-      syncChildStatusToCaregiver({
+      void syncChildStatusToCaregiver({
         childName: childName || 'Child',
         lastAacSentence: singleSpoken,
         currentMood: currentMood as any,
-      });
+      }).catch(() => {});
       await playAudioUrl(sentence[0].audioDataUrl, singleSpoken);
       return;
     }
@@ -224,11 +224,11 @@ export function useAacCommunication({
     const englishSentence = autocorrectAacGrammar(englishTokens, 'en');
 
     recordSentenceSpoken(englishSentence, sentence[0]?.emoji);
-    syncChildStatusToCaregiver({
+    void syncChildStatusToCaregiver({
       childName: childName || 'Child',
       lastAacSentence: fullText,
       currentMood: currentMood as any,
-    });
+    }).catch(() => {});
     const sentenceWords = sentence.map((item) => (item.speechText || item.label));
     await speak(fullText, { sentenceWords });
   };

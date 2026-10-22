@@ -64,6 +64,7 @@ import { wipeDeviceStorage, getSyncSecureCaregiverPin, getSecureCaregiverPin, sa
 import { setLanguage, getLanguage, subscribeToLanguage } from '../services/translator';
 import { AacVoiceLoadingScreen } from '../components/common/AacVoiceLoadingScreen';
 import { isVoicePackLoaded } from '../services/aacPreloadService';
+import { preloadPiperVoice } from '../services/piperTtsService';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -815,8 +816,13 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (newSettings.voicePersona || newSettings.language) {
       const p = newSettings.voicePersona || settings.voicePersona || 'amy';
       const l = newSettings.language || settings.language || 'en';
-      if (p !== 'system' && !isVoicePackLoaded(p, l)) {
-        triggerVoicePreload(p, l);
+      if (p !== 'system') {
+        if (!isVoicePackLoaded(p, l)) {
+          triggerVoicePreload(p, l);
+        } else {
+          // Warm up target voice in memory eagerly upon selection
+          preloadPiperVoice(p, l).catch(() => {});
+        }
       }
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));

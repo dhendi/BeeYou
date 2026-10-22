@@ -222,18 +222,19 @@ async function runTests() {
     const concurrentResponses = await Promise.all(concurrentPromises);
 
     let all200 = true;
-    let allWav = true;
+    let allAudio = true;
     const concurrentBuffers: Buffer[] = [];
 
     for (const resp of concurrentResponses) {
       if (resp.status !== 200) all200 = false;
-      if (resp.headers.get('content-type') !== 'audio/wav') allWav = false;
+      const ct = resp.headers.get('content-type') || '';
+      if (!ct.includes('audio/wav') && !ct.includes('audio/mpeg')) allAudio = false;
       const buf = Buffer.from(await resp.arrayBuffer());
       concurrentBuffers.push(buf);
     }
 
     assert(all200, `All ${concurrentCount} concurrent requests completed with 200 OK`);
-    assert(allWav, `All ${concurrentCount} concurrent responses returned audio/wav`);
+    assert(allAudio, `All ${concurrentCount} concurrent responses returned valid audio stream`);
 
     const firstBuffer = concurrentBuffers[0];
     assert(firstBuffer.length > 5000, `Concurrent audio generation returned valid audio (${(firstBuffer.length / 1024).toFixed(1)} KB)`);

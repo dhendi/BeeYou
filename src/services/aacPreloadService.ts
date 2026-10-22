@@ -1,6 +1,6 @@
 import { getPrimarySpokenPhrasesForLanguage, getSpokenPhrasesForLanguage } from '../data/aacVocabularyCatalog';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
-import { preloadPiperVoice, isPiperVoiceReady } from './piperTtsService';
+import { preloadPiperVoice, isPiperVoiceReady, isPiperVoiceReadySync } from './piperTtsService';
 import {
   getTtsStreamUrl,
   getTtsCacheKey,
@@ -37,7 +37,9 @@ export function isVoicePackLoaded(personaId: string = 'amy', lang: string = 'en'
   if (typeof window === 'undefined') return true;
   try {
     const key = getStorageKey(personaId, lang);
-    return localStorage.getItem(key) === 'ready';
+    const vpReady = localStorage.getItem(key) === 'ready';
+    const piperReady = isPiperVoiceReadySync(personaId, lang);
+    return vpReady && piperReady;
   } catch {
     return false;
   }
@@ -121,8 +123,9 @@ export async function preloadVoicePack(
     }
 
     // Preload Piper on-device neural voice model first
+    let piperReady = false;
     try {
-      await preloadPiperVoice(voiceToUse, normalizedLang, (pInfo) => {
+      piperReady = await preloadPiperVoice(voiceToUse, normalizedLang, (pInfo) => {
         dispatchProgress({
           loaded: Math.round((pInfo.percent / 100) * total),
           total,
@@ -132,6 +135,13 @@ export async function preloadVoicePack(
       });
     } catch (piperErr) {
       console.warn('[AAC Preload] Piper voice model download notice:', piperErr);
+    }
+
+    // If Piper on-device neural voice is verified ready, the engine is fully prepared
+    if (piperReady || isPiperVoiceReadySync(voiceToUse, normalizedLang)) {
+      markVoicePackLoaded(personaId, normalizedLang);
+      dispatchProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
+      return;
     }
 
     // Concurrency worker pool (up to 6 parallel fetches for fast downloads)
