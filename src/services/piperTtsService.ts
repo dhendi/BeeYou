@@ -30,6 +30,49 @@ export const PIPER_VOICE_MAP: Record<string, string> = {
   bryce: 'en_US-bryce-medium',
   kristin: 'en_US-kristin-medium',
   joe: 'en_US-joe-medium',
+  cori: 'en_GB-cori-medium',
+  alan: 'en_GB-alan-medium',
+
+  // Chinese (Mandarin)
+  huayan: 'zh_CN-huayan-medium',
+  huayan_lite: 'zh_CN-huayan-x_low',
+  xiaobei: 'zh_CN-huayan-medium',
+  zh_default: 'zh_CN-huayan-medium',
+
+  // Spanish
+  claude: 'es_MX-claude-high',
+  davefx: 'es_ES-davefx-medium',
+  ald: 'es_MX-ald-medium',
+  sharvard: 'es_ES-sharvard-medium',
+  es_default: 'es_MX-claude-high',
+
+  // French
+  upmc: 'fr_FR-upmc-medium',
+  siwis: 'fr_FR-siwis-medium',
+  tom: 'fr_FR-tom-medium',
+  fr_default: 'fr_FR-upmc-medium',
+
+  // German
+  thorsten: 'de_DE-thorsten-medium',
+  thorsten_high: 'de_DE-thorsten-high',
+  de_default: 'de_DE-thorsten-medium',
+
+  // Italian
+  paola: 'it_IT-paola-medium',
+  it_default: 'it_IT-paola-medium',
+
+  // Portuguese
+  faber: 'pt_BR-faber-medium',
+  pt_default: 'pt_BR-faber-medium',
+
+  // Russian
+  irina: 'ru_RU-irina-medium',
+  denis: 'ru_RU-denis-medium',
+  ru_default: 'ru_RU-irina-medium',
+
+  // Vietnamese
+  vais: 'vi_VN-vais1000-medium',
+  vi_default: 'vi_VN-vais1000-medium',
 
   // Legacy persona alias mappings so existing user settings work smoothly
   puck: 'en_US-amy-medium',
@@ -52,19 +95,6 @@ export const PIPER_VOICE_MAP: Record<string, string> = {
   sadaltager: 'en_US-lessac-medium',
   sadachbia: 'en_US-danny-low',
   achernar: 'en_US-amy-medium',
-
-  // Spanish
-  claude: 'es_MX-claude-high',
-  davefx: 'es_ES-davefx-medium',
-  es_default: 'es_MX-claude-high',
-
-  // French
-  upmc: 'fr_FR-upmc-medium',
-  fr_default: 'fr_FR-upmc-medium',
-
-  // German
-  thorsten: 'de_DE-thorsten-medium',
-  de_default: 'de_DE-thorsten-medium',
 };
 
 // Internal cache for synthesized sentence audio buffers (text -> ArrayBuffer)
@@ -197,26 +227,20 @@ export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): st
   const normLang = (lang || 'en').toLowerCase().trim();
   const normPersona = (personaId || '').toLowerCase().trim();
 
-  // If language is Spanish, pick appropriate Spanish Piper voice
-  if (normLang.startsWith('es')) {
-    if (normPersona === 'davefx') return PIPER_VOICE_MAP.davefx;
-    return PIPER_VOICE_MAP.claude; // Default Mexican / Latin American Spanish
-  }
-
-  // If language is French
-  if (normLang.startsWith('fr')) {
-    return PIPER_VOICE_MAP.upmc;
-  }
-
-  // If language is German
-  if (normLang.startsWith('de')) {
-    return PIPER_VOICE_MAP.thorsten;
-  }
-
-  // English default lookup
+  // If specific persona is in PIPER_VOICE_MAP
   if (normPersona && PIPER_VOICE_MAP[normPersona]) {
     return PIPER_VOICE_MAP[normPersona];
   }
+
+  // Language based fallback
+  if (normLang.startsWith('zh')) return PIPER_VOICE_MAP.huayan;
+  if (normLang.startsWith('es')) return PIPER_VOICE_MAP.claude;
+  if (normLang.startsWith('fr')) return PIPER_VOICE_MAP.upmc;
+  if (normLang.startsWith('de')) return PIPER_VOICE_MAP.thorsten;
+  if (normLang.startsWith('it')) return PIPER_VOICE_MAP.paola;
+  if (normLang.startsWith('pt')) return PIPER_VOICE_MAP.faber;
+  if (normLang.startsWith('ru')) return PIPER_VOICE_MAP.irina;
+  if (normLang.startsWith('vi')) return PIPER_VOICE_MAP.vais;
 
   return PIPER_VOICE_MAP.amy;
 }

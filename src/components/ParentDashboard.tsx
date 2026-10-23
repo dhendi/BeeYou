@@ -14,7 +14,7 @@ import { CaregiverAlert, PredefinedCaregiverResponseId, CaregiverChildStatus } f
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { CaregiverTourDirectoryModal } from './CaregiverTourDirectoryModal';
 import { SECTION_TOURS, TourSectionId } from '../data/caregiverTourData';
-import { VOICE_PERSONAS, getVoicePersonaById } from '../data/voicePersonasData';
+import { VOICE_PERSONAS, getVoicePersonaById, getVoicePersonasForLanguage } from '../data/voicePersonasData';
 
 import { LanguageDropdown } from './LanguageDropdown';
 import {
@@ -462,7 +462,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'voice-studio',
           label: 'Voice Studio & Preferences',
-          badge: `${VOICE_PERSONAS.length} Voices`,
+          badge: `${getVoicePersonasForLanguage(settings.language).length} Voices`,
         },
       ],
     },

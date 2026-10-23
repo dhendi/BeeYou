@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, 
@@ -32,7 +32,7 @@ import { playChime, prewarmCoreAudioVocabulary, stopSpeaking } from '../utils/au
 import { triggerHaptic, setHapticsEnabled } from '../services/haptics';
 import { EnabledFeatures } from '../types';
 import { FEATURE_GROUPS } from '../data/navigation';
-import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../data/voicePersonasData';
+import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById, getVoicePersonasForLanguage } from '../data/voicePersonasData';
 import { t } from '../services/translator';
 
 export const AccessibilityPreferencesModal: React.FC = () => {
@@ -50,7 +50,36 @@ export const AccessibilityPreferencesModal: React.FC = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'visuals' | 'audio' | 'features'>('visuals');
-  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<'featured' | 'all' | 'free' | 'kids' | 'teens' | 'caring' | 'pro'>('featured');
+  const [voiceCategoryFilter, setVoiceCategoryFilter] = useState<string>('all');
+
+  const activeLanguage = (settings.language || 'en').toLowerCase().split(/[-_]/)[0];
+  const languageVoices = useMemo(() => {
+    return getVoicePersonasForLanguage(activeLanguage);
+  }, [activeLanguage]);
+
+  const availableCategories = useMemo(() => {
+    const categories: { key: string; label: string }[] = [];
+    if (activeLanguage === 'en') {
+      categories.push({ key: 'featured', label: 'Curated (4 Voices + Free)' });
+    }
+    categories.push({ key: 'all', label: `All Voices (${languageVoices.length})` });
+    if (languageVoices.some((p) => p.category === 'system')) {
+      categories.push({ key: 'free', label: 'Free (Native)' });
+    }
+    if (languageVoices.some((p) => p.category === 'kids')) {
+      categories.push({ key: 'kids', label: 'Kids & Children' });
+    }
+    if (languageVoices.some((p) => p.category === 'teens')) {
+      categories.push({ key: 'teens', label: 'Teens & Youth' });
+    }
+    if (languageVoices.some((p) => p.category === 'caring_women' || p.category === 'caring_men')) {
+      categories.push({ key: 'caring', label: 'Caring & Warm' });
+    }
+    if (languageVoices.some((p) => p.category === 'pro_women' || p.category === 'pro_men')) {
+      categories.push({ key: 'pro', label: 'Professional' });
+    }
+    return categories;
+  }, [activeLanguage, languageVoices]);
 
   useEffect(() => {
     return () => {
@@ -626,15 +655,15 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 </label>
               </div>
 
-              {/* Voice Studio: 20 Curated Neural Personas & System Voice */}
+              {/* Voice Studio: Dedicated Neural Personas & System Voice */}
               <div className="p-4 sm:p-5 rounded-[28px] bg-[#FCF9F2] border-2 border-[#E0D8CB] shadow-[0_3px_12px_rgba(0,0,0,0.02)] space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="font-black text-[#2D241E] text-sm sm:text-base">
-                      {t("Voice Studio")} ({VOICE_PERSONAS.length} {t("Personas")})
+                      {t("Voice Studio")} ({languageVoices.length} {t("Personas")})
                     </h4>
                     <p className="text-xs text-[#7A6C60] font-semibold mt-0.5">
-                      {t("Choose from 20 natural AI voices across kids, teens, caring caregivers, and professionals.")}
+                      {t("Natural on-device neural voices dedicated to your selected language. Downloaded only on demand.")}
                     </p>
                   </div>
 
@@ -647,22 +676,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
 
                 {/* Category Filter Pills (Silicone Tray Style) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                  {[
-                    { key: 'featured', label: 'Curated (4 Voices + Free)' },
-                    { key: 'all', label: `All Voices (${VOICE_PERSONAS.length})` },
-                    { key: 'free', label: 'Free (Native)' },
-                    { key: 'kids', label: 'Kids & Children' },
-                    { key: 'teens', label: 'Teens & Youth' },
-                    { key: 'caring', label: 'Caring & Warm' },
-                    { key: 'pro', label: 'Professional' },
-                  ].map((filter) => {
+                  {availableCategories.map((filter) => {
                     const isActive = voiceCategoryFilter === filter.key;
                     return (
                       <button
                         key={filter.key}
                         type="button"
                         onClick={() => {
-                          setVoiceCategoryFilter(filter.key as any);
+                          setVoiceCategoryFilter(filter.key);
                           playChime('tap');
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
@@ -679,7 +700,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
 
                 {/* Voice Persona Cards List */}
                 <div className="max-h-72 overflow-y-auto pr-1 space-y-2.5 rounded-2xl">
-                  {VOICE_PERSONAS.filter((p) => {
+                  {languageVoices.filter((p) => {
                     if (voiceCategoryFilter === 'featured') return ['system', 'amy', 'ryan', 'lessac', 'danny'].includes(p.id);
                     if (voiceCategoryFilter === 'all') return true;
                     if (voiceCategoryFilter === 'free') return p.category === 'system';
@@ -741,7 +762,12 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                speak(t(persona.previewText), { voicePersona: persona.id, previewAudio: true, force: true });
+                                playChime('tap');
+                                if (persona.category === 'system') {
+                                  speak(t(persona.previewText), { voicePersona: 'system', previewAudio: true, force: true });
+                                } else {
+                                  speak(persona.previewText, { voicePersona: persona.id, previewAudio: true, force: true });
+                                }
                               }}
                               className="px-3 py-1.5 rounded-xl bg-[#EFE9DF] hover:bg-[#E2A44E] hover:text-white text-[#4A2F0F] text-xs font-black transition-all cursor-pointer border border-[#E0D8CB] active:scale-95 shadow-2xs"
                               title={`${t("Audition")} ${t(persona.name)}`}

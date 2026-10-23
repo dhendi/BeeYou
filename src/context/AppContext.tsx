@@ -65,6 +65,7 @@ import { setLanguage, getLanguage, subscribeToLanguage } from '../services/trans
 import { AacVoiceLoadingScreen } from '../components/common/AacVoiceLoadingScreen';
 import { isVoicePackLoaded } from '../services/aacPreloadService';
 import { preloadPiperVoice } from '../services/piperTtsService';
+import { getVoicePersonaById, getDefaultVoicePersonaForLanguage } from '../data/voicePersonasData';
 
 // Domain Hooks
 import { useSpeechEngine } from '../hooks/useSpeechEngine';
@@ -844,6 +845,18 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     }
     if (newSettings.language) {
       setLanguage(newSettings.language).catch(() => {});
+
+      // Automatically switch to dedicated default voice for new language if persona is not explicitly specified
+      if (!newSettings.voicePersona && newSettings.language !== settings.language) {
+        const currentVoice = getVoicePersonaById(settings.voicePersona);
+        const newNormLang = newSettings.language.toLowerCase().split(/[-_]/)[0];
+        const currentVoiceLang = (currentVoice.language || 'en').toLowerCase().split(/[-_]/)[0];
+
+        // If the current persona is not dedicated to the new language, auto-switch to new language default
+        if (currentVoice.id !== 'system' && currentVoiceLang !== newNormLang) {
+          newSettings.voicePersona = getDefaultVoicePersonaForLanguage(newSettings.language);
+        }
+      }
     }
 
     const wasAacActive =
