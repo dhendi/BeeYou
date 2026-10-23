@@ -38,14 +38,20 @@ async function runRulesVerification() {
   console.log('======================================================\n');
 
   const databaseRules = fs.readFileSync(path.join(process.cwd(), 'database.rules.json'), 'utf8');
+  const firestoreRules = fs.readFileSync(path.join(process.cwd(), 'firestore.rules'), 'utf8');
   const storageRules = fs.readFileSync(path.join(process.cwd(), 'storage.rules'), 'utf8');
 
   const testEnv: RulesTestEnvironment = await initializeTestEnvironment({
-    projectId: 'beeyou-rules-test',
+    projectId: 'beeyou-23d7d',
     database: {
       rules: databaseRules,
       host: '127.0.0.1',
       port: 9000,
+    },
+    firestore: {
+      rules: firestoreRules,
+      host: '127.0.0.1',
+      port: 8080,
     },
     storage: {
       rules: storageRules,
@@ -810,7 +816,7 @@ async function runRulesVerification() {
     }
 
     // -------------------------------------------------------------------------
-    // Suite 9: Firebase Storage Rules: Backend TTS, Revocation Awareness & Direct Uploads
+    // Suite 9: Firebase Storage Rules: Authoritative Firestore Revocation, TTS & User Uploads
     // -------------------------------------------------------------------------
     console.log('\n--- Suite 9: Firebase Storage Rules Verification ---');
 
@@ -823,11 +829,53 @@ async function runRulesVerification() {
     });
 
     const storageMemberUid = 'storage-member-202';
-    // Initially valid family member token
+    // Initially valid family member token with familyCode claim
     const storageMemberContext = testEnv.authenticatedContext(storageMemberUid, {
       email: 'member@family.com',
       familyCode: 'BEE-SEC101',
       role: 'caregiver',
+    });
+
+    const storageBobUid = 'storage-bob-303';
+    const storageBobContext = testEnv.authenticatedContext(storageBobUid, {
+      email: 'bob@family.com',
+      familyCode: 'BEE-SEC101',
+      role: 'caregiver',
+    });
+
+    // Seed authoritative membership in Cloud Firestore
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const fsDb = context.firestore();
+      await fsDb.doc('beeyou_families/BEE-SEC101').set({
+        ownerUid: storageOwnerUid,
+        createdAt: Date.now(),
+      });
+      await fsDb.doc(`beeyou_families/BEE-SEC101/members/${storageOwnerUid}`).set({
+        uid: storageOwnerUid,
+        role: 'owner',
+        active: true,
+      });
+      await fsDb.doc(`beeyou_families/BEE-SEC101/members/${storageMemberUid}`).set({
+        uid: storageMemberUid,
+        role: 'caregiver',
+        active: true,
+      });
+      await fsDb.doc(`beeyou_families/BEE-SEC101/members/${storageBobUid}`).set({
+        uid: storageBobUid,
+        role: 'caregiver',
+        active: true,
+      });
+
+      // Seed cross-family
+      await fsDb.doc('beeyou_families/BEE-OTHER99').set({
+        ownerUid: 'cross-user-222',
+        createdAt: Date.now(),
+      });
+      await fsDb.doc('beeyou_families/BEE-OTHER99/members/cross-user-222').set({
+        uid: 'cross-user-222',
+        role: 'owner',
+        active: true,
+      });
     });
 
     // 9.1 Unauthenticated storage access denied
@@ -887,7 +935,49 @@ async function runRulesVerification() {
       assert(false, 'Authorized family member can read shared family storage', e?.message);
     }
 
-    // 9.6 Revoked member with previously valid token CANNOT write to family storage
+    // 9.6 Authorized family member can upload custom icon to shared family storage
+    try {
+      await assertSucceeds(
+        storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/member_shared.png`).put(Buffer.from('member-icon-bytes'), {
+          contentType: 'image/png',
+          customMetadata: {
+            familyCode: 'BEE-SEC101',
+            userId: storageOwnerUid,
+          },
+        })
+      );
+      assert(true, 'Authorized family upload to shared family storage succeeds');
+    } catch (e: any) {
+      assert(false, 'Authorized family upload to shared family storage succeeds', e?.message);
+    }
+
+    // -------------------------------------------------------------------------
+    // AUTHORITATIVE REVOCATION OF MEMBER IN FIRESTORE
+    // -------------------------------------------------------------------------
+    // Revoke storageMemberUid in Firestore.
+    // Note: storageMemberContext's token is NOT modified, NOT re-minted, and keeps familyCode claim!
+    // Note: Files in Cloud Storage have NO mutable metadata changes applied!
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const fsDb = context.firestore();
+      await fsDb.doc(`beeyou_families/BEE-SEC101/revokedMembers/${storageMemberUid}`).set({
+        uid: storageMemberUid,
+        revokedAt: Date.now(),
+        reason: 'Revoked by family owner',
+      });
+      await fsDb.doc(`beeyou_families/BEE-SEC101/members/${storageMemberUid}`).delete();
+    });
+
+    // 9.7 Revoked member using PREVIOUSLY VALID TOKEN cannot read shared family files (authoritative check)
+    try {
+      await assertFails(
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
+      );
+      assert(true, 'Revoked member with unchanged token CANNOT read shared family file');
+    } catch (e: any) {
+      assert(false, 'Revoked member with unchanged token CANNOT read shared family file', e?.message);
+    }
+
+    // 9.8 Revoked member with PREVIOUSLY VALID TOKEN cannot write to shared family storage
     try {
       await assertFails(
         storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/hacked.png`).put(Buffer.from('hacked-bytes'), {
@@ -898,47 +988,44 @@ async function runRulesVerification() {
           },
         })
       );
-      assert(true, 'Revoked member with previously valid token CANNOT write to family storage');
+      assert(true, 'Revoked member with unchanged token CANNOT write to family storage');
     } catch (e: any) {
-      assert(false, 'Revoked member with previously valid token CANNOT write to family storage', e?.message);
+      assert(false, 'Revoked member with unchanged token CANNOT write to family storage', e?.message);
     }
 
-    // 9.7 Seed family file with revocation metadata recording revoked member
-    await storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).put(Buffer.from('protected-bytes'), {
-      contentType: 'image/png',
-      customMetadata: {
-        familyCode: 'BEE-SEC101',
-        userId: storageOwnerUid,
-        revokedMembers: storageMemberUid,
-      },
-    });
-
-    // 9.8 Revoked member using previously valid token CANNOT read family file marked with revocation
+    // 9.9 Revoked member with PREVIOUSLY VALID TOKEN cannot update metadata on shared family storage
     try {
       await assertFails(
-        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).getDownloadURL()
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).updateMetadata({
+          customMetadata: { tampered: 'true' },
+        })
       );
-      assert(true, 'Revoked member using previously valid token CANNOT read revocation-marked family file');
+      assert(true, 'Revoked member with unchanged token CANNOT update shared family file');
     } catch (e: any) {
-      assert(false, 'Revoked member using previously valid token CANNOT read revocation-marked family file', e?.message);
+      assert(false, 'Revoked member with unchanged token CANNOT update shared family file', e?.message);
     }
 
-    // 9.9 Active non-revoked member Bob can still read the revocation-marked family file
-    const storageBobUid = 'storage-bob-303';
-    const storageBobContext = testEnv.authenticatedContext(storageBobUid, {
-      email: 'bob@family.com',
-      familyCode: 'BEE-SEC101',
-    });
+    // 9.10 Revoked member with PREVIOUSLY VALID TOKEN cannot delete shared family files
+    try {
+      await assertFails(
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).delete()
+      );
+      assert(true, 'Revoked member with unchanged token CANNOT delete shared family file');
+    } catch (e: any) {
+      assert(false, 'Revoked member with unchanged token CANNOT delete shared family file', e?.message);
+    }
+
+    // 9.11 Active non-revoked member Bob can still read shared family storage
     try {
       await assertSucceeds(
-        storageBobContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).getDownloadURL()
+        storageBobContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
       );
       assert(true, 'Active non-revoked member can read family storage');
     } catch (e: any) {
       assert(false, 'Active non-revoked member can read family storage', e?.message);
     }
 
-    // 9.10 Direct client uploads for revoked member to their own users/{userId} remain functional
+    // 9.12 Direct client uploads for revoked member to their own users/{userId} remain functional
     try {
       await assertSucceeds(
         storageMemberContext.storage().ref(`users/${storageMemberUid}/personal/note.png`).put(Buffer.from('note-png'), {
@@ -950,7 +1037,17 @@ async function runRulesVerification() {
       assert(false, 'Direct client uploads for revoked member to users/{userId} remain functional', e?.message);
     }
 
-    // 9.11 Cross-family storage read is denied (Family A cannot read Family B)
+    // 9.13 Revoked member CANNOT tamper with Firestore revocation record
+    try {
+      await assertFails(
+        storageMemberContext.firestore().doc(`beeyou_families/BEE-SEC101/revokedMembers/${storageMemberUid}`).delete()
+      );
+      assert(true, 'Revoked member CANNOT tamper with Firestore revocation record');
+    } catch (e: any) {
+      assert(false, 'Revoked member CANNOT tamper with Firestore revocation record', e?.message);
+    }
+
+    // 9.14 Cross-family storage read is denied (Family A cannot read Family B)
     const crossFamilyContext = testEnv.authenticatedContext('cross-user-222', {
       email: 'cross@other.com',
       familyCode: 'BEE-OTHER99',
@@ -964,7 +1061,7 @@ async function runRulesVerification() {
       assert(false, 'Cross-family storage read is denied (Family A cannot read Family B)', e?.message);
     }
 
-    // 9.12 Demo reviewer account CANNOT access real family storage
+    // 9.15 Demo reviewer account CANNOT access real family storage
     try {
       await assertFails(
         demoContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
@@ -974,7 +1071,7 @@ async function runRulesVerification() {
       assert(false, 'Demo reviewer account CANNOT read real family storage', e?.message);
     }
 
-    // 9.13 Real user CANNOT access BEE-DEMO storage
+    // 9.16 Real user CANNOT access BEE-DEMO storage
     try {
       await assertFails(
         storageOwnerContext.storage().ref('beeyou/families/BEE-DEMO/icons/demo.png').getDownloadURL()
@@ -984,7 +1081,17 @@ async function runRulesVerification() {
       assert(false, 'Real user CANNOT access BEE-DEMO storage', e?.message);
     }
 
-    // 9.14 Public read allowed on tts_cache
+    // 9.17 Family owner CAN delete shared family file
+    try {
+      await assertSucceeds(
+        storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/member_shared.png`).delete()
+      );
+      assert(true, 'Family owner CAN delete shared family file');
+    } catch (e: any) {
+      assert(false, 'Family owner CAN delete shared family file', e?.message);
+    }
+
+    // 9.18 Public read allowed on tts_cache
     // First, upload valid TTS audio file from trusted backend
     const backendAdminContext = testEnv.authenticatedContext('backend-worker', {
       email: 'backend@beeyou.app',
@@ -1004,7 +1111,7 @@ async function runRulesVerification() {
       assert(false, 'Public read allowed on tts_cache for fast edge distribution', e?.message);
     }
 
-    // 9.15 Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)
+    // 9.19 Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)
     try {
       await assertFails(
         storageMemberContext.storage().ref('tts_cache/v4/amy/en/poisoned.wav').put(Buffer.from('poisoned-audio'), {
@@ -1016,7 +1123,7 @@ async function runRulesVerification() {
       assert(false, 'Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)', e?.message);
     }
 
-    // 9.16 Trusted backend / admin CAN write to tts_cache
+    // 9.20 Trusted backend / admin CAN write to tts_cache
     try {
       await assertSucceeds(
         backendAdminContext.storage().ref('tts_cache/v4/puck/es/hola.wav').put(Buffer.from('RIFF-audio-data-es'), {
@@ -1028,7 +1135,7 @@ async function runRulesVerification() {
       assert(false, 'Trusted backend / admin CAN write to tts_cache', e?.message);
     }
 
-    // 9.17 Backend write rejected if oversized (> 10MB)
+    // 9.21 Backend write rejected if oversized (> 10MB)
     const oversizedTts = Buffer.alloc(11 * 1024 * 1024);
     try {
       await assertFails(
@@ -1041,7 +1148,7 @@ async function runRulesVerification() {
       assert(false, 'Rejects oversized audio write to tts_cache (> 10MB)', e?.message);
     }
 
-    // 9.18 Backend write rejected if non-audio MIME type
+    // 9.22 Backend write rejected if non-audio MIME type
     try {
       await assertFails(
         backendAdminContext.storage().ref('tts_cache/v4/amy/en/malicious.exe').put(Buffer.from('MZ...'), {

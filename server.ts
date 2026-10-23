@@ -662,6 +662,7 @@ const FAMILY_ACCOUNTS_FILE = path.join(DATA_DIR, 'family_accounts.json');
 const PAIRING_SESSIONS_FILE = path.join(DATA_DIR, 'pairing_sessions.json');
 const CAREGIVER_SESSIONS_FILE = path.join(DATA_DIR, 'caregiver_sessions.json');
 const FIREBASE_DB_URL = process.env.VITE_FIREBASE_DATABASE_URL || 'https://beeyou-23d7d-default-rtdb.firebaseio.com';
+const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
 
 export async function saveFamilyAccounts(): Promise<void> {
   try {
@@ -934,6 +935,101 @@ async function syncFamilyToFirebase(code: string): Promise<void> {
   } catch {}
 }
 
+const FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST;
+const FIRESTORE_BASE_HOST = FIRESTORE_EMULATOR_HOST
+  ? `http://${FIRESTORE_EMULATOR_HOST}`
+  : 'https://firestore.googleapis.com';
+const FIRESTORE_DOCS_URL = `${FIRESTORE_BASE_HOST}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+
+/**
+ * Authoritative Cloud Firestore synchronization for family membership and revocation.
+ * Used by Cloud Storage security rules cross-service lookups to enforce immediate access severance.
+ */
+export async function syncFamilyToFirestore(
+  familyCode: string,
+  action: 'init_owner' | 'approve' | 'revoke',
+  targetUid: string,
+  details?: { role?: string; email?: string; reason?: string }
+): Promise<void> {
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') return;
+
+  const url = `${FIRESTORE_DOCS_URL}:commit`;
+  const writes: any[] = [];
+  const baseDocPath = `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_families/${cleanCode}`;
+
+  if (action === 'init_owner') {
+    writes.push({
+      update: {
+        name: baseDocPath,
+        fields: {
+          ownerUid: { stringValue: targetUid },
+          createdAt: { integerValue: String(Date.now()) },
+          updatedAt: { integerValue: String(Date.now()) },
+        },
+      },
+    });
+    writes.push({
+      update: {
+        name: `${baseDocPath}/members/${targetUid}`,
+        fields: {
+          uid: { stringValue: targetUid },
+          role: { stringValue: 'owner' },
+          active: { booleanValue: true },
+          approvedAt: { integerValue: String(Date.now()) },
+        },
+      },
+    });
+  } else if (action === 'approve') {
+    writes.push({
+      update: {
+        name: `${baseDocPath}/members/${targetUid}`,
+        fields: {
+          uid: { stringValue: targetUid },
+          role: { stringValue: details?.role || 'caregiver' },
+          email: { stringValue: details?.email || '' },
+          active: { booleanValue: true },
+          approvedAt: { integerValue: String(Date.now()) },
+        },
+      },
+    });
+    writes.push({
+      delete: `${baseDocPath}/revokedMembers/${targetUid}`,
+    });
+  } else if (action === 'revoke') {
+    writes.push({
+      update: {
+        name: `${baseDocPath}/revokedMembers/${targetUid}`,
+        fields: {
+          uid: { stringValue: targetUid },
+          revokedAt: { integerValue: String(Date.now()) },
+          reason: { stringValue: details?.reason || 'Revoked by family owner' },
+        },
+      },
+    });
+    writes.push({
+      delete: `${baseDocPath}/members/${targetUid}`,
+    });
+  }
+
+  if (writes.length === 0) return;
+
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (FIRESTORE_EMULATOR_HOST) {
+      headers['Authorization'] = 'Bearer owner';
+    } else if (process.env.FIREBASE_AUTH_TOKEN) {
+      headers['Authorization'] = `Bearer ${process.env.FIREBASE_AUTH_TOKEN}`;
+    }
+
+    await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ writes }),
+    });
+  } catch {}
+}
+
 let isFlushing = false;
 async function flushDirtyFamilies(): Promise<void> {
   if (isFlushing || dirtyFamilyCodes.size === 0) return;
@@ -1155,7 +1251,6 @@ interface GoogleCertsCache {
   expiresAt: number;
 }
 let googleCertsCache: GoogleCertsCache | null = null;
-const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
 
 /**
  * Fetch and cache Google's public certificates for Firebase ID Token RS256 signature verification.
@@ -2641,6 +2736,11 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     saveCaregiverSessions().catch(() => {});
   }
 
+  // Atomically initialize family in Firestore for authoritative Cloud Storage access
+  if (verified.uid) {
+    syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail }).catch(() => {});
+  }
+
   const signedToken = signFamilyToken(familyCode, 'caregiver', cleanEmail, verified.uid);
 
   const safeAccount = {
@@ -2854,6 +2954,9 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
     } catch {}
   }
 
+  // Atomically update membership and clear revocation in Firestore for authoritative Cloud Storage access
+  syncFamilyToFirestore(account.familyCode, 'approve', targetUid, { role: role || 'caregiver', email: pending?.email }).catch(() => {});
+
   return res.json({ success: true, message: `Member ${targetUid} approved successfully.` });
 });
 
@@ -2907,6 +3010,9 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
       });
     } catch {}
   }
+
+  // Atomically record revocation and remove member in Firestore for authoritative Cloud Storage access
+  syncFamilyToFirestore(account.familyCode, 'revoke', targetUid, { reason: reason?.trim() }).catch(() => {});
 
   // Broadcast revocation event across devices
   broadcastEvent(account.familyCode, {
