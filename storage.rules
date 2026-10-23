@@ -3,33 +3,50 @@ service firebase.storage {
   match /b/{bucket}/o {
     // Isolated per-user storage (strictly authenticated)
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'));
     }
 
     // Isolated per-family custom icons and media
     // Strictly requires authenticated user and verified family membership
     match /beeyou/families/{familyCode}/{allPaths=**} {
-      allow read: if request.auth != null && (
-        familyCode == 'BEE-DEMO' ||
-        request.auth.token.email == 'demo@beeyou.app' ||
-        request.auth.token.familyCode == familyCode ||
-        resource.metadata.familyCode == familyCode ||
-        resource.metadata.ownerUid == request.auth.uid ||
-        resource.metadata.userId == request.auth.uid
-      );
-      allow write: if request.auth != null && (
-        familyCode == 'BEE-DEMO' ||
-        request.auth.token.email == 'demo@beeyou.app' ||
-        request.auth.token.familyCode == familyCode ||
-        (request.resource.metadata != null && request.resource.metadata.familyCode == familyCode && (request.resource.metadata.userId == request.auth.uid || request.resource.metadata.ownerUid == request.auth.uid))
-      );
+      // Demo isolated sandbox
+      allow read: if request.auth != null 
+        && familyCode == 'BEE-DEMO' 
+        && request.auth.token.email == 'demo@beeyou.app';
+      allow write: if request.auth != null 
+        && familyCode == 'BEE-DEMO' 
+        && request.auth.token.email == 'demo@beeyou.app'
+        && request.resource.size < 5 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'));
+
+      // Real families: strictly forbidden to demo account, strictly tied to user's familyCode
+      allow read: if request.auth != null 
+        && familyCode != 'BEE-DEMO'
+        && request.auth.token.email != 'demo@beeyou.app'
+        && request.auth.token.familyCode == familyCode;
+
+      allow write: if request.auth != null 
+        && familyCode != 'BEE-DEMO'
+        && request.auth.token.email != 'demo@beeyou.app'
+        && request.auth.token.familyCode == familyCode
+        && request.resource.size < 5 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'))
+        && request.resource.metadata != null
+        && request.resource.metadata.familyCode == familyCode
+        && request.resource.metadata.userId == request.auth.uid;
     }
 
     // Shared durable TTS audio cache across all users and serverless instances
-    // Public read allows fast global CDN distribution; writes restricted to authenticated clients / backend
+    // Public read allows fast global CDN distribution; writes restricted to backend or authenticated clients
     match /tts_cache/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if request.auth != null 
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
     }
 
     // Block all unauthenticated or root access

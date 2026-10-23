@@ -11,6 +11,7 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test": "tsx scripts/test-tts-abuse-protection.ts",
+    "test:rules": "firebase-tools emulators:exec --only database,storage \"tsx scripts/test-firebase-rules.ts\"",
     "cap:sync": "npm run build && cap sync",
     "cap:ios": "cap open ios",
     "cap:android": "cap open android",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^4.17.21",

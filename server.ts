@@ -2848,6 +2848,9 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(true),
       });
+      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`, {
+        method: 'DELETE',
+      });
     } catch {}
   }
 
@@ -2891,11 +2894,16 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   }
   saveFamilyAccounts().catch(() => {});
 
-  // Remove member from Firebase Realtime Database
+  // Remove member from Firebase Realtime Database and record revocation
   if (FIREBASE_DB_URL) {
     try {
       await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/members/${encodeURIComponent(targetUid)}.json`, {
         method: 'DELETE',
+      });
+      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ revokedAt: Date.now(), reason: reason?.trim() || 'Revoked by family owner' }),
       });
     } catch {}
   }

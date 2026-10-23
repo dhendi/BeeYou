@@ -8,7 +8,7 @@
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid",
-          ".validate": "newData.hasChildren(['familyCode']) && (newData.child('familyCode').val() === 'BEE-DEMO' || root.child('beeyou/families/' + newData.child('familyCode').val() + '/ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.child('familyCode').val() + '/members/' + auth.uid).val() === true || !root.child('beeyou/families/' + newData.child('familyCode').val()).exists())"
+          ".validate": "newData.hasChildren(['familyCode']) && newData.child('familyCode').isString() && (newData.child('familyCode').val() === 'BEE-DEMO' ? auth.token.email === 'demo@beeyou.app' : (auth.token.email !== 'demo@beeyou.app' && !root.child('beeyou/families/' + newData.child('familyCode').val() + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + newData.child('familyCode').val() + '/ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.child('familyCode').val() + '/members/' + auth.uid).val() === true || !root.child('beeyou/families/' + newData.child('familyCode').val()).exists())))"
         }
       },
 
@@ -17,41 +17,81 @@
         ".write": false,
 
         "$familyCode": {
-          ".read": "auth != null && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-          ".write": "auth != null && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid || (!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('members/' + auth.uid).val() === true) || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-          ".validate": "newData.hasChildren(['familyCode']) && newData.child('familyCode').val() === $familyCode",
+          ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !data.child('revokedMembers/' + auth.uid).exists() && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid)))",
+          ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !data.child('revokedMembers/' + auth.uid).exists() && (data.child('members/' + auth.uid).val() === true || data.child('ownerUid').val() === auth.uid || (!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('members/' + auth.uid).val() === true))))",
+          ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/) && newData.hasChildren(['familyCode']) && newData.child('familyCode').val() === $familyCode",
 
           "ownerUid": {
             ".validate": "newData.isString() && (data.val() === null || data.val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
           },
 
+          "caregiverName": {
+            ".validate": "newData.isString() && newData.val().length <= 100 && (!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
+          },
+
+          "caregiverRole": {
+            ".validate": "newData.isString() && newData.val().length <= 50 && (!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
+          },
+
+          "email": {
+            ".validate": "newData.isString() && newData.val().length <= 254 && (!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
+          },
+
           "members": {
-            ".read": "auth != null && (data.parent().child('members/' + auth.uid).val() === true || data.parent().child('ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-            ".write": "auth != null && (data.parent().child('ownerUid').val() === auth.uid || (!data.parent().exists() && newData.parent().child('ownerUid').val() === auth.uid) || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
+            ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
+            ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
+            ".validate": "!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO')"
+          },
+
+          "memberRoles": {
+            ".validate": "!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO')"
+          },
+
+          "revokedMembers": {
+            ".read": "auth != null && (root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+            ".write": "auth != null && (root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+            ".validate": "root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO')"
           },
 
           "pendingRequests": {
             "$reqUid": {
               ".read": "auth != null && (auth.uid === $reqUid || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-              ".write": "auth != null && (auth.uid === $reqUid || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))"
+              ".write": "auth != null && (auth.uid === $reqUid || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+              ".validate": "newData.val() === null || (newData.hasChildren(['requestedAt']) && newData.child('requestedAt').isNumber())"
             }
           },
 
           "customIcons": {
             "$iconId": {
-              ".validate": "newData.hasChildren(['id', 'label', 'dataUrl']) && newData.child('dataUrl').isString() && newData.child('dataUrl').val().length < 500000"
+              ".validate": "newData.hasChildren(['id', 'label', 'dataUrl']) && newData.child('id').isString() && newData.child('id').val().length <= 64 && newData.child('label').isString() && newData.child('label').val().length <= 100 && newData.child('dataUrl').isString() && newData.child('dataUrl').val().length < 500000"
             }
           },
 
           "activeAlert": {
-            ".validate": "newData.val() === null || (newData.hasChildren(['status']) && (newData.child('status').val() === 'active' || newData.child('status').val() === 'acknowledged' || newData.child('status').val() === 'resolved'))"
+            ".validate": "newData.val() === null || (newData.hasChildren(['status']) && (newData.child('status').val() === 'active' || newData.child('status').val() === 'acknowledged' || newData.child('status').val() === 'resolved') && (!newData.child('responseMessage').exists() || (newData.child('responseMessage').isString() && newData.child('responseMessage').val().length <= 500)) && (!newData.child('note').exists() || (newData.child('note').isString() && newData.child('note').val().length <= 500)) && (!newData.child('childName').exists() || (newData.child('childName').isString() && newData.child('childName').val().length <= 100)))"
           },
 
           "messages": {
             ".indexOn": ["timestamp"],
             "$messageId": {
-              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length <= 1000"
+              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 1000 && (!newData.child('senderName').exists() || (newData.child('senderName').isString() && newData.child('senderName').val().length <= 100))"
             }
+          },
+
+          "childState": {
+            ".validate": "newData.val() === null || ((!newData.child('currentMood').exists() || (newData.child('currentMood').isString() && newData.child('currentMood').val().length <= 50)) && (!newData.child('currentActivity').exists() || (newData.child('currentActivity').isString() && newData.child('currentActivity').val().length <= 100)))"
+          },
+
+          "childProfile": {
+            ".validate": "newData.val() === null || (newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 100 && (!newData.child('pronouns').exists() || (newData.child('pronouns').isString() && newData.child('pronouns').val().length <= 50)))"
+          },
+
+          "routines": {
+            ".validate": "newData.val() === null || newData.hasChildren() || newData.isString() || newData.val().length <= 500000"
+          },
+
+          "plansChanged": {
+            ".validate": "newData.val() === null || (newData.hasChildren(['active']) && newData.child('active').isBoolean())"
           }
         }
       },
@@ -61,31 +101,28 @@
         ".write": false,
 
         "$familyCode": {
-          ".read": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-          ".write": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+          ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
+          ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
           ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
 
           "pings": {
             "$role": {
-              ".validate": "$role === 'caregiver' || $role === 'child' || $role === 'child_device'",
-              "timestamp": {
-                ".validate": "newData.isNumber()"
-              }
+              ".validate": "($role === 'caregiver' || $role === 'child' || $role === 'child_device') && newData.hasChildren(['timestamp']) && newData.child('timestamp').isNumber() && (!newData.child('name').exists() || (newData.child('name').isString() && newData.child('name').val().length <= 100))"
             }
           },
 
           "activeAlert": {
-            ".validate": "newData.val() === null || newData.hasChildren(['status'])"
+            ".validate": "newData.val() === null || (newData.hasChildren(['status']) && (newData.child('status').val() === 'active' || newData.child('status').val() === 'acknowledged' || newData.child('status').val() === 'resolved') && (!newData.child('responseMessage').exists() || (newData.child('responseMessage').isString() && newData.child('responseMessage').val().length <= 500)) && (!newData.child('childName').exists() || (newData.child('childName').isString() && newData.child('childName').val().length <= 100)))"
           },
 
           "childStatus": {
-            ".validate": "newData.hasChildren(['currentMood', 'currentActivity'])"
+            ".validate": "newData.val() === null || ((!newData.child('currentMood').exists() || (newData.child('currentMood').isString() && newData.child('currentMood').val().length <= 50)) && (!newData.child('currentActivity').exists() || (newData.child('currentActivity').isString() && newData.child('currentActivity').val().length <= 100)))"
           },
 
           "messages": {
             ".indexOn": ["timestamp"],
             "$messageId": {
-              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length <= 1000"
+              ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 1000 && (!newData.child('senderName').exists() || (newData.child('senderName').isString() && newData.child('senderName').val().length <= 100))"
             }
           }
         }
@@ -96,12 +133,12 @@
         ".write": false,
 
         "$familyCode": {
-          ".read": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
-          ".write": "auth != null && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO'))",
+          ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
+          ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
           ".validate": "$familyCode.matches(/^BEE-[A-Z0-9-]{3,16}$/)",
 
           "latest": {
-            ".validate": "newData.hasChildren(['type', 'pairingCode', 'sentAt']) && newData.child('pairingCode').val() === $familyCode"
+            ".validate": "newData.hasChildren(['type', 'pairingCode', 'sentAt']) && newData.child('pairingCode').val() === $familyCode && newData.child('type').isString() && newData.child('type').val().length <= 50 && newData.child('sentAt').isNumber()"
           }
         }
       },
@@ -111,9 +148,9 @@
         ".write": false,
 
         "$pairingCode": {
-          ".read": "auth != null",
-          ".write": "auth != null && (!data.exists() || data.child('ownerUid').val() === auth.uid || data.child('requestingUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO'))",
-          ".validate": "newData.hasChildren(['pairingCode', 'status', 'expiresAt'])"
+          ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $pairingCode === 'BEE-DEMO' : ($pairingCode !== 'BEE-DEMO' && (!data.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (data.child('ownerUid').val() === auth.uid || data.child('creatorUid').val() === auth.uid || data.child('requestingUid').val() === auth.uid || data.child('claimedByUid').val() === auth.uid || (data.child('targetFamilyCode').exists() && (root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid || root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/members/' + auth.uid).val() === true)))))",
+          ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $pairingCode === 'BEE-DEMO' : ($pairingCode !== 'BEE-DEMO' && (!data.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (!newData.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + newData.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (!data.exists() ? (newData.child('ownerUid').val() === auth.uid || newData.child('creatorUid').val() === auth.uid) : (data.child('ownerUid').val() === auth.uid || data.child('creatorUid').val() === auth.uid || data.child('requestingUid').val() === auth.uid || (!data.child('requestingUid').exists() && (newData.child('requestingUid').val() === auth.uid || newData.child('claimedByUid').val() === auth.uid)) || (data.child('targetFamilyCode').exists() && root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))))",
+          ".validate": "newData.hasChildren(['pairingCode', 'status', 'expiresAt']) && newData.child('pairingCode').val() === $pairingCode && newData.child('status').isString() && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'claimed' || newData.child('status').val() === 'awaiting_approval' || newData.child('status').val() === 'paired' || newData.child('status').val() === 'rejected' || newData.child('status').val() === 'expired' || newData.child('status').val() === 'revoked') && newData.child('expiresAt').isNumber() && (!newData.child('targetFamilyCode').exists() || (newData.child('targetFamilyCode').isString() && newData.child('targetFamilyCode').val().matches(/^BEE-[A-Z0-9-]{3,16}$/))) && (!newData.child('caregiverEmail').exists() || (newData.child('caregiverEmail').isString() && newData.child('caregiverEmail').val().length <= 254)) && (!newData.child('caregiverPhone').exists() || (newData.child('caregiverPhone').isString() && newData.child('caregiverPhone').val().length <= 30)) && (!newData.child('caregiverName').exists() || (newData.child('caregiverName').isString() && newData.child('caregiverName').val().length <= 100)) && (!newData.child('childName').exists() || (newData.child('childName').isString() && newData.child('childName').val().length <= 100))"
         }
       }
     }
