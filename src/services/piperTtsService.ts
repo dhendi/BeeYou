@@ -324,7 +324,7 @@ export async function isPiperVoiceReady(personaId?: string, lang: string = 'en')
  * Helper to ensure OPFS file handle has finished writing and flushing to disk before reading.
  * Works around upstream piper-tts-web omitting `await` before writeBlob().
  */
-async function waitForOpfsFileReady(filename: string, minBytes: number = 1000000, maxWaitMs: number = 5000): Promise<boolean> {
+async function waitForOpfsFileReady(filename: string, minBytes: number = 1000000, maxWaitMs: number = 1200): Promise<boolean> {
   if (typeof navigator === 'undefined' || !navigator.storage?.getDirectory) return true;
   const start = performance.now();
   while (performance.now() - start < maxWaitMs) {
@@ -332,6 +332,10 @@ async function waitForOpfsFileReady(filename: string, minBytes: number = 1000000
       const root = await navigator.storage.getDirectory();
       const dir = await root.getDirectoryHandle('piper');
       const fileHandle = await dir.getFileHandle(filename);
+      if (typeof (fileHandle as any).createWritable !== 'function') {
+        // WebKit / iOS Safari main thread lacks createWritable - do not stall
+        return true;
+      }
       const file = await fileHandle.getFile();
       if (file.size >= minBytes) {
         return true;
@@ -397,20 +401,23 @@ export async function preloadPiperVoice(
           totalBytes: 100,
         });
 
-        await runWithPiperLock(async () => {
-          // Clear singleton session lock if different voice was previously active
-          if ((piper as any).TtsSession?._instance) {
-            (piper as any).TtsSession._instance = null;
-          }
+        await Promise.race([
+          runWithPiperLock(async () => {
+            // Clear singleton session lock if different voice was previously active
+            if ((piper as any).TtsSession?._instance) {
+              (piper as any).TtsSession._instance = null;
+            }
 
-          try {
-            await piper.predict({ text: 'ready', voiceId: voiceId as any });
-            activeLoadedVoiceId = voiceId;
-            console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
-          } catch (warmErr) {
-            console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
-          }
-        });
+            try {
+              await piper.predict({ text: 'ready', voiceId: voiceId as any });
+              activeLoadedVoiceId = voiceId;
+              console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
+            } catch (warmErr) {
+              console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
+            }
+          }),
+          new Promise((r) => setTimeout(r, 2000)),
+        ]);
       }
 
       try {
@@ -488,7 +495,11 @@ export async function synthesizeWithPiper(
 
     const effectiveTimeout = Math.min(timeoutMs || 2200, 2500);
 
-    return await runWithPiperLock(async () => {
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), effectiveTimeout)
+    );
+
+    const executionPromise = runWithPiperLock(async () => {
       // If changing active voice, clear previous singleton instance so new ONNX model is loaded
       if (activeLoadedVoiceId !== voiceId && (piper as any).TtsSession?._instance) {
         (piper as any).TtsSession._instance = null;
@@ -497,18 +508,12 @@ export async function synthesizeWithPiper(
       try {
         const tStart = performance.now();
         lastOnnxInferenceMs = 0;
-        const predictionWork = piper.predict({
+        const wavBlob = await piper.predict({
           text: cleanText,
           voiceId: voiceId as any,
         });
 
-        const timeoutWork = new Promise<null>((resolve) =>
-          setTimeout(() => resolve(null), effectiveTimeout)
-        );
-
-        const wavBlob = await Promise.race([predictionWork, timeoutWork]);
         if (!wavBlob) {
-          console.warn(`[AAC Speech] Piper synthesis timed out after ${effectiveTimeout}ms for voice ${voiceId}`);
           if ((piper as any).TtsSession?._instance) {
             (piper as any).TtsSession._instance = null;
           }
@@ -546,6 +551,12 @@ export async function synthesizeWithPiper(
         return null;
       }
     });
+
+    const result = await Promise.race([executionPromise, timeoutPromise]);
+    if (!result) {
+      console.warn(`[AAC Speech] Piper synthesis timed out or lock busy after ${effectiveTimeout}ms for voice ${voiceId}`);
+    }
+    return result;
   })().finally(() => {
     inFlightPiperPredictions.delete(cacheKey);
   });

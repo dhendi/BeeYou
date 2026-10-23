@@ -1121,6 +1121,22 @@ export async function speakText(
       if (played || speechId !== latestSpeechRequestId) return;
     }
 
+    // Priority 1 for System Persona: Direct Native Browser SpeechSynthesis
+    if (selectedPersonaId === 'system') {
+      console.log(`[AAC Speech] Vocalizing sentence via primary system speech synthesis`);
+      const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
+        ...options,
+        voicePersona: selectedPersonaId,
+        pitch: calibratedPitch,
+        rate: calibratedRate,
+        force: options?.force,
+      });
+      if (systemSuccess || speechId !== latestSpeechRequestId) {
+        recordReport('system_speech', false, 0, 0, 0, 0, 0);
+        return;
+      }
+    }
+
     // Priority 1: Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
     if (selectedPersonaId !== 'system') {
       try {
@@ -1220,7 +1236,23 @@ export async function speakText(
     if (played || speechId !== latestSpeechRequestId) return;
   }
 
-  // 3b. Piper On-Device Neural Synthesis for Single Word
+  // 3b. Priority for System Persona: Direct Native Browser SpeechSynthesis
+  if (selectedPersonaId === 'system') {
+    console.log(`[AAC Speech] Vocalizing single word via primary system speech synthesis`);
+    const singleSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
+      ...options,
+      voicePersona: selectedPersonaId,
+      pitch: calibratedPitch,
+      rate: calibratedRate,
+      force: options?.force,
+    });
+    if (singleSuccess || speechId !== latestSpeechRequestId) {
+      recordReport('system_speech', false, 0, 0, 0, 0, 0);
+      return;
+    }
+  }
+
+  // 3c. Piper On-Device Neural Synthesis for Single Word
   if (selectedPersonaId !== 'system') {
     try {
       const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 1200);
