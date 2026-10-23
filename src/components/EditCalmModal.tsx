@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { CalmCopingStrategy, BreathingPacerConfig } from '../types';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const EditCalmModal: React.FC = () => {
   const {
@@ -98,7 +99,7 @@ export const EditCalmModal: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 px-6 pt-3 pb-2.5 border-b-2 border-amber-200/80 bg-[#FFF9EE]">
+        <div className="flex gap-1.5 sm:gap-2 px-3 sm:px-6 pt-3 pb-2.5 border-b-2 border-amber-200/80 bg-[#FFF9EE] overflow-x-auto no-scrollbar">
           {[
             { id: 'pacer' as const, label: 'Breathing Pacer Timings', icon: Wind },
             { id: 'strategies' as const, label: 'Coping Strategies Catalog', icon: Heart, count: calmStrategies.length },
@@ -109,14 +110,14 @@ export const EditCalmModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); playChime('tap'); }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer active:scale-95 ${
+                className={`min-w-0 flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer active:scale-95 text-center leading-tight ${
                   isTabActive
                     ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs ring-2 ring-amber-300'
                     : 'bg-white/80 hover:bg-amber-100/70 text-slate-700 border border-amber-200/70'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate sm:overflow-visible break-words max-w-full">{t(tab.label)}</span>
                 {tab.count !== undefined && (
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                     isTabActive ? 'bg-amber-700/60 text-white' : 'bg-amber-100 text-amber-950'

@@ -199,22 +199,22 @@ export const AccessibilityPreferencesModal: React.FC = () => {
         </div>
 
         {/* Tab Navigation (Silicone Tray Style) */}
-        <div className="px-6 pt-3 pb-2 bg-[#FCF9F2] border-b border-[#E0D8CB] shrink-0">
-          <div className="flex items-center gap-2 p-1.5 bg-[#EFE9DF] rounded-2xl border border-[#E0D8CB]">
+        <div className="px-3 sm:px-6 pt-3 pb-2 bg-[#FCF9F2] border-b border-[#E0D8CB] shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-[#EFE9DF] rounded-2xl border border-[#E0D8CB] overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={() => {
                 setActiveTab('visuals');
                 playChime('tap');
               }}
-              className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'visuals'
                   ? 'bg-[#FCF9F2] text-[#2D241E] shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] border border-[#E0D8CB]'
                   : 'text-[#7A6C60] hover:text-[#2D241E]'
               }`}
             >
-              <Eye className="w-4 h-4 text-[#E28743]" />
-              <span>{t("Colors & Visuals")}</span>
+              <Eye className="w-4 h-4 text-[#E28743] shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Colors & Visuals")}</span>
             </button>
 
             <button
@@ -223,14 +223,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 setActiveTab('audio');
                 playChime('tap');
               }}
-              className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'audio'
                   ? 'bg-[#FCF9F2] text-[#2D241E] shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] border border-[#E0D8CB]'
                   : 'text-[#7A6C60] hover:text-[#2D241E]'
               }`}
             >
-              <Volume2 className="w-4 h-4 text-[#5B8E7D]" />
-              <span>{t("Sound & Voice")}</span>
+              <Volume2 className="w-4 h-4 text-[#5B8E7D] shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Sound & Voice")}</span>
             </button>
 
             <button
@@ -239,14 +239,14 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                 setActiveTab('features');
                 playChime('tap');
               }}
-              className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'features'
                   ? 'bg-[#FCF9F2] text-[#2D241E] shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] border border-[#E0D8CB]'
                   : 'text-[#7A6C60] hover:text-[#2D241E]'
               }`}
             >
-              <Sliders className="w-4 h-4 text-[#9B72AA]" />
-              <span>{t("Feature Toggles")}</span>
+              <Sliders className="w-4 h-4 text-[#9B72AA] shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Feature Toggles")}</span>
             </button>
           </div>
         </div>

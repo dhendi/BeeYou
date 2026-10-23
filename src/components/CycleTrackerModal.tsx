@@ -5,6 +5,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 import { FlowIntensity, CycleSymptom, CycleDailyLog } from '../types';
 
 export const CycleTrackerModal: React.FC = () => {
@@ -204,7 +205,7 @@ export const CycleTrackerModal: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 shrink-0 overflow-x-auto">
+        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 sm:gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => {
@@ -217,7 +218,7 @@ export const CycleTrackerModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <span>Summary & Rhythm</span>
+            <span>{t("Summary & Rhythm")}</span>
           </button>
 
           <button
@@ -232,7 +233,7 @@ export const CycleTrackerModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <span>Log Symptoms</span>
+            <span>{t("Log Symptoms")}</span>
           </button>
 
           <button
@@ -247,7 +248,7 @@ export const CycleTrackerModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <span>Cycle History ({cycleLogs.length})</span>
+            <span>{t("Cycle History")} ({cycleLogs.length})</span>
           </button>
 
           <button
@@ -262,7 +263,7 @@ export const CycleTrackerModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <span>Cycle Settings</span>
+            <span>{t("Cycle Settings")}</span>
           </button>
         </div>
 

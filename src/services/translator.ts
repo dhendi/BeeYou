@@ -18,6 +18,18 @@ function rebuildLowerDictionary() {
   }
 }
 
+function syncDocumentLanguage(lang: string) {
+  if (typeof document !== 'undefined' && document.documentElement) {
+    const htmlLang = lang === 'fr_ca' ? 'fr-CA' : lang;
+    document.documentElement.lang = htmlLang;
+  }
+}
+
+// Ensure document lang is synchronized on load for native browser hyphenation dictionaries
+if (typeof window !== 'undefined') {
+  syncDocumentLanguage(currentLang);
+}
+
 // Load cached dictionary from localStorage on start, and revalidate in background
 if (typeof window !== 'undefined' && currentLang !== 'en') {
   try {
@@ -52,6 +64,7 @@ export async function setLanguage(lang: string): Promise<void> {
   currentLang = lang;
   if (typeof window === 'undefined') return;
   localStorage.setItem('beeyou_lang', lang);
+  syncDocumentLanguage(lang);
 
   if (lang === 'en') {
     dictionary = {};

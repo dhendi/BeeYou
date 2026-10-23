@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { HelpAlertPreset, CaregiverResponsePreset } from '../types';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 
 export const EditAlertsModal: React.FC = () => {
   const {
@@ -119,7 +120,7 @@ export const EditAlertsModal: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 px-6 pt-3 pb-2 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex gap-1.5 sm:gap-2 px-3 sm:px-6 pt-3 pb-2 border-b border-slate-100 bg-slate-50/50 overflow-x-auto no-scrollbar">
           {[
             { id: 'alerts' as const, label: 'Alert Buttons', icon: ShieldAlert, count: helpAlertPresets.length },
             { id: 'responses' as const, label: 'Caregiver Replies', icon: MessageSquare, count: caregiverResponses.length },
@@ -130,14 +131,14 @@ export const EditAlertsModal: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); playChime('tap'); }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`min-w-0 flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center leading-tight ${
                   activeTab === tab.id
                     ? 'bg-rose-500 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate sm:overflow-visible break-words max-w-full">{t(tab.label)}</span>
                 {tab.count !== undefined && (
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
                     activeTab === tab.id ? 'bg-white/30 text-white' : 'bg-slate-200 text-slate-700'

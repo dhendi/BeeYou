@@ -25,6 +25,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 import { RoutineStickerIcon, TurtleRiverStoneSticker } from './icons/JournalStickers';
 import { ThemedEmotionFace } from './ThemedEmotionFace';
 import { MoodJournalEmotion, MoodTriggerCategory, CopingStrategyUsed, MoodJournalEntry } from '../types';
@@ -268,14 +269,14 @@ export const MoodJournalModal: React.FC = () => {
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 shrink-0">
+        <div className="flex border-b border-slate-200 bg-slate-50/70 p-2 gap-1 sm:gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => {
               setActiveTab('new');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
               activeTab === 'new'
                 ? isFrogTheme
                   ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
@@ -287,8 +288,8 @@ export const MoodJournalModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>New Reflection</span>
+            <Plus className="w-4 h-4 shrink-0" />
+            <span className="truncate sm:overflow-visible break-words max-w-full">{t("New Reflection")}</span>
           </button>
 
           <button
@@ -297,7 +298,7 @@ export const MoodJournalModal: React.FC = () => {
               setActiveTab('history');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
               activeTab === 'history'
                 ? isFrogTheme
                   ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
@@ -309,8 +310,8 @@ export const MoodJournalModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <Calendar className="w-4 h-4" />
-            <span>Past Entries ({moodJournalEntries.length})</span>
+            <Calendar className="w-4 h-4 shrink-0" />
+            <span className="truncate sm:overflow-visible break-words max-w-full">{t("Past Entries")} ({moodJournalEntries.length})</span>
           </button>
 
           <button
@@ -319,7 +320,7 @@ export const MoodJournalModal: React.FC = () => {
               setActiveTab('insights');
               playChime('tap');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
               activeTab === 'insights'
                 ? isFrogTheme
                   ? 'bg-white text-lime-800 shadow-xs border border-lime-400'
@@ -331,8 +332,8 @@ export const MoodJournalModal: React.FC = () => {
                 : 'text-slate-600 hover:bg-white/60'
             }`}
           >
-            <BarChart2 className="w-4 h-4" />
-            <span>Mood Patterns</span>
+            <BarChart2 className="w-4 h-4 shrink-0" />
+            <span className="truncate sm:overflow-visible break-words max-w-full">{t("Mood Patterns")}</span>
           </button>
         </div>
 

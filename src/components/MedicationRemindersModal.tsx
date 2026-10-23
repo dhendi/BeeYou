@@ -20,6 +20,7 @@ import {
   Lock
 } from 'lucide-react';
 import { playChime } from '../utils/audio';
+import { t } from '../services/translator';
 import { RoutineStickerIcon } from './icons/JournalStickers';
 
 export const MedicationRemindersModal: React.FC = () => {
@@ -254,22 +255,22 @@ export const MedicationRemindersModal: React.FC = () => {
 
         {/* Tab Switcher & Add Medication Action */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-amber-200/80 bg-amber-50/40 p-2 gap-2 shrink-0">
-          <div className="flex items-center gap-1 flex-1">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-1 overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={() => {
                 setActiveTab('schedule');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'schedule'
                   ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
                   : 'text-stone-600 hover:bg-white/60'
               }`}
             >
-              <Calendar className="w-4 h-4" />
-              <span>Today's Doses</span>
-              <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-950 border border-amber-200/80">
+              <Calendar className="w-4 h-4 shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Today's Doses")}</span>
+              <span className="ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-950 border border-amber-200/80 shrink-0">
                 {takenDosesCount}/{totalDosesCount}
               </span>
             </button>
@@ -280,16 +281,16 @@ export const MedicationRemindersModal: React.FC = () => {
                 setActiveTab('inventory');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'inventory'
                   ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
                   : 'text-stone-600 hover:bg-white/60'
               }`}
             >
-              <Package className="w-4 h-4" />
-              <span>Supply Inventory</span>
+              <Package className="w-4 h-4 shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Supply Inventory")}</span>
               {lowSupplyMeds.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
               )}
             </button>
 
@@ -299,14 +300,14 @@ export const MedicationRemindersModal: React.FC = () => {
                 setActiveTab('history');
                 playChime('tap');
               }}
-              className={`flex-1 py-2 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`flex-1 min-w-0 py-2 px-2 sm:px-3 rounded-xl font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition-all cursor-pointer text-center leading-tight ${
                 activeTab === 'history'
                   ? 'bg-white text-amber-950 shadow-xs border border-amber-300'
                   : 'text-stone-600 hover:bg-white/60'
               }`}
             >
-              <History className="w-4 h-4" />
-              <span>Dose Log</span>
+              <History className="w-4 h-4 shrink-0" />
+              <span className="truncate sm:overflow-visible break-words max-w-full">{t("Dose Log")}</span>
             </button>
           </div>
 

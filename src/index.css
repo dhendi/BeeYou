@@ -11,6 +11,11 @@
 }
 
 @layer base {
+  *, ::before, ::after {
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+  }
+
   html, body, #root {
     height: 100%;
     max-height: 100%;
@@ -31,9 +36,24 @@
     color: #1E293B;
   }
 
+  button, [role="button"], a, input, select, textarea, label {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    overflow-wrap: break-word;
   }
+}
+
+/* Utility to hide scrollbars while allowing smooth horizontal or vertical scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Safe Area Inset Utility Classes for iOS Notch, Dynamic Island, and Android Camera Cutouts */
