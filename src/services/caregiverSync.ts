@@ -1553,10 +1553,27 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
 
   let effectiveCode = safeCode;
   try {
+    let authHeaderToken = '';
+    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
+    if (raw) {
+      try {
+        const s = JSON.parse(raw);
+        if (s?.token) authHeaderToken = s.token;
+      } catch {}
+    }
+    if (!authHeaderToken) {
+      authHeaderToken = await getClientAuthToken(safeCode);
+    }
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authHeaderToken) {
+      headers['Authorization'] = `Bearer ${authHeaderToken}`;
+    }
+
     const res = await fetch('/api/caregiver/pairing/approve', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pairingCode: safeCode }),
+      headers,
+      body: JSON.stringify({ pairingCode: safeCode, sessionToken: authHeaderToken }),
     });
     if (res.ok) {
       const data = await res.json();

@@ -392,7 +392,7 @@ export interface ServerFamilyAccount {
   childProfile: {
     name: string;
     ageGroup: string;
-    pin: string;
+    pin?: string;
     interests: string[];
     pronouns: string;
   };
@@ -490,7 +490,7 @@ export interface SharedFamilyState {
   childProfile: {
     name: string;
     ageGroup: string;
-    pin: string;
+    pin?: string;
     interests: string[];
     pronouns: string;
   };
@@ -994,17 +994,29 @@ export function getOrCreateFamilyState(code: string, email?: string): SharedFami
   let state = activeFamilyStates.get(cleanCode);
 
   if (!state) {
+    // Check if an authoritative family account or approved session exists for this code
+    const account = findFamilyAccount({ familyCode: cleanCode }) || (email ? findFamilyAccount({ email }) : undefined);
+    const session = caregiverSessions.get(cleanCode);
+    const pairing = Array.from(pairingSessions.values()).find(
+      (s) => s.status === 'paired' && (s.targetFamilyCode === cleanCode || s.pairingCode === cleanCode)
+    );
+
+    // Unauthenticated, unregistered code: DO NOT create a real family state
+    if (!account && !session && !pairing) {
+      return null;
+    }
+
     state = {
       familyCode: cleanCode,
-      email: email || `${cleanCode.toLowerCase()}@family.beeyou.app`,
-      caregiverName: 'Caregiver',
-      caregiverRole: 'Parent',
+      email: account?.email || pairing?.caregiverEmail || email || `${cleanCode.toLowerCase()}@family.beeyou.app`,
+      caregiverName: account?.caregiverName || pairing?.caregiverName || 'Caregiver',
+      caregiverRole: account?.caregiverRole || 'Parent',
       childProfile: {
-        name: 'Child',
-        ageGroup: 'kid',
-        pin: '1234',
-        interests: ['Visual schedules', 'Creative play'],
-        pronouns: 'they/them',
+        name: account?.childProfile?.name || session?.childName || pairing?.childName || 'Child',
+        ageGroup: account?.childProfile?.ageGroup || pairing?.ageGroup || 'kid',
+        pin: account?.childProfile?.pin, // ONLY if explicitly set; NEVER default to 1234
+        interests: account?.childProfile?.interests || ['Visual schedules', 'Creative play'],
+        pronouns: account?.childProfile?.pronouns || 'they/them',
       },
       childState: {
         lastActiveTime: new Date().toISOString(),
@@ -1302,6 +1314,15 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
             isDemo: acc.familyCode === 'BEE-DEMO',
           };
         }
+      } else {
+        // Legitimate authenticated Firebase user who does not have a family account yet
+        return {
+          familyCode: '',
+          role: 'caregiver',
+          email,
+          uid,
+          isDemo: false,
+        };
       }
     }
   }
@@ -1342,13 +1363,21 @@ export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
       });
     }
 
+    // Require active family registration
+    if (!user.familyCode) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Access denied. Account is not registered to an active family.',
+      });
+    }
+
     // Determine target code from route params, body, or query
     const targetRaw = req.params.code || req.body?.pairingCode || req.body?.code || req.query.code;
     const targetCode = sanitizeFamilyCode(targetRaw);
 
     // Cross-Family Denial: Ensure user token has explicit access to target family
     if (targetCode) {
-      if (user.familyCode !== targetCode) {
+      if (user.familyCode !== targetCode && user.role !== 'admin') {
         return res.status(403).json({
           error: 'Forbidden',
           message: `Access denied. Your authorization token does not have access to family '${targetCode}'.`,
@@ -1537,33 +1566,40 @@ app.post('/api/family/auth/token', async (req, res) => {
     return res.status(403).json({ error: 'Forbidden', message: 'Demo access requires valid reviewer credentials.' });
   }
 
-  // Check if caller already has a valid Bearer token (e.g. Firebase ID token or pairing token)
+  // 2. Real family verification: require verified Bearer credentials
   const bearerToken = extractAuthToken(req);
-  if (bearerToken) {
-    const verified = await verifyFamilyToken(bearerToken);
-    if (verified && (verified.familyCode === cleanCode || verified.role === 'admin')) {
-      const token = signFamilyToken(cleanCode, verified.role === 'admin' ? 'caregiver' : (verified.role as any), verified.email || email, verified.uid);
-      return res.json({ success: true, token, familyCode: cleanCode, role: verified.role });
-    }
+  if (!bearerToken) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Caregiver authorization requires verified authentication credentials.',
+    });
   }
 
-  // 2. Real family verification
-  let state = activeFamilyStates.get(cleanCode);
-  const session = caregiverSessions.get(cleanCode);
-
-  if (!state && !session) {
-    if (email) {
-      state = getOrCreateFamilyState(cleanCode, email) || undefined;
-    } else {
-      return res.status(404).json({ error: 'NotFound', message: `Family '${cleanCode}' was not found.` });
-    }
+  const verified = await verifyFamilyToken(bearerToken);
+  if (!verified) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Invalid or expired authentication credentials.',
+    });
   }
 
-  const storedPin = state?.childProfile?.pin;
-  if (storedPin) {
-    if (!pin) {
-      return res.status(401).json({ error: 'Unauthorized', message: 'Family PIN required.' });
-    }
+  // Cross-family verification: token must match target familyCode or be admin
+  if (verified.familyCode !== cleanCode && verified.role !== 'admin') {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: `Access denied. Your credentials do not have access to family '${cleanCode}'.`,
+    });
+  }
+
+  // Retrieve state for verified family
+  const state = getOrCreateFamilyState(cleanCode, verified.email || email);
+  if (!state) {
+    return res.status(404).json({ error: 'NotFound', message: `Family '${cleanCode}' was not found.` });
+  }
+
+  // Optional: If state has a PIN configured and pin was provided, verify it
+  const storedPin = state.childProfile?.pin;
+  if (storedPin && pin) {
     const cleanPin = String(pin).trim();
     const isDirectMatch = cleanPin === storedPin;
     const hashed = crypto.createHash('sha256').update(`beeyou_secure_caregiver_pin_salt_v1:${cleanPin}`).digest('hex');
@@ -1574,8 +1610,9 @@ app.post('/api/family/auth/token', async (req, res) => {
     }
   }
 
-  const token = signFamilyToken(cleanCode, 'caregiver', email || state?.email);
-  return res.json({ success: true, token, familyCode: cleanCode, role: 'caregiver' });
+  const effectiveRole = verified.role === 'admin' ? 'caregiver' : (verified.role as any);
+  const token = signFamilyToken(cleanCode, effectiveRole, verified.email || email, verified.uid);
+  return res.json({ success: true, token, familyCode: cleanCode, role: effectiveRole });
 });
 
 // -------------------------------------------------------------
@@ -1710,7 +1747,7 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
 // Explicit approval endpoint called by the intended account on the host device
 app.post('/api/caregiver/pairing/approve', async (req, res) => {
-  const { pairingCode } = req.body || {};
+  const { pairingCode, sessionToken } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
     return res.status(400).json({ error: 'Invalid pairing code.' });
@@ -1726,14 +1763,35 @@ app.post('/api/caregiver/pairing/approve', async (req, res) => {
     return res.status(400).json({ error: 'Pairing code has expired. Please generate a new code.' });
   }
 
-  // Resolve target permanent family code
+  // Authorization check: approver must present valid sessionToken (matching pairing session creator)
+  // or a verified caregiver/admin token for the target family.
+  const callerToken = extractAuthToken(req) || (typeof sessionToken === 'string' ? sessionToken.trim() : null);
+  let isAuthorized = false;
   let effectiveFamilyCode = session.targetFamilyCode;
-  const callerToken = extractAuthToken(req);
+
   if (callerToken) {
-    const verified = await verifyFamilyToken(callerToken);
-    if (verified?.familyCode) {
-      effectiveFamilyCode = verified.familyCode;
+    if (callerToken === session.token) {
+      isAuthorized = true;
+    } else {
+      const verified = await verifyFamilyToken(callerToken);
+      if (verified) {
+        if (verified.role === 'child') {
+          return res.status(403).json({ error: 'Forbidden', message: 'Caregiver authorization required to approve pairing.' });
+        }
+        if (verified.role === 'caregiver' || verified.role === 'admin' || verified.role === 'demo') {
+          if (!session.targetFamilyCode || verified.familyCode === session.targetFamilyCode || verified.role === 'admin') {
+            isAuthorized = true;
+            if (verified.familyCode && verified.familyCode !== 'BEE-DEMO') {
+              effectiveFamilyCode = verified.familyCode;
+            }
+          }
+        }
+      }
     }
+  }
+
+  if (!isAuthorized) {
+    return res.status(401).json({ error: 'Unauthorized', message: 'Caregiver authorization required to approve pairing.' });
   }
 
   if (!effectiveFamilyCode) {
@@ -2394,13 +2452,8 @@ app.post('/api/family/message/:code', requireFamilyAuth(), (req, res) => {
     return res.status(400).json({ error: 'Message text is required' });
   }
 
-  const determinedRole = senderRole || (
-    typeof senderName === 'string' &&
-    senderName.trim().toLowerCase() !== 'caregiver' &&
-    senderName.trim().toLowerCase() !== 'parent'
-      ? 'child'
-      : 'caregiver'
-  );
+  const authUser = (req as any).user;
+  const determinedRole = authUser?.role === 'child' ? 'child' : (senderRole === 'child' ? 'child' : 'caregiver');
 
   const newMsg: CaregiverMessageItem = {
     id: 'msg-' + Date.now(),
@@ -2481,7 +2534,7 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     childProfile: {
       name: childName?.trim() || 'Child',
       ageGroup: childAgeGroup || 'kid',
-      pin: pin || '1234',
+      pin: pin ? String(pin).trim() : undefined,
       interests: ['Visual Schedules', 'Calm Activities'],
       pronouns: 'they/them',
     },
@@ -2576,7 +2629,7 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       childProfile: {
         name: 'Child',
         ageGroup: 'kid',
-        pin: '1234',
+        pin: undefined,
         interests: ['Visual Schedules'],
         pronouns: 'they/them',
       },
@@ -3082,13 +3135,8 @@ app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode and message text are required.' });
   }
 
-  const determinedRole = senderRole || (
-    typeof senderName === 'string' &&
-    senderName.trim().toLowerCase() !== 'caregiver' &&
-    senderName.trim().toLowerCase() !== 'parent'
-      ? 'child'
-      : 'caregiver'
-  );
+  const authUser = (req as any).user;
+  const determinedRole = authUser?.role === 'child' ? 'child' : (senderRole === 'child' ? 'child' : 'caregiver');
 
   let session = getCaregiverSession(code);
   if (!session) {

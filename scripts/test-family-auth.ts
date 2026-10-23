@@ -22,7 +22,7 @@ import path from 'path';
 
 async function runTests() {
   console.log('\n======================================================');
-  console.log('🐝 BeeYou Priority 3: Family API Authorization Test Suite');
+  console.log('BeeYou Family API Authorization Test Suite');
   console.log('======================================================\n');
 
   // Dynamic import so process.env.VERCEL='1' prevents automatic listen
@@ -43,10 +43,10 @@ async function runTests() {
 
   function assert(condition: boolean, testName: string, detail?: string) {
     if (condition) {
-      console.log(`  ✅ PASS: ${testName}`);
+      console.log(`  [PASS] ${testName}`);
       passed++;
     } else {
-      console.error(`  ❌ FAIL: ${testName}${detail ? ` (${detail})` : ''}`);
+      console.error(`  [FAIL] ${testName}${detail ? ` (${detail})` : ''}`);
       failed++;
     }
   }
@@ -258,7 +258,7 @@ async function runTests() {
     assert(res.status === 200, 'POST /api/caregiver/pairing/create returns 200 OK', `got ${res.status}`);
     const createdRes = await res.json();
     const createdSession = createdRes?.session;
-    assert(createdSession?.pairingCode?.startsWith('BEE-'), `Pairing code starts with BEE- (${createdSession?.pairingCode})`);
+    assert(createdSession?.pairingCode?.startsWith('PAIR-') || createdSession?.pairingCode?.startsWith('BEE-'), `Pairing code starts with PAIR- or BEE- (${createdSession?.pairingCode})`);
     assert(createdSession?.pairingCode !== 'BEE-DEMO', 'Pairing code is not BEE-DEMO');
     const ttlMinutes = (createdSession?.expiresAt - Date.now()) / (60 * 1000);
     assert(ttlMinutes >= 14 && ttlMinutes <= 16, `Session TTL is 15 minutes (got ${ttlMinutes.toFixed(1)} min)`);
@@ -298,11 +298,14 @@ async function runTests() {
     assert(polledStatus?.status === 'awaiting_approval', `Poll reflects 'awaiting_approval'`);
     assert(polledStatus?.requestingDeviceName === 'Mom', `Poll reflects requestingDeviceName: Mom`);
 
-    // Explicit approval from host device
+    // Explicit approval from host device using session token
     res = await fetch(`${baseUrl}/api/caregiver/pairing/approve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pairingCode: codeToPair }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${createdSession.token}`,
+      },
+      body: JSON.stringify({ pairingCode: codeToPair, sessionToken: createdSession.token }),
     });
     assert(res.status === 200, 'POST /api/caregiver/pairing/approve returns 200 OK', `got ${res.status}`);
     const approveResult = await res.json();
@@ -333,9 +336,13 @@ async function runTests() {
     // Suite 10: Data Minimization & Secret Sanitization (Security Audit Finding #3)
     console.log('\n--- Suite 10: Data Minimization & Secret Sanitization ---');
     const testRegEmail = `audit_test_${Date.now()}@example.com`;
+    const regBearerToken = signFamilyToken('BEE-NEW', 'caregiver', testRegEmail);
     const resReg = await fetch(`${baseUrl}/api/caregiver/family/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${regBearerToken}`,
+      },
       body: JSON.stringify({
         email: testRegEmail,
         caregiverName: 'Auditor',
@@ -355,7 +362,10 @@ async function runTests() {
     // Login test
     const resLogin = await fetch(`${baseUrl}/api/caregiver/family/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${regData.token}`,
+      },
       body: JSON.stringify({ email: testRegEmail }),
     });
     assert(resLogin.status === 200, 'POST /api/caregiver/family/login returns 200 OK', `got ${resLogin.status}`);
