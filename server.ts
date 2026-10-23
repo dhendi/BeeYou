@@ -264,6 +264,7 @@ app.use('/api/caregiver/alert', alertLimiter);
 app.use('/api/family', apiLimiter);
 app.use('/api/caregiver', apiLimiter);
 app.use('/api/subscription', apiLimiter);
+app.use('/api/admin', apiLimiter);
 
 // Global Express route param handler for :code across all family and caregiver endpoints
 app.param('code', (req, res, next, rawCode) => {
@@ -289,24 +290,85 @@ app.get(['/api/translate', '/translate'], handleTranslateRequest);
 // Authentic High-Fidelity Audio Streaming Endpoint with Abuse Protection, Quotas & Caching
 app.get(['/api/tts', '/tts'], handleTtsRequest);
 
+export const ADMIN_EMAILS = new Set<string>(
+  (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+);
+
+function sanitizeCacheDiagnostics(cache: any) {
+  if (!cache || typeof cache !== 'object') return cache;
+  const { path: _diskPath, ...safeCache } = cache;
+  return safeCache;
+}
+
+function requireAdminAuth() {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const token = extractAuthToken(req);
+    if (!token) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Administrator authentication required. Missing authorization token.',
+      });
+    }
+
+    const user = await verifyFamilyToken(token);
+    if (!user) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Invalid or expired administrator token.',
+      });
+    }
+
+    // Server-side administrator verification: strictly enforce role: 'admin'
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Access denied. Administrator privileges required.',
+      });
+    }
+
+    (req as any).user = user;
+    next();
+  };
+}
+
 // Usage Metrics & Budget Status Endpoint (Admin & Diagnostic Health)
-app.get('/api/admin/usage', (_req, res) => {
+app.get('/api/admin/usage', requireAdminAuth(), (_req, res) => {
   res.json({
     success: true,
     metrics: usageBudgetTracker.getMetrics(),
-    level3DiskCache: verifyLevel3DiskCache(),
+    level3DiskCache: sanitizeCacheDiagnostics(verifyLevel3DiskCache()),
     timestamp: new Date().toISOString(),
   });
 });
 
-// Explicit Level 3 Server-Side Disk Cache Deployment Verification Endpoint
-app.get('/api/admin/cache-status', async (req, res) => {
-  if (req.query.prune === 'true' || req.query.force === 'true') {
-    await enforceDiskCacheLifecycle(true);
-  }
+// Explicit Level 3 Server-Side Disk Cache Deployment Verification Endpoint (Read-Only Diagnostics)
+app.get('/api/admin/cache-status', requireAdminAuth(), async (_req, res) => {
   res.json({
     success: true,
-    cache: verifyLevel3DiskCache(),
+    cache: sanitizeCacheDiagnostics(verifyLevel3DiskCache()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// State-Changing Disk Cache Maintenance Endpoint (Prune / Force Eviction)
+app.post(['/api/admin/cache/maintain', '/api/admin/cache-status', '/api/admin/cache/prune'], requireAdminAuth(), async (req, res) => {
+  const { prune, force } = req.body || {};
+  const shouldPrune = prune === true || prune === 'true' || req.query.prune === 'true';
+  const shouldForce = force === true || force === 'true' || req.query.force === 'true' || shouldPrune;
+
+  let maintenanceResult: any = null;
+  if (shouldForce) {
+    maintenanceResult = await enforceDiskCacheLifecycle(true);
+  }
+
+  res.json({
+    success: true,
+    action: shouldForce ? 'enforced_maintenance' : 'verified',
+    maintenance: maintenanceResult,
+    cache: sanitizeCacheDiagnostics(verifyLevel3DiskCache()),
     timestamp: new Date().toISOString(),
   });
 });
@@ -319,6 +381,8 @@ export {
   normalizeLanguageCode,
   verifyLevel3DiskCache,
   enforceDiskCacheLifecycle,
+  requireAdminAuth,
+  sanitizeCacheDiagnostics,
 };
 
 // -------------------------------------------------------------
@@ -1294,6 +1358,18 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
       // Demo reviewer bypass
       if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
         return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
+      }
+
+      // Check if user is an administrator via verified Firebase claim or configured admin email
+      const isAdmin = (email && ADMIN_EMAILS.has(email.toLowerCase())) || verified.role === 'admin';
+      if (isAdmin) {
+        return {
+          familyCode: 'ADMIN',
+          role: 'admin',
+          email,
+          uid,
+          isDemo: false,
+        };
       }
 
       // Check authoritative family accounts

@@ -37,7 +37,7 @@ import http from 'http';
 
 async function runTests() {
   console.log('\n========================================================================');
-  console.log('🐝 BeeYou: Real Gemini Audio, Concurrency & Caching Resilience Suite');
+  console.log('BeeYou: Real Gemini Audio, Concurrency & Caching Resilience Suite');
   console.log('========================================================================\n');
 
   const {
@@ -46,6 +46,7 @@ async function runTests() {
     validateTextInput,
     normalizeLanguageCode,
     enforceDiskCacheLifecycle,
+    signFamilyToken,
   } = await import('../server');
 
   const {
@@ -66,10 +67,10 @@ async function runTests() {
 
   function assert(condition: boolean, testName: string, detail?: string) {
     if (condition) {
-      console.log(`  ✅ PASS: ${testName}`);
+      console.log(`  [PASS] ${testName}`);
       passed++;
     } else {
-      console.error(`  ❌ FAIL: ${testName}${detail ? ` (${detail})` : ''}`);
+      console.error(`  [FAIL] ${testName}${detail ? ` (${detail})` : ''}`);
       failed++;
     }
   }
@@ -272,9 +273,16 @@ async function runTests() {
     assert(typeof lifecycleResult.scannedFiles === 'number', 'Disk lifecycle scans files in directory');
     assert(lifecycleResult.totalSizeBytes > 0, `Disk lifecycle calculates total disk size (${(lifecycleResult.totalSizeBytes / 1024 / 1024).toFixed(2)} MB)`);
 
-    // Verify /api/admin/cache-status endpoint
+    // Verify /api/admin/cache-status endpoint rejects unauthenticated requests
     res = await fetch(`${baseUrl}/api/admin/cache-status`);
-    assert(res.status === 200, 'GET /api/admin/cache-status returns 200 OK');
+    assert(res.status === 401, 'GET /api/admin/cache-status without token returns 401 Unauthorized');
+
+    // Verify /api/admin/cache-status succeeds with administrator token
+    const adminToken = signFamilyToken('ADMIN', 'admin', 'admin@beeyou.app');
+    res = await fetch(`${baseUrl}/api/admin/cache-status`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+    });
+    assert(res.status === 200, 'GET /api/admin/cache-status with admin token returns 200 OK');
     const cacheStatus = await res.json();
     assert(cacheStatus.success === true, 'cache-status reports success');
     assert(cacheStatus.cache.status === 'VERIFIED_READY', 'Disk cache status is VERIFIED_READY');
@@ -287,8 +295,15 @@ async function runTests() {
     // Suite 7: Spending & Usage Budget Tracker
     // -------------------------------------------------------------
     console.log('\n--- Suite 7: Spending & Usage Budget Tracker ---');
+    // Verify unauthenticated /api/admin/usage returns 401
     res = await fetch(`${baseUrl}/api/admin/usage`);
-    assert(res.status === 200, 'GET /api/admin/usage returns 200 OK');
+    assert(res.status === 401, 'GET /api/admin/usage without token returns 401 Unauthorized');
+
+    // Verify authenticated /api/admin/usage returns 200 OK
+    res = await fetch(`${baseUrl}/api/admin/usage`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+    });
+    assert(res.status === 200, 'GET /api/admin/usage with admin token returns 200 OK');
     const adminUsage = await res.json();
     assert(adminUsage.success === true, 'Usage response success is true');
     assert(adminUsage.metrics?.date !== undefined, 'Usage response includes date');
