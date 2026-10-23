@@ -27,6 +27,19 @@ import {
   verifyLevel3DiskCache,
   enforceDiskCacheLifecycle,
 } from './src/services/ttsAndTranslationService';
+import {
+  syncFamilyToFirestore,
+  verifyFirestoreConfig,
+  FirestoreSyncError,
+  FirestoreConfigReport,
+} from './src/services/firestoreSyncService';
+
+export type { FirestoreConfigReport };
+export {
+  syncFamilyToFirestore,
+  verifyFirestoreConfig,
+  FirestoreSyncError,
+};
 
 dotenv.config();
 
@@ -369,6 +382,15 @@ app.post(['/api/admin/cache/maintain', '/api/admin/cache-status', '/api/admin/ca
     action: shouldForce ? 'enforced_maintenance' : 'verified',
     maintenance: maintenanceResult,
     cache: sanitizeCacheDiagnostics(verifyLevel3DiskCache()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Firestore Security Configuration & Credential Verification Endpoint (Admin Diagnostics)
+app.get('/api/admin/firestore-status', requireAdminAuth(), (_req, res) => {
+  res.json({
+    success: true,
+    firestore: verifyFirestoreConfig(),
     timestamp: new Date().toISOString(),
   });
 });
@@ -931,101 +953,6 @@ async function syncFamilyToFirebase(code: string): Promise<void> {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(state),
-    });
-  } catch {}
-}
-
-const FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST;
-const FIRESTORE_BASE_HOST = FIRESTORE_EMULATOR_HOST
-  ? `http://${FIRESTORE_EMULATOR_HOST}`
-  : 'https://firestore.googleapis.com';
-const FIRESTORE_DOCS_URL = `${FIRESTORE_BASE_HOST}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
-
-/**
- * Authoritative Cloud Firestore synchronization for family membership and revocation.
- * Used by Cloud Storage security rules cross-service lookups to enforce immediate access severance.
- */
-export async function syncFamilyToFirestore(
-  familyCode: string,
-  action: 'init_owner' | 'approve' | 'revoke',
-  targetUid: string,
-  details?: { role?: string; email?: string; reason?: string }
-): Promise<void> {
-  const cleanCode = sanitizeFamilyCode(familyCode);
-  if (!cleanCode || cleanCode === 'BEE-DEMO') return;
-
-  const url = `${FIRESTORE_DOCS_URL}:commit`;
-  const writes: any[] = [];
-  const baseDocPath = `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_families/${cleanCode}`;
-
-  if (action === 'init_owner') {
-    writes.push({
-      update: {
-        name: baseDocPath,
-        fields: {
-          ownerUid: { stringValue: targetUid },
-          createdAt: { integerValue: String(Date.now()) },
-          updatedAt: { integerValue: String(Date.now()) },
-        },
-      },
-    });
-    writes.push({
-      update: {
-        name: `${baseDocPath}/members/${targetUid}`,
-        fields: {
-          uid: { stringValue: targetUid },
-          role: { stringValue: 'owner' },
-          active: { booleanValue: true },
-          approvedAt: { integerValue: String(Date.now()) },
-        },
-      },
-    });
-  } else if (action === 'approve') {
-    writes.push({
-      update: {
-        name: `${baseDocPath}/members/${targetUid}`,
-        fields: {
-          uid: { stringValue: targetUid },
-          role: { stringValue: details?.role || 'caregiver' },
-          email: { stringValue: details?.email || '' },
-          active: { booleanValue: true },
-          approvedAt: { integerValue: String(Date.now()) },
-        },
-      },
-    });
-    writes.push({
-      delete: `${baseDocPath}/revokedMembers/${targetUid}`,
-    });
-  } else if (action === 'revoke') {
-    writes.push({
-      update: {
-        name: `${baseDocPath}/revokedMembers/${targetUid}`,
-        fields: {
-          uid: { stringValue: targetUid },
-          revokedAt: { integerValue: String(Date.now()) },
-          reason: { stringValue: details?.reason || 'Revoked by family owner' },
-        },
-      },
-    });
-    writes.push({
-      delete: `${baseDocPath}/members/${targetUid}`,
-    });
-  }
-
-  if (writes.length === 0) return;
-
-  try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (FIRESTORE_EMULATOR_HOST) {
-      headers['Authorization'] = 'Bearer owner';
-    } else if (process.env.FIREBASE_AUTH_TOKEN) {
-      headers['Authorization'] = `Bearer ${process.env.FIREBASE_AUTH_TOKEN}`;
-    }
-
-    await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ writes }),
     });
   } catch {}
 }
@@ -2736,9 +2663,22 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     saveCaregiverSessions().catch(() => {});
   }
 
-  // Atomically initialize family in Firestore for authoritative Cloud Storage access
-  if (verified.uid) {
-    syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail }).catch(() => {});
+  // Authoritatively initialize family in Firestore for Cloud Storage access
+  if (verified.uid && !verified.isDemo) {
+    try {
+      await syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail });
+    } catch (syncErr: any) {
+      console.error(`[Family Register] Authoritative Firestore initialization failed for ${familyCode}:`, syncErr?.message);
+      // Roll back in-memory account state to prevent partially initialized families
+      familyAccounts.delete(cleanEmail);
+      activeFamilyStates.delete(familyCode);
+      const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
+      return res.status(statusCode).json({
+        error: 'SecuritySyncError',
+        message: 'Failed to initialize family in authoritative cloud security store. Account creation aborted. Please retry.',
+        detail: syncErr?.message,
+      });
+    }
   }
 
   const signedToken = signFamilyToken(familyCode, 'caregiver', cleanEmail, verified.uid);
@@ -2924,8 +2864,24 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
     return res.status(403).json({ error: 'Forbidden', message: 'Only the family owner can approve new members.' });
   }
 
-  if (!account.members) account.members = {};
   const pending = account.pendingMembers?.[targetUid];
+
+  // Authoritatively update membership and clear revocation in Firestore BEFORE updating local state
+  if (!user.isDemo) {
+    try {
+      await syncFamilyToFirestore(account.familyCode, 'approve', targetUid, { role: role || 'caregiver', email: pending?.email });
+    } catch (syncErr: any) {
+      console.error(`[Member Approve] Authoritative Firestore approval failed for ${targetUid}:`, syncErr?.message);
+      const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
+      return res.status(statusCode).json({
+        error: 'SecuritySyncError',
+        message: 'Failed to synchronize member approval with authoritative cloud security store. Please retry.',
+        detail: syncErr?.message,
+      });
+    }
+  }
+
+  if (!account.members) account.members = {};
   account.members[targetUid] = {
     role: role || 'caregiver',
     email: pending?.email,
@@ -2938,7 +2894,7 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
   if (account.revokedMembers) {
     delete account.revokedMembers[targetUid];
   }
-  saveFamilyAccounts().catch(() => {});
+  await saveFamilyAccounts();
 
   // Sync to Firebase RTDB if available
   if (FIREBASE_DB_URL) {
@@ -2953,9 +2909,6 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
       });
     } catch {}
   }
-
-  // Atomically update membership and clear revocation in Firestore for authoritative Cloud Storage access
-  syncFamilyToFirestore(account.familyCode, 'approve', targetUid, { role: role || 'caregiver', email: pending?.email }).catch(() => {});
 
   return res.json({ success: true, message: `Member ${targetUid} approved successfully.` });
 });
@@ -2983,6 +2936,21 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
     return res.status(400).json({ error: 'BadRequest', message: 'Cannot revoke the family owner.' });
   }
 
+  // Authoritatively record revocation and remove member in Firestore BEFORE updating local state
+  if (!user.isDemo) {
+    try {
+      await syncFamilyToFirestore(account.familyCode, 'revoke', targetUid, { reason: reason?.trim() });
+    } catch (syncErr: any) {
+      console.error(`[Member Revoke] Authoritative Firestore revocation failed for ${targetUid}:`, syncErr?.message);
+      const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
+      return res.status(statusCode).json({
+        error: 'SecuritySyncError',
+        message: 'Failed to record authoritative revocation with cloud security store. Member remains unrevoked. Please retry.',
+        detail: syncErr?.message,
+      });
+    }
+  }
+
   if (!account.revokedMembers) account.revokedMembers = {};
   account.revokedMembers[targetUid] = {
     revokedAt: Date.now(),
@@ -2995,7 +2963,7 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   if (account.pendingMembers) {
     delete account.pendingMembers[targetUid];
   }
-  saveFamilyAccounts().catch(() => {});
+  await saveFamilyAccounts();
 
   // Remove member from Firebase Realtime Database and record revocation
   if (FIREBASE_DB_URL) {
@@ -3010,9 +2978,6 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
       });
     } catch {}
   }
-
-  // Atomically record revocation and remove member in Firestore for authoritative Cloud Storage access
-  syncFamilyToFirestore(account.familyCode, 'revoke', targetUid, { reason: reason?.trim() }).catch(() => {});
 
   // Broadcast revocation event across devices
   broadcastEvent(account.familyCode, {
