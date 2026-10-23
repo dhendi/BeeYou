@@ -4,7 +4,7 @@ import { X, ShieldAlert, Volume2, VolumeX, Heart, MicOff, Hand, Moon, PhoneCall 
 import { playSoundscape, stopSoundscape, setSoundscapeVolume } from '../utils/audio';
 import { SoundscapeId } from '../types';
 import { AccessibleTile } from './common/AccessibleTile';
-import { t } from '../services/translator';
+import { t, subscribeToLanguage } from '../services/translator';
 
 const EMERGENCY_AAC_CARDS = [
   { text: 'I cannot speak right now.', icon: MicOff, color: '#1e40af' },
@@ -37,7 +37,14 @@ export const EmergencySensoryModal: React.FC = () => {
 
   const [soundOn, setSoundOn] = useState(false);
   const [spokenCard, setSpokenCard] = useState<string | null>(null);
+  const [, setLangRev] = useState(0);
   const audioStartedRef = useRef(false);
+
+  useEffect(() => {
+    return subscribeToLanguage(() => {
+      setLangRev((r) => r + 1);
+    });
+  }, []);
 
   useEffect(() => {
     if (!showEmergencyModal) {
@@ -58,7 +65,7 @@ export const EmergencySensoryModal: React.FC = () => {
   };
 
   const handleCard = (text: string) => {
-    speak(text);
+    speak(t(text));
     setSpokenCard(text);
     setTimeout(() => setSpokenCard(null), 2000);
   };
@@ -124,7 +131,7 @@ export const EmergencySensoryModal: React.FC = () => {
                 <AccessibleTile
                   key={card.text}
                   variant="emergency"
-                  label={card.text}
+                  label={t(card.text)}
                   onClick={() => handleCard(card.text)}
                   className="relative rounded-3xl p-5 sm:p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all active:scale-95 border-2 border-white/10 hover:border-white/30"
                   style={{ backgroundColor: card.color + '33', borderColor: spokenCard === card.text ? '#ffffff80' : undefined }}
@@ -136,7 +143,7 @@ export const EmergencySensoryModal: React.FC = () => {
                     <IconComp className="w-8 h-8 sm:w-10 sm:h-10 text-white" aria-hidden="true" />
                   </div>
                   <p className="text-white font-black text-sm sm:text-base text-center leading-tight">
-                    {card.text}
+                    {t(card.text)}
                   </p>
                 </AccessibleTile>
               );
@@ -153,7 +160,7 @@ export const EmergencySensoryModal: React.FC = () => {
               }`}
             >
               {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              <span>{soundOn ? 'Sound On' : 'Sound Off'}</span>
+              <span>{soundOn ? t('Sound On') : t('Sound Off')}</span>
             </button>
 
             {/* Soundscape picker */}
@@ -171,7 +178,7 @@ export const EmergencySensoryModal: React.FC = () => {
               className="bg-gray-800 border border-gray-600 text-gray-200 text-sm rounded-2xl px-3 py-2.5 font-bold cursor-pointer"
             >
               {SOUNDSCAPE_OPTIONS.map((s) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
+                <option key={s.id} value={s.id}>{t(s.label)}</option>
               ))}
             </select>
 
@@ -181,7 +188,7 @@ export const EmergencySensoryModal: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-800 border border-rose-600 text-rose-200 font-bold text-sm cursor-pointer transition-all active:scale-95"
             >
               <Heart className="w-4 h-4 fill-rose-300" />
-              <span>Ping Caregiver</span>
+              <span>{t('Ping Caregiver')}</span>
             </button>
           </div>
 

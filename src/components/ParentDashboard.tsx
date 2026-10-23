@@ -462,7 +462,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'voice-studio',
           label: 'Voice Studio & Preferences',
-          badge: `${getVoicePersonasForLanguage(settings.language).length} Voices`,
+          badge: `${getVoicePersonasForLanguage(settings.language).length} ${t('Voices')}`,
         },
       ],
     },
@@ -473,7 +473,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'subscription',
           label: 'Membership & Plan',
-          badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()}d Trial` : 'Premium') : t('Free Plan'),
+          badge: isPremium ? (subscription.status === 'trial' ? `${getTrialDaysRemaining()} ${t('d Trial')}` : t('Premium')) : t('Free Plan'),
         },
       ],
     },
@@ -601,7 +601,7 @@ export const ParentDashboard: React.FC = () => {
             <div className="bg-amber-500/15 border-b border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100 px-4 py-2.5 text-xs font-semibold flex flex-col sm:flex-row items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2 text-center sm:text-left">
                 <span>
-                  Verify your email (<strong>{storedAcc.email}</strong>) so you can try the 15-day free Premium trial whenever you're ready.
+                  {t('Verify your email')} (<strong>{storedAcc.email}</strong>) {t("so you can try the 15-day free Premium trial whenever you're ready.")}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -610,7 +610,7 @@ export const ParentDashboard: React.FC = () => {
                   onClick={() => setShowEmailVerificationModal(true)}
                   className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition cursor-pointer active:scale-95 shadow-2xs"
                 >
-                  <span>Verify Email</span>
+                  <span>{t('Verify Email')}</span>
                 </button>
               </div>
             </div>

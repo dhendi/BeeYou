@@ -3,12 +3,20 @@ import { ShieldAlert, Volume2, Lock, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { playChime } from '../utils/audio';
 import { AccessibleTile } from './common/AccessibleTile';
+import { t, subscribeToLanguage } from '../services/translator';
 
 export const SensorySafeModeOverlay: React.FC = () => {
   const { isSafeModeActive, deactivateSafeMode, speak } = useApp();
   const [activeSpokenId, setActiveSpokenId] = useState<string | null>(null);
   const [holdProgress, setHoldProgress] = useState<number>(0);
   const [isHoldingUnlock, setIsHoldingUnlock] = useState<boolean>(false);
+  const [, setLangRevision] = useState<number>(0);
+
+  useEffect(() => {
+    return subscribeToLanguage(() => {
+      setLangRevision((r) => r + 1);
+    });
+  }, []);
 
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,8 +66,8 @@ export const SensorySafeModeOverlay: React.FC = () => {
   const handleTileTouch = (tile: typeof SURVIVAL_TILES[0]) => {
     setActiveSpokenId(tile.id);
     playChime('tap');
-    // Immediate native on-device speech audio upon touch
-    speak(tile.speech, { force: true });
+    // Immediate native on-device speech audio upon touch in target language
+    speak(t(tile.speech), { force: true });
     setTimeout(() => {
       setActiveSpokenId(null);
     }, 2000);
@@ -110,7 +118,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
     <div
       role="alertdialog"
       aria-modal="true"
-      aria-label="Sensory Safe Mode Activated"
+      aria-label={t('Sensory Safe Mode Activated')}
       className="fixed inset-0 z-[100000] bg-black text-white flex flex-col justify-between p-4 sm:p-6 select-none overflow-hidden touch-none"
     >
       {/* Discreet Header with Status Banner */}
@@ -118,7 +126,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <div className="w-3.5 h-3.5 rounded-full bg-red-600 animate-ping shrink-0" />
           <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-red-500">
-            Sensory Safe Mode • Overload Shield Active
+            {t('Sensory Safe Mode • Overload Shield Active')}
           </span>
         </div>
 
@@ -132,7 +140,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
           onTouchEnd={cancelUnlockHold}
           onTouchCancel={cancelUnlockHold}
           className="relative px-3.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-neutral-500 text-neutral-300 font-bold text-xs flex items-center gap-2 cursor-pointer active:scale-95 transition-all overflow-hidden"
-          title="Caregiver: Hold for 3 seconds to exit safe mode"
+          title={t('Caregiver: Hold for 3 seconds to exit safe mode')}
         >
           {isHoldingUnlock && (
             <div
@@ -142,7 +150,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
           )}
           <Lock className="w-3.5 h-3.5 text-neutral-400 relative z-10" />
           <span className="relative z-10 text-[11px] sm:text-xs">
-            {isHoldingUnlock ? `Holding... (${Math.max(0, Math.ceil((HOLD_DURATION_MS - (holdProgress / 100) * HOLD_DURATION_MS) / 1000))}s)` : 'Hold 3s to Exit'}
+            {isHoldingUnlock ? `${t('Holding...')} (${Math.max(0, Math.ceil((HOLD_DURATION_MS - (holdProgress / 100) * HOLD_DURATION_MS) / 1000))}s)` : t('Hold 3s to Exit')}
           </span>
         </button>
       </div>
@@ -155,7 +163,7 @@ export const SensorySafeModeOverlay: React.FC = () => {
             <AccessibleTile
               key={tile.id}
               variant="emergency"
-              label={tile.text}
+              label={t(tile.text)}
               onClick={() => handleTileTouch(tile)}
               className={`w-full h-full rounded-3xl ${tile.colorBg} border-4 ${tile.colorBorder} ${tile.textColor} flex flex-col items-center justify-center p-4 sm:p-6 gap-2 sm:gap-4 transition-transform active:scale-95 cursor-pointer relative overflow-hidden shadow-2xl focus-visible:ring-4 focus-visible:ring-white`}
               style={{ minHeight: '35vh' }}
@@ -167,12 +175,12 @@ export const SensorySafeModeOverlay: React.FC = () => {
                 {tile.emoji}
               </span>
               <span className="text-xl sm:text-2xl md:text-4xl font-black text-center tracking-tight leading-snug drop-shadow-sm px-2">
-                {tile.text}
+                {t(tile.text)}
               </span>
               {isSpoken && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 text-white text-xs font-bold border border-white/30 animate-in fade-in">
                   <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Spoken</span>
+                  <span>{t('Spoken')}</span>
                 </span>
               )}
             </AccessibleTile>
@@ -181,8 +189,8 @@ export const SensorySafeModeOverlay: React.FC = () => {
       </div>
 
       {/* Footer reassurance */}
-      <div className="text-center pt-2 pb-1 shrink-0 text-neutral-500 text-xs font-semibold">
-        Tap any tile to speak instantly. Silent notice dispatched to caregiver. Take slow, gentle breaths.
+      <div className="text-center pt-2 pb-1 shrink-0 text-neutral-400 text-xs font-semibold px-4">
+        {t('Tap any tile to speak instantly. Silent notice dispatched to caregiver. Take slow, gentle breaths.')}
       </div>
     </div>
   );
