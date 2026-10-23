@@ -514,6 +514,10 @@ export const PERSONA_SYSTEM_VOICE_PREFERENCES: Record<string, { preferred: strin
   claude: { preferred: ['george', 'bruce', 'daniel', 'alex', 'david'], avoid: ['female', 'samantha'] },
   davefx: { preferred: ['bruce', 'david', 'daniel', 'alex', 'guy'], avoid: ['female', 'samantha'] },
   upmc: { preferred: ['moira', 'victoria', 'allison', 'karen', 'serena'], avoid: ['daniel', 'david', 'male'] },
+  ja_haruto: { preferred: ['otoya', 'hattori', 'google', 'male'], avoid: ['kyoko', 'female'] },
+  ja_sakura: { preferred: ['kyoko', 'google', 'female', 'ayumi'], avoid: ['otoya', 'male'] },
+  ko_minjun: { preferred: ['minjun', 'google', 'male'], avoid: ['yuna', 'female'] },
+  ko_seoyeon: { preferred: ['yuna', 'sora', 'google', 'female'], avoid: ['male'] },
 
   // Legacy persona mappings for backward compatibility
   fenrir: { preferred: ['daniel', 'david', 'guy', 'ryan', 'oliver', 'george', 'mark', 'alex'], avoid: ['samantha', 'karen', 'moira', 'zira', 'female'] },

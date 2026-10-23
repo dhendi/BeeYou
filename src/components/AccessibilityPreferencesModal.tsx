@@ -732,7 +732,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               <h5 className="font-black text-[#2D241E] text-xs sm:text-sm">
                                 {t(persona.label)}
                               </h5>
-                              {persona.category === 'system' && (
+                              {(persona.category === 'system' || !persona.piperVoice) && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-[9px] font-black">
                                   {t("Native Free")}
                                 </span>

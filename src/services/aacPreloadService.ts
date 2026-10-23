@@ -34,6 +34,8 @@ function getStorageKey(personaId: string, lang: string): string {
  */
 export function isVoicePackLoaded(personaId: string = 'amy', lang: string = 'en'): boolean {
   if (personaId === 'system') return true;
+  const personaObj = getVoicePersonaById(personaId);
+  if (!personaObj.piperVoice) return true;
   if (typeof window === 'undefined') return true;
   try {
     const key = getStorageKey(personaId, lang);

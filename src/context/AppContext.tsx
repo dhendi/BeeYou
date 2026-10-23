@@ -874,7 +874,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
     if (newSettings.voicePersona || newSettings.language || isActivatingAac) {
       const p = newSettings.voicePersona || settings.voicePersona || 'amy';
       const l = newSettings.language || settings.language || 'en';
-      if (p !== 'system' && willAacBeActive) {
+      const pObj = getVoicePersonaById(p);
+      if (p !== 'system' && pObj.piperVoice && willAacBeActive) {
         if (!isVoicePackLoaded(p, l) || isActivatingAac) {
           triggerVoicePreload(p, l, true);
         } else {

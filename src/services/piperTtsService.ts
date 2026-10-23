@@ -37,6 +37,7 @@ export const PIPER_VOICE_MAP: Record<string, string> = {
   huayan: 'zh_CN-huayan-medium',
   huayan_lite: 'zh_CN-huayan-x_low',
   xiaobei: 'zh_CN-huayan-medium',
+  xiaobei_playful: 'zh_CN-huayan-medium',
   zh_default: 'zh_CN-huayan-medium',
 
   // Spanish
@@ -44,35 +45,52 @@ export const PIPER_VOICE_MAP: Record<string, string> = {
   davefx: 'es_ES-davefx-medium',
   ald: 'es_MX-ald-medium',
   sharvard: 'es_ES-sharvard-medium',
+  carlfm: 'es_ES-carlfm-x_low',
   es_default: 'es_MX-claude-high',
 
   // French
   upmc: 'fr_FR-upmc-medium',
   siwis: 'fr_FR-siwis-medium',
   tom: 'fr_FR-tom-medium',
+  gilles: 'fr_FR-gilles-low',
   fr_default: 'fr_FR-upmc-medium',
 
   // German
   thorsten: 'de_DE-thorsten-medium',
   thorsten_high: 'de_DE-thorsten-high',
+  karlsson: 'de_DE-karlsson-low',
+  kerstin: 'de_DE-kerstin-low',
+  ramona: 'de_DE-ramona-low',
   de_default: 'de_DE-thorsten-medium',
 
   // Italian
   paola: 'it_IT-paola-medium',
+  riccardo: 'it_IT-riccardo-x_low',
   it_default: 'it_IT-paola-medium',
 
   // Portuguese
   faber: 'pt_BR-faber-medium',
+  edresson: 'pt_BR-edresson-low',
+  tugao: 'pt_PT-tugão-medium',
   pt_default: 'pt_BR-faber-medium',
 
   // Russian
   irina: 'ru_RU-irina-medium',
   denis: 'ru_RU-denis-medium',
+  dmitri: 'ru_RU-dmitri-medium',
+  ruslan: 'ru_RU-ruslan-medium',
   ru_default: 'ru_RU-irina-medium',
 
   // Vietnamese
   vais: 'vi_VN-vais1000-medium',
+  vivos: 'vi_VN-vivos-x_low',
+  h25hours: 'vi_VN-25hours_single-low',
   vi_default: 'vi_VN-vais1000-medium',
+
+  // Greek
+  rapunzelina: 'el_GR-rapunzelina-low',
+  rapunzelina_calm: 'el_GR-rapunzelina-low',
+  el_default: 'el_GR-rapunzelina-low',
 
   // Legacy persona alias mappings so existing user settings work smoothly
   puck: 'en_US-amy-medium',
@@ -241,6 +259,7 @@ export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): st
   if (normLang.startsWith('pt')) return PIPER_VOICE_MAP.faber;
   if (normLang.startsWith('ru')) return PIPER_VOICE_MAP.irina;
   if (normLang.startsWith('vi')) return PIPER_VOICE_MAP.vais;
+  if (normLang.startsWith('el')) return PIPER_VOICE_MAP.rapunzelina;
 
   return PIPER_VOICE_MAP.amy;
 }
