@@ -547,7 +547,7 @@ export const ParentDashboard: React.FC = () => {
           )}
 
           {/* Language Dropdown Choices */}
-          <LanguageDropdown />
+          <LanguageDropdown align="left" />
 
           {/* Sensory Preferences & 20-Voice Studio Button */}
           <button

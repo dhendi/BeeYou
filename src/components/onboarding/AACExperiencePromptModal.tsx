@@ -267,7 +267,7 @@ export const AACExperiencePromptModal: React.FC<AACExperiencePromptModalProps> =
         
         {/* Language selector in top corner */}
         <div className="flex justify-end items-center mb-1">
-          <LanguageDropdown />
+          <LanguageDropdown align="right" />
         </div>
 
         {/* Top Decorative Mascot / Header */}

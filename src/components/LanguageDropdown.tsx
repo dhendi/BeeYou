@@ -31,20 +31,84 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 interface LanguageDropdownProps {
   buttonClassName?: string;
   className?: string;
+  align?: 'left' | 'right' | 'auto';
 }
 
 export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
   buttonClassName,
   className = '',
+  align = 'auto',
 }) => {
   const { settings, updateSettings } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const [menuPlacement, setMenuPlacement] = useState<{
+    left?: number | string;
+    right?: number | string;
+    transformOrigin?: string;
+  }>({
+    left: align === 'right' ? undefined : 0,
+    right: align === 'right' ? 0 : undefined,
+    transformOrigin: align === 'right' ? 'top right' : 'top left',
+  });
+
+  const calculatePosition = () => {
+    if (typeof window === 'undefined') return;
+    const triggerEl = dropdownRef.current;
+    if (!triggerEl) return;
+
+    if (align === 'left') {
+      setMenuPlacement({ left: 0, right: undefined, transformOrigin: 'top left' });
+      return;
+    }
+    if (align === 'right') {
+      setMenuPlacement({ left: undefined, right: 0, transformOrigin: 'top right' });
+      return;
+    }
+
+    const rect = triggerEl.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const menuWidth = 240;
+    const margin = 8;
+
+    const overflowLeftIfRightAligned = rect.right - menuWidth < margin;
+    const overflowRightIfLeftAligned = rect.left + menuWidth > viewportWidth - margin;
+
+    if (overflowLeftIfRightAligned && !overflowRightIfLeftAligned) {
+      setMenuPlacement({ left: 0, right: undefined, transformOrigin: 'top left' });
+    } else if (overflowRightIfLeftAligned && !overflowLeftIfRightAligned) {
+      setMenuPlacement({ left: undefined, right: 0, transformOrigin: 'top right' });
+    } else if (overflowLeftIfRightAligned && overflowRightIfLeftAligned) {
+      let targetViewportLeft = rect.left;
+      if (targetViewportLeft + menuWidth > viewportWidth - margin) {
+        targetViewportLeft = Math.max(margin, viewportWidth - margin - menuWidth);
+      }
+      if (targetViewportLeft < margin) {
+        targetViewportLeft = margin;
+      }
+      const relativeLeft = targetViewportLeft - rect.left;
+      setMenuPlacement({
+        left: relativeLeft,
+        right: undefined,
+        transformOrigin: relativeLeft < 0 ? 'top right' : 'top left',
+      });
+    } else {
+      const isRightHalf = rect.left + rect.width / 2 > viewportWidth / 2;
+      if (isRightHalf) {
+        setMenuPlacement({ left: undefined, right: 0, transformOrigin: 'top right' });
+      } else {
+        setMenuPlacement({ left: 0, right: undefined, transformOrigin: 'top left' });
+      }
+    }
+  };
+
   const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === settings.language) || SUPPORTED_LANGUAGES[0];
 
   useEffect(() => {
     if (!isOpen) return;
+
+    calculatePosition();
 
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -58,16 +122,24 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
       }
     };
 
+    const handleResize = () => {
+      calculatePosition();
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
-  }, [isOpen]);
+  }, [isOpen, align]);
 
   const handleSelectLanguage = async (code: LanguageOption['code']) => {
     playChime('tap');
@@ -76,16 +148,23 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
     updateSettings({ language: code });
   };
 
+  const handleToggle = () => {
+    if (!isOpen) {
+      calculatePosition();
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+    playChime('tap');
+  };
+
   return (
     <div ref={dropdownRef} className={`relative inline-block text-left shrink-0 ${className}`}>
       {/* Dropdown Trigger Button */}
       <button
         type="button"
         data-testid="language-dropdown-trigger"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          playChime('tap');
-        }}
+        onClick={handleToggle}
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-label={t('Select Language')}
@@ -113,7 +192,12 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 top-full mt-1.5 w-56 sm:w-60 rounded-2xl bg-white shadow-xl border border-amber-200/90 z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 origin-top-right"
+          style={{
+            left: menuPlacement.left !== undefined ? menuPlacement.left : undefined,
+            right: menuPlacement.right !== undefined ? menuPlacement.right : undefined,
+            transformOrigin: menuPlacement.transformOrigin || 'top left',
+          }}
+          className="absolute top-full mt-1.5 w-56 sm:w-60 max-w-[calc(100vw-1rem)] rounded-2xl bg-white shadow-xl border border-amber-200/90 z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header indicator */}
           <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-900/60 border-b border-amber-100 mb-1">

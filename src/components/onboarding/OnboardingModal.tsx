@@ -371,7 +371,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           {/* Language Switcher & Escape Hatch Button */}
           <div className="flex items-center gap-2">
-            <LanguageDropdown />
+            <LanguageDropdown align="left" />
 
             <button
               type="button"

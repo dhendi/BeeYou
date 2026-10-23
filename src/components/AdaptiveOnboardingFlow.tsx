@@ -472,7 +472,7 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                   </div>
                 </div>
                 <div className="shrink-0">
-                  <LanguageDropdown />
+                  <LanguageDropdown align="left" />
                 </div>
               </div>
 

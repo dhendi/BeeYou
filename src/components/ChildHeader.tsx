@@ -60,7 +60,7 @@ export const ChildHeader: React.FC<ChildHeaderProps> = ({ previewTheme }) => {
       {/* Right: Streamlined Compact Actions */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <div className="flex items-center gap-1 sm:gap-1.5">
-          <LanguageDropdown />
+          <LanguageDropdown align="left" />
 
           {/* Compact Live Connection Indicator Pill */}
           <button
