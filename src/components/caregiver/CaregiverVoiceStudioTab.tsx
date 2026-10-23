@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 // Clean minimalist accessible voice studio without redundant decorative icons
 import { playChime, prewarmCoreAudioVocabulary, stopSpeaking } from '../../utils/audio';
 import { triggerHaptic, setHapticsEnabled } from '../../services/haptics';
-import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById } from '../../data/voicePersonasData';
+import { VOICE_PERSONAS, VoicePersona, getVoicePersonaById, getVoicePersonasForLanguage } from '../../data/voicePersonasData';
 import { t } from '../../services/translator';
 
 interface CaregiverVoiceStudioTabProps {
@@ -43,6 +43,9 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const FEATURED_VOICE_IDS = ['system', 'amy', 'ryan', 'lessac', 'danny'];
 
+  const activeLanguage = settings.language || 'en';
+  const languagePersonas = getVoicePersonasForLanguage(activeLanguage);
+
   const activePersona = getVoicePersonaById(settings.voicePersona);
   const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
 
@@ -55,7 +58,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     stopSpeaking();
     setPlayingVoiceId(persona.id);
     try {
-      await speak(t(persona.previewText), {
+      const textToPreview = persona.category === 'system' ? t(persona.previewText) : persona.previewText;
+      await speak(textToPreview, {
         voicePersona: persona.id,
         previewAudio: true,
         force: true,
@@ -75,10 +79,13 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
     onShowNotification(`Voice persona updated to ${persona.name}`);
   };
 
-  const filteredPersonas = VOICE_PERSONAS.filter((p) => {
-    if (voiceCategoryFilter === 'featured') return FEATURED_VOICE_IDS.includes(p.id);
+  const filteredPersonas = languagePersonas.filter((p) => {
+    if (voiceCategoryFilter === 'featured') {
+      if (activeLanguage === 'en') return FEATURED_VOICE_IDS.includes(p.id);
+      return true;
+    }
     if (voiceCategoryFilter === 'all') {
-      if (!showAllCatalog) return FEATURED_VOICE_IDS.includes(p.id);
+      if (!showAllCatalog && activeLanguage === 'en') return FEATURED_VOICE_IDS.includes(p.id);
       return true;
     }
     if (voiceCategoryFilter === 'free') return p.category === 'system';
@@ -360,8 +367,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
           {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { key: 'featured', label: 'Curated (4 Voices + Free)' },
-              { key: 'all', label: `All (${VOICE_PERSONAS.length})` },
+              { key: 'featured', label: activeLanguage === 'en' ? 'Curated (4 Voices + Free)' : `Voices (${languagePersonas.length})` },
+              { key: 'all', label: `All (${languagePersonas.length})` },
               { key: 'free', label: 'Free (Native)' },
               { key: 'kids', label: 'Kids' },
               { key: 'teens', label: 'Teens' },

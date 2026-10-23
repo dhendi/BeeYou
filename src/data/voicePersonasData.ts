@@ -797,7 +797,11 @@ export const DEFAULT_LANGUAGE_VOICES: Record<string, string> = {
  * Returns the dedicated default voice persona ID for a given language.
  */
 export function getDefaultVoicePersonaForLanguage(lang: string = 'en'): string {
-  const norm = (lang || 'en').toLowerCase().split(/[-_]/)[0];
+  const clean = (lang || 'en').toLowerCase().replace('-', '_');
+  if (DEFAULT_LANGUAGE_VOICES[clean]) {
+    return DEFAULT_LANGUAGE_VOICES[clean];
+  }
+  const norm = clean.split('_')[0];
   return DEFAULT_LANGUAGE_VOICES[norm] || 'amy';
 }
 

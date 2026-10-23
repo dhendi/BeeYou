@@ -10,6 +10,7 @@ import {
   prewarmCoreAudioVocabulary,
 } from '../utils/audio';
 import { t, setLanguage, getLanguage, translateDynamic } from '../services/translator';
+import { getVoicePersonaById } from '../data/voicePersonasData';
 
 interface UseSpeechEngineProps {
   settings: AppSettings;
@@ -70,15 +71,23 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     }
   ) => {
     if (settings.soundEffects && options?.previewAudio) playChime('speak');
-    const currentActiveLang = (settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en');
-    let spoken = t(text);
-    if (currentActiveLang && currentActiveLang !== 'en' && spoken === text && text.trim().length > 0) {
-      try {
-        spoken = await translateDynamic(text);
-      } catch {}
+    const personaToUse = options?.voicePersona || settings.voicePersona || 'amy';
+    const personaObj = getVoicePersonaById(personaToUse);
+    const personaLang = (personaObj.language && personaObj.language !== 'all') ? personaObj.language : undefined;
+    const currentActiveLang = (options?.previewAudio && personaLang)
+      ? personaLang
+      : ((settings.language && settings.language !== 'en') ? settings.language : (getLanguage() || settings.language || 'en'));
+
+    let spoken = text;
+    if (!options?.previewAudio) {
+      spoken = t(text);
+      if (currentActiveLang && currentActiveLang !== 'en' && spoken === text && text.trim().length > 0) {
+        try {
+          spoken = await translateDynamic(text);
+        } catch {}
+      }
     }
 
-    const personaToUse = options?.voicePersona || settings.voicePersona || 'amy';
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,

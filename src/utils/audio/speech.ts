@@ -1,6 +1,6 @@
 import { playChime } from './chimes';
 import { getAudioContext, enableSilentModePlayback } from './context';
-import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
+import { getVoicePersonaById, getDefaultVoicePersonaForLanguage, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 import { t, getLanguage } from '../../services/translator';
 import { isPremiumSubscription } from '../../services/subscriptionService';
 import { synthesizeWithPiper, resolvePiperVoiceId, isPiperVoiceReady, isPiperVoiceReadySync, preloadPiperVoice, getLastPiperTimings } from '../../services/piperTtsService';
@@ -28,7 +28,7 @@ const decodedAudioBufferCache = new Map<string, AudioBuffer>();
 export interface SpeechLatencyReport {
   text: string;
   voicePersona: string;
-  engine: 'piper' | 'core_audio' | 'local_cache' | 'system_speech' | 'offline_stitching' | 'custom_recording';
+  engine: 'piper' | 'core_audio' | 'local_cache' | 'system_speech' | 'offline_stitching' | 'custom_recording' | 'server_stream';
   isCached: boolean;
   tapToHandlerMs: number;
   voiceResolutionMs: number;
@@ -556,12 +556,12 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
   const matchingVoices = voices.filter((v) => {
     const l = v.lang.toLowerCase();
     if (isCanadianFrench) {
-      return l.startsWith('fr') && (l.includes('ca') || v.name.toLowerCase().includes('canada'));
+      return l.startsWith('fr');
     }
     return l.startsWith(targetPrefix);
   });
 
-  const candidates = matchingVoices.length > 0 ? matchingVoices : (targetPrefix === 'en' ? voices : []);
+  const candidates = matchingVoices.length > 0 ? matchingVoices : voices;
   if (candidates.length === 0) return null;
 
   const personaObj = getVoicePersonaById(persona);
@@ -973,7 +973,7 @@ export async function speakText(
   const calibratedPitch = Math.max(0.5, Math.min(1.85, userBasePitch * profile.pitch));
   const calibratedRate = Math.max(0.55, Math.min(1.6, userBaseRate * profile.rate));
 
-  const voiceToStream = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
+  const voiceToStream = selectedPersonaId === 'system' ? getDefaultVoicePersonaForLanguage(normalizedLang) : selectedPersonaId;
   const isConstructedSentence = Boolean(
     options?.sentenceWords && options.sentenceWords.length > 1
   );
@@ -1040,15 +1040,56 @@ export async function speakText(
         } catch {}
       }
     }
-    // Fallback if preview file not present
+
+    // 1b. On-device Piper neural preview
+    if (selectedPersonaId !== 'system') {
+      try {
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
+        if (speechId !== latestSpeechRequestId) return;
+        if (piperBuf && isAudioPayload(piperBuf)) {
+          const previewKey = `preview_piper_${selectedPersonaId}_${normalizedLang}`;
+          const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
+          const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, previewKey, (t) => {
+            recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
+          });
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (piperErr) {
+        console.warn('[AAC Speech] Preview Piper synthesis notice:', piperErr);
+      }
+    }
+
+    // 1c. Universal Edge TTS Stream Preview (/api/tts)
+    try {
+      const previewCacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
+      const previewStreamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
+      const serverItem = await getOrFetchAudioItem(previewStreamUrl, previewCacheKey);
+      if (speechId !== latestSpeechRequestId) return;
+      if (serverItem && isAudioPayload(serverItem.buffer)) {
+        const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, previewCacheKey, (t) => {
+          recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
+        });
+        if (played || speechId !== latestSpeechRequestId) return;
+      }
+    } catch (streamErr) {
+      console.warn('[AAC Speech] Preview server stream notice:', streamErr);
+    }
+
+    // 1d. Native Browser Speech Synthesis Fallback
     if (speechId !== latestSpeechRequestId) return;
-    await speakWithBrowserSpeechSynthesis(formattedText, {
+    const browserSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
       ...options,
       voicePersona: selectedPersonaId,
       pitch: calibratedPitch,
       rate: calibratedRate,
       force: options?.force,
     });
+    if (browserSuccess || speechId !== latestSpeechRequestId) return;
+
+    // 1e. Sensory chime fallback if audio generation failed completely
+    if (speechId === latestSpeechRequestId) {
+      playChime('speak');
+    }
     return;
   }
 
@@ -1107,7 +1148,22 @@ export async function speakText(
       }
     }
 
-    // Priority 2: System text-to-speech fallback (single continuous utterance)
+    // Priority 2: Universal Edge TTS Stream (/api/tts)
+    try {
+      const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
+      if (speechId !== latestSpeechRequestId) return;
+      if (serverItem && isAudioPayload(serverItem.buffer)) {
+        console.log(`[AAC Speech] Playing multi-word sentence via edge TTS stream (${voiceToStream})`);
+        const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+          recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
+        });
+        if (played || speechId !== latestSpeechRequestId) return;
+      }
+    } catch (streamErr) {
+      console.warn('[AAC Speech] Edge TTS multi-word stream notice:', streamErr);
+    }
+
+    // Priority 3: System text-to-speech fallback (single continuous utterance)
     if (speechId !== latestSpeechRequestId) return;
     console.log(`[AAC Speech] Multi-word sentence falling back to system speech synthesis (${selectedPersonaId})`);
     const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
@@ -1122,7 +1178,7 @@ export async function speakText(
       return;
     }
 
-    // Priority 3: Offline pre-recorded word stitching emergency fallback
+    // Priority 4: Offline pre-recorded word stitching emergency fallback
     console.log(`[AAC Speech] System speech synthesis unavailable or dropped, attempting offline word stitching (${voiceToStream})`);
     try {
       const stitchedWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
@@ -1145,7 +1201,7 @@ export async function speakText(
 
   // 3. Single Word Vocalization
   // When an individual tile is tapped on the board, vocalizes using the consistent selected Piper voice.
-  // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. System speech fallback
+  // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. Edge TTS stream -> 4. System speech fallback
 
   // 3a. Local Audio Cache (L1 RAM + L2 CacheStorage)
   const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
@@ -1158,7 +1214,7 @@ export async function speakText(
     if (played || speechId !== latestSpeechRequestId) return;
   }
 
-  // 3c. Piper On-Device Neural Synthesis for Single Word
+  // 3b. Piper On-Device Neural Synthesis for Single Word
   if (selectedPersonaId !== 'system') {
     try {
       const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 1200);
@@ -1177,6 +1233,21 @@ export async function speakText(
     } catch (piperErr) {
       console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
     }
+  }
+
+  // 3c. Universal Edge TTS Stream for Single Word (/api/tts)
+  try {
+    const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
+    if (speechId !== latestSpeechRequestId) return;
+    if (serverItem && isAudioPayload(serverItem.buffer)) {
+      console.log(`[AAC Speech] Playing single word via edge TTS stream (${voiceToStream})`);
+      const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+        recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
+      });
+      if (played || speechId !== latestSpeechRequestId) return;
+    }
+  } catch (streamErr) {
+    console.warn('[AAC Speech] Edge TTS single-word stream notice:', streamErr);
   }
 
   // 3d. Native Browser SpeechSynthesis Fallback:
@@ -1935,6 +2006,7 @@ function speakWithBrowserSpeechSynthesis(
           const fallbackVoice = getBestSystemVoice('en', options?.voicePersona || 'amy') || voices[0];
           if (fallbackVoice) {
             utterance.voice = fallbackVoice;
+            utterance.lang = fallbackVoice.lang;
           }
         }
       }

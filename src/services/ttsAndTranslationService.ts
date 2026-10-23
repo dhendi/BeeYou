@@ -28,6 +28,8 @@ export const ALLOWED_LANGUAGES = new Set([
   'zh',
   'zh-cn',
   'zh_cn',
+  'it',
+  'pt',
 ]);
 
 export function normalizeLanguageCode(lang: unknown): string | null {
@@ -1159,7 +1161,10 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const generationPromise = (async (): Promise<{ buffer: Buffer; contentType: string } | null> => {
     // 7a. Instant Google TTS generation via native fetch (~180ms response time, zero rate limits, all languages)
     try {
-      const normLang = (normalizedLang === 'fr_ca') ? 'fr' : (normalizedLang === 'zh' || normalizedLang.startsWith('zh')) ? 'zh-CN' : normalizedLang.substring(0, 2);
+      const lowerNorm = (normalizedLang || '').toLowerCase();
+      const normLang = lowerNorm.startsWith('fr')
+        ? 'fr'
+        : (lowerNorm.startsWith('zh') ? 'zh-CN' : lowerNorm.substring(0, 2));
       
       // Split text into chunks if it exceeds Google Translate TTS length limit (180 chars)
       const textChunks: string[] = [];
