@@ -5541,5 +5541,17 @@
   "High Contrast Text": "고대비 텍스트",
   "Sharp borders & distinct outlines": "선명한 테두리 및 뚜렷한 윤곽선",
   "Dyslexia-Friendly Font": "난독증 친화적인 글꼴",
-  "Weighted bottoms to prevent flips": "뒤집힘을 방지하기 위한 무게 있는 바닥"
+  "Weighted bottoms to prevent flips": "뒤집힘을 방지하기 위한 무게 있는 바닥",
+  "Loading Your Voice": "음성을 불러오는 중입니다",
+  "Voice Pack Ready!": "음성 팩 준비 완료!",
+  "Pre-caching every speech tile for instantaneous communication.": "즉각적인 의사소통을 위해 단어 카드를 준비하고 있습니다.",
+  "All AAC tiles are cached for instant 0ms speech.": "모든 단어 카드가 준비되었습니다.",
+  "Speech Tiles Cached": "준비된 단어 카드",
+  "Ready for communication!": "대화할 준비가 완료되었습니다!",
+  "Connecting to neural speech engine...": "음성 엔진에 연결 중...",
+  "Preparing speech cache...": "음성 데이터를 준비하는 중...",
+  "Continue to app": "앱으로 계속하기",
+  "Downloading neural voice model...": "음성 모델 다운로드 중...",
+  "Preparing neural speech engine...": "음성 엔진 준비 중...",
+  "Voice model ready": "음성 모델 준비 완료"
 }

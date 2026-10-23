@@ -1,5 +1,5 @@
 import { playChime } from './chimes';
-import { getAudioContext, enableSilentModePlayback } from './context';
+import { getAudioContext, enableSilentModePlayback, unlockAudioHardwareNode } from './context';
 import { getVoicePersonaById, getDefaultVoicePersonaForLanguage, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 import { t, getLanguage } from '../../services/translator';
 import { isPremiumSubscription } from '../../services/subscriptionService';
@@ -771,6 +771,9 @@ function stopAudioHardware() {
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
         window.speechSynthesis.cancel();
       }
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
     } catch (e) {}
     activeUtterance = null;
     activeUtterancesSet.clear();
@@ -944,11 +947,14 @@ export async function speakText(
   const speechId = latestSpeechRequestId;
 
   // CRITICAL FOR IOS SAFARI & CAPACITOR:
-  // Synchronously initialize and resume Web Audio context during the active user gesture.
+  // Synchronously initialize, resume, and unlock Web Audio context during the active user gesture.
   // This unlocks the audio hardware pipeline before any async operations occur.
   const ctx = getAudioContext();
-  if (ctx && ctx.state === 'suspended') {
-    ctx.resume().catch(() => {});
+  if (ctx) {
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    unlockAudioHardwareNode(ctx);
   }
 
   const rawPersona = options?.voicePersona || 'amy';
@@ -1044,7 +1050,7 @@ export async function speakText(
     // 1b. On-device Piper neural preview
     if (selectedPersonaId !== 'system') {
       try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 2200);
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           const previewKey = `preview_piper_${selectedPersonaId}_${normalizedLang}`;
@@ -1118,7 +1124,7 @@ export async function speakText(
     // Priority 1: Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
     if (selectedPersonaId !== 'system') {
       try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 2200);
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
@@ -2087,20 +2093,15 @@ function speakWithBrowserSpeechSynthesis(
         cleanup(false);
       };
 
-      // Start Watchdog: if WebKit or Android silently drops or ignores utterance.speak(),
-      // detect within 400ms so fallback tiers (offline word stitching / chime) trigger immediately.
+      // Start Watchdog: if native speech engine silently drops or hangs on utterance.speak(),
+      // wait a safe 2000ms window before releasing fallback, without firing destructive cancel commands
       startWatchdogTimer = setTimeout(() => {
         if (!started && !finished) {
-          console.warn('[AAC Speech] SpeechSynthesis did not start within 400ms (likely dropped or muted by iOS WebKit), falling back');
-          try {
-            (utterance as any).__beeyouCancelled = true;
-            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-              window.speechSynthesis.cancel();
-            }
-          } catch {}
+          console.warn('[AAC Speech] SpeechSynthesis did not start within window, releasing fallback');
+          (utterance as any).__beeyouCancelled = true;
           cleanup(false);
         }
-      }, 400);
+      }, 2000);
 
       // Watchdog timeout in case onend never fires on buggy Android Chrome versions
       const approxDurationMs = Math.max(2500, (formattedText.split(' ').length / 1.5) * 1000 + 3500);

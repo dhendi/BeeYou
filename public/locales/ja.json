@@ -4386,7 +4386,7 @@
   "Micro-Steps": "マイクロステップ",
   "Tap to check off": "タップしてチェックを入れます",
   "Playing...": "遊んでいます...",
-  "Voice": "声",
+  "Voice": "音声",
   "of": "/",
   "completed": "完成した",
   "Recurring Daily Tasks": "定期的な毎日のタスク",
@@ -5534,5 +5534,17 @@
   "High Contrast Text": "ハイコントラストテキスト",
   "Sharp borders & distinct outlines": "シャープな境界線と明確な輪郭",
   "Dyslexia-Friendly Font": "ディスレクシアに優しいフォント",
-  "Weighted bottoms to prevent flips": "反転を防ぐ重みのある底部"
+  "Weighted bottoms to prevent flips": "反転を防ぐ重みのある底部",
+  "Loading Your Voice": "音声を読み込んでいます",
+  "Voice Pack Ready!": "音声パックの準備が完了しました！",
+  "Pre-caching every speech tile for instantaneous communication.": "瞬時に発声できるようカードを準備しています。",
+  "All AAC tiles are cached for instant 0ms speech.": "すべてのカードの準備が完了しました。",
+  "Speech Tiles Cached": "準備完了したカード",
+  "Ready for communication!": "コミュニケーションの準備ができました！",
+  "Connecting to neural speech engine...": "音声エンジンに接続しています...",
+  "Preparing speech cache...": "音声を準備しています...",
+  "Continue to app": "アプリに進む",
+  "Downloading neural voice model...": "音声モデルをダウンロードしています...",
+  "Preparing neural speech engine...": "音声エンジンを準備しています...",
+  "Voice model ready": "音声モデルの準備完了"
 }

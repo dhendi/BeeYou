@@ -3,7 +3,7 @@ import { Volume2, Loader2, CheckCircle2, ArrowRight, Mic } from 'lucide-react';
 import { preloadVoicePack, PreloadProgress } from '../../services/aacPreloadService';
 import { playChime } from '../../utils/audio/chimes';
 import { getVoicePersonaById } from '../../data/voicePersonasData';
-import { t } from '../../services/translator';
+import { t, subscribeToLanguage, getLanguage } from '../../services/translator';
 
 interface AacVoiceLoadingScreenProps {
   isOpen: boolean;
@@ -18,14 +18,38 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
   persona = 'amy',
   language = 'en',
 }) => {
+  const [currentUiLang, setCurrentUiLang] = useState(language || getLanguage() || 'en');
   const [progress, setProgress] = useState<PreloadProgress>({
     loaded: 0,
     total: 83,
     percent: 0,
-    currentPhrase: 'Connecting to neural speech engine...',
+    currentPhrase: 'Preparing speech cache...',
   });
   const [isFinished, setIsFinished] = useState(false);
   const personaObj = getVoicePersonaById(persona);
+
+  useEffect(() => {
+    return subscribeToLanguage((newLang) => {
+      setCurrentUiLang(newLang);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (language) {
+      setCurrentUiLang(language);
+    }
+  }, [language]);
+
+  const formatProgressPhrase = (phrase: string): string => {
+    if (!phrase) return '';
+    if (phrase.startsWith('Downloading neural voice model')) return t('Downloading neural voice model...', currentUiLang);
+    if (phrase.startsWith('Downloading voice model')) return t('Downloading neural voice model...', currentUiLang);
+    if (phrase.startsWith('Preparing neural speech engine')) return t('Preparing neural speech engine...', currentUiLang);
+    if (phrase.startsWith('Voice model ready')) return t('Voice model ready', currentUiLang);
+    if (phrase.startsWith('Connecting to neural speech engine')) return t('Connecting to neural speech engine...', currentUiLang);
+    if (phrase.startsWith('Preparing speech cache')) return t('Preparing speech cache...', currentUiLang);
+    return t(phrase, currentUiLang);
+  };
 
   // Keep a stable ref to onComplete to avoid triggering re-renders or restarting preloads
   const onCompleteRef = useRef(onComplete);
@@ -152,12 +176,12 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
         {/* Headline */}
         <h3 id="aac-loading-title" className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight">
-          {isFinished ? t('Voice Pack Ready!') : t('Loading Your Voice')}
+          {isFinished ? t('Voice Pack Ready!', currentUiLang) : t('Loading Your Voice', currentUiLang)}
         </h3>
         <p className="text-xs sm:text-sm text-[#7A6C60] font-semibold mt-1 max-w-xs">
           {isFinished
-            ? t('All AAC tiles are cached for instant 0ms speech.')
-            : t('Pre-caching every speech tile for instantaneous communication.')}
+            ? t('All AAC tiles are cached for instant 0ms speech.', currentUiLang)
+            : t('Pre-caching every speech tile for instantaneous communication.', currentUiLang)}
         </p>
 
         {/* Live Progress Bar */}
@@ -170,7 +194,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
                 <Loader2 className="w-3.5 h-3.5 text-amber-600 animate-spin shrink-0" />
               )}
               <span className="truncate">
-                {isFinished ? t('Ready for communication!') : progress.currentPhrase}
+                {isFinished ? t('Ready for communication!', currentUiLang) : formatProgressPhrase(progress.currentPhrase)}
               </span>
             </span>
             <span className="tabular-nums font-extrabold shrink-0 text-amber-700">
@@ -186,7 +210,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           </div>
 
           <div className="flex items-center justify-between text-[11px] text-[#8C7A6B] font-bold px-0.5">
-            <span>{t('Speech Tiles Cached')}</span>
+            <span>{t('Speech Tiles Cached', currentUiLang)}</span>
             <span className="tabular-nums font-extrabold">
               {progress.loaded} / {progress.total}
             </span>
@@ -195,7 +219,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
         {/* Selected Persona Badge */}
         <div className="mt-5 px-3.5 py-1.5 rounded-full bg-amber-100/80 border border-amber-300 text-amber-950 text-xs font-bold flex items-center gap-2">
-          <span>{t('Voice')}: <strong>{personaObj.name}</strong></span>
+          <span>{t('Voice', currentUiLang)}: <strong>{personaObj.name}</strong></span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
           <span className="text-emerald-800 text-[11px] font-black">{displayLanguage}</span>
         </div>
@@ -209,7 +233,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           }}
           className="mt-6 text-xs text-[#7A6C60] hover:text-[#2D241E] font-bold underline cursor-pointer flex items-center gap-1 transition"
         >
-          <span>{t('Continue to app')}</span>
+          <span>{t('Continue to app', currentUiLang)}</span>
           <ArrowRight className="w-3 h-3" />
         </button>
       </div>

@@ -5541,5 +5541,17 @@
   "High Contrast Text": "Κείμενο υψηλής αντίθεσης",
   "Sharp borders & distinct outlines": "Αιχμηρά περιγράμματα και ευδιάκριτα περιγράμματα",
   "Dyslexia-Friendly Font": "Δυσλεξία-Friendly Γραμματοσειρά",
-  "Weighted bottoms to prevent flips": "Ζυγισμένο πάτο για αποφυγή ανατροπής"
+  "Weighted bottoms to prevent flips": "Ζυγισμένο πάτο για αποφυγή ανατροπής",
+  "Loading Your Voice": "Φόρτωση της φωνής σας",
+  "Voice Pack Ready!": "Το πακέτο φωνής είναι έτοιμο!",
+  "Pre-caching every speech tile for instantaneous communication.": "Προετοιμασία καρτών για άμεση ομιλία.",
+  "All AAC tiles are cached for instant 0ms speech.": "Όλες οι κάρτες είναι έτοιμες για άμεση επικοινωνία.",
+  "Speech Tiles Cached": "Έτοιμες κάρτες ομιλίας",
+  "Ready for communication!": "Έτοιμο για επικοινωνία!",
+  "Connecting to neural speech engine...": "Σύνδεση με τη μηχανή φωνής...",
+  "Preparing speech cache...": "Προετοιμασία φωνής...",
+  "Continue to app": "Συνέχεια στην εφαρμογή",
+  "Downloading neural voice model...": "Λήψη μοντέλου φωνής...",
+  "Preparing neural speech engine...": "Προετοιμασία μηχανής φωνής...",
+  "Voice model ready": "Το μοντέλο φωνής είναι έτοιμο"
 }

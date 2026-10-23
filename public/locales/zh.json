@@ -5541,5 +5541,17 @@
   "High Contrast Text": "高对比度文本",
   "Sharp borders & distinct outlines": "锐利的边框和清晰的轮廓",
   "Dyslexia-Friendly Font": "阅读障碍友好字体",
-  "Weighted bottoms to prevent flips": "加重底部以防止翻转"
+  "Weighted bottoms to prevent flips": "加重底部以防止翻转",
+  "Loading Your Voice": "正在加载您的语音",
+  "Voice Pack Ready!": "语音包已就绪！",
+  "Pre-caching every speech tile for instantaneous communication.": "正在预载所有交流按键以实现即时发音。",
+  "All AAC tiles are cached for instant 0ms speech.": "所有交流卡片均已就绪，可随时发音。",
+  "Speech Tiles Cached": "已缓存交流卡片",
+  "Ready for communication!": "已准备好进行交流！",
+  "Connecting to neural speech engine...": "正在连接神经网络语音引擎...",
+  "Preparing speech cache...": "正在准备语音缓存...",
+  "Continue to app": "继续进入应用",
+  "Downloading neural voice model...": "正在下载神经网络语音模型...",
+  "Preparing neural speech engine...": "正在准备神经网络语音引擎...",
+  "Voice model ready": "语音模型已就绪"
 }

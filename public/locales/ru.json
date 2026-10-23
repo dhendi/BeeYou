@@ -5541,5 +5541,17 @@
   "High Contrast Text": "Высококонтрастный текст",
   "Sharp borders & distinct outlines": "Четкие границы и четкие контуры",
   "Dyslexia-Friendly Font": "Шрифт, подходящий для дислексии",
-  "Weighted bottoms to prevent flips": "Утяжеленное дно для предотвращения переворотов"
+  "Weighted bottoms to prevent flips": "Утяжеленное дно для предотвращения переворотов",
+  "Loading Your Voice": "Загрузка голоса",
+  "Voice Pack Ready!": "Голосовой пакет готов!",
+  "Pre-caching every speech tile for instantaneous communication.": "Подготовка карточек для мгновенного звучания речи.",
+  "All AAC tiles are cached for instant 0ms speech.": "Все карточки готовы к мгновенному общению.",
+  "Speech Tiles Cached": "Готово карточек",
+  "Ready for communication!": "Готово к общению!",
+  "Connecting to neural speech engine...": "Подключение к голосовому модулю...",
+  "Preparing speech cache...": "Подготовка речи...",
+  "Continue to app": "Перейти в приложение",
+  "Downloading neural voice model...": "Загрузка голосовой модели...",
+  "Preparing neural speech engine...": "Подготовка голосового движка...",
+  "Voice model ready": "Голосовая модель готова"
 }

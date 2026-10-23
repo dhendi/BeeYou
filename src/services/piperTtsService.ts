@@ -130,6 +130,15 @@ let activeLoadedVoiceId: string | null = null;
 // Tracks in-flight preload promises to coalesce concurrent model downloads/warm-ups
 const inFlightPiperPreloads = new Map<string, Promise<boolean>>();
 
+// Serial execution queue / mutex ensuring only one WebAssembly ONNX operation executes at a time
+let piperExecutionQueue = Promise.resolve<any>(null);
+
+function runWithPiperLock<T>(task: () => Promise<T>): Promise<T> {
+  const current = piperExecutionQueue.then(task, task);
+  piperExecutionQueue = current.catch(() => {});
+  return current;
+}
+
 // Performance telemetry for Piper phonemization and ONNX inference
 let lastOnnxInferenceMs = 0;
 let lastPhonemizeMs = 0;
@@ -388,18 +397,20 @@ export async function preloadPiperVoice(
           totalBytes: 100,
         });
 
-        // Clear singleton session lock if different voice was previously active
-        if ((piper as any).TtsSession?._instance) {
-          (piper as any).TtsSession._instance = null;
-        }
+        await runWithPiperLock(async () => {
+          // Clear singleton session lock if different voice was previously active
+          if ((piper as any).TtsSession?._instance) {
+            (piper as any).TtsSession._instance = null;
+          }
 
-        try {
-          await piper.predict({ text: 'ready', voiceId: voiceId as any });
-          activeLoadedVoiceId = voiceId;
-          console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
-        } catch (warmErr) {
-          console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
-        }
+          try {
+            await piper.predict({ text: 'ready', voiceId: voiceId as any });
+            activeLoadedVoiceId = voiceId;
+            console.log(`[Piper TTS] Voice session warmed up successfully in memory: ${voiceId}`);
+          } catch (warmErr) {
+            console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
+          }
+        });
       }
 
       try {
@@ -475,61 +486,69 @@ export async function synthesizeWithPiper(
       return null;
     }
 
-    // If changing active voice, clear previous singleton instance so new ONNX model is loaded
-    if (activeLoadedVoiceId !== voiceId && (piper as any).TtsSession?._instance) {
-      (piper as any).TtsSession._instance = null;
-    }
+    const effectiveTimeout = Math.min(timeoutMs || 2200, 2500);
 
-    const isCold = (activeLoadedVoiceId !== voiceId);
-    // Cold initialization (loading ONNX model into WebAssembly) takes ~4-6 seconds; warm inference takes ~400-800ms
-    const effectiveTimeout = Math.max(timeoutMs, isCold ? 8000 : 3500);
-
-    try {
-      const tStart = performance.now();
-      lastOnnxInferenceMs = 0;
-      const predictionWork = piper.predict({
-        text: cleanText,
-        voiceId: voiceId as any,
-      });
-
-      const timeoutWork = new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), effectiveTimeout)
-      );
-
-      const wavBlob = await Promise.race([predictionWork, timeoutWork]);
-      if (!wavBlob) {
-        console.warn(`[AAC Speech] Piper synthesis timed out after ${effectiveTimeout}ms for voice ${voiceId}`);
-        return null;
+    return await runWithPiperLock(async () => {
+      // If changing active voice, clear previous singleton instance so new ONNX model is loaded
+      if (activeLoadedVoiceId !== voiceId && (piper as any).TtsSession?._instance) {
+        (piper as any).TtsSession._instance = null;
       }
 
-      const arrayBuffer = await wavBlob.arrayBuffer();
-      const durationMs = Math.round(performance.now() - tStart);
-      lastPhonemizeMs = Math.max(0, durationMs - lastOnnxInferenceMs);
+      try {
+        const tStart = performance.now();
+        lastOnnxInferenceMs = 0;
+        const predictionWork = piper.predict({
+          text: cleanText,
+          voiceId: voiceId as any,
+        });
 
-      if (arrayBuffer && arrayBuffer.byteLength > 44) {
-        activeLoadedVoiceId = voiceId;
-        console.log(`[AAC Speech] Piper sentence synthesized successfully (${voiceId}, ${cleanText.split(/\s+/).length} words, total: ${durationMs}ms [phonemize: ${lastPhonemizeMs}ms, onnx: ${lastOnnxInferenceMs}ms], ${arrayBuffer.byteLength} bytes)`);
+        const timeoutWork = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), effectiveTimeout)
+        );
 
-        // LRU guard: keep cache size bounded to prevent excessive mobile memory usage (max 150 entries)
-        if (piperAudioMemoryCache.size >= 150) {
-          const firstKey = piperAudioMemoryCache.keys().next().value;
-          if (firstKey) piperAudioMemoryCache.delete(firstKey);
+        const wavBlob = await Promise.race([predictionWork, timeoutWork]);
+        if (!wavBlob) {
+          console.warn(`[AAC Speech] Piper synthesis timed out after ${effectiveTimeout}ms for voice ${voiceId}`);
+          if ((piper as any).TtsSession?._instance) {
+            (piper as any).TtsSession._instance = null;
+          }
+          activeLoadedVoiceId = null;
+          return null;
         }
 
-        piperAudioMemoryCache.set(cacheKey, arrayBuffer);
-        try {
-          localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
-        } catch {}
-        return arrayBuffer;
+        const arrayBuffer = await wavBlob.arrayBuffer();
+        const durationMs = Math.round(performance.now() - tStart);
+        lastPhonemizeMs = Math.max(0, durationMs - lastOnnxInferenceMs);
+
+        if (arrayBuffer && arrayBuffer.byteLength > 44) {
+          activeLoadedVoiceId = voiceId;
+          console.log(`[AAC Speech] Piper sentence synthesized successfully (${voiceId}, ${cleanText.split(/\s+/).length} words, total: ${durationMs}ms [phonemize: ${lastPhonemizeMs}ms, onnx: ${lastOnnxInferenceMs}ms], ${arrayBuffer.byteLength} bytes)`);
+
+          // LRU guard: keep cache size bounded to prevent excessive mobile memory usage (max 150 entries)
+          if (piperAudioMemoryCache.size >= 150) {
+            const firstKey = piperAudioMemoryCache.keys().next().value;
+            if (firstKey) piperAudioMemoryCache.delete(firstKey);
+          }
+
+          piperAudioMemoryCache.set(cacheKey, arrayBuffer);
+          try {
+            localStorage.setItem(`beeyou_piper_ready_${voiceId}`, '1');
+          } catch {}
+          return arrayBuffer;
+        }
+        return null;
+      } catch (err: any) {
+        console.warn(`[AAC Speech] Piper synthesis failed for voice ${voiceId} (words: ${cleanText.split(/\s+/).length}):`, err?.message || err);
+        if ((piper as any).TtsSession?._instance) {
+          (piper as any).TtsSession._instance = null;
+        }
+        activeLoadedVoiceId = null;
+        return null;
       }
-      return null;
-    } catch (err: any) {
-      console.warn(`[AAC Speech] Piper synthesis failed for voice ${voiceId} (words: ${cleanText.split(/\s+/).length}):`, err?.message || err);
-      return null;
-    } finally {
-      inFlightPiperPredictions.delete(cacheKey);
-    }
-  })();
+    });
+  })().finally(() => {
+    inFlightPiperPredictions.delete(cacheKey);
+  });
 
   inFlightPiperPredictions.set(cacheKey, predictionPromise);
   return predictionPromise;

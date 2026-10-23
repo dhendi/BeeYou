@@ -8,6 +8,7 @@ import { normalizeAacSentenceToEnglish } from '../utils/aacGrammar';
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
 let lowerDictionary: Record<string, string> = {};
+const localeDictionaries: Record<string, Record<string, string>> = {};
 const pendingDynamicTranslations = new Set<string>();
 
 function rebuildLowerDictionary() {
@@ -23,6 +24,7 @@ if (typeof window !== 'undefined' && currentLang !== 'en') {
     const cached = localStorage.getItem(`beeyou_dict_${currentLang}`);
     if (cached) {
       dictionary = JSON.parse(cached);
+      localeDictionaries[currentLang] = dictionary;
       rebuildLowerDictionary();
     }
   } catch {}
@@ -31,6 +33,7 @@ if (typeof window !== 'undefined' && currentLang !== 'en') {
     .then((data) => {
       if (data) {
         dictionary = { ...dictionary, ...data };
+        localeDictionaries[currentLang] = dictionary;
         rebuildLowerDictionary();
         try {
           localStorage.setItem(`beeyou_dict_${currentLang}`, JSON.stringify(dictionary));
@@ -59,6 +62,7 @@ export async function setLanguage(lang: string): Promise<void> {
       const cached = localStorage.getItem(`beeyou_dict_${lang}`);
       if (cached) {
         dictionary = JSON.parse(cached);
+        localeDictionaries[lang] = dictionary;
         rebuildLowerDictionary();
       }
     } catch {}
@@ -69,6 +73,7 @@ export async function setLanguage(lang: string): Promise<void> {
       if (res.ok) {
         const freshData = await res.json();
         dictionary = { ...dictionary, ...freshData };
+        localeDictionaries[lang] = dictionary;
         rebuildLowerDictionary();
         localStorage.setItem(`beeyou_dict_${lang}`, JSON.stringify(dictionary));
       }
@@ -91,31 +96,53 @@ export function subscribeToLanguage(listener: (lang: string) => void): () => voi
   };
 }
 
-export function t(text: string): string {
+export function t(text: string, targetLang?: string): string {
   if (!text) return '';
-  if (currentLang === 'en') {
+  const effectiveLang = (targetLang && targetLang !== 'all') ? targetLang : currentLang;
+  if (effectiveLang === 'en') {
     return normalizeAacSentenceToEnglish(text);
+  }
+
+  let dict = dictionary;
+  let lowerDict = lowerDictionary;
+
+  if (effectiveLang !== currentLang) {
+    if (!localeDictionaries[effectiveLang]) {
+      try {
+        const cached = typeof localStorage !== 'undefined' ? localStorage.getItem(`beeyou_dict_${effectiveLang}`) : null;
+        if (cached) {
+          localeDictionaries[effectiveLang] = JSON.parse(cached);
+        }
+      } catch {}
+    }
+    if (localeDictionaries[effectiveLang]) {
+      dict = localeDictionaries[effectiveLang];
+      lowerDict = {};
+      for (const k in dict) {
+        lowerDict[k.toLowerCase()] = dict[k];
+      }
+    }
   }
 
   // If text was passed in a foreign language from legacy cache, first normalize to English canonical key
   const englishKey = normalizeAacSentenceToEnglish(text);
 
-  if (dictionary[englishKey]) return dictionary[englishKey];
+  if (dict[englishKey]) return dict[englishKey];
 
   const trimmed = englishKey.trim();
-  if (dictionary[trimmed]) return dictionary[trimmed];
+  if (dict[trimmed]) return dict[trimmed];
 
   const lower = trimmed.toLowerCase();
-  if (lowerDictionary[lower]) return lowerDictionary[lower];
+  if (lowerDict[lower]) return lowerDict[lower];
 
   // Handle slash compounds like "I / Me", "My/Mine", "Hurt / Pain", "Toilet / Potty"
   // Return only the primary word so it never speaks "slash" or repeats both options
   if (trimmed.includes(' / ')) {
-    const parts = trimmed.split(' / ').map(p => t(p.trim()));
+    const parts = trimmed.split(' / ').map(p => t(p.trim(), effectiveLang));
     return parts[0] || englishKey;
   }
   if (trimmed.includes('/') && !trimmed.startsWith('http')) {
-    const parts = trimmed.split('/').map(p => t(p.trim()));
+    const parts = trimmed.split('/').map(p => t(p.trim(), effectiveLang));
     return parts[0] || englishKey;
   }
 
@@ -124,7 +151,7 @@ export function t(text: string): string {
     const words = trimmed.split(/\s+/);
     const translatedWords = words.map(w => {
       const wLower = w.toLowerCase();
-      return lowerDictionary[wLower] || dictionary[w] || w;
+      return lowerDict[wLower] || dict[w] || w;
     });
     const hasTranslation = translatedWords.some((tw, idx) => tw.toLowerCase() !== words[idx].toLowerCase());
     if (hasTranslation) {

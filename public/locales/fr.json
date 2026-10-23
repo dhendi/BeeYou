@@ -5534,5 +5534,17 @@
   "High Contrast Text": "Texte à contraste élevé",
   "Sharp borders & distinct outlines": "Bordures nettes et contours distincts",
   "Dyslexia-Friendly Font": "Police adaptée à la dyslexie",
-  "Weighted bottoms to prevent flips": "Bas lestés pour éviter les retournements"
+  "Weighted bottoms to prevent flips": "Bas lestés pour éviter les retournements",
+  "Loading Your Voice": "Chargement de votre voix",
+  "Voice Pack Ready!": "Pack vocal prêt !",
+  "Pre-caching every speech tile for instantaneous communication.": "Mise en mémoire de chaque bouton pour une parole instantanée.",
+  "All AAC tiles are cached for instant 0ms speech.": "Tous les boutons sont prêts pour une communication instantanée.",
+  "Speech Tiles Cached": "Boutons vocaux prêts",
+  "Ready for communication!": "Prêt pour communiquer !",
+  "Connecting to neural speech engine...": "Connexion au moteur vocal...",
+  "Preparing speech cache...": "Préparation de la parole...",
+  "Continue to app": "Continuer vers l'application",
+  "Downloading neural voice model...": "Téléchargement de la voix...",
+  "Preparing neural speech engine...": "Préparation du moteur vocal...",
+  "Voice model ready": "Modèle vocal prêt"
 }

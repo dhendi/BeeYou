@@ -5541,5 +5541,17 @@
   "High Contrast Text": "Văn bản có độ tương phản cao",
   "Sharp borders & distinct outlines": "Đường viền sắc nét và đường viền khác biệt",
   "Dyslexia-Friendly Font": "Phông chữ thân thiện với chứng khó đọc",
-  "Weighted bottoms to prevent flips": "Đáy có trọng lượng để chống lật"
+  "Weighted bottoms to prevent flips": "Đáy có trọng lượng để chống lật",
+  "Loading Your Voice": "Đang tải giọng nói của bạn",
+  "Voice Pack Ready!": "Gói giọng nói đã sẵn sàng!",
+  "Pre-caching every speech tile for instantaneous communication.": "Đang lưu sẵn các ô giao tiếp để phát âm tức thì.",
+  "All AAC tiles are cached for instant 0ms speech.": "Tất cả các ô giao tiếp đã sẵn sàng để trò chuyện.",
+  "Speech Tiles Cached": "Ô giọng nói đã nạp",
+  "Ready for communication!": "Sẵn sàng giao tiếp!",
+  "Connecting to neural speech engine...": "Đang kết nối với công cụ giọng nói...",
+  "Preparing speech cache...": "Đang chuẩn bị giọng nói...",
+  "Continue to app": "Tiếp tục vào ứng dụng",
+  "Downloading neural voice model...": "Đang tải mô hình giọng nói...",
+  "Preparing neural speech engine...": "Đang chuẩn bị công cụ giọng nói...",
+  "Voice model ready": "Mô hình giọng nói đã sẵn sàng"
 }
