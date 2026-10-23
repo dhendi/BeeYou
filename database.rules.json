@@ -38,7 +38,7 @@
           },
 
           "members": {
-            ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (root.child('beeyou/families/' + $familyCode + '/members/' + auth.uid).val() === true || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
+            ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (data.parent().child('members/' + auth.uid).val() === true || data.parent().child('ownerUid').val() === auth.uid)))",
             ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $familyCode === 'BEE-DEMO' : ($familyCode !== 'BEE-DEMO' && !root.child('beeyou/families/' + $familyCode + '/revokedMembers/' + auth.uid).exists() && (!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid)))",
             ".validate": "!root.child('beeyou/families/' + $familyCode).exists() || root.child('beeyou/families/' + $familyCode + '/ownerUid').val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $familyCode === 'BEE-DEMO')"
           },
@@ -150,7 +150,39 @@
         "$pairingCode": {
           ".read": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $pairingCode === 'BEE-DEMO' : ($pairingCode !== 'BEE-DEMO' && (!data.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (data.child('ownerUid').val() === auth.uid || data.child('creatorUid').val() === auth.uid || data.child('requestingUid').val() === auth.uid || data.child('claimedByUid').val() === auth.uid || (data.child('targetFamilyCode').exists() && (root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid || root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/members/' + auth.uid).val() === true)))))",
           ".write": "auth != null && (auth.token.email === 'demo@beeyou.app' ? $pairingCode === 'BEE-DEMO' : ($pairingCode !== 'BEE-DEMO' && (!data.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (!newData.child('targetFamilyCode').exists() || !root.child('beeyou/families/' + newData.child('targetFamilyCode').val() + '/revokedMembers/' + auth.uid).exists()) && (!data.exists() ? (newData.child('ownerUid').val() === auth.uid || newData.child('creatorUid').val() === auth.uid) : (data.child('ownerUid').val() === auth.uid || data.child('creatorUid').val() === auth.uid || data.child('requestingUid').val() === auth.uid || (!data.child('requestingUid').exists() && (newData.child('requestingUid').val() === auth.uid || newData.child('claimedByUid').val() === auth.uid)) || (data.child('targetFamilyCode').exists() && root.child('beeyou/families/' + data.child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))))",
-          ".validate": "newData.hasChildren(['pairingCode', 'status', 'expiresAt']) && newData.child('pairingCode').val() === $pairingCode && newData.child('status').isString() && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'claimed' || newData.child('status').val() === 'awaiting_approval' || newData.child('status').val() === 'paired' || newData.child('status').val() === 'rejected' || newData.child('status').val() === 'expired' || newData.child('status').val() === 'revoked') && newData.child('expiresAt').isNumber() && (!newData.child('targetFamilyCode').exists() || (newData.child('targetFamilyCode').isString() && newData.child('targetFamilyCode').val().matches(/^BEE-[A-Z0-9-]{3,16}$/))) && (!newData.child('caregiverEmail').exists() || (newData.child('caregiverEmail').isString() && newData.child('caregiverEmail').val().length <= 254)) && (!newData.child('caregiverPhone').exists() || (newData.child('caregiverPhone').isString() && newData.child('caregiverPhone').val().length <= 30)) && (!newData.child('caregiverName').exists() || (newData.child('caregiverName').isString() && newData.child('caregiverName').val().length <= 100)) && (!newData.child('childName').exists() || (newData.child('childName').isString() && newData.child('childName').val().length <= 100))"
+          ".validate": "newData.hasChildren(['pairingCode', 'status', 'expiresAt']) && newData.child('pairingCode').val() === $pairingCode && (!newData.child('caregiverEmail').exists() || (newData.child('caregiverEmail').isString() && newData.child('caregiverEmail').val().length <= 254)) && (!newData.child('caregiverPhone').exists() || (newData.child('caregiverPhone').isString() && newData.child('caregiverPhone').val().length <= 30)) && (!newData.child('caregiverName').exists() || (newData.child('caregiverName').isString() && newData.child('caregiverName').val().length <= 100)) && (!newData.child('childName').exists() || (newData.child('childName').isString() && newData.child('childName').val().length <= 100))",
+
+          "pairingCode": {
+            ".validate": "newData.isString() && newData.val() === $pairingCode && (!data.exists() || newData.val() === data.val())"
+          },
+
+          "ownerUid": {
+            ".validate": "newData.isString() && (!data.exists() ? (newData.val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO')) : newData.val() === data.val())"
+          },
+
+          "creatorUid": {
+            ".validate": "newData.isString() && (!data.exists() ? (newData.val() === auth.uid || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO')) : newData.val() === data.val())"
+          },
+
+          "targetFamilyCode": {
+            ".validate": "newData.isString() && newData.val().matches(/^BEE-[A-Z0-9-]{3,16}$/) && (!data.exists() ? (root.child('beeyou/families/' + newData.val() + '/ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.val() + '/members/' + auth.uid).val() === true || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO')) : newData.val() === data.val())"
+          },
+
+          "requestingUid": {
+            ".validate": "newData.isString() && (!data.exists() ? newData.val() === auth.uid : newData.val() === data.val())"
+          },
+
+          "claimedByUid": {
+            ".validate": "newData.isString() && (!data.exists() ? newData.val() === auth.uid : newData.val() === data.val())"
+          },
+
+          "expiresAt": {
+            ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val() || newData.parent().child('ownerUid').val() === auth.uid)"
+          },
+
+          "status": {
+            ".validate": "newData.isString() && ((data.val() === null && (newData.val() === 'pending' || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO'))) || (data.val() === 'pending' && (newData.val() === 'pending' || ((newData.val() === 'claimed' || newData.val() === 'awaiting_approval') && (newData.parent().child('requestingUid').val() === auth.uid || newData.parent().child('claimedByUid').val() === auth.uid)) || ((newData.val() === 'rejected' || newData.val() === 'expired' || newData.val() === 'revoked') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || ((data.val() === 'claimed' || data.val() === 'awaiting_approval') && (newData.val() === data.val() || ((newData.val() === 'paired' || newData.val() === 'rejected' || newData.val() === 'revoked') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || ((data.val() === 'paired' || data.val() === 'rejected' || data.val() === 'expired' || data.val() === 'revoked') && (newData.val() === data.val() || ((newData.val() === 'revoked' || newData.val() === 'expired') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO'))"
+          }
         }
       }
     }

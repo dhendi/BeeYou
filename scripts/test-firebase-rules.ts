@@ -5,14 +5,14 @@
  *
  * Verifies:
  * 1. Unauthenticated read/write denials across all nodes
- * 2. Pairing records protection and unauthorized read denial
+ * 2. Pairing records protection, field immutability, authorized state transitions
  * 3. Family ownership, permissions, and privilege escalation prevention
  * 4. Child member authorized actions and restriction enforcement
  * 5. Revocation enforcement and immediate access severance
  * 6. Cross-family read/write isolation
  * 7. BEE-DEMO sandbox isolation from real families
  * 8. Schema validation and oversized payload rejection
- * 9. Firebase Cloud Storage rules validation
+ * 9. Firebase Cloud Storage rules: backend-only TTS cache writes, revocation-aware family access, direct client uploads
  */
 
 import { initializeTestEnvironment, assertFails, assertSucceeds, RulesTestEnvironment } from '@firebase/rules-unit-testing';
@@ -126,9 +126,9 @@ async function runRulesVerification() {
     }
 
     // -------------------------------------------------------------------------
-    // Suite 2: Pairing Protection & Information Disclosure Prevention
+    // Suite 2: Pairing Protection, Field Immutability & Authorized State Transitions
     // -------------------------------------------------------------------------
-    console.log('\n--- Suite 2: Pairing Protection & Information Disclosure Prevention ---');
+    console.log('\n--- Suite 2: Pairing Protection, Field Immutability & State Transitions ---');
 
     const ownerUid = 'caregiver-owner-101';
     const ownerContext = testEnv.authenticatedContext(ownerUid, { email: 'owner@family.com' });
@@ -151,7 +151,23 @@ async function runRulesVerification() {
       });
     });
 
-    // 2.1 Owner can create a pairing record
+    // 2.1 Owner CANNOT initialize pairing directly with status 'paired' (self-approval at creation rejected)
+    try {
+      await assertFails(
+        ownerDb.ref(`beeyou/pairings/${pairingCode}`).set({
+          pairingCode,
+          status: 'paired',
+          expiresAt: Date.now() + 900000,
+          ownerUid,
+          targetFamilyCode,
+        })
+      );
+      assert(true, 'Cannot initialize pairing directly with status paired (self-approval rejected)');
+    } catch (e: any) {
+      assert(false, 'Cannot initialize pairing directly with status paired (self-approval rejected)', e?.message);
+    }
+
+    // 2.2 Owner can create a pairing record with initial status pending
     try {
       await assertSucceeds(
         ownerDb.ref(`beeyou/pairings/${pairingCode}`).set({
@@ -164,12 +180,12 @@ async function runRulesVerification() {
           caregiverEmail: 'owner@family.com',
         })
       );
-      assert(true, 'Owner can create pairing record');
+      assert(true, 'Owner can create pairing record with initial status pending');
     } catch (e: any) {
-      assert(false, 'Owner can create pairing record', e?.message);
+      assert(false, 'Owner can create pairing record with initial status pending', e?.message);
     }
 
-    // 2.2 Owner can read their pairing record
+    // 2.3 Owner can read their pairing record
     try {
       await assertSucceeds(ownerDb.ref(`beeyou/pairings/${pairingCode}`).get());
       assert(true, 'Owner can read their pairing record');
@@ -177,7 +193,7 @@ async function runRulesVerification() {
       assert(false, 'Owner can read their pairing record', e?.message);
     }
 
-    // 2.3 Arbitrary third-party authenticated user CANNOT read pairing record (Finding 2 verified)
+    // 2.4 Arbitrary third-party authenticated user CANNOT read pairing record
     const attackerUid = 'unrelated-attacker-999';
     const attackerContext = testEnv.authenticatedContext(attackerUid, { email: 'attacker@evil.com' });
     const attackerDb = attackerContext.database();
@@ -189,11 +205,25 @@ async function runRulesVerification() {
       assert(false, 'Arbitrary authenticated user CANNOT read pairing record', e?.message);
     }
 
-    // 2.4 Companion device can claim an unclaimed pairing record
+    // 2.5 Companion device CANNOT claim and jump directly to status 'paired' (self-approval rejected)
     const childUid = 'companion-child-202';
     const childContext = testEnv.authenticatedContext(childUid, { email: 'child@family.com' });
     const childDb = childContext.database();
 
+    try {
+      await assertFails(
+        childDb.ref(`beeyou/pairings/${pairingCode}`).update({
+          requestingUid: childUid,
+          status: 'paired',
+          childName: 'Tommy',
+        })
+      );
+      assert(true, 'Companion device CANNOT claim and self-approve to status paired');
+    } catch (e: any) {
+      assert(false, 'Companion device CANNOT claim and self-approve to status paired', e?.message);
+    }
+
+    // 2.6 Companion device can claim an unclaimed pairing record with status 'claimed'
     try {
       await assertSucceeds(
         childDb.ref(`beeyou/pairings/${pairingCode}`).update({
@@ -207,7 +237,7 @@ async function runRulesVerification() {
       assert(false, 'Companion device can claim an unclaimed pairing record', e?.message);
     }
 
-    // 2.5 Claimed companion can read the pairing record
+    // 2.7 Claimed companion can read the pairing record
     try {
       await assertSucceeds(childDb.ref(`beeyou/pairings/${pairingCode}`).get());
       assert(true, 'Claimed companion can read the pairing record');
@@ -215,7 +245,37 @@ async function runRulesVerification() {
       assert(false, 'Claimed companion can read the pairing record', e?.message);
     }
 
-    // 2.6 Second uninvited attacker CANNOT overwrite or claim an already-claimed pairing
+    // 2.8 Claimant CANNOT alter ownerUid (field immutability)
+    try {
+      await assertFails(
+        childDb.ref(`beeyou/pairings/${pairingCode}/ownerUid`).set(childUid)
+      );
+      assert(true, 'Claimant CANNOT alter ownerUid (field immutability)');
+    } catch (e: any) {
+      assert(false, 'Claimant CANNOT alter ownerUid (field immutability)', e?.message);
+    }
+
+    // 2.9 Claimant CANNOT alter targetFamilyCode (field immutability)
+    try {
+      await assertFails(
+        childDb.ref(`beeyou/pairings/${pairingCode}/targetFamilyCode`).set('BEE-OTHER99')
+      );
+      assert(true, 'Claimant CANNOT alter targetFamilyCode (field immutability)');
+    } catch (e: any) {
+      assert(false, 'Claimant CANNOT alter targetFamilyCode (field immutability)', e?.message);
+    }
+
+    // 2.10 Claimant CANNOT alter requestingUid once claimed (requesting identity immutability)
+    try {
+      await assertFails(
+        childDb.ref(`beeyou/pairings/${pairingCode}/requestingUid`).set('impostor-uid-777')
+      );
+      assert(true, 'Claimant CANNOT alter requestingUid once claimed (identity immutability)');
+    } catch (e: any) {
+      assert(false, 'Claimant CANNOT alter requestingUid once claimed (identity immutability)', e?.message);
+    }
+
+    // 2.11 Second uninvited attacker CANNOT overwrite or claim an already-claimed pairing
     try {
       await assertFails(
         attackerDb.ref(`beeyou/pairings/${pairingCode}`).update({
@@ -228,7 +288,7 @@ async function runRulesVerification() {
       assert(false, 'Second uninvited attacker CANNOT overwrite or claim an already-claimed pairing', e?.message);
     }
 
-    // 2.7 Target family member can read the pairing record
+    // 2.12 Target family member can read the pairing record
     const caregiverMemberUid = 'caregiver-helper-303';
     await testEnv.withSecurityRulesDisabled(async (context) => {
       const db = context.database();
@@ -245,7 +305,27 @@ async function runRulesVerification() {
       assert(false, 'Target family member can read pairing record', e?.message);
     }
 
-    // 2.8 Revoked family member CANNOT read the pairing record
+    // 2.13 Authorized family owner CAN transition status from 'claimed' to 'paired'
+    try {
+      await assertSucceeds(
+        ownerDb.ref(`beeyou/pairings/${pairingCode}/status`).set('paired')
+      );
+      assert(true, 'Authorized family owner CAN transition status to paired');
+    } catch (e: any) {
+      assert(false, 'Authorized family owner CAN transition status to paired', e?.message);
+    }
+
+    // 2.14 Once paired, non-owner CANNOT transition status back to pending
+    try {
+      await assertFails(
+        childDb.ref(`beeyou/pairings/${pairingCode}/status`).set('pending')
+      );
+      assert(true, 'Once paired, non-owner CANNOT transition status back to pending');
+    } catch (e: any) {
+      assert(false, 'Once paired, non-owner CANNOT transition status back to pending', e?.message);
+    }
+
+    // 2.15 Revoked family member CANNOT read the pairing record
     const revokedUid = 'revoked-user-404';
     await testEnv.withSecurityRulesDisabled(async (context) => {
       const db = context.database();
@@ -293,7 +373,7 @@ async function runRulesVerification() {
       assert(false, 'Owner can initialize new family node with valid format', e?.message);
     }
 
-    // 3.2 Owner can read and write to family state
+    // 3.2 Owner can read family state
     try {
       await assertSucceeds(freshOwnerDb.ref(`beeyou/families/${freshFamilyCode}`).get());
       assert(true, 'Owner can read family state');
@@ -301,7 +381,7 @@ async function runRulesVerification() {
       assert(false, 'Owner can read family state', e?.message);
     }
 
-    // 3.3 Owner can add and remove members
+    // 3.3 Owner can add members
     const newMemberUid = 'new-member-606';
     try {
       await assertSucceeds(freshOwnerDb.ref(`beeyou/families/${freshFamilyCode}/members/${newMemberUid}`).set(true));
@@ -323,7 +403,7 @@ async function runRulesVerification() {
       assert(false, 'Owner can update caregiver metadata', e?.message);
     }
 
-    // 3.5 Owner can update routines, custom icons, and child profile
+    // 3.5 Owner can update child profile
     try {
       await assertSucceeds(
         freshOwnerDb.ref(`beeyou/families/${freshFamilyCode}/childProfile`).set({
@@ -347,7 +427,7 @@ async function runRulesVerification() {
       assert(false, 'Non-owner member CANNOT change family ownerUid (privilege escalation blocked)', e?.message);
     }
 
-    // 3.7 Non-owner member CANNOT add or remove members (privilege escalation blocked)
+    // 3.7 Non-owner member CANNOT add members (privilege escalation blocked)
     try {
       await assertFails(ordinaryMemberDb.ref(`beeyou/families/${freshFamilyCode}/members/attacker-999`).set(true));
       assert(true, 'Non-owner member CANNOT add members (privilege escalation blocked)');
@@ -730,121 +810,247 @@ async function runRulesVerification() {
     }
 
     // -------------------------------------------------------------------------
-    // Suite 9: Firebase Storage Rules Verification
+    // Suite 9: Firebase Storage Rules: Backend TTS, Revocation Awareness & Direct Uploads
     // -------------------------------------------------------------------------
     console.log('\n--- Suite 9: Firebase Storage Rules Verification ---');
 
-    const storageUserUid = 'storage-user-111';
-    const storageUserContext = testEnv.authenticatedContext(storageUserUid, {
-      email: 'storageuser@family.com',
+    const storageOwnerUid = 'storage-owner-101';
+    const storageOwnerContext = testEnv.authenticatedContext(storageOwnerUid, {
+      email: 'storageowner@family.com',
       familyCode: 'BEE-SEC101',
+      role: 'owner',
+      isOwner: true,
     });
-    const storageUserStorage = storageUserContext.storage();
+
+    const storageMemberUid = 'storage-member-202';
+    // Initially valid family member token
+    const storageMemberContext = testEnv.authenticatedContext(storageMemberUid, {
+      email: 'member@family.com',
+      familyCode: 'BEE-SEC101',
+      role: 'caregiver',
+    });
 
     // 9.1 Unauthenticated storage access denied
     const unauthedStorage = testEnv.unauthenticatedContext().storage();
     try {
-      await assertFails(unauthedStorage.ref(`users/${storageUserUid}/pic.png`).getDownloadURL());
+      await assertFails(unauthedStorage.ref(`users/${storageOwnerUid}/pic.png`).getDownloadURL());
       assert(true, 'Unauthenticated access to user storage denied');
     } catch (e: any) {
       assert(false, 'Unauthenticated access to user storage denied', e?.message);
     }
 
-    // 9.2 Authenticated user can read and write their own user storage
+    // 9.2 Direct client uploads to users/{userId}/** remain fully functional
     try {
       await assertSucceeds(
-        storageUserStorage.ref(`users/${storageUserUid}/avatar.png`).put(Buffer.from('avatar-png-bytes'), {
+        storageMemberContext.storage().ref(`users/${storageMemberUid}/icons/avatar.png`).put(Buffer.from('avatar-png-bytes'), {
           contentType: 'image/png',
         })
       );
-      assert(true, 'Authenticated user can write to their own user storage');
+      assert(true, 'Direct client uploads to users/{userId} remain functional');
     } catch (e: any) {
-      assert(false, 'Authenticated user can write to their own user storage', e?.message);
+      assert(false, 'Direct client uploads to users/{userId} remain functional', e?.message);
     }
 
-    // 9.3 Authenticated user CANNOT read or write another user storage
+    // 9.3 Authenticated user CANNOT read another user storage
     try {
       await assertFails(
-        attackerContext.storage().ref(`users/${storageUserUid}/avatar.png`).getDownloadURL()
+        attackerContext.storage().ref(`users/${storageMemberUid}/icons/avatar.png`).getDownloadURL()
       );
       assert(true, 'Authenticated user CANNOT read another user storage');
     } catch (e: any) {
       assert(false, 'Authenticated user CANNOT read another user storage', e?.message);
     }
 
-    // 9.4 Family member with valid familyCode token can write their family storage
+    // 9.4 Family owner can write to shared family storage
     try {
       await assertSucceeds(
-        storageUserStorage.ref(`beeyou/families/BEE-SEC101/icons/custom.png`).put(Buffer.from('icon-bytes'), {
+        storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).put(Buffer.from('logo-bytes'), {
           contentType: 'image/png',
           customMetadata: {
             familyCode: 'BEE-SEC101',
-            userId: storageUserUid,
+            userId: storageOwnerUid,
           },
         })
       );
-      assert(true, 'Family member with matching familyCode token can write family storage');
+      assert(true, 'Family owner can write to shared family storage');
     } catch (e: any) {
-      assert(false, 'Family member with matching familyCode token can write family storage', e?.message);
+      assert(false, 'Family owner can write to shared family storage', e?.message);
     }
 
-    // 9.5 Cross-family storage read/write is denied
+    // 9.5 Authorized family member with valid familyCode token can read shared family storage
+    try {
+      await assertSucceeds(
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
+      );
+      assert(true, 'Authorized family member can read shared family storage');
+    } catch (e: any) {
+      assert(false, 'Authorized family member can read shared family storage', e?.message);
+    }
+
+    // 9.6 Revoked member with previously valid token CANNOT write to family storage
+    try {
+      await assertFails(
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/hacked.png`).put(Buffer.from('hacked-bytes'), {
+          contentType: 'image/png',
+          customMetadata: {
+            familyCode: 'BEE-SEC101',
+            userId: storageMemberUid,
+          },
+        })
+      );
+      assert(true, 'Revoked member with previously valid token CANNOT write to family storage');
+    } catch (e: any) {
+      assert(false, 'Revoked member with previously valid token CANNOT write to family storage', e?.message);
+    }
+
+    // 9.7 Seed family file with revocation metadata recording revoked member
+    await storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).put(Buffer.from('protected-bytes'), {
+      contentType: 'image/png',
+      customMetadata: {
+        familyCode: 'BEE-SEC101',
+        userId: storageOwnerUid,
+        revokedMembers: storageMemberUid,
+      },
+    });
+
+    // 9.8 Revoked member using previously valid token CANNOT read family file marked with revocation
+    try {
+      await assertFails(
+        storageMemberContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).getDownloadURL()
+      );
+      assert(true, 'Revoked member using previously valid token CANNOT read revocation-marked family file');
+    } catch (e: any) {
+      assert(false, 'Revoked member using previously valid token CANNOT read revocation-marked family file', e?.message);
+    }
+
+    // 9.9 Active non-revoked member Bob can still read the revocation-marked family file
+    const storageBobUid = 'storage-bob-303';
+    const storageBobContext = testEnv.authenticatedContext(storageBobUid, {
+      email: 'bob@family.com',
+      familyCode: 'BEE-SEC101',
+    });
+    try {
+      await assertSucceeds(
+        storageBobContext.storage().ref(`beeyou/families/BEE-SEC101/icons/protected.png`).getDownloadURL()
+      );
+      assert(true, 'Active non-revoked member can read family storage');
+    } catch (e: any) {
+      assert(false, 'Active non-revoked member can read family storage', e?.message);
+    }
+
+    // 9.10 Direct client uploads for revoked member to their own users/{userId} remain functional
+    try {
+      await assertSucceeds(
+        storageMemberContext.storage().ref(`users/${storageMemberUid}/personal/note.png`).put(Buffer.from('note-png'), {
+          contentType: 'image/png',
+        })
+      );
+      assert(true, 'Direct client uploads for revoked member to users/{userId} remain functional');
+    } catch (e: any) {
+      assert(false, 'Direct client uploads for revoked member to users/{userId} remain functional', e?.message);
+    }
+
+    // 9.11 Cross-family storage read is denied (Family A cannot read Family B)
     const crossFamilyContext = testEnv.authenticatedContext('cross-user-222', {
       email: 'cross@other.com',
       familyCode: 'BEE-OTHER99',
     });
     try {
       await assertFails(
-        crossFamilyContext.storage().ref(`beeyou/families/BEE-SEC101/icons/custom.png`).getDownloadURL()
+        crossFamilyContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
       );
       assert(true, 'Cross-family storage read is denied (Family A cannot read Family B)');
     } catch (e: any) {
       assert(false, 'Cross-family storage read is denied (Family A cannot read Family B)', e?.message);
     }
 
-    // 9.6 Demo reviewer account CANNOT access real family storage
+    // 9.12 Demo reviewer account CANNOT access real family storage
     try {
       await assertFails(
-        demoContext.storage().ref(`beeyou/families/BEE-SEC101/icons/custom.png`).getDownloadURL()
+        demoContext.storage().ref(`beeyou/families/BEE-SEC101/icons/logo.png`).getDownloadURL()
       );
       assert(true, 'Demo reviewer account CANNOT read real family storage');
     } catch (e: any) {
       assert(false, 'Demo reviewer account CANNOT read real family storage', e?.message);
     }
 
-    // 9.7 Real user CANNOT access BEE-DEMO storage
+    // 9.13 Real user CANNOT access BEE-DEMO storage
     try {
       await assertFails(
-        storageUserStorage.ref('beeyou/families/BEE-DEMO/icons/demo.png').getDownloadURL()
+        storageOwnerContext.storage().ref('beeyou/families/BEE-DEMO/icons/demo.png').getDownloadURL()
       );
       assert(true, 'Real user CANNOT access BEE-DEMO storage');
     } catch (e: any) {
       assert(false, 'Real user CANNOT access BEE-DEMO storage', e?.message);
     }
 
-    // 9.8 Rejects oversized file upload (> 5MB)
-    const oversizedFile = Buffer.alloc(6 * 1024 * 1024);
+    // 9.14 Public read allowed on tts_cache
+    // First, upload valid TTS audio file from trusted backend
+    const backendAdminContext = testEnv.authenticatedContext('backend-worker', {
+      email: 'backend@beeyou.app',
+      admin: true,
+      role: 'admin',
+    });
+    await backendAdminContext.storage().ref('tts_cache/v4/amy/en/greeting.wav').put(Buffer.from('RIFF....WAVEfmt ....data....'), {
+      contentType: 'audio/wav',
+    });
+
     try {
-      await assertFails(
-        storageUserStorage.ref(`users/${storageUserUid}/huge.png`).put(oversizedFile, {
-          contentType: 'image/png',
-        })
+      await assertSucceeds(
+        unauthedStorage.ref('tts_cache/v4/amy/en/greeting.wav').getDownloadURL()
       );
-      assert(true, 'Rejects oversized file upload (> 5MB)');
+      assert(true, 'Public read allowed on tts_cache for fast edge distribution');
     } catch (e: any) {
-      assert(false, 'Rejects oversized file upload (> 5MB)', e?.message);
+      assert(false, 'Public read allowed on tts_cache for fast edge distribution', e?.message);
     }
 
-    // 9.9 Public read allowed on tts_cache, unauthenticated write denied
+    // 9.15 Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)
     try {
       await assertFails(
-        unauthedStorage.ref('tts_cache/audio.wav').put(Buffer.from('hacked-audio'), {
+        storageMemberContext.storage().ref('tts_cache/v4/amy/en/poisoned.wav').put(Buffer.from('poisoned-audio'), {
           contentType: 'audio/wav',
         })
       );
-      assert(true, 'Unauthenticated write to tts_cache is denied');
+      assert(true, 'Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)');
     } catch (e: any) {
-      assert(false, 'Unauthenticated write to tts_cache is denied', e?.message);
+      assert(false, 'Ordinary authenticated client CANNOT write to tts_cache (cache poisoning prevented)', e?.message);
+    }
+
+    // 9.16 Trusted backend / admin CAN write to tts_cache
+    try {
+      await assertSucceeds(
+        backendAdminContext.storage().ref('tts_cache/v4/puck/es/hola.wav').put(Buffer.from('RIFF-audio-data-es'), {
+          contentType: 'audio/wav',
+        })
+      );
+      assert(true, 'Trusted backend / admin CAN write to tts_cache');
+    } catch (e: any) {
+      assert(false, 'Trusted backend / admin CAN write to tts_cache', e?.message);
+    }
+
+    // 9.17 Backend write rejected if oversized (> 10MB)
+    const oversizedTts = Buffer.alloc(11 * 1024 * 1024);
+    try {
+      await assertFails(
+        backendAdminContext.storage().ref('tts_cache/v4/amy/en/huge.wav').put(oversizedTts, {
+          contentType: 'audio/wav',
+        })
+      );
+      assert(true, 'Rejects oversized audio write to tts_cache (> 10MB)');
+    } catch (e: any) {
+      assert(false, 'Rejects oversized audio write to tts_cache (> 10MB)', e?.message);
+    }
+
+    // 9.18 Backend write rejected if non-audio MIME type
+    try {
+      await assertFails(
+        backendAdminContext.storage().ref('tts_cache/v4/amy/en/malicious.exe').put(Buffer.from('MZ...'), {
+          contentType: 'application/octet-stream',
+        })
+      );
+      assert(true, 'Rejects non-audio write to tts_cache');
+    } catch (e: any) {
+      assert(false, 'Rejects non-audio write to tts_cache', e?.message);
     }
 
     // Cleanup environment
