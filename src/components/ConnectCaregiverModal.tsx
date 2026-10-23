@@ -749,12 +749,17 @@ export const ConnectCaregiverModal: React.FC<ConnectCaregiverModalProps> = ({
                       <button
                         type="button"
                         onClick={async () => {
-                          playChime('complete');
-                          await approvePairingSession(tempSession.pairingCode);
-                          setTempSession((prev) => prev ? { ...prev, status: 'paired' } : null);
-                          setIsConnected(true);
-                          setSentSuccess('Pairing approved! Device connected.');
-                          speak('Pairing approved. Device connected.');
+                          const result = await approvePairingSession(tempSession.pairingCode);
+                          if (result.success) {
+                            playChime('complete');
+                            setTempSession((prev) => prev ? { ...prev, status: 'paired' } : null);
+                            setIsConnected(true);
+                            setSentSuccess('Pairing approved! Device connected.');
+                            speak('Pairing approved. Device connected.');
+                          } else {
+                            playChime('tap');
+                            setSentSuccess(result.message || 'Pairing approval failed.');
+                          }
                         }}
                         className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
                       >

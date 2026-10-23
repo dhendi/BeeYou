@@ -1551,50 +1551,88 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
   const safeCode = (code || '').trim().toUpperCase();
   if (!safeCode) return { success: false, message: 'Invalid pairing code.' };
 
-  let effectiveCode = safeCode;
+  let authHeaderToken = '';
   try {
-    let authHeaderToken = '';
-    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
-    if (raw) {
-      try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('beeyou_temporary_pairing_session');
+      if (raw) {
         const s = JSON.parse(raw);
         if (s?.token) authHeaderToken = s.token;
-      } catch {}
-    }
-    if (!authHeaderToken) {
-      authHeaderToken = await getClientAuthToken(safeCode);
-    }
-
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (authHeaderToken) {
-      headers['Authorization'] = `Bearer ${authHeaderToken}`;
-    }
-
-    const res = await fetch('/api/caregiver/pairing/approve', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ pairingCode: safeCode, sessionToken: authHeaderToken }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.token) {
-        saveClientAuthToken(data.token);
-      }
-      if (data?.familyCode) {
-        effectiveCode = data.familyCode;
       }
     }
   } catch {}
 
-  // Update local session
+  if (!authHeaderToken) {
+    try {
+      authHeaderToken = await getClientAuthToken(safeCode);
+    } catch {}
+  }
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (authHeaderToken) {
+    headers['Authorization'] = `Bearer ${authHeaderToken}`;
+  }
+
+  let res: Response;
   try {
-    const raw = localStorage.getItem('beeyou_temporary_pairing_session');
-    if (raw) {
-      const s = JSON.parse(raw);
-      if (s.pairingCode === safeCode) {
-        s.status = 'paired';
-        s.targetFamilyCode = effectiveCode;
-        localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(s));
+    res = await fetch('/api/caregiver/pairing/approve', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ pairingCode: safeCode, sessionToken: authHeaderToken }),
+    });
+  } catch (netErr: any) {
+    return {
+      success: false,
+      message: netErr?.message
+        ? `Network request failed: ${netErr.message}`
+        : 'Network error during pairing approval. Please check your connection and try again.',
+    };
+  }
+
+  if (!res.ok) {
+    let errorMsg = `Server error ${res.status}: Failed to approve pairing.`;
+    try {
+      const errData = await res.json();
+      if (errData?.message) {
+        errorMsg = errData.message;
+      } else if (errData?.error) {
+        errorMsg = errData.error;
+      }
+    } catch {}
+    return { success: false, message: errorMsg };
+  }
+
+  let data: any = null;
+  try {
+    data = await res.json();
+  } catch {
+    return { success: false, message: 'Invalid response from pairing server.' };
+  }
+
+  if (!data || data.success === false || (data.status && data.status !== 'paired')) {
+    return {
+      success: false,
+      message: data?.message || data?.error || 'Server did not confirm pairing approval.',
+    };
+  }
+
+  const effectiveCode = (data.familyCode || safeCode).trim().toUpperCase();
+
+  if (data.token) {
+    saveClientAuthToken(data.token);
+  }
+
+  // Update local session ONLY after explicit server confirmation
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('beeyou_temporary_pairing_session');
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.pairingCode === safeCode) {
+          s.status = 'paired';
+          s.targetFamilyCode = effectiveCode;
+          localStorage.setItem('beeyou_temporary_pairing_session', JSON.stringify(s));
+        }
       }
     }
   } catch {}
@@ -1617,7 +1655,7 @@ export async function approvePairingSession(code: string): Promise<{ success: bo
     });
   }
 
-  return { success: true, message: 'Device paired and connected successfully!' };
+  return { success: true, message: data.message || 'Device paired and connected successfully!' };
 }
 
 /**
