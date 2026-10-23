@@ -935,7 +935,7 @@ async function runRulesVerification() {
       assert(false, 'Authorized family member can read shared family storage', e?.message);
     }
 
-    // 9.6 Authorized family member can upload custom icon to shared family storage
+    // 9.6 Authorized family owner can upload custom icon to shared family storage
     try {
       await assertSucceeds(
         storageOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/member_shared.png`).put(Buffer.from('member-icon-bytes'), {
@@ -949,6 +949,29 @@ async function runRulesVerification() {
       assert(true, 'Authorized family upload to shared family storage succeeds');
     } catch (e: any) {
       assert(false, 'Authorized family upload to shared family storage succeeds', e?.message);
+    }
+
+    // 9.6b Outdated owner-role token cannot write when Firestore ownerUid differs
+    const formerOwnerUid = 'former-owner-999';
+    const formerOwnerContext = testEnv.authenticatedContext(formerOwnerUid, {
+      email: 'formerowner@family.com',
+      familyCode: 'BEE-SEC101',
+      role: 'owner',
+      isOwner: true,
+    });
+    try {
+      await assertFails(
+        formerOwnerContext.storage().ref(`beeyou/families/BEE-SEC101/icons/former_owner.png`).put(Buffer.from('bytes'), {
+          contentType: 'image/png',
+          customMetadata: {
+            familyCode: 'BEE-SEC101',
+            userId: formerOwnerUid,
+          },
+        })
+      );
+      assert(true, 'Outdated owner-role token CANNOT write when Firestore ownerUid differs');
+    } catch (e: any) {
+      assert(false, 'Outdated owner-role token CANNOT write when Firestore ownerUid differs', e?.message);
     }
 
     // -------------------------------------------------------------------------

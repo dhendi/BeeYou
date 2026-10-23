@@ -32,6 +32,7 @@ import {
   verifyFirestoreConfig,
   FirestoreSyncError,
   FirestoreConfigReport,
+  getFirestoreAuthHeader,
 } from './src/services/firestoreSyncService';
 
 export type { FirestoreConfigReport };
@@ -39,6 +40,7 @@ export {
   syncFamilyToFirestore,
   verifyFirestoreConfig,
   FirestoreSyncError,
+  getFirestoreAuthHeader,
 };
 
 dotenv.config();
@@ -469,6 +471,14 @@ interface CaregiverSessionData {
   lastCaregiverActiveTime?: string;
 }
 
+export interface RtdbReconciliationItem {
+  action: 'approve' | 'revoke';
+  targetUid: string;
+  role?: string;
+  reason?: string;
+  timestamp: number;
+}
+
 export interface ServerFamilyAccount {
   id: string;
   email: string;
@@ -489,6 +499,7 @@ export interface ServerFamilyAccount {
   members?: Record<string, { role: string; email?: string; approvedAt: number }>;
   pendingMembers?: Record<string, { email: string; name: string; requestedAt: number }>;
   revokedMembers?: Record<string, { revokedAt: number; reason?: string }>;
+  pendingRtdbReconciliations?: RtdbReconciliationItem[];
 }
 
 export const caregiverSessions = new Map<string, CaregiverSessionData>();
@@ -955,6 +966,135 @@ async function syncFamilyToFirebase(code: string): Promise<void> {
       body: JSON.stringify(state),
     });
   } catch {}
+}
+
+export interface SyncMemberRtdbOptions {
+  customFetch?: typeof fetch;
+  customAuthHeader?: string;
+  customDbUrl?: string;
+}
+
+/**
+ * Synchronizes a member addition or revocation to Firebase Realtime Database.
+ * Verifies HTTP responses and throws on non-2xx status for caller reconciliation.
+ */
+export async function syncMemberToRtdb(
+  familyCode: string,
+  action: 'approve' | 'revoke',
+  targetUid: string,
+  details?: { role?: string; reason?: string },
+  options?: SyncMemberRtdbOptions
+): Promise<{ success: boolean }> {
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') {
+    return { success: true };
+  }
+
+  const dbUrl = options?.customDbUrl || FIREBASE_DB_URL;
+  if (!dbUrl) {
+    return { success: true };
+  }
+
+  const fetchFn = options?.customFetch || fetch;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const authHeader = options?.customAuthHeader || (await getFirestoreAuthHeader().catch(() => undefined));
+  if (authHeader) {
+    headers['Authorization'] = authHeader;
+  }
+
+  if (action === 'approve') {
+    // 1. Add member
+    const memberUrl = `${dbUrl}/beeyou/families/${encodeURIComponent(cleanCode)}/members/${encodeURIComponent(targetUid)}.json`;
+    const res1 = await fetchFn(memberUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(true),
+    });
+    if (!res1.ok) {
+      const errText = await res1.text().catch(() => res1.statusText);
+      throw new Error(`RTDB member PUT failed (${res1.status}): ${errText}`);
+    }
+
+    // 2. Delete from revokedMembers
+    const revokedUrl = `${dbUrl}/beeyou/families/${encodeURIComponent(cleanCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`;
+    const res2 = await fetchFn(revokedUrl, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!res2.ok) {
+      const errText = await res2.text().catch(() => res2.statusText);
+      throw new Error(`RTDB revokedMembers DELETE failed (${res2.status}): ${errText}`);
+    }
+  } else if (action === 'revoke') {
+    // 1. Delete member
+    const memberUrl = `${dbUrl}/beeyou/families/${encodeURIComponent(cleanCode)}/members/${encodeURIComponent(targetUid)}.json`;
+    const res1 = await fetchFn(memberUrl, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!res1.ok) {
+      const errText = await res1.text().catch(() => res1.statusText);
+      throw new Error(`RTDB member DELETE failed (${res1.status}): ${errText}`);
+    }
+
+    // 2. Add to revokedMembers
+    const revokedUrl = `${dbUrl}/beeyou/families/${encodeURIComponent(cleanCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`;
+    const res2 = await fetchFn(revokedUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        revokedAt: Date.now(),
+        reason: details?.reason?.trim() || 'Revoked by family owner',
+      }),
+    });
+    if (!res2.ok) {
+      const errText = await res2.text().catch(() => res2.statusText);
+      throw new Error(`RTDB revokedMembers PUT failed (${res2.status}): ${errText}`);
+    }
+  }
+
+  return { success: true };
+}
+
+/**
+ * Reconciles any deferred Realtime Database member operations for a family.
+ */
+export async function reconcileFamilyRtdb(
+  familyCode: string,
+  options?: SyncMemberRtdbOptions
+): Promise<{ success: boolean; reconciledCount: number; remainingCount: number }> {
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode) {
+    return { success: true, reconciledCount: 0, remainingCount: 0 };
+  }
+  const account = findFamilyAccount({ familyCode: cleanCode });
+  if (!account || !account.pendingRtdbReconciliations || account.pendingRtdbReconciliations.length === 0) {
+    return { success: true, reconciledCount: 0, remainingCount: 0 };
+  }
+
+  const remaining: Array<RtdbReconciliationItem> = [];
+  let reconciledCount = 0;
+
+  for (const item of account.pendingRtdbReconciliations) {
+    try {
+      await syncMemberToRtdb(cleanCode, item.action, item.targetUid, { role: item.role, reason: item.reason }, options);
+      reconciledCount++;
+    } catch {
+      remaining.push(item);
+    }
+  }
+
+  account.pendingRtdbReconciliations = remaining.length > 0 ? remaining : undefined;
+  await saveFamilyAccounts().catch(() => {});
+
+  return {
+    success: true,
+    reconciledCount,
+    remainingCount: remaining.length,
+  };
 }
 
 let isFlushing = false;
@@ -2641,8 +2781,34 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     lastSyncedAt: new Date().toISOString(),
   };
 
+  // Authoritatively initialize family in Firestore for Cloud Storage access BEFORE committing local state
+  if (verified.uid && !verified.isDemo) {
+    try {
+      await syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail });
+    } catch (syncErr: any) {
+      console.error(`[Family Register] Authoritative Firestore initialization failed for ${familyCode}:`, syncErr?.message);
+      // Clean up in-memory and disk state completely to guarantee zero orphaned records
+      familyAccounts.delete(cleanEmail);
+      caregiverSessions.delete(familyCode);
+      activeFamilyStates.delete(familyCode);
+      dirtyFamilyCodes.delete(familyCode);
+      await saveFamilyAccounts().catch(() => {});
+      await saveCaregiverSessions().catch(() => {});
+      const perFamilyFile = path.join(FAMILIES_DIR, `${familyCode}.json`);
+      if (fs.existsSync(perFamilyFile)) {
+        try { fs.unlinkSync(perFamilyFile); } catch {}
+      }
+      const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
+      return res.status(statusCode).json({
+        error: 'SecuritySyncError',
+        message: 'Failed to initialize family in authoritative cloud security store. Account creation aborted. Please retry.',
+        detail: syncErr?.message,
+      });
+    }
+  }
+
   familyAccounts.set(cleanEmail, account);
-  saveFamilyAccounts().catch(() => {});
+  await saveFamilyAccounts().catch(() => {});
 
   // Initialize caregiver session for this familyCode
   if (!caregiverSessions.has(familyCode)) {
@@ -2660,25 +2826,7 @@ app.post('/api/caregiver/family/register', async (req, res) => {
       messages: [],
       unlinked: false,
     });
-    saveCaregiverSessions().catch(() => {});
-  }
-
-  // Authoritatively initialize family in Firestore for Cloud Storage access
-  if (verified.uid && !verified.isDemo) {
-    try {
-      await syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail });
-    } catch (syncErr: any) {
-      console.error(`[Family Register] Authoritative Firestore initialization failed for ${familyCode}:`, syncErr?.message);
-      // Roll back in-memory account state to prevent partially initialized families
-      familyAccounts.delete(cleanEmail);
-      activeFamilyStates.delete(familyCode);
-      const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
-      return res.status(statusCode).json({
-        error: 'SecuritySyncError',
-        message: 'Failed to initialize family in authoritative cloud security store. Account creation aborted. Please retry.',
-        detail: syncErr?.message,
-      });
-    }
+    await saveCaregiverSessions().catch(() => {});
   }
 
   const signedToken = signFamilyToken(familyCode, 'caregiver', cleanEmail, verified.uid);
@@ -2722,12 +2870,30 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       return res.status(403).json({ error: 'Forbidden', message: 'Family access has been revoked by the account owner.' });
     }
 
+    let isRecovering = false;
     // Link ownerUid if not previously set
     if (!account.ownerUid && verified.uid && account.email === cleanEmail) {
       account.ownerUid = verified.uid;
       if (!account.members) account.members = {};
       account.members[verified.uid] = { role: 'caregiver', email: cleanEmail, approvedAt: Date.now() };
-      saveFamilyAccounts().catch(() => {});
+      isRecovering = true;
+      await saveFamilyAccounts().catch(() => {});
+    }
+
+    // Reconcile authoritative Firestore membership for recovering or existing legitimate users
+    if (verified.uid && !verified.isDemo) {
+      const isOwner = account.ownerUid === verified.uid || isRecovering;
+      const targetRole = isOwner ? 'owner' : (account.members?.[verified.uid]?.role || 'caregiver');
+      try {
+        await syncFamilyToFirestore(
+          account.familyCode,
+          isOwner ? 'init_owner' : 'approve',
+          verified.uid,
+          { role: targetRole, email: cleanEmail }
+        );
+      } catch (syncErr: any) {
+        console.warn(`[Family Login] Non-fatal Firestore reconciliation notice for ${cleanEmail}:`, syncErr?.message);
+      }
     }
   } else {
     // Deterministically generate so sign in NEVER fails across devices
@@ -2753,8 +2919,34 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       createdAt: new Date().toISOString(),
       lastSyncedAt: new Date().toISOString(),
     };
+
+    // Authoritatively initialize Firestore for login-created account BEFORE committing local state
+    if (verified.uid && !verified.isDemo) {
+      try {
+        await syncFamilyToFirestore(account.familyCode, 'init_owner', verified.uid, { email: cleanEmail });
+      } catch (syncErr: any) {
+        console.error(`[Family Login] Authoritative Firestore initialization failed for ${account.familyCode}:`, syncErr?.message);
+        familyAccounts.delete(cleanEmail);
+        caregiverSessions.delete(account.familyCode);
+        activeFamilyStates.delete(account.familyCode);
+        dirtyFamilyCodes.delete(account.familyCode);
+        await saveFamilyAccounts().catch(() => {});
+        await saveCaregiverSessions().catch(() => {});
+        const perFamilyFile = path.join(FAMILIES_DIR, `${account.familyCode}.json`);
+        if (fs.existsSync(perFamilyFile)) {
+          try { fs.unlinkSync(perFamilyFile); } catch {}
+        }
+        const statusCode = syncErr?.statusCode && syncErr.statusCode >= 400 && syncErr.statusCode < 600 ? syncErr.statusCode : 502;
+        return res.status(statusCode).json({
+          error: 'SecuritySyncError',
+          message: 'Failed to initialize family in authoritative cloud security store. Login account creation aborted. Please retry.',
+          detail: syncErr?.message,
+        });
+      }
+    }
+
     familyAccounts.set(cleanEmail, account);
-    saveFamilyAccounts().catch(() => {});
+    await saveFamilyAccounts().catch(() => {});
   }
 
   // Ensure caregiver session is initialized
@@ -2773,7 +2965,7 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       messages: [],
       unlinked: false,
     });
-    saveCaregiverSessions().catch(() => {});
+    await saveCaregiverSessions().catch(() => {});
   }
 
   const signedToken = signFamilyToken(account.familyCode, 'caregiver', cleanEmail, verified.uid);
@@ -2896,21 +3088,32 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
   }
   await saveFamilyAccounts();
 
-  // Sync to Firebase RTDB if available
-  if (FIREBASE_DB_URL) {
+  // Sync to Firebase RTDB with HTTP response verification and reliable reconciliation
+  let rtdbReconciliationPending = false;
+  if (FIREBASE_DB_URL && !user.isDemo) {
     try {
-      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/members/${encodeURIComponent(targetUid)}.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(true),
+      await syncMemberToRtdb(account.familyCode, 'approve', targetUid, { role });
+    } catch (rtdbErr: any) {
+      console.warn(`[Member Approve] RTDB sync failed for ${targetUid} in ${account.familyCode}:`, rtdbErr?.message);
+      if (!account.pendingRtdbReconciliations) {
+        account.pendingRtdbReconciliations = [];
+      }
+      account.pendingRtdbReconciliations.push({
+        action: 'approve',
+        targetUid,
+        role: role || 'caregiver',
+        timestamp: Date.now(),
       });
-      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`, {
-        method: 'DELETE',
-      });
-    } catch {}
+      await saveFamilyAccounts().catch(() => {});
+      rtdbReconciliationPending = true;
+    }
   }
 
-  return res.json({ success: true, message: `Member ${targetUid} approved successfully.` });
+  return res.json({
+    success: true,
+    rtdbReconciliationPending,
+    message: `Member ${targetUid} approved successfully.${rtdbReconciliationPending ? ' (Realtime Database reconciliation pending)' : ''}`,
+  });
 });
 
 // Explicit owner revocation of a member
@@ -2965,18 +3168,25 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   }
   await saveFamilyAccounts();
 
-  // Remove member from Firebase Realtime Database and record revocation
-  if (FIREBASE_DB_URL) {
+  // Remove member from Firebase Realtime Database and record revocation with response verification and reconciliation
+  let rtdbReconciliationPending = false;
+  if (FIREBASE_DB_URL && !user.isDemo) {
     try {
-      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/members/${encodeURIComponent(targetUid)}.json`, {
-        method: 'DELETE',
+      await syncMemberToRtdb(account.familyCode, 'revoke', targetUid, { reason: reason?.trim() });
+    } catch (rtdbErr: any) {
+      console.warn(`[Member Revoke] RTDB sync failed for ${targetUid} in ${account.familyCode}:`, rtdbErr?.message);
+      if (!account.pendingRtdbReconciliations) {
+        account.pendingRtdbReconciliations = [];
+      }
+      account.pendingRtdbReconciliations.push({
+        action: 'revoke',
+        targetUid,
+        reason: reason?.trim() || 'Revoked by family owner',
+        timestamp: Date.now(),
       });
-      await fetch(`${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(account.familyCode)}/revokedMembers/${encodeURIComponent(targetUid)}.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ revokedAt: Date.now(), reason: reason?.trim() || 'Revoked by family owner' }),
-      });
-    } catch {}
+      await saveFamilyAccounts().catch(() => {});
+      rtdbReconciliationPending = true;
+    }
   }
 
   // Broadcast revocation event across devices
@@ -2988,7 +3198,11 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
     sentAt: Date.now(),
   });
 
-  return res.json({ success: true, message: `Member ${targetUid} has been revoked.` });
+  return res.json({
+    success: true,
+    rtdbReconciliationPending,
+    message: `Member ${targetUid} has been revoked.${rtdbReconciliationPending ? ' (Realtime Database reconciliation pending)' : ''}`,
+  });
 });
 
 // Fetch account details by email (sanitized - strips internal PIN)

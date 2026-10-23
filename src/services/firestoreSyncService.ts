@@ -8,6 +8,8 @@
  * authoritative membership verification and immediate revocation enforcement.
  */
 
+import fs from 'fs';
+import path from 'path';
 import { GoogleAuth } from 'google-auth-library';
 
 export class FirestoreSyncError extends Error {
@@ -42,6 +44,7 @@ export interface SyncOptions {
 const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
 
 let cachedGoogleAuth: GoogleAuth | null = null;
+let cachedAdcConfigured = false;
 
 /**
  * Diagnostic helper to verify Firestore credentials configuration without exposing secrets.
@@ -106,6 +109,42 @@ export function verifyFirestoreConfig(): FirestoreConfigReport {
     };
   }
 
+  // 4. Application Default Credentials (ADC) - Metadata server, Cloud Run, GCF, GAE, or well-known credentials
+  const hasMetadataEnv = Boolean(
+    process.env.GCE_METADATA_HOST ||
+    process.env.K_SERVICE ||
+    process.env.FUNCTION_TARGET ||
+    process.env.FUNCTION_NAME ||
+    process.env.GAE_SERVICE ||
+    process.env.GAE_INSTANCE ||
+    process.env.CLOUD_SHELL ||
+    process.env.GOOGLE_APPLICATION_DEFAULT_CREDENTIALS_ENABLED === 'true' ||
+    (process.env.NODE_ENV === 'production' && (process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT))
+  );
+
+  let hasWellKnownAdc = false;
+  if (!hasMetadataEnv) {
+    try {
+      const wellKnownPath = process.platform === 'win32'
+        ? (process.env.APPDATA ? path.join(process.env.APPDATA, 'gcloud', 'application_default_credentials.json') : '')
+        : (process.env.HOME ? path.join(process.env.HOME, '.config', 'gcloud', 'application_default_credentials.json') : '');
+      if (wellKnownPath && fs.existsSync(wellKnownPath)) {
+        hasWellKnownAdc = true;
+      }
+    } catch {}
+  }
+
+  if (hasMetadataEnv || hasWellKnownAdc || cachedAdcConfigured) {
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || FIREBASE_PROJECT_ID;
+    return {
+      configured: true,
+      mode: 'adc',
+      projectId,
+      hasClientEmail: false,
+      hasPrivateKey: false,
+    };
+  }
+
   return {
     configured: false,
     mode: 'unconfigured',
@@ -164,6 +203,10 @@ export async function getFirestoreAuthHeader(options?: SyncOptions): Promise<str
       throw new Error('GoogleAuth client did not return a valid access token');
     }
 
+    if (!credentials && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      cachedAdcConfigured = true;
+    }
+
     return `Bearer ${token}`;
   } catch (err: any) {
     throw new FirestoreSyncError(
@@ -179,6 +222,7 @@ export async function getFirestoreAuthHeader(options?: SyncOptions): Promise<str
  */
 export function resetCachedGoogleAuth(): void {
   cachedGoogleAuth = null;
+  cachedAdcConfigured = false;
 }
 
 /**

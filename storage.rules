@@ -52,13 +52,7 @@ service firebase.storage {
     }
 
     function isValidFamilyWrite(familyCode) {
-      return isCurrentFamilyMember(familyCode)
-        && (
-          request.auth.token.get('role', '') == 'owner' 
-          || request.auth.token.get('isOwner', false) == true 
-          || request.auth.token.get('admin', false) == true 
-          || (firestore.exists(/databases/(default)/documents/beeyou_families/$(familyCode)) && firestore.get(/databases/(default)/documents/beeyou_families/$(familyCode)).data.ownerUid == request.auth.uid)
-        )
+      return isCurrentFamilyOwner(familyCode)
         && request.resource.size < 5 * 1024 * 1024
         && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'))
         && request.resource.metadata != null
