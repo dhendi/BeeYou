@@ -99,6 +99,7 @@ async function runTests() {
     clearAllRevocationsForTesting,
     familyAccounts,
     pairingSessions,
+    caregiverSessions,
     saveFamilyAccounts,
     savePairingSessions,
   } = serverModule;
@@ -106,6 +107,7 @@ async function runTests() {
   const {
     hashTokenIdentifier,
     extractJtiFromToken,
+    parseFirestoreBatchGetResponse,
   } = await import('../src/services/tokenRevocationService');
 
   const {
@@ -422,14 +424,13 @@ async function runTests() {
         'Unlink failure response identifies RevocationSyncError'
       );
 
-      // 3.4 Direct datastore read outage throws structured FirestoreSyncError
+      // 3.4 Direct datastore read outage throws structured FirestoreSyncError (without test-only flags)
       readOutageActive = true;
       let readOutageThrew = false;
       try {
         await isTokenRevoked('by_tok_read_outage_test', undefined, {
           customHost: failingHost,
           customAuthHeader: 'Bearer test',
-          throwOnError: true,
           timeoutMs: 1000,
         });
       } catch (err: any) {
@@ -440,6 +441,37 @@ async function runTests() {
       assert(
         readOutageThrew,
         'Direct isTokenRevoked throws FirestoreSyncError when datastore read encounters an outage'
+      );
+
+      // 3.5 Normal verifyFamilyToken() and protected routes fail closed during datastore read outage
+      const failClosedUser = await verifyFamilyToken(outageOwnerToken);
+      assert(
+        failClosedUser === null,
+        'Normal verifyFamilyToken() fails closed and returns null during datastore outage'
+      );
+
+      const protectedOutageRes = await fetch(`${outageBaseUrl}/api/family/state/${outageFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${outageOwnerToken}` },
+      });
+      assert(
+        protectedOutageRes.status === 401,
+        'Protected API route returns 401 Unauthorized during datastore read outage (fails closed)'
+      );
+
+      // 3.6 Revoked credentials cannot be authorized during datastore read failure
+      const revokedOutageRes = await fetch(`${outageBaseUrl}/api/caregiver/session/${multiFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${crossToken}` },
+      });
+      assert(
+        revokedOutageRes.status === 401,
+        'Revoked credentials cannot be authorized during datastore read failures'
+      );
+
+      // 3.7 Existing demo reviewer sandbox remains functional during datastore read failure
+      const demoVerifyResult = await verifyFamilyToken('by_demo_reviewer_token_2026');
+      assert(
+        demoVerifyResult?.role === 'demo' && demoVerifyResult?.isDemo === true,
+        'Existing demo reviewer token remains functional during datastore outage'
       );
     } finally {
       if (prevEmulator) {
@@ -484,6 +516,190 @@ async function runTests() {
       );
     } finally {
       workerC.child.kill();
+    }
+
+    // ==================================================================
+    // Suite 5: Production Firestore REST documents:batchGet Stream Parsing
+    // ==================================================================
+    console.log('\n--- Suite 5: Production Firestore REST documents:batchGet Stream Parsing ---');
+
+    // 5.1 Direct parser verification for NDJSON stream (newline-delimited JSON objects)
+    const streamDocName = `projects/beeyou-reviewer-demo/databases/(default)/documents/beeyou_revoked_tokens/${crypto.createHash('sha256').update('test_tok_stream').digest('hex')}`;
+    const ndjsonFoundStream = [
+      JSON.stringify({ readTime: '2026-10-23T20:00:00.000000Z' }),
+      JSON.stringify({
+        found: {
+          name: streamDocName,
+          fields: {
+            revokedAt: { integerValue: String(Date.now()) },
+            reason: { stringValue: 'stream_test' },
+          },
+        },
+        readTime: '2026-10-23T20:00:01.000000Z',
+      }),
+    ].join('\n') + '\n';
+
+    const parsedNdjson = parseFirestoreBatchGetResponse(ndjsonFoundStream, 1);
+    assert(parsedNdjson.length === 2, 'Parses real production NDJSON streamed response into discrete items');
+    assert(parsedNdjson[1].found?.name === streamDocName, 'Correctly extracts found document from NDJSON stream');
+
+    // 5.2 Direct parser verification for concatenated JSON stream (no newlines)
+    const concatStream = `{"readTime":"2026-10-23T20:00:00Z","missing":"doc1"}{"readTime":"2026-10-23T20:00:00Z","missing":"doc2"}`;
+    const parsedConcat = parseFirestoreBatchGetResponse(concatStream, 2);
+    assert(parsedConcat.length === 2, 'Parses concatenated JSON objects from HTTP stream without newlines');
+    assert(parsedConcat[0].missing === 'doc1' && parsedConcat[1].missing === 'doc2', 'Correctly extracts missing document paths');
+
+    // 5.3 Direct parser verification for single JSON object response
+    const singleObjStream = JSON.stringify({
+      readTime: '2026-10-23T20:00:00Z',
+      missing: 'doc_single',
+    });
+    const parsedSingle = parseFirestoreBatchGetResponse(singleObjStream, 1);
+    assert(parsedSingle.length === 1 && parsedSingle[0].missing === 'doc_single', 'Parses single JSON object response without assuming array');
+
+    // 5.4 Direct parser failure on malformed or unexpected responses (fails closed)
+    let threwOnHtml = false;
+    try {
+      parseFirestoreBatchGetResponse('<html><body>502 Bad Gateway</body></html>', 1);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError) threwOnHtml = true;
+    }
+    assert(threwOnHtml, 'Throws FirestoreSyncError on HTML or non-JSON error stream (fails closed)');
+
+    let threwOnEmpty = false;
+    try {
+      parseFirestoreBatchGetResponse('', 1);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError) threwOnEmpty = true;
+    }
+    assert(threwOnEmpty, 'Throws FirestoreSyncError on empty response when documents were requested');
+
+    let threwOnUnexpectedFormat = false;
+    try {
+      parseFirestoreBatchGetResponse(JSON.stringify({ unexpectedKey: 12345 }), 1);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError) threwOnUnexpectedFormat = true;
+    }
+    assert(threwOnUnexpectedFormat, 'Throws FirestoreSyncError on unexpected object structure (does not assume empty)');
+
+    // 5.5 End-to-end streamed response verification with normal verifyFamilyToken() and protected API routes
+    let streamMode: 'valid_ndjson' | 'revoked_ndjson' | 'malformed_html' = 'valid_ndjson';
+    const streamFamilyCode = 'BEE-STREAM1';
+    const streamOwnerEmail = 'stream-owner@test.com';
+    const streamToken = signFamilyToken(streamFamilyCode, 'caregiver', streamOwnerEmail, 'uid-stream-1');
+    const streamTokenHash = crypto.createHash('sha256').update(streamToken).digest('hex');
+
+    familyAccounts.set(streamOwnerEmail, {
+      id: 'fam-stream1',
+      email: streamOwnerEmail,
+      familyCode: streamFamilyCode,
+      ownerUid: 'uid-stream-1',
+      caregiverName: 'Stream Owner',
+      caregiverRole: 'Parent',
+      members: {
+        'uid-stream-1': { role: 'caregiver', email: streamOwnerEmail, approvedAt: Date.now() },
+        'uid-stream-1-rev': { role: 'caregiver', email: streamOwnerEmail, approvedAt: Date.now() },
+        'uid-stream-1-malformed': { role: 'caregiver', email: streamOwnerEmail, approvedAt: Date.now() },
+      },
+      childProfile: { name: 'Stream Child', ageGroup: 'kid', interests: [] },
+    });
+    caregiverSessions.set(streamFamilyCode, {
+      pairingCode: streamFamilyCode,
+      childName: 'Stream Child',
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 0,
+      routineProgress: 0,
+      stars: 0,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    });
+
+    const streamServer = http.createServer((req, res) => {
+      if (req.url?.includes(':batchGet')) {
+        if (streamMode === 'valid_ndjson') {
+          // Stream NDJSON with missing documents (token is valid)
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z', missing: `projects/p/databases/(default)/documents/beeyou_revoked_tokens/${streamTokenHash}` }) + '\n');
+          res.end();
+        } else if (streamMode === 'revoked_ndjson') {
+          // Stream NDJSON with found document (token is revoked)
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z' }) + '\n');
+          res.write(JSON.stringify({
+            found: {
+              name: `projects/p/databases/(default)/documents/beeyou_revoked_tokens/${streamTokenHash}`,
+              fields: {
+                revokedAt: { integerValue: String(Date.now()) },
+                reason: { stringValue: 'stream_revoked' },
+              },
+            },
+            readTime: '2026-10-23T20:00:00Z',
+          }) + '\n');
+          res.end();
+        } else if (streamMode === 'malformed_html') {
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end('<html><body>Proxy Error</body></html>');
+        }
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({}));
+      }
+    });
+    await new Promise<void>((r) => streamServer.listen(0, r));
+    const streamPort = (streamServer.address() as any).port;
+
+    const streamApp = http.createServer(appA);
+    await new Promise<void>((r) => streamApp.listen(0, r));
+    const streamAppPort = (streamApp.address() as any).port;
+    const streamBaseUrl = `http://127.0.0.1:${streamAppPort}`;
+
+    const prevEmuStream = process.env.FIRESTORE_EMULATOR_HOST;
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = `127.0.0.1:${streamPort}`;
+
+      // A: When stream indicates missing, normal verifyFamilyToken succeeds
+      streamMode = 'valid_ndjson';
+      const validStreamUser = await verifyFamilyToken(streamToken);
+      assert(validStreamUser?.familyCode === 'BEE-STREAM1', 'Normal verifyFamilyToken() succeeds when streamed response indicates unrevoked token');
+
+      const streamProtectedRes = await fetch(`${streamBaseUrl}/api/family/state/BEE-STREAM1`, {
+        headers: { 'Authorization': `Bearer ${streamToken}` },
+      });
+      assert(streamProtectedRes.status === 200, 'Protected API route returns 200 OK when streamed NDJSON confirms token is valid');
+
+      // B: When stream indicates found, normal verifyFamilyToken rejects (401)
+      streamMode = 'revoked_ndjson';
+      const revokedStreamToken = signFamilyToken('BEE-STREAM1', 'caregiver', 'stream-owner@test.com', 'uid-stream-1-rev');
+      const revokedStreamUser = await verifyFamilyToken(revokedStreamToken);
+      assert(revokedStreamUser === null, 'Normal verifyFamilyToken() rejects token when streamed response contains found revocation');
+
+      const streamRevokedRes = await fetch(`${streamBaseUrl}/api/family/state/BEE-STREAM1`, {
+        headers: { 'Authorization': `Bearer ${revokedStreamToken}` },
+      });
+      assert(streamRevokedRes.status === 401, 'Protected API route returns 401 Unauthorized when streamed NDJSON reports token is revoked');
+
+      // C: When stream sends malformed HTML, normal verifyFamilyToken fails closed (401)
+      streamMode = 'malformed_html';
+      const malformedStreamToken = signFamilyToken('BEE-STREAM1', 'caregiver', 'stream-owner@test.com', 'uid-stream-1-malformed');
+      const malformedStreamUser = await verifyFamilyToken(malformedStreamToken);
+      assert(malformedStreamUser === null, 'Normal verifyFamilyToken() fails closed when stream returns malformed HTML');
+
+      const streamMalformedRes = await fetch(`${streamBaseUrl}/api/family/state/BEE-STREAM1`, {
+        headers: { 'Authorization': `Bearer ${malformedStreamToken}` },
+      });
+      assert(streamMalformedRes.status === 401, 'Protected API route returns 401 Unauthorized when stream is malformed (fails closed)');
+    } finally {
+      if (prevEmuStream) {
+        process.env.FIRESTORE_EMULATOR_HOST = prevEmuStream;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+      streamServer.close();
+      streamApp.close();
     }
   } catch (err: any) {
     console.error('Unhandled shared revocation test exception:', err);

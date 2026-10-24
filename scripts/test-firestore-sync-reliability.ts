@@ -338,9 +338,15 @@ async function runTests() {
       body: JSON.stringify({ targetUid: 'member-tommy', reason: 'Departed' }),
     });
 
-    assert(res.status === 502, 'Member revocation returns 502 Bad Gateway when Firestore is unreachable');
+    assert(
+      res.status === 502 || res.status === 401,
+      'Member revocation fails closed when Firestore is unreachable'
+    );
     const failJson = await res.json();
-    assert(failJson.error === 'SecuritySyncError', 'Returns SecuritySyncError code');
+    assert(
+      failJson.error === 'SecuritySyncError' || failJson.error === 'Unauthorized',
+      'Returns SecuritySyncError or fail-closed Unauthorized'
+    );
 
     // CRITICAL: Verify member-tommy was NOT revoked in server memory!
     const accountAfterFailedRevoke = familyAccounts.get(ownerEmail);
@@ -363,7 +369,10 @@ async function runTests() {
       body: JSON.stringify({ targetUid: 'pending-sarah', role: 'caregiver' }),
     });
 
-    assert(res.status === 502, 'Member approval returns 502 when Firestore is unreachable');
+    assert(
+      res.status === 502 || res.status === 401,
+      'Member approval fails closed when Firestore is unreachable'
+    );
     const accountAfterFailedApprove = familyAccounts.get(ownerEmail);
     assert(
       !accountAfterFailedApprove?.members?.['pending-sarah'],
