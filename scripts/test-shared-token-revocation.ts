@@ -108,11 +108,14 @@ async function runTests() {
     hashTokenIdentifier,
     extractJtiFromToken,
     parseFirestoreBatchGetResponse,
+    validateBatchGetDocumentsCoverage,
+    isProductionEnvironment,
   } = await import('../src/services/tokenRevocationService');
 
   const {
     verifyFirestoreConfig,
     FirestoreSyncError,
+    resetCachedGoogleAuth,
   } = await import('../src/services/firestoreSyncService');
 
   // Server A (Process 1)
@@ -332,8 +335,19 @@ async function runTests() {
           res.writeHead(503, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: { code: 503, message: 'Datastore read unavailable' } }));
         } else {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify([]));
+          let bodyStr = '';
+          req.on('data', (c) => { bodyStr += c.toString(); });
+          req.on('end', () => {
+            let reqDocs: string[] = [];
+            try {
+              reqDocs = JSON.parse(bodyStr).documents || [];
+            } catch {}
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            for (const doc of reqDocs) {
+              res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z', missing: doc }) + '\n');
+            }
+            res.end();
+          });
         }
       } else {
         res.writeHead(503, { 'Content-Type': 'application/json' });
@@ -620,30 +634,48 @@ async function runTests() {
 
     const streamServer = http.createServer((req, res) => {
       if (req.url?.includes(':batchGet')) {
-        if (streamMode === 'valid_ndjson') {
-          // Stream NDJSON with missing documents (token is valid)
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z', missing: `projects/p/databases/(default)/documents/beeyou_revoked_tokens/${streamTokenHash}` }) + '\n');
-          res.end();
-        } else if (streamMode === 'revoked_ndjson') {
-          // Stream NDJSON with found document (token is revoked)
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z' }) + '\n');
-          res.write(JSON.stringify({
-            found: {
-              name: `projects/p/databases/(default)/documents/beeyou_revoked_tokens/${streamTokenHash}`,
-              fields: {
-                revokedAt: { integerValue: String(Date.now()) },
-                reason: { stringValue: 'stream_revoked' },
-              },
-            },
-            readTime: '2026-10-23T20:00:00Z',
-          }) + '\n');
-          res.end();
-        } else if (streamMode === 'malformed_html') {
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end('<html><body>Proxy Error</body></html>');
-        }
+        let bodyStr = '';
+        req.on('data', (c) => { bodyStr += c.toString(); });
+        req.on('end', () => {
+          let reqDocs: string[] = [];
+          try {
+            const parsed = JSON.parse(bodyStr);
+            reqDocs = parsed.documents || [];
+          } catch {}
+
+          if (streamMode === 'valid_ndjson') {
+            // Stream NDJSON with missing documents (token is valid)
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            for (const doc of reqDocs) {
+              res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z', missing: doc }) + '\n');
+            }
+            res.end();
+          } else if (streamMode === 'revoked_ndjson') {
+            // Stream NDJSON with found document (token is revoked)
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z' }) + '\n');
+            for (const doc of reqDocs) {
+              if (doc.includes('/beeyou_revoked_tokens/')) {
+                res.write(JSON.stringify({
+                  found: {
+                    name: doc,
+                    fields: {
+                      revokedAt: { integerValue: String(Date.now()) },
+                      reason: { stringValue: 'stream_revoked' },
+                    },
+                  },
+                  readTime: '2026-10-23T20:00:00Z',
+                }) + '\n');
+              } else {
+                res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z', missing: doc }) + '\n');
+              }
+            }
+            res.end();
+          } else if (streamMode === 'malformed_html') {
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end('<html><body>Proxy Error</body></html>');
+          }
+        });
       } else {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({}));
@@ -700,6 +732,383 @@ async function runTests() {
       }
       streamServer.close();
       streamApp.close();
+    }
+
+    // ==================================================================
+    // Suite 6: Production Unconfigured & Incomplete Stream Coverage
+    // ==================================================================
+    console.log('\n--- Suite 6: Production Unconfigured & Incomplete Stream Coverage ---');
+
+    // 6.1 Missing production Firestore configuration denies protected authentication
+    const prodFamilyCode = 'BEE-PROD-TEST';
+    const prodOwnerEmail = 'prod-owner@test.com';
+    const prodToken = signFamilyToken(prodFamilyCode, 'caregiver', prodOwnerEmail, 'uid-prod-1');
+
+    familyAccounts.set(prodOwnerEmail, {
+      id: 'fam-prod1',
+      email: prodOwnerEmail,
+      familyCode: prodFamilyCode,
+      ownerUid: 'uid-prod-1',
+      caregiverName: 'Prod Owner',
+      caregiverRole: 'Parent',
+      members: {
+        'uid-prod-1': { role: 'caregiver', email: prodOwnerEmail, approvedAt: Date.now() },
+      },
+      childProfile: { name: 'Prod Child', ageGroup: 'kid', interests: [] },
+    });
+    caregiverSessions.set(prodFamilyCode, {
+      pairingCode: prodFamilyCode,
+      childName: 'Prod Child',
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 0,
+      routineProgress: 0,
+      stars: 0,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    });
+
+    const oldNodeEnv = process.env.NODE_ENV;
+    const oldEmuHost = process.env.FIRESTORE_EMULATOR_HOST;
+    const oldOfflineDev = process.env.OFFLINE_DEV;
+    const oldGcloudProject = process.env.GCLOUD_PROJECT;
+    const oldGoogleCloudProject = process.env.GOOGLE_CLOUD_PROJECT;
+
+    try {
+      // Simulate production environment with missing Firestore credentials
+      process.env.NODE_ENV = 'production';
+      delete process.env.FIRESTORE_EMULATOR_HOST;
+      delete process.env.OFFLINE_DEV;
+      delete process.env.GCLOUD_PROJECT;
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+      resetCachedGoogleAuth();
+
+      // A: Direct isTokenRevoked throws structured error in production when credentials missing
+      let threwMissingConfig = false;
+      try {
+        await isTokenRevoked(prodToken);
+      } catch (err: any) {
+        if (err instanceof FirestoreSyncError && err.statusCode === 500) {
+          threwMissingConfig = true;
+        }
+      }
+      assert(
+        threwMissingConfig,
+        'Direct isTokenRevoked throws 500 FirestoreSyncError when production credentials missing'
+      );
+
+      // B: Normal verifyFamilyToken denies authentication in production when credentials missing
+      const prodVerifyResult = await verifyFamilyToken(prodToken);
+      assert(
+        prodVerifyResult === null,
+        'Normal verifyFamilyToken denies authentication in production when credentials missing'
+      );
+
+      // C: Protected route denies request (401 Unauthorized) in production
+      const prodProtectedRes = await fetch(`${baseUrlA}/api/family/state/${prodFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${prodToken}` },
+      });
+      assert(
+        prodProtectedRes.status === 401,
+        'Protected API route returns 401 Unauthorized in production when credentials missing'
+      );
+
+      // D: Revocation write in production fails closed and throws (never reports success)
+      let threwOnRevokeMissing = false;
+      try {
+        await revokeToken(prodToken, undefined, 'prod_missing_test');
+      } catch (err: any) {
+        if (err instanceof FirestoreSyncError && err.statusCode === 500) {
+          threwOnRevokeMissing = true;
+        }
+      }
+      assert(
+        threwOnRevokeMissing,
+        'Direct revokeToken throws 500 FirestoreSyncError in production when credentials missing'
+      );
+
+      // E: Normal /api/caregiver/logout endpoint returns 502 or 401 (fails closed)
+      const prodLogoutRes = await fetch(`${baseUrlA}/api/caregiver/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${prodToken}`,
+        },
+      });
+      assert(
+        prodLogoutRes.status === 502 || prodLogoutRes.status === 401,
+        '/api/caregiver/logout fails closed when production credentials missing'
+      );
+
+      // F: Isolated demo sandbox remains intact in production even without Firestore
+      const prodDemoUser = await verifyFamilyToken('by_demo_reviewer_token_2026');
+      assert(
+        prodDemoUser?.role === 'demo' && prodDemoUser?.isDemo === true,
+        'Isolated demo sandbox remains functional in production without cloud credentials'
+      );
+
+      // G: Explicitly configured offline development allows verification
+      process.env.OFFLINE_DEV = 'true';
+      const offlineDevResult = await verifyFamilyToken('by_demo_reviewer_token_2026');
+      assert(
+        offlineDevResult !== null,
+        'Explicitly configured offline development allows local verification'
+      );
+    } finally {
+      process.env.NODE_ENV = oldNodeEnv;
+      if (oldEmuHost) process.env.FIRESTORE_EMULATOR_HOST = oldEmuHost;
+      if (oldOfflineDev) process.env.OFFLINE_DEV = oldOfflineDev;
+      else delete process.env.OFFLINE_DEV;
+      if (oldGcloudProject) process.env.GCLOUD_PROJECT = oldGcloudProject;
+      else delete process.env.GCLOUD_PROJECT;
+      if (oldGoogleCloudProject) process.env.GOOGLE_CLOUD_PROJECT = oldGoogleCloudProject;
+      else delete process.env.GOOGLE_CLOUD_PROJECT;
+      resetCachedGoogleAuth();
+    }
+
+    // 6.2 Incomplete response testing: 4 documents requested but only 1 response received
+    const fourDocPaths = [
+      'projects/p/databases/(default)/documents/beeyou_revoked_tokens/tok_hash_1',
+      'projects/p/databases/(default)/documents/beeyou_revoked_tokens/jti_hash_1',
+      'projects/p/databases/(default)/documents/beeyou_revoked_users/uid_1',
+      'projects/p/databases/(default)/documents/beeyou_revoked_families/FAM_1',
+    ];
+
+    let threwOnPartialResponse = false;
+    try {
+      const partialItems = [
+        { missing: fourDocPaths[0], readTime: '2026-10-23T20:00:00Z' },
+      ];
+      validateBatchGetDocumentsCoverage(fourDocPaths, partialItems);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError && err.message.includes('omitted requested documents (1/4)')) {
+        threwOnPartialResponse = true;
+      }
+    }
+    assert(
+      threwOnPartialResponse,
+      'validateBatchGetDocumentsCoverage rejects partial response when 4 requested but 1 received'
+    );
+
+    // 6.3 Completely missing response records (only read-time metadata returned)
+    let threwOnMetadataOnly = false;
+    try {
+      const metadataOnlyItems = [
+        { readTime: '2026-10-23T20:00:00Z' },
+        { transaction: 'tx-metadata-start' },
+      ];
+      validateBatchGetDocumentsCoverage(fourDocPaths, metadataOnlyItems);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError && err.message.includes('omitted requested documents (0/4)')) {
+        threwOnMetadataOnly = true;
+      }
+    }
+    assert(
+      threwOnMetadataOnly,
+      'validateBatchGetDocumentsCoverage rejects metadata-only stream with 0 document records'
+    );
+
+    // 6.4 Duplicate results rejection
+    let threwOnDuplicate = false;
+    try {
+      const duplicateItems = [
+        { missing: fourDocPaths[0] },
+        { missing: fourDocPaths[1] },
+        { missing: fourDocPaths[2] },
+        { missing: fourDocPaths[3] },
+        { missing: fourDocPaths[0] },
+      ];
+      validateBatchGetDocumentsCoverage(fourDocPaths, duplicateItems);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError && err.message.includes('duplicate results')) {
+        threwOnDuplicate = true;
+      }
+    }
+    assert(
+      threwOnDuplicate,
+      'validateBatchGetDocumentsCoverage rejects duplicate results for the same document path'
+    );
+
+    // 6.5 Unexpected document paths rejection
+    let threwOnUnexpectedPath = false;
+    try {
+      const unexpectedItems = [
+        { missing: fourDocPaths[0] },
+        { missing: fourDocPaths[1] },
+        { missing: fourDocPaths[2] },
+        { missing: 'projects/p/databases/(default)/documents/unrelated/alien_path' },
+      ];
+      validateBatchGetDocumentsCoverage(fourDocPaths, unexpectedItems);
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError && err.message.includes('unexpected document path')) {
+        threwOnUnexpectedPath = true;
+      }
+    }
+    assert(
+      threwOnUnexpectedPath,
+      'validateBatchGetDocumentsCoverage rejects responses containing unexpected document paths'
+    );
+
+    // 6.6 Valid complete streams in different orders
+    const shuffledItems = [
+      { missing: fourDocPaths[2] },
+      { readTime: '2026-10-23T20:00:00Z' },
+      { missing: fourDocPaths[0] },
+      { missing: fourDocPaths[3] },
+      { missing: fourDocPaths[1] },
+    ];
+    const coveredResults = validateBatchGetDocumentsCoverage(fourDocPaths, shuffledItems);
+    assert(
+      coveredResults.length === 4,
+      'validateBatchGetDocumentsCoverage handles valid complete streams in shuffled orders'
+    );
+
+    // 6.7 End-to-end: Stream server returning only 1 of multiple documents causes normal verifyFamilyToken to fail closed
+    let incompleteStreamMode: 'single_doc' | 'metadata_only' | 'shuffled_complete' = 'single_doc';
+    const fourDocFamilyCode = 'BEE-FOURDOC';
+    const fourDocToken = signFamilyToken(fourDocFamilyCode, 'caregiver', 'fourdoc@test.com', 'uid-fourdoc-1');
+    const fourDocTokenHash = crypto.createHash('sha256').update(fourDocToken).digest('hex');
+
+    familyAccounts.set('fourdoc@test.com', {
+      id: 'fam-fourdoc',
+      email: 'fourdoc@test.com',
+      familyCode: fourDocFamilyCode,
+      ownerUid: 'uid-fourdoc-1',
+      caregiverName: 'FourDoc Owner',
+      caregiverRole: 'Parent',
+      members: {
+        'uid-fourdoc-1': { role: 'caregiver', email: 'fourdoc@test.com', approvedAt: Date.now() },
+      },
+      childProfile: { name: 'FourDoc Child', ageGroup: 'kid', interests: [] },
+    });
+    caregiverSessions.set(fourDocFamilyCode, {
+      pairingCode: fourDocFamilyCode,
+      childName: 'FourDoc Child',
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Active in BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 0,
+      routineProgress: 0,
+      stars: 0,
+      isOffline: false,
+      messages: [],
+      unlinked: false,
+    });
+
+    const incompleteStreamServer = http.createServer((req, res) => {
+      if (req.url?.includes(':batchGet')) {
+        let bodyStr = '';
+        req.on('data', (c) => { bodyStr += c.toString(); });
+        req.on('end', () => {
+          let reqDocs: string[] = [];
+          try {
+            const parsed = JSON.parse(bodyStr);
+            reqDocs = parsed.documents || [];
+          } catch {}
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          if (incompleteStreamMode === 'single_doc') {
+            // Send only 1 document result even though multiple documents are requested
+            if (reqDocs.length > 0) {
+              res.write(JSON.stringify({
+                readTime: '2026-10-23T20:00:00Z',
+                missing: reqDocs[0],
+              }) + '\n');
+            }
+            res.end();
+          } else if (incompleteStreamMode === 'metadata_only') {
+            // Send only readTime metadata without document records
+            res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z' }) + '\n');
+            res.end();
+          } else if (incompleteStreamMode === 'shuffled_complete') {
+            // Send all requested documents in shuffled order with interleaved metadata
+            res.write(JSON.stringify({ readTime: '2026-10-23T20:00:00Z' }) + '\n');
+            const reversed = [...reqDocs].reverse();
+            for (const doc of reversed) {
+              res.write(JSON.stringify({
+                readTime: '2026-10-23T20:00:01Z',
+                missing: doc,
+              }) + '\n');
+            }
+            res.end();
+          }
+        });
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({}));
+      }
+    });
+    await new Promise<void>((r) => incompleteStreamServer.listen(0, r));
+    const incPort = (incompleteStreamServer.address() as any).port;
+
+    const incApp = http.createServer(appA);
+    await new Promise<void>((r) => incApp.listen(0, r));
+    const incAppPort = (incApp.address() as any).port;
+    const incBaseUrl = `http://127.0.0.1:${incAppPort}`;
+
+    const prevIncEmu = process.env.FIRESTORE_EMULATOR_HOST;
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = `127.0.0.1:${incPort}`;
+
+      // Test 1: Incomplete stream with 1 of multiple documents causes normal verifyFamilyToken to fail closed
+      incompleteStreamMode = 'single_doc';
+      const incVerifyResult = await verifyFamilyToken(fourDocToken);
+      assert(
+        incVerifyResult === null,
+        'Normal verifyFamilyToken fails closed when stream omits requested documents'
+      );
+
+      const incRouteRes = await fetch(`${incBaseUrl}/api/family/state/${fourDocFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${fourDocToken}` },
+      });
+      assert(
+        incRouteRes.status === 401,
+        'Protected API route returns 401 Unauthorized when stream omits requested documents'
+      );
+
+      // Test 2: Metadata-only stream causes normal verifyFamilyToken to fail closed
+      incompleteStreamMode = 'metadata_only';
+      const metaVerifyResult = await verifyFamilyToken(fourDocToken);
+      assert(
+        metaVerifyResult === null,
+        'Normal verifyFamilyToken fails closed when stream returns only metadata without document records'
+      );
+
+      const metaRouteRes = await fetch(`${incBaseUrl}/api/family/state/${fourDocFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${fourDocToken}` },
+      });
+      assert(
+        metaRouteRes.status === 401,
+        'Protected API route returns 401 Unauthorized when stream returns only metadata'
+      );
+
+      // Test 3: Shuffled complete stream succeeds normally
+      incompleteStreamMode = 'shuffled_complete';
+      const completeVerifyResult = await verifyFamilyToken(fourDocToken);
+      assert(
+        completeVerifyResult?.familyCode === fourDocFamilyCode,
+        'Normal verifyFamilyToken succeeds when streamed responses arrive complete in shuffled order'
+      );
+
+      const completeRouteRes = await fetch(`${incBaseUrl}/api/family/state/${fourDocFamilyCode}`, {
+        headers: { 'Authorization': `Bearer ${fourDocToken}` },
+      });
+      assert(
+        completeRouteRes.status === 200,
+        'Protected API route returns 200 OK when complete streamed response is verified'
+      );
+    } finally {
+      if (prevIncEmu) {
+        process.env.FIRESTORE_EMULATOR_HOST = prevIncEmu;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+      incompleteStreamServer.close();
+      incApp.close();
     }
   } catch (err: any) {
     console.error('Unhandled shared revocation test exception:', err);

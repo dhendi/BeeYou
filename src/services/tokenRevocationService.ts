@@ -128,6 +128,13 @@ export async function saveRevocationStore(): Promise<void> {
   }
 }
 
+export function isProductionEnvironment(): boolean {
+  if (process.env.OFFLINE_DEV === 'true' || process.env.ALLOW_OFFLINE_REVOCATION === 'true') {
+    return false;
+  }
+  return process.env.NODE_ENV === 'production' || process.env.REQUIRE_FIRESTORE_SYNC === 'true';
+}
+
 /**
  * Executes an atomic batch commit to Cloud Firestore for revocation updates.
  * Throws FirestoreSyncError on non-2xx responses or network failures.
@@ -135,9 +142,9 @@ export async function saveRevocationStore(): Promise<void> {
 async function executeFirestoreCommit(writes: any[], options?: SyncOptions): Promise<void> {
   const config = verifyFirestoreConfig();
   if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
-    if (process.env.NODE_ENV === 'production' || process.env.REQUIRE_FIRESTORE_SYNC === 'true') {
+    if (isProductionEnvironment()) {
       throw new FirestoreSyncError(
-        'Cloud Firestore service account credentials are required in production for revocation',
+        'Cloud Firestore service account credentials are required in production for revocation write',
         500,
         false
       );
@@ -370,6 +377,71 @@ function validateBatchGetItem(item: any): void {
 }
 
 /**
+ * Matches each `found` or `missing` result against the exact document paths requested.
+ *
+ * Requirements:
+ * 1. Reject responses that omit requested documents (e.g. 4 requested but fewer received).
+ * 2. Reject duplicate results for the same document path.
+ * 3. Reject unexpected document paths that were not in the request.
+ * 4. Reject responses returning only read-time metadata without document results.
+ * 5. Handle valid streamed responses regardless of document ordering.
+ * 6. Fails closed (throws FirestoreSyncError).
+ */
+export function validateBatchGetDocumentsCoverage(
+  requestedDocs: string[],
+  items: any[]
+): Array<{ found?: { name: string; fields?: Record<string, any>; createTime?: string; updateTime?: string }; missing?: string; readTime?: string }> {
+  if (!requestedDocs || requestedDocs.length === 0) {
+    return [];
+  }
+
+  const requestedSet = new Set(requestedDocs);
+  const seenDocs = new Set<string>();
+  const docResults: any[] = [];
+
+  for (const item of items) {
+    if (!item || typeof item !== 'object') continue;
+
+    const docPath = item.found?.name || item.missing;
+    if (docPath) {
+      if (!requestedSet.has(docPath)) {
+        throw new FirestoreSyncError(
+          `Firestore batchGet stream contained unexpected document path: "${docPath}"`,
+          502,
+          true
+        );
+      }
+      if (seenDocs.has(docPath)) {
+        throw new FirestoreSyncError(
+          `Firestore batchGet stream contained duplicate results for document path: "${docPath}"`,
+          502,
+          true
+        );
+      }
+      seenDocs.add(docPath);
+      docResults.push(item);
+    }
+  }
+
+  // Reject streams that omit any requested documents or return only metadata
+  if (seenDocs.size < requestedSet.size) {
+    const omittedDocs: string[] = [];
+    for (const reqDoc of requestedDocs) {
+      if (!seenDocs.has(reqDoc)) {
+        omittedDocs.push(reqDoc);
+      }
+    }
+    throw new FirestoreSyncError(
+      `Firestore batchGet stream omitted requested documents (${seenDocs.size}/${requestedSet.size}): ${omittedDocs.join(', ')}`,
+      502,
+      true
+    );
+  }
+
+  return docResults;
+}
+
+/**
  * Performs a batch document lookup against Cloud Firestore.
  * Throws FirestoreSyncError on non-2xx responses or network failures.
  */
@@ -380,6 +452,13 @@ async function executeFirestoreBatchGet(documents: string[], options?: SyncOptio
 
   const config = verifyFirestoreConfig();
   if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
+    if (isProductionEnvironment()) {
+      throw new FirestoreSyncError(
+        'Cloud Firestore configuration is missing or unconfigured in production; authoritative revocation checks cannot run',
+        500,
+        false
+      );
+    }
     return [];
   }
 
@@ -435,7 +514,8 @@ async function executeFirestoreBatchGet(documents: string[], options?: SyncOptio
     clearTimeout(timer);
   }
 
-  return parseFirestoreBatchGetResponse(rawText, documents.length);
+  const rawItems = parseFirestoreBatchGetResponse(rawText, documents.length);
+  return validateBatchGetDocumentsCoverage(documents, rawItems);
 }
 
 /**
@@ -465,39 +545,36 @@ export async function revokeToken(
   const jtiHash = jti ? hashTokenIdentifier(jti) : undefined;
 
   // 1. Authoritative write to shared Cloud Firestore datastore
-  const config = verifyFirestoreConfig();
-  if (config.configured || options?.customAuthHeader || options?.customHost) {
-    const writes: any[] = [
-      {
-        update: {
-          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${tokenHash}`,
-          fields: {
-            tokenHash: { stringValue: tokenHash },
-            revokedAt: { integerValue: String(now) },
-            reason: { stringValue: reason },
-            ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
-          },
+  const writes: any[] = [
+    {
+      update: {
+        name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${tokenHash}`,
+        fields: {
+          tokenHash: { stringValue: tokenHash },
+          revokedAt: { integerValue: String(now) },
+          reason: { stringValue: reason },
+          ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
         },
       },
-    ];
+    },
+  ];
 
-    if (jtiHash && jtiHash !== tokenHash) {
-      writes.push({
-        update: {
-          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${jtiHash}`,
-          fields: {
-            tokenHash: { stringValue: jtiHash },
-            jti: { stringValue: jti || '' },
-            revokedAt: { integerValue: String(now) },
-            reason: { stringValue: reason },
-            ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
-          },
+  if (jtiHash && jtiHash !== tokenHash) {
+    writes.push({
+      update: {
+        name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${jtiHash}`,
+        fields: {
+          tokenHash: { stringValue: jtiHash },
+          jti: { stringValue: jti || '' },
+          revokedAt: { integerValue: String(now) },
+          reason: { stringValue: reason },
+          ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
         },
-      });
-    }
-
-    await executeFirestoreCommit(writes, options);
+      },
+    });
   }
+
+  await executeFirestoreCommit(writes, options);
 
   // 2. Update local memory indexes
   memoryRevokedTokens.set(id, record);
@@ -527,24 +604,21 @@ export async function revokeUserTokens(
   const now = Date.now();
 
   // 1. Authoritative write to shared Cloud Firestore datastore
-  const config = verifyFirestoreConfig();
-  if (config.configured || options?.customAuthHeader || options?.customHost) {
-    const safeUidDocId = encodeURIComponent(cleanUid);
-    const writes = [
-      {
-        update: {
-          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_users/${safeUidDocId}`,
-          fields: {
-            uid: { stringValue: cleanUid },
-            revokedAt: { integerValue: String(now) },
-            reason: { stringValue: reason },
-          },
+  const safeUidDocId = encodeURIComponent(cleanUid);
+  const writes = [
+    {
+      update: {
+        name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_users/${safeUidDocId}`,
+        fields: {
+          uid: { stringValue: cleanUid },
+          revokedAt: { integerValue: String(now) },
+          reason: { stringValue: reason },
         },
       },
-    ];
+    },
+  ];
 
-    await executeFirestoreCommit(writes, options);
-  }
+  await executeFirestoreCommit(writes, options);
 
   // 2. Update local memory index
   memoryRevokedUsers.set(cleanUid, {
@@ -578,24 +652,21 @@ export async function revokeFamilyTokens(
   }
 
   // 1. Authoritative write to shared Cloud Firestore datastore
-  const config = verifyFirestoreConfig();
-  if (config.configured || options?.customAuthHeader || options?.customHost) {
-    const safeFamDocId = encodeURIComponent(cleanCode);
-    const writes = [
-      {
-        update: {
-          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_families/${safeFamDocId}`,
-          fields: {
-            familyCode: { stringValue: cleanCode },
-            revokedAt: { integerValue: String(now) },
-            reason: { stringValue: reason },
-          },
+  const safeFamDocId = encodeURIComponent(cleanCode);
+  const writes = [
+    {
+      update: {
+        name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_families/${safeFamDocId}`,
+        fields: {
+          familyCode: { stringValue: cleanCode },
+          revokedAt: { integerValue: String(now) },
+          reason: { stringValue: reason },
         },
       },
-    ];
+    },
+  ];
 
-    await executeFirestoreCommit(writes, options);
-  }
+  await executeFirestoreCommit(writes, options);
 
   // 2. Update local memory index
   memoryRevokedFamilies.set(cleanCode, {
@@ -663,8 +734,18 @@ export async function isTokenRevoked(
 
   // 2. Query authoritative shared Firestore datastore for cross-instance verification
   const config = verifyFirestoreConfig();
-  if (config.configured || options?.customAuthHeader || options?.customHost) {
-    const docsToCheck: string[] = [];
+  if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
+    if (isProductionEnvironment()) {
+      throw new FirestoreSyncError(
+        'Cloud Firestore configuration is missing or unconfigured in production; authoritative revocation checks cannot run',
+        500,
+        false
+      );
+    }
+    return false;
+  }
+
+  const docsToCheck: string[] = [];
     const basePath = `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
     docsToCheck.push(`${basePath}/beeyou_revoked_tokens/${tokenHash}`);
 
@@ -725,7 +806,6 @@ export async function isTokenRevoked(
         }
       }
     }
-  }
 
   return false;
 }
