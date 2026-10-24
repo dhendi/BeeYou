@@ -28,6 +28,7 @@ import {
 } from 'firebase/auth';
 
 import { hashPin, verifyPin, getPinRateLimitStatus, resetPinRateLimit } from '../utils/security';
+import { purgeLegacyApiCaches } from '../utils/pwaCacheCleaner';
 import {
   saveSecureAuthToken,
   getSecureAuthToken,
@@ -1106,6 +1107,7 @@ export async function logoutFamilyAccount(): Promise<void> {
     console.warn('Firebase signOut error:', err);
   }
   saveStoredFamilyAccount(null);
+  purgeLegacyApiCaches().catch(() => {});
   try {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('beeyou_pairing_code');

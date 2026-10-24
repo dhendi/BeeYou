@@ -159,6 +159,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Strict HTTP caching security middleware for API endpoints
+// Mandates private, no-store headers on all sensitive family, caregiver, auth, admin, and translate responses.
+// Prevents cross-user leakage, stale token authorization, and shared browser/CDN cache pollution.
+app.use((req, res, next) => {
+  const isApi = req.path.startsWith('/api') || req.path === '/tts' || req.path === '/translate';
+  if (isApi) {
+    res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 /**
  * Strict validation and sanitization for family sync codes.
  * Ensures code matches safe alphanumeric format (3-32 characters),

@@ -966,6 +966,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     usageBudgetTracker.recordTtsCacheHit();
     console.log(`[TTS Cache HIT L1] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
     if (req.headers['if-none-match'] === `"${hashKey}"`) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+      res.setHeader('ETag', `"${hashKey}"`);
       res.status(304).end();
       return;
     }
@@ -986,6 +988,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       if (joined) {
         usageBudgetTracker.recordTtsCacheHit();
         if (req.headers['if-none-match'] === `"${hashKey}"`) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+          res.setHeader('ETag', `"${hashKey}"`);
           res.status(304).end();
           return;
         }
@@ -1057,6 +1061,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       usageBudgetTracker.recordTtsCacheHit();
       console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
       if (req.headers['if-none-match'] === `"${hashKey}"`) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+        res.setHeader('ETag', `"${hashKey}"`);
         res.status(304).end();
         return;
       }
@@ -1083,6 +1089,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       usageBudgetTracker.recordTtsCacheHit();
 
       if (req.headers['if-none-match'] === `"${hashKey}"`) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+        res.setHeader('ETag', `"${hashKey}"`);
         res.status(304).end();
         return;
       }
@@ -1102,6 +1110,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       if (joined) {
         usageBudgetTracker.recordTtsCacheHit();
         if (req.headers['if-none-match'] === `"${hashKey}"`) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+          res.setHeader('ETag', `"${hashKey}"`);
           res.status(304).end();
           return;
         }
@@ -1271,6 +1281,8 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
   if (result) {
     if (req.headers['if-none-match'] === `"${hashKey}"`) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
+      res.setHeader('ETag', `"${hashKey}"`);
       res.status(304).end();
       return;
     }

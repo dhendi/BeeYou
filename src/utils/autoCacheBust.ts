@@ -6,7 +6,9 @@
  * Gemini voice references upon a new app release.
  */
 
-export const APP_RELEASE_VERSION = 'v11-piper-neural-20261021';
+import { purgeLegacyApiCaches, PRESERVED_OFFLINE_CACHE_PATTERNS } from './pwaCacheCleaner';
+
+export const APP_RELEASE_VERSION = 'v12-pwa-cache-security-20261024';
 const RELEASE_KEY = 'beeyou_release_version';
 
 export function runReleaseAutoCacheBust(): void {
@@ -75,11 +77,13 @@ export function runReleaseAutoCacheBust(): void {
       console.warn('Storage migration notice:', e);
     }
 
-    // 3. Purge Workbox and browser runtime caches (keeping sticker cache intact)
+    // 3. Purge obsolete API caches while strictly preserving offline assets, locales, sounds, and symbols
     if ('caches' in window) {
+      purgeLegacyApiCaches().catch(() => {});
       caches.keys().then((names) => {
         for (const name of names) {
-          if (!name.includes('stickers')) {
+          const isPreserved = PRESERVED_OFFLINE_CACHE_PATTERNS.some((pattern) => name.includes(pattern));
+          if (!isPreserved) {
             caches.delete(name).catch(() => {});
           }
         }
@@ -108,3 +112,4 @@ export function runReleaseAutoCacheBust(): void {
 }
 
 runReleaseAutoCacheBust();
+purgeLegacyApiCaches().catch(() => {});

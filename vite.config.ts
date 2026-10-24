@@ -49,6 +49,8 @@ export default defineConfig(() => {
           skipWaiting: true,
           clientsClaim: true,
           cleanupOutdatedCaches: true,
+          navigateFallbackDenylist: [/^\/api/],
+          importScripts: ['/sw-cleanup.js'],
           runtimeCaching: [
             {
               urlPattern: /\/locales\/.*\.json$/i,
@@ -135,18 +137,8 @@ export default defineConfig(() => {
               },
             },
             {
-              urlPattern: /\/api\/(tts|translate)/i,
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'api-speech-translation-cache',
-                expiration: {
-                  maxEntries: 150,
-                  maxAgeSeconds: 60 * 60 * 24 * 30,
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
+              urlPattern: ({ url }) => url.pathname.startsWith('/api/') || url.pathname.startsWith('/tts') || url.pathname.startsWith('/translate'),
+              handler: 'NetworkOnly',
             },
           ],
         },

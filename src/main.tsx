@@ -1,6 +1,7 @@
 import './utils/autoCacheBust';
 import './utils/migrateLegacyStorage';
 import { ensurePersistentStorage } from './utils/offlineStorage';
+import { purgeLegacyApiCaches } from './utils/pwaCacheCleaner';
 import { preloadAllStickersOnIdle } from './utils/stickerPreloader';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
@@ -10,6 +11,7 @@ import './index.css';
 // Request persistent storage and pre-warm sticker cache for 0ms instantaneous icon rendering
 if (typeof window !== 'undefined') {
   ensurePersistentStorage().catch(() => {});
+  purgeLegacyApiCaches().catch(() => {});
   preloadAllStickersOnIdle();
 }
 
