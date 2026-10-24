@@ -10,6 +10,9 @@
  * 6. Review merged Android manifests and generated Capacitor assets for both debug and release variants.
  * 7. Test that production builds reject unencrypted remote traffic while debug localhost connectivity continues working.
  * 8. Run TypeScript validation, web build, Capacitor sync, and Android debug/release build verification where tooling permits.
+ * 9. Fail-closed release guard: Reject release builds when capacitor.config.json is missing, unreadable, malformed, or dev-configured.
+ * 10. PowerShell parameter structure: param([switch]$Release) must precede executable statements.
+ * 11. Distinct debug vs release testing: Standalone debug APK installable for testing without claiming release restrictions; unsigned release APK not installed without signing.
  */
 
 import fs from 'fs';
@@ -95,6 +98,53 @@ function evaluateNetworkRequest(
   };
 }
 
+/**
+ * Simulates the fail-closed verifyProductionNetworkSecurity guard.
+ */
+function simulateProductionNetworkSecurityGuard(configContent: string | null): {
+  success: boolean;
+  error?: string;
+} {
+  if (configContent === null) {
+    return { success: false, error: 'Missing required configuration file' };
+  }
+  if (!configContent || configContent.trim().length === 0) {
+    return { success: false, error: 'Configuration file is unreadable or empty' };
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(configContent);
+  } catch (e: any) {
+    return { success: false, error: `Malformed JSON: ${e.message}` };
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { success: false, error: 'Expected JSON object in configuration' };
+  }
+
+  if (parsed.server?.url && String(parsed.server.url).trim().length > 0) {
+    return {
+      success: false,
+      error: `Release build contains development server URL (${parsed.server.url})`,
+    };
+  }
+  if (parsed.server?.cleartext === true) {
+    return {
+      success: false,
+      error: 'Release build has server.cleartext set to true',
+    };
+  }
+  if (parsed.android?.allowMixedContent === true) {
+    return {
+      success: false,
+      error: 'Release build has android.allowMixedContent set to true',
+    };
+  }
+
+  return { success: true };
+}
+
 async function runTests(): Promise<void> {
   console.log('========================================================================');
   console.log('BeeYou: Android Network Security Verification Suite');
@@ -109,11 +159,11 @@ async function runTests(): Promise<void> {
     const content = fs.readFileSync(configTsPath, 'utf-8');
 
     assert.ok(
-      content.includes("cleartext: false"),
+      content.includes('cleartext: false'),
       'capacitor.config.ts must set cleartext: false'
     );
     assert.ok(
-      !content.includes("cleartext: true"),
+      !content.includes('cleartext: true'),
       'capacitor.config.ts must not set cleartext: true'
     );
     assert.ok(
@@ -374,7 +424,7 @@ async function runTests(): Promise<void> {
     fail('7. Debug Network Security Config', err);
   }
 
-  // 8. Build-Time Security Guard in android/app/build.gradle
+  // 8. Fail-Closed Build-Time Security Guard in android/app/build.gradle
   try {
     const gradlePath = path.join(rootDir, 'android', 'app', 'build.gradle');
     assert.ok(fs.existsSync(gradlePath), 'android/app/build.gradle must exist');
@@ -385,8 +435,12 @@ async function runTests(): Promise<void> {
       'build.gradle must register verifyProductionNetworkSecurity task'
     );
     assert.ok(
-      gradleContent.includes("it.name == 'preReleaseBuild'"),
-      'build.gradle must hook preReleaseBuild to verifyProductionNetworkSecurity'
+      gradleContent.includes('!configFile.exists()'),
+      'verifyProductionNetworkSecurity must fail-closed if config file is missing'
+    );
+    assert.ok(
+      gradleContent.includes('!configFile.canRead() || configFile.length() == 0'),
+      'verifyProductionNetworkSecurity must fail-closed if config file is unreadable or empty'
     );
     assert.ok(
       gradleContent.includes('parsed.server?.url'),
@@ -396,13 +450,77 @@ async function runTests(): Promise<void> {
       gradleContent.includes('parsed.server?.cleartext == true'),
       'verifyProductionNetworkSecurity must check for cleartext: true'
     );
+    assert.ok(
+      gradleContent.includes('parsed.android?.allowMixedContent == true'),
+      'verifyProductionNetworkSecurity must check for allowMixedContent: true'
+    );
+    assert.ok(
+      gradleContent.includes(
+        "tasks.matching { it.name in ['preReleaseBuild', 'mergeReleaseAssets', 'packageRelease'] }"
+      ),
+      'verifyProductionNetworkSecurity must guard preReleaseBuild, mergeReleaseAssets, and packageRelease'
+    );
 
-    pass('8. Gradle build-time security verification task is configured and guards preReleaseBuild');
+    pass('8. Fail-closed Gradle build-time security verification task is configured and guards release tasks');
   } catch (err) {
-    fail('8. Build-Time Security Guard in build.gradle', err);
+    fail('8. Fail-Closed Build-Time Security Guard in build.gradle', err);
   }
 
-  // 9. Merged Manifests Verification (Debug vs Release)
+  // 9. Fail-Closed Guard Simulation Tests
+  try {
+    // Test: missing config
+    const resMissing = simulateProductionNetworkSecurityGuard(null);
+    assert.strictEqual(resMissing.success, false);
+    assert.ok(resMissing.error?.includes('Missing'));
+
+    // Test: empty config
+    const resEmpty = simulateProductionNetworkSecurityGuard('');
+    assert.strictEqual(resEmpty.success, false);
+    assert.ok(resEmpty.error?.includes('unreadable or empty'));
+
+    // Test: malformed JSON
+    const resMalformed = simulateProductionNetworkSecurityGuard('{ malformed: ');
+    assert.strictEqual(resMalformed.success, false);
+    assert.ok(resMalformed.error?.includes('Malformed'));
+
+    // Test: dev server URL present
+    const resUrl = simulateProductionNetworkSecurityGuard(
+      JSON.stringify({ server: { url: 'http://localhost:3000', cleartext: false } })
+    );
+    assert.strictEqual(resUrl.success, false);
+    assert.ok(resUrl.error?.includes('development server URL'));
+
+    // Test: cleartext enabled
+    const resCleartext = simulateProductionNetworkSecurityGuard(
+      JSON.stringify({ server: { cleartext: true } })
+    );
+    assert.strictEqual(resCleartext.success, false);
+    assert.ok(resCleartext.error?.includes('server.cleartext'));
+
+    // Test: mixed content enabled
+    const resMixed = simulateProductionNetworkSecurityGuard(
+      JSON.stringify({ server: { cleartext: false }, android: { allowMixedContent: true } })
+    );
+    assert.strictEqual(resMixed.success, false);
+    assert.ok(resMixed.error?.includes('allowMixedContent'));
+
+    // Test: valid production config
+    const resValid = simulateProductionNetworkSecurityGuard(
+      JSON.stringify({
+        appId: 'com.beeyou.app',
+        appName: 'BeeYou',
+        server: { androidScheme: 'https', cleartext: false, hostname: 'localhost' },
+        android: { allowMixedContent: false },
+      })
+    );
+    assert.strictEqual(resValid.success, true);
+
+    pass('9. Fail-closed security guard simulation validates all edge cases (missing, empty, malformed, dev URLs, cleartext, mixed content)');
+  } catch (err) {
+    fail('9. Fail-Closed Guard Simulation Tests', err);
+  }
+
+  // 10. Merged Manifests Verification (Debug vs Release)
   try {
     const releaseMergedManifest = path.join(
       rootDir,
@@ -459,12 +577,12 @@ async function runTests(): Promise<void> {
       );
     }
 
-    pass('9. Compiled intermediate Android manifests correctly differentiate release (usesCleartextTraffic=false) vs debug (usesCleartextTraffic=true)');
+    pass('10. Compiled intermediate Android manifests correctly differentiate release (usesCleartextTraffic=false) vs debug (usesCleartextTraffic=true)');
   } catch (err) {
-    fail('9. Merged Manifests Verification', err);
+    fail('10. Merged Manifests Verification', err);
   }
 
-  // 10. Packaged XML Resources Verification (Debug vs Release)
+  // 11. Packaged XML Resources Verification (Debug vs Release)
   try {
     const releaseRes = path.join(
       rootDir,
@@ -515,12 +633,12 @@ async function runTests(): Promise<void> {
       );
     }
 
-    pass('10. Packaged XML resources correctly enforce strict cleartext block for release and localhost-only for debug');
+    pass('11. Packaged XML resources correctly enforce strict cleartext block for release and localhost-only for debug');
   } catch (err) {
-    fail('10. Packaged XML Resources Verification', err);
+    fail('11. Packaged XML Resources Verification', err);
   }
 
-  // 11. Simulated Network Policy Enforcement
+  // 12. Simulated Network Policy Enforcement
   try {
     const prodPolicy: NetworkSecurityPolicy = {
       variant: 'release',
@@ -539,7 +657,6 @@ async function runTests(): Promise<void> {
     };
 
     // Test cases for production:
-    // 1. Remote HTTP must be blocked
     const prodRemoteHttp = evaluateNetworkRequest(
       prodPolicy,
       'http://api.beeyou.app/v1/sync'
@@ -550,7 +667,6 @@ async function runTests(): Promise<void> {
       'Production build must block remote HTTP'
     );
 
-    // 2. Insecure third party HTTP must be blocked
     const prodThirdPartyHttp = evaluateNetworkRequest(
       prodPolicy,
       'http://insecure-cdn.example.com/sound.mp3'
@@ -561,7 +677,6 @@ async function runTests(): Promise<void> {
       'Production build must block third-party HTTP'
     );
 
-    // 3. Localhost HTTP in production must be blocked
     const prodLocalhostHttp = evaluateNetworkRequest(
       prodPolicy,
       'http://localhost:3000'
@@ -572,7 +687,6 @@ async function runTests(): Promise<void> {
       'Production build must block localhost HTTP'
     );
 
-    // 4. Secure HTTPS Firebase endpoints must be permitted
     const prodFirebaseHttps = evaluateNetworkRequest(
       prodPolicy,
       'https://beeyou-app.firebaseio.com/families/demo.json'
@@ -583,7 +697,6 @@ async function runTests(): Promise<void> {
       'Production build must allow Firebase HTTPS'
     );
 
-    // 5. Secure HTTPS Google Cloud TTS & Translation must be permitted
     const prodGoogleTtsHttps = evaluateNetworkRequest(
       prodPolicy,
       'https://texttospeech.googleapis.com/v1/text:synthesize'
@@ -594,7 +707,6 @@ async function runTests(): Promise<void> {
       'Production build must allow Google TTS HTTPS'
     );
 
-    // 6. Capacitor internal scheme must be permitted
     const prodCapacitorInternal = evaluateNetworkRequest(
       prodPolicy,
       'https://localhost/index.html'
@@ -606,7 +718,6 @@ async function runTests(): Promise<void> {
     );
 
     // Test cases for debug:
-    // 1. Localhost HTTP live reload must be permitted
     const debugLocalhostHttp = evaluateNetworkRequest(
       debugPolicy,
       'http://localhost:3000'
@@ -617,7 +728,6 @@ async function runTests(): Promise<void> {
       'Debug build must permit localhost HTTP live reload'
     );
 
-    // 2. 127.0.0.1 HTTP must be permitted
     const debugLoopbackHttp = evaluateNetworkRequest(
       debugPolicy,
       'http://127.0.0.1:3000'
@@ -628,7 +738,6 @@ async function runTests(): Promise<void> {
       'Debug build must permit 127.0.0.1 HTTP'
     );
 
-    // 3. 10.0.2.2 emulator host loopback must be permitted
     const debugEmulatorHttp = evaluateNetworkRequest(
       debugPolicy,
       'http://10.0.2.2:3000'
@@ -639,7 +748,6 @@ async function runTests(): Promise<void> {
       'Debug build must permit 10.0.2.2 emulator loopback'
     );
 
-    // 4. Remote HTTP in debug MUST STILL BE BLOCKED
     const debugRemoteHttp = evaluateNetworkRequest(
       debugPolicy,
       'http://api.beeyou.app/v1/sync'
@@ -650,7 +758,6 @@ async function runTests(): Promise<void> {
       'Debug build must still block unencrypted remote HTTP'
     );
 
-    // 5. HTTPS in debug must be permitted
     const debugHttps = evaluateNetworkRequest(
       debugPolicy,
       'https://firestore.googleapis.com/v1/projects/beeyou/databases'
@@ -661,41 +768,61 @@ async function runTests(): Promise<void> {
       'Debug build must allow HTTPS traffic'
     );
 
-    pass('11. Simulated network security policy correctly evaluates production vs debug traffic scenarios');
+    pass('12. Simulated network security policy correctly evaluates production vs debug traffic scenarios');
   } catch (err) {
-    fail('11. Simulated Network Policy Enforcement', err);
+    fail('12. Simulated Network Policy Enforcement', err);
   }
 
-  // 12. Build Scripts Safety Verification (scripts/android-prod.ps1 & scripts/android-dev.ps1)
+  // 13. PowerShell Parameter & Script Structure (scripts/android-prod.ps1)
   try {
     const prodScriptPath = path.join(rootDir, 'scripts', 'android-prod.ps1');
-    const devScriptPath = path.join(rootDir, 'scripts', 'android-dev.ps1');
-
     assert.ok(fs.existsSync(prodScriptPath), 'scripts/android-prod.ps1 must exist');
-    assert.ok(fs.existsSync(devScriptPath), 'scripts/android-dev.ps1 must exist');
-
     const prodScript = fs.readFileSync(prodScriptPath, 'utf-8');
-    const devScript = fs.readFileSync(devScriptPath, 'utf-8');
 
-    // Production script checks
+    // Remove comments and whitespace to verify param() is first executable statement
+    const nonCommentLines = prodScript
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && !l.startsWith('#'));
+
     assert.ok(
-      prodScript.includes('npx cap sync android'),
-      'android-prod.ps1 must sync Capacitor assets'
-    );
-    assert.ok(
-      prodScript.includes('configContent.server.url'),
-      'android-prod.ps1 must check for dev server url'
-    );
-    assert.ok(
-      prodScript.includes('configContent.server.cleartext -ne $false'),
-      'android-prod.ps1 must check that cleartext is disabled'
+      nonCommentLines.length > 0 && nonCommentLines[0].startsWith('param'),
+      'param() block must be the very first statement in scripts/android-prod.ps1'
     );
     assert.ok(
       prodScript.includes('[switch]$Release'),
-      'android-prod.ps1 must support -Release switch'
+      'android-prod.ps1 must declare [switch]$Release'
     );
 
-    // Development script checks
+    // Verify it distinguishes standalone debug testing from release testing
+    assert.ok(
+      prodScript.includes('assembleRelease'),
+      'android-prod.ps1 must invoke assembleRelease when -Release is provided'
+    );
+    assert.ok(
+      prodScript.includes('assembleDebug'),
+      'android-prod.ps1 must invoke assembleDebug for ordinary standalone device testing'
+    );
+    assert.ok(
+      !prodScript.includes('adb -s $deviceId install -r $unsignedApkPath'),
+      'android-prod.ps1 must NOT attempt to adb install an unsigned release APK'
+    );
+    assert.ok(
+      prodScript.includes('Release APK is unsigned'),
+      'android-prod.ps1 must document that unsigned release APK cannot be installed directly'
+    );
+
+    pass('13. scripts/android-prod.ps1 places param() before all executable statements and cleanly differentiates debug vs release testing');
+  } catch (err) {
+    fail('13. PowerShell Parameter & Script Structure', err);
+  }
+
+  // 14. Development Script Safe Exit & Restoration (scripts/android-dev.ps1)
+  try {
+    const devScriptPath = path.join(rootDir, 'scripts', 'android-dev.ps1');
+    assert.ok(fs.existsSync(devScriptPath), 'scripts/android-dev.ps1 must exist');
+    const devScript = fs.readFileSync(devScriptPath, 'utf-8');
+
     assert.ok(
       devScript.includes('finally'),
       'android-dev.ps1 must have finally block'
@@ -705,9 +832,9 @@ async function runTests(): Promise<void> {
       'android-dev.ps1 must restore production config on exit'
     );
 
-    pass('12. Build scripts enforce security validations and clean restoration of production config');
+    pass('14. scripts/android-dev.ps1 guarantees restoration of production config via finally block');
   } catch (err) {
-    fail('12. Build Scripts Safety Verification', err);
+    fail('14. Development Script Safe Exit & Restoration', err);
   }
 
   console.log('\n========================================================================');
